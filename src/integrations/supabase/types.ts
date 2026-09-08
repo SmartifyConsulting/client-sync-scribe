@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -3204,6 +3204,7 @@ export type Database = {
           notify_min_severity: string
           personal_info_ref: string | null
           phone: string | null
+          priority: number
           relationship: string | null
           source: string
           updated_at: string
@@ -3217,6 +3218,7 @@ export type Database = {
           notify_min_severity?: string
           personal_info_ref?: string | null
           phone?: string | null
+          priority?: number
           relationship?: string | null
           source?: string
           updated_at?: string
@@ -3230,6 +3232,7 @@ export type Database = {
           notify_min_severity?: string
           personal_info_ref?: string | null
           phone?: string | null
+          priority?: number
           relationship?: string | null
           source?: string
           updated_at?: string
@@ -3640,6 +3643,7 @@ export type Database = {
       holarchelp_incidents: {
         Row: {
           accepted_at: string | null
+          activation_method: string | null
           admitted_at: string | null
           ai_emergency_summary: string | null
           arrived_at: string | null
@@ -3652,14 +3656,18 @@ export type Database = {
           at_hospital_at: string | null
           at_risk: boolean
           breathing: boolean | null
+          cancelled_at: string | null
           completed_at: string | null
           conscious: boolean | null
           coverage: string
           created_at: string
           destination_hospital_id: string | null
+          device_id: string | null
           en_route_at: string | null
           escalated_at: string | null
+          escalation_level: number
           eta_minutes: number | null
+          first_contact_acknowledged_at: string | null
           handover_at: string | null
           handover_notes: string | null
           handover_status: string
@@ -3697,6 +3705,7 @@ export type Database = {
         }
         Insert: {
           accepted_at?: string | null
+          activation_method?: string | null
           admitted_at?: string | null
           ai_emergency_summary?: string | null
           arrived_at?: string | null
@@ -3709,14 +3718,18 @@ export type Database = {
           at_hospital_at?: string | null
           at_risk?: boolean
           breathing?: boolean | null
+          cancelled_at?: string | null
           completed_at?: string | null
           conscious?: boolean | null
           coverage?: string
           created_at?: string
           destination_hospital_id?: string | null
+          device_id?: string | null
           en_route_at?: string | null
           escalated_at?: string | null
+          escalation_level?: number
           eta_minutes?: number | null
+          first_contact_acknowledged_at?: string | null
           handover_at?: string | null
           handover_notes?: string | null
           handover_status?: string
@@ -3754,6 +3767,7 @@ export type Database = {
         }
         Update: {
           accepted_at?: string | null
+          activation_method?: string | null
           admitted_at?: string | null
           ai_emergency_summary?: string | null
           arrived_at?: string | null
@@ -3766,14 +3780,18 @@ export type Database = {
           at_hospital_at?: string | null
           at_risk?: boolean
           breathing?: boolean | null
+          cancelled_at?: string | null
           completed_at?: string | null
           conscious?: boolean | null
           coverage?: string
           created_at?: string
           destination_hospital_id?: string | null
+          device_id?: string | null
           en_route_at?: string | null
           escalated_at?: string | null
+          escalation_level?: number
           eta_minutes?: number | null
+          first_contact_acknowledged_at?: string | null
           handover_at?: string | null
           handover_notes?: string | null
           handover_status?: string
@@ -3962,6 +3980,7 @@ export type Database = {
           cost: string | null
           created_at: string
           error_message: string | null
+          escalation_level: number | null
           id: string
           incident_id: string | null
           metadata: Json | null
@@ -3977,6 +3996,7 @@ export type Database = {
           cost?: string | null
           created_at?: string
           error_message?: string | null
+          escalation_level?: number | null
           id?: string
           incident_id?: string | null
           metadata?: Json | null
@@ -3992,6 +4012,7 @@ export type Database = {
           cost?: string | null
           created_at?: string
           error_message?: string | null
+          escalation_level?: number | null
           id?: string
           incident_id?: string | null
           metadata?: Json | null
@@ -8128,6 +8149,100 @@ export type Database = {
         }
         Relationships: []
       }
+      procedure_kit_items: {
+        Row: {
+          id: string
+          kit_id: string | null
+          quantity: number
+          stock_item_id: string | null
+        }
+        Insert: {
+          id?: string
+          kit_id?: string | null
+          quantity?: number
+          stock_item_id?: string | null
+        }
+        Update: {
+          id?: string
+          kit_id?: string | null
+          quantity?: number
+          stock_item_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "procedure_kit_items_kit_id_fkey"
+            columns: ["kit_id"]
+            isOneToOne: false
+            referencedRelation: "procedure_kits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "procedure_kit_items_stock_item_id_fkey"
+            columns: ["stock_item_id"]
+            isOneToOne: false
+            referencedRelation: "stock_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      procedure_kits: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          hospital_id: string | null
+          id: string
+          is_active: boolean | null
+          kit_name: string
+          procedure_name: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          hospital_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          kit_name: string
+          procedure_name?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          hospital_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          kit_name?: string
+          procedure_name?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "procedure_kits_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "procedure_kits_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_hospitals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "procedure_kits_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_hospitals_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       procedure_stock_usage: {
         Row: {
           admission_id: string | null
@@ -9083,6 +9198,9 @@ export type Database = {
       }
       stock_count_reconciliation: {
         Row: {
+          applied: boolean | null
+          applied_at: string | null
+          applied_by: string | null
           count_date: string | null
           counted_by: string | null
           created_at: string | null
@@ -9095,6 +9213,9 @@ export type Database = {
           variance_reason: string | null
         }
         Insert: {
+          applied?: boolean | null
+          applied_at?: string | null
+          applied_by?: string | null
           count_date?: string | null
           counted_by?: string | null
           created_at?: string | null
@@ -9107,6 +9228,9 @@ export type Database = {
           variance_reason?: string | null
         }
         Update: {
+          applied?: boolean | null
+          applied_at?: string | null
+          applied_by?: string | null
           count_date?: string | null
           counted_by?: string | null
           created_at?: string | null
@@ -9119,6 +9243,13 @@ export type Database = {
           variance_reason?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "stock_count_reconciliation_applied_by_fkey"
+            columns: ["applied_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "stock_count_reconciliation_counted_by_fkey"
             columns: ["counted_by"]
@@ -10471,6 +10602,7 @@ export type Database = {
           actual_spend: number
           allocated_amount: number
           category: string
+          department_budget_id: string
           department_name: string
           percent_used: number
           remaining: number
@@ -10635,6 +10767,7 @@ export type Database = {
         Args: { _incident_id: string; _provider_id: string }
         Returns: Json
       }
+      holarchelp_ack_tracking: { Args: { _token: string }; Returns: undefined }
       holarchelp_approve_ambulance: {
         Args: { _provider_id: string }
         Returns: undefined
@@ -11012,12 +11145,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -11041,11 +11174,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -11066,11 +11199,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -11091,11 +11224,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -11108,11 +11241,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
