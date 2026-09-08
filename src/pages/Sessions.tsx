@@ -1730,13 +1730,27 @@ export default function Sessions() {
               <ClinicianNotesColumns notes={notes} />
             ) : liveHintError ? (
               <p className="text-xs text-destructive">{liveHintError}</p>
+            ) : liveTranscribeError ? (
+              <p className="text-xs text-destructive">{liveTranscribeError}</p>
             ) : isRecording ? (
               <p className="text-xs text-muted-foreground">
-                {liveHintLoading ? "Analysing the consultation…" : "Listening — clinical guidance appears as you talk."}
+                {liveHintLoading
+                  ? "Analysing the consultation…"
+                  : (liveTranscript || transcript)
+                    ? "Listening — clinical guidance appears as you talk."
+                    : "Listening — no speech captured yet."}
               </p>
             ) : (
               <p className="text-xs text-muted-foreground">Live AI Clinician starts as soon as you record.</p>
             )}
+            {(isRecording || liveHintLastRunAt) && (
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                {liveHintLastRunAt
+                  ? `Last analysed at ${liveHintLastRunAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+                  : "Waiting for the first analysis…"}
+              </p>
+            )}
+
 
             <p className="mt-2 text-xs text-muted-foreground leading-snug">
               <span className="font-semibold text-foreground">
