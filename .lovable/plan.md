@@ -1,5 +1,11 @@
 # Make the AI Clinician actually scribe while you talk
 
+## How it was used
+
+The session was started by picking the patient from the Select Patient
+dropdown on the Sessions screen, so that exact path is what gets re-tested
+after the fix.
+
 ## What I found
 
 Nothing reached the AI service during your consultation: the live analysis
