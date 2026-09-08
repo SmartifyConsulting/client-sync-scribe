@@ -47,12 +47,14 @@ export function useLiveDiagnosticHint({
 
   language,
   intervalMs = 12000,
-  minGrowthChars = 40,
+  minGrowthChars = 25,
 }: Args) {
   const [hint, setHint] = useState<LiveDiagnosticHint | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastRunAt, setLastRunAt] = useState<Date | null>(null);
   const lastTranscriptLen = useRef(0);
+
   const inFlight = useRef<AbortController | null>(null);
   const transcriptRef = useRef(transcript);
   // Context changes constantly; keep it in a ref so the polling loop never
