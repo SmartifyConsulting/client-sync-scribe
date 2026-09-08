@@ -733,11 +733,11 @@ export default function Sessions() {
     }
     setGeneratedDocs(results);
 
-    // Review order: AI summary → prescription → med cert → referral → other
-    // docs → schedule → invoice → vulas. The invoice step is always queued —
-    // every consultation is billable, so it must never be skipped.
+    // Review order: AI scribed notes → prescription → referral → hospital
+    // admission → medical certificate → next appointment → invoice → vulas.
+    // The invoice step is always queued — every consultation is billable.
     const steps: PostSessionStepType[] = ["summary"];
-    const ORDER: PostSessionStepType[] = ["prescription", "medcert", "referral"];
+    const ORDER: PostSessionStepType[] = ["prescription", "referral", "admission" as PostSessionStepType, "medcert"];
     for (const key of ORDER) {
       if (results.some((d) => d.key === key)) steps.push(key);
     }
@@ -754,6 +754,12 @@ export default function Sessions() {
     setShowPostSessionFlow(true);
 
   }, [extractedMedCert, extractedPrescription, extractedInvoice, extractedReferral, patientId, currentPatient]);
+
+  // Assigned once the live-hint hook is created below; lets the completion
+  // handler run one final whole-transcript analysis without a circular dep.
+  const analyzeLiveRef = useRef<((transcript?: string) => Promise<unknown>) | null>(null);
+
+
 
 
   // Callback to handle session completion after transcription
