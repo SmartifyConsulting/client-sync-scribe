@@ -780,13 +780,25 @@ export default function Sessions() {
 
     // Final whole-consultation AI pass so the four clinician sections are always
     // populated once recording stops, even if the live passes missed the ending.
-    if (fullTranscript.trim().length > 40) {
+    if (fullTranscript.trim().length > 25) {
       try {
-        await analyzeLiveRef.current?.(fullTranscript);
+        const finalHint = await analyzeLiveRef.current?.(fullTranscript);
+        console.log("Final AI clinician pass result:", finalHint ? "ok" : "empty");
+        if (!finalHint && !notesRef.current?.trim()) {
+          setNotes(
+            [
+              "WORKING IMPRESSION\nThe final AI analysis could not be completed for this consultation.",
+              "SAFETY CHECKS\n• none noted",
+              "DIFFERENTIALS\n• none noted",
+              "SUGGESTED CHECKS\n• none noted",
+            ].join("\n\n"),
+          );
+        }
       } catch (e) {
         console.warn("Final AI clinician pass failed:", e);
       }
     }
+
 
     let hasDocs = false;
 
