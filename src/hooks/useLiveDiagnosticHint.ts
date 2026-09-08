@@ -68,7 +68,8 @@ export function useLiveDiagnosticHint({
 
   const run = useCallback(async (override?: string) => {
     const current = (override ?? transcriptRef.current) || "";
-    if (current.trim().length < 40) return null;
+    if (current.trim().length < 25) return null;
+
 
     inFlight.current?.abort();
     const ac = new AbortController();
@@ -95,11 +96,13 @@ export function useLiveDiagnosticHint({
         setError("The AI clinician could not analyse this part of the consultation.");
         return null;
       }
+      setLastRunAt(new Date());
       if (data && (data.suggestion || data.differentials?.length || data.alerts?.length)) {
         setHint(data as LiveDiagnosticHint);
         return data as LiveDiagnosticHint;
       }
       return null;
+
     } catch (e) {
       if (!(e as any)?.name?.includes("Abort")) {
         console.warn("live-diagnostic-hint invoke failed:", e);
