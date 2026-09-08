@@ -339,8 +339,11 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
         try { mediaRecorderRef.current.resume(); } catch {}
       }
       mediaRecorderRef.current.stop();
+      // Flush the final live chunk before the mic closes.
+      stopLiveChunking(true);
       // Free the microphone right away so the browser tab indicator clears
       releaseStream();
+
       setIsRecording(false);
       setIsPaused(false);
       // Stop speech recognition
