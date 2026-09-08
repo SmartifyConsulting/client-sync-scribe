@@ -733,11 +733,11 @@ export default function Sessions() {
     }
     setGeneratedDocs(results);
 
-    // Review order: AI summary → prescription → med cert → referral → other
-    // docs → schedule → invoice → vulas. The invoice step is always queued —
-    // every consultation is billable, so it must never be skipped.
+    // Review order: AI scribed notes → prescription → referral → hospital
+    // admission → medical certificate → next appointment → invoice → vulas.
+    // The invoice step is always queued — every consultation is billable.
     const steps: PostSessionStepType[] = ["summary"];
-    const ORDER: PostSessionStepType[] = ["prescription", "medcert", "referral"];
+    const ORDER: PostSessionStepType[] = ["prescription", "referral", "admission" as PostSessionStepType, "medcert"];
     for (const key of ORDER) {
       if (results.some((d) => d.key === key)) steps.push(key);
     }
@@ -754,6 +754,12 @@ export default function Sessions() {
     setShowPostSessionFlow(true);
 
   }, [extractedMedCert, extractedPrescription, extractedInvoice, extractedReferral, patientId, currentPatient]);
+
+  // Assigned once the live-hint hook is created below; lets the completion
+  // handler run one final whole-transcript analysis without a circular dep.
+  const analyzeLiveRef = useRef<((transcript?: string) => Promise<unknown>) | null>(null);
+
+
 
 
   // Callback to handle session completion after transcription
@@ -772,7 +778,18 @@ export default function Sessions() {
       .filter((part) => part && part.trim())
       .join("\n\n");
 
+    // Final whole-consultation AI pass so the four clinician sections are always
+    // populated once recording stops, even if the live passes missed the ending.
+    if (fullTranscript.trim().length > 40) {
+      try {
+        await analyzeLiveRef.current?.(fullTranscript);
+      } catch (e) {
+        console.warn("Final AI clinician pass failed:", e);
+      }
+    }
+
     let hasDocs = false;
+
     try {
       const result = await completeSession(
         null,
@@ -920,9 +937,11 @@ export default function Sessions() {
     }
   });
 
-  // Live AI diagnostic hint while doctor is recording (before they conclude)
-  const { hint: liveHint, isLoading: liveHintLoading } = useLiveDiagnosticHint({
-    enabled: isRecording && !isPaused && aiConsultEnabled,
+  // Live AI diagnostic hint while doctor is recording (before they conclude).
+  // Always on for a recording — no toggle gate; the AI Consult button just runs it now.
+  const { hint: liveHint, isLoading: liveHintLoading, error: liveHintError, analyze: analyzeLive } = useLiveDiagnosticHint({
+    enabled: isRecording && !isPaused,
+
     transcript: liveTranscript || transcript,
     patientAge: (currentPatient as any)?.dob
       ? Math.max(0, Math.floor((Date.now() - new Date((currentPatient as any).dob).getTime()) / 31557600000))
@@ -936,6 +955,9 @@ export default function Sessions() {
 
     language: (typeof doctorLanguage === "string" ? doctorLanguage : undefined),
   });
+  analyzeLiveRef.current = analyzeLive;
+
+
 
   // The live hints ARE the AI Clinician Notes: each new hint is merged into a
   // running, de-duplicated clinical note instead of being appended verbatim, so
@@ -1702,12 +1724,18 @@ export default function Sessions() {
               </div>
               {liveHintLoading && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
             </div>
-            {aiConsultEnabled && (isRecording || notes) ? (
+            {notes ? (
               <ClinicianNotesColumns notes={notes} />
-
+            ) : liveHintError ? (
+              <p className="text-xs text-destructive">{liveHintError}</p>
+            ) : isRecording ? (
+              <p className="text-xs text-muted-foreground">
+                {liveHintLoading ? "Analysing the consultation…" : "Listening — clinical guidance appears as you talk."}
+              </p>
             ) : (
-              <p className="text-xs text-muted-foreground">Live AI Clinician is not active for this session.</p>
+              <p className="text-xs text-muted-foreground">Live AI Clinician starts as soon as you record.</p>
             )}
+
             <p className="mt-2 text-xs text-muted-foreground leading-snug">
               <span className="font-semibold text-foreground">
                 Private — Only visible to you. Not shared with the patient or other doctors.

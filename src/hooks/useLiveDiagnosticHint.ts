@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface LiveDiagnosticAlert {
@@ -29,10 +29,11 @@ interface Args {
   minGrowthChars?: number;
 }
 
-
 /**
  * Polls the live-diagnostic-hint edge function while the doctor is recording,
  * so a working diagnostic impression appears BEFORE they conclude the visit.
+ * `analyze()` runs the same analysis on demand (manual AI Consult, or the final
+ * whole-transcript pass once recording stops).
  */
 export function useLiveDiagnosticHint({
   enabled,
@@ -50,58 +51,74 @@ export function useLiveDiagnosticHint({
 }: Args) {
   const [hint, setHint] = useState<LiveDiagnosticHint | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const lastTranscriptLen = useRef(0);
   const inFlight = useRef<AbortController | null>(null);
   const transcriptRef = useRef(transcript);
+  // Context changes constantly; keep it in a ref so the polling loop never
+  // restarts (and never loses accumulated state) mid-consultation.
+  const contextRef = useRef({ patientAge, patientSex, currentMedications, chronicConditions, allergies, pastSessions, language });
+  contextRef.current = { patientAge, patientSex, currentMedications, chronicConditions, allergies, pastSessions, language };
 
   useEffect(() => {
     transcriptRef.current = transcript;
   }, [transcript]);
 
+  const run = useCallback(async (override?: string) => {
+    const current = (override ?? transcriptRef.current) || "";
+    if (current.trim().length < 40) return null;
+
+    inFlight.current?.abort();
+    const ac = new AbortController();
+    inFlight.current = ac;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const ctx = contextRef.current;
+      const { data, error: fnError } = await supabase.functions.invoke("live-diagnostic-hint", {
+        body: {
+          transcript: current,
+          patientAge: ctx.patientAge,
+          patientSex: ctx.patientSex,
+          currentMedications: ctx.currentMedications,
+          chronicConditions: ctx.chronicConditions,
+          allergies: ctx.allergies,
+          pastSessions: (ctx.pastSessions ?? []).slice(0, 5),
+          language: ctx.language,
+        },
+      });
+      if (ac.signal.aborted) return null;
+      if (fnError) {
+        console.warn("live-diagnostic-hint error:", fnError);
+        setError("The AI clinician could not analyse this part of the consultation.");
+        return null;
+      }
+      if (data && (data.suggestion || data.differentials?.length || data.alerts?.length)) {
+        setHint(data as LiveDiagnosticHint);
+        return data as LiveDiagnosticHint;
+      }
+      return null;
+    } catch (e) {
+      if (!(e as any)?.name?.includes("Abort")) {
+        console.warn("live-diagnostic-hint invoke failed:", e);
+        setError("The AI clinician could not be reached.");
+      }
+      return null;
+    } finally {
+      if (!ac.signal.aborted) setIsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (!enabled) return;
     lastTranscriptLen.current = 0;
-    setHint(null);
 
-    const tick = async () => {
+    const tick = () => {
       const current = transcriptRef.current;
       if (!current || current.length < 60) return;
       if (current.length - lastTranscriptLen.current < minGrowthChars) return;
       lastTranscriptLen.current = current.length;
-
-      inFlight.current?.abort();
-      const ac = new AbortController();
-      inFlight.current = ac;
-      setIsLoading(true);
-      try {
-        const { data, error } = await supabase.functions.invoke("live-diagnostic-hint", {
-          body: {
-            transcript: current,
-            patientAge,
-            patientSex,
-            currentMedications,
-            chronicConditions,
-            allergies,
-            pastSessions: (pastSessions ?? []).slice(0, 5),
-
-            language,
-          },
-        });
-        if (ac.signal.aborted) return;
-        if (error) {
-          console.warn("live-diagnostic-hint error:", error);
-          return;
-        }
-        if (data && (data.suggestion || data.differentials?.length || data.alerts?.length)) {
-          setHint(data as LiveDiagnosticHint);
-        }
-      } catch (e) {
-        if (!(e as any)?.name?.includes("Abort")) {
-          console.warn("live-diagnostic-hint invoke failed:", e);
-        }
-      } finally {
-        if (!ac.signal.aborted) setIsLoading(false);
-      }
+      void run();
     };
 
     const warmup = setTimeout(tick, 6000);
@@ -114,5 +131,5 @@ export function useLiveDiagnosticHint({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled]);
 
-  return { hint, isLoading };
+  return { hint, isLoading, error, analyze: run, reset: () => setHint(null) };
 }

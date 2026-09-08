@@ -92,67 +92,64 @@ ${language ? `Respond in ${language}.` : ""}`;
 
     const userPrompt = `PATIENT CONTEXT:\n${patientContext}\n\nLIVE TRANSCRIPT SO FAR:\n${transcript.slice(-6000)}`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
+        "Lovable-API-Key": LOVABLE_API_KEY,
+        "X-Lovable-AIG-SDK": "fetch",
       },
       body: JSON.stringify({
-        model: "google/gemini-3.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        tools: [{
-          type: "function",
-          function: {
-            name: "emit_live_hint",
-            description: "Emit a live clinical decision-support hint with safety alerts",
-            parameters: {
+        model: "openai/gpt-6-astra",
+        stream: true,
+        reasoning: { effort: "low" },
+        instructions: systemPrompt,
+        input: userPrompt,
+        text: {
+          format: {
+            type: "json_schema",
+            name: "live_hint",
+            strict: true,
+            schema: {
               type: "object",
+              additionalProperties: false,
               properties: {
-                suggestion: { type: "string", description: "2-3 sentence working impression of what is going on clinically" },
+                suggestion: {
+                  type: "string",
+                  description: "2-3 sentence working impression of what is going on clinically",
+                },
                 alerts: {
                   type: "array",
-                  description: "Safety cross-checks against current meds, allergies, conditions and prior visits. Empty if none apply.",
+                  description:
+                    "Safety cross-checks against current meds, allergies, conditions and prior visits. Empty if none apply.",
                   items: {
                     type: "object",
+                    additionalProperties: false,
                     properties: {
                       type: {
                         type: "string",
                         enum: ["duplicate", "interaction", "allergy", "recurrence", "red_flag", "gap"],
                       },
                       severity: { type: "string", enum: ["critical", "caution", "info"] },
-                      message: { type: "string", description: "One specific sentence naming the drug/condition/date involved" },
+                      message: { type: "string" },
                     },
                     required: ["type", "severity", "message"],
-                    additionalProperties: false,
                   },
                 },
-                differentials: {
-                  type: "array",
-                  items: { type: "string" },
-                  description: "Up to 4 short differentials the doctor should consider",
-                },
-                red_flags: {
-                  type: "array",
-                  items: { type: "string" },
-                  description: "Up to 3 red-flag symptoms/signs to rule out, if any",
-                },
-                suggested_investigations: {
-                  type: "array",
-                  items: { type: "string" },
-                  description: "1-4 quick bedside checks or investigations to consider",
-                },
+                differentials: { type: "array", items: { type: "string" } },
+                red_flags: { type: "array", items: { type: "string" } },
+                suggested_investigations: { type: "array", items: { type: "string" } },
               },
-              required: ["suggestion"],
-              additionalProperties: false,
+              required: [
+                "suggestion",
+                "alerts",
+                "differentials",
+                "red_flags",
+                "suggested_investigations",
+              ],
             },
           },
-        }],
-        tool_choice: { type: "function", function: { name: "emit_live_hint" } },
-        max_tokens: 900,
+        },
       }),
     });
 
@@ -174,23 +171,51 @@ ${language ? `Respond in ${language}.` : ""}`;
       throw new Error(`AI gateway error: ${response.status}`);
     }
 
-    const data = await response.json();
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    let result: any = { suggestion: "", differentials: [], red_flags: [], alerts: [] };
-    if (toolCall?.function?.arguments) {
-      try {
-        result = JSON.parse(toolCall.function.arguments);
-      } catch (e) {
-        console.error("Parse tool args error:", e);
+    // Read the SSE stream and accumulate the answer text (reasoning runs can be
+    // long; streaming keeps bytes flowing so the request is never severed).
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let answer = "";
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+      for (const line of lines) {
+        if (!line.startsWith("data:")) continue;
+        const payload = line.slice(5).trim();
+        if (!payload || payload === "[DONE]") continue;
+        try {
+          const evt = JSON.parse(payload);
+          if (evt.type === "response.output_text.delta" && typeof evt.delta === "string") {
+            answer += evt.delta;
+          } else if (evt.type === "response.completed" && evt.response?.output_text) {
+            if (!answer) answer = evt.response.output_text;
+          }
+        } catch {
+          // partial or non-JSON event line — ignore
+        }
       }
-    } else if (data.choices?.[0]?.message?.content) {
-      result.suggestion = data.choices[0].message.content;
+    }
+
+    let result: any = { suggestion: "", differentials: [], red_flags: [], alerts: [] };
+    if (answer.trim()) {
+      try {
+        const match = answer.match(/\{[\s\S]*\}/);
+        result = JSON.parse(match ? match[0] : answer);
+      } catch (e) {
+        console.error("Parse live hint error:", e);
+        result.suggestion = answer.trim();
+      }
     }
     result.alerts = Array.isArray(result.alerts) ? result.alerts : [];
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+
   } catch (error) {
     console.error("live-diagnostic-hint error:", error);
     return new Response(
