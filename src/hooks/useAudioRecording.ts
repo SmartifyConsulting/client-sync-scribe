@@ -37,6 +37,17 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
   const streamRef = useRef<MediaStream | null>(null);
   const speechRecognitionRef = useRef<SpeechRecognition | null>(null);
   const endSessionDetectedRef = useRef(false);
+  // Rolling live transcription: a second recorder on the same mic stream that is
+  // restarted every ~20s so each blob is a complete, decodable webm file which the
+  // transcription service can handle on its own. This is what feeds the live AI
+  // clinician — the browser speech recogniser is unreliable and only used for the
+  // spoken "end session" cue and the speaking indicator.
+  const chunkRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunkBufferRef = useRef<Blob[]>([]);
+  const chunkTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const chunkingActiveRef = useRef(false);
+  const [liveTranscribeError, setLiveTranscribeError] = useState<string | null>(null);
+
   
   // Use refs to always have latest options
   const optionsRef = useRef(options);
