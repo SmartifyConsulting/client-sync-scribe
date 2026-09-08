@@ -120,13 +120,13 @@ export function useLiveDiagnosticHint({
 
     const tick = () => {
       const current = transcriptRef.current;
-      if (!current || current.length < 60) return;
+      if (!current || current.trim().length < 25) return;
       if (current.length - lastTranscriptLen.current < minGrowthChars) return;
       lastTranscriptLen.current = current.length;
       void run();
     };
 
-    const warmup = setTimeout(tick, 6000);
+    const warmup = setTimeout(tick, 4000);
     const interval = setInterval(tick, intervalMs);
     return () => {
       clearTimeout(warmup);
@@ -136,5 +136,6 @@ export function useLiveDiagnosticHint({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled]);
 
-  return { hint, isLoading, error, analyze: run, reset: () => setHint(null) };
+  return { hint, isLoading, error, lastRunAt, analyze: run, reset: () => setHint(null) };
 }
+
