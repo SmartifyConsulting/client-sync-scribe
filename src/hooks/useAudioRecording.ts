@@ -110,6 +110,91 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
     }
   };
 
+  const LIVE_CHUNK_MS = 20000;
+
+  const transcribeLiveChunk = useCallback(async (blob: Blob) => {
+    if (blob.size < 4000) return; // effectively silence
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+      const { data, error } = await supabase.functions.invoke('transcribe-audio', {
+        body: {
+          audio: base64,
+          patientName: optionsRef.current.patientName,
+          doctorName: optionsRef.current.doctorName,
+          language: optionsRef.current.language,
+        },
+      });
+      if (error || data?.error) {
+        console.warn('Live chunk transcription failed:', error || data?.error);
+        setLiveTranscribeError('Live transcription is not keeping up with the consultation.');
+        return;
+      }
+      const text = (data?.text || '').trim();
+      if (!text) return;
+      setLiveTranscribeError(null);
+      liveTranscriptRef.current = `${liveTranscriptRef.current} ${text}`.trim();
+      setLiveTranscript(liveTranscriptRef.current);
+      setLiveMessages((prev) => [...prev, text]);
+    } catch (e) {
+      console.warn('Live chunk transcription error:', e);
+      setLiveTranscribeError('Live transcription could not be reached.');
+    }
+  }, []);
+
+  const runChunkCycle = useCallback(() => {
+    const stream = streamRef.current;
+    if (!chunkingActiveRef.current || !stream) return;
+    try {
+      const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+      chunkBufferRef.current = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunkBufferRef.current.push(e.data);
+      };
+      recorder.onstop = () => {
+        const blob = new Blob(chunkBufferRef.current, { type: 'audio/webm' });
+        chunkBufferRef.current = [];
+        void transcribeLiveChunk(blob);
+        if (chunkingActiveRef.current) runChunkCycle();
+      };
+      recorder.start();
+      chunkRecorderRef.current = recorder;
+      chunkTimerRef.current = setTimeout(() => {
+        try {
+          if (recorder.state !== 'inactive') recorder.stop();
+        } catch {}
+      }, LIVE_CHUNK_MS);
+    } catch (e) {
+      console.warn('Live chunk recorder failed to start:', e);
+      chunkingActiveRef.current = false;
+    }
+  }, [transcribeLiveChunk]);
+
+  const startLiveChunking = useCallback(() => {
+    if (chunkingActiveRef.current) return;
+    chunkingActiveRef.current = true;
+    runChunkCycle();
+  }, [runChunkCycle]);
+
+  const stopLiveChunking = useCallback((flush = true) => {
+    chunkingActiveRef.current = false;
+    if (chunkTimerRef.current) {
+      clearTimeout(chunkTimerRef.current);
+      chunkTimerRef.current = null;
+    }
+    const recorder = chunkRecorderRef.current;
+    chunkRecorderRef.current = null;
+    if (recorder && recorder.state !== 'inactive') {
+      if (!flush) recorder.ondataavailable = null as any;
+      try { recorder.stop(); } catch {}
+    }
+  }, []);
+
+
   const startRecording = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
