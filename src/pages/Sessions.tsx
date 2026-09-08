@@ -955,6 +955,9 @@ export default function Sessions() {
 
     language: (typeof doctorLanguage === "string" ? doctorLanguage : undefined),
   });
+  analyzeLiveRef.current = analyzeLive;
+
+
 
   // The live hints ARE the AI Clinician Notes: each new hint is merged into a
   // running, de-duplicated clinical note instead of being appended verbatim, so
