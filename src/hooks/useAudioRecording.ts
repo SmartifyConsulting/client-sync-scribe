@@ -37,6 +37,17 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
   const streamRef = useRef<MediaStream | null>(null);
   const speechRecognitionRef = useRef<SpeechRecognition | null>(null);
   const endSessionDetectedRef = useRef(false);
+  // Rolling live transcription: a second recorder on the same mic stream that is
+  // restarted every ~20s so each blob is a complete, decodable webm file which the
+  // transcription service can handle on its own. This is what feeds the live AI
+  // clinician — the browser speech recogniser is unreliable and only used for the
+  // spoken "end session" cue and the speaking indicator.
+  const chunkRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunkBufferRef = useRef<Blob[]>([]);
+  const chunkTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const chunkingActiveRef = useRef(false);
+  const [liveTranscribeError, setLiveTranscribeError] = useState<string | null>(null);
+
   
   // Use refs to always have latest options
   const optionsRef = useRef(options);
@@ -59,8 +70,13 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
           mediaRecorderRef.current.stop();
         }
       } catch {}
+      chunkingActiveRef.current = false;
+      if (chunkTimerRef.current) clearTimeout(chunkTimerRef.current);
+      try { chunkRecorderRef.current?.stop(); } catch {}
+      chunkRecorderRef.current = null;
       try { speechRecognitionRef.current?.stop(); } catch {}
       speechRecognitionRef.current = null;
+
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
         streamRef.current = null;
@@ -98,6 +114,91 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
       return null;
     }
   };
+
+  const LIVE_CHUNK_MS = 20000;
+
+  const transcribeLiveChunk = useCallback(async (blob: Blob) => {
+    if (blob.size < 4000) return; // effectively silence
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+      const { data, error } = await supabase.functions.invoke('transcribe-audio', {
+        body: {
+          audio: base64,
+          patientName: optionsRef.current.patientName,
+          doctorName: optionsRef.current.doctorName,
+          language: optionsRef.current.language,
+        },
+      });
+      if (error || data?.error) {
+        console.warn('Live chunk transcription failed:', error || data?.error);
+        setLiveTranscribeError('Live transcription is not keeping up with the consultation.');
+        return;
+      }
+      const text = (data?.text || '').trim();
+      if (!text) return;
+      setLiveTranscribeError(null);
+      liveTranscriptRef.current = `${liveTranscriptRef.current} ${text}`.trim();
+      setLiveTranscript(liveTranscriptRef.current);
+      setLiveMessages((prev) => [...prev, text]);
+    } catch (e) {
+      console.warn('Live chunk transcription error:', e);
+      setLiveTranscribeError('Live transcription could not be reached.');
+    }
+  }, []);
+
+  const runChunkCycle = useCallback(() => {
+    const stream = streamRef.current;
+    if (!chunkingActiveRef.current || !stream) return;
+    try {
+      const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+      chunkBufferRef.current = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunkBufferRef.current.push(e.data);
+      };
+      recorder.onstop = () => {
+        const blob = new Blob(chunkBufferRef.current, { type: 'audio/webm' });
+        chunkBufferRef.current = [];
+        void transcribeLiveChunk(blob);
+        if (chunkingActiveRef.current) runChunkCycle();
+      };
+      recorder.start();
+      chunkRecorderRef.current = recorder;
+      chunkTimerRef.current = setTimeout(() => {
+        try {
+          if (recorder.state !== 'inactive') recorder.stop();
+        } catch {}
+      }, LIVE_CHUNK_MS);
+    } catch (e) {
+      console.warn('Live chunk recorder failed to start:', e);
+      chunkingActiveRef.current = false;
+    }
+  }, [transcribeLiveChunk]);
+
+  const startLiveChunking = useCallback(() => {
+    if (chunkingActiveRef.current) return;
+    chunkingActiveRef.current = true;
+    runChunkCycle();
+  }, [runChunkCycle]);
+
+  const stopLiveChunking = useCallback((flush = true) => {
+    chunkingActiveRef.current = false;
+    if (chunkTimerRef.current) {
+      clearTimeout(chunkTimerRef.current);
+      chunkTimerRef.current = null;
+    }
+    const recorder = chunkRecorderRef.current;
+    chunkRecorderRef.current = null;
+    if (recorder && recorder.state !== 'inactive') {
+      if (!flush) recorder.ondataavailable = null as any;
+      try { recorder.stop(); } catch {}
+    }
+  }, []);
+
 
   const startRecording = useCallback(async () => {
     try {
@@ -158,6 +259,10 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
       };
 
       mediaRecorder.start(1000);
+      setLiveTranscribeError(null);
+      // Rolling live transcription feeds the AI clinician while the doctor talks.
+      startLiveChunking();
+
       setIsRecording(true);
       endSessionDetectedRef.current = false;
       liveTranscriptRef.current = '';
@@ -172,7 +277,8 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
           const recognition = new SpeechRecognitionAPI();
           recognition.continuous = true;
           recognition.interimResults = true;
-          recognition.lang = 'en-US';
+          recognition.lang = optionsRef.current.language || 'en-US';
+
           
           const endPhrases = ['end session', 'end of session', 'end the session', 'conclude the session', 'session ended'];
           
@@ -238,8 +344,11 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
         try { mediaRecorderRef.current.resume(); } catch {}
       }
       mediaRecorderRef.current.stop();
+      // Flush the final live chunk before the mic closes.
+      stopLiveChunking(true);
       // Free the microphone right away so the browser tab indicator clears
       releaseStream();
+
       setIsRecording(false);
       setIsPaused(false);
       // Stop speech recognition
@@ -255,6 +364,7 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
       try {
         mediaRecorderRef.current.pause();
         setIsPaused(true);
+        stopLiveChunking(true);
         if (speechRecognitionRef.current) {
           try { speechRecognitionRef.current.stop(); } catch {}
         }
@@ -262,21 +372,24 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
         console.error('Pause failed:', err);
       }
     }
-  }, []);
+  }, [stopLiveChunking]);
+
 
   const resumeRecording = useCallback(() => {
     if (mediaRecorderRef.current?.state === 'paused') {
       try {
         mediaRecorderRef.current.resume();
         setIsPaused(false);
+        startLiveChunking();
         // Restart speech recognition
+
         try {
           const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
           if (SpeechRecognitionAPI && !speechRecognitionRef.current) {
             const recognition = new SpeechRecognitionAPI();
             recognition.continuous = true;
             recognition.interimResults = true;
-            recognition.lang = 'en-US';
+            recognition.lang = optionsRef.current.language || 'en-US';
             recognition.onresult = (event: SpeechRecognitionEvent) => {
               const last = event.results[event.results.length - 1];
               if (!last.isFinal) {
@@ -300,7 +413,8 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
         console.error('Resume failed:', err);
       }
     }
-  }, []);
+  }, [startLiveChunking]);
+
 
   const transcribeAudio = async (audioBlob: Blob, storageUrl?: string | null) => {
     setIsTranscribing(true);
@@ -398,6 +512,8 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
     isSavingAudio,
     transcript,
     liveTranscript,
+    liveTranscribeError,
+
     liveMessages,
     isSpeaking,
     audioUrl,

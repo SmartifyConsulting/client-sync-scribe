@@ -780,13 +780,25 @@ export default function Sessions() {
 
     // Final whole-consultation AI pass so the four clinician sections are always
     // populated once recording stops, even if the live passes missed the ending.
-    if (fullTranscript.trim().length > 40) {
+    if (fullTranscript.trim().length > 25) {
       try {
-        await analyzeLiveRef.current?.(fullTranscript);
+        const finalHint = await analyzeLiveRef.current?.(fullTranscript);
+        console.log("Final AI clinician pass result:", finalHint ? "ok" : "empty");
+        if (!finalHint && !notesRef.current?.trim()) {
+          setNotes(
+            [
+              "WORKING IMPRESSION\nThe final AI analysis could not be completed for this consultation.",
+              "SAFETY CHECKS\n• none noted",
+              "DIFFERENTIALS\n• none noted",
+              "SUGGESTED CHECKS\n• none noted",
+            ].join("\n\n"),
+          );
+        }
       } catch (e) {
         console.warn("Final AI clinician pass failed:", e);
       }
     }
+
 
     let hasDocs = false;
 
@@ -882,6 +894,8 @@ export default function Sessions() {
     isSavingAudio,
     transcript,
     liveTranscript,
+    liveTranscribeError,
+
     liveMessages,
     isSpeaking,
     audioUrl,
@@ -939,7 +953,7 @@ export default function Sessions() {
 
   // Live AI diagnostic hint while doctor is recording (before they conclude).
   // Always on for a recording — no toggle gate; the AI Consult button just runs it now.
-  const { hint: liveHint, isLoading: liveHintLoading, error: liveHintError, analyze: analyzeLive } = useLiveDiagnosticHint({
+  const { hint: liveHint, isLoading: liveHintLoading, error: liveHintError, lastRunAt: liveHintLastRunAt, analyze: analyzeLive } = useLiveDiagnosticHint({
     enabled: isRecording && !isPaused,
 
     transcript: liveTranscript || transcript,
@@ -1728,13 +1742,27 @@ export default function Sessions() {
               <ClinicianNotesColumns notes={notes} />
             ) : liveHintError ? (
               <p className="text-xs text-destructive">{liveHintError}</p>
+            ) : liveTranscribeError ? (
+              <p className="text-xs text-destructive">{liveTranscribeError}</p>
             ) : isRecording ? (
               <p className="text-xs text-muted-foreground">
-                {liveHintLoading ? "Analysing the consultation…" : "Listening — clinical guidance appears as you talk."}
+                {liveHintLoading
+                  ? "Analysing the consultation…"
+                  : (liveTranscript || transcript)
+                    ? "Listening — clinical guidance appears as you talk."
+                    : "Listening — no speech captured yet."}
               </p>
             ) : (
               <p className="text-xs text-muted-foreground">Live AI Clinician starts as soon as you record.</p>
             )}
+            {(isRecording || liveHintLastRunAt) && (
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                {liveHintLastRunAt
+                  ? `Last analysed at ${liveHintLastRunAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+                  : "Waiting for the first analysis…"}
+              </p>
+            )}
+
 
             <p className="mt-2 text-xs text-muted-foreground leading-snug">
               <span className="font-semibold text-foreground">

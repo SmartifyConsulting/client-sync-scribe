@@ -47,12 +47,14 @@ export function useLiveDiagnosticHint({
 
   language,
   intervalMs = 12000,
-  minGrowthChars = 40,
+  minGrowthChars = 25,
 }: Args) {
   const [hint, setHint] = useState<LiveDiagnosticHint | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastRunAt, setLastRunAt] = useState<Date | null>(null);
   const lastTranscriptLen = useRef(0);
+
   const inFlight = useRef<AbortController | null>(null);
   const transcriptRef = useRef(transcript);
   // Context changes constantly; keep it in a ref so the polling loop never
@@ -66,7 +68,8 @@ export function useLiveDiagnosticHint({
 
   const run = useCallback(async (override?: string) => {
     const current = (override ?? transcriptRef.current) || "";
-    if (current.trim().length < 40) return null;
+    if (current.trim().length < 25) return null;
+
 
     inFlight.current?.abort();
     const ac = new AbortController();
@@ -93,11 +96,13 @@ export function useLiveDiagnosticHint({
         setError("The AI clinician could not analyse this part of the consultation.");
         return null;
       }
+      setLastRunAt(new Date());
       if (data && (data.suggestion || data.differentials?.length || data.alerts?.length)) {
         setHint(data as LiveDiagnosticHint);
         return data as LiveDiagnosticHint;
       }
       return null;
+
     } catch (e) {
       if (!(e as any)?.name?.includes("Abort")) {
         console.warn("live-diagnostic-hint invoke failed:", e);
@@ -115,13 +120,13 @@ export function useLiveDiagnosticHint({
 
     const tick = () => {
       const current = transcriptRef.current;
-      if (!current || current.length < 60) return;
+      if (!current || current.trim().length < 25) return;
       if (current.length - lastTranscriptLen.current < minGrowthChars) return;
       lastTranscriptLen.current = current.length;
       void run();
     };
 
-    const warmup = setTimeout(tick, 6000);
+    const warmup = setTimeout(tick, 4000);
     const interval = setInterval(tick, intervalMs);
     return () => {
       clearTimeout(warmup);
@@ -131,5 +136,6 @@ export function useLiveDiagnosticHint({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled]);
 
-  return { hint, isLoading, error, analyze: run, reset: () => setHint(null) };
+  return { hint, isLoading, error, lastRunAt, analyze: run, reset: () => setHint(null) };
 }
+
