@@ -882,6 +882,8 @@ export default function Sessions() {
     isSavingAudio,
     transcript,
     liveTranscript,
+    liveTranscribeError,
+
     liveMessages,
     isSpeaking,
     audioUrl,
