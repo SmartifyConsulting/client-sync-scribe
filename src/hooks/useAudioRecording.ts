@@ -408,7 +408,8 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
         console.error('Resume failed:', err);
       }
     }
-  }, []);
+  }, [startLiveChunking]);
+
 
   const transcribeAudio = async (audioBlob: Blob, storageUrl?: string | null) => {
     setIsTranscribing(true);
