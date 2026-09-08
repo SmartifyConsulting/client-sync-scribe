@@ -939,7 +939,7 @@ export default function Sessions() {
 
   // Live AI diagnostic hint while doctor is recording (before they conclude).
   // Always on for a recording — no toggle gate; the AI Consult button just runs it now.
-  const { hint: liveHint, isLoading: liveHintLoading, error: liveHintError, analyze: analyzeLive } = useLiveDiagnosticHint({
+  const { hint: liveHint, isLoading: liveHintLoading, error: liveHintError, lastRunAt: liveHintLastRunAt, analyze: analyzeLive } = useLiveDiagnosticHint({
     enabled: isRecording && !isPaused,
 
     transcript: liveTranscript || transcript,
