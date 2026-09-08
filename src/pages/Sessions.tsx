@@ -778,7 +778,18 @@ export default function Sessions() {
       .filter((part) => part && part.trim())
       .join("\n\n");
 
+    // Final whole-consultation AI pass so the four clinician sections are always
+    // populated once recording stops, even if the live passes missed the ending.
+    if (fullTranscript.trim().length > 40) {
+      try {
+        await analyzeLiveRef.current?.(fullTranscript);
+      } catch (e) {
+        console.warn("Final AI clinician pass failed:", e);
+      }
+    }
+
     let hasDocs = false;
+
     try {
       const result = await completeSession(
         null,
