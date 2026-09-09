@@ -235,8 +235,9 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
 
       const allResults = (data || []) as ProviderResult[];
       setTotalFound(allResults.length);
-      const connectedIds = doctors?.map((d) => d.doctor_id) || [];
-      setSearchResults(allResults.filter((d) => !(d.kind === 'doctor' && connectedIds.includes(d.id))));
+      // Keep providers the patient is already connected to in the list — hiding
+      // them made it look like the person was not on the platform at all.
+      setSearchResults(allResults);
     } catch (err) {
       console.error("Search error:", err);
     } finally {
