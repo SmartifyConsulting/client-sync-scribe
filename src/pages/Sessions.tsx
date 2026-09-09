@@ -1207,6 +1207,29 @@ export default function Sessions() {
     toast({ title: "Paused session discarded" });
   };
 
+  /**
+   * Close off a consultation that was paused and never ended: no new recording,
+   * just fold the saved transcript/notes into the normal completion pipeline.
+   */
+  const stopPausedDraft = async () => {
+    const draft = pausedDraft;
+    if (!draft) return;
+    setPausedDraft(null);
+    setCurrentSessionId(draft.id);
+    pausedSessionIdRef.current = draft.id;
+    resumedTranscriptRef.current = draft.transcript || "";
+    setNotes(draft.notes || "");
+    notesRef.current = draft.notes || "";
+    setPersonalNotes(draft.privateNotes || "");
+    personalNotesRef.current = draft.privateNotes || "";
+    personalNotesHasLoaded.current = true;
+    setSessionDuration(draft.elapsedSeconds || 0);
+    sessionStartTimeRef.current = draft.startedAt ? new Date(draft.startedAt) : new Date();
+    savedAudioUrlRef.current = null;
+    completionRanRef.current = false;
+    await handleSessionComplete("");
+  };
+
   const handleAboutRecordingAck = () => {
     setShowAboutRecordingDialog(false);
     setShowAiConsultPrompt(true);
