@@ -523,6 +523,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
                           <TableBody>
                             {groupRows.map((doctor) => {
                               const KindIcon = doctor.kind === 'hospital' ? Building2 : doctor.kind === 'ambulance' ? Ambulance : Stethoscope;
+                              const alreadyConnected = doctor.kind === 'doctor' && (doctors || []).some((d) => d.doctor_id === doctor.id);
                               return (
                                 <TableRow key={`${doctor.kind}-${doctor.id}`}>
                                   <TableCell className="p-2">
