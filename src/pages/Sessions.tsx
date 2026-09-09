@@ -1207,6 +1207,29 @@ export default function Sessions() {
     toast({ title: "Paused session discarded" });
   };
 
+  /**
+   * Close off a consultation that was paused and never ended: no new recording,
+   * just fold the saved transcript/notes into the normal completion pipeline.
+   */
+  const stopPausedDraft = async () => {
+    const draft = pausedDraft;
+    if (!draft) return;
+    setPausedDraft(null);
+    setCurrentSessionId(draft.id);
+    pausedSessionIdRef.current = draft.id;
+    resumedTranscriptRef.current = draft.transcript || "";
+    setNotes(draft.notes || "");
+    notesRef.current = draft.notes || "";
+    setPersonalNotes(draft.privateNotes || "");
+    personalNotesRef.current = draft.privateNotes || "";
+    personalNotesHasLoaded.current = true;
+    setSessionDuration(draft.elapsedSeconds || 0);
+    sessionStartTimeRef.current = draft.startedAt ? new Date(draft.startedAt) : new Date();
+    savedAudioUrlRef.current = null;
+    completionRanRef.current = false;
+    await handleSessionComplete("");
+  };
+
   const handleAboutRecordingAck = () => {
     setShowAboutRecordingDialog(false);
     setShowAiConsultPrompt(true);
@@ -1537,21 +1560,30 @@ export default function Sessions() {
           
           {/* Resume a consultation that was paused earlier (persisted draft). */}
           {pausedDraft && currentPatient && (
-            <div className="w-full max-w-md rounded-lg border-2 border-warning bg-warning/10 p-4 text-left space-y-2">
-              <p className="text-sm font-medium text-foreground flex items-center gap-2">
-                <Pause className="h-4 w-4" />
+            <div className="w-full max-w-md rounded-lg border-2 border-warning bg-warning/10 px-3 py-2.5 text-left space-y-1.5">
+              <p className="text-xs font-medium text-foreground flex items-center gap-1.5">
+                <Pause className="h-3.5 w-3.5" />
                 Paused session with {currentPatient.name}
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[11px] text-muted-foreground">
                 Paused {format(new Date(pausedDraft.pausedAt), "d MMM yyyy, HH:mm")} ·{" "}
                 {formatDuration(pausedDraft.elapsedSeconds)} recorded
               </p>
-              <div className="flex flex-wrap gap-2 pt-1">
-                <Button size="sm" className="gap-2" onClick={() => startSession(pausedDraft)}>
-                  <Play className="h-4 w-4" />
-                  Resume session
+              <div className="flex flex-wrap items-center gap-2">
+                <Button size="sm" className="h-7 gap-1.5 px-2.5 text-xs" onClick={() => startSession(pausedDraft)}>
+                  <Play className="h-3.5 w-3.5" />
+                  Resume
                 </Button>
-                <Button size="sm" variant="ghost" onClick={discardPausedDraft}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 gap-1.5 px-2.5 text-xs"
+                  onClick={stopPausedDraft}
+                >
+                  <Square className="h-3.5 w-3.5" />
+                  Stop &amp; finish
+                </Button>
+                <Button size="sm" variant="ghost" className="h-7 px-2.5 text-xs" onClick={discardPausedDraft}>
                   Discard
                 </Button>
               </div>
@@ -1561,7 +1593,7 @@ export default function Sessions() {
           <Button 
             onClick={() => startSession()} 
             size="lg" 
-            className="gap-2"
+            className="mt-4 gap-2"
             disabled={!currentPatient}
           >
             <Play className="h-5 w-5" />
