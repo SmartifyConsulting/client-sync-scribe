@@ -570,7 +570,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
                                   </TableCell>
                                   <TableCell className="p-2">
                                     <div className="flex items-center gap-1">
-                                      {doctor.kind === 'doctor' && (
+                                      {doctor.kind === 'doctor' && !alreadyConnected && (
                                         <InviteDoctorDialog
                                           prefillDoctorId={doctor.id}
                                           prefillDoctorName={doctor.full_name || ""}
