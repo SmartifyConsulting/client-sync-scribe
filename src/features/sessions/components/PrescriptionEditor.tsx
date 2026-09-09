@@ -24,6 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
 import { useTemplateWithHeaderFooter } from "@/hooks/useTemplateWithHeaderFooter";
+import { fillPrescriptionMedications } from "@/features/documents/lib/templateCleanup";
 
 interface MedicationConflict {
   type: "drug-drug" | "drug-allergy";
@@ -143,7 +144,8 @@ Signature: ___________________
 
     // If we have a saved template with header/footer, use it as wrapper
     if (savedTemplate) {
-      return savedTemplate
+      const filled = fillPrescriptionMedications(savedTemplate, medicationLines);
+      return filled
         .replace(/\[DATE\]/g, new Date().toLocaleDateString())
         .replace(/\[PrescriptionDate\]/g, new Date().toLocaleDateString())
         .replace(/\[PATIENT_NAME\]/g, patientName)

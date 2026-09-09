@@ -60,19 +60,11 @@ Time of Consultation: [ConsultationTime]
 
 Nature of illness or injury: [NatureOfIllness]
 
-..............................................................................................................
-
-..............................................................................................................
-
 Recommended sick leave from: [SickLeaveFrom] until [SickLeaveUntil] [Inclusive]
 
 Other information / recommendations: [OtherRecommendations]
 
-..............................................................................................................
 
-..............................................................................................................
-
-..............................................................................................................
 
 [DoctorSignature]
 
@@ -149,29 +141,7 @@ Rx:
 
 ---
 
-1. [Medication1]
-
-   Dosage: [Dosage1]
-
-   Quantity: [Quantity1]
-
-   Instructions: [Instructions1]
-
-2. [Medication2]
-
-   Dosage: [Dosage2]
-
-   Quantity: [Quantity2]
-
-   Instructions: [Instructions2]
-
-3. [Medication3]
-
-   Dosage: [Dosage3]
-
-   Quantity: [Quantity3]
-
-   Instructions: [Instructions3]
+[MedicationList]
 
 Repeats: [NumberOfRepeats]
 

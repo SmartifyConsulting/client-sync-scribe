@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
 import { useTemplateWithHeaderFooter } from "@/hooks/useTemplateWithHeaderFooter";
+import { stripDottedLines } from "@/features/documents/lib/templateCleanup";
 import { SendDocumentButton } from "./SendDocumentButton";
 import { DocumentPreview } from "./DocumentPreview";
 
@@ -150,7 +151,7 @@ export function MedicalCertificateEditor({
   const [isSaving, setIsSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
-  const baseTemplate = savedTemplate || FALLBACK_TEMPLATE;
+  const baseTemplate = stripDottedLines(savedTemplate || FALLBACK_TEMPLATE);
 
   const generateContent = () => {
     return baseTemplate

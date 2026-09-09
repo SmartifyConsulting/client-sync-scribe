@@ -1695,10 +1695,6 @@ export default function Sessions() {
               )}
             </div>
 
-            {/* Transcript document — only shown once transcription has finished.
-                Nothing is streamed on screen while recording (the waveform above shows progress). */}
-            <SessionTranscriptAccordion transcript={transcript} doctorName={doctorName} />
-
 
             {/* Audio Playback */}
             {audioUrl && !isRecording && (
@@ -1726,7 +1722,12 @@ export default function Sessions() {
               />
             </div>
 
+            {/* Transcript document — full width beneath Patient Overview, shown once
+                transcription has finished. Nothing streams while recording. */}
+            <SessionTranscriptAccordion transcript={transcript} doctorName={doctorName} />
+
           </div>
+
 
           {/* Live AI Clinician — directly below the Session Recorder frame. */}
           <div className="order-3 min-w-0 rounded-xl border border-primary bg-primary/5 p-3 lg:col-span-2 lg:col-start-1 lg:row-start-2">
