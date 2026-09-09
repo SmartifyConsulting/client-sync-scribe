@@ -406,6 +406,7 @@ export function PostSessionStepDialog({
         summary={summary}
         actionPoints={actionPoints}
         patientName={patientName || currentPatient?.name}
+        clinicianNotes={clinicianNotes}
         onAdvance={onAdvance}
       />
     );
