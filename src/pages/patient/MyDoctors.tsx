@@ -494,11 +494,12 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
               {isSearching ? (
                 <div className="flex justify-center py-4"><Loader2 className="h-4 w-4 animate-spin text-primary" /></div>
               ) : searchResults.length === 0 ? (
-                 <p className="text-sm text-muted-foreground text-center py-4">
-                   {totalFound > 0
-                     ? "All matching providers are already on your profile."
-                     : "No healthcare providers found matching your search."}
-                 </p>
+                 <div className="flex flex-col items-center gap-2 py-4">
+                   <p className="text-sm text-muted-foreground text-center">
+                     No healthcare providers found. Check the spelling, or try their surname, email address or practice number.
+                   </p>
+                   <InviteDoctorDialog />
+                 </div>
               ) : (
                 <div className="space-y-4">
                   {(['doctor','hospital','ambulance'] as const).map((groupKind) => {
