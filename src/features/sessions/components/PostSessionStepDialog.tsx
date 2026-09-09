@@ -285,21 +285,23 @@ function DocStepDialog({
 }
 
 
-/** First step of the queue — the AI summary and action points for the visit. */
+/** First step of the queue — the AI summary, action points and clinician notes. */
 function SummaryStepDialog({
   summary,
   actionPoints,
   patientName,
+  clinicianNotes,
   onAdvance,
 }: {
   summary?: string | null;
   actionPoints?: string[];
   patientName?: string;
+  clinicianNotes?: string | null;
   onAdvance: () => void;
 }) {
   return (
     <Dialog open onOpenChange={() => {}}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-5xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Brain className="h-5 w-5 text-primary" />
@@ -309,7 +311,7 @@ function SummaryStepDialog({
             {patientName ? `Consultation summary for ${patientName}.` : "Consultation summary."}
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4 max-h-[55vh] overflow-y-auto text-sm leading-relaxed text-foreground">
+        <div className="space-y-4 max-h-[65vh] overflow-y-auto text-sm leading-relaxed text-foreground">
           <p className="whitespace-pre-wrap">{summary?.trim() || "No summary was produced for this session."}</p>
           {(actionPoints || []).length > 0 && (
             <div className="space-y-1.5">
@@ -319,6 +321,12 @@ function SummaryStepDialog({
                   <li key={i}>{point}</li>
                 ))}
               </ul>
+            </div>
+          )}
+          {clinicianNotes?.trim() && (
+            <div className="space-y-2">
+              <p className="font-semibold">AI Clinician notes</p>
+              <ClinicianNotesColumns notes={clinicianNotes} />
             </div>
           )}
         </div>
@@ -332,6 +340,7 @@ function SummaryStepDialog({
     </Dialog>
   );
 }
+
 
 /** Renders nothing and immediately advances the queue past a missing document step. */
 function MissingStepAdvancer({ onAdvance }: { onAdvance: () => void }) {
