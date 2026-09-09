@@ -55,6 +55,7 @@ interface UserRecord {
   full_name: string | null;
   role: string; // from get_users_admin (joined user_roles row, may be 'none')
   created_at: string;
+  last_sign_in_at?: string | null;
   status: string;
   holarchelp_enabled?: boolean;
   v2_demo?: boolean;
@@ -389,7 +390,8 @@ export default function UsersTab({ kind }: UsersTabProps) {
             </TableHead>
             <TableHead>v2.0 demo</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Joined</TableHead>
+            <TableHead>Registered</TableHead>
+            <TableHead>Last Active</TableHead>
             <TableHead className="w-[110px] text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -478,6 +480,9 @@ export default function UsersTab({ kind }: UsersTabProps) {
                   </div>
                 </TableCell>
                 <TableCell className="text-[hsl(var(--admin-text-tertiary))]">{format(new Date(u.created_at), "dd MMM yyyy")}</TableCell>
+                <TableCell className="text-[hsl(var(--admin-text-tertiary))]">
+                  {u.last_sign_in_at ? format(new Date(u.last_sign_in_at), "dd MMM yyyy") : "Never"}
+                </TableCell>
                 <TableCell className="text-right">
                   {isEditing ? (
                     <div className="flex justify-end items-center gap-1.5">
