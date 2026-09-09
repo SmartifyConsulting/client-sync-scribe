@@ -535,7 +535,12 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
                                         </AvatarFallback>
                                       </Avatar>
                                       <div className="flex flex-col min-w-0">
-                                        <span className="font-medium text-foreground text-xs truncate">{doctor.full_name || "Unknown"}</span>
+                                        <span className="font-medium text-foreground text-xs truncate flex items-center gap-1.5">
+                                          {doctor.full_name || "Unknown"}
+                                          {alreadyConnected && (
+                                            <Badge variant="outline" className="text-[10px] px-1 py-0 border-primary text-primary">Already connected</Badge>
+                                          )}
+                                        </span>
                                         <span className="text-xs text-muted-foreground flex items-center gap-1">
                                           {Array.from({ length: Math.min(5, Math.max(0, Math.round(Number(doctor.stars) || 0))) }).map((_, i) => (
                                             <Star key={i} className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
