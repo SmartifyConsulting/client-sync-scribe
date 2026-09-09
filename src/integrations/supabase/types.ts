@@ -10743,6 +10743,7 @@ export type Database = {
           created_at: string
           email: string
           full_name: string
+          last_sign_in_at: string
           role: string
           status: string
           user_id: string
@@ -10990,6 +10991,8 @@ export type Database = {
           success: boolean
         }[]
       }
+      name_match_score: { Args: { _name: string; _q: string }; Returns: number }
+      norm_lang: { Args: { _v: string }; Returns: string }
       norm_text: { Args: { _t: string }; Returns: string }
       nurse_record_hospital: { Args: { _nurse_id: string }; Returns: string }
       nurse_ward_id: {
@@ -11073,6 +11076,8 @@ export type Database = {
         Args: { _user_a: string; _user_b: string }
         Returns: boolean
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       storage_object_path: {
         Args: { _bucket: string; _url: string }
         Returns: string

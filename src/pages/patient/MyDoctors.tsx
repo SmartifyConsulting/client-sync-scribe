@@ -235,8 +235,9 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
 
       const allResults = (data || []) as ProviderResult[];
       setTotalFound(allResults.length);
-      const connectedIds = doctors?.map((d) => d.doctor_id) || [];
-      setSearchResults(allResults.filter((d) => !(d.kind === 'doctor' && connectedIds.includes(d.id))));
+      // Keep providers the patient is already connected to in the list — hiding
+      // them made it look like the person was not on the platform at all.
+      setSearchResults(allResults);
     } catch (err) {
       console.error("Search error:", err);
     } finally {
@@ -493,11 +494,12 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
               {isSearching ? (
                 <div className="flex justify-center py-4"><Loader2 className="h-4 w-4 animate-spin text-primary" /></div>
               ) : searchResults.length === 0 ? (
-                 <p className="text-sm text-muted-foreground text-center py-4">
-                   {totalFound > 0
-                     ? "All matching providers are already on your profile."
-                     : "No healthcare providers found matching your search."}
-                 </p>
+                 <div className="flex flex-col items-center gap-2 py-4">
+                   <p className="text-sm text-muted-foreground text-center">
+                     No healthcare providers found. Check the spelling, or try their surname, email address or practice number.
+                   </p>
+                   <InviteDoctorDialog />
+                 </div>
               ) : (
                 <div className="space-y-4">
                   {(['doctor','hospital','ambulance'] as const).map((groupKind) => {
@@ -522,6 +524,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
                           <TableBody>
                             {groupRows.map((doctor) => {
                               const KindIcon = doctor.kind === 'hospital' ? Building2 : doctor.kind === 'ambulance' ? Ambulance : Stethoscope;
+                              const alreadyConnected = doctor.kind === 'doctor' && (doctors || []).some((d) => d.doctor_id === doctor.id);
                               return (
                                 <TableRow key={`${doctor.kind}-${doctor.id}`}>
                                   <TableCell className="p-2">
@@ -533,7 +536,12 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
                                         </AvatarFallback>
                                       </Avatar>
                                       <div className="flex flex-col min-w-0">
-                                        <span className="font-medium text-foreground text-xs truncate">{doctor.full_name || "Unknown"}</span>
+                                        <span className="font-medium text-foreground text-xs truncate flex items-center gap-1.5">
+                                          {doctor.full_name || "Unknown"}
+                                          {alreadyConnected && (
+                                            <Badge variant="outline" className="text-[10px] px-1 py-0 border-primary text-primary">Already connected</Badge>
+                                          )}
+                                        </span>
                                         <span className="text-xs text-muted-foreground flex items-center gap-1">
                                           {Array.from({ length: Math.min(5, Math.max(0, Math.round(Number(doctor.stars) || 0))) }).map((_, i) => (
                                             <Star key={i} className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
@@ -563,7 +571,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
                                   </TableCell>
                                   <TableCell className="p-2">
                                     <div className="flex items-center gap-1">
-                                      {doctor.kind === 'doctor' && (
+                                      {doctor.kind === 'doctor' && !alreadyConnected && (
                                         <InviteDoctorDialog
                                           prefillDoctorId={doctor.id}
                                           prefillDoctorName={doctor.full_name || ""}
