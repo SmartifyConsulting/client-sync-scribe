@@ -291,6 +291,7 @@ const App = () => (
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/pricing" element={<PricingAdmin />} />
             <Route path="/admin/gamification" element={<GamificationAdmin />} />
+            <Route path="/admin/performance" element={<CountryPerformance />} />
             <Route path="/admin/bulk-password-reset" element={<BulkPasswordReset />} />
             <Route path="/admin/users" element={<HolarcHelpProviders />} />
             <Route path="/admin/holarchelp-providers" element={<Navigate to="/admin/users" replace />} />
