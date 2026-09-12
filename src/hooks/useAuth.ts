@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { startLoginTracking, endLoginTracking } from '@/lib/loginTracking';
 
 const SIGNIN_COUNT_PREFIX = 'holarc.signinCount.';
 const LAST_TOKEN_PREFIX = 'holarc.lastTokenSeen.';
@@ -72,12 +73,16 @@ export function useAuth() {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      if (session) void startLoginTracking(session);
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        if (event === 'SIGNED_IN') bumpSigninCount(session);
+        if (event === 'SIGNED_IN') {
+          bumpSigninCount(session);
+          void startLoginTracking(session);
+        }
 
         if (event === 'SIGNED_OUT' && !manualSignOutRequested) {
           setLoading(true);
@@ -129,6 +134,7 @@ export function useAuth() {
 
   const signOut = async () => {
     manualSignOutRequested = true;
+    await endLoginTracking().catch(() => undefined);
     const { error } = await supabase.auth.signOut();
     if (error) manualSignOutRequested = false;
     return { error };
