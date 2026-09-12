@@ -10411,6 +10411,36 @@ export type Database = {
           success: boolean
         }[]
       }
+      admin_country_list: {
+        Args: never
+        Returns: {
+          country: string
+          users: number
+        }[]
+      }
+      admin_user_performance: {
+        Args: { _country?: string; _from?: string; _to?: string }
+        Returns: {
+          activated: boolean
+          appointments_count: number
+          checkins_count: number
+          country: string
+          documents_count: number
+          email: string
+          full_name: string
+          incidents_count: number
+          last_active: string
+          last_sign_in: string
+          login_days: number
+          minutes_active: number
+          prescriptions_count: number
+          returned: boolean
+          role: string
+          sessions_count: number
+          signed_up: string
+          user_id: string
+        }[]
+      }
       approve_blood_donation: { Args: { _donation_id: string }; Returns: Json }
       assistant_of_doctor: {
         Args: { _assistant: string; _doctor: string }
@@ -10539,6 +10569,7 @@ export type Database = {
         Args: { _city: string; _name: string; _reg_no: string; _type: string }
         Returns: Json
       }
+      country_from_dial_code: { Args: { _phone: string }; Returns: string }
       create_allergy_alert: {
         Args: {
           p_admission_id?: string
