@@ -34,6 +34,7 @@ import {
   Lock,
   Stethoscope,
   History,
+  BarChart3,
 } from "lucide-react";
 
 import { useUserRole } from "@/hooks/useUserRole";
@@ -154,6 +155,7 @@ const assistantNavItems: (NavItem & { tour?: string })[] = [
 const adminNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Home", labelKey: "nav.home", to: "/doctor-dashboard" },
   { icon: Users, label: "Users", labelKey: "nav.users", to: "/admin/users" },
+  { icon: BarChart3, label: "Performance", labelKey: "nav.performance", to: "/admin/performance" },
   { icon: DollarSign, label: "Pricing", labelKey: "nav.pricing", to: "/admin/pricing" },
   { icon: Gift, label: "Rewards", labelKey: "nav.rewards", to: "/admin/gamification" },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true },
