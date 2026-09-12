@@ -66,6 +66,7 @@ import NurseProfile from "./pages/NurseProfile";
 import PracticePatients from "./pages/practice/PracticePatients";
 import PricingAdmin from "./pages/admin/PricingAdmin";
 import GamificationAdmin from "./pages/admin/GamificationAdmin";
+import CountryPerformance from "./pages/admin/CountryPerformance";
 import BulkPasswordReset from "./pages/admin/BulkPasswordReset";
 
 import ReferralDoctors from "./pages/ReferralDoctors";
