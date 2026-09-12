@@ -59,6 +59,7 @@
   },
   "nav": {
     "home": "Home",
+    "performance": "Performance",
     "myPatients": "My Patients",
     "admissions": "Admissions",
     "allDocuments": "Documents",
