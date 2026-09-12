@@ -5535,6 +5535,39 @@ export type Database = {
         }
         Relationships: []
       }
+      login_events: {
+        Row: {
+          created_at: string
+          ended_at: string | null
+          id: string
+          last_seen_at: string
+          session_key: string
+          started_at: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          last_seen_at?: string
+          session_key: string
+          started_at?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          last_seen_at?: string
+          session_key?: string
+          started_at?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       meal_plan_foods: {
         Row: {
           created_at: string
@@ -10560,6 +10593,7 @@ export type Database = {
         Args: { patient_id: string }
         Returns: boolean
       }
+      end_login_event: { Args: { _session_key: string }; Returns: undefined }
       forecast_stock_demand: {
         Args: { p_lookback_days?: number; p_stock_item_id: string }
         Returns: {
@@ -11011,6 +11045,10 @@ export type Database = {
         Args: { _incident_id: string; _user_id: string }
         Returns: boolean
       }
+      record_login_event: {
+        Args: { _session_key: string; _user_agent?: string }
+        Returns: undefined
+      }
       record_procedure_stock_usage: {
         Args: {
           p_admission_id: string
@@ -11082,6 +11120,7 @@ export type Database = {
         Args: { _bucket: string; _url: string }
         Returns: string
       }
+      touch_login_event: { Args: { _session_key: string }; Returns: undefined }
       user_can_access_patient_rt: {
         Args: { _patient_id: string }
         Returns: boolean
