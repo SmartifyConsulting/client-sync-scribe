@@ -23,3 +23,9 @@
 - [x] Vula removal, greeting subtext, beta notice, grey pill, My Business, client tabs, Unknown WM, overview, Beneficiaries
 - [x] My Business: remove Rewards/Referrals, Targets & Commission
 - [x] 7 compliance forms (typed e-signature; Astute, screening and liveness integrations still pending external services)
+
+## PayFast billing
+- [x] PayFast keys saved, sandbox mode
+- [x] Checkout, payment notifications, cancel; Billing tab in My Business
+- [ ] Real plan prices (placeholder R499 Adviser / R1,999 Firm) — waiting on user
+- [ ] Compliance guardrails, FICA file storage, drawn signatures, commission entry (Part A)
