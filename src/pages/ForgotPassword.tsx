@@ -187,7 +187,7 @@ export default function ForgotPassword() {
                 </div>
                 <p className="text-sm text-muted-foreground text-center">
                   {codeType === "totp"
-                    ? "Open your authenticator app and enter the 6-digit code for Holarc Health."
+                    ? "Open your authenticator app and enter the 6-digit code for Indigro."
                     : "Enter one of the 8-character backup codes you saved when you set up the authenticator."}
                 </p>
 

@@ -66,7 +66,7 @@ export function AppLayout() {
       {/* Mobile support link (footer hidden on mobile) */}
       <div className="md:hidden px-4 pb-24 -mt-4">
         <a
-          href="mailto:support@holarchealth.com?subject=Holarc%20Health%20Support"
+          href="mailto:support@holarchealth.com?subject=Indigro%20Support"
           className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-primary"
         >
           <LifeBuoy className="h-3.5 w-3.5" /> {t("common.support")}

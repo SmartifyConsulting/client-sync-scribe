@@ -197,7 +197,7 @@ export function InstallAppButton({ variant = "primary", className }: Props) {
                 3
               </span>
               <span>
-                Tap <strong>Add</strong> in the top right. The Holarc icon will appear on your home screen.
+                Tap <strong>Add</strong> in the top right. The Indigro icon will appear on your home screen.
               </span>
             </li>
           </ol>

@@ -503,7 +503,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               {(isDoctor || isNurse) && profileToggle}
               {(doctorInPatientMode || nurseInPatientMode) && (
                 <p className="mx-1 px-3 py-1.5 rounded-md bg-neutral-900 text-[10px] font-bold uppercase tracking-[0.14em] text-white">
-                  My Holarchy
+                  My Profile
                 </p>
               )}
               {visibleItems.map((item) => renderNavLink(item))}

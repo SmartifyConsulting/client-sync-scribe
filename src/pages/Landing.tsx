@@ -437,7 +437,7 @@ export default function Landing() {
               {t("landing.patientBenefits.sectionBadge")}
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              {t("landing.patientBenefits.sectionTitle")} <span className="text-primary">360°</span> {t("landing.patientBenefits.sectionTitleHighlight")}
+              {t("landing.patientBenefits.sectionTitle")} {t("landing.patientBenefits.sectionTitleHighlight")}
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               {t("landing.patientBenefits.sectionDescription")}
