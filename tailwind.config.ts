@@ -148,6 +148,10 @@ export default {
         "22": "5.5rem",
       },
       keyframes: {
+        throb: {
+          "0%,100%": { boxShadow: "0 0 0 0 hsl(var(--primary) / 0.35)" },
+          "50%": { boxShadow: "0 0 0 8px hsl(var(--primary) / 0)" },
+        },
         "upload-shimmer": {
           "0%": { transform: "translateX(-100%)" },
           "100%": { transform: "translateX(300%)" },
@@ -221,6 +225,7 @@ export default {
         },
       },
       animation: {
+        throb: "throb 1.6s ease-in-out infinite",
         "upload-shimmer": "upload-shimmer 1.2s ease-in-out infinite",
         "doc-sent": "doc-sent 0.7s ease-in forwards",
         "doc-saved": "doc-saved 0.7s ease-out forwards",

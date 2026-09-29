@@ -22,7 +22,7 @@ const stateLabel: Record<string, string> = {
   waiting: "Waiting", not_applicable: "Not applicable",
 };
 
-export function WorkflowGroupCard({ view, blockers, onOpen }: { view: GroupView; blockers: string[]; onOpen: () => void }) {
+export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSelectStep }: { view: GroupView; blockers: string[]; onOpen: () => void; selectedStep?: string | null; onSelectStep?: (label: string) => void }) {
   const { group: g, state } = view;
   const active = state === "current" || state === "waiting" || state === "blocked";
   const [open, setOpen] = useState(active || state === "pending");
@@ -75,9 +75,12 @@ export function WorkflowGroupCard({ view, blockers, onOpen }: { view: GroupView;
             {view.steps.map((s) => (
               <li
                 key={s.label}
+                onClick={onSelectStep ? () => onSelectStep(s.label) : undefined}
                 className={cn(
                   "flex items-center gap-2 px-3 py-2",
-                  s.state === "next" && "mx-1.5 my-1 rounded border border-primary bg-primary/5",
+                  onSelectStep && "cursor-pointer hover:bg-muted/40",
+                  s.state === "next" && "mx-1.5 my-1 rounded-lg border border-primary bg-primary/5 animate-throb",
+                  selectedStep === s.label && s.state !== "next" && "bg-muted/60",
                 )}
               >
                 <span className="w-3 text-primary">

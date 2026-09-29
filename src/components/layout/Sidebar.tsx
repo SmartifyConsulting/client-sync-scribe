@@ -116,6 +116,7 @@ const CLIENT_BLOCKED_PATHS = ["/practice", "/patients"];
 const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.myPersonalDashboard", to: "/my-dashboard" },
   { icon: Users, label: "My Profile", labelKey: "nav.myHolarchy", to: "/patient/details?section=health", tour: "patient-holarchy" },
+  { icon: Activity, label: "Live Workspace", labelKey: "nav.liveWorkspace", to: "/my-workspace" },
   { icon: Activity, label: "My Future", labelKey: "nav.myFuture", to: "/my-future" },
   { icon: FolderOpen, label: "Documents", labelKey: "nav.futureDocuments", to: "/my-future?tab=documents" },
   { icon: Activity, label: "My Biolog", labelKey: "nav.myBiolog", to: "/biolog" },

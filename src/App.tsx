@@ -9,6 +9,7 @@ import { PatientAppLayout } from "@/components/layout/PatientAppLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import MyFuture from "@/pages/MyFuture";
+import MyWorkspace from "@/pages/MyWorkspace";
 import { useProviderAccess } from "@/modules/holarchelp/components/ProviderGate";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import Landing from "./pages/Landing";
@@ -286,6 +287,7 @@ const App = () => (
             <Route path="/my-sessions" element={<MySessions />} />
             <Route path="/my-dashboard" element={<MyPersonalDashboard />} />
             <Route path="/my-future" element={<MyFuture />} />
+            <Route path="/my-workspace" element={<MyWorkspace />} />
             <Route path="/my-shift" element={<MyShiftScreen />} />
             <Route path="/sessions/:id" element={<SessionDetail />} />
 

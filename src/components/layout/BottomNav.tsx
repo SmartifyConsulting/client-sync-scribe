@@ -13,6 +13,7 @@ import {
   DollarSign,
   Home,
   Sparkles,
+  Activity,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -31,6 +32,7 @@ const doctorNavItems = [
 const patientSections = [
   { icon: Handshake, labelKey: "nav.myHolarchy", section: "health", to: "/patient/details?section=health" },
   { icon: FolderOpen, labelKey: "bottomNav.myDesk", section: "admin", to: "/patient/details?section=admin" },
+  { icon: Activity, labelKey: "nav.liveWorkspace", section: "workspace", to: "/my-workspace" },
   { icon: Handshake, labelKey: "nav.myFuture", section: "future", to: "/my-future" },
   { icon: Gift, labelKey: "nav.myRewards", section: "rewards", to: "/patient/rewards" },
   { icon: Sparkles, labelKey: "nav.askMaeve", section: "maeve", to: "/ask-maeve", accent: true },
@@ -168,6 +170,8 @@ export function BottomNav() {
               ? location.pathname === "/patient/rewards"
               : item.section === "maeve"
               ? location.pathname.startsWith("/ask-maeve")
+              : item.section === "workspace"
+              ? location.pathname.startsWith("/my-workspace")
               : item.section === "future"
               ? location.pathname.startsWith("/my-future")
               : item.section === "sos"
