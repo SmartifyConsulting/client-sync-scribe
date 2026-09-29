@@ -104,17 +104,6 @@ export function EmoticonSender({ recipientId, patientId, recipientName }: Emotic
         is_read: false,
       });
 
-      // Award doctor vulas if not flagged
-      if (!isAiFlagged) {
-        await supabase.from('doctor_rewards' as any).insert({
-          doctor_id: user.id,
-          reward_type: 'emoticon_checkin',
-          description: `Checked in on ${recipientName}`,
-          vulas_count: vulasAwarded,
-          reference_id: patientId,
-        });
-      }
-
       toast({
         title: `${emoticon} Check-in sent`,
         description: isAiFlagged
@@ -170,9 +159,6 @@ export function EmoticonSender({ recipientId, patientId, recipientName }: Emotic
           className="min-h-[80px] text-xs"
           disabled={sending}
         />
-        <p className="mt-1 text-[10px] text-muted-foreground">
-          Vulas are only awarded for genuine, meaningful check-ins.
-        </p>
 
         <Button size="sm" className="mt-2 w-full gap-2" onClick={sendCheckIn} disabled={sending}>
           {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}

@@ -1073,7 +1073,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
               <DialogHeader>
                 <DialogTitle>Create New Fee statement</DialogTitle>
                 <DialogDescription>
-                  Select a patient and enter invoice details
+                  Select a client and enter invoice details
                 </DialogDescription>
               </DialogHeader>
               

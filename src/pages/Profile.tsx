@@ -224,7 +224,7 @@ function DoctorPatientsTab() {
                               View Profile
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => navigate(`/sessions?patient=${patient.id}&autoStart=true`)}>
-                              Start Session
+                              Start Consultation
                             </DropdownMenuItem>
                             {!isMe && (
                               <DropdownMenuItem
