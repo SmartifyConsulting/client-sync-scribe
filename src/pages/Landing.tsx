@@ -536,6 +536,7 @@ export default function Landing() {
       <Dialog open={showRoleDialog} onOpenChange={setShowRoleDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
+            <img src={holarcLogo} alt="Holarc Wealth" className="mx-auto h-20 w-auto object-contain" />
             <DialogTitle className="text-center text-2xl">{t("landing.roleDialog.title")}</DialogTitle>
             <DialogDescription className="text-center">{t("landing.roleDialog.description")}</DialogDescription>
           </DialogHeader>
