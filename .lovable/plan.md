@@ -15,13 +15,13 @@
 
 ## 3. New Step 1 (Client Onboarding)
 1. CLIENT: Scan QR or open secure link
-2. SYSTEM: KYC, AML and PEP Screening
+2. CLIENT: KYC, AML and PEP Screening (the client completes it in the Didit app)
 3. CLIENT: Sign disclosure and LOA
 
 The footer stays "No advice until all checks pass".
 
 ### Sub-step 2: KYC, AML and PEP Screening (Didit)
-- The client clicks "Verify my identity" in the Working Window. This opens a Didit check for their ID, a live selfie, and AML and PEP screening.
+- This is the client's own step. The client sees "Complete your identity and screening check" and clicks "Verify my identity" in the Working Window. This opens a Didit check for their ID, a live selfie, and AML and PEP screening.
 - Didit sends the result back to the app. The step then shows Passed, Needs review or Failed, with the date.
 - The Wealth Manager sees the detailed outcome, such as PEP match or sanctions hit. The client sees a plain-language status.
 - The workflow moves to sub-step 3 only after a pass. Needs review creates a task for the Wealth Manager.
