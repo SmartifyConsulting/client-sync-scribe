@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Loader2, Search, Plus, MoreVertical, Trash2, Upload, Send } from "lucide-react";
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
-import { ClientJourney } from "@/features/wealth-workflow/map/ClientJourney";
+import { ClientWorkspace } from "@/features/wealth-workflow/workspace/ClientWorkspace";
 import { Patient, usePatients } from "@/hooks/usePatients";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -311,7 +311,7 @@ export default function Profile() {
         </div>
       ) : patientRecord ? (
         <div className="space-y-4">
-        <ClientJourney patientId={patientRecord.id} />
+        <ClientWorkspace patientId={patientRecord.id} />
         <PatientDetailsEditor
           patient={patientRecord}
           onSave={async (updates: Partial<Patient>) => {

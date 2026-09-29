@@ -93,9 +93,10 @@ export default function PatientProfile() {
   const [showCompareDialog, setShowCompareDialog] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") || "details";
-  const handleTabChange = (value: string) => {
+  const handleTabChange = (value: string, group?: string) => {
     const next = new URLSearchParams(searchParams);
     next.set("tab", value);
+    if (group) next.set("group", group); else next.delete("group");
     setSearchParams(next, { replace: true });
   };
 
