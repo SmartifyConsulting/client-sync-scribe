@@ -143,8 +143,8 @@ const DOC_TYPE_CONFIG: Record<
   },
   hospital_admission: {
     label: "Hospital Admission",
-    color: "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400",
-    borderColor: "border-rose-400",
+    color: "bg-slate-100 text-slate-800 dark:bg-slate-900/30 dark:text-slate-400",
+    borderColor: "border-slate-400",
     icon: FileText,
   },
   lab_result: {

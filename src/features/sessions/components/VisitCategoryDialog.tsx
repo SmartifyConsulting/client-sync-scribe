@@ -228,7 +228,7 @@ export function VisitCategoryDialog({
             ref={confirmRef}
             onClick={handleConfirm}
             disabled={selectedCategories.size === 0 && !customCategory.trim()}
-            className="bg-pink-500 hover:bg-pink-600 text-white"
+            className="bg-slate-500 hover:bg-slate-600 text-white"
           >
             Ⓜ️ Award Vula
           </Button>
