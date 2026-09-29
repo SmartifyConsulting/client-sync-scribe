@@ -13,6 +13,7 @@ import {
   DollarSign,
   Home,
   Sparkles,
+  Activity,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
