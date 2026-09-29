@@ -7766,7 +7766,9 @@ export type Database = {
           currency: string
           description: string
           id: string
+          payfast_payment_id: string | null
           paypal_transaction_id: string | null
+          provider: string | null
           status: string
           subscription_id: string | null
           user_id: string
@@ -7777,7 +7779,9 @@ export type Database = {
           currency?: string
           description: string
           id?: string
+          payfast_payment_id?: string | null
           paypal_transaction_id?: string | null
+          provider?: string | null
           status?: string
           subscription_id?: string | null
           user_id: string
@@ -7788,7 +7792,9 @@ export type Database = {
           currency?: string
           description?: string
           id?: string
+          payfast_payment_id?: string | null
           paypal_transaction_id?: string | null
+          provider?: string | null
           status?: string
           subscription_id?: string | null
           user_id?: string
@@ -8156,6 +8162,7 @@ export type Database = {
         Row: {
           billing_cycle: string
           created_at: string
+          currency: string
           id: string
           name: string
           price: number
@@ -8166,6 +8173,7 @@ export type Database = {
         Insert: {
           billing_cycle: string
           created_at?: string
+          currency?: string
           id?: string
           name: string
           price: number
@@ -8176,6 +8184,7 @@ export type Database = {
         Update: {
           billing_cycle?: string
           created_at?: string
+          currency?: string
           id?: string
           name?: string
           price?: number
@@ -9554,14 +9563,18 @@ export type Database = {
       subscriptions: {
         Row: {
           accepted_terms_at: string | null
+          amount: number | null
           billing_cycle: string
           created_at: string
           current_period_end: string | null
           current_period_start: string | null
           id: string
           is_trial: boolean | null
+          payfast_token: string | null
           paypal_subscription_id: string | null
           plan_type: string
+          pricing_id: string | null
+          provider: string | null
           status: string
           trial_ends_at: string | null
           updated_at: string
@@ -9569,14 +9582,18 @@ export type Database = {
         }
         Insert: {
           accepted_terms_at?: string | null
+          amount?: number | null
           billing_cycle: string
           created_at?: string
           current_period_end?: string | null
           current_period_start?: string | null
           id?: string
           is_trial?: boolean | null
+          payfast_token?: string | null
           paypal_subscription_id?: string | null
           plan_type: string
+          pricing_id?: string | null
+          provider?: string | null
           status?: string
           trial_ends_at?: string | null
           updated_at?: string
@@ -9584,14 +9601,18 @@ export type Database = {
         }
         Update: {
           accepted_terms_at?: string | null
+          amount?: number | null
           billing_cycle?: string
           created_at?: string
           current_period_end?: string | null
           current_period_start?: string | null
           id?: string
           is_trial?: boolean | null
+          payfast_token?: string | null
           paypal_subscription_id?: string | null
           plan_type?: string
+          pricing_id?: string | null
+          provider?: string | null
           status?: string
           trial_ends_at?: string | null
           updated_at?: string
