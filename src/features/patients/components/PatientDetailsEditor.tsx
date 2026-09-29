@@ -1991,6 +1991,7 @@ export function PatientDetailsEditor({
 
           {/* === MY HOLARCHY TAB (EDIT, overview) === */}
           <TabsContent value="overview" className="space-y-4 mt-4">
+            <ClientAISummary patientId={patient.id} />
             <Tabs defaultValue="team">
               <TabsList className="bg-neutral-600 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
                 <TabsTrigger value="team" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Holarc Wealth Financial Team</TabsTrigger>
