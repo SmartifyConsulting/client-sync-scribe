@@ -1,9 +1,9 @@
 /**
- * Indigro wealth-management terminology. One name per concept — use these
+ * Holarc Wealth wealth-management terminology. One name per concept — use these
  * everywhere user-facing copy refers to a person, object or stage.
  * Database/table/route identifiers are unchanged (patient, doctor, session…).
  */
-export const BRAND = "Indigro";
+export const BRAND = "Holarc Wealth";
 
 export const TERMS = {
   client: "Client", clients: "Clients",

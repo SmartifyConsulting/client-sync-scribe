@@ -30,7 +30,7 @@ const OTHER_PRACTITIONER_ACCESS: { label: string; allowed: boolean }[] = [
   { label: "Documents the client has shared with them", allowed: true },
   { label: "Medication, allergy and condition lists", allowed: true },
   { label: "Your private advice notes not shared to the care team", allowed: false },
-  { label: "The client's Emotional Journal / Ask Indigro chats", allowed: false },
+  { label: "The client's Emotional Journal / Ask Holarc Wealth chats", allowed: false },
   { label: "Records from wealth managers not shared with them", allowed: false },
   { label: "The client's fees and subscription details", allowed: false },
 ];

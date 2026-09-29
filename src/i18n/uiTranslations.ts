@@ -42,7 +42,7 @@ export const uiTranslations: Record<string, TranslationTree> = {
       delete: "Delete",
     },
     footer: {
-      copyright: "© {{year}} Indigro (Pty) Ltd. All rights reserved.",
+      copyright: "© {{year}} Holarc Wealth (Pty) Ltd. All rights reserved.",
       terms: "Terms and Conditions",
       privacy: "Privacy & Consent",
       compliance: "Compliance",
@@ -68,12 +68,12 @@ export const uiTranslations: Record<string, TranslationTree> = {
     },
     earlyRelease: {
       title: "Reminder",
-      description: "You are participating in an early release of Indigro. As we continue to expand functionality and improve the platform, some features may evolve and occasional issues may occur. Your feedback is invaluable and can be submitted through the Bug Log feature found next to the notification button.",
+      description: "You are participating in an early release of Holarc Wealth. As we continue to expand functionality and improve the platform, some features may evolve and occasional issues may occur. Your feedback is invaluable and can be submitted through the Bug Log feature found next to the notification button.",
     },
     shareApp: {
       button: "Share App",
-      title: "Share Indigro",
-      description: "Invite someone to join Indigro. You'll earn Vulas when they accept! This does not add them as your client.",
+      title: "Share Holarc Wealth",
+      description: "Invite someone to join Holarc Wealth. You'll earn Vulas when they accept! This does not add them as your client.",
       recipientName: "Recipient Name",
       emailAddress: "Email Address *",
       personalMessage: "Personal Message (optional)",
@@ -284,7 +284,7 @@ export const uiTranslations: Record<string, TranslationTree> = {
       onDiversion: "On diversion",
     },
     install: {
-      installPhone: "Install IndigroHealth on your phone",
+      installPhone: "Install Holarc WealthHealth on your phone",
       iosInstructions: "To install: tap the Share button, then 'Add to Home Screen'.",
     },
     profileMenu: {
@@ -311,14 +311,14 @@ export const uiTranslations: Record<string, TranslationTree> = {
       sendInvitation: "Send invitation",
     },
     helpGate: {
-      title: "Indigro",
-      description: "Emergency SOS, live location sharing, and instant responder dispatch — an optional subscription module on top of your Indigro account.",
+      title: "Holarc Wealth",
+      description: "Emergency SOS, live location sharing, and instant responder dispatch — an optional subscription module on top of your Holarc Wealth account.",
       notEnabled: "Not enabled yet",
-      notEnabledBody: "Indigro is currently activated by an administrator. Contact your administrator to request access.",
+      notEnabledBody: "Holarc Wealth is currently activated by an administrator. Contact your administrator to request access.",
       goBack: "Go back",
     },
     providerGate: {
-      title: "Indigro Provider Portal",
+      title: "Holarc Wealth Provider Portal",
       description: "This portal is for approved hospitals and ER providers in the HolarcHelp network.",
       notProvider: "Not a provider yet",
       notProviderBody: "Your account isn't linked to a hospital or emergency response service. If you started signing up but didn't finish, complete your application below — an administrator will activate your organisation before you can access the dispatch portal.",

@@ -1617,7 +1617,7 @@ export default function MyPractice() {
                                     body: {
                                       recipientEmail: partnerEmail,
                                       senderName: profile?.full_name || "A colleague",
-                                      message: "You have been invited to join Indigro as a firm partner.",
+                                      message: "You have been invited to join Holarc Wealth as a firm partner.",
                                       isPracticePartner: true,
                                       partnerName: partner.full_name,
                                     },
@@ -1678,7 +1678,7 @@ export default function MyPractice() {
 
                     {/* ── Existing user ── */}
                     <TabsContent value="existing" className="space-y-2 pt-3">
-                      <Label className="text-xs">Search Indigro users by name or registration #</Label>
+                      <Label className="text-xs">Search Holarc Wealth users by name or registration #</Label>
                       <Input
                         value={partnerSearch}
                         onChange={(e) => setPartnerSearch(e.target.value)}

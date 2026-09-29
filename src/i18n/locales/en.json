@@ -8,7 +8,7 @@
     },
     "provider": {
       "title": "Provider application",
-      "subtitle": "Register your organisation on Indigro. Applications are vetted before your administrator account is activated.",
+      "subtitle": "Register your organisation on Holarc Wealth. Applications are vetted before your administrator account is activated.",
       "organizationType": "Organisation type",
       "hospital": "Hospital",
       "emergency": "Emergency service provider",
@@ -339,7 +339,7 @@
       "sectionBasic": "Basic Information",
       "labelName": "Name *",
       "searchPlaceholder": "Type client name to search...",
-      "inviteFallbackText": "Client not found on Indigro? Send an invitation",
+      "inviteFallbackText": "Client not found on Holarc Wealth? Send an invitation",
       "emailPlaceholder": "client@email.com",
       "labelEmail": "Email",
       "labelPhone": "Phone",
@@ -1222,7 +1222,7 @@
     },
     "profileCompletion": {
       "title": "Complete your wealth manager profile",
-      "message": "Add your specialty, FSP number, HPCSA/registration number and firm address so clients can find you and your documents render correctly. All credentials are encrypted in transit and at rest, visible only to you and clients you connect with. Indigro is HIPAA- and POPIA-aligned and never sells or shares your data."
+      "message": "Add your specialty, FSP number, HPCSA/registration number and firm address so clients can find you and your documents render correctly. All credentials are encrypted in transit and at rest, visible only to you and clients you connect with. Holarc Wealth is HIPAA- and POPIA-aligned and never sells or shares your data."
     },
     "stats": {
       "totalPatients": "Total Clients",
@@ -1472,7 +1472,7 @@
     "title": "My Wealth Managers",
     "subtitle": "Wealth management providers with access to your profile",
     "search": {
-      "title": "Find a Wealth Manager on Indigro",
+      "title": "Find a Wealth Manager on Holarc Wealth",
       "description": "Filter by name, specialty, language — or any combination",
       "namePlaceholder": "Wealth Manager name, firm or registration #",
       "specialtyPlaceholder": "Any specialty",
@@ -2039,7 +2039,7 @@
       "badge": "Client consent · Record of Advice · Audit trail",
       "title": "Wealth management,",
       "titleHighlight": "from consultation to annual review.",
-      "description": "Indigro is where Wealth Managers run their clients, consultations, recommendations, applications and annual reviews in one place — and where clients follow every step of their wealth journey.",
+      "description": "Holarc Wealth is where Wealth Managers run their clients, consultations, recommendations, applications and annual reviews in one place — and where clients follow every step of their wealth journey.",
       "cta": "Get started",
       "doctorsButton": "Wealth Managers",
       "patientsButton": "Clients"
@@ -2059,7 +2059,7 @@
       "hospitalNetwork": "Annual Reviews"
     },
     "mobile": {
-      "title": "Get Indigro on your phone",
+      "title": "Get Holarc Wealth on your phone",
       "description": "Available on iOS and Android — your wealth journey, actions and documents wherever you are.",
       "appStore": "App Store",
       "googlePlay": "Google Play"
@@ -2123,7 +2123,7 @@
       "button": "Get started"
     },
     "roleDialog": {
-      "title": "Join Indigro",
+      "title": "Join Holarc Wealth",
       "description": "How will you use the platform?",
       "label": "I am a...",
       "placeholder": "Select user type",

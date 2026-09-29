@@ -31,7 +31,7 @@ export function Footer() {
           <span className="flex items-center gap-3">
             <Dot />
             <a
-              href="mailto:support@holarchealth.com?subject=Indigro%20Support"
+              href="mailto:support@holarchealth.com?subject=Holarc Wealth%20Support"
               className="inline-flex items-center gap-1.5 hover:text-primary transition-colors"
             >
               <LifeBuoy className="h-3.5 w-3.5" />

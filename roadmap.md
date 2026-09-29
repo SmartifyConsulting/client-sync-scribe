@@ -17,3 +17,9 @@
 - [x] Demo users + data tracing Client → Wealth Manager → FSP → Insurer
 - [x] "View as" switcher + pipeline / underwriting dashboard card
 - [ ] Richer Indie-style client portfolio dashboard
+
+## Holarc Wealth cleanup pass
+- [x] Indigro → Holarc Wealth
+- [ ] Vula removal, greeting subtext, beta notice, grey pill, My Business, client tabs, Unknown WM, overview, Beneficiaries
+- [ ] My Business: remove Rewards/Referrals, Targets & Commission
+- [ ] 7 compliance form templates

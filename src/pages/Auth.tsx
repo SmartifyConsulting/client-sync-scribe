@@ -987,7 +987,7 @@ export default function Auth() {
           <div className="w-full max-w-md">
             <div className="text-center mb-6">
               <button type="button" onClick={() => navigate("/")} className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity">
-                <img src={holarcLogo} alt="Indigro" className="h-[117px] w-auto" />
+                <img src={holarcLogo} alt="Holarc Wealth" className="h-[117px] w-auto" />
               </button>
             </div>
             {/* Sign In / Sign Up tabs */}
@@ -1223,7 +1223,7 @@ export default function Auth() {
         <div className="w-full max-w-md">
           <div className="text-center mb-6">
             <button type="button" onClick={() => navigate("/")} className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity">
-              <img src={holarcLogo} alt="Indigro" className="h-[117px] w-auto" />
+              <img src={holarcLogo} alt="Holarc Wealth" className="h-[117px] w-auto" />
             </button>
           </div>
           {/* Sign In / Sign Up tabs */}

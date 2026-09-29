@@ -19,7 +19,7 @@ const NotFound = () => {
       <div className="w-full max-w-md text-center">
         <img
           src={holarcLogo}
-          alt="Indigro"
+          alt="Holarc Wealth"
           className="mx-auto h-14 w-auto mb-6"
         />
         <p className="text-7xl sm:text-8xl font-bold text-primary leading-none mb-2">

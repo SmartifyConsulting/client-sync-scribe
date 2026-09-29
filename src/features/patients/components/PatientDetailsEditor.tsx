@@ -1703,7 +1703,7 @@ export function PatientDetailsEditor({
             <TabsContent value="overview" className="space-y-4 mt-4">
               <Tabs defaultValue="team">
                 <TabsList className="bg-neutral-600 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                  <TabsTrigger value="team" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Indigro Financial Team</TabsTrigger>
+                  <TabsTrigger value="team" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Holarc Wealth Financial Team</TabsTrigger>
                   <TabsTrigger value="careteam" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Personal Care Circle</TabsTrigger>
                   <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Insurance</TabsTrigger>
                   <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Pharmacies</TabsTrigger>
@@ -1776,7 +1776,7 @@ export function PatientDetailsEditor({
             {/* === MY HOLARC TEAM SUB-TAB (view) === */}
             <TabsContent value="team" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-[18px] font-semibold text-primary-dark">My Indigro Financial Team</h2>
+                <h2 className="text-[18px] font-semibold text-primary-dark">My Holarc Wealth Financial Team</h2>
                 <p className="text-xs text-muted-foreground">Your financial wealth managers — the wealth managers with access to your profile</p>
               </div>
               <Suspense
@@ -2361,7 +2361,7 @@ export function PatientDetailsEditor({
           <TabsContent value="overview" className="space-y-4 mt-4">
             <Tabs defaultValue="team">
               <TabsList className="bg-neutral-600 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                <TabsTrigger value="team" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Indigro Financial Team</TabsTrigger>
+                <TabsTrigger value="team" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Holarc Wealth Financial Team</TabsTrigger>
                   <TabsTrigger value="careteam" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Personal Care Circle</TabsTrigger>
                 <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Insurance</TabsTrigger>
                 <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Pharmacies</TabsTrigger>

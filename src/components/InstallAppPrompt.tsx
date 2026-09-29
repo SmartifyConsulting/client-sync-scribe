@@ -29,7 +29,7 @@ export function InstallAppPrompt({ className }: Props) {
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-foreground">
-          Install Indigro on your phone
+          Install Holarc Wealth on your phone
         </p>
         <p className="text-xs text-muted-foreground mt-0.5">
           Works on iPhone and Android — one-tap access from your home screen.

@@ -455,7 +455,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
       {/* Doctor Search */}
       <Card>
         <CardHeader className="pb-1 pt-3 px-4">
-          <CardTitle className="text-sm">Find a Wealth Manager on Indigro</CardTitle>
+          <CardTitle className="text-sm">Find a Wealth Manager on Holarc Wealth</CardTitle>
           <CardDescription className="text-xs">Filter by name, specialty, language — or any combination</CardDescription>
         </CardHeader>
         <CardContent>

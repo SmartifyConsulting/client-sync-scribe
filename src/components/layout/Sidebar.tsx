@@ -119,7 +119,7 @@ const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: ListChecks, label: "My Actions", labelKey: "nav.myTasks", to: "/patient/tasks", tour: "patient-tasks" },
   
   { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/patient/rewards" },
-  { icon: Sparkles, label: "Ask Indigro", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
+  { icon: Sparkles, label: "Ask Holarc Wealth", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true, tour: "patient-sos" },
 ];
 
@@ -446,7 +446,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     <aside className="fixed left-0 top-0 z-40 h-screen w-[252px] bg-sidebar">
       <div className="flex h-full flex-col">
         <div className="flex h-24 items-center gap-3 px-6">
-          <img src={holarcLogo} alt="Indigro" className="h-[82px] w-auto object-contain" />
+          <img src={holarcLogo} alt="Holarc Wealth" className="h-[82px] w-auto object-contain" />
         </div>
 
         {/* Navigation */}
