@@ -69,6 +69,7 @@ import { getSignedUrl } from "@/utils/storageUrls";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BillingPanel } from "@/features/billing/BillingPanel";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -1287,7 +1288,17 @@ export default function MyPractice() {
           >
             {t("myPractice.tabCredentials")}
           </TabsTrigger>
+          <TabsTrigger
+            value="billing"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+          >
+            Billing
+          </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="billing" className="mt-4">
+          <BillingPanel />
+        </TabsContent>
 
         {/* === PRACTICE TAB (Personal + Practice merged) === */}
         <TabsContent value="practice" className="mt-4 space-y-4 my-practice-tab-body">
