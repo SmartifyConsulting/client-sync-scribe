@@ -190,7 +190,7 @@ export default function MyDetails() {
 
 
   const sectionHeading: Record<string, { title: string; subtitle: string }> = {
-    health: { title: t("patient.myDetails.myHolarchy", "My Profile"), subtitle: t("patient.myDetails.holarchySubtitle", "Your financial information, care team and history") },
+    health: { title: t("patient.myDetails.myHolarchy", "My Profile"), subtitle: t("patient.myDetails.holarchySubtitle", "Your personal and financial details, advisers and consultation history") },
     admin: { title: t("patient.myDetails.myDesk", "My Desk"), subtitle: t("patient.myDetails.deskSubtitle", "Calendar, actions and documents") },
     rewards: { title: t("patient.myDetails.myRewards", "My Rewards"), subtitle: t("patient.myDetails.rewardsSubtitle", "Track your Vulas and rewards") },
   };
