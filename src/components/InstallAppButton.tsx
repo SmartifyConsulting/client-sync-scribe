@@ -125,18 +125,18 @@ export function InstallAppButton({ variant = "primary", className }: Props) {
       ? [
           { icon: <Menu className="inline h-4 w-4 align-text-bottom" />, text: <>Tap the <strong>menu</strong> icon (☰) in Samsung Internet.</> },
           { icon: null, text: <>Tap <strong>Add page to</strong> → <strong>Home screen</strong>.</> },
-          { icon: null, text: <>Tap <strong>Add</strong>. The Indigro icon appears on your home screen.</> },
+          { icon: null, text: <>Tap <strong>Add</strong>. The Holarc Wealth icon appears on your home screen.</> },
         ]
       : androidBrowser === "firefox"
       ? [
           { icon: <MoreVertical className="inline h-4 w-4 align-text-bottom" />, text: <>Tap the <strong>⋮</strong> menu in Firefox.</> },
           { icon: null, text: <>Tap <strong>Install</strong> (or <strong>Add to Home screen</strong>).</> },
-          { icon: null, text: <>Confirm. The Indigro icon appears on your home screen.</> },
+          { icon: null, text: <>Confirm. The Holarc Wealth icon appears on your home screen.</> },
         ]
       : [
           { icon: <MoreVertical className="inline h-4 w-4 align-text-bottom" />, text: <>Tap the <strong>⋮</strong> menu in your browser (top right).</> },
           { icon: <Plus className="inline h-4 w-4 align-text-bottom" />, text: <>Tap <strong>Install app</strong> (or <strong>Add to Home screen</strong>).</> },
-          { icon: null, text: <>Tap <strong>Install</strong>. The Indigro icon appears on your home screen.</> },
+          { icon: null, text: <>Tap <strong>Install</strong>. The Holarc Wealth icon appears on your home screen.</> },
         ];
 
   return (
@@ -166,7 +166,7 @@ export function InstallAppButton({ variant = "primary", className }: Props) {
       <Dialog open={iosOpen} onOpenChange={setIosOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Install Indigro on your iPhone</DialogTitle>
+            <DialogTitle>Install Holarc Wealth on your iPhone</DialogTitle>
             <DialogDescription>
               {inAppBrowser
                 ? "You're viewing this inside another app. Tap the menu (•••) and choose \"Open in Safari\" first, then follow the steps below."
@@ -197,7 +197,7 @@ export function InstallAppButton({ variant = "primary", className }: Props) {
                 3
               </span>
               <span>
-                Tap <strong>Add</strong> in the top right. The Indigro icon will appear on your home screen.
+                Tap <strong>Add</strong> in the top right. The Holarc Wealth icon will appear on your home screen.
               </span>
             </li>
           </ol>
@@ -208,7 +208,7 @@ export function InstallAppButton({ variant = "primary", className }: Props) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {isAndroid ? "Install Indigro on your phone" : "Install Indigro"}
+              {isAndroid ? "Install Holarc Wealth on your phone" : "Install Holarc Wealth"}
             </DialogTitle>
             <DialogDescription>{androidIntro}</DialogDescription>
           </DialogHeader>

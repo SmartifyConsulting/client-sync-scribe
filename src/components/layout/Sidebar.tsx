@@ -80,10 +80,10 @@ const DOCTOR_TOP_ITEMS: (NavItem & { tour?: string })[] = [];
 
 const DOCTOR_SECTIONS: NavSection[] = [
   {
-    title: "My Firm",
+    title: "My Business",
     items: [
       { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.dashboard", to: "/doctor-dashboard", tour: "doctor-home" },
-      { icon: Settings2, label: "My Firm", labelKey: "nav.myPractice", to: "/practice", tour: "practice-settings" },
+      { icon: Settings2, label: "My Business", labelKey: "nav.myPractice", to: "/practice", tour: "practice-settings" },
       { icon: Clock, label: "My Shifts", labelKey: "nav.myShift", to: "/my-shift" },
       { icon: Users, label: "My Clients", labelKey: "nav.myPatients", to: "/patients", tour: "import-patients" },
       { icon: BedDouble, label: "Admissions", labelKey: "nav.admissions", to: "/admissions" },
@@ -119,7 +119,7 @@ const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: ListChecks, label: "My Actions", labelKey: "nav.myTasks", to: "/patient/tasks", tour: "patient-tasks" },
   
   { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/patient/rewards" },
-  { icon: Sparkles, label: "Ask Indigro", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
+  { icon: Sparkles, label: "Ask Holarc Wealth", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true, tour: "patient-sos" },
 ];
 
@@ -446,7 +446,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     <aside className="fixed left-0 top-0 z-40 h-screen w-[252px] bg-sidebar">
       <div className="flex h-full flex-col">
         <div className="flex h-24 items-center gap-3 px-6">
-          <img src={holarcLogo} alt="Indigro" className="h-[82px] w-auto object-contain" />
+          <img src={holarcLogo} alt="Holarc Wealth" className="h-[82px] w-auto object-contain" />
         </div>
 
         {/* Navigation */}
@@ -469,9 +469,6 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                 if (sectionItems.length === 0) return null;
                 return (
                   <div key={section.title} className="space-y-1.5">
-                    <p className="mx-1 px-3 py-1.5 rounded-md bg-neutral-600 text-[10px] font-bold uppercase tracking-[0.14em] text-white">
-                      {section.title}
-                    </p>
                     {sectionItems.map((item) => renderNavLink(item))}
                   </div>
                 );
@@ -488,9 +485,6 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               <div className="space-y-1.5">{profileToggle}</div>
               {NURSE_SECTIONS.map((section) => (
                 <div key={section.title} className="space-y-1.5">
-                  <p className="mx-1 px-3 py-1.5 rounded-md bg-neutral-600 text-[10px] font-bold uppercase tracking-[0.14em] text-white">
-                    {section.title}
-                  </p>
                   {section.items.map((item) => renderNavLink(item))}
                 </div>
               ))}

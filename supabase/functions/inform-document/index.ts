@@ -107,7 +107,7 @@ serve(async (req) => {
         }</p>
         ${message ? `<p style="margin:0 0 16px;white-space:pre-wrap;">${message}</p>` : ""}
         <p style="margin:0 0 16px;">
-          The document is not attached. It stays securely in Indigro and can be
+          The document is not attached. It stays securely in Holarc Wealth and can be
           opened with the link below.
         </p>
         <p style="margin:0 0 24px;">
@@ -115,7 +115,7 @@ serve(async (req) => {
             ${isRegistered ? "Open document" : "Register to view document"}
           </a>
         </p>
-        <p style="font-size:12px;color:#666;">Sent via Indigro.</p>
+        <p style="font-size:12px;color:#666;">Sent via Holarc Wealth.</p>
       </div>`;
 
     const result = await sendEmail({

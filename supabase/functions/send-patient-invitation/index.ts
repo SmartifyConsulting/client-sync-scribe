@@ -128,18 +128,18 @@ const handler = async (req: Request): Promise<Response> => {
         const appUrl = Deno.env.get("APP_URL") || "https://lovable.dev";
         await sendEmail({
           to: patientEmail,
-          subject: `${doctorName} has connected with you on Indigro`,
+          subject: `${doctorName} has connected with you on Holarc Wealth`,
           html: `
               <!DOCTYPE html>
               <html>
               <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
               <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
                 <div style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
-                  <h1 style="color: white; margin: 0; font-size: 28px;">Indigro</h1>
+                  <h1 style="color: white; margin: 0; font-size: 28px;">Holarc Wealth</h1>
                 </div>
                 <div style="background: #f8fafc; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
                   <p style="font-size: 18px; margin-top: 0;">Hello ${patientName},</p>
-                  <p><strong>${doctorName}</strong> from <strong>${practiceName}</strong> has connected with you on Indigro.</p>
+                  <p><strong>${doctorName}</strong> from <strong>${practiceName}</strong> has connected with you on Holarc Wealth.</p>
                   <p>You can now:</p>
                   <ul style="padding-left: 20px;">
                     <li>View your appointment calendar</li>
@@ -153,7 +153,7 @@ const handler = async (req: Request): Promise<Response> => {
                   </div>
                   <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
                   <p style="color: #94a3b8; font-size: 12px; margin-bottom: 0;">
-                    Indigro - Wealth Management Platform
+                    Holarc Wealth - Wealth Management Platform
                   </p>
                 </div>
               </body>
@@ -195,19 +195,19 @@ const handler = async (req: Request): Promise<Response> => {
 
     const emailResponse = await sendEmail({
       to: patientEmail,
-      subject: `${doctorName} has invited you to join Indigro`,
+      subject: `${doctorName} has invited you to join Holarc Wealth`,
       html: `
           <!DOCTYPE html>
           <html>
           <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
           <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
-              <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to Indigro</h1>
+              <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to Holarc Wealth</h1>
             </div>
             <div style="background: #f8fafc; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
               <p style="font-size: 18px; margin-top: 0;">Hello ${patientName},</p>
-              <p><strong>${doctorName}</strong> from <strong>${practiceName}</strong> has invited you to join Indigro - a secure platform for following your wealth journey.</p>
-              <p>With Indigro, you can:</p>
+              <p><strong>${doctorName}</strong> from <strong>${practiceName}</strong> has invited you to join Holarc Wealth - a secure platform for following your wealth journey.</p>
+              <p>With Holarc Wealth, you can:</p>
               <ul style="padding-left: 20px;">
                 <li>View your appointment calendar</li>
                 <li>Access your prescription history</li>
@@ -222,7 +222,7 @@ const handler = async (req: Request): Promise<Response> => {
               <p style="color: #64748b; font-size: 14px;">This invitation expires in 7 days. If you didn't expect this invitation, you can safely ignore this email.</p>
               <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
               <p style="color: #94a3b8; font-size: 12px; margin-bottom: 0;">
-                Indigro - Wealth Management Platform<br>
+                Holarc Wealth - Wealth Management Platform<br>
                 This is an automated message, please do not reply directly to this email.
               </p>
             </div>

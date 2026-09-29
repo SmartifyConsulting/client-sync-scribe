@@ -257,7 +257,7 @@ export default function MyPersonalDashboard() {
             {!isAdmin && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
           </div>
           <p className="text-[10px] text-muted-foreground">Something on your mind? A place to slow down and find your own way forward.</p>
-          <p className="text-[10px] text-muted-foreground italic">Indigro does not dispense advice — only questions.</p>
+          <p className="text-[10px] text-muted-foreground italic">Holarc Wealth does not dispense advice — only questions.</p>
         </div>
         <button
           type="button"
@@ -455,7 +455,7 @@ export default function MyPersonalDashboard() {
           <Panel title="My Holarcy" icon={HeartHandshake} unlocked={unlocked}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1 rounded-xl border border-border bg-background/40 p-4">
-                <p className="text-xs font-semibold text-foreground">My Indigro Financial Team</p>
+                <p className="text-xs font-semibold text-foreground">My Holarc Wealth Financial Team</p>
                 <EmotionalHeadline
                   emoji="❤️"
                   title="You're not looking after yourself alone"

@@ -1703,7 +1703,7 @@ export function PatientDetailsEditor({
             <TabsContent value="overview" className="space-y-4 mt-4">
               <Tabs defaultValue="team">
                 <TabsList className="bg-neutral-600 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                  <TabsTrigger value="team" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Indigro Financial Team</TabsTrigger>
+                  <TabsTrigger value="team" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Holarc Wealth Financial Team</TabsTrigger>
                   <TabsTrigger value="careteam" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Personal Care Circle</TabsTrigger>
                   <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Insurance</TabsTrigger>
                   <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Pharmacies</TabsTrigger>
@@ -1776,7 +1776,7 @@ export function PatientDetailsEditor({
             {/* === MY HOLARC TEAM SUB-TAB (view) === */}
             <TabsContent value="team" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-[18px] font-semibold text-primary-dark">My Indigro Financial Team</h2>
+                <h2 className="text-[18px] font-semibold text-primary-dark">My Holarc Wealth Financial Team</h2>
                 <p className="text-xs text-muted-foreground">Your financial wealth managers — the wealth managers with access to your profile</p>
               </div>
               <Suspense
@@ -1870,7 +1870,18 @@ export function PatientDetailsEditor({
               </Collapsible>
 
               <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
-                <SectionHeader icon={Users} label="Next of Kin" />
+                <SectionHeader icon={Briefcase} label="Employer" />
+                <CollapsibleContent className="p-3">
+                  <div className={FIELD_GRID_2_CLASS}>
+                    <ViewField label="Employer" value={patient.employer} />
+                    <ViewField label="Occupation" value={patient.occupation} />
+                    <ViewField label="Reporting To Email (Optional)" value={patient.reporting_to_email} />
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
+              <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+                <SectionHeader icon={Users} label="Beneficiaries" />
                 <CollapsibleContent className="p-3">
                   {nokMembers.length > 0 ? (
                     <div className="space-y-2">
@@ -1942,16 +1953,6 @@ export function PatientDetailsEditor({
                 />
               )}
 
-              <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
-                <SectionHeader icon={Briefcase} label="Employer" />
-                <CollapsibleContent className="p-3">
-                  <div className={FIELD_GRID_2_CLASS}>
-                    <ViewField label="Employer" value={patient.employer} />
-                    <ViewField label="Occupation" value={patient.occupation} />
-                    <ViewField label="Reporting To Email (Optional)" value={patient.reporting_to_email} />
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
 
               <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                 <SectionHeader icon={StickyNote} label="General Notes" />
@@ -2361,7 +2362,7 @@ export function PatientDetailsEditor({
           <TabsContent value="overview" className="space-y-4 mt-4">
             <Tabs defaultValue="team">
               <TabsList className="bg-neutral-600 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                <TabsTrigger value="team" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Indigro Financial Team</TabsTrigger>
+                <TabsTrigger value="team" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Holarc Wealth Financial Team</TabsTrigger>
                   <TabsTrigger value="careteam" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Personal Care Circle</TabsTrigger>
                 <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Insurance</TabsTrigger>
                 <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Pharmacies</TabsTrigger>
@@ -2803,9 +2804,57 @@ export function PatientDetailsEditor({
 
             </Collapsible>
 
-            {/* Next of Kin (multiple) */}
+            {/* Beneficiaries */}
             <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
-              <SectionHeader icon={Users} label="Next of Kin" />
+              <SectionHeader icon={Briefcase} label="Employer" />
+              <CollapsibleContent className="p-3">
+                <div className={FIELD_GRID_2_CLASS}>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="employer">
+                      Employer{insuranceCaptured ? " *" : ""}
+                    </Label>
+                    <Input
+                      id="employer"
+                      className="text-sm"
+                      value={formData.employer}
+                      onChange={(e) => updateFormData({ employer: e.target.value })}
+                      placeholder="Company name"
+                    />
+                    {insuranceCaptured && !formData.employer?.trim() && (
+                      <p className="text-xs text-destructive">
+                        Employer details are required when medical insurance is captured.
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="occupation">Occupation</Label>
+                    <Input
+                      id="occupation"
+                      className="text-sm"
+                      value={formData.occupation}
+                      onChange={(e) => updateFormData({ occupation: e.target.value })}
+                      placeholder="Job title"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="reporting_to_email">Reporting To Email (Optional)</Label>
+                    <Input
+                      id="reporting_to_email"
+                      className="text-sm"
+                      type="email"
+                      value={formData.reporting_to_email}
+                      onChange={(e) => updateFormData({ reporting_to_email: e.target.value })}
+                      placeholder="manager@company.com"
+                    />
+                    <p className="text-xs text-muted-foreground">Used for e-mailing of Advice Letters</p>
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+
+            <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+              <SectionHeader icon={Users} label="Beneficiaries" />
               <CollapsibleContent className="p-3">
                 <div className="flex justify-end mb-3">
                   {!showAddNOK && (
@@ -3006,53 +3055,6 @@ export function PatientDetailsEditor({
               />
             )}
 
-            <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
-              <SectionHeader icon={Briefcase} label="Employer" />
-              <CollapsibleContent className="p-3">
-                <div className={FIELD_GRID_2_CLASS}>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="employer">
-                      Employer{insuranceCaptured ? " *" : ""}
-                    </Label>
-                    <Input
-                      id="employer"
-                      className="text-sm"
-                      value={formData.employer}
-                      onChange={(e) => updateFormData({ employer: e.target.value })}
-                      placeholder="Company name"
-                    />
-                    {insuranceCaptured && !formData.employer?.trim() && (
-                      <p className="text-xs text-destructive">
-                        Employer details are required when medical insurance is captured.
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label htmlFor="occupation">Occupation</Label>
-                    <Input
-                      id="occupation"
-                      className="text-sm"
-                      value={formData.occupation}
-                      onChange={(e) => updateFormData({ occupation: e.target.value })}
-                      placeholder="Job title"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="reporting_to_email">Reporting To Email (Optional)</Label>
-                    <Input
-                      id="reporting_to_email"
-                      className="text-sm"
-                      type="email"
-                      value={formData.reporting_to_email}
-                      onChange={(e) => updateFormData({ reporting_to_email: e.target.value })}
-                      placeholder="manager@company.com"
-                    />
-                    <p className="text-xs text-muted-foreground">Used for e-mailing of Advice Letters</p>
-                  </div>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
 
             <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
               <SectionHeader icon={StickyNote} label="General Notes" />

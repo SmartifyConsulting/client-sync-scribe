@@ -304,7 +304,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col min-w-0">
-            <span className="font-medium text-sm text-foreground truncate hover:underline">{doctor.full_name || "Unknown Doctor"}</span>
+            <span className="font-medium text-sm text-foreground truncate hover:underline">{doctor.full_name || "Unknown Wealth Manager"}</span>
             <div className="flex items-center gap-1.5 flex-wrap">
               {doctor.specialty && (
                 <Badge className={`text-xs font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
@@ -455,7 +455,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
       {/* Doctor Search */}
       <Card>
         <CardHeader className="pb-1 pt-3 px-4">
-          <CardTitle className="text-sm">Find a Wealth Manager on Indigro</CardTitle>
+          <CardTitle className="text-sm">Find a Wealth Manager on Holarc Wealth</CardTitle>
           <CardDescription className="text-xs">Filter by name, specialty, language — or any combination</CardDescription>
         </CardHeader>
         <CardContent>

@@ -108,7 +108,7 @@ serve(async (req) => {
         contentType: typeof a.contentType === "string" ? a.contentType : "application/pdf",
       }));
     let documentName = body.documentName || "Document";
-    let senderName = body.senderName || "Indigro";
+    let senderName = body.senderName || "Holarc Wealth";
     let practiceName = body.practiceName;
 
     // Handle the { documentId, recipientEmail } pattern
@@ -253,7 +253,7 @@ serve(async (req) => {
     if (documentHtml) {
       // Caller supplied a fully-rendered HTML document (e.g. PAID invoice).
       // Keep the document markup exactly as rendered on screen, but drop it
-      // inside the Indigro branded shell.
+      // inside the Holarc Wealth branded shell.
       const inner = extractBody(documentHtml);
       htmlContent = brandedEmail({
         title: documentName,

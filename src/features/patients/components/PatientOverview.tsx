@@ -1,3 +1,4 @@
+import { WorkflowStatusCard } from "@/features/wealth-workflow/WorkflowStatusCard";
 import { useState, useEffect } from "react";
 import { Loader2, Sparkles, Wallet as Pill, LineChart as HeartPulse, RefreshCw, TrendingUp as Activity, AlertTriangle, Check, X, ChevronDown, ChevronRight, Flame, PartyPopper, Droplets, ShieldAlert, Phone, Mail } from "lucide-react";
 import { DiscPersonalityCard } from "@/features/patients/components/DiscPersonalityCard";
@@ -1079,27 +1080,10 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
 
 export function PatientOverview(props: PatientOverviewProps) {
   return (
-    <Tabs defaultValue="physical" className="w-full">
-      <TabsList className="mb-4 bg-primary/10 p-1 rounded-full">
-        <TabsTrigger
-          value="physical"
-          className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white text-xs px-4"
-        >
-          Physical State
-        </TabsTrigger>
-        <TabsTrigger
-          value="emotional"
-          className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white text-xs px-4"
-        >
-          Emotional State
-        </TabsTrigger>
-      </TabsList>
-      <TabsContent value="physical" className="mt-0">
-        <PhysicalOverview {...props} />
-      </TabsContent>
-      <TabsContent value="emotional" className="mt-0">
-        <EmotionalJournal patientId={props.patient.id} />
-      </TabsContent>
-    </Tabs>
+    <div className="space-y-4">
+      <h2 className="text-base font-semibold text-foreground">Financial Health Summary</h2>
+      <WorkflowStatusCard patientId={props.patient.id} />
+      <EmotionalJournal patientId={props.patient.id} />
+    </div>
   );
 }

@@ -216,80 +216,28 @@ export function DoctorsOnProfile({ patientId, patientName }: DoctorsOnProfilePro
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-foreground">Attending Wealth Managers</h3>
-          <p className="text-sm text-muted-foreground">
-            Doctors with access to this patient's profile
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setShowPermissionModal(true)}>
-            <Shield className="h-3.5 w-3.5" />
-            View Permissions
-          </Button>
-          <Badge variant="secondary">{doctors.length} doctor{doctors.length !== 1 ? 's' : ''}</Badge>
-        </div>
+      <div>
+        <h3 className="text-lg font-semibold text-foreground">Wealth Manager History</h3>
+        <p className="text-sm text-muted-foreground">Wealth Managers who have looked after this client.</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        {doctors.map((doctor) => {
-          const isCurrentUser = doctor.doctor_id === currentUserId;
-          
-          return (
-            <div
-              key={doctor.id}
-              className="rounded-xl border border-primary bg-card p-4 shadow-sm"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                    <User className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-foreground">
-                      {doctor.doctor_profile?.full_name || "Unknown Doctor"}
-                      {isCurrentUser && (
-                        <span className="ml-2 text-xs text-muted-foreground">(You)</span>
-                      )}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Practice: {doctor.doctor_profile?.practice_number || "N/A"}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Reg: {doctor.doctor_profile?.doctor_number || "N/A"}
-                    </p>
-                  </div>
-                </div>
-                {!isCurrentUser && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="gap-2"
-                    onClick={() => openMessageDialog(doctor)}
-                  >
-                    <Mail className="h-4 w-4" />
-                    Message
-                  </Button>
-                )}
-              </div>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                {doctor.permissions.map((permission) => {
-                  const config = permissionLabels[permission];
-                  if (!config) return null;
-                  const Icon = config.icon;
-                  return (
-                    <Badge key={permission} variant="secondary" className="gap-1">
-                      <Icon className="h-4 w-4" />
-                      {config.label}
-                    </Badge>
-                  );
-                })}
-              </div>
+      <div className="divide-y rounded-xl border border-border bg-card">
+        {doctors.map((doctor) => (
+          <div key={doctor.id} className="flex items-center gap-3 p-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+              <User className="h-4 w-4 text-primary" />
             </div>
-          );
-        })}
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-foreground">
+                {doctor.doctor_profile?.full_name || "Unknown Wealth Manager"}
+                {doctor.doctor_id === currentUserId && <span className="ml-2 text-xs text-muted-foreground">(You)</span>}
+              </p>
+              {(doctor as any).granted_at && (
+                <p className="text-xs text-muted-foreground">Since {new Date((doctor as any).granted_at).toLocaleDateString()}</p>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Permission Transparency Modal */}

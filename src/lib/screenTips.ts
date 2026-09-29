@@ -37,7 +37,7 @@ export const SCREEN_TIPS: ScreenTip[] = [
   { id: "doctor.invoices", match: "/doctor/invoices", title: "Fees & Remuneration", body: "Create and track advice-fee statements. Line items pre-fill from your fee schedule." },
   { id: "doctor.referrals", match: "/referrals", title: "Referral Network", body: "Advisers and specialists you refer clients to. Invite new ones by email." },
   { id: "doctor.connections", match: "/connections", title: "Connections", body: "Pending client invites, access requests and firm member approvals." },
-  { id: "doctor.practice", match: "/my-practice", title: "My Firm", body: "Add firm members, set your fee schedule, design your letterhead and configure how clients reach you." },
+  { id: "doctor.practice", match: "/my-practice", title: "My Business", body: "Add firm members, set your fee schedule, design your letterhead and configure how clients reach you." },
   { id: "doctor.mySessions", match: "/my-sessions", title: "My Consultations", body: "Today's consultations are expanded. Tap a date group to see earlier ones." },
   { id: "doctor.cpd", match: "/cpd-certificates", title: "CPD Certificates", body: "Upload and track your CPD points for the annual threshold." },
 

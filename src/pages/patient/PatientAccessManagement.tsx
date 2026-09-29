@@ -343,7 +343,7 @@ export default function PatientAccessManagement() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium">
-                        {invitation.sender_name || "Unknown Doctor"}
+                        {invitation.sender_name || "Unknown Wealth Manager"}
                       </p>
                       {invitation.message && (
                         <p className="text-sm text-muted-foreground truncate">

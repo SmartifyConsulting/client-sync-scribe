@@ -194,7 +194,7 @@ export function PatientHeroCard({
           {action && <div className="mt-3">{action}</div>}
         </div>
 
-        {!rewardsLoading && (
+        {false && !rewardsLoading && (
           <div className="hidden lg:flex shrink-0 items-center gap-3 ml-auto rounded-xl bg-background/70 border border-border px-4 py-2">
             <img src={vulaVouchersLogo} alt="Vulas" className="h-[52px] w-auto object-contain" />
             <span className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
@@ -204,7 +204,7 @@ export function PatientHeroCard({
         )}
       </div>
 
-      {!rewardsLoading && (
+      {false && !rewardsLoading && (
         <div className="mt-3 border-t border-border pt-3 lg:hidden">
           <div className="flex items-center justify-center gap-2">
             <img src={vulaVouchersLogo} alt="Vulas" className="h-[52px] w-auto object-contain" />
