@@ -1268,7 +1268,7 @@ export default function MyPractice() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="practice" className="w-full">
+      <Tabs defaultValue={new URLSearchParams(window.location.search).get("billing") ? "billing" : "practice"} className="w-full">
         <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
           <TabsTrigger
             value="practice"
