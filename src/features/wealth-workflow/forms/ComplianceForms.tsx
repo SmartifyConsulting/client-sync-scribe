@@ -1,3 +1,4 @@
+import { SignaturePad } from "./SignaturePad";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,6 +46,8 @@ function FormDialog({ form, onClose }: { form: ComplianceForm; onClose: () => vo
   const [patientId, setPatientId] = useState("");
   const [v, setV] = useState<Record<string, any>>({});
   const [saving, setSaving] = useState(false);
+  const [files, setFiles] = useState<Record<string, File>>({});
+  const [sigs, setSigs] = useState<Record<string, string | null>>({});
   const set = (k: string, val: any) => setV((p) => ({ ...p, [k]: val }));
 
   const { data: clients = [] } = useQuery({
@@ -72,6 +75,20 @@ function FormDialog({ form, onClose }: { form: ComplianceForm; onClose: () => vo
     }
     setSaving(true);
     const stamp = new Date().toISOString();
+    const attachments: { name: string; path: string; kind: string }[] = [];
+    const upload = async (key: string, blob: Blob, name: string) => {
+      const path = `${client.id}/${form.id}/${Date.now()}-${key}-${name.replace(/[^\w.-]/g, "_")}`;
+      const { error } = await supabase.storage.from("compliance-docs").upload(path, blob);
+      if (error) throw error;
+      attachments.push({ name, path, kind: key });
+    };
+    try {
+      for (const [k, f] of Object.entries(files)) await upload(k, f, f.name);
+      for (const [k, d] of Object.entries(sigs)) if (d) await upload(k, await (await fetch(d)).blob(), `${k}.png`);
+    } catch (e: any) {
+      setSaving(false);
+      return toast({ title: "Upload failed", description: "A file or signature couldn't be stored. Check your connection and try again.", variant: "destructive" });
+    }
     const lines = form.fields.filter((f) => !(single && f.fnaOnly)).map((f) => `${f.label}: ${Array.isArray(v[f.key]) ? v[f.key].join(", ") : typeof v[f.key] === "boolean" ? (v[f.key] ? "Yes" : "No") : v[f.key] ?? "—"}`);
     const body = [
       `# Form ${form.number}: ${form.title}`,
@@ -89,7 +106,7 @@ function FormDialog({ form, onClose }: { form: ComplianceForm; onClose: () => vo
     const { error } = await supabase.from("documents").insert({
       user_id: user!.id, patient_id: client.id, patient_name: client.name,
       name: `${form.title} — ${client.name}`, template_name: `Form ${form.number}: ${form.title}`,
-      content: body, document_kind: kind, record_date: stamp.slice(0, 10),
+      content: body, document_kind: kind, record_date: stamp.slice(0, 10), attachments,
     } as any);
     setSaving(false);
     if (error) return toast({ title: "Form not saved", description: error.message, variant: "destructive" });
@@ -134,7 +151,7 @@ function FormDialog({ form, onClose }: { form: ComplianceForm; onClose: () => vo
                   <label key={i} className="flex items-center gap-1.5 text-sm"><Checkbox checked={(v[f.key] ?? []).includes(i)} onCheckedChange={(c) => set(f.key, c ? [...(v[f.key] ?? []), i] : (v[f.key] ?? []).filter((x: string) => x !== i))} />{i}</label>
                 ))}</div>
               ) : f.type === "file" ? (
-                <Input type="file" accept="image/*,application/pdf" onChange={(e) => set(f.key, e.target.files?.[0]?.name ?? "")} />
+                <Input type="file" accept="image/*,application/pdf" onChange={(e) => { const file = e.target.files?.[0]; if (file && file.size > 5 * 1024 * 1024) { toast({ title: "File too large", description: "Files must be 5MB or smaller.", variant: "destructive" }); e.target.value = ""; return; } set(f.key, file?.name ?? ""); setFiles((p) => { const n = { ...p }; if (file) n[f.key] = file; else delete n[f.key]; return n; }); }} />
               ) : f.type === "range" ? (
                 <div className="flex items-center gap-3"><input type="range" min={1} max={5} value={v[f.key] ?? 3} onChange={(e) => set(f.key, e.target.value)} className="flex-1" /><span className="text-sm w-6">{v[f.key] ?? 3}</span></div>
               ) : f.type === "radio" ? (
@@ -147,8 +164,8 @@ function FormDialog({ form, onClose }: { form: ComplianceForm; onClose: () => vo
             </div>
           ))}
           <div className="grid gap-3 sm:grid-cols-2 border-t pt-3">
-            <div className="space-y-1.5"><Label>Client signature (type full name) *</Label><Input value={v.clientSignature ?? ""} onChange={(e) => set("clientSignature", e.target.value)} className="font-[cursive]" /></div>
-            {form.adviserSigns && <div className="space-y-1.5"><Label>Adviser signature (type full name) *</Label><Input value={v.adviserSignature ?? ""} onChange={(e) => set("adviserSignature", e.target.value)} className="font-[cursive]" /></div>}
+            <div className="space-y-1.5"><Label>Client signature (type full name) *</Label><Input value={v.clientSignature ?? ""} onChange={(e) => set("clientSignature", e.target.value)} className="font-[cursive]" /><Label className="text-xs text-muted-foreground">Or draw signature</Label><SignaturePad onChange={(d) => setSigs((p) => ({ ...p, client_signature: d }))} /></div>
+            {form.adviserSigns && <div className="space-y-1.5"><Label>Adviser signature (type full name) *</Label><Input value={v.adviserSignature ?? ""} onChange={(e) => set("adviserSignature", e.target.value)} className="font-[cursive]" /><Label className="text-xs text-muted-foreground">Or draw signature</Label><SignaturePad onChange={(d) => setSigs((p) => ({ ...p, adviser_signature: d }))} /></div>}
           </div>
         </div>
         <DialogFooter>
