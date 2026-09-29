@@ -37,6 +37,15 @@
 
     /* Holarc teal #2DB0A6 */
     --primary: 175 59% 43%;
+    /* Wealth workflow owner badges */
+    --owner-client: 175 59% 38%;
+    --owner-client-bg: 175 55% 94%;
+    --owner-advisor: 214 70% 45%;
+    --owner-advisor-bg: 214 80% 95%;
+    --owner-insurer: 35 85% 38%;
+    --owner-insurer-bg: 40 90% 92%;
+    --owner-system: 220 9% 40%;
+    --owner-system-bg: 220 14% 94%;
     --primary-foreground: 0 0% 100%;
     --primary-glow: 175 59% 55%;
     --primary-dark: 175 64% 30%;     /* #1C7B74 active */
@@ -144,6 +153,14 @@
     --popover-foreground: 0 0% 95%;
 
     --primary: 172 60% 55%;
+    --owner-client: 172 60% 60%;
+    --owner-client-bg: 172 40% 16%;
+    --owner-advisor: 214 80% 70%;
+    --owner-advisor-bg: 214 40% 18%;
+    --owner-insurer: 40 90% 65%;
+    --owner-insurer-bg: 35 40% 16%;
+    --owner-system: 220 10% 70%;
+    --owner-system-bg: 220 10% 18%;
     --primary-foreground: 0 0% 5%;
     --primary-glow: 172 60% 65%;
     --primary-dark: 176 70% 45%;
