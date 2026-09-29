@@ -11606,6 +11606,7 @@ export type Database = {
         Args: { _rid?: string; _rtype?: string; _workflow_id: string }
         Returns: Json
       }
+      wealth_send_reminder: { Args: { _todo_id: string }; Returns: boolean }
       wealth_start_annual_review: {
         Args: {
           _appointment_id?: string
