@@ -68,8 +68,8 @@ function FormDialog({ form, onClose }: { form: ComplianceForm; onClose: () => vo
       if (f.required && !v[f.key]) return toast({ title: `${f.label} is missing`, description: "Complete every required field before signing.", variant: "destructive" });
       if (f.type === "said" && v[f.key] && !isValidSaId(v[f.key])) return toast({ title: "ID number is not valid", description: "Enter the client's 13-digit South African ID number.", variant: "destructive" });
     }
-    if (!v.clientSignature?.trim()) return toast({ title: "Client signature missing", description: "The client must type their full name to sign.", variant: "destructive" });
-    if (form.adviserSigns && !v.adviserSignature?.trim()) return toast({ title: "Adviser signature missing", description: "Type your full name to sign.", variant: "destructive" });
+    if (!v.clientSignature?.trim() && !sigs.client_signature) return toast({ title: "Client signature missing", description: "The client must draw a signature or type their full name.", variant: "destructive" });
+    if (form.adviserSigns && !v.adviserSignature?.trim() && !sigs.adviser_signature) return toast({ title: "Adviser signature missing", description: "Draw your signature or type your full name.", variant: "destructive" });
     if (form.id === "fica" && v.adverse) {
       if (!confirm("An adverse finding marks this client as high risk and stops onboarding. Continue?")) return;
     }
@@ -98,8 +98,8 @@ function FormDialog({ form, onClose }: { form: ComplianceForm; onClose: () => vo
       single ? `\nSINGLE NEED DISCLAIMER\nThe client has declined a full Financial Needs Analysis and understands advice is limited to the single need stated.\n` : "",
       ...lines,
       "",
-      `Client signature: ${v.clientSignature}`,
-      form.adviserSigns ? `Adviser signature: ${v.adviserSignature}` : "",
+      `Client signature: ${v.clientSignature || "(drawn, attached)"}`,
+      form.adviserSigns ? `Adviser signature: ${v.adviserSignature || "(drawn, attached)"}` : "",
       `Signed: ${new Date(stamp).toLocaleString("en-ZA")} (${stamp})`,
     ].filter(Boolean).join("\n");
     const kind = form.id === "fna" && single ? "fna_disclaimer" : form.id === "fica" && v.adverse ? "fica_adverse" : form.kind;
