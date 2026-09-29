@@ -8,7 +8,7 @@
     },
     "provider": {
       "title": "Provider application",
-      "subtitle": "Register your organisation on Indigro Health. Applications are vetted before your administrator account is activated.",
+      "subtitle": "Register your organisation on Indigro. Applications are vetted before your administrator account is activated.",
       "organizationType": "Organisation type",
       "hospital": "Hospital",
       "emergency": "Emergency service provider",
@@ -134,7 +134,7 @@
   "topbar": {
     "reportBug": "Report Bug/Fix",
     "calendar": "Calendar",
-    "recordTask": "Record a Action",
+    "recordTask": "Record an Action",
     "notifications": "Notifications"
   },
   "userAdmin": {
@@ -254,7 +254,7 @@
     "searchRoundTable": "Search patient to start round table...",
     "noPatientsFound": "No clients found",
     "todoList": "To-Do List",
-    "addTask": "Add a action...",
+    "addTask": "Add an action...",
     "active": "Active",
     "done": "Done",
     "noActiveTasks": "No active actions",
@@ -1222,7 +1222,7 @@
     },
     "profileCompletion": {
       "title": "Complete your wealth manager profile",
-      "message": "Add your specialty, firm number, HPCSA/registration number and firm address so clients can find you and your documents render correctly. All credentials are encrypted in transit and at rest, visible only to you and clients you connect with. Indigro Health is HIPAA- and POPIA-aligned and never sells or shares your data."
+      "message": "Add your specialty, firm number, HPCSA/registration number and firm address so clients can find you and your documents render correctly. All credentials are encrypted in transit and at rest, visible only to you and clients you connect with. Indigro is HIPAA- and POPIA-aligned and never sells or shares your data."
     },
     "stats": {
       "totalPatients": "Total Clients",
@@ -1287,14 +1287,14 @@
       "practiceNumberPlaceholder": "e.g., PR123456",
       "registrationNumber": "Registration Number",
       "registrationPlaceholder": "e.g., MP123456",
-      "practiceAddress": "Address of Wealth Manager's Rooms",
+      "practiceAddress": "Address of Wealth Manager's Office",
       "addressPlaceholder": "e.g., 123 Financial Centre, Suite 4, Cape Town",
       "calendarColor": "Calendar Color",
       "colorPlaceholder": "#0EA5E9",
       "colorDescription": "Used on the shared Firm Calendar so colleagues can see whose appointment a slot belongs to.",
       "practiceLogo": "Firm Logo",
       "partnerName": "Full Name *",
-      "partnerNamePlaceholder": "Wealth Manager Jane Doe",
+      "partnerNamePlaceholder": "Dr. Jane Doe",
       "partnerRegNumber": "Registration Number *",
       "partnerRegPlaceholder": "e.g., MP654321",
       "partnerMobile": "Mobile (Optional)",
@@ -1410,7 +1410,7 @@
       "assignedTasks": "Assigned Actions"
     },
     "aiSummary": {
-      "empty": "No health summary available yet. Visit your wealth manager to build your health profile."
+      "empty": "No financial summary available yet. Visit your wealth manager to build your financial profile."
     },
     "appointments": {
       "empty": "No upcoming appointments."
@@ -1423,7 +1423,7 @@
       "tip4": "Keep visit streaks going"
     },
     "recentClaims": {
-      "subtitle": "Fee statements submitted to your financial aid",
+      "subtitle": "Fee statements submitted to your provider",
       "empty": "No claims submitted recently."
     },
     "claims": {
@@ -1445,7 +1445,7 @@
     "recordTask": "Record Action",
     "recentActivity": "Recent Activity",
     "aiSummaryTitle": "AI Health Summary",
-    "aiSummaryEmpty": "No health summary available yet. Visit your wealth manager to build your health profile.",
+    "aiSummaryEmpty": "No financial summary available yet. Visit your wealth manager to build your financial profile.",
     "appointmentsTitle": "Upcoming Appointments",
     "appointmentsEmpty": "No upcoming appointments.",
     "doctorFallback": "Wealth Manager",
@@ -1458,7 +1458,7 @@
     "tip4": "Keep visit streaks going",
     "claimsTitle": "Recent Claims",
     "claimsAllInvoices": "All Fee statements",
-    "claimsDescription": "Fee statements submitted to your financial aid",
+    "claimsDescription": "Fee statements submitted to your provider",
     "claimsEmpty": "No claims submitted recently.",
     "claimsSubmitted": "Submitted",
     "documentationTitle": "Documentation",
@@ -1524,7 +1524,7 @@
     },
     "dialog": {
       "removeTitle": "Remove Wealth Manager",
-      "removeMessage": "Are you sure you want to remove {name} from your wealth managers? They will lose access to your health information."
+      "removeMessage": "Are you sure you want to remove {name} from your wealth managers? They will lose access to your financial information."
     },
     "details": {
       "registrationLabel": "Registration #:",
@@ -2037,7 +2037,7 @@
     },
     "hero": {
       "badge": "AI-powered · Client-controlled · HIPAA-aligned",
-      "title": "A revolutionary wealth management ecosystem",
+      "title": "A wealth-management platform",
       "titleHighlight": "built around you.",
       "description": "Holarc is one connected platform where doctors run their entire practice and patients own their entire health story — from voice-recorded consultations and AI summaries, to video-verified medication adherence rewards, cross-specialist Round Tables, hospital admissions, prescriptions, billing, and a unified care calendar.",
       "cta": "Join the Ecosystem",
@@ -2164,7 +2164,7 @@
     "noDocuments": "No documents yet",
     "noDocumentsDescription": "Documents will appear here as your wealth managers upload them",
     "uploadTitle": "Upload Document",
-    "uploadDescription": "Add a new financial document to your health record",
+    "uploadDescription": "Add a new financial document to your client record",
     "selectFile": "Select File",
     "fileName": "File Name",
     "documentTypeLabel": "Document Type",
