@@ -12,6 +12,9 @@ export interface MapContext {
     kyc_fica_status: string; bank_validation_status: string; bank_validation_required: boolean; declarations_status: string;
   } | null;
   docKinds: Set<string>;
+  clientLinked: boolean;
+  kycStatus: string | null;
+  signedDocs: Set<string>;
 }
 
 export interface SubStep {
@@ -42,10 +45,11 @@ export const WORKFLOW_GROUPS: WorkflowGroup[] = [
     n: 1, key: "gateway", title: "Client Onboarding", clientTitle: "Getting started", icon: ScanFace,
     stages: ["consultation"],
     steps: [
-      { owner: "client", label: "Scan QR or open secure link", done: past(1) },
-      { owner: "system", label: "Liveness and Home Affairs ID", done: (c) => (c.docKinds.has("id_document") ? true : undefined) },
+      { owner: "client", label: "Scan QR or open secure link", done: (c) => past(1)(c) || c.clientLinked || !!c.kycStatus },
+      { owner: "client", label: "KYC, AML and PEP Screening", done: (c) => past(1)(c) || c.kycStatus === "approved" },
+      { owner: "client", label: "Sign disclosure and LOA", done: (c) => past(1)(c) || (c.signedDocs.has("disclosure") && c.signedDocs.has("loa")) },
     ],
-    footer: "No advice until all four pass",
+    footer: "No advice until all checks pass",
   },
   {
     n: 2, key: "portfolio", title: "Portfolio", clientTitle: "Your current cover", icon: Database,

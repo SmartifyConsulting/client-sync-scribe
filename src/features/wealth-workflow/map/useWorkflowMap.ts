@@ -20,18 +20,24 @@ export function useWorkflowRecords(workflowId?: string, patientId?: string) {
     queryKey: ["wealth-map-records", workflowId, patientId],
     enabled: !!workflowId && !!patientId,
     queryFn: async () => {
-      const [apps, comp, tasks, docs] = await Promise.all([
+      const [apps, comp, tasks, docs, kyc, signed, pat] = await Promise.all([
         db.from("wealth_applications").select("*").eq("workflow_id", workflowId).order("created_at", { ascending: false }),
         db.from("wealth_compliance_checks").select("*").eq("workflow_id", workflowId).maybeSingle(),
         db.from("todos").select("id,title,status,due_date,owner_role,workflow_stage,priority")
           .eq("workflow_id", workflowId).order("due_date", { ascending: true }),
         db.from("documents").select("id,name,document_kind,created_at").eq("patient_id", patientId).not("document_kind", "is", null),
+        db.from("wealth_kyc_checks").select("*").eq("workflow_id", workflowId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+        db.from("wealth_signed_documents").select("*").eq("workflow_id", workflowId).order("signed_at"),
+        db.from("patients").select("user_id").eq("id", patientId).maybeSingle(),
       ]);
       return {
         apps: (apps.data ?? []) as any[],
         compliance: comp.data ?? null,
         tasks: (tasks.data ?? []) as any[],
         docs: (docs.data ?? []) as any[],
+        kyc: kyc.data ?? null,
+        signed: (signed.data ?? []) as any[],
+        clientLinked: !!pat.data?.user_id,
       };
     },
   });
@@ -54,6 +60,9 @@ export function useWorkflowMap(patientId?: string) {
     apps: rec?.apps ?? [],
     compliance: rec?.compliance ?? null,
     docKinds: new Set((rec?.docs ?? []).map((d) => d.document_kind)),
+    clientLinked: !!rec?.clientLinked,
+    kycStatus: rec?.kyc?.status ?? null,
+    signedDocs: new Set((rec?.signed ?? []).map((d: any) => d.doc_type)),
   };
 
   const closed = wf?.status === "closed_declined";

@@ -62,8 +62,9 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
   const shownStep = picked ? picked.step : liveStep;
   const isLive = !picked || (picked.group === liveGroup?.group.key && picked.step === liveStep);
 
+  const clientFirst = (clientName ?? "").split(" ")[0] || "Client";
   const cards = m.groups.map((g) => (
-    <WorkflowGroupCard key={g.group.key} view={g} blockers={g.state === "blocked" ? wf.blockers : []}
+    <WorkflowGroupCard key={g.group.key} view={g} blockers={g.state === "blocked" ? wf.blockers : []} viewer={viewer} clientFirst={clientFirst}
       onOpen={() => viewer === "manager" && setSelected(g)}
       selectedStep={shownGroup?.group.key === g.group.key ? shownStep : null}
       onSelectStep={(label) => setPicked({ group: g.group.key, step: label })} />
@@ -90,6 +91,7 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
         <div className="space-y-2">{cards}</div>
         <div className="lg:sticky lg:top-4 lg:self-start">
           <WorkingWindow group={shownGroup} stepLabel={shownStep} isLive={isLive} viewer={viewer}
+            clientName={clientName ?? "Client"} workflowId={wf.id} records={m.records}
             blockers={wf.status === "blocked" ? wf.blockers : []}
             documents={(m.records?.docs ?? []) as any[]}
             onBackToCurrent={() => setPicked(null)} onOpenDocuments={onOpenDocuments} />
