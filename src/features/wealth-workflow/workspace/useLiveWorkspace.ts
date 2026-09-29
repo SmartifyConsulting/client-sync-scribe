@@ -8,7 +8,7 @@ import {
 } from "./rules";
 import { useWorkflowRealtime } from "./useWorkflowRealtime";
 
-export type ItemKind = "task" | "requirement" | "decision" | "present" | "annual_review" | "next";
+export type ItemKind = "task" | "requirement" | "decision" | "present" | "annual_review" | "next" | "message";
 
 export interface WorkspaceItem {
   id: string;
@@ -44,6 +44,35 @@ export function useLiveWorkspace(patientId?: string) {
     },
   });
 
+  // Unanswered client question (existing messages)
+  const { data: unread } = useQuery({
+    queryKey: ["wealth-client-question", patientId],
+    enabled: !!patientId,
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return null;
+      const { data } = await supabase.from("messages").select("id,subject,content,created_at")
+        .eq("patient_id", patientId!).eq("recipient_id", u.user.id).eq("is_read", false)
+        .order("created_at", { ascending: false }).limit(1).maybeSingle();
+      return data;
+    },
+  });
+
+  // Previous cycle's position (for annual review)
+  const { data: prior } = useQuery({
+    queryKey: ["wealth-prior-cycle", wf?.previous_workflow_id],
+    enabled: !!(wf as any)?.previous_workflow_id,
+    queryFn: async () => {
+      const db = supabase as any;
+      const pid = (wf as any).previous_workflow_id;
+      const [r, a] = await Promise.all([
+        db.from("wealth_recommendations").select("title,version").eq("workflow_id", pid).eq("status", "accepted").order("version", { ascending: false }).limit(1).maybeSingle(),
+        db.from("wealth_applications").select("product,provider").eq("workflow_id", pid).eq("status", "issued").limit(1).maybeSingle(),
+      ]);
+      return { rec: r.data, app: a.data };
+    },
+  });
+
   const now: WorkspaceItem[] = [];
   const next: WorkspaceItem[] = [];
   const waiting: WorkspaceItem[] = [];
@@ -75,6 +104,34 @@ export function useLiveWorkspace(patientId?: string) {
     }
     if (stage === "underwriting") waiting.push({ id: "uw", kind: "next", what: "Underwriting decision", who: "provider", priority: "waiting", why: "The insurer is assessing the application.", next: "Submission.", group });
     if (stage === "submission") waiting.push({ id: "issue", kind: "next", what: "Policy confirmation", who: "provider", priority: "waiting", why: "The insurer must confirm issue.", next: "Follow-up and annual review get scheduled.", group });
+
+    // Client question awaiting response
+    if (unread) now.push({
+      id: `msg-${unread.id}`, kind: "message", what: `Client question: ${unread.subject || (unread.content ?? "").slice(0, 60)}`,
+      who: "wealth_manager", due: unread.created_at, priority: "due_today", why: "The client is waiting for your reply.", next: "The client gets an answer.", group,
+    });
+
+    // Quote expiring (only where an expiry date is recorded)
+    recs.filter((r: any) => r.quote_expires_at && ["draft", "presented"].includes(r.status)).forEach((r: any) => {
+      const d = differenceInCalendarDays(new Date(r.quote_expires_at), new Date());
+      if (d <= 7) now.push({
+        id: `exp-${r.id}`, kind: "next", what: d < 0 ? `Quote for v${r.version} has expired` : `Quote for v${r.version} expires in ${d} day${d === 1 ? "" : "s"}`,
+        who: "wealth_manager", due: r.quote_expires_at, priority: priorityFor(r.quote_expires_at, "due_soon"),
+        why: "Expired quotes must be re-issued before the client can proceed.", next: "Re-quote or obtain the decision before expiry.", group: "quotes",
+      });
+    });
+
+    // Provider response received (last 7 days)
+    (m.records?.apps ?? []).forEach((a: any) => {
+      const at = a.issued_at ?? a.updated_at;
+      if (["issued", "declined", "accepted"].includes(a.status) && at && differenceInCalendarDays(new Date(), new Date(at)) <= 7) {
+        now.push({
+          id: `prov-${a.id}`, kind: "next", what: `${a.provider ?? "Provider"} response: ${a.status}${a.product ? ` (${a.product})` : ""}`,
+          who: "wealth_manager", due: at, priority: "normal", why: "The insurer has responded to the application.",
+          next: a.status === "issued" ? "Share the policy schedule with the client." : "Discuss the outcome with the client.", group: "issuance",
+        });
+      }
+    });
 
     // Blockers (exact missing items)
     const blockList: string[] = wf.status === "blocked" && wf.blockers.length ? wf.blockers : nextBlockers;
