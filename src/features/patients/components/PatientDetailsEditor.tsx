@@ -1870,7 +1870,7 @@ export function PatientDetailsEditor({
               </Collapsible>
 
               <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
-                <SectionHeader icon={Users} label="Next of Kin" />
+                <SectionHeader icon={Users} label="Beneficiaries" />
                 <CollapsibleContent className="p-3">
                   {nokMembers.length > 0 ? (
                     <div className="space-y-2">
@@ -2803,9 +2803,9 @@ export function PatientDetailsEditor({
 
             </Collapsible>
 
-            {/* Next of Kin (multiple) */}
+            {/* Beneficiaries */}
             <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
-              <SectionHeader icon={Users} label="Next of Kin" />
+              <SectionHeader icon={Users} label="Beneficiaries" />
               <CollapsibleContent className="p-3">
                 <div className="flex justify-end mb-3">
                   {!showAddNOK && (
