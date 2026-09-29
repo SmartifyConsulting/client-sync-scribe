@@ -20,6 +20,6 @@
 
 ## Holarc Wealth cleanup pass
 - [x] Indigro → Holarc Wealth
-- [ ] Vula removal, greeting subtext, beta notice, grey pill, My Business, client tabs, Unknown WM, overview, Beneficiaries
-- [ ] My Business: remove Rewards/Referrals, Targets & Commission
-- [ ] 7 compliance form templates
+- [x] Vula removal, greeting subtext, beta notice, grey pill, My Business, client tabs, Unknown WM, overview, Beneficiaries
+- [x] My Business: remove Rewards/Referrals, Targets & Commission
+- [x] 7 compliance forms (typed e-signature; Astute, screening and liveness integrations still pending external services)
