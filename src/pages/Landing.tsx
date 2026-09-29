@@ -357,7 +357,7 @@ export default function Landing() {
               className="lg:col-span-5 card-modern p-4 border border-[#E01837]/30 bg-gradient-to-br from-[#E01837]/5 to-[#E01837]/10"
             >
               <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E01837] text-white shrink-0">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shrink-0">
                   <ShieldCheck className="h-5 w-5" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -430,7 +430,7 @@ export default function Landing() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <div className="inline-flex items-center gap-2 bg-primary text-primary px-4 py-2 rounded-full text-sm font-medium mb-4">
+            <div className="inline-flex items-center gap-2 bg-accent text-accent-foreground px-4 py-2 rounded-full text-sm font-medium mb-4">
               <UserCircle className="h-4 w-4" />
               {t("landing.patientBenefits.sectionBadge")}
             </div>
@@ -452,7 +452,7 @@ export default function Landing() {
                 viewport={{ once: true }}
                 className="card-modern p-6 hover-lift"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary mb-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent mb-4">
                   <benefit.icon className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">{benefit.title}</h3>
@@ -473,7 +473,7 @@ export default function Landing() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <div className="inline-flex items-center gap-2 bg-primary text-primary px-4 py-2 rounded-full text-sm font-medium mb-4">
+            <div className="inline-flex items-center gap-2 bg-accent text-accent-foreground px-4 py-2 rounded-full text-sm font-medium mb-4">
               <Stethoscope className="h-4 w-4" />
               {t("landing.providerBenefits.sectionBadge")}
             </div>
@@ -493,7 +493,7 @@ export default function Landing() {
                 viewport={{ once: true }}
                 className="card-modern p-6 hover-lift"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary mb-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent mb-4">
                   <benefit.icon className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">{benefit.title}</h3>
