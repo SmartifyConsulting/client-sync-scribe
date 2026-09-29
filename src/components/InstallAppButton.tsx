@@ -208,7 +208,7 @@ export function InstallAppButton({ variant = "primary", className }: Props) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {isAndroid ? "Install Holarc on your phone" : "Install Holarc"}
+              {isAndroid ? "Install Indigro on your phone" : "Install Indigro"}
             </DialogTitle>
             <DialogDescription>{androidIntro}</DialogDescription>
           </DialogHeader>
