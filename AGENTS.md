@@ -4,3 +4,4 @@
 - User-facing wealth terminology comes from src/lib/terminology.ts; DB/route identifiers keep healthcare names. Why: copy-only transformation, no renames.
 - Client-facing wealth views (client dashboard, My Future) read data only through `useClientWealth` in src/features/wealth-workflow/client. Why: one source for cover, investment, beneficiary and claim figures.
 - Clients are blocked from /practice and /patients in both the sidebar and WealthRouteGuard. Why: firm screens must never reach client accounts.
+- Onboarding (Step 1) moves on only via `wealth_onboarding_refresh`, called by the didit-webhook/didit-session/sign-wealth-document functions; signed documents are insert-only with a SHA-256 seal. Why: KYC result and signatures must be tamper-evident and server-recorded (IP captured server-side).
