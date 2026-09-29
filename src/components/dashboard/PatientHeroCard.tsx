@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { format } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
 import { Camera, Loader2 } from "lucide-react";
 
 import vulaVouchersLogo from "@/assets/vula-vouchers-logo.png";

@@ -110,9 +110,13 @@ const doctorModeItems: (NavItem & { tour?: string })[] = [
   ...DOCTOR_BOTTOM_ITEMS,
 ];
 
+/** Firm-facing screens a client must never see. */
+const CLIENT_BLOCKED_PATHS = ["/practice", "/patients"];
+
 const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.myPersonalDashboard", to: "/my-dashboard" },
   { icon: Users, label: "My Profile", labelKey: "nav.myHolarchy", to: "/patient/details?section=health", tour: "patient-holarchy" },
+  { icon: TrendingUp, label: "My Future", labelKey: "nav.myFuture", to: "/my-future" },
   { icon: Activity, label: "My Biolog", labelKey: "nav.myBiolog", to: "/biolog" },
   { icon: BedDouble, label: "My Admissions", labelKey: "nav.myAdmissions", to: "/patient/admissions" },
   { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/patient/calendar" },
@@ -265,7 +269,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     : isNurseMenu
       ? withShiftRule(nurseNavItems)
       : isPatientMenu
-      ? withShiftRule(patientNavItems)
+      ? withShiftRule(patientNavItems).filter((i) => !CLIENT_BLOCKED_PATHS.includes(i.to))
       : doctorItems;
 
 
