@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, lazy, Suspense } from "react";
+import { useSearchParams } from "react-router-dom";
+const PatientDocuments = lazy(() => import("@/pages/patient/PatientDocuments"));
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Loader2, Plus } from "lucide-react";
@@ -101,7 +102,7 @@ export default function MyFuture() {
         <p className="text-xs text-muted-foreground">Your cover, investments, retirement, claims and documents in one place.</p>
       </div>
 
-      <Tabs defaultValue="cover">
+      <Tabs value={tab} onValueChange={(v) => setParams({ tab: v }, { replace: true })}>
         <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
           <TabsTrigger value="cover" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5">My Cover</TabsTrigger>
           <TabsTrigger value="investments" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5">My Investments</TabsTrigger>
@@ -200,20 +201,10 @@ export default function MyFuture() {
           </Frame>
         </TabsContent>
 
-        <TabsContent value="documents">
-          <Frame title="Documents">
-            {data.documents.length ? (
-              <ul className="space-y-2">
-                {data.documents.map((d) => (
-                  <li key={d.id} className="flex items-center justify-between rounded-lg border border-border bg-background/60 p-3 text-xs">
-                    <span className="font-semibold truncate">{DOC_LABEL[d.document_kind] ?? d.name}</span>
-                    <span className="text-muted-foreground shrink-0">{format(new Date(d.created_at), "d MMM yyyy")}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : <Empty text="No documents yet. Signed documents will appear here." />}
-            <Link to="/patient/details?section=admin" className="mt-3 inline-block text-xs font-semibold text-primary">Open all documents →</Link>
-          </Frame>
+        <TabsContent value="documents" className="mt-4">
+          <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+            <PatientDocuments hideHeader />
+          </Suspense>
         </TabsContent>
       </Tabs>
     </div>
