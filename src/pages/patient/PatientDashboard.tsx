@@ -405,7 +405,7 @@ export default function PatientDashboard() {
 
       {/* Row 2: Vulas Balance */}
       <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2'}`}>
-        <Link to="/patient/rewards">
+        {false && (<Link to="/patient/rewards">
           <Card className="h-full border-primary hover:shadow-lg transition-all cursor-pointer">
             <CardContent className="flex items-center gap-4 p-5">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary shrink-0">
@@ -418,7 +418,7 @@ export default function PatientDashboard() {
               <ArrowRight className="h-4 w-4 text-muted-foreground" />
             </CardContent>
           </Card>
-        </Link>
+        </Link>)}
 
 
         {!isMobile && (

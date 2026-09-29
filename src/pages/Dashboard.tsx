@@ -344,7 +344,7 @@ export default function Dashboard() {
             href="/todos"
           />
         )}
-        {isDoctor && (
+        {false && isDoctor && (
           <Link
             to="/doctor/rewards"
             className="col-span-2 min-h-[80px] md:min-h-[100px] flex items-center justify-center gap-2 rounded-2xl border-2 border-primary bg-white p-2 md:p-3 text-center shadow-card hover:shadow-card-hover transition-all duration-300"
