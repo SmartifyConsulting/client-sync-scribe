@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { isWealthHidden } from "@/lib/terminology";
-import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PatientAppLayout } from "@/components/layout/PatientAppLayout";
 import { useAuth } from "@/hooks/useAuth";
