@@ -807,7 +807,7 @@ export function PatientDetailsEditor({
       if ((data.medical_aid?.trim() || data.medical_aid_number?.trim()) && !data.employer?.trim()) {
         toast({
           title: "Employer required",
-          description: "Employer details are required when financial insurance is captured.",
+          description: "Employer details are required when insurance is captured.",
           variant: "destructive",
         });
         return;
@@ -1713,14 +1713,14 @@ export function PatientDetailsEditor({
             {/* === INSURANCE SUB-TAB (view) === */}
             <TabsContent value="insurance" className="mt-4">
               <Collapsible defaultOpen className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
-                <SectionHeader icon={ShieldCheck} label="Financial Insurance" />
+                <SectionHeader icon={ShieldCheck} label="Insurance" />
                 <CollapsibleContent className="p-3">
                   <div className={FIELD_GRID_2_CLASS}>
                     <ViewField label="Insurance Provider" value={patient.medical_aid} />
                     <ViewField label="Insurance Product" value={patient.medical_insurance_product} />
                     <ViewField label="Insurance Number" value={patient.medical_aid_number} />
                     <ViewField label="Primary Member" value={patient.primary_member} />
-                    <ViewField label="Financial Aid Claims Email" value={patient.claims_email} />
+                    <ViewField label="Provider Claims Email" value={patient.claims_email} />
                   </div>
                 </CollapsibleContent>
               </Collapsible>
@@ -2379,7 +2379,7 @@ export function PatientDetailsEditor({
           {/* === INSURANCE SUB-TAB (EDIT) === */}
           <TabsContent value="insurance" className="mt-4">
             <Collapsible defaultOpen className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
-              <SectionHeader icon={ShieldCheck} label="Financial Insurance" />
+              <SectionHeader icon={ShieldCheck} label="Insurance" />
               <CollapsibleContent className="p-3">
                 {insuranceCaptured && !formData.employer?.trim() && (
                   <p className="mb-2 text-xs text-destructive">
@@ -2425,7 +2425,7 @@ export function PatientDetailsEditor({
                     />
                   </div>
                   <div className="space-y-1.5 sm:col-span-2">
-                    <Label>Financial Aid Claims Email</Label>
+                    <Label>Provider Claims Email</Label>
                     <Input
                       className="text-sm"
                       type="email"
@@ -3048,7 +3048,7 @@ export function PatientDetailsEditor({
                       onChange={(e) => updateFormData({ reporting_to_email: e.target.value })}
                       placeholder="manager@company.com"
                     />
-                    <p className="text-xs text-muted-foreground">Used for e-mailing of Financial Certificates</p>
+                    <p className="text-xs text-muted-foreground">Used for e-mailing of Advice Letters</p>
                   </div>
                 </div>
               </CollapsibleContent>

@@ -306,7 +306,7 @@ export function SettingsContent() {
                   <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
                     <div className="flex-1 mr-3">
                       <p className="text-sm font-medium text-foreground">Auto-email certificate to employer</p>
-                      <p className="text-sm text-muted-foreground mt-0.5">When your wealth manager saves a financial certificate, it will be sent to your employer.</p>
+                      <p className="text-sm text-muted-foreground mt-0.5">When your wealth manager saves a advice letter, it will be sent to your employer.</p>
                     </div>
                     <Switch checked={(profile as any)?.auto_email_certificate_to_employer || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_certificate_to_employer: c } as any); toast({ title: "Preference updated" }); }} />
                   </div>

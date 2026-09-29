@@ -205,7 +205,7 @@ export function MedicalCertificateEditor({
       onSave({ content });
       toast({
         title: "Certificate Saved",
-        description: "The financial certificate has been saved",
+        description: "The advice letter has been saved",
       });
 
       // Auto-email to employer if patient allows
@@ -259,7 +259,7 @@ export function MedicalCertificateEditor({
   if (showPreview) {
     return (
       <DocumentPreview
-        title="Financial Certificate"
+        title="Advice Letter"
         subtitle={`Patient: ${patientName}`}
         content={generateContent()}
         logoUrl={profile?.logo_url || undefined}
@@ -281,7 +281,7 @@ export function MedicalCertificateEditor({
               <FileText className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-foreground">Financial Certificate</h2>
+              <h2 className="text-lg font-semibold text-foreground">Advice Letter</h2>
               <p className="text-sm text-muted-foreground">Patient: {patientName}</p>
             </div>
           </div>

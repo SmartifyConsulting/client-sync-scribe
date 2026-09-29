@@ -446,7 +446,7 @@ export default function SessionDetail() {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuItem onSelect={() => setShowPrescriptionEditor(true)}><Pill className="mr-2 h-4 w-4" />Prescription</DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setShowInvoiceEditor(true)}><Receipt className="mr-2 h-4 w-4" />Fee statement</DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setShowMedicalCertificateEditor(true)}><FileBadge className="mr-2 h-4 w-4" />Financial Certificate</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setShowMedicalCertificateEditor(true)}><FileBadge className="mr-2 h-4 w-4" />Advice Letter</DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setShowReferralLetterEditor(true)}><FileText className="mr-2 h-4 w-4" />Referral Letter</DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setShowGeneralLetterEditor(true)}><FileEdit className="mr-2 h-4 w-4" />General Letter</DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setShowDrawingPad(true)}><PenTool className="mr-2 h-4 w-4" />Drawing Pad</DropdownMenuItem>
@@ -675,8 +675,8 @@ export default function SessionDetail() {
           onClose={() => setShowMedicalCertificateEditor(false)}
           onSave={() => {
             toast({
-              title: "Financial Certificate created",
-              description: "The financial certificate has been saved.",
+              title: "Advice Letter created",
+              description: "The advice letter has been saved.",
             });
           }}
         />

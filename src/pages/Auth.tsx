@@ -321,7 +321,7 @@ export default function Auth() {
       if (!practiceNumber.trim() || !doctorNumber.trim()) {
         toast({
           title: "Registration details required",
-          description: "Please enter both your Firm Number and your License / Wealth Manager Registration Number to continue.",
+          description: "Please enter both your FSP Number and your License / Wealth Manager Registration Number to continue.",
           variant: "destructive",
         });
         return false;
@@ -778,7 +778,7 @@ export default function Auth() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label htmlFor="practiceNumber">Firm Number <span className="text-destructive">*</span></Label>
+                <Label htmlFor="practiceNumber">FSP Number <span className="text-destructive">*</span></Label>
                 <Input
                   id="practiceNumber"
                   placeholder="e.g. 0123456"

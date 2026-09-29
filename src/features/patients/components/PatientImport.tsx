@@ -641,7 +641,7 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[100px] px-1">DOB</TableHead>
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[65px] px-1">Gender</TableHead>
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[90px] px-1">ID/Passport</TableHead>
-                  <TableHead className="sticky top-0 bg-card z-10 min-w-[100px] px-1">Financial Aid</TableHead>
+                  <TableHead className="sticky top-0 bg-card z-10 min-w-[100px] px-1">Provider</TableHead>
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[90px] px-1">Employer</TableHead>
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[90px] px-1">Allergies</TableHead>
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[100px] px-1">Address</TableHead>

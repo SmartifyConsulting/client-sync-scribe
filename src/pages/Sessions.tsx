@@ -1980,7 +1980,7 @@ export default function Sessions() {
                 <SelectContent>
                   <SelectItem value="prescription">Prescription</SelectItem>
                   <SelectItem value="invoice">Fee statement</SelectItem>
-                  <SelectItem value="medical_certificate">Financial Certificate</SelectItem>
+                  <SelectItem value="medical_certificate">Advice Letter</SelectItem>
                   <SelectItem value="referral_letter">Referral Letter</SelectItem>
                   <SelectItem value="general_letter">General Letter</SelectItem>
                   <SelectItem value="hospital_admission">Hospital Admission</SelectItem>

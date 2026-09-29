@@ -439,7 +439,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
               </Avatar>
               <div className="min-w-0">
                 <p className="font-medium text-foreground truncate">{gpInfo.name}</p>
-                <p className="text-xs text-muted-foreground">General Wealth Manager</p>
+                <p className="text-xs text-muted-foreground">Referring Adviser</p>
               </div>
             </div>
             <Badge

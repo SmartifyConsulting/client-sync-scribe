@@ -579,10 +579,10 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
 
                 {/* Medical Insurance Information */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-foreground border-b pb-2">Financial Insurance Information</h3>
+                  <h3 className="text-sm font-semibold text-foreground border-b pb-2">Insurance Information</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label>Financial Insurance</Label>
+                      <Label>Insurance</Label>
                       <Input
                         placeholder="Insurance provider"
                         value={newPatient.medical_insurance}
@@ -590,7 +590,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       />
                     </div>
                     <div>
-                      <Label>Financial Insurance Product</Label>
+                      <Label>Insurance Product</Label>
                       <Input
                         placeholder="e.g., Executive Plan"
                         value={newPatient.medical_insurance_product}
@@ -598,7 +598,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       />
                     </div>
                     <div>
-                      <Label>Financial Insurance Number</Label>
+                      <Label>Insurance Number</Label>
                       <Input
                         placeholder="Member number"
                         value={newPatient.medical_insurance_number}
@@ -630,7 +630,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                   <h3 className="text-sm font-semibold text-foreground border-b pb-2">Financial Information</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label>General Wealth Manager</Label>
+                      <Label>Referring Adviser</Label>
                       <Input
                         placeholder="GP name"
                         value={newPatient.general_practitioner}
@@ -961,10 +961,10 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <span className="inline-flex items-center justify-center rounded-full bg-red-600 h-4 w-4 p-0.5">
-                                      <img src={chronicIcon} alt="Chronic client" className="h-full w-full object-contain" />
+                                      <img src={chronicIcon} alt="Priority client" className="h-full w-full object-contain" />
                                     </span>
                                   </TooltipTrigger>
-                                  <TooltipContent>Chronic Client</TooltipContent>
+                                  <TooltipContent>Priority Client</TooltipContent>
                                 </Tooltip>
                               </TooltipProvider>
                             )}

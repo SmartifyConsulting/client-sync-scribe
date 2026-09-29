@@ -292,7 +292,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
         if (!opts.silent) {
           toast({
             title: "No Claims Email",
-            description: "Add a Financial Aid Claims Email on the client profile to send claims.",
+            description: "Add a Provider Claims Email on the client profile to send claims.",
             variant: "destructive",
           });
         }
@@ -370,7 +370,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
       if (emailErr) throw emailErr;
 
       toast({
-        title: "Sent to Financial Aid",
+        title: "Sent to Provider",
         description: patientData.email
           ? `Paid invoice emailed to ${patientData.claims_email}, cc ${patientData.email}`
           : `Paid invoice emailed to ${patientData.claims_email}`,
@@ -501,7 +501,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
           if (!patientData?.claims_email) {
             toast({
               title: "No Claims Email",
-              description: "Add a Financial Aid Claims Email on the client profile to enable auto-submit.",
+              description: "Add a Provider Claims Email on the client profile to enable auto-submit.",
             });
           } else if (patientData?.patient_user_id) {
             const { data: patientProfile } = await supabase
@@ -1694,7 +1694,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                               variant="outline"
                               className="gap-1.5 h-8 text-sm"
                               onClick={() => sendPaidInvoiceToMedicalAid(invoice)}
-                              title="Send PAID fee statement to Financial Aid claims email"
+                              title="Send PAID fee statement to Provider claims email"
                             >
                               <Send className="h-3.5 w-3.5" />
                               Send to Medical Aid

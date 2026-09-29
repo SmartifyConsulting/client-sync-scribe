@@ -124,7 +124,7 @@ const DOC_TYPE_CONFIG: Record<
     icon: Receipt,
   },
   medical_certificate: {
-    label: "Financial Certificate",
+    label: "Advice Letter",
     color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
     borderColor: "border-blue-400",
     icon: FileCheck,

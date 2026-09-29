@@ -1426,7 +1426,7 @@ export default function MyPractice() {
                 <AccordionContent className={SECTION_CONTENT_CLASS}>
                   <div className="flex flex-wrap items-end gap-4">
                     <div className="space-y-1.5 w-40">
-                      <Label>Firm Number</Label>
+                      <Label>FSP Number</Label>
                       <Input
                         value={formData.practice_number}
                         onChange={(e) => setFormData({ ...formData, practice_number: e.target.value })}
@@ -1446,7 +1446,7 @@ export default function MyPractice() {
                       <Input
                         value={formData.practice_address}
                         onChange={(e) => setFormData({ ...formData, practice_address: e.target.value })}
-                        placeholder="e.g., 123 Financial Centre, Suite 4, Cape Town"
+                        placeholder="e.g., 123 Office, Suite 4, Cape Town"
                       />
                     </div>
                     <div className="space-y-1.5">
