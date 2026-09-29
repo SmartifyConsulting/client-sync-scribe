@@ -2,7 +2,7 @@
 // All callers import { sendEmail } from "../_shared/email.ts".
 
 const DEFAULT_FROM_EMAIL = "no-reply@holarchealth.com";
-const DEFAULT_FROM_NAME = "Holarc Health";
+const DEFAULT_FROM_NAME = "Indigro";
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 
 export interface EmailAddressInput {
