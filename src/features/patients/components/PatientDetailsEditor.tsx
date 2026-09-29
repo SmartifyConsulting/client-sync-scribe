@@ -2471,6 +2471,23 @@ export function PatientDetailsEditor({
                     </Select>
                   </div>
                   <div className="space-y-1.5">
+                    <Label htmlFor="marital_regime">Marital Regime</Label>
+                    <Select
+                      value={(formData as any).marital_regime || ""}
+                      onValueChange={(value) => updateFormData({ marital_regime: value } as any)}
+                    >
+                      <SelectTrigger id="marital_regime" className="text-sm">
+                        <SelectValue placeholder="Select regime" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="In community of property">In community of property</SelectItem>
+                        <SelectItem value="Out of community with accrual">Out of community with accrual</SelectItem>
+                        <SelectItem value="Out of community without accrual">Out of community without accrual</SelectItem>
+                        <SelectItem value="Not applicable">Not applicable</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
                     <Label htmlFor="preferred_language">Language</Label>
                     <Select
                       value={formData.preferred_language}
@@ -2580,6 +2597,16 @@ export function PatientDetailsEditor({
                       value={formData.occupation}
                       onChange={(e) => updateFormData({ occupation: e.target.value })}
                       placeholder="Job title"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="industry">Industry</Label>
+                    <Input
+                      id="industry"
+                      className="text-sm"
+                      value={(formData as any).industry || ""}
+                      onChange={(e) => updateFormData({ industry: e.target.value } as any)}
+                      placeholder="e.g. Financial services"
                     />
                   </div>
                   <div className="space-y-1.5">
