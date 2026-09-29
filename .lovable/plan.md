@@ -1,35 +1,43 @@
-# Live Workspace (Izenzo style) for Wealth Manager and Client
+# Live Workspace: step list on the left, working window on the right
 
 ## What you will see
-- **Client menu:** a new "Live Workspace" item between My Profile and My Future.
-- **Wealth Manager, on a client record:** the current "Live" and "Workflow" tabs become a single "Live Workspace" tab. The separate Workflow tab goes away, but nothing in it is lost: its map moves into the workspace.
-- **Real time:** both people see the same workspace. When a document is uploaded, a form is signed, or a stage moves on, it updates live for both.
+- **Client record (Wealth Manager):** the "Live" tab is removed. The "Workflow" tab stays, keeps its content, and is renamed **Live Workspace**.
+- **Client menu:** a new "Live Workspace" item between My Profile and My Future. It shows the same screen for the client's own record.
+- **Real time:** both the Wealth Manager and the client see it update live when a step is completed, a document is uploaded or a form is signed.
 
-## Layout (from the Izenzo template, in Holarc colours, rounded shapes)
+## Layout
 ```text
-+-----------------------------------------+---------------------------+
-| WORKFLOW MAP                [MAP|STEPS] | LIVE WORKSPACE  LW-CASE-xx|
-|  1 Client Gateway  ->  2 Portfolio      |  STEP 1 · CLIENT GATEWAY ✓|
-|  6 Issuance            3 Needs Analysis |  STEP 2 · PORTFOLIO    (−)|
-|  5 Presentation  <- 4 Quotes & ROA      |    now / next / waiting / |
-|  [Documents (n)]                        |    blocked items          |
-+-----------------------------------------+---------------------------+
-| [client tab] ........................................ [refresh]     |
-+---------------------------------------------------------------------+
++------------------------------------+-------------------------------+
+| (v) Client Gateway   Completed   v | WORKING WINDOW                |
+| (v) Portfolio        Completed   v | Step 6 · Issuance & Review    |
+| (v) Needs Analysis   Completed   v | Now: Policy schedule to       |
+| (v) Quotes & ROA     Completed   v |      portal and CRM           |
+| (v) Presentation     Completed   v | What is required:             |
+| (6) Issuance & Review [You are here] |  - who does it (System)     |
+|   v INSURER  Accept, decline       |  - what's needed / missing    |
+|   • SYSTEM   Policy schedule  Next |  - documents involved         |
+|   v SYSTEM   Schedule review       |  - what unlocks next          |
+|     CLIENT   Acknowledge renewal   | [action button if it's yours] |
+|   Repeats every 12 months          |                               |
++------------------------------------+-------------------------------+
 ```
-- **Left side:** the workflow map. The 6 existing groups each sit in a white frame with a thin grey border, running round the edge of the map (1 top, 2 and 3 down the right, 4 at the bottom, 5 bottom-left, 6 up the left). Each group's steps are pills inside its frame, joined by fine grey arrows. The MAP | STEPS switch shows either this map or a vertical list of the steps.
-- **Right side:** six stacked stage bars, one per group. Only the current stage is open, and inside it the existing Now, Next, Waiting, Blocked and Completed items are shown, with reasons for anything blocked. Finished stages collapse with a tick.
-- **Documents:** a tile on the map with a count. Clicking it opens the client's documents.
-- **Pulsing:** only the one next action for whoever is looking pulses. It is the Wealth Manager's action on their screen and the client's action on theirs. The client sees a read-only view in a blue accent, with only their own actions available (sign, upload, acknowledge).
-- **Mobile:** the stages stack from 1 to 6 and the stage bars drop below the map.
-- **Bottom bar:** a slim bar with the case tab and a refresh button. The Wealth Manager's bar also has tabs for recently opened clients.
+- **Left:** the existing step accordions, exactly as in your screenshot: a tick circle, icon, "Completed" badge, "You are here" on the current group, and substep rows with role tags (Insurer, System, Client, Advisor). The current substep pulses softly.
+- **Right:** a working window that follows the pulse. When the current step changes, it slides over to explain the new one:
+  - what the step is, in plain language
+  - who needs to act
+  - what is still outstanding or blocking, and why
+  - the related documents
+  - what completing it unlocks
+  - an action button, but only when it is the viewer's own turn (for example "Sign ROA" for the client)
+- **Clicking another step:** clicking any substep on the left shows its explanation in the window. A "Back to current" link returns to the live step.
+- **Client view:** only the client's own actions are clickable, with Wealth Manager and system steps shown for information.
+- **Mobile:** the window drops below the step list.
 
 ## Technical details
-- New `src/features/wealth-workflow/live/`: `LiveWorkspaceShell.tsx` (split grid), `WorkflowCanvas.tsx` (perimeter map + SVG arrows, STEPS view), `GateTray.tsx`, `WorkspaceTaskbar.tsx`, `lexicon.ts` (all labels in one place, wealth wording). It reuses `useWorkflowMap`, `useLiveWorkspace`, `useWorkflowRealtime` and `groups.ts`, so it adds no new data logic, and all stage changes still go through the existing database functions.
-- `PatientProfile.tsx`: remove the `workflow` trigger and content, rename `live` to "Live Workspace", render the new shell. Old `?tab=workflow` links redirect to `live`.
-- Client: a new route `/my-workspace` (added to the shared-dashboard allow-list in AppLayout and to the client guard), and a Sidebar/BottomNav item before My Future. It resolves the client's own record through `useClientWealth` and renders the same shell with `viewer="client"`.
-- Pulse animations (`animate-throb`) are added to tailwind.config using the existing `--primary`, plus a blue counterparty accent token. Semantic tokens only.
-- The Wealth Manager's taskbar tabs use localStorage for now (no new table).
-- The existing `WorkflowMap`, `LiveWorkspace` and `ClientWorkspace` files are kept, not deleted.
-- Check with Playwright at 1280px and 390px, as both the Wealth Manager and Georgia.
-- The answers (6 stages, app colours, rounded, tab on the client record) will be saved to project memory.
+- `PatientProfile.tsx`: remove the `live` trigger and content, rename the `workflow` trigger to "Live Workspace", and point old `?tab=live` links to `workflow`.
+- `WorkflowMap.tsx`: wrap it in a 2-column grid (`lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]`). The existing group cards stay on the left, and `WorkflowGroupCard` gets an `onSelectSubstep` callback and a soft pulse class on the current substep.
+- New `src/features/wealth-workflow/map/WorkingWindow.tsx`: reads the current/selected substep from `useWorkflowMap`, outstanding and blocked items from `useLiveWorkspace`, and documents. The explanation text comes from a new `stepGuidance.ts` map (one entry per substep, in wealth wording). Updates arrive through the existing `useWorkflowRealtime`, with a fade-in animation when the step changes.
+- Pulse: a `throb` keyframe in tailwind.config using `--primary`. Semantic tokens only; rounded shapes; current app colours.
+- Client: a new `/my-workspace` route (added to the AppLayout shared-dashboard allow-list and the client guard), plus a Sidebar/BottomNav item before My Future. It resolves the client's record via `useClientWealth` and renders the same component with `viewer="client"`.
+- `LiveWorkspace.tsx` / `ClientWorkspace.tsx` stay in the code but are no longer shown on the tab. All stage changes still go through the existing database functions.
+- Check with Playwright as the Wealth Manager and as Georgia, at 1280px and 390px.
