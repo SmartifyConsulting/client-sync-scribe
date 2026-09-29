@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
-import capabilitiesAsset from "@/assets/holarc-capabilities-wave.png.asset.json";
 const holarcLogo = holarcLogoAsset.url;
 import { motion } from "framer-motion";
 import {
@@ -26,6 +25,7 @@ import {
   Activity,
   Hospital,
   Siren,
+  ShieldCheck,
   Ambulance,
   Building2,
   Smartphone,
