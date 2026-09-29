@@ -15,7 +15,7 @@ export function useWorkflowRealtime(patientId?: string, workflowId?: string) {
     ch.on("postgres_changes", { event: "*", schema: "public", table: "todos", filter: `patient_id=eq.${patientId}` }, refresh);
     ch.on("postgres_changes", { event: "*", schema: "public", table: "messages", filter: `patient_id=eq.${patientId}` }, refresh);
     if (workflowId) {
-      ["wealth_workflow_transitions", "wealth_recommendations", "wealth_applications", "wealth_compliance_checks"].forEach((t) =>
+      ["wealth_workflow_transitions", "wealth_recommendations", "wealth_applications", "wealth_compliance_checks", "wealth_kyc_checks", "wealth_signed_documents"].forEach((t) =>
         ch.on("postgres_changes", { event: "*", schema: "public", table: t, filter: `workflow_id=eq.${workflowId}` }, refresh),
       );
     }
