@@ -28,4 +28,6 @@
 - [x] PayFast keys saved, sandbox mode
 - [x] Checkout, payment notifications, cancel; Billing tab in My Business
 - [ ] Real plan prices (placeholder R499 Adviser / R1,999 Firm) — waiting on user
-- [ ] Compliance guardrails, FICA file storage, drawn signatures, commission entry (Part A)
+- [x] Compliance guardrails, FICA file storage, drawn signatures, commission entry
+- [x] Plan change cancels old PayFast subscription
+- [x] Client profile: Personal Information / Financial Information (FNA pillars), no header icons
