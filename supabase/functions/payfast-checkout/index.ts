@@ -1,7 +1,7 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from "npm:zod@3";
-import { PF_HOST, PF_MERCHANT_ID, PF_MERCHANT_KEY, signOrdered } from "../_shared/payfast.ts";
+import { PF_HOST, PF_MERCHANT_ID, PF_MERCHANT_KEY, PF_MODE, signApi, signOrdered } from "../_shared/payfast.ts";
 
 const Body = z.object({ pricing_id: z.string().uuid(), return_url: z.string().url() });
 
@@ -21,6 +21,19 @@ Deno.serve(async (req) => {
     const admin = createClient(url, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
     const { data: plan } = await admin.from("pricing_config").select("*").eq("id", parsed.data.pricing_id).maybeSingle();
     if (!plan || plan.currency !== "ZAR") return json({ error: "That plan is not available." }, 400);
+
+    // Cancel any existing PayFast subscription so the client isn't billed twice
+    const { data: existing } = await admin.from("subscriptions").select("id, payfast_token")
+      .eq("user_id", user.id).eq("provider", "payfast").in("status", ["active", "past_due"]);
+    for (const ex of existing ?? []) {
+      if (ex.payfast_token) {
+        const h = { "merchant-id": PF_MERCHANT_ID, version: "v1", timestamp: new Date().toISOString().slice(0, 19) };
+        const r = await fetch(`https://api.payfast.co.za/subscriptions/${ex.payfast_token}/cancel${PF_MODE === "sandbox" ? "?testing=true" : ""}`,
+          { method: "PUT", headers: { ...h, signature: await signApi(h) } });
+        if (!r.ok) { console.error(await r.text()); return json({ error: "Couldn't cancel your current plan. Please try again." }, 502); }
+      }
+      await admin.from("subscriptions").update({ status: "cancelled" }).eq("id", ex.id);
+    }
 
     const { data: sub, error } = await admin.from("subscriptions").insert({
       user_id: user.id, plan_type: plan.role, billing_cycle: plan.billing_cycle, status: "pending",

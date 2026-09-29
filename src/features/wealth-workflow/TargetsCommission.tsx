@@ -30,7 +30,7 @@ export function TargetsCommission() {
     enabled: !!user,
     queryFn: async () => {
       const { data } = await supabase.from("wealth_applications" as any)
-        .select("product, provider, monthly_premium, commission_amount, issued_at")
+        .select("id, product, provider, monthly_premium, commission_amount, issued_at")
         .eq("status", "issued").gte("issued_at", `${year}-01-01`);
       return (data as any[]) ?? [];
     },
@@ -52,6 +52,18 @@ export function TargetsCommission() {
     if (error) return toast({ title: "Targets not saved", description: error.message, variant: "destructive" });
     toast({ title: "Targets saved" });
     qc.invalidateQueries({ queryKey: ["wealth-targets"] });
+  };
+
+  const [edits, setEdits] = useState<Record<string, { premium?: string; commission?: string }>>({});
+  const saveApp = async (a: any) => {
+    const e = edits[a.id] ?? {};
+    const { error } = await supabase.from("wealth_applications" as any).update({
+      monthly_premium: e.premium !== undefined ? Number(e.premium) || null : a.monthly_premium,
+      commission_amount: e.commission !== undefined ? Number(e.commission) || null : a.commission_amount,
+    }).eq("id", a.id);
+    if (error) return toast({ title: "Not saved", description: "You may not have access to this client's policy.", variant: "destructive" });
+    toast({ title: "Policy figures saved" });
+    qc.invalidateQueries({ queryKey: ["wealth-issued"] });
   };
 
   const policies = apps.length;
@@ -79,6 +91,18 @@ export function TargetsCommission() {
           <div key={r.label} className="space-y-1">
             <div className="flex justify-between text-xs"><span className="font-medium">{r.label}</span><span className="text-muted-foreground">{r.show(r.actual)} of {r.show(r.goal)}</span></div>
             <Progress value={r.goal ? Math.min(100, (r.actual / r.goal) * 100) : 0} />
+          </div>
+        ))}
+      </div>
+      <div className="space-y-2">
+        <p className="text-xs font-semibold">Issued policies: enter premium and commission</p>
+        {apps.length === 0 && <p className="text-xs text-muted-foreground">No policies issued yet this year.</p>}
+        {apps.map((a) => (
+          <div key={a.id} className="grid gap-2 sm:grid-cols-[1fr_140px_140px_auto] items-end rounded-lg border p-2">
+            <div className="text-xs"><p className="font-medium">{a.product}</p><p className="text-muted-foreground">{a.provider}{a.issued_at ? ` · ${new Date(a.issued_at).toLocaleDateString("en-ZA")}` : ""}</p></div>
+            <div className="space-y-1"><Label className="text-xs">Premium / month (R)</Label><Input type="number" defaultValue={a.monthly_premium ?? ""} onChange={(e) => setEdits((p) => ({ ...p, [a.id]: { ...p[a.id], premium: e.target.value } }))} /></div>
+            <div className="space-y-1"><Label className="text-xs">Commission (R)</Label><Input type="number" defaultValue={a.commission_amount ?? ""} onChange={(e) => setEdits((p) => ({ ...p, [a.id]: { ...p[a.id], commission: e.target.value } }))} /></div>
+            <Button size="sm" variant="outline" onClick={() => saveApp(a)}>Save</Button>
           </div>
         ))}
       </div>

@@ -2063,6 +2063,53 @@ export type Database = {
         }
         Relationships: []
       }
+      client_financial_profiles: {
+        Row: {
+          assets_liabilities: Json
+          cash_flow: Json
+          created_at: string
+          estate: Json
+          goals_risk: Json
+          investments: Json
+          patient_id: string
+          risk_portfolio: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          assets_liabilities?: Json
+          cash_flow?: Json
+          created_at?: string
+          estate?: Json
+          goals_risk?: Json
+          investments?: Json
+          patient_id: string
+          risk_portfolio?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          assets_liabilities?: Json
+          cash_flow?: Json
+          created_at?: string
+          estate?: Json
+          goals_risk?: Json
+          investments?: Json
+          patient_id?: string
+          risk_portfolio?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_financial_profiles_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: true
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clinical_protocols: {
         Row: {
           applicable_conditions: string[]
@@ -7589,9 +7636,11 @@ export type Database = {
           height_cm: number | null
           id: string
           id_passport_number: string | null
+          industry: string | null
           is_chronic: boolean | null
           is_sample: boolean
           last_name: string | null
+          marital_regime: string | null
           marital_status: string | null
           medical_aid: string | null
           medical_aid_number: string | null
@@ -7654,9 +7703,11 @@ export type Database = {
           height_cm?: number | null
           id?: string
           id_passport_number?: string | null
+          industry?: string | null
           is_chronic?: boolean | null
           is_sample?: boolean
           last_name?: string | null
+          marital_regime?: string | null
           marital_status?: string | null
           medical_aid?: string | null
           medical_aid_number?: string | null
@@ -7719,9 +7770,11 @@ export type Database = {
           height_cm?: number | null
           id?: string
           id_passport_number?: string | null
+          industry?: string | null
           is_chronic?: boolean | null
           is_sample?: boolean
           last_name?: string | null
+          marital_regime?: string | null
           marital_status?: string | null
           medical_aid?: string | null
           medical_aid_number?: string | null
