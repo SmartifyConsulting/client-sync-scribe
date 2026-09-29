@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Loader2, UserPlus, Copy, Check, ArrowLeft, User, Building2, Siren, Pill, ShieldCheck } from "lucide-react";
+import { Loader2, UserPlus, Copy, Check, ArrowLeft, User, Building2, Siren, Wallet as Pill, ShieldCheck } from "lucide-react";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";

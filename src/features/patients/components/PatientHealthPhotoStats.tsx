@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Camera, Dumbbell, Utensils, Pill, Calendar, Award, Loader2, Lock } from "lucide-react";
+import { Camera, Dumbbell, Utensils, Wallet as Pill, Calendar, Award, Loader2, Lock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, Pencil, Plus, Sparkles, Trash2, Utensils, Dumbbell, Pill } from "lucide-react";
+import { Check, Pencil, Plus, Sparkles, Trash2, Utensils, Dumbbell, Wallet as Pill } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

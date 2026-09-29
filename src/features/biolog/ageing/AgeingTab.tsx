@@ -2,7 +2,7 @@ import { useMemo, useState, Fragment } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Info, Plus, Dna, Activity, FileText } from "lucide-react";
+import { Info, Plus, PieChart as Dna, TrendingUp as Activity, FileText } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { useBiologEntries } from "../useBiolog";
 import { useAgeingAssessments, useAgeingConfig, useOwnerDob, signedReportUrl } from "./useAgeing";

@@ -1,4 +1,4 @@
-import { Receipt, Pill, CalendarDays, Award, ArrowUpRight, FlaskConical, FileText, Phone, Mail, Users, CreditCard, Hospital, Bell, AlertTriangle, CheckSquare } from "lucide-react";
+import { Receipt, Wallet as Pill, CalendarDays, Award, ArrowUpRight, FlaskConical, FileText, Phone, Mail, Users, CreditCard, Landmark as Hospital, Bell, AlertTriangle, CheckSquare } from "lucide-react";
 
 const ITEMS = [
   { Icon: Receipt, label: "Fee statement" },

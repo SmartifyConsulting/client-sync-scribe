@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { format, parseISO } from "date-fns";
-import { CalendarDays, Loader2, Mic, Pill, Plus, Settings2, Trash2, Utensils, X, Dumbbell } from "lucide-react";
+import { CalendarDays, Loader2, Mic, Wallet as Pill, Plus, Settings2, Trash2, Utensils, X, Dumbbell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";

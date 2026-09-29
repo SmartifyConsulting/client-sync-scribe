@@ -11,7 +11,7 @@ import {
   X,
   Calendar as CalendarIcon,
   FileText,
-  Pill,
+  Wallet as Pill,
 } from "lucide-react";
 
 const GRANTED_ACCESS = [

@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Loader2, Stethoscope, Search, Lock, UserMinus, MoreVertical, Building2, Ambulance, Star, EyeOff, Eye, Info } from "lucide-react";
+import { Loader2, Briefcase as Stethoscope, Search, Lock, UserMinus, MoreVertical, Building2, Building2 as Ambulance, Star, EyeOff, Eye, Info } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";

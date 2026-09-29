@@ -3,7 +3,7 @@ import {
   X,
   Save,
   Loader2,
-  Pill,
+  Wallet as Pill,
   AlertTriangle,
   CheckCircle,
   Shield,

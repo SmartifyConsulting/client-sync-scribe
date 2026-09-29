@@ -23,7 +23,7 @@ import {
   Volume2,
   VolumeX,
   Calendar,
-  Pill,
+  Wallet as Pill,
   Receipt,
   Users,
   ChevronsUpDown,

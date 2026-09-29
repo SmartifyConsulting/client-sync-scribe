@@ -4,7 +4,7 @@ import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
 const holarcLogo = holarcLogoAsset.url;
 import {
   Mail, Lock, Loader2, User, Building2, MapPin, Plus, Trash2, Phone,
-  Stethoscope, PenTool, UserCircle, Camera, ChevronLeft, ChevronRight, Globe,
+  Briefcase as Stethoscope, PenTool, UserCircle, Camera, ChevronLeft, ChevronRight, Globe,
   Eye, EyeOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";

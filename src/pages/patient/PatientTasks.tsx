@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
-import { CheckSquare, Loader2, Clock, CheckCircle2, Video, Check, Pill, Square, Play, Mic, MicOff, Send, Search } from "lucide-react";
+import { CheckSquare, Loader2, Clock, CheckCircle2, Video, Check, Wallet as Pill, Square, Play, Mic, MicOff, Send, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";

@@ -10,7 +10,7 @@ import {
   Eye,
   Calendar,
   FileText,
-  Pill,
+  Wallet as Pill,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";

@@ -6,9 +6,9 @@ import {
   Eye,
   FileText,
   Receipt,
-  Pill,
+  Wallet as Pill,
   MoreHorizontal,
-  Hospital,
+  Landmark as Hospital,
 } from "lucide-react";
 import {
   Table,

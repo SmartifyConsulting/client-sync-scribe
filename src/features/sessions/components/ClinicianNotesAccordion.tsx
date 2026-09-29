@@ -1,4 +1,4 @@
-import { AlertTriangle, Brain, ListChecks, Stethoscope } from "lucide-react";
+import { AlertTriangle, Brain, ListChecks, Briefcase as Stethoscope } from "lucide-react";
 import {
   Accordion,
   AccordionContent,

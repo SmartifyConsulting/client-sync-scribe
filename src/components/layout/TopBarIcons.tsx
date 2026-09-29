@@ -1,4 +1,4 @@
-import { Bell, Mic, User, Settings, LogOut, Award, Share2, Stethoscope, HeartPulse, Calendar as CalendarIcon, Gift, Bug, Scale, UserCog, ShieldCheck, Loader2 } from "lucide-react";
+import { Bell, Mic, User, Settings, LogOut, Award, Share2, Briefcase as Stethoscope, LineChart as HeartPulse, Calendar as CalendarIcon, Gift, Bug, Scale, UserCog, ShieldCheck, Loader2 } from "lucide-react";
 import { TEST_PROFILES, ADMIN_EMAIL } from "./testProfiles";
 import { useImpersonate } from "./useImpersonate";
 import { useEffect, useState } from "react";

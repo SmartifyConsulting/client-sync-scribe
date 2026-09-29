@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Building2, Plus, X, Hospital, ChevronsUpDown } from "lucide-react";
+import { Building2, Plus, X, Landmark as Hospital, ChevronsUpDown } from "lucide-react";
 import { toast } from "sonner";
 import { toastError } from "@/lib/userMessage";
 

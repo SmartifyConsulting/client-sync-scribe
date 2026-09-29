@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Camera, Dumbbell, Utensils, Pill, Trash2, Calendar, Award, Loader2, Image } from "lucide-react";
+import { Camera, Dumbbell, Utensils, Wallet as Pill, Trash2, Calendar, Award, Loader2, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

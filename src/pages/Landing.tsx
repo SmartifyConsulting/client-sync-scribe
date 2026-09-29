@@ -5,7 +5,7 @@ import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
 const holarcLogo = holarcLogoAsset.url;
 import { motion } from "framer-motion";
 import {
-  Stethoscope,
+  Briefcase as Stethoscope,
   UserCircle,
   Calendar,
   FileText,
@@ -19,14 +19,14 @@ import {
   Mic,
   Video,
   Gift,
-  Pill,
+  Wallet as Pill,
   ClipboardList,
   Sparkles,
-  Activity,
-  Hospital,
+  TrendingUp as Activity,
+  Landmark as Hospital,
   Siren,
   ShieldCheck,
-  Ambulance,
+  Building2 as Ambulance,
   Building2,
   Smartphone,
   Apple,

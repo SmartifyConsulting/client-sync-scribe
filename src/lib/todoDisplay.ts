@@ -1,6 +1,6 @@
 import {
   Receipt,
-  Pill,
+  Wallet as Pill,
   CalendarDays,
   Phone,
   FileText,
@@ -10,7 +10,7 @@ import {
   Mail,
   Users,
   CreditCard,
-  Hospital,
+  Landmark as Hospital,
   Bell,
   AlertTriangle,
   CheckSquare,

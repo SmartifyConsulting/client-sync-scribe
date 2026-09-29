@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Loader2, Sparkles, Pill, HeartPulse, RefreshCw, Activity, AlertTriangle, Check, X, ChevronDown, ChevronRight, Flame, PartyPopper, Droplets, ShieldAlert, Phone, Mail } from "lucide-react";
+import { Loader2, Sparkles, Wallet as Pill, LineChart as HeartPulse, RefreshCw, TrendingUp as Activity, AlertTriangle, Check, X, ChevronDown, ChevronRight, Flame, PartyPopper, Droplets, ShieldAlert, Phone, Mail } from "lucide-react";
 import { DiscPersonalityCard } from "@/features/patients/components/DiscPersonalityCard";
 import { useV2Demo } from "@/hooks/useV2Demo";
 import { RelationshipInsightCard } from "@/features/patients/components/RelationshipInsightCard";

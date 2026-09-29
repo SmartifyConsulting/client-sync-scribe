@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Pill, Video, Flame, Check, Clock, AlertCircle, Loader2, Square, Camera, RefreshCw, Sparkles, Info } from "lucide-react";
+import { Wallet as Pill, Video, Flame, Check, Clock, AlertCircle, Loader2, Square, Camera, RefreshCw, Sparkles, Info } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

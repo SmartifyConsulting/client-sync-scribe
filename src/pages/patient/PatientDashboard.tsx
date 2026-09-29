@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Calendar, FileText, Clock, User, Loader2, Pill, ListChecks, ArrowRight, Info, Sparkles, Building2, Receipt, Star, Camera, Trophy, Heart, Mic } from "lucide-react";
+import { Calendar, FileText, Clock, User, Loader2, Wallet as Pill, ListChecks, ArrowRight, Info, Sparkles, Building2, Receipt, Star, Camera, Trophy, Heart, Mic } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
