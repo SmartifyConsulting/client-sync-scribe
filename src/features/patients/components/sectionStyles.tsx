@@ -37,7 +37,7 @@ export const SectionHeader = ({
         titleClassName
       )}
     >
-      <Icon className="h-3.5 w-3.5 text-white" /> {label}
+      {label}
     </h3>
     <div className="flex items-center gap-2">
       {extra}
