@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Home, LifeBuoy } from "lucide-react";
-import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
+import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
 const holarcLogo = holarcLogoAsset.url;
 
 const NotFound = () => {

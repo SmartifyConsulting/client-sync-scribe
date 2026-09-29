@@ -7,7 +7,7 @@ import { Sidebar } from "./Sidebar";
 import { AnimatePresence } from "framer-motion";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { SubscriptionGateModal } from "@/components/auth/SubscriptionGateModal";
-import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
+import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
 const holarcLogo = holarcLogoAsset.url;
 import { TopBarIcons } from "./TopBarIcons";
 import { useTranslation } from "react-i18next";

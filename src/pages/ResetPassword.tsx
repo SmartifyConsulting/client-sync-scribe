@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
+import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
 const holarcLogo = holarcLogoAsset.url;
 import { Lock, Loader2, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";

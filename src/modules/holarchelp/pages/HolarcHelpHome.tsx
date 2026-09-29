@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Loader2, MapPin } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
+import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
 import { triggerEmergencySOS, flushPendingSOS } from "../services/emergencyService";
 
 const logo = holarcLogoAsset.url;

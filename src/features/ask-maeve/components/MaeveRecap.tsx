@@ -8,7 +8,7 @@ import { useMaeveSession } from "../hooks/useMaeveSession";
 import { useMaeveVoice } from "../hooks/useMaeveVoice";
 import { CLIENT_FALLBACK, looksLikeAdvice } from "../lib/suggestionDetector";
 import { SessionTitleEditor } from "./SessionTitleEditor";
-import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
+import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
 
 const logo = holarcLogoAsset.url;
 
