@@ -183,8 +183,8 @@ function RoleBasedRedirect() {
 
 function WealthRouteGuard() {
   const loc = useLocation();
-  const { isAdmin } = useIsAdmin();
-  if (!isAdmin && isWealthHidden(loc.pathname)) return <Navigate to="/dashboard" replace />;
+  const { isAdmin, isLoading } = useIsAdmin();
+  if (!isLoading && !isAdmin && isWealthHidden(loc.pathname)) return <Navigate to="/dashboard" replace />;
   return null;
 }
 
