@@ -72,7 +72,7 @@ export function FinancialInformation({ patientId }: { patientId: string }) {
   });
   const issued = useQuery({
     queryKey: ["client-issued-policies", patientId],
-    queryFn: async () => (await (supabase as any).from("wealth_applications").select("id,product,insurer,cover_amount,monthly_premium,status").eq("patient_id", patientId).eq("status", "issued")).data ?? [],
+    queryFn: async () => (await (supabase as any).from("wealth_applications").select("id,product,provider,monthly_premium,status,wealth_workflows!inner(patient_id)").eq("wealth_workflows.patient_id", patientId).eq("status", "issued")).data ?? [],
   });
   const [data, setData] = useState<Record<string, any>>({});
   const [saving, setSaving] = useState<string | null>(null);
@@ -163,7 +163,7 @@ export function FinancialInformation({ patientId }: { patientId: string }) {
                 <div className="text-sm space-y-1">
                   <p className="font-medium text-primary-dark">Issued through Holarc Wealth</p>
                   {(issued.data as any[]).map((a) => (
-                    <p key={a.id} className="text-muted-foreground">{a.product} · {a.insurer}{a.cover_amount ? ` · ${zar(num(a.cover_amount))}` : ""}{a.monthly_premium ? ` · ${zar(num(a.monthly_premium))}/m` : ""}</p>
+                    <p key={a.id} className="text-muted-foreground">{a.product} · {a.provider}{a.monthly_premium ? ` · ${zar(num(a.monthly_premium))}/m` : ""}</p>
                   ))}
                 </div>
               )}
