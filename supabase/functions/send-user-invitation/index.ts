@@ -169,7 +169,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send email
     const appUrl = Deno.env.get("APP_URL") || "https://holarc.health";
     const senderName = senderProfile?.full_name || "A Holarc user";
-    const senderRole = senderProfile?.role === "doctor" ? "healthcare provider" : "user";
+    const senderRole = senderProfile?.role === "doctor" ? "Wealth Manager" : "user";
 
     const emailHtml = finalRecipientId && !isPracticePartner ? `
       <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
