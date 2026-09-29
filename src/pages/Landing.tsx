@@ -241,7 +241,7 @@ export default function Landing() {
                     {t("landing.features.roundTableDescription")}
                   </p>
                   <div className="mt-3 flex -space-x-1.5">
-                    {["bg-primary", "bg-primary-dark", "bg-muted-foreground", "bg-teal-500"].map((c, i) => (
+                    {["bg-primary", "bg-primary-dark", "bg-muted-foreground", "bg-accent0"].map((c, i) => (
                       <span key={i} className={`h-5 w-5 rounded-full border-2 border-background ${c}`} />
                     ))}
                   </div>
