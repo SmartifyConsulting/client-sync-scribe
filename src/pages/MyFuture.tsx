@@ -46,6 +46,8 @@ function Row({ cells }: { cells: React.ReactNode[] }) {
 
 export default function MyFuture() {
   const { user } = useAuth();
+  const [params, setParams] = useSearchParams();
+  const tab = params.get("tab") || "cover";
   const qc = useQueryClient();
   const { data, isLoading } = useClientWealth();
   const [claimType, setClaimType] = useState("");
