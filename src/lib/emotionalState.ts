@@ -35,7 +35,7 @@ export const EMOTIONAL_HEADLINE: Record<EmotionalState, string> = {
 
 /** The second sentence of the greeting, chosen from the patient's real state. */
 export const GREETING_LINE: Record<EmotionalState, string> = {
-  good: "You're doing well. Nothing needs your attention right now.",
+  good: "",
   stable: "Things look steady. Here's what matters today.",
   mixed: "A few things are changing. Here's what matters today.",
   catchup: "You've got a few things happening today. We'll keep them together for you.",

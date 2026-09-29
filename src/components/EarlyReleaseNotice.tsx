@@ -15,6 +15,8 @@ const holarcLogo = holarcLogoAsset.url;
 
 const STORAGE_PREFIX = "holarc_early_release_seen_";
 
+const SHOW_BETA_NOTICE = false;
+
 export function EarlyReleaseNotice() {
   const { user, loading } = useAuth();
   const { t } = useTranslation();
@@ -40,7 +42,7 @@ export function EarlyReleaseNotice() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
+    <Dialog open={SHOW_BETA_NOTICE && open} onOpenChange={(o) => !o && handleClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <div className="mx-auto mb-2 flex items-center gap-2">
