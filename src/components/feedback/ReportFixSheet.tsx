@@ -29,7 +29,7 @@ const STATUS_META: Record<ReportStatus, { className: string }> = {
   "Logged": { className: "bg-muted text-muted-foreground border-border" },
   "In Process": { className: "bg-amber-500/15 text-amber-700 border-amber-500/30" },
   "Review": { className: "bg-blue-500/15 text-blue-700 border-blue-500/30" },
-  "Closed": { className: "bg-green-500/15 text-green-700 border-green-500/30" },
+  "Closed": { className: "bg-sky-500/15 text-primary border-primary/40" },
 };
 
 interface ReportFixSheetProps {
@@ -39,7 +39,7 @@ interface ReportFixSheetProps {
 
 const TYPE_META: Record<ReportType, { label: string; icon: typeof Bug; border: string; chip: string; fill: string }> = {
   bug: { label: "Bug", icon: Bug, border: "border-l-destructive", chip: "bg-destructive/10 text-destructive", fill: "bg-destructive hover:bg-destructive/90" },
-  fix: { label: "Fix", icon: Wrench, border: "border-l-primary", chip: "bg-primary text-primary", fill: "bg-primary hover:bg-primary/90" },
+  fix: { label: "Fix", icon: Wrench, border: "border-l-primary", chip: "bg-primary text-primary", fill: "bg-primary hover:bg-primary-dark/90" },
   nice_to_have: { label: "Nice-to-have", icon: Sparkles, border: "border-l-amber-500", chip: "bg-amber-500/10 text-amber-700", fill: "bg-amber-500 hover:bg-amber-600" },
 };
 

@@ -134,8 +134,8 @@ function DocStepDialog({
           </div>
         ) : anim === "sent" || anim === "saved" ? (
           <div className="flex flex-col items-center justify-center py-14 gap-3 animate-scale-in">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-              <Check className="h-6 w-6 text-emerald-600" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-sky-50 dark:bg-primary/15">
+              <Check className="h-6 w-6 text-primary" />
             </div>
             <p className="text-sm font-medium text-foreground">
               {anim === "sent" ? (stepType === "invoice" ? "Invoice sent" : "Sent") : "Saved"}

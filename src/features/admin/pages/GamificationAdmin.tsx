@@ -523,7 +523,7 @@ export default function GamificationAdmin() {
                             onChange={(e) => setEditValues({ ...editValues, lollipops_awarded: parseInt(e.target.value) || 1 })}
                           />
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-emerald-600 font-semibold">
+                          <span className="inline-flex items-center gap-1 text-primary font-semibold">
                             {config.lollipops_awarded} <img src={vulaSymbol} alt="Vula" className="h-4 w-4 inline object-contain" />
                           </span>
                         )}
@@ -683,7 +683,7 @@ export default function GamificationAdmin() {
                           {editingAdherenceId === config.id ? (
                             <Input type="number" min={1} className="w-20" value={editAdherenceValues.lollipops_awarded} onChange={(e) => setEditAdherenceValues({ ...editAdherenceValues, lollipops_awarded: parseInt(e.target.value) || 1 })} />
                           ) : (
-                            <span className="inline-flex items-center gap-1 text-emerald-600 font-semibold">
+                            <span className="inline-flex items-center gap-1 text-primary font-semibold">
                               {config.lollipops_awarded} <img src={vulaSymbol} alt="Vula" className="h-4 w-4 inline object-contain" />
                             </span>
                           )}
@@ -865,7 +865,7 @@ export default function GamificationAdmin() {
                             onChange={(e) => setEditStreakValues({ ...editStreakValues, lollipops_awarded: parseInt(e.target.value) || 1 })}
                           />
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-emerald-600 font-semibold">
+                          <span className="inline-flex items-center gap-1 text-primary font-semibold">
                             {config.lollipops_awarded} <img src={vulaSymbol} alt="Vula" className="h-4 w-4 inline object-contain" />
                           </span>
                         )}

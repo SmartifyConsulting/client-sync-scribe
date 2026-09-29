@@ -72,7 +72,7 @@ export default function ProviderApprovalAction() {
           )}
           {state.kind === "success" && state.action === "approve" && (
             <>
-              <CheckCircle2 className="h-12 w-12 mx-auto text-emerald-600" />
+              <CheckCircle2 className="h-12 w-12 mx-auto text-primary" />
               <h1 className="text-xl font-semibold">{t('admin.approval.approved')}</h1>
               <p className="text-muted-foreground">
                 {state.orgName ?? t('admin.approval.provider')} {t('admin.approval.approvedMessage')}

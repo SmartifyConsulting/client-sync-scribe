@@ -800,7 +800,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
               "flex-1 min-w-0 h-7 rounded-lg text-xs font-semibold transition-colors border",
               selectedLetter === null
                 ? "bg-primary text-primary-foreground border-primary"
-                : "bg-transparent text-foreground border-neutral-500 hover:bg-primary/10"
+                : "bg-transparent text-foreground border-neutral-500 hover:bg-primary-dark/10"
             )}
           >
             All
@@ -820,7 +820,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                   hasPatients
                     ? selectedLetter === letter
                       ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-transparent text-foreground border-neutral-500 hover:bg-primary/10"
+                      : "bg-transparent text-foreground border-neutral-500 hover:bg-primary-dark/10"
                     : "bg-transparent text-muted-foreground/40 border-neutral-400 cursor-default"
                 )}
               >
@@ -870,7 +870,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                           <div className="flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs bg-[#E01837] text-white">
                             ME
                           </div>
-                          <div className={cn("h-2 w-2 rounded-full flex-shrink-0", mePatient.status === "active" ? "bg-emerald-500" : "bg-red-400")} />
+                          <div className={cn("h-2 w-2 rounded-full flex-shrink-0", mePatient.status === "active" ? "bg-sky-500" : "bg-red-400")} />
                           <span className="font-medium text-xs text-foreground group-hover:text-[#E01837] dark:group-hover:text-red-400 transition-colors whitespace-nowrap">
                             {mePatient.name.includes(',') ? mePatient.name : (() => {
                               const parts = mePatient.name.trim().split(/\s+/);
@@ -955,7 +955,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                             )}>
                               {patient.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                             </div>
-                            <div className={cn("h-2 w-2 rounded-full flex-shrink-0", patient.status === "active" ? "bg-emerald-500" : "bg-red-400")} />
+                            <div className={cn("h-2 w-2 rounded-full flex-shrink-0", patient.status === "active" ? "bg-sky-500" : "bg-red-400")} />
                             {patient.is_chronic && (
                               <TooltipProvider>
                                 <Tooltip>

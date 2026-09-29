@@ -21,7 +21,7 @@ interface PhotoStat {
 
 const CATEGORY_CONFIG = {
   gym: { label: 'Gym', icon: Dumbbell, color: 'bg-blue-500', textColor: 'text-blue-600' },
-  healthy_meal: { label: 'Meals', icon: Utensils, color: 'bg-green-500', textColor: 'text-green-600' },
+  healthy_meal: { label: 'Meals', icon: Utensils, color: 'bg-sky-500', textColor: 'text-primary' },
   medication: { label: 'Medication', icon: Pill, color: 'bg-purple-500', textColor: 'text-purple-600' },
 };
 
@@ -139,8 +139,8 @@ export function PatientHealthPhotoStats({ patientId }: PatientHealthPhotoStatsPr
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
-            <Utensils className="h-5 w-5 mx-auto mb-2 text-green-600" />
-            <p className="text-2xl font-bold text-green-600">{totals.healthy_meal}</p>
+            <Utensils className="h-5 w-5 mx-auto mb-2 text-primary" />
+            <p className="text-2xl font-bold text-primary">{totals.healthy_meal}</p>
             <p className="text-xs text-muted-foreground">Healthy Meals</p>
           </CardContent>
         </Card>
@@ -204,9 +204,9 @@ export function PatientHealthPhotoStats({ patientId }: PatientHealthPhotoStatsPr
                         {stat.gym} gym
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 p-2 rounded bg-green-50 dark:bg-green-950/30">
-                      <Utensils className="h-4 w-4 text-green-600" />
-                      <span className="text-sm font-medium text-green-700 dark:text-green-400">
+                    <div className="flex items-center gap-2 p-2 rounded bg-sky-50 dark:bg-primary/15">
+                      <Utensils className="h-4 w-4 text-primary" />
+                      <span className="text-sm font-medium text-primary dark:text-primary">
                         {stat.healthy_meal} meals
                       </span>
                     </div>

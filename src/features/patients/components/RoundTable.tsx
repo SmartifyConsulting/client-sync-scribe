@@ -35,7 +35,7 @@ const BUBBLE_TONES = [
   { bubble: "bg-amber-500/10 text-foreground", avatar: "bg-amber-500/20 text-amber-700" },
   { bubble: "bg-violet-500/10 text-foreground", avatar: "bg-violet-500/20 text-violet-700" },
   { bubble: "bg-slate-500/10 text-foreground", avatar: "bg-slate-500/20 text-slate-700" },
-  { bubble: "bg-emerald-500/10 text-foreground", avatar: "bg-emerald-500/20 text-emerald-700" },
+  { bubble: "bg-sky-500/10 text-foreground", avatar: "bg-sky-500/20 text-primary" },
 ];
 
 function bubbleTone(doctorId: string) {
@@ -211,7 +211,7 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
             <h3 className="text-sm font-semibold">Round Table — {patientName}</h3>
           </div>
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
-            <Circle className="h-2 w-2 fill-emerald-500 text-emerald-500" />
+            <Circle className="h-2 w-2 fill-primary text-primary" />
             {onlineCount} online
           </div>
         </div>
@@ -321,7 +321,7 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
                           >
                             <div className="mb-0.5 flex items-center gap-1">
                               <span className="text-xs font-semibold">{m.doctor_name}</span>
-                              {onlineDoctors[m.doctor_id] && <Circle className="h-1.5 w-1.5 fill-emerald-500 text-emerald-500" />}
+                              {onlineDoctors[m.doctor_id] && <Circle className="h-1.5 w-1.5 fill-primary text-primary" />}
                               <span className="ml-auto pl-2 text-[10px] opacity-70">
                                 {format(new Date(m.created_at), "MMM d, h:mm a")}
                                 {m.edited_at ? " · edited" : ""}

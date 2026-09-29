@@ -56,9 +56,9 @@ export function SuccessCelebration({
       <DialogContent className="max-w-sm text-center py-8">
         <div className="flex flex-col items-center gap-4">
           <div
-            className="h-20 w-20 rounded-full bg-green-500/15 flex items-center justify-center animate-in zoom-in-50 duration-500"
+            className="h-20 w-20 rounded-full bg-sky-500/15 flex items-center justify-center animate-in zoom-in-50 duration-500"
           >
-            <Check className="h-10 w-10 text-green-600" strokeWidth={3} />
+            <Check className="h-10 w-10 text-primary" strokeWidth={3} />
           </div>
           <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-500 to-teal-500 bg-clip-text text-transparent">
             Great job!

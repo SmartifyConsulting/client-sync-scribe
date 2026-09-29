@@ -546,8 +546,8 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
   return (
     <>
       <div className={`flex items-center gap-2 px-1 py-2 ${isCompleted ? "opacity-60" : ""}`}>
-        <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${isCompleted ? "bg-green-100 dark:bg-green-900/30" : "bg-primary/10"}`}>
-          {isCompleted ? <CheckCircle2 className="h-3.5 w-3.5 text-green-600" /> : <CheckSquare className="h-3.5 w-3.5 text-primary" />}
+        <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${isCompleted ? "bg-sky-50 dark:bg-primary/15" : "bg-primary/10"}`}>
+          {isCompleted ? <CheckCircle2 className="h-3.5 w-3.5 text-primary" /> : <CheckSquare className="h-3.5 w-3.5 text-primary" />}
         </div>
         <span
           className={`flex-1 min-w-0 truncate text-sm font-medium ${isCompleted ? "line-through text-muted-foreground" : "text-foreground"}`}

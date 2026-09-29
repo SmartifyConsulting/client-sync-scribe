@@ -197,7 +197,7 @@ export function InviteDoctorDialog({
         <div className="grid gap-3 py-2">
           {/* Selected Doctor Info */}
           {prefillDoctorName && (
-            <div className="flex items-center gap-3 p-3 rounded-lg border border-green-500 bg-green-50/30">
+            <div className="flex items-center gap-3 p-3 rounded-lg border border-primary/40 bg-sky-50/30">
               <Avatar className="h-10 w-10">
                 {prefillAvatarUrl && <AvatarImage src={prefillAvatarUrl} alt={prefillDoctorName} />}
                 <AvatarFallback className="text-xs font-semibold">

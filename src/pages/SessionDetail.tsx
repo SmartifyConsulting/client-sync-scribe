@@ -378,7 +378,7 @@ export default function SessionDetail() {
               <span
                 className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                   session.status === "completed"
-                    ? "bg-green-500/15 text-green-700 dark:text-green-400"
+                    ? "bg-sky-500/15 text-primary dark:text-primary"
                     : "bg-amber-500/15 text-amber-700 dark:text-amber-400"
                 }`}
               >
@@ -437,7 +437,7 @@ export default function SessionDetail() {
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="inline-flex h-9 items-center justify-between gap-2 rounded-md border border-primary bg-primary px-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+                className="inline-flex h-9 items-center justify-between gap-2 rounded-md border border-primary bg-primary px-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary-dark/90"
               >
                 Quick Actions
                 <ChevronDown className="h-4 w-4 opacity-80" />
@@ -606,7 +606,7 @@ export default function SessionDetail() {
                 <Button
                   size="icon"
                   variant="ghost"
-                  className={`h-6 w-6 ${doc.email_sent_at ? 'text-muted-foreground' : 'text-green-600 hover:text-green-700'}`}
+                  className={`h-6 w-6 ${doc.email_sent_at ? 'text-muted-foreground' : 'text-primary hover:text-primary'}`}
                   disabled={!!doc.email_sent_at || sendingDocId === doc.id}
                   onClick={() => handleSendDocument(doc)}
                 >

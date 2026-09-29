@@ -215,7 +215,7 @@ export function RateNurseControl({ admissionId, recordTable, recordId, nurseId, 
 
       {rating !== null && ratingRowId && !showComment && (
         awarded ? (
-          <p className="flex items-center gap-1 text-xs font-medium text-green-600 pl-1">
+          <p className="flex items-center gap-1 text-xs font-medium text-primary pl-1">
             <Check className="h-3 w-3" /> Awarded {rating} Vulas to {nurseName || "this nurse"}
           </p>
         ) : !awardDismissed ? (
@@ -225,7 +225,7 @@ export function RateNurseControl({ admissionId, recordTable, recordId, nurseId, 
               type="button"
               size="sm"
               variant="outline"
-              className="h-7 text-xs gap-1 border-primary/40 text-primary hover:bg-primary/10"
+              className="h-7 text-xs gap-1 border-primary/40 text-primary hover:bg-primary-dark/10"
               onClick={awardVulas}
               disabled={awarding}
             >

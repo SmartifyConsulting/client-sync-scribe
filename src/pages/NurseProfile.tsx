@@ -51,7 +51,7 @@ function expiryStatus(date?: string | null): { label: string; className: string 
   if (d === null) return { label: "NOT RECORDED", className: "bg-neutral-200 text-neutral-700" };
   if (d < 0) return { label: "EXPIRED", className: "bg-red-100 text-red-800 border border-red-300" };
   if (d <= 90) return { label: "EXPIRING SOON", className: "bg-amber-100 text-amber-900 border border-amber-300" };
-  return { label: "ACTIVE", className: "bg-emerald-100 text-emerald-800 border border-emerald-300" };
+  return { label: "ACTIVE", className: "bg-sky-50 text-primary border border-primary/40" };
 }
 
 function certStatus(date?: string | null) {
@@ -62,7 +62,7 @@ function certStatus(date?: string | null) {
 function permissionPill(status: string) {
   switch (status) {
     case "authorised":
-      return { label: "AUTHORISED", className: "bg-emerald-100 text-emerald-800 border border-emerald-300" };
+      return { label: "AUTHORISED", className: "bg-sky-50 text-primary border border-primary/40" };
     case "requires_supervision":
       return { label: "REQUIRES SUPERVISION", className: "bg-amber-100 text-amber-900 border border-amber-300" };
     default:
@@ -197,8 +197,8 @@ export default function NurseProfile() {
               {assignment?.wardName ? ` · ${assignment.wardName}` : ""}
               {assignment?.hospitalName ? ` · ${assignment.hospitalName}` : ""}
             </p>
-            <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" /> Active
+            <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-primary">
+              <span className="h-2 w-2 rounded-full bg-sky-500" /> Active
             </p>
           </div>
           {saving && <Loader2 className="ml-auto h-4 w-4 animate-spin text-muted-foreground" />}

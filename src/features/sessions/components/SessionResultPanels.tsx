@@ -191,7 +191,7 @@ export function SessionResultPanels({
           </div>
           {actionPoints.length > 0 && showTodoHint && (
             <div className="mt-2 pt-2 border-t border-border">
-              <p className="text-xs text-green-600 flex items-center gap-1">
+              <p className="text-xs text-primary flex items-center gap-1">
                 <CheckCircle className="h-4 w-4" />
                 Added to To-Do List
               </p>

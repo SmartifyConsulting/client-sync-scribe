@@ -78,7 +78,7 @@ export function SessionGeneratedDocuments({
                   )}
                 </div>
                 {doc.sent && (
-                  <Badge variant="secondary" className="text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                  <Badge variant="secondary" className="text-[10px] bg-sky-50 text-primary dark:bg-primary/15 dark:text-primary">
                     Sent
                   </Badge>
                 )}

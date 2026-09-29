@@ -566,7 +566,7 @@ function AdmissionDetail({
                     <div key={m.id} className="flex items-center gap-2 text-xs p-2 rounded bg-muted/40">
                       <Badge variant="outline" className="text-xs capitalize shrink-0">{m.meal_slot}</Badge>
                       <span className="text-muted-foreground shrink-0">{format(new Date(m.meal_date), "dd MMM")}</span>
-                      {m.ate === true && <span className="text-green-700 flex items-center gap-0.5 shrink-0"><Check className="h-3 w-3" /> Ate</span>}
+                      {m.ate === true && <span className="text-primary flex items-center gap-0.5 shrink-0"><Check className="h-3 w-3" /> Ate</span>}
                       {m.ate === false && <span className="text-destructive flex items-center gap-0.5 shrink-0"><XIcon className="h-3 w-3" /> Did not eat</span>}
                       {m.notes && <span className="text-muted-foreground truncate">{m.notes}</span>}
                       {m.nurse_name_snapshot && <span className="text-muted-foreground ml-auto shrink-0">· {m.nurse_name_snapshot}</span>}

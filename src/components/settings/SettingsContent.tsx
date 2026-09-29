@@ -571,7 +571,7 @@ export function SettingsContent() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div><p className="font-medium text-foreground">Current Plan</p><p className="text-sm text-muted-foreground">{loadingSubscription ? "Loading..." : getCurrentPlanName()}</p></div>
-                {subscription?.status === "active" ? <Badge variant="default" className="bg-green-600">Active</Badge> : subscription?.status === "cancelled" ? <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">Cancelled</Badge> : <Badge variant="secondary">Inactive</Badge>}
+                {subscription?.status === "active" ? <Badge variant="default" className="bg-primary">Active</Badge> : subscription?.status === "cancelled" ? <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">Cancelled</Badge> : <Badge variant="secondary">Inactive</Badge>}
               </div>
               <Separator />
               <div className="flex items-center justify-between">
@@ -579,7 +579,7 @@ export function SettingsContent() {
                 <div className="flex gap-2">
                   {subscription?.status === "active" && <Button variant="outline" onClick={() => setShowCancelDialog(true)} className="text-destructive hover:text-destructive">Cancel</Button>}
                   {subscription?.status === "cancelled" && (
-                    <Button variant="outline" onClick={handleReactivateSubscription} disabled={reactivatingSubscription} className="text-green-600 hover:text-green-700">
+                    <Button variant="outline" onClick={handleReactivateSubscription} disabled={reactivatingSubscription} className="text-primary hover:text-primary">
                       {reactivatingSubscription ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Reactivating...</> : <><RotateCcw className="h-4 w-4 mr-2" />Reactivate</>}
                     </Button>
                   )}
@@ -647,7 +647,7 @@ export function SettingsContent() {
             <div className={`relative flex items-start rounded-lg border p-4 cursor-pointer transition-colors ${selectedBillingCycle === "annual" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"}`} onClick={() => setSelectedBillingCycle("annual")}>
               <RadioGroupItem value="annual" id="annual" className="mt-1" />
               <div className="ml-3 flex-1">
-                <Label htmlFor="annual" className="font-semibold text-foreground cursor-pointer">Annual <span className="ml-2 text-primary">${plans.annual.price}/{plans.annual.period}</span> <Badge variant="secondary" className="ml-2 bg-green-100 text-green-700">Save ${plans.annual.savings}</Badge></Label>
+                <Label htmlFor="annual" className="font-semibold text-foreground cursor-pointer">Annual <span className="ml-2 text-primary">${plans.annual.price}/{plans.annual.period}</span> <Badge variant="secondary" className="ml-2 bg-sky-50 text-primary">Save ${plans.annual.savings}</Badge></Label>
                 <ul className="mt-2 text-sm text-muted-foreground space-y-1">
                   <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Full access to all features</li>
                   <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />2 months free</li>

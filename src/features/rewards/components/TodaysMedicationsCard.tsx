@@ -110,7 +110,7 @@ export function TodaysMedicationsCard({ patientId, onTakeMedication }: Props) {
                       {dosage} · {frequency}
                     </p>
                     {taken ? (
-                      <p className="text-xs text-emerald-600 mt-1">
+                      <p className="text-xs text-primary mt-1">
                         ✅ Already taken today{taken.taken_at ? ` at ${new Date(taken.taken_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : ""}
                       </p>
                     ) : (

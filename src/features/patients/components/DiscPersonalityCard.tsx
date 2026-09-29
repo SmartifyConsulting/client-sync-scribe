@@ -29,7 +29,7 @@ interface Props {
 const TILES = [
   { key: "dominance", letter: "D", label: "Dominance", barClass: "bg-red-500" },
   { key: "influence", letter: "I", label: "Influence", barClass: "bg-amber-500" },
-  { key: "steadiness", letter: "S", label: "Steadiness", barClass: "bg-emerald-500" },
+  { key: "steadiness", letter: "S", label: "Steadiness", barClass: "bg-sky-500" },
   { key: "conscientiousness", letter: "C", label: "Conscientiousness", barClass: "bg-blue-500" },
 ] as const;
 

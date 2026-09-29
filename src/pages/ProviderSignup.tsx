@@ -245,10 +245,10 @@ export default function ProviderSignup() {
         </p>
 
         {result ? (
-          <Card className="mt-8 border-2 border-emerald-500/60">
+          <Card className="mt-8 border-2 border-primary/40">
             <CardContent className="space-y-4 p-6">
               <div className="flex items-start gap-3">
-                <CheckCircle2 className="h-6 w-6 text-emerald-600 shrink-0" />
+                <CheckCircle2 className="h-6 w-6 text-primary shrink-0" />
                 <div>
                   <h2 className="text-xl font-semibold">{t("auth.provider.applicationReceived")}</h2>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -276,7 +276,7 @@ export default function ProviderSignup() {
               </div>
 
               <Button onClick={copyCreds} variant="outline" className="w-full gap-2">
-                {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
+                {copied ? <Check className="h-4 w-4 text-primary" /> : <Copy className="h-4 w-4" />}
                 {copied ? t("auth.provider.copied") : t("auth.provider.copyCredentials")}
               </Button>
 
@@ -309,7 +309,7 @@ export default function ProviderSignup() {
                 mode="public"
               />
 
-              <div className="rounded-md border border-emerald-500/40 bg-emerald-50/60 text-emerald-900 dark:border-emerald-400/30 dark:bg-emerald-950/30 dark:text-emerald-200 text-sm p-3 flex gap-2 items-start">
+              <div className="rounded-md border border-primary/40 bg-sky-50/60 text-primary dark:border-primary/40 dark:bg-primary/15 dark:text-primary text-sm p-3 flex gap-2 items-start">
                 <Clock className="h-4 w-4 mt-0.5 shrink-0" />
                 <span>The administrator email you supply becomes the account used to sign in once approved.</span>
               </div>

@@ -163,7 +163,7 @@ export function FollowUpAppointmentDialog({
           <div className="flex flex-col items-center justify-center gap-3 py-12 animate-doc-scheduled">
             <div className="relative">
               <CalendarCheck className="h-12 w-12 text-primary" />
-              <Check className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-emerald-500 p-0.5 text-white" />
+              <Check className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-sky-500 p-0.5 text-white" />
             </div>
             <p className="text-sm font-medium text-foreground">Follow-up scheduled</p>
           </div>

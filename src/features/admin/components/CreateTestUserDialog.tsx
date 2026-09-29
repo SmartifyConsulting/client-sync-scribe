@@ -261,7 +261,7 @@ export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
         {result ? (
           <div className="space-y-3">
             {result.pending && (
-              <div className="rounded-lg border-2 border-emerald-500/60 bg-emerald-50/60 dark:border-emerald-400/40 dark:bg-emerald-950/30 p-3 text-sm text-emerald-900 dark:text-emerald-200">
+              <div className="rounded-lg border-2 border-primary/40 bg-sky-50/60 dark:border-primary/40 dark:bg-primary/15 p-3 text-sm text-primary dark:text-primary">
                 <p className="font-semibold">Application received — pending approval</p>
                 <p className="mt-1 text-xs">
                   We aim to approve all applications within <strong>6 hours</strong>.
@@ -280,7 +280,7 @@ export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
               <div><span className="text-muted-foreground">Password:</span> <span className="font-bold">{result.password}</span></div>
             </div>
             <Button onClick={copyCreds} variant="outline" className="w-full gap-2">
-              {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
+              {copied ? <Check className="h-4 w-4 text-primary" /> : <Copy className="h-4 w-4" />}
               {copied ? "Copied" : "Copy email + password"}
             </Button>
             <DialogFooter>

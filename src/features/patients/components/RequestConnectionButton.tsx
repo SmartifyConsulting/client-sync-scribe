@@ -132,7 +132,7 @@ export function RequestConnectionButton({ patientUserId, patientName }: RequestC
 
   if (connectionStatus === 'connected') {
     return (
-      <Button variant="outline" size="sm" disabled className="gap-1.5 text-green-600 border-green-200 bg-green-50">
+      <Button variant="outline" size="sm" disabled className="gap-1.5 text-primary border-primary/40 bg-sky-50">
         <Check className="h-3.5 w-3.5" />
         Connected
       </Button>

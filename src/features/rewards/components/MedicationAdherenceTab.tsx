@@ -644,14 +644,14 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
         const adherenceRate = totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0;
 
         return (
-          <Card key={rx.id} id={`rx-card-${rx.id}`} className={todayStatus === "completed" ? "border-green-500/30" : ""}>
+          <Card key={rx.id} id={`rx-card-${rx.id}`} className={todayStatus === "completed" ? "border-primary/40" : ""}>
             <CardContent className="pt-6">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-semibold text-foreground">{rx.medication}</h3>
                     {todayStatus === "completed" ? (
-                      <Badge className="bg-green-500/15 text-green-700 dark:text-green-400 border-green-500/30">
+                      <Badge className="bg-sky-500/15 text-primary dark:text-primary border-primary/40">
                         <Check className="h-4 w-4 mr-1" /> Taken Today
                       </Badge>
                     ) : todayStatus === "missed" ? (
@@ -831,7 +831,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
                       (!pillCheckResult.isPillVisible
                         ? "border-destructive/40 bg-destructive/10 text-destructive"
                         : pillCheckResult.isMatch
-                        ? "border-green-500/40 bg-green-500/10 text-green-700 dark:text-green-400"
+                        ? "border-primary/40 bg-sky-500/10 text-primary dark:text-primary"
                         : "border-yellow-500/40 bg-yellow-500/10 text-yellow-700 dark:text-yellow-400")
                     }
                   >

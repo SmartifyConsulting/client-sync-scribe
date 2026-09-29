@@ -797,7 +797,7 @@ export function TodaysBriefing() {
 
                   {apt.lastPrescription && (
                     <div className="flex items-center gap-1.5 text-xs">
-                      <Pill className="h-4 w-4 text-green-600" />
+                      <Pill className="h-4 w-4 text-primary" />
                       <span className="text-muted-foreground">{apt.lastPrescription}</span>
                     </div>
                   )}

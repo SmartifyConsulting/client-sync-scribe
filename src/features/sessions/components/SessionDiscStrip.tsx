@@ -40,7 +40,7 @@ const DIMS: {
     key: "steadiness",
     letter: "S",
     label: "Steadiness",
-    chip: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30",
+    chip: "bg-sky-500/10 text-primary border-primary/40",
     high: ["calm", "patient", "cooperative", "reserved"],
     moderate: ["steady", "agreeable"],
   },

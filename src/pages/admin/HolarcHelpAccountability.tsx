@@ -142,7 +142,7 @@ export function AccountabilityPanel() {
               <AccordionContent className="p-0 border-t border-border/50">
                 <Accordion type="multiple" className="space-y-2 py-1">
                   {[
-                    { key: "approved", label: "Approved", items: approved, dot: "bg-emerald-500" },
+                    { key: "approved", label: "Approved", items: approved, dot: "bg-sky-500" },
                     { key: "unapproved", label: "Unapproved", items: unapproved, dot: "bg-amber-500" },
                   ].map(({ key, label, items, dot }) => (
                     <AccordionItem

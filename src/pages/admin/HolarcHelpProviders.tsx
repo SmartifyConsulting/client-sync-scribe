@@ -208,7 +208,7 @@ export default function HolarcHelpProviders() {
         <TableCell>
           <div className="flex items-center gap-2">
             <Switch checked={active} onCheckedChange={(v) => setActiveFlag(kind, r.id, v)} />
-            <span className={`text-sm font-semibold ${active ? "text-emerald-700" : "text-muted-foreground"}`}>
+            <span className={`text-sm font-semibold ${active ? "text-primary" : "text-muted-foreground"}`}>
               {active ? "Active" : "Inactive"}
             </span>
           </div>

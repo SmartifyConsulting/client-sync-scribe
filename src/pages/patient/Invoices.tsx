@@ -34,7 +34,7 @@ interface Invoice {
 
 const statusConfig: Record<string, { color: string; icon: typeof CheckCircle; label: string }> = {
   paid: {
-    color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+    color: "bg-sky-50 text-primary dark:bg-primary/15 dark:text-primary",
     icon: CheckCircle,
     label: "Paid",
   },

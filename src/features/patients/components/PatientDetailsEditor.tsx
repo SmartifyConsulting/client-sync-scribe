@@ -184,7 +184,7 @@ const AutosaveStatus = ({
   }
   if (lastSavedAt) {
     return (
-      <span className="flex items-center gap-1.5 text-xs text-emerald-600">
+      <span className="flex items-center gap-1.5 text-xs text-primary">
         <Save className="h-3.5 w-3.5" /> Saved
       </span>
     );
@@ -2003,7 +2003,7 @@ export function PatientDetailsEditor({
                               <div key={a.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
                                 <div className="flex items-center gap-2">
                                   <div className="flex-1 min-w-0">
-                                    <span className="inline-flex items-center rounded-full bg-green-600 px-2 py-0.5 text-xs font-medium text-white">{a.name}</span>
+                                    <span className="inline-flex items-center rounded-full bg-primary px-2 py-0.5 text-xs font-medium text-white">{a.name}</span>
 
                                     {(a.reaction || a.date_identified) && (
                                       <p className="text-xs text-muted-foreground">
@@ -2050,7 +2050,7 @@ export function PatientDetailsEditor({
                                 <Pill className="h-4 w-4 text-muted-foreground shrink-0" />
                                 <div className="flex-1 min-w-0">
                                   <p className="text-xs font-medium text-foreground">
-                                    <span className="inline-flex items-center rounded-full bg-green-600 px-2 py-0.5 text-xs font-medium text-white">
+                                    <span className="inline-flex items-center rounded-full bg-primary px-2 py-0.5 text-xs font-medium text-white">
                                       {m.name}
                                       {m.dosage ? ` — ${m.dosage}` : ""}
                                     </span>
@@ -2064,7 +2064,7 @@ export function PatientDetailsEditor({
                                   )}
                                 </div>
                                 <Badge
-                                  className={`text-xs border-0 ${m.status === "past" ? "bg-muted text-muted-foreground" : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"}`}
+                                  className={`text-xs border-0 ${m.status === "past" ? "bg-muted text-muted-foreground" : "bg-sky-50 text-primary dark:bg-primary/15 dark:text-primary"}`}
                                 >
                                   {m.status === "past" ? "Past" : "Current"}
                                 </Badge>
@@ -2101,7 +2101,7 @@ export function PatientDetailsEditor({
                               <div key={c.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
                                 <div className="flex items-center gap-2">
                                   <div className="flex-1 min-w-0">
-                                    <span className="inline-flex items-center rounded-full bg-green-600 px-2 py-0.5 text-xs font-medium text-white">{c.name}</span>
+                                    <span className="inline-flex items-center rounded-full bg-primary px-2 py-0.5 text-xs font-medium text-white">{c.name}</span>
 
                                     <p className="text-xs text-muted-foreground">
                                       {c.diagnosed_date
@@ -2179,7 +2179,7 @@ export function PatientDetailsEditor({
 
                   {/* Organ Donor — collapsible with inline Yes/No */}
                   <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
-                    <CollapsibleTrigger className="flex w-full items-center justify-between transition-colors px-4 py-3 group bg-primary text-white hover:bg-primary/90 [&_*:not(.organ-donor-pill)]:!text-white">
+                    <CollapsibleTrigger className="flex w-full items-center justify-between transition-colors px-4 py-3 group bg-primary text-white hover:bg-primary-dark/90 [&_*:not(.organ-donor-pill)]:!text-white">
                       <h3 className="text-xs font-semibold tracking-wide flex items-center gap-2 text-left !text-white">
                         <Heart className="h-3.5 w-3.5 !text-white" /> Organ Donor
                       </h3>
@@ -2350,7 +2350,7 @@ export function PatientDetailsEditor({
           )}
           {!saving && !hasChanges && isEditing && (
             <div className="flex justify-end mt-2">
-              <span className="flex items-center gap-1.5 text-xs text-green-600">
+              <span className="flex items-center gap-1.5 text-xs text-primary">
                 <Save className="h-4 w-4" />
                 Saved
               </span>
@@ -3444,7 +3444,7 @@ export function PatientDetailsEditor({
                                   )}
                                 </div>
                                 <Badge
-                                  className={`text-xs border-0 ${m.status === "past" ? "bg-muted text-muted-foreground" : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"}`}
+                                  className={`text-xs border-0 ${m.status === "past" ? "bg-muted text-muted-foreground" : "bg-sky-50 text-primary dark:bg-primary/15 dark:text-primary"}`}
                                 >
                                   {m.status === "past" ? "Past" : "Current"}
                                 </Badge>
@@ -3894,7 +3894,7 @@ export function PatientDetailsEditor({
 
                 {/* Organ Donor — collapsible with inline Yes/No */}
                 <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
-                  <CollapsibleTrigger className="flex w-full items-center justify-between transition-colors px-4 py-3 group bg-primary text-white hover:bg-primary/90 [&_*:not(.organ-donor-pill)]:!text-white">
+                  <CollapsibleTrigger className="flex w-full items-center justify-between transition-colors px-4 py-3 group bg-primary text-white hover:bg-primary-dark/90 [&_*:not(.organ-donor-pill)]:!text-white">
                     <h3 className="text-xs font-semibold tracking-wide flex items-center gap-2 text-left !text-white">
                       <Heart className="h-3.5 w-3.5 !text-white" /> Organ Donor
                     </h3>

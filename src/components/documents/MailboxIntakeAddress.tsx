@@ -61,7 +61,7 @@ export function MailboxIntakeAddress({ className, compact }: { className?: strin
         onClick={copy}
         title="Copy address"
       >
-        {copied ? <Check className="h-3.5 w-3.5 text-green-600" /> : <Copy className="h-3.5 w-3.5" />}
+        {copied ? <Check className="h-3.5 w-3.5 text-primary" /> : <Copy className="h-3.5 w-3.5" />}
       </Button>
     </div>
   );
