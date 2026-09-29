@@ -30,3 +30,11 @@ export const TEST_PROFILES: TestProfile[] = [
   { email: "2348167581572@phone.holarc.local", name: "Samuel 0koli", role: "Patient", icon: HeartPulse },
   { email: "nurse.test@holarchealth.com", name: "Nomvula Dlamini", role: "Nurse", icon: Syringe },
 ];
+
+/** Wealth demo accounts — the four roles used to trace one case end to end. */
+export const WEALTH_DEMO_PROFILES: TestProfile[] = [
+  { email: "georgia.client@demo.holarcwealth.co.za", name: "Georgia Adams", role: "as Client", icon: HeartPulse },
+  { email: "jaco.steyn@demo.holarcwealth.co.za", name: "Jaco Steyn", role: "as Wealth Manager", icon: Stethoscope },
+  { email: "sipho.nkosi@demo.holarcwealth.co.za", name: "Sipho Nkosi", role: "as FSP / Key Individual", icon: ShieldCheck },
+  { email: "underwriting@demo.momentum.co.za", name: "Momentum Underwriting", role: "as Insurer", icon: Building2 },
+];
