@@ -59,7 +59,7 @@ export function CheckInReply({ patientId }: CheckInReplyProps) {
         is_read: false,
       });
 
-      toast({ title: "Reply sent", description: "Your doctor has been notified." });
+      toast({ title: "Reply sent", description: "Your wealth manager has been notified." });
       setText("");
       setOpenReply(false);
     } catch (err: any) {
@@ -87,7 +87,7 @@ export function CheckInReply({ patientId }: CheckInReplyProps) {
           <Textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Reply to your doctor..."
+            placeholder="Reply to your wealth manager..."
             className="min-h-[70px] text-xs"
             disabled={sending}
           />

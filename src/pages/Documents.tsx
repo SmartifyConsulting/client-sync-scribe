@@ -828,7 +828,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
             >
               <ToggleGroupItem value="date" className="text-xs px-3">Date</ToggleGroupItem>
               <ToggleGroupItem value="type" className="text-xs px-3">Type</ToggleGroupItem>
-              <ToggleGroupItem value="patient" className="text-xs px-3">Patient</ToggleGroupItem>
+              <ToggleGroupItem value="patient" className="text-xs px-3">Client</ToggleGroupItem>
             </ToggleGroup>
           </div>
         </div>

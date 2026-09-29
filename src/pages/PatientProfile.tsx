@@ -482,8 +482,8 @@ export default function PatientProfile() {
               <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
                 <FileText className="h-7 w-7 text-muted-foreground" />
               </div>
-              <p className="text-muted-foreground">No sessions with recordings yet.</p>
-              <p className="text-sm text-muted-foreground mt-1">Start your first session with this patient!</p>
+              <p className="text-muted-foreground">No consultations with recordings yet.</p>
+              <p className="text-sm text-muted-foreground mt-1">Start your first consultation with this client!</p>
             </div>
           ) : (
             <>
@@ -536,7 +536,7 @@ export default function PatientProfile() {
               )}
 
               {completedSessions.length === 0 && inProgressSessions.length > 0 && (
-                <p className="text-sm text-muted-foreground text-center py-6">No completed sessions yet.</p>
+                <p className="text-sm text-muted-foreground text-center py-6">No completed consultations yet.</p>
               )}
             </>
           )}
@@ -916,7 +916,7 @@ export default function PatientProfile() {
             fetchDocuments();
             toast({
               title: "Document created",
-              description: "The document has been saved to this patient's profile.",
+              description: "The document has been saved to this client's profile.",
             });
           }}
         />

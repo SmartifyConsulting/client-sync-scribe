@@ -164,7 +164,7 @@ export default function Invoices() {
 
       toast({
         title: "Payment Successful",
-        description: "Your invoice has been marked as paid.",
+        description: "Your fee statement has been marked as paid.",
       });
 
       // Refresh invoices
@@ -235,8 +235,8 @@ export default function Invoices() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Invoices</h1>
-        <p className="text-muted-foreground text-xs">View and manage your medical invoices</p>
+        <h1 className="text-3xl font-bold text-foreground">Fee statements</h1>
+        <p className="text-muted-foreground text-xs">View and manage your financial fee statements</p>
       </div>
 
       {/* Summary Cards */}
@@ -281,8 +281,8 @@ export default function Invoices() {
         <CardHeader>
           <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
             <div>
-              <CardTitle>All Invoices</CardTitle>
-              <CardDescription>Your complete invoice history</CardDescription>
+              <CardTitle>All Fee statements</CardTitle>
+              <CardDescription>Your complete fee statement history</CardDescription>
             </div>
           </div>
           <div className="flex gap-2 mt-4">
@@ -417,7 +417,7 @@ export default function Invoices() {
                   <Receipt className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-foreground">Invoice Details</h2>
+                  <h2 className="text-lg font-semibold text-foreground">Fee statement Details</h2>
                   <p className="text-sm text-muted-foreground">{viewingInvoice.invoice_number}</p>
                 </div>
               </div>
@@ -433,7 +433,7 @@ export default function Invoices() {
             <div className="space-y-4">
               {viewingInvoice.doctor_profile?.full_name && (
                 <div>
-                  <p className="text-sm text-muted-foreground">From Doctor</p>
+                  <p className="text-sm text-muted-foreground">From Wealth Manager</p>
                   <p className="font-medium">{viewingInvoice.doctor_profile.full_name}</p>
                 </div>
               )}

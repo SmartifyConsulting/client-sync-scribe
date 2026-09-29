@@ -172,7 +172,7 @@ export function SessionDiagnosticsModal({
         <DialogHeader>
           <div className="flex items-center gap-2">
             <Brain className="w-5 h-5 text-primary" />
-            <DialogTitle className="text-base">AI Clinical Assessment</DialogTitle>
+            <DialogTitle className="text-base">AI Financial Needs Analysis</DialogTitle>
           </div>
           <DialogDescription className="text-xs">
             Clinical decision support — the session keeps recording while you read

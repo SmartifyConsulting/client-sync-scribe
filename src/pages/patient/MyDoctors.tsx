@@ -190,7 +190,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
       toast({ title: "Error", description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: "Doctor hidden", description: "They won't appear in your active list. Historic records remain." });
+    toast({ title: "Wealth Manager hidden", description: "They won't appear in your active list. Historic records remain." });
     queryClient.invalidateQueries({ queryKey: ["patient-doctors-with-hidden"] });
   };
 
@@ -210,7 +210,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
         .update({ is_active: true, revoked_at: null } as any)
         .eq("id", access.id);
     }
-    toast({ title: "Doctor restored", description: "They're back in your active list." });
+    toast({ title: "Wealth Manager restored", description: "They're back in your active list." });
     queryClient.invalidateQueries({ queryKey: ["patient-doctors-with-hidden"] });
   };
 
@@ -276,7 +276,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
         .eq("id", uninviteTarget.id);
 
       // Intentionally do NOT notify the doctor when a patient revokes access.
-      toast({ title: "Doctor deactivated", description: "They no longer have live access. Historic records are preserved." });
+      toast({ title: "Wealth Manager deactivated", description: "They no longer have live access. Historic records are preserved." });
       queryClient.invalidateQueries({ queryKey: ["patient-doctors-with-hidden"] });
       setUninviteTarget(null);
     } catch (err: any) {
@@ -358,7 +358,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
                       size="icon"
                       className="h-7 w-7"
                       onClick={() => handleHide(access)}
-                      aria-label="Hide doctor"
+                      aria-label="Hide wealth manager"
                     >
                       <EyeOff className="h-3.5 w-3.5" />
                     </Button>
@@ -374,7 +374,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
                       size="icon"
                       className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
                       onClick={() => setUninviteTarget(access)}
-                      aria-label="Deactivate doctor"
+                      aria-label="Deactivate wealth manager"
                     >
                       <UserMinus className="h-3.5 w-3.5" />
                     </Button>
@@ -403,7 +403,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
       {!hideHeader && (
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">My Healthcare Providers</h1>
+            <h1 className="text-3xl font-bold text-foreground">My Wealth Managers</h1>
             <p className="text-muted-foreground text-xs">
               Healthcare providers with access to your profile
             </p>
@@ -439,7 +439,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
               </Avatar>
               <div className="min-w-0">
                 <p className="font-medium text-foreground truncate">{gpInfo.name}</p>
-                <p className="text-xs text-muted-foreground">General Practitioner</p>
+                <p className="text-xs text-muted-foreground">General Wealth Manager</p>
               </div>
             </div>
             <Badge
@@ -455,7 +455,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
       {/* Doctor Search */}
       <Card>
         <CardHeader className="pb-1 pt-3 px-4">
-          <CardTitle className="text-sm">Find a Healthcare Provider on Holarc</CardTitle>
+          <CardTitle className="text-sm">Find a Wealth Manager on Indigro</CardTitle>
           <CardDescription className="text-xs">Filter by name, specialty, language — or any combination</CardDescription>
         </CardHeader>
         <CardContent>
@@ -463,7 +463,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Doctor name, practice or registration #"
+                placeholder="Wealth Manager name, firm or registration #"
                 value={nameQuery}
                 onChange={(e) => setNameQuery(e.target.value)}
                 className="pl-10"
@@ -614,7 +614,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Stethoscope className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold text-foreground">No healthcare providers on your profile</h3>
+            <h3 className="text-lg font-semibold text-foreground">No wealth managers on your profile</h3>
              <p className="text-muted-foreground text-center mt-2 max-w-md">
                Search for a healthcare provider above or use the invite button to connect.
             </p>
@@ -625,7 +625,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
           {/* Provider list */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-semibold text-foreground">Healthcare Providers</h2>
+              <h2 className="text-base font-semibold text-foreground">Wealth Managers</h2>
               <div className="flex items-center gap-2">
               <div className="relative w-56">
                 <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -692,7 +692,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
       <Dialog open={!!uninviteTarget} onOpenChange={() => setUninviteTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Remove Healthcare Provider</DialogTitle>
+            <DialogTitle>Remove Wealth Manager</DialogTitle>
             <DialogDescription>
               Are you sure you want to remove {uninviteTarget?.doctor?.full_name || "this doctor"} from your healthcare providers? They will lose access to your health information.
             </DialogDescription>

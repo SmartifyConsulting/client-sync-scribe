@@ -339,7 +339,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
     if (!newPatient.name.trim()) {
       toast({
         title: "Error",
-        description: "Patient name is required",
+        description: "Client name is required",
         variant: "destructive",
       });
       return;
@@ -410,7 +410,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         {!hideHeader && (
           <div>
-            <h1 className="text-3xl font-bold text-foreground">{t("nav.myPatients", "Patients")}</h1>
+            <h1 className="text-3xl font-bold text-foreground">{t("nav.myPatients", "Clients")}</h1>
             <p className="mt-1 text-muted-foreground text-xs">
               {t("patients.subtitle")}
             </p>
@@ -436,8 +436,8 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
             </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh]">
             <DialogHeader>
-              <DialogTitle>Add New Patient</DialogTitle>
-              <DialogDescription>Enter patient information below</DialogDescription>
+              <DialogTitle>Add New Client</DialogTitle>
+              <DialogDescription>Enter client information below</DialogDescription>
             </DialogHeader>
             <ScrollArea className="max-h-[70vh] pr-4">
               <div className="space-y-6 pt-4">
@@ -450,7 +450,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       <div className="relative">
                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
-                          placeholder="Type patient name to search..."
+                          placeholder="Type client name to search..."
                           value={newPatient.name}
                           onChange={(e) => { setNewPatient({ ...newPatient, name: e.target.value }); setSelectedPatientUserId(null); }}
                           onFocus={() => patientSuggestions.length > 0 && setShowPatientSuggestions(true)}
@@ -476,11 +476,11 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       {/* Invite fallback when patient not found */}
                       {newPatient.name.length >= 3 && !searchingPatients && patientSuggestions.length === 0 && !selectedPatientUserId && (
                         <div className="mt-3 rounded-lg border border-dashed border-border p-4 space-y-3 bg-muted/30">
-                          <p className="text-sm text-muted-foreground">Patient not found on Holarc? Send an invitation</p>
+                          <p className="text-sm text-muted-foreground">Client not found on Indigro? Send an invitation</p>
                           <div className="flex gap-2">
                             <Input
                               type="email"
-                              placeholder="patient@email.com"
+                              placeholder="client@email.com"
                               value={newPatient.email}
                               onChange={(e) => setNewPatient({ ...newPatient, email: e.target.value })}
                               className="flex-1"
@@ -503,7 +503,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       <Label>Email</Label>
                       <Input
                         type="email"
-                        placeholder="patient@email.com"
+                        placeholder="client@email.com"
                         value={newPatient.email}
                         onChange={(e) => setNewPatient({ ...newPatient, email: e.target.value })}
                       />
@@ -579,10 +579,10 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
 
                 {/* Medical Insurance Information */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-foreground border-b pb-2">Medical Insurance Information</h3>
+                  <h3 className="text-sm font-semibold text-foreground border-b pb-2">Financial Insurance Information</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label>Medical Insurance</Label>
+                      <Label>Financial Insurance</Label>
                       <Input
                         placeholder="Insurance provider"
                         value={newPatient.medical_insurance}
@@ -590,7 +590,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       />
                     </div>
                     <div>
-                      <Label>Medical Insurance Product</Label>
+                      <Label>Financial Insurance Product</Label>
                       <Input
                         placeholder="e.g., Executive Plan"
                         value={newPatient.medical_insurance_product}
@@ -598,7 +598,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       />
                     </div>
                     <div>
-                      <Label>Medical Insurance Number</Label>
+                      <Label>Financial Insurance Number</Label>
                       <Input
                         placeholder="Member number"
                         value={newPatient.medical_insurance_number}
@@ -627,10 +627,10 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
 
                 {/* Medical Information */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-foreground border-b pb-2">Medical Information</h3>
+                  <h3 className="text-sm font-semibold text-foreground border-b pb-2">Financial Information</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label>General Practitioner</Label>
+                      <Label>General Wealth Manager</Label>
                       <Input
                         placeholder="GP name"
                         value={newPatient.general_practitioner}
@@ -961,10 +961,10 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <span className="inline-flex items-center justify-center rounded-full bg-red-600 h-4 w-4 p-0.5">
-                                      <img src={chronicIcon} alt="Chronic patient" className="h-full w-full object-contain" />
+                                      <img src={chronicIcon} alt="Chronic client" className="h-full w-full object-contain" />
                                     </span>
                                   </TooltipTrigger>
-                                  <TooltipContent>Chronic Patient</TooltipContent>
+                                  <TooltipContent>Chronic Client</TooltipContent>
                                 </Tooltip>
                               </TooltipProvider>
                             )}

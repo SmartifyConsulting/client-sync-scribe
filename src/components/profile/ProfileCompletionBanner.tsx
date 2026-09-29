@@ -45,7 +45,7 @@ export function ProfileCompletionBanner({
       <button
         type="button"
         onClick={dismiss}
-        aria-label="Dismiss for this session"
+        aria-label="Dismiss for this consultation"
         className="absolute right-2 top-2 text-muted-foreground hover:text-foreground"
       >
         <X className="h-4 w-4" />

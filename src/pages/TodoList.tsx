@@ -290,7 +290,7 @@ export default function TodoList() {
         const avg = dataArray.reduce((s, v) => s + v, 0) / dataArray.length;
         if (avg < 10) { silenceTimerRef.current += 200; if (silenceTimerRef.current >= 8000 && mediaRecorderRef.current?.state === 'recording') { mediaRecorderRef.current.stop(); setIsRecording(false); } } else { silenceTimerRef.current = 0; }
       }, 200);
-      toast({ title: "Listening...", description: "Speak your task — recording stops automatically after a pause" });
+      toast({ title: "Listening...", description: "Speak your action — recording stops automatically after a pause" });
     } catch { toast({ title: "Microphone access denied", variant: "destructive" }); }
   };
 
@@ -311,7 +311,7 @@ export default function TodoList() {
       if (data?.text) { setNewTaskText(data.text); setIsProcessing(false); await handleAiProcess(data.text); return; }
       throw new Error('No transcription returned');
     } catch (error) {
-      toast({ title: "Transcription failed", description: error instanceof Error ? error.message : "Please try again", variant: "destructive" });
+      toast({ title: "Transcription failed", description: error instanceof Error ? error.message: "Please try again", variant: "destructive" });
     } finally { setIsProcessing(false); }
   };
 
@@ -356,8 +356,8 @@ export default function TodoList() {
 
       setTodos([{ ...data, completed: false, priority: data.priority as "low" | "medium" | "high", is_auto_executed: false, patient_name: null, document_id: null, task_type: 'standard' }, ...todos]);
       setNewTaskText(""); setNewTaskPriority("medium");
-      toast({ title: "Task added" });
-    } catch { toast({ title: "Error", description: "Failed to add task", variant: "destructive" }); }
+      toast({ title: "Action added" });
+    } catch { toast({ title: "Error", description: "Failed to add action", variant: "destructive" }); }
   };
 
   const toggleComplete = async (id: string) => {
@@ -370,7 +370,7 @@ export default function TodoList() {
   };
 
   const deleteTask = async (id: string) => {
-    try { await supabase.from('todos').delete().eq('id', id); setTodos(todos.filter((t) => t.id !== id)); toast({ title: "Task deleted" }); }
+    try { await supabase.from('todos').delete().eq('id', id); setTodos(todos.filter((t) => t.id !== id)); toast({ title: "Action deleted" }); }
     catch { toast({ title: "Error", variant: "destructive" }); }
   };
 
@@ -380,7 +380,7 @@ export default function TodoList() {
       if (!user) return;
       await supabase.from('todos').delete().eq('user_id', user.id).eq('status', 'completed');
       setTodos((prev) => prev.filter((t) => !t.completed));
-      toast({ title: "Completed tasks cleared" });
+      toast({ title: "Completed actions cleared" });
     } catch { toast({ title: "Error", variant: "destructive" }); }
   };
 
@@ -411,7 +411,7 @@ export default function TodoList() {
       }).select('*, patients(name)').single();
       if (error) throw error;
       setTodos([{ ...(data as any), completed: false, patient_name: (data as any).patients?.name || null, is_auto_executed: false, task_type: (data as any).task_type || 'standard' }, ...todos]);
-      toast({ title: "Task duplicated" });
+      toast({ title: "Action duplicated" });
     } catch { toast({ title: "Error", variant: "destructive" }); }
   };
 
@@ -480,9 +480,9 @@ export default function TodoList() {
       await supabase.from('todos').update({ status: 'completed', completed_at: paidAtIso }).eq('id', todo.id);
       setTodos(todos.map((t) => t.id === todo.id ? { ...t, completed: true } : t));
 
-      toast({ title: "Invoice marked as paid" });
+      toast({ title: "Fee statement marked as paid" });
     } catch {
-      toast({ title: "Error", description: "Failed to mark invoice as paid", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to mark fee statement as paid", variant: "destructive" });
     } finally {
       setMarkingInvoicePaidId(null);
     }
@@ -612,8 +612,8 @@ export default function TodoList() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">{t("nav.myTasks", "Tasks")}</h1>
-          <p className="mt-1 text-muted-foreground text-xs">Manage your tasks with voice or text input — AI can auto-execute actions</p>
+          <h1 className="text-3xl font-bold text-foreground">{t("nav.myTasks", "Actions")}</h1>
+          <p className="mt-1 text-muted-foreground text-xs">Manage your actions with voice or text input — AI can auto-execute actions</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <div className="relative min-w-[200px]">
@@ -621,7 +621,7 @@ export default function TodoList() {
             <Input
               value={taskQuery}
               onChange={(e) => setTaskQuery(e.target.value)}
-              placeholder={t("todo.searchTasks", "Search tasks...")}
+              placeholder={t("todo.searchTasks", "Search actions...")}
               className="h-9 pl-8 text-xs"
             />
           </div>
@@ -644,15 +644,15 @@ export default function TodoList() {
             variant="outline"
           >
             <ToggleGroupItem value="date" className="text-xs px-3">{t("todo.groupByDate", "Date")}</ToggleGroupItem>
-            <ToggleGroupItem value="patient" className="text-xs px-3">{t("todo.groupByPatient", "Patient")}</ToggleGroupItem>
+            <ToggleGroupItem value="patient" className="text-xs px-3">{t("todo.groupByPatient", "Client")}</ToggleGroupItem>
           </ToggleGroup>
           <Button size="sm" variant="outline" className="gap-2" onClick={() => setShowAssignTask(true)}>
             <UserPlus className="h-4 w-4" />
-            {t("todo.assignTask", "Assign Task")}
+            {t("todo.assignTask", "Assign Action")}
           </Button>
           <Button size="sm" className="gap-2" onClick={() => setShowAddTask((v) => !v)}>
             <Plus className="h-4 w-4" />
-            {t("todo.addNewTask", "Add Task")}
+            {t("todo.addNewTask", "Add Action")}
           </Button>
         </div>
       </div>
@@ -740,7 +740,7 @@ export default function TodoList() {
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Clear all completed tasks?</AlertDialogTitle>
+                <AlertDialogTitle>Clear all completed actions?</AlertDialogTitle>
                 <AlertDialogDescription>
                   This permanently deletes your {completedCount} completed task{completedCount === 1 ? "" : "s"}. Active tasks are not affected.
                 </AlertDialogDescription>
@@ -778,7 +778,7 @@ export default function TodoList() {
               </AccordionTrigger>
               <AccordionContent className={SECTION_CONTENT_CLASS}>
                 {g.items.length === 0 ? (
-                  <p className="text-xs text-muted-foreground px-4 py-3">No tasks in this group.</p>
+                  <p className="text-xs text-muted-foreground px-4 py-3">No actions in this group.</p>
                 ) : groupMode === "date" ? (
                   <Accordion type="multiple" className="space-y-3">
                     {patientSubGroups(g.items).map((sub) => (

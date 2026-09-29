@@ -226,7 +226,7 @@ export function SettingsContent() {
     try {
       const response = await supabase.functions.invoke("paypal-subscription", { body: { action: "cancel", userId: user.id } });
       if (response.error) throw new Error(response.error.message);
-      toast({ title: "Subscription Cancelled", description: "You will retain access until the end of your billing period." });
+      toast({ title: "Subscription Cancelled", description: "You will retain access until the end of your fees period." });
       setShowCancelDialog(false); fetchSubscription();
     } catch (error: any) { toast({ title: "Error", description: error.message, variant: "destructive" }); } finally { setCancellingSubscription(false); }
   };
@@ -275,7 +275,7 @@ export function SettingsContent() {
           <TabsTrigger value="preferences" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Preferences</TabsTrigger>
           <TabsTrigger value="notifications" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Notifications</TabsTrigger>
           <TabsTrigger value="security" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Security</TabsTrigger>
-          <TabsTrigger value="billing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Billing</TabsTrigger>
+          <TabsTrigger value="billing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Fees</TabsTrigger>
         </TabsList>
 
         {/* PREFERENCES */}
@@ -291,8 +291,8 @@ export function SettingsContent() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
                     <div className="flex-1 mr-3">
-                      <p className="text-sm font-medium text-foreground">Auto-email invoice to medical aid</p>
-                      <p className="text-sm text-muted-foreground mt-0.5">When your doctor marks an invoice as paid, it will be sent to your insurance claims email.</p>
+                      <p className="text-sm font-medium text-foreground">Auto-email fee statement to provider</p>
+                      <p className="text-sm text-muted-foreground mt-0.5">When your wealth manager marks an fee statement as paid, it will be sent to your insurance claims email.</p>
                     </div>
                     <Switch checked={(profile as any)?.auto_email_invoice_to_insurance || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_invoice_to_insurance: c } as any); toast({ title: "Preference updated" }); }} />
                   </div>
@@ -306,7 +306,7 @@ export function SettingsContent() {
                   <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
                     <div className="flex-1 mr-3">
                       <p className="text-sm font-medium text-foreground">Auto-email certificate to employer</p>
-                      <p className="text-sm text-muted-foreground mt-0.5">When your doctor saves a medical certificate, it will be sent to your employer.</p>
+                      <p className="text-sm text-muted-foreground mt-0.5">When your wealth manager saves a financial certificate, it will be sent to your employer.</p>
                     </div>
                     <Switch checked={(profile as any)?.auto_email_certificate_to_employer || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_certificate_to_employer: c } as any); toast({ title: "Preference updated" }); }} />
                   </div>
@@ -318,12 +318,12 @@ export function SettingsContent() {
               <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
                 <div className="flex items-center gap-3">
                   <Users className="h-4 w-4 text-primary" />
-                  <h3 className="text-sm font-semibold text-foreground">Patient Management</h3>
+                  <h3 className="text-sm font-semibold text-foreground">Client Management</h3>
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-foreground text-sm">Patient Inactivity Threshold</p>
-                    <p className="text-sm text-muted-foreground">Automatically mark patients as inactive after this period without a visit</p>
+                    <p className="font-medium text-foreground text-sm">Client Inactivity Threshold</p>
+                    <p className="text-sm text-muted-foreground">Automatically mark clients as inactive after this period without a visit</p>
                   </div>
                   <Select value={inactiveThreshold.toString()} onValueChange={(value) => saveInactiveThreshold(parseInt(value))} disabled={savingThreshold}>
                     <SelectTrigger className="w-[180px]"><SelectValue placeholder="Select period" /></SelectTrigger>
@@ -395,7 +395,7 @@ export function SettingsContent() {
               </div>
               <Separator />
               <div className="flex items-center justify-between">
-                <div><p className="font-medium text-foreground">Session Reminders</p><p className="text-sm text-muted-foreground">Get notified 15 minutes before sessions</p></div>
+                <div><p className="font-medium text-foreground">Consultation Reminders</p><p className="text-sm text-muted-foreground">Get notified 15 minutes before consultations</p></div>
                 <Switch defaultChecked />
               </div>
               <Separator />
@@ -556,7 +556,7 @@ export function SettingsContent() {
             </div>
             <div className="space-y-4">
               <Button variant="outline">Export All Data</Button>
-              <p className="text-sm text-muted-foreground">Download all your client data, documents, and session records</p>
+              <p className="text-sm text-muted-foreground">Download all your client data, documents, and consultation records</p>
             </div>
           </div>
         </TabsContent>

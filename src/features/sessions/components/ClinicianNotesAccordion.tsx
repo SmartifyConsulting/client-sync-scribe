@@ -153,7 +153,7 @@ export function ClinicianNotesAccordion({
 
   if (sections.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">No AI Clinician notes recorded for this session.</p>
+      <p className="text-sm text-muted-foreground">No AI Consultation Assistant notes recorded for this consultation.</p>
     );
   }
 

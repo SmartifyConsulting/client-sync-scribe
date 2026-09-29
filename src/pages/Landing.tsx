@@ -59,12 +59,12 @@ const getPatientBenefits = (t: any) => [
   {
     icon: Shield,
     title: t("landing.patientBenefits.benefit3Title", "You're in Control"),
-    description: t("landing.patientBenefits.benefit3Description", "Decide exactly which doctors see your records. Grant or revoke access anytime with granular permissions."),
+    description: t("landing.patientBenefits.benefit3Description", "Decide exactly which wealth managers see your records. Grant or revoke access anytime with granular permissions."),
   },
   {
     icon: Calendar,
     title: t("landing.patientBenefits.benefit4Title", "Unified Appointments"),
-    description: t("landing.patientBenefits.benefit4Description", "All your healthcare appointments from every provider in one calendar—never miss a follow-up."),
+    description: t("landing.patientBenefits.benefit4Description", "All your wealth management appointments from every provider in one calendar—never miss a follow-up."),
   },
 ];
 
@@ -77,7 +77,7 @@ const getProviderBenefits = (t: any) => [
   {
     icon: Share2,
     title: t("landing.providerBenefits.benefit2Title", "Seamless Collaboration"),
-    description: t("landing.providerBenefits.benefit2Description", "Round Table notes enable real-time communication with other specialists caring for the same patient."),
+    description: t("landing.providerBenefits.benefit2Description", "Round Table notes enable real-time communication with other specialists caring for the same client."),
   },
   {
     icon: FileText,
@@ -86,13 +86,13 @@ const getProviderBenefits = (t: any) => [
   },
   {
     icon: Heart,
-    title: t("landing.providerBenefits.benefit4Title", "Better Patient Outcomes"),
-    description: t("landing.providerBenefits.benefit4Description", "Access complete patient history across all their providers—make informed decisions with the full picture."),
+    title: t("landing.providerBenefits.benefit4Title", "Better Client Outcomes"),
+    description: t("landing.providerBenefits.benefit4Description", "Access complete client history across all their providers—make informed decisions with the full picture."),
   },
   {
     icon: Ambulance,
     title: t("landing.providerBenefits.benefit5Title", "Emergency Service Providers"),
-    description: t("landing.providerBenefits.benefit5Description", "Emergency response crews onboard in minutes, accept SOS incidents with one tap, share live ETA, and arrive with the patient's full medical context."),
+    description: t("landing.providerBenefits.benefit5Description", "Emergency response crews onboard in minutes, accept SOS incidents with one tap, share live ETA, and arrive with the client's full financial context."),
   },
   {
     icon: Hospital,

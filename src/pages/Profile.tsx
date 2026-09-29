@@ -84,7 +84,7 @@ function AutoCreatePatientFallback({ user, onCreated }: { user: any; onCreated: 
           next_of_kin_members: [],
           current_medications: [],
         } as unknown as Patient);
-        toast({ title: "Record created", description: "Your Holarchive has been initialized." });
+        toast({ title: "Record created", description: "Your Profile has been initialized." });
       }
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -95,7 +95,7 @@ function AutoCreatePatientFallback({ user, onCreated }: { user: any; onCreated: 
 
   return (
     <div className="rounded-xl border border-primary bg-card p-8 text-center space-y-4">
-      <p className="text-muted-foreground">No clinical record found. Create your Holarchive to start managing your health information.</p>
+      <p className="text-muted-foreground">No advice record found. Create your Profile to start managing your financial information.</p>
       <Button onClick={handleCreate} disabled={creating}>
         {creating ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Creating...</> : "Create My Holarchive"}
       </Button>
@@ -148,7 +148,7 @@ function DoctorPatientsTab() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search patients..."
+            placeholder="Search clients..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -179,7 +179,7 @@ function DoctorPatientsTab() {
             <table className="w-full">
               <thead>
                 <tr className="bg-primary">
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">Patient</th>
+                  <th className="px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">Client</th>
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">Contact</th>
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">Status</th>
                   <th className="px-4 py-2.5 text-right text-xs font-medium text-primary-foreground">Actions</th>
@@ -301,8 +301,8 @@ export default function Profile() {
   return (
     <div className="space-y-4 animate-fade-in">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">My Holarchive</h1>
-        <p className="text-muted-foreground text-xs">Manage your health information</p>
+        <h1 className="text-3xl font-bold text-foreground">My Profile</h1>
+        <p className="text-muted-foreground text-xs">Manage your financial information</p>
       </div>
 
       {patientLoading ? (

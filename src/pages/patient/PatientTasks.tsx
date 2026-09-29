@@ -159,10 +159,10 @@ export default function PatientTasks() {
 
       if (error) throw error;
       setTaskText("");
-      toast({ title: "Task added" });
+      toast({ title: "Action added" });
       fetchTodos();
     } catch (err: any) {
-      toast({ title: "Failed to add task", description: err.message, variant: "destructive" });
+      toast({ title: "Failed to add action", description: err.message, variant: "destructive" });
     } finally {
       setAddingTask(false);
     }
@@ -182,7 +182,7 @@ export default function PatientTasks() {
         <h1 className="text-3xl font-bold text-foreground">
           My Tasks
         </h1>
-        <p className="text-muted-foreground text-xs">Tasks assigned to you by your healthcare providers</p>
+        <p className="text-muted-foreground text-xs">Actions assigned to you by your wealth managers</p>
       </div>
 
       {/* Task Input Area */}
@@ -207,7 +207,7 @@ export default function PatientTasks() {
         </p>
         <div className="flex w-full max-w-md gap-2">
           <Input
-            placeholder="Type a task..."
+            placeholder="Type an action..."
             value={taskText}
             onChange={(e) => setTaskText(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleAddTask()}
@@ -222,7 +222,7 @@ export default function PatientTasks() {
       {todos.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border p-12 text-center">
           <CheckSquare className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-          <p className="text-sm text-muted-foreground">No tasks assigned yet</p>
+          <p className="text-sm text-muted-foreground">No actions assigned yet</p>
         </div>
       ) : (
         <>
@@ -232,7 +232,7 @@ export default function PatientTasks() {
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search tasks..."
+                placeholder="Search actions..."
                 className="h-9 pl-8 text-xs"
               />
             </div>
@@ -243,7 +243,7 @@ export default function PatientTasks() {
           </div>
 
           {filteredTodos.length === 0 ? (
-            <p className="text-xs text-muted-foreground px-1 py-6 text-center">No tasks match your search.</p>
+            <p className="text-xs text-muted-foreground px-1 py-6 text-center">No actions match your search.</p>
           ) : groupBy === "date" ? (
             <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
               {dateGroups.map((group, idx) => (
@@ -508,7 +508,7 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
           });
         }
 
-        toast({ title: "✅ Task verified!", description: `AI confirmed your proof. +${todo.vulas_reward} Vulas earned!` });
+        toast({ title: "✅ Action verified!", description: `AI confirmed your proof. +${todo.vulas_reward} Vulas earned!` });
         handleCloseRecording();
         queryClient.invalidateQueries({ queryKey: ["my-rewards"] });
         onComplete();

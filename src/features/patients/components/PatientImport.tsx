@@ -285,8 +285,8 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
         });
       } else {
         toast({
-          title: "No patients found",
-          description: "AI could not extract any valid patient records from the content",
+          title: "No clients found",
+          description: "AI could not extract any valid client records from the content",
           variant: "destructive",
         });
       }
@@ -406,8 +406,8 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
 
       if (patients.length === 0) {
         toast({
-          title: "No valid patients",
-          description: "Could not parse any valid patient records from the file",
+          title: "No valid clients",
+          description: "Could not parse any valid client records from the file",
           variant: "destructive",
         });
       } else {
@@ -538,7 +538,7 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
     } else {
       toast({
         title: "Import failed",
-        description: "Could not import any patients. Please check the data.",
+        description: "Could not import any clients. Please check the data.",
         variant: "destructive",
       });
     }
@@ -641,7 +641,7 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[100px] px-1">DOB</TableHead>
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[65px] px-1">Gender</TableHead>
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[90px] px-1">ID/Passport</TableHead>
-                  <TableHead className="sticky top-0 bg-card z-10 min-w-[100px] px-1">Medical Aid</TableHead>
+                  <TableHead className="sticky top-0 bg-card z-10 min-w-[100px] px-1">Financial Aid</TableHead>
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[90px] px-1">Employer</TableHead>
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[90px] px-1">Allergies</TableHead>
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[100px] px-1">Address</TableHead>

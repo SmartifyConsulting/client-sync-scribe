@@ -183,7 +183,7 @@ export default function HealthAlbum() {
         <Card>
           <CardContent className="pt-4 text-center">
             <p className="text-3xl font-bold text-blue-600">{stats.gym}</p>
-            <p className="text-xs text-muted-foreground">Gym Sessions</p>
+            <p className="text-xs text-muted-foreground">Gym Consultations</p>
           </CardContent>
         </Card>
         <Card>

@@ -20,7 +20,7 @@ export function SessionTranscriptAccordion({ transcript, doctorName }: Props) {
     <div className="rounded-xl border border-primary bg-card overflow-hidden">
       <div className="flex items-center gap-1.5 border-b bg-muted/30 px-3 py-2">
         <FileText className="h-3.5 w-3.5 text-primary" />
-        <span className="text-sm font-medium text-foreground">Session Transcript</span>
+        <span className="text-sm font-medium text-foreground">Consultation Transcript</span>
       </div>
       <div className="max-h-[260px] overflow-y-auto px-3 py-2 space-y-2">
         {lines.map((line, index) => {

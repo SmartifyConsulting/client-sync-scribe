@@ -57,7 +57,7 @@ export default function PracticePatients() {
     <div className="space-y-4 p-4 md:p-6">
       <div className="flex items-center gap-2">
         <Users className="h-5 w-5 text-primary" />
-        <h1 className="text-3xl font-bold text-foreground">Practice Patients</h1>
+        <h1 className="text-3xl font-bold text-foreground">Firm Clients</h1>
       </div>
       <p className="text-sm text-muted-foreground">
         Administrative view of the practice doctors' patients. Clinical records are not shown.
@@ -68,14 +68,14 @@ export default function PracticePatients() {
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search patients…"
+          placeholder="Search clients…"
           className="pl-9"
         />
       </div>
 
       <Card className="divide-y divide-border">
         {filtered.length === 0 && (
-          <div className="p-6 text-sm text-muted-foreground">No patients found.</div>
+          <div className="p-6 text-sm text-muted-foreground">No clients found.</div>
         )}
         {filtered.map((p) => (
           <div key={p.id} className="flex items-center justify-between gap-3 p-3">

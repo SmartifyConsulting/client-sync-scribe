@@ -57,7 +57,7 @@ interface DashboardTile {
 const TILES: DashboardTile[] = [
   { icon: FolderOpen, label: "My Documents", description: "All generated and uploaded documents", to: "/documents" },
   { icon: FlaskConical, label: "Lab Results", description: "Lab requests and results", to: "/patient/lab-results" },
-  { icon: ListChecks, label: "My Tasks", description: "To-dos and reminders", to: "/todos" },
+  { icon: ListChecks, label: "My Actions", description: "To-dos and reminders", to: "/todos" },
   { icon: BedDouble, label: "My Admissions", description: "Hospital admissions", to: "/admissions" },
 ];
 
@@ -83,7 +83,7 @@ const CARE_CIRCLE = [
 const HAPPENING = [
   { icon: CalendarDays, title: "Tomorrow 10:30", detail: "GP appointment", to: "/patient/calendar" },
   { icon: FlaskConical, title: "Blood results", detail: "Expected Friday", to: "/patient/lab-results" },
-  { icon: Activity, title: "Physio session", detail: "Monday 3:00 PM", to: "/patient/calendar" },
+  { icon: Activity, title: "Physio consultation", detail: "Monday 3:00 PM", to: "/patient/calendar" },
 ];
 
 const INSIGHTS = [
@@ -257,7 +257,7 @@ export default function MyPersonalDashboard() {
             {!isAdmin && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
           </div>
           <p className="text-[10px] text-muted-foreground">Something on your mind? A place to slow down and find your own way forward.</p>
-          <p className="text-[10px] text-muted-foreground italic">Holarc does not dispense advice — only questions.</p>
+          <p className="text-[10px] text-muted-foreground italic">Indigro does not dispense advice — only questions.</p>
         </div>
         <button
           type="button"
@@ -455,7 +455,7 @@ export default function MyPersonalDashboard() {
           <Panel title="My Holarcy" icon={HeartHandshake} unlocked={unlocked}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1 rounded-xl border border-border bg-background/40 p-4">
-                <p className="text-xs font-semibold text-foreground">My Holarc Medical Team</p>
+                <p className="text-xs font-semibold text-foreground">My Indigro Financial Team</p>
                 <EmotionalHeadline
                   emoji="❤️"
                   title="You're not looking after yourself alone"

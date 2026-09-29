@@ -1,7 +1,7 @@
 import { Receipt, Pill, CalendarDays, Award, ArrowUpRight, FlaskConical, FileText, Phone, Mail, Users, CreditCard, Hospital, Bell, AlertTriangle, CheckSquare } from "lucide-react";
 
 const ITEMS = [
-  { Icon: Receipt, label: "Invoice" },
+  { Icon: Receipt, label: "Fee statement" },
   { Icon: Pill, label: "Prescription" },
   { Icon: CalendarDays, label: "Appointment" },
   { Icon: Award, label: "Med. Cert" },
@@ -15,7 +15,7 @@ const ITEMS = [
   { Icon: Hospital, label: "Admission" },
   { Icon: Bell, label: "Reminder" },
   { Icon: AlertTriangle, label: "Urgent" },
-  { Icon: CheckSquare, label: "Task" },
+  { Icon: CheckSquare, label: "Action" },
 ];
 
 export function TodoLegend({ className = "" }: { className?: string }) {

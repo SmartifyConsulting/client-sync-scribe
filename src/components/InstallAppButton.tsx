@@ -125,18 +125,18 @@ export function InstallAppButton({ variant = "primary", className }: Props) {
       ? [
           { icon: <Menu className="inline h-4 w-4 align-text-bottom" />, text: <>Tap the <strong>menu</strong> icon (☰) in Samsung Internet.</> },
           { icon: null, text: <>Tap <strong>Add page to</strong> → <strong>Home screen</strong>.</> },
-          { icon: null, text: <>Tap <strong>Add</strong>. The Holarc icon appears on your home screen.</> },
+          { icon: null, text: <>Tap <strong>Add</strong>. The Indigro icon appears on your home screen.</> },
         ]
       : androidBrowser === "firefox"
       ? [
           { icon: <MoreVertical className="inline h-4 w-4 align-text-bottom" />, text: <>Tap the <strong>⋮</strong> menu in Firefox.</> },
           { icon: null, text: <>Tap <strong>Install</strong> (or <strong>Add to Home screen</strong>).</> },
-          { icon: null, text: <>Confirm. The Holarc icon appears on your home screen.</> },
+          { icon: null, text: <>Confirm. The Indigro icon appears on your home screen.</> },
         ]
       : [
           { icon: <MoreVertical className="inline h-4 w-4 align-text-bottom" />, text: <>Tap the <strong>⋮</strong> menu in your browser (top right).</> },
           { icon: <Plus className="inline h-4 w-4 align-text-bottom" />, text: <>Tap <strong>Install app</strong> (or <strong>Add to Home screen</strong>).</> },
-          { icon: null, text: <>Tap <strong>Install</strong>. The Holarc icon appears on your home screen.</> },
+          { icon: null, text: <>Tap <strong>Install</strong>. The Indigro icon appears on your home screen.</> },
         ];
 
   return (
@@ -166,7 +166,7 @@ export function InstallAppButton({ variant = "primary", className }: Props) {
       <Dialog open={iosOpen} onOpenChange={setIosOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Install Holarc on your iPhone</DialogTitle>
+            <DialogTitle>Install Indigro on your iPhone</DialogTitle>
             <DialogDescription>
               {inAppBrowser
                 ? "You're viewing this inside another app. Tap the menu (•••) and choose \"Open in Safari\" first, then follow the steps below."

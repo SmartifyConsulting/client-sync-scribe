@@ -176,7 +176,7 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
               <label className="text-xs font-medium text-foreground shrink-0 w-14">Name *</label>
               <Input
-                placeholder="e.g., Medical Certificate"
+                placeholder="e.g., Financial Certificate"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="h-8 flex-1 text-sm"

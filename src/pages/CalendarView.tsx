@@ -660,13 +660,13 @@ export default function CalendarView() {
             </DialogHeader>
             <div className="space-y-4 pt-4">
               <div>
-                <label className="text-sm font-medium text-foreground">Patient *</label>
+                <label className="text-sm font-medium text-foreground">Client *</label>
                 <Select
                   value={newAppointment.patientId}
                   onValueChange={(value) => setNewAppointment({ ...newAppointment, patientId: value })}
                 >
                   <SelectTrigger className="min-h-11">
-                    <SelectValue placeholder="Select a patient" />
+                    <SelectValue placeholder="Select a client" />
                   </SelectTrigger>
                   <SelectContent className="z-[100] bg-popover max-h-[60vh]">
                     {[...patients]
@@ -762,7 +762,7 @@ export default function CalendarView() {
                       ))
                     ) : (
                       <>
-                        <SelectItem value="session">Session</SelectItem>
+                        <SelectItem value="session">Consultation</SelectItem>
                         <SelectItem value="followup">Follow-up</SelectItem>
                         <SelectItem value="internal">Internal Meeting</SelectItem>
                       </>
@@ -1172,7 +1172,7 @@ export default function CalendarView() {
                             ))
                           ) : (
                             <>
-                              <SelectItem value="session">Session</SelectItem>
+                              <SelectItem value="session">Consultation</SelectItem>
                               <SelectItem value="followup">Follow-up</SelectItem>
                               <SelectItem value="internal">Internal Meeting</SelectItem>
                             </>

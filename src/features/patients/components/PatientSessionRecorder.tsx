@@ -77,7 +77,7 @@ export function PatientSessionRecorder({ patientId, patientName }: Props) {
 
   const handleStart = async () => {
     if (!doctorName.trim()) {
-      toast({ title: "Doctor name required", variant: "destructive" });
+      toast({ title: "Wealth Manager name required", variant: "destructive" });
       return;
     }
     const { data: { user } } = await supabase.auth.getUser();
@@ -122,7 +122,7 @@ export function PatientSessionRecorder({ patientId, patientName }: Props) {
         duration_minutes: duration,
       })
       .eq("id", sessionId);
-    toast({ title: "Session saved" });
+    toast({ title: "Consultation saved" });
     setOpen(false);
     setDoctorName("");
     setDoctorSpecialty("");
@@ -188,11 +188,11 @@ export function PatientSessionRecorder({ patientId, patientName }: Props) {
       <Dialog open={open} onOpenChange={(v) => !isRecording && setOpen(v)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Record a session</DialogTitle>
+            <DialogTitle>Record a consultation</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1.5">
-              <Label htmlFor="ed_name">Doctor name *</Label>
+              <Label htmlFor="ed_name">Wealth Manager name *</Label>
               <Input
                 id="ed_name"
                 value={doctorName}
@@ -213,13 +213,13 @@ export function PatientSessionRecorder({ patientId, patientName }: Props) {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="ed_prac">Practice</Label>
+                <Label htmlFor="ed_prac">Firm</Label>
                 <Input
                   id="ed_prac"
                   value={doctorPractice}
                   onChange={(e) => setDoctorPractice(e.target.value)}
                   disabled={isRecording || !!sessionId}
-                  placeholder="Practice name"
+                  placeholder="Firm name"
                 />
               </div>
             </div>

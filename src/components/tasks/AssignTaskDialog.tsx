@@ -157,13 +157,13 @@ export function AssignTaskDialog({
         });
       }
 
-      toast({ title: "Task assigned" });
+      toast({ title: "Action assigned" });
       reset();
       onOpenChange(false);
       onCreated?.();
     } catch (err: any) {
       toast({
-        title: "Could not assign task",
+        title: "Could not assign action",
         description: err?.message,
         variant: "destructive",
       });
@@ -187,7 +187,7 @@ export function AssignTaskDialog({
             <Label htmlFor="assign-to">Assign to</Label>
             <Select value={targetKey} onValueChange={setTargetKey}>
               <SelectTrigger id="assign-to">
-                <SelectValue placeholder="Choose a doctor, assistant or patient" />
+                <SelectValue placeholder="Choose a wealth manager, assistant or client" />
               </SelectTrigger>
               <SelectContent className="max-h-72">
                 {targets.map((t) => (
@@ -203,7 +203,7 @@ export function AssignTaskDialog({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="assign-title">Task</Label>
+            <Label htmlFor="assign-title">Action</Label>
             <Input
               id="assign-title"
               value={title}

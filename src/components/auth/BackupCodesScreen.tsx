@@ -80,12 +80,12 @@ export function BackupCodesScreen({ onContinue }: Props) {
     const w = window.open("", "_blank", "noopener,noreferrer");
     if (!w) return;
     w.document.write(
-      `<html><head><title>Holarc Backup Codes</title>
+      `<html><head><title>Indigro Backup Codes</title>
        <style>body{font-family:Arial,sans-serif;padding:24px}h1{font-size:18px}
        .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;font-family:monospace;font-size:18px}
        .code{padding:10px;border:1px solid #ccc;border-radius:6px;text-align:center}
        p{color:#444;font-size:13px}</style></head>
-       <body><h1>Holarc Health — Backup Codes</h1>
+       <body><h1>Indigro — Backup Codes</h1>
        <p>Generated ${new Date().toLocaleString()}. Each code works once. Use one if you lose your phone.</p>
        <div class="grid">${codes.map((c) => `<div class="code">${c}</div>`).join("")}</div>
        </body></html>`
@@ -100,7 +100,7 @@ export function BackupCodesScreen({ onContinue }: Props) {
         <div className="w-full max-w-md">
           <div className="text-center mb-5 sm:mb-6 px-1">
             <div className="flex justify-center mb-3">
-              <img src={holarcLogo} alt="Holarc Health" className="h-10 w-auto" />
+              <img src={holarcLogo} alt="Indigro" className="h-10 w-auto" />
             </div>
             <div className="inline-flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-primary/10 mb-3">
               <ShieldCheck className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />

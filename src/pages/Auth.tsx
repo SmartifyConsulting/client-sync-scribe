@@ -127,7 +127,7 @@ export default function Auth() {
       if (result.redirected) return;
       navigate("/dashboard");
     } catch (e) {
-      toast({ title: "Google sign-in failed", description: e instanceof Error ? e.message : "Unknown error", variant: "destructive" });
+      toast({ title: "Google sign-in failed", description: e instanceof Error ? e.message: "Unknown error", variant: "destructive" });
     } finally {
       setGoogleLoading(false);
     }
@@ -321,7 +321,7 @@ export default function Auth() {
       if (!practiceNumber.trim() || !doctorNumber.trim()) {
         toast({
           title: "Registration details required",
-          description: "Please enter both your Practice Number and your License / Doctor Registration Number to continue.",
+          description: "Please enter both your Firm Number and your License / Wealth Manager Registration Number to continue.",
           variant: "destructive",
         });
         return false;
@@ -387,8 +387,7 @@ export default function Auth() {
         setTimeout(() => document.getElementById("password")?.focus(), 0);
         toast({
           title: "Choose a different password",
-          description:
-            "This password has appeared in a known data breach. Even though it looks strong, it's unsafe to reuse. Please pick a unique password you haven't used elsewhere.",
+          description: "This password has appeared in a known data breach. Even though it looks strong, it's unsafe to reuse. Please pick a unique password you haven't used elsewhere.",
           variant: "destructive",
         });
         return false;
@@ -731,8 +730,8 @@ export default function Auth() {
                   <SelectValue placeholder="Select user type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="patient">Patient</SelectItem>
-                  <SelectItem value="doctor">Healthcare Provider</SelectItem>
+                  <SelectItem value="patient">Client</SelectItem>
+                  <SelectItem value="doctor">Wealth Manager</SelectItem>
                   <SelectItem value="hospital">Hospital</SelectItem>
                   <SelectItem value="emergency">Emergency Service Provider</SelectItem>
                   <SelectItem value="insurance">Insurance Company</SelectItem>
@@ -773,13 +772,13 @@ export default function Auth() {
                   <Button type="button" variant="outline" size="sm" onClick={() => avatarInputRef.current?.click()}>
                     {avatarPreview ? "Change photo" : "Upload photo"}
                   </Button>
-                  <p className="text-xs text-muted-foreground">Shown on your profile and to patients.</p>
+                  <p className="text-xs text-muted-foreground">Shown on your profile and to clients.</p>
                 </div>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label htmlFor="practiceNumber">Practice Number <span className="text-destructive">*</span></Label>
+                <Label htmlFor="practiceNumber">Firm Number <span className="text-destructive">*</span></Label>
                 <Input
                   id="practiceNumber"
                   placeholder="e.g. 0123456"
@@ -884,15 +883,15 @@ export default function Auth() {
                   <SelectValue placeholder="Select user type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="patient">Patient</SelectItem>
-                  <SelectItem value="doctor">Healthcare Provider</SelectItem>
+                  <SelectItem value="patient">Client</SelectItem>
+                  <SelectItem value="doctor">Wealth Manager</SelectItem>
                   <SelectItem value="hospital">Hospital</SelectItem>
                   <SelectItem value="emergency">Emergency Service Provider</SelectItem>
                   <SelectItem value="insurance">Insurance Company</SelectItem>
                   <SelectItem value="pharmacy">Pharmacy</SelectItem>
                 </SelectContent>
               </Select>
-              {inviteToken && <p className="text-xs text-muted-foreground mt-2">You're registering via a doctor's invitation</p>}
+              {inviteToken && <p className="text-xs text-muted-foreground mt-2">You're registering via a wealth manager's invitation</p>}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
@@ -988,7 +987,7 @@ export default function Auth() {
           <div className="w-full max-w-md">
             <div className="text-center mb-6">
               <button type="button" onClick={() => navigate("/")} className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity">
-                <img src={holarcLogo} alt="Holarc Health" className="h-[117px] w-auto" />
+                <img src={holarcLogo} alt="Indigro" className="h-[117px] w-auto" />
               </button>
             </div>
             {/* Sign In / Sign Up tabs */}
@@ -1224,7 +1223,7 @@ export default function Auth() {
         <div className="w-full max-w-md">
           <div className="text-center mb-6">
             <button type="button" onClick={() => navigate("/")} className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity">
-              <img src={holarcLogo} alt="Holarc Health" className="h-[117px] w-auto" />
+              <img src={holarcLogo} alt="Indigro" className="h-[117px] w-auto" />
             </button>
           </div>
           {/* Sign In / Sign Up tabs */}

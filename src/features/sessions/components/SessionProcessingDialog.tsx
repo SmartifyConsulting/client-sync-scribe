@@ -19,7 +19,7 @@ export function SessionProcessingDialog({ open }: Props) {
       >
         <div className="flex flex-col items-center gap-3 py-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm font-medium text-foreground">Analysing session</p>
+          <p className="text-sm font-medium text-foreground">Analysing consultation</p>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Generating summary, action points and documents…
           </p>

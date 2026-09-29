@@ -76,7 +76,7 @@ function SessionCard({ s, t }: { s: SessionRow; t: any }) {
           <p className="text-sm font-medium truncate flex items-center gap-1.5 min-w-0">
             <FileText className="h-3.5 w-3.5 text-primary shrink-0" />
             <span className="truncate">
-              {s.patient?.name || t("mySessions.noPatient", "No patient")} — {format(new Date(s.started_at), "MMMM d, yyyy")}
+              {s.patient?.name || t("mySessions.noPatient", "No client")} — {format(new Date(s.started_at), "MMMM d, yyyy")}
             </span>
           </p>
           <div className="flex items-center gap-3 shrink-0">
@@ -124,7 +124,7 @@ export default function MySessions() {
         .eq("patient_user_id", user.id);
       if (patientsError) {
         if (!cancelled) {
-          setLoadError(t("mySessions.loadError", "Could not load sessions."));
+          setLoadError(t("mySessions.loadError", "Could not load consultations."));
           setLoading(false);
         }
         return;
@@ -144,7 +144,7 @@ export default function MySessions() {
       const { data, error: sessionsError } = await q;
       if (sessionsError) {
         if (!cancelled) {
-          setLoadError(t("mySessions.loadError", "Could not load sessions."));
+          setLoadError(t("mySessions.loadError", "Could not load consultations."));
           setLoading(false);
         }
         return;
@@ -175,7 +175,7 @@ export default function MySessions() {
       visibleSessions.map((s) => ({
         item: s,
         date: s.started_at,
-        patient: s.patient?.name || t("mySessions.noPatient", "No patient"),
+        patient: s.patient?.name || t("mySessions.noPatient", "No client"),
         hospital: (s as any).hospital || null,
         search: [s.title, s.patient?.name, s.status].filter(Boolean).join(" "),
       })),
@@ -187,10 +187,10 @@ export default function MySessions() {
       <div className="mb-6 flex items-start justify-between gap-4">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold text-foreground">
-            {t("nav.mySessions", "Sessions")}
+            {t("nav.mySessions", "Consultations")}
           </h1>
           <p className="text-muted-foreground text-xs">
-            {t("mySessions.subtitle", "Browse your consultation sessions grouped by date.")}
+            {t("mySessions.subtitle", "Browse your consultation consultations grouped by date.")}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -210,7 +210,7 @@ export default function MySessions() {
             <Button asChild size="sm" className="gap-2">
               <Link to="/sessions">
                 <Plus className="h-4 w-4" />
-                {t("mySessions.addSession", "Add Session")}
+                {t("mySessions.addSession", "Add Consultation")}
               </Link>
             </Button>
           )}
@@ -231,8 +231,8 @@ export default function MySessions() {
           storageKey="sessions"
           items={items}
           allowHospital={isHospitalUser}
-          searchPlaceholder={t("mySessions.search", "Search sessions...")}
-          emptyLabel={t("mySessions.empty", "No sessions in this period.")}
+          searchPlaceholder={t("mySessions.search", "Search consultations...")}
+          emptyLabel={t("mySessions.empty", "No consultations in this period.")}
           renderItem={(s: SessionRow) => <SessionCard s={s} t={t} />}
           subGroupByPatient
         />

@@ -87,7 +87,7 @@ export function InviteDoctorDialog({
       }
 
       if (!doctorRow) {
-        toast({ title: "Doctor not found", description: "We couldn't locate this provider's account.", variant: "destructive" });
+        toast({ title: "Wealth Manager not found", description: "We couldn't locate this provider's account.", variant: "destructive" });
         setIsLoading(false);
         return;
       }
@@ -98,7 +98,7 @@ export function InviteDoctorDialog({
       if (!practiceNum || !registrationNum) {
         toast({
           title: "Missing registration details",
-          description: "This provider has no practice or registration number on file; please contact support to connect.",
+          description: "This provider has no firm or registration number on file; please contact support to connect.",
           variant: "destructive",
         });
         setIsLoading(false);
@@ -124,7 +124,7 @@ export function InviteDoctorDialog({
 
       if (existingRequest) {
         if (existingRequest.status === "pending") {
-          toast({ title: "Request already pending", description: "You have already sent a request to this doctor.", variant: "destructive" });
+          toast({ title: "Request already pending", description: "You have already sent a request to this wealth manager.", variant: "destructive" });
           setIsLoading(false);
           return;
         }
@@ -165,7 +165,7 @@ export function InviteDoctorDialog({
         });
       }
 
-      toast({ title: "Request sent", description: "Your access request has been sent to the doctor." });
+      toast({ title: "Request sent", description: "Your access request has been sent to the wealth manager." });
       setSelectedPermissions(["patient_info", "calendar", "session_summaries", "prescription_history"]);
       setOpen(false);
     } catch (error: any) {
@@ -209,7 +209,7 @@ export function InviteDoctorDialog({
                 {prefillSpecialty && (
                   <Badge variant="secondary" className="text-xs mt-0.5">{prefillSpecialty}</Badge>
                 )}
-                {!prefillSpecialty && <p className="text-xs text-muted-foreground">Selected healthcare provider</p>}
+                {!prefillSpecialty && <p className="text-xs text-muted-foreground">Selected wealth manager</p>}
               </div>
             </div>
           )}
@@ -217,7 +217,7 @@ export function InviteDoctorDialog({
           {/* Permission Transparency */}
           <div className="space-y-2">
             <Label>Data Sharing Transparency</Label>
-            <p className="text-xs text-muted-foreground">What your doctor will and won't be able to see:</p>
+            <p className="text-xs text-muted-foreground">What your wealth manager will and won't be able to see:</p>
             <PermissionTransparencyModal inline isPatientFacing />
           </div>
         </div>

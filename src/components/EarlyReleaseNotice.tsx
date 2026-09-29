@@ -46,7 +46,7 @@ export function EarlyReleaseNotice() {
           <div className="mx-auto mb-2 flex items-center gap-2">
             <img
               src={holarcLogo}
-              alt="Holarc Health"
+              alt="Indigro"
               className="h-10 w-auto object-contain"
             />
             <span className="text-[10px] font-bold tracking-widest px-1.5 py-0.5 rounded bg-primary text-primary-foreground">

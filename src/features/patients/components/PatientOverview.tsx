@@ -189,7 +189,7 @@ function ChronicAdherenceSection({ patientId, patientName }: { patientId: string
       if (patientData?.patient_user_id) {
         await supabase.from("notifications").insert({
           user_id: patientData.patient_user_id,
-          title: "🎉 Your Doctor Congratulated You!",
+          title: "🎉 Your Wealth Manager Congratulated You!",
           description: `Your doctor congratulated you on your ${maxStreak}-day medication streak! You earned 250 Vulas!`,
           type: "congratulation",
           reference_id: patientId,

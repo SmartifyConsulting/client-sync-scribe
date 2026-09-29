@@ -305,7 +305,7 @@ export default function Dashboard() {
 
       {doctorIncomplete && (
         <ProfileCompletionBanner
-          title="Complete your practitioner profile"
+          title="Complete your wealth manager profile"
           message="Add your specialty, practice number, HPCSA/registration number and practice address so patients can find you and your documents render correctly. All credentials are encrypted in transit and at rest, visible only to you and patients you connect with. Holarc Health is HIPAA- and POPIA-aligned and never sells or shares your data."
           onComplete={() => navigate("/profile")}
           storageKey="holarc_doctor_profile_banner_dismissed"

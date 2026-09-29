@@ -26,13 +26,13 @@ const GRANTED_ACCESS = [
 // What OTHER practitioners on the patient's panel can / cannot see.
 const OTHER_PRACTITIONER_ACCESS: { label: string; allowed: boolean }[] = [
   { label: "Round Table notes and shared care-team discussions", allowed: true },
-  { label: "Sessions the patient has explicitly shared with them", allowed: true },
-  { label: "Documents the patient has shared with them", allowed: true },
+  { label: "Consultations the client has explicitly shared with them", allowed: true },
+  { label: "Documents the client has shared with them", allowed: true },
   { label: "Medication, allergy and condition lists", allowed: true },
-  { label: "Your private clinical notes not shared to the care team", allowed: false },
-  { label: "The patient's Emotional Journal / Ask Holarc chats", allowed: false },
-  { label: "Records from practitioners not shared with them", allowed: false },
-  { label: "The patient's billing and subscription details", allowed: false },
+  { label: "Your private advice notes not shared to the care team", allowed: false },
+  { label: "The client's Emotional Journal / Ask Indigro chats", allowed: false },
+  { label: "Records from wealth managers not shared with them", allowed: false },
+  { label: "The client's fees and subscription details", allowed: false },
 ];
 
 const DENIED_ACCESS = [
@@ -78,9 +78,9 @@ const FULL_PERMISSIONS: AccessPermission[] = [
 ];
 
 const ACCESS_ITEMS = [
-  { icon: User, label: "Patient Information", desc: "Contact details, demographics and clinical profile." },
+  { icon: User, label: "Client Information", desc: "Contact details, demographics and clinical profile." },
   { icon: CalendarIcon, label: "Calendar", desc: "Their upcoming appointments and availability." },
-  { icon: FileText, label: "Session Summaries", desc: "AI-generated summaries of past consultations." },
+  { icon: FileText, label: "Consultation Summaries", desc: "AI-generated summaries of past consultations." },
   { icon: Pill, label: "Documentation", desc: "Prescriptions, results and other shared documents." },
 ];
 

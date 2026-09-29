@@ -86,12 +86,12 @@ export function InformDocumentDialog({
 
         <div className="space-y-3">
           <div className="space-y-1.5">
-            <Label className="text-xs font-bold">Doctor's email address</Label>
+            <Label className="text-xs font-bold">Wealth Manager's email address</Label>
             <Input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="colleague@practice.com"
+              placeholder="colleague@firm.com"
             />
           </div>
           <div className="space-y-1.5">

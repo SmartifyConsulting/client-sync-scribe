@@ -216,13 +216,13 @@ export function UploadDocumentDialog({ open, onOpenChange, onUploaded }: UploadD
           </div>
 
           <div>
-            <Label className="text-sm">Patient (optional)</Label>
+            <Label className="text-sm">Client (optional)</Label>
             <Select value={patientId} onValueChange={setPatientId}>
               <SelectTrigger>
-                <SelectValue placeholder="No patient (practice document)" />
+                <SelectValue placeholder="No client (firm document)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={NO_PATIENT_VALUE}>No patient (practice document)</SelectItem>
+                <SelectItem value={NO_PATIENT_VALUE}>No client (firm document)</SelectItem>
                 {patients.map((p) => (
                   <SelectItem key={p.id} value={p.id}>
                     {p.name}

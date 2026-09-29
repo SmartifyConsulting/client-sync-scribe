@@ -81,7 +81,7 @@ export function PracticeAssistants() {
           <Input
             value={practiceName}
             onChange={(e) => setPracticeName(e.target.value)}
-            placeholder="Practice name"
+            placeholder="Firm name"
             className="max-w-xs"
           />
           <Button

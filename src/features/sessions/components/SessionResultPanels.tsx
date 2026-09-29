@@ -208,7 +208,7 @@ export function SessionResultPanels({
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
               <Brain className="h-4 w-4 text-primary" />
             </div>
-            <h3 className="text-sm font-bold text-foreground">AI Clinician Notes</h3>
+            <h3 className="text-sm font-bold text-foreground">AI Wealth Manager Notes</h3>
           </div>
           {clinicianActions}
         </div>

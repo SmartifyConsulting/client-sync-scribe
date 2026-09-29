@@ -207,7 +207,7 @@ export function AppointmentRequestsPanel() {
         description: `Your doctor has proposed a new time: ${format(proposedStart, "MMM d, yyyy 'at' h:mm a")}.`,
       });
 
-      toast({ title: "Proposed", description: "Alternative time sent to patient." });
+      toast({ title: "Proposed", description: "Alternative time sent to client." });
       setProposeDialogOpen(false);
       fetchRequests();
     } catch (err: any) {

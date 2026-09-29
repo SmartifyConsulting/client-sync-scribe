@@ -231,7 +231,7 @@ export function ApplyHistoryDialog({
       if (error) throw error;
 
       toast({
-        title: "Patient record updated",
+        title: "Client record updated",
         description: "History and overview notes appended from the transcribed record.",
       });
       onApplied?.();
@@ -253,7 +253,7 @@ export function ApplyHistoryDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Apply to patient record?</DialogTitle>
+          <DialogTitle>Apply to client record?</DialogTitle>
           <DialogDescription>
             The AI found the following history in the transcribed record
             {effectiveDate ? ` dated ${effectiveDate}` : ""}. Nothing is overwritten — selected

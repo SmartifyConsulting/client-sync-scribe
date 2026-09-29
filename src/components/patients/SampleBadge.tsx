@@ -13,7 +13,7 @@ export function SampleBadge({ size = "sm", className }: SampleBadgeProps) {
   return (
     <span
       role="img"
-      aria-label="Sample data — not a real patient"
+      aria-label="Sample data — not a real client"
       className={cn(
         "shrink-0 align-middle font-normal text-muted-foreground",
         size === "md" ? "text-sm" : "text-xs",

@@ -30,7 +30,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
     <aside className="fixed left-0 top-0 z-40 h-screen w-[252px] bg-sidebar">
       <div className="flex h-full flex-col">
         <div className="flex h-24 items-center gap-3 px-6">
-          <img src={holarcLogo} alt="Holarc Health" className="h-[82px] w-auto object-contain" />
+          <img src={holarcLogo} alt="Indigro" className="h-[82px] w-auto object-contain" />
         </div>
 
         {isAdmin && (
