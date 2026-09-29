@@ -2587,6 +2587,7 @@ export type Database = {
           attachments: Json
           content: string
           created_at: string
+          document_kind: string | null
           email_sent_at: string | null
           id: string
           is_draft: boolean | null
@@ -2612,6 +2613,7 @@ export type Database = {
           attachments?: Json
           content: string
           created_at?: string
+          document_kind?: string | null
           email_sent_at?: string | null
           id?: string
           is_draft?: boolean | null
@@ -2637,6 +2639,7 @@ export type Database = {
           attachments?: Json
           content?: string
           created_at?: string
+          document_kind?: string | null
           email_sent_at?: string | null
           id?: string
           is_draft?: boolean | null
@@ -9707,6 +9710,7 @@ export type Database = {
       }
       todos: {
         Row: {
+          application_id: string | null
           assigned_to_user_id: string | null
           assignee: string
           completed_at: string | null
@@ -9717,9 +9721,12 @@ export type Database = {
           due_date: string | null
           id: string
           is_auto_executed: boolean | null
+          owner_role: string | null
           patient_id: string | null
           priority: string
+          product: string | null
           proof_url: string | null
+          recommendation_id: string | null
           session_id: string | null
           status: string
           task_type: string
@@ -9727,8 +9734,11 @@ export type Database = {
           updated_at: string
           user_id: string
           vulas_reward: number
+          workflow_id: string | null
+          workflow_stage: string | null
         }
         Insert: {
+          application_id?: string | null
           assigned_to_user_id?: string | null
           assignee?: string
           completed_at?: string | null
@@ -9739,9 +9749,12 @@ export type Database = {
           due_date?: string | null
           id?: string
           is_auto_executed?: boolean | null
+          owner_role?: string | null
           patient_id?: string | null
           priority?: string
+          product?: string | null
           proof_url?: string | null
+          recommendation_id?: string | null
           session_id?: string | null
           status?: string
           task_type?: string
@@ -9749,8 +9762,11 @@ export type Database = {
           updated_at?: string
           user_id: string
           vulas_reward?: number
+          workflow_id?: string | null
+          workflow_stage?: string | null
         }
         Update: {
+          application_id?: string | null
           assigned_to_user_id?: string | null
           assignee?: string
           completed_at?: string | null
@@ -9761,9 +9777,12 @@ export type Database = {
           due_date?: string | null
           id?: string
           is_auto_executed?: boolean | null
+          owner_role?: string | null
           patient_id?: string | null
           priority?: string
+          product?: string | null
           proof_url?: string | null
+          recommendation_id?: string | null
           session_id?: string | null
           status?: string
           task_type?: string
@@ -9771,8 +9790,17 @@ export type Database = {
           updated_at?: string
           user_id?: string
           vulas_reward?: number
+          workflow_id?: string | null
+          workflow_stage?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "todos_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "wealth_applications"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "todos_patient_id_fkey"
             columns: ["patient_id"]
@@ -9781,10 +9809,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "todos_recommendation_id_fkey"
+            columns: ["recommendation_id"]
+            isOneToOne: false
+            referencedRelation: "wealth_recommendations"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "todos_session_id_fkey"
             columns: ["session_id"]
             isOneToOne: false
             referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "todos_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "wealth_workflows"
             referencedColumns: ["id"]
           },
         ]
@@ -10107,6 +10149,356 @@ export type Database = {
             columns: ["partner_app_id"]
             isOneToOne: false
             referencedRelation: "vula_partner_apps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wealth_applications: {
+        Row: {
+          created_at: string
+          id: string
+          issued_at: string | null
+          product: string | null
+          provider: string | null
+          recommendation_id: string | null
+          review_date: string | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+          workflow_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          issued_at?: string | null
+          product?: string | null
+          provider?: string | null
+          recommendation_id?: string | null
+          review_date?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          workflow_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          issued_at?: string | null
+          product?: string | null
+          provider?: string | null
+          recommendation_id?: string | null
+          review_date?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wealth_applications_recommendation_id_fkey"
+            columns: ["recommendation_id"]
+            isOneToOne: false
+            referencedRelation: "wealth_recommendations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wealth_applications_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "wealth_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wealth_compliance_checks: {
+        Row: {
+          bank_validation_completed_at: string | null
+          bank_validation_required: boolean
+          bank_validation_status: string
+          created_at: string
+          declarations_completed_at: string | null
+          declarations_status: string
+          id: string
+          kyc_fica_completed_at: string | null
+          kyc_fica_status: string
+          updated_at: string
+          workflow_id: string
+        }
+        Insert: {
+          bank_validation_completed_at?: string | null
+          bank_validation_required?: boolean
+          bank_validation_status?: string
+          created_at?: string
+          declarations_completed_at?: string | null
+          declarations_status?: string
+          id?: string
+          kyc_fica_completed_at?: string | null
+          kyc_fica_status?: string
+          updated_at?: string
+          workflow_id: string
+        }
+        Update: {
+          bank_validation_completed_at?: string | null
+          bank_validation_required?: boolean
+          bank_validation_status?: string
+          created_at?: string
+          declarations_completed_at?: string | null
+          declarations_status?: string
+          id?: string
+          kyc_fica_completed_at?: string | null
+          kyc_fica_status?: string
+          updated_at?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wealth_compliance_checks_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: true
+            referencedRelation: "wealth_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wealth_recommendations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          decided_at: string | null
+          decision_reason: string | null
+          id: string
+          presented_at: string | null
+          roa_document_id: string | null
+          status: string
+          summary: string | null
+          supersedes_id: string | null
+          title: string | null
+          updated_at: string
+          version: number
+          workflow_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decision_reason?: string | null
+          id?: string
+          presented_at?: string | null
+          roa_document_id?: string | null
+          status?: string
+          summary?: string | null
+          supersedes_id?: string | null
+          title?: string | null
+          updated_at?: string
+          version?: number
+          workflow_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decision_reason?: string | null
+          id?: string
+          presented_at?: string | null
+          roa_document_id?: string | null
+          status?: string
+          summary?: string | null
+          supersedes_id?: string | null
+          title?: string | null
+          updated_at?: string
+          version?: number
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wealth_recommendations_roa_document_id_fkey"
+            columns: ["roa_document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wealth_recommendations_supersedes_id_fkey"
+            columns: ["supersedes_id"]
+            isOneToOne: false
+            referencedRelation: "wealth_recommendations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wealth_recommendations_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "wealth_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wealth_workflow_stage_defs: {
+        Row: {
+          dependencies: string[]
+          label: string
+          next_stages: string[]
+          owner_role: string
+          position: number
+          required_documents: string[]
+          required_info: string[]
+          stage: string
+        }
+        Insert: {
+          dependencies?: string[]
+          label: string
+          next_stages?: string[]
+          owner_role: string
+          position: number
+          required_documents?: string[]
+          required_info?: string[]
+          stage: string
+        }
+        Update: {
+          dependencies?: string[]
+          label?: string
+          next_stages?: string[]
+          owner_role?: string
+          position?: number
+          required_documents?: string[]
+          required_info?: string[]
+          stage?: string
+        }
+        Relationships: []
+      }
+      wealth_workflow_transitions: {
+        Row: {
+          actor_type: string
+          actor_user_id: string | null
+          created_at: string
+          decision: string | null
+          from_stage: string | null
+          id: string
+          reason: string | null
+          related_record_id: string | null
+          related_record_type: string | null
+          to_stage: string
+          workflow_id: string
+        }
+        Insert: {
+          actor_type?: string
+          actor_user_id?: string | null
+          created_at?: string
+          decision?: string | null
+          from_stage?: string | null
+          id?: string
+          reason?: string | null
+          related_record_id?: string | null
+          related_record_type?: string | null
+          to_stage: string
+          workflow_id: string
+        }
+        Update: {
+          actor_type?: string
+          actor_user_id?: string | null
+          created_at?: string
+          decision?: string | null
+          from_stage?: string | null
+          id?: string
+          reason?: string | null
+          related_record_id?: string | null
+          related_record_type?: string | null
+          to_stage?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wealth_workflow_transitions_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "wealth_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wealth_workflows: {
+        Row: {
+          annual_review_appointment_id: string | null
+          blockers: Json
+          consultation_session_id: string | null
+          created_at: string
+          current_stage: string
+          cycle_number: number
+          id: string
+          next_review_date: string | null
+          owner_user_id: string
+          patient_id: string
+          practice_id: string | null
+          previous_workflow_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          annual_review_appointment_id?: string | null
+          blockers?: Json
+          consultation_session_id?: string | null
+          created_at?: string
+          current_stage?: string
+          cycle_number?: number
+          id?: string
+          next_review_date?: string | null
+          owner_user_id?: string
+          patient_id: string
+          practice_id?: string | null
+          previous_workflow_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          annual_review_appointment_id?: string | null
+          blockers?: Json
+          consultation_session_id?: string | null
+          created_at?: string
+          current_stage?: string
+          cycle_number?: number
+          id?: string
+          next_review_date?: string | null
+          owner_user_id?: string
+          patient_id?: string
+          practice_id?: string | null
+          previous_workflow_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wealth_workflows_consultation_session_id_fkey"
+            columns: ["consultation_session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wealth_workflows_current_stage_fkey"
+            columns: ["current_stage"]
+            isOneToOne: false
+            referencedRelation: "wealth_workflow_stage_defs"
+            referencedColumns: ["stage"]
+          },
+          {
+            foreignKeyName: "wealth_workflows_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wealth_workflows_practice_id_fkey"
+            columns: ["practice_id"]
+            isOneToOne: false
+            referencedRelation: "practices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wealth_workflows_previous_workflow_id_fkey"
+            columns: ["previous_workflow_id"]
+            isOneToOne: false
+            referencedRelation: "wealth_workflows"
             referencedColumns: ["id"]
           },
         ]
@@ -11174,6 +11566,61 @@ export type Database = {
           is_safe: boolean
           warnings: string[]
         }[]
+      }
+      wealth_apply_stage: {
+        Args: {
+          _actor: string
+          _blockers: Json
+          _decision: string
+          _reason: string
+          _rid: string
+          _rtype: string
+          _stage: string
+          _workflow_id: string
+        }
+        Returns: undefined
+      }
+      wealth_assert_access: {
+        Args: { _workflow_id: string }
+        Returns: Record<string, unknown>
+      }
+      wealth_blockers: {
+        Args: { _target_stage: string; _workflow_id: string }
+        Returns: Json
+      }
+      wealth_derive_stage: { Args: { _workflow_id: string }; Returns: Json }
+      wealth_has_doc: { Args: { _kind: string; _wf: string }; Returns: boolean }
+      wealth_present_recommendation: {
+        Args: { _recommendation_id: string }
+        Returns: Json
+      }
+      wealth_record_decision: {
+        Args: {
+          _decision: string
+          _reason?: string
+          _recommendation_id: string
+        }
+        Returns: Json
+      }
+      wealth_refresh: {
+        Args: { _rid?: string; _rtype?: string; _workflow_id: string }
+        Returns: Json
+      }
+      wealth_start_annual_review: {
+        Args: {
+          _appointment_id?: string
+          _session_id?: string
+          _workflow_id: string
+        }
+        Returns: string
+      }
+      wealth_start_workflow: {
+        Args: { _patient_id: string; _session_id?: string }
+        Returns: string
+      }
+      wealth_transition: {
+        Args: { _reason?: string; _to_stage: string; _workflow_id: string }
+        Returns: Json
       }
     }
     Enums: {
