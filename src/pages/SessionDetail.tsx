@@ -61,7 +61,7 @@ import { useSessions } from "@/hooks/useSessions";
 import { DocumentPreviewWithLetterhead } from "@/features/documents/components/DocumentPreviewWithLetterhead";
 
 import { SessionResultPanels, AISummaryCard } from "@/features/sessions/components/SessionResultPanels";
-import { SessionPatientOverview } from "@/features/sessions/components/SessionPatientOverview";
+import { WealthClientOverview } from "@/features/sessions/components/WealthClientOverview";
 import { SessionDiscStrip } from "@/features/sessions/components/SessionDiscStrip";
 import { ClinicianNotesColumns } from "@/features/sessions/components/ClinicianNotesAccordion";
 import {
@@ -457,9 +457,8 @@ export default function SessionDetail() {
       )}
 
       {/* Patient Overview — full width */}
-      <SessionPatientOverview
+      <WealthClientOverview
         patient={session.patient}
-        currentMedications={currentMedications}
         discSlot={<SessionDiscStrip patientId={session.patient?.id} inline />}
       />
 

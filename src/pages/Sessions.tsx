@@ -46,7 +46,7 @@ import { ReferralLetterEditor } from "@/components/sessions/ReferralLetterEditor
 import { GeneralLetterEditor } from "@/components/sessions/GeneralLetterEditor";
 import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmissionEditor";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SessionPatientOverview } from "@/features/sessions/components/SessionPatientOverview";
+import { WealthClientOverview } from "@/features/sessions/components/WealthClientOverview";
 import { SessionDiscStrip } from "@/features/sessions/components/SessionDiscStrip";
 import { SessionProcessingDialog } from "@/features/sessions/components/SessionProcessingDialog";
 import { SessionTranscriptAccordion } from "@/features/sessions/components/SessionTranscriptAccordion";
@@ -1745,9 +1745,8 @@ export default function Sessions() {
           <div className="flex flex-col gap-4 order-2 min-w-0 lg:col-start-2 lg:row-start-1">
             {/* Patient Overview — AI recap of the last 6 months with DISC descriptors on top. */}
             <div className="min-h-[210px] flex flex-col">
-              <SessionPatientOverview
+              <WealthClientOverview
                 patient={currentPatient}
-                currentMedications={currentMedications}
                 discSlot={<SessionDiscStrip patientId={currentPatient?.id} inline />}
               />
             </div>
