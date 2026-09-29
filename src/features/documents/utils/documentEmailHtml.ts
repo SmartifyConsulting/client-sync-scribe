@@ -1,8 +1,8 @@
 import { renderFormattedContent } from "@/features/documents/utils/documentFormatting";
 import { getFontFamilyCss } from "@/features/documents/templates/fontOptions";
-import holarcLogo from "@/assets/holarc-email-logo.png.asset.json";
+import holarcLogo from "@/assets/holarc-wealth-logo.png.asset.json";
 
-/** Absolute URL of the Holarc Health logo so it renders inside email clients. */
+/** Absolute URL of the Holarc Wealth logo so it renders inside email clients. */
 export const HOLARC_EMAIL_LOGO_URL = `https://www.holarchealth.com${holarcLogo.url}`;
 
 interface SectionCell {
@@ -59,7 +59,7 @@ const renderSection = (section: Section | null | undefined, fontFamily: string, 
 /**
  * Renders a document to the exact same visual layout as `DocumentCanvas`
  * (letterhead grid, 12pt body, 10.5pt header/footer) as standalone HTML that
- * email clients can display, with the Holarc Health logo centred on top at
+ * email clients can display, with the Holarc Wealth logo centred on top at
  * roughly one third of the document width.
  */
 export function buildDocumentEmailHtml({
@@ -82,7 +82,7 @@ export function buildDocumentEmailHtml({
   <body style="margin:0;padding:24px 0;background:#f5f5f5;">
     <div id="holarc-document" style="max-width:210mm;margin:0 auto;background:#ffffff;padding:20mm;font-family:${font};color:#000;">
       <div style="text-align:center;margin-bottom:16px;">
-        <img src="${HOLARC_EMAIL_LOGO_URL}" alt="Holarc Health" style="width:33%;max-width:200px;height:auto;object-fit:contain;" />
+        <img src="${HOLARC_EMAIL_LOGO_URL}" alt="Holarc Wealth" style="width:33%;max-width:200px;height:auto;object-fit:contain;" />
       </div>
       ${header ? header + rule : logoUrl ? `<div style="margin-bottom:16px;"><img src="${logoUrl}" alt="" style="max-height:64px;object-fit:contain;" /></div>` : ""}
       <div style="font-family:${font};font-size:${bodyFontSize};line-height:1.6;white-space:pre-wrap;">${renderFormattedContent(
@@ -90,7 +90,7 @@ export function buildDocumentEmailHtml({
       )}</div>
       ${footer ? rule + footer : ""}
       <div style="margin-top:32px;padding-top:12px;border-top:1px solid #e5e5e5;font-size:9pt;color:#666;text-align:center;">
-        Sent by ${senderName || "Holarc Health"} via Holarc Health
+        Sent by ${senderName || "Holarc Wealth"} via Holarc Wealth
       </div>
     </div>
   </body>

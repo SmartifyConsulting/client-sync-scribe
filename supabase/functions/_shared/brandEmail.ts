@@ -1,5 +1,5 @@
 /**
- * Shared Holarc Health email shell.
+ * Shared Holarc Wealth email shell.
  *
  * Every outbound email (documents to patients, medical aids, pharmacies,
  * invoices and reports) is wrapped in this so recipients always see the
@@ -13,12 +13,12 @@ export const HOLARC_LOGO_CID = "holarc-logo";
 export const HOLARC_SIGNATURE_CID = "holarc-signature";
 
 export const HOLARC_LOGO_URL =
-  "https://www.holarchealth.com/__l5e/assets-v1/b61ca18b-7d1a-4a2f-9445-cfbccf4c9b3e/holarc-email-logo.png";
+  "https://www.holarchealth.com/__l5e/assets-v1/8f35c2f6-23ea-4a43-9fc6-3569d0ef7fa8/holarc-wealth-logo-v2.png";
 
 /** Brand tokens mirrored from the app's design system. */
-const TEAL = "#2AA79E";
-const TEAL_DARK = "#1C7B74";
-const RED = "#E01837";
+const TEAL = "#0D7A75";
+const TEAL_DARK = "#1E3A5F";
+const RED = "#2F6FB0";
 const INK = "#1F2933";
 const MUTED = "#6B7280";
 
@@ -78,7 +78,7 @@ export function brandedEmail({
           <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;">
             <tr>
               <td style="border-top:4px solid ${RED};padding:20px 28px 34px 28px;">
-                <a href="https://www.holarchealth.com" style="text-decoration:none;color:${TEAL_DARK};font-family:${HEADING_FONT};font-weight:700;font-size:18px;"><img src="${inlineLogo ? `cid:${HOLARC_LOGO_CID}` : HOLARC_LOGO_URL}" alt="Holarc Health" width="200" height="79" style="height:79px;width:200px;max-width:200px;display:block;border:0;outline:none;text-decoration:none;color:${TEAL_DARK};font-family:${HEADING_FONT};font-weight:700;font-size:18px;" /></a>
+                <a href="https://www.holarchealth.com" style="text-decoration:none;color:${TEAL_DARK};font-family:${HEADING_FONT};font-weight:700;font-size:18px;"><img src="${inlineLogo ? `cid:${HOLARC_LOGO_CID}` : HOLARC_LOGO_URL}" alt="Holarc Wealth" width="200" height="80" style="height:auto;width:200px;max-width:200px;display:block;border:0;outline:none;text-decoration:none;color:${TEAL_DARK};font-family:${HEADING_FONT};font-weight:700;font-size:18px;" /></a>
               </td>
             </tr>
             <tr>
@@ -93,7 +93,7 @@ export function brandedEmail({
                 ${bodyHtml}
                 ${documentUrl ? `
                 <div style="margin-top:24px;">
-                  <a href="${documentUrl}" style="display:inline-block;background:${TEAL};color:#ffffff;font-family:${HEADING_FONT};font-weight:600;font-size:14px;text-decoration:none;padding:11px 20px;border-radius:8px;">View this document in Holarc Health</a>
+                  <a href="${documentUrl}" style="display:inline-block;background:${TEAL};color:#ffffff;font-family:${HEADING_FONT};font-weight:600;font-size:14px;text-decoration:none;padding:11px 20px;border-radius:8px;">View this document in Holarc Wealth</a>
                 </div>` : ""}
               </td>
             </tr>
@@ -102,7 +102,7 @@ export function brandedEmail({
                 ${signatureHtml ? `<div style="margin:0 0 10px 0;">${signatureHtml}</div>` : ""}
                 ${from ? `<p style="margin:0 0 6px 0;font-weight:600;color:${INK};">Sent by ${escapeHtml(from)}</p>` : ""}
                 <p style="margin:0 0 6px 0;">${escapeHtml(note)}</p>
-                <p style="margin:0;color:${TEAL_DARK};font-family:${HEADING_FONT};font-weight:600;">Holarc Health</p>
+                <p style="margin:0;color:${TEAL_DARK};font-family:${HEADING_FONT};font-weight:600;">Holarc Wealth</p>
               </td>
             </tr>
           </table>
