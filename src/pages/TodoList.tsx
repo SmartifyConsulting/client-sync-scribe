@@ -444,7 +444,7 @@ export default function TodoList() {
               task_type: 'patient_assignment',
               priority: 'medium',
               status: 'pending',
-              vulas_reward: 1,
+              vulas_reward: 0,
             }).select('id').single();
             if (newTodo) {
               await supabase.from('notifications').insert({

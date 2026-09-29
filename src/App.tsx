@@ -8,6 +8,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { PatientAppLayout } from "@/components/layout/PatientAppLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
+import MyFuture from "@/pages/MyFuture";
 import { useProviderAccess } from "@/modules/holarchelp/components/ProviderGate";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import Landing from "./pages/Landing";
@@ -183,7 +184,13 @@ function RoleBasedRedirect() {
 function WealthRouteGuard() {
   const loc = useLocation();
   const { isAdmin, isLoading } = useIsAdmin();
+  const { hasDoctorRole, hasPatientRole, loading: roleLoading } = useUserRole();
   if (!isLoading && !isAdmin && isWealthHidden(loc.pathname)) return <Navigate to="/dashboard" replace />;
+  // Clients never reach firm-facing screens (My Business, My Clients).
+  const clientOnly = !roleLoading && !isLoading && !isAdmin && hasPatientRole && !hasDoctorRole;
+  if (clientOnly && (loc.pathname === "/practice" || loc.pathname.startsWith("/practice/") || loc.pathname === "/patients")) {
+    return <Navigate to="/my-dashboard" replace />;
+  }
   return null;
 }
 
@@ -278,6 +285,7 @@ const App = () => (
             <Route path="/sessions" element={<Sessions />} />
             <Route path="/my-sessions" element={<MySessions />} />
             <Route path="/my-dashboard" element={<MyPersonalDashboard />} />
+            <Route path="/my-future" element={<MyFuture />} />
             <Route path="/my-shift" element={<MyShiftScreen />} />
             <Route path="/sessions/:id" element={<SessionDetail />} />
 

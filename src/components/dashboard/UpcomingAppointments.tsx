@@ -157,7 +157,7 @@ export function UpcomingAppointments() {
                   size="sm"
                   onClick={() => handleStartSession(appointment.patientId!)}
                 >
-                  Start Session
+                  Start Consultation
                 </Button>
               )}
             </div>

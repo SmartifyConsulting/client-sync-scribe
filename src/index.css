@@ -57,8 +57,8 @@
     --muted: 216 24% 95%;               /* #F5F5F5 hover surface */
     --muted-foreground: 218 14% 42%;    /* #666 secondary text */
 
-    --accent: 176 42% 93%;
-    --accent-foreground: 176 62% 26%;
+    --accent: 200 48% 74%;              /* #9CC7DD soft sky (replaces pastel green) */
+    --accent-foreground: 205 60% 20%;
 
     /* Status colors */
     --destructive: 0 64% 50%;        /* #D32F2F */
@@ -171,8 +171,8 @@
     --muted: 222 22% 16%;
     --muted-foreground: 218 14% 62%;
 
-    --accent: 176 30% 16%;
-    --accent-foreground: 176 55% 66%;
+    --accent: 200 35% 28%;
+    --accent-foreground: 200 48% 82%;
 
     --destructive: 356 67% 50%;
     --destructive-foreground: 0 0% 100%;

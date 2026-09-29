@@ -128,33 +128,6 @@ export function StarRatingDialog({
       const { error } = await supabase.from('visit_ratings' as any).insert(insertData);
       if (error) throw error;
 
-      // Award vulas
-      if (raterRole === "doctor") {
-        const { data: session } = await supabase
-          .from('sessions')
-          .select('patient_id')
-          .eq('id', sessionId)
-          .single();
-
-        if (session) {
-          await supabase.from('patient_rewards').insert({
-            patient_id: session.patient_id,
-            session_id: sessionId,
-            visit_category: 'Visit Rating',
-            lollipops_count: overallRating,
-            awarded_by: user.id,
-          });
-        }
-      } else {
-        await supabase.from('doctor_rewards' as any).insert({
-          doctor_id: ratedUserId,
-          reward_type: 'visit_rating',
-          description: `Rated ${overallRating} stars by patient`,
-          vulas_count: overallRating,
-          reference_id: sessionId,
-        });
-      }
-
       toast({
         title: "Rating Submitted",
         description: `You rated ${ratedUserName} ${overallRating} star${overallRating > 1 ? 's' : ''}`,

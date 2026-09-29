@@ -1268,7 +1268,7 @@ export default function CalendarView() {
                             {selectedEvent.type !== "internal" && selectedEvent.patientId && (
                               <Button className="mt-3 w-full bg-primary hover:bg-primary-dark text-white" onClick={handleStartSession}>
                                 <Play className="h-3.5 w-3.5 mr-1" />
-                                Start Session
+                                Start Consultation
                               </Button>
                             )}
                           </div>
@@ -1304,7 +1304,7 @@ export default function CalendarView() {
                             {selectedEvent.type !== "internal" && selectedEvent.patientId && (
                               <Button className="bg-primary hover:bg-primary-dark text-white" onClick={handleStartSession}>
                                 <Play className="h-3.5 w-3.5 mr-1" />
-                                Start Session
+                                Start Consultation
                               </Button>
                             )}
                           </div>

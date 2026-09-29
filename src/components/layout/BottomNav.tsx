@@ -31,6 +31,7 @@ const doctorNavItems = [
 const patientSections = [
   { icon: Handshake, labelKey: "nav.myHolarchy", section: "health", to: "/patient/details?section=health" },
   { icon: FolderOpen, labelKey: "bottomNav.myDesk", section: "admin", to: "/patient/details?section=admin" },
+  { icon: Handshake, labelKey: "nav.myFuture", section: "future", to: "/my-future" },
   { icon: Gift, labelKey: "nav.myRewards", section: "rewards", to: "/patient/rewards" },
   { icon: Sparkles, labelKey: "nav.askMaeve", section: "maeve", to: "/ask-maeve", accent: true },
   { icon: Siren, labelKey: "nav.sos", section: "sos", to: "/patient/holarchelp", danger: true },
@@ -167,6 +168,8 @@ export function BottomNav() {
               ? location.pathname === "/patient/rewards"
               : item.section === "maeve"
               ? location.pathname.startsWith("/ask-maeve")
+              : item.section === "future"
+              ? location.pathname.startsWith("/my-future")
               : item.section === "sos"
               ? location.pathname.startsWith("/patient/holarchelp")
               : isOnDetails && currentSection === item.section;
