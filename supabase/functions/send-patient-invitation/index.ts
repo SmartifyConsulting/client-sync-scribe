@@ -153,7 +153,7 @@ const handler = async (req: Request): Promise<Response> => {
                   </div>
                   <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
                   <p style="color: #94a3b8; font-size: 12px; margin-bottom: 0;">
-                    Indigro - Secure Healthcare Management
+                    Indigro - Wealth Management Platform
                   </p>
                 </div>
               </body>
@@ -206,7 +206,7 @@ const handler = async (req: Request): Promise<Response> => {
             </div>
             <div style="background: #f8fafc; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
               <p style="font-size: 18px; margin-top: 0;">Hello ${patientName},</p>
-              <p><strong>${doctorName}</strong> from <strong>${practiceName}</strong> has invited you to join Indigro - a secure platform for managing your wealth management journey.</p>
+              <p><strong>${doctorName}</strong> from <strong>${practiceName}</strong> has invited you to join Indigro - a secure platform for following your wealth journey.</p>
               <p>With Indigro, you can:</p>
               <ul style="padding-left: 20px;">
                 <li>View your appointment calendar</li>
@@ -222,7 +222,7 @@ const handler = async (req: Request): Promise<Response> => {
               <p style="color: #64748b; font-size: 14px;">This invitation expires in 7 days. If you didn't expect this invitation, you can safely ignore this email.</p>
               <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
               <p style="color: #94a3b8; font-size: 12px; margin-bottom: 0;">
-                Indigro - Secure Healthcare Management<br>
+                Indigro - Wealth Management Platform<br>
                 This is an automated message, please do not reply directly to this email.
               </p>
             </div>
