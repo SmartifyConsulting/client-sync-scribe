@@ -14,5 +14,6 @@
 - [x] Resend key saved (RESEND_API_KEY)
 - [x] Sign-up "I am a..." limited to Client, Wealth Manager, FSP / Key Individual, Insurer
 - [x] Pastel green badges/buttons swapped to brand blue
-- [ ] Demo users + data tracing Client → Wealth Manager → FSP → Insurer
-- [ ] "View as" role switcher and enriched dashboards (from Indie)
+- [x] Demo users + data tracing Client → Wealth Manager → FSP → Insurer
+- [x] "View as" switcher + pipeline / underwriting dashboard card
+- [ ] Richer Indie-style client portfolio dashboard
