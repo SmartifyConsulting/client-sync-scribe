@@ -440,7 +440,7 @@ export default function GamificationAdmin() {
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle className="flex items-center gap-2">
-                  <Gift className="h-5 w-5 text-pink-500" />
+                  <Gift className="h-5 w-5 text-slate-500" />
                   Reward Categories
                 </CardTitle>
                 <CardDescription>

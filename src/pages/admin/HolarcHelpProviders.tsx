@@ -46,7 +46,7 @@ const COUNTRY_FLAGS: Record<string, string> = {
 const COUNTRY_PINS = ["South Africa", "Nigeria"];
 const TIER_ORDER = ["tier_1", "tier_2", "tier_3", "tier_4"];
 const TIER_CHIP: Record<string, string> = {
-  tier_1: "bg-pink-100 text-pink-700 border-pink-200",
+  tier_1: "bg-slate-100 text-slate-700 border-slate-200",
   tier_2: "bg-orange-100 text-orange-700 border-orange-200",
   tier_3: "bg-yellow-100 text-yellow-800 border-yellow-200",
   tier_4: "bg-blue-100 text-blue-700 border-blue-200",

@@ -62,7 +62,7 @@ const MILESTONES = [
   { count: 10, label: "Getting Healthy", icon: "💪", color: "text-blue-500" },
   { count: 25, label: "Health Champion", icon: "🏆", color: "text-purple-500" },
   { count: 50, label: "Wellness Warrior", icon: "⚔️", color: "text-orange-500" },
-  { count: 100, label: "Health Legend", icon: "👑", color: "text-pink-500" },
+  { count: 100, label: "Health Legend", icon: "👑", color: "text-slate-500" },
 ];
 
 

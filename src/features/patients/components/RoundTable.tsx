@@ -34,7 +34,7 @@ const BUBBLE_TONES = [
   { bubble: "bg-blue-500/10 text-foreground", avatar: "bg-blue-500/20 text-blue-700" },
   { bubble: "bg-amber-500/10 text-foreground", avatar: "bg-amber-500/20 text-amber-700" },
   { bubble: "bg-violet-500/10 text-foreground", avatar: "bg-violet-500/20 text-violet-700" },
-  { bubble: "bg-rose-500/10 text-foreground", avatar: "bg-rose-500/20 text-rose-700" },
+  { bubble: "bg-slate-500/10 text-foreground", avatar: "bg-slate-500/20 text-slate-700" },
   { bubble: "bg-emerald-500/10 text-foreground", avatar: "bg-emerald-500/20 text-emerald-700" },
 ];
 

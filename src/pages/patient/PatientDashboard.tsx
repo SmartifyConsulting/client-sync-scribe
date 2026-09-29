@@ -50,7 +50,7 @@ const getSpecialtyColor = (specialty: string): string => {
   const s = specialty.toLowerCase();
   if (s.includes("cardio")) return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300";
   if (s.includes("dent")) return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300";
-  if (s.includes("derma")) return "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300";
+  if (s.includes("derma")) return "bg-slate-100 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300";
   if (s.includes("ortho")) return "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300";
   if (s.includes("neuro")) return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300";
   if (s.includes("paed") || s.includes("pedia")) return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300";

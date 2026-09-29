@@ -414,7 +414,7 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
     "text-amber-600 border-amber-500",
     "text-emerald-600 border-emerald-500",
     "text-violet-600 border-violet-500",
-    "text-rose-600 border-rose-500",
+    "text-slate-600 border-slate-500",
   ];
 
   const YEAR_DOT_COLORS = [
@@ -423,7 +423,7 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
     "bg-amber-500",
     "bg-emerald-500",
     "bg-violet-500",
-    "bg-rose-500",
+    "bg-slate-500",
   ];
 
   // Render summary as timeline bullets with dates, grouped by year
