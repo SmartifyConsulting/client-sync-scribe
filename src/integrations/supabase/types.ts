@@ -10155,9 +10155,11 @@ export type Database = {
       }
       wealth_applications: {
         Row: {
+          commission_amount: number | null
           created_at: string
           id: string
           issued_at: string | null
+          monthly_premium: number | null
           product: string | null
           provider: string | null
           recommendation_id: string | null
@@ -10168,9 +10170,11 @@ export type Database = {
           workflow_id: string
         }
         Insert: {
+          commission_amount?: number | null
           created_at?: string
           id?: string
           issued_at?: string | null
+          monthly_premium?: number | null
           product?: string | null
           provider?: string | null
           recommendation_id?: string | null
@@ -10181,9 +10185,11 @@ export type Database = {
           workflow_id: string
         }
         Update: {
+          commission_amount?: number | null
           created_at?: string
           id?: string
           issued_at?: string | null
+          monthly_premium?: number | null
           product?: string | null
           provider?: string | null
           recommendation_id?: string | null
@@ -10335,6 +10341,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      wealth_targets: {
+        Row: {
+          annual_commission_target: number
+          annual_policies_target: number
+          annual_premium_target: number
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          annual_commission_target?: number
+          annual_policies_target?: number
+          annual_premium_target?: number
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+          year: number
+        }
+        Update: {
+          annual_commission_target?: number
+          annual_policies_target?: number
+          annual_premium_target?: number
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+          year?: number
+        }
+        Relationships: []
       }
       wealth_workflow_stage_defs: {
         Row: {
