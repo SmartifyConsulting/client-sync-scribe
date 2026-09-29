@@ -1714,7 +1714,7 @@ export default function Sessions() {
                       : "Tap to record"}
               </p>
               <p className="text-xs text-muted-foreground/60 text-center mt-1 px-2 leading-snug">
-                🔒 Only shared between you and the patient — auto-deleted from our servers within 7 days. Download it beforehand to keep a copy.
+                🔒 Only shared between you and the client — auto-deleted from our servers within 7 days. Download it beforehand to keep a copy.
               </p>
 
               {/* Compact Waveform */}
