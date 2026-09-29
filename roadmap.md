@@ -33,10 +33,10 @@
 - [x] Client profile: Personal Information / Financial Information (FNA pillars), no header icons
 
 ## Client menu / consultation / dashboard pass
-- [ ] My Future menu for clients (My Cover, My Investments, Retirement, Claims, Documents); no My Business for clients
-- [ ] Client greeting uses real name
-- [ ] Consultation Mode wealth copy + Client Overview + Start Consultation
-- [ ] Pastel green icons → #9CC7DD
-- [ ] Remove Vula awarding
-- [ ] Hide My Clients from clients
-- [ ] Client dashboard: existing frames with Indie wealth data
+- [x] My Future menu for clients (My Cover, My Investments, Retirement, Claims, Documents); no My Business for clients
+- [x] Client greeting uses real name
+- [x] Consultation Mode wealth copy + Client Overview + Start Consultation
+- [x] Pastel green icons → #9CC7DD
+- [x] Remove Vula awarding
+- [x] Hide My Clients from clients
+- [x] Client dashboard: existing frames with Indie wealth data
