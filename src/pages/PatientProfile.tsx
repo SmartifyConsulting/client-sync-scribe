@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom"
 import { BiologPanel } from "@/features/biolog/BiologPanel";
 import { useV2Demo } from "@/hooks/useV2Demo";
 import { PatientProgrammesTab } from "@/features/programmes/components/PatientProgrammesTab";
+import { WorkflowMap } from "@/features/wealth-workflow/map/WorkflowMap";
 
 import { useTranslation } from "react-i18next";
 import {
@@ -404,6 +405,12 @@ export default function PatientProfile() {
             {t("patientProfile.tabOverview")}
           </TabsTrigger>
           <TabsTrigger
+            value="workflow"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+          >
+            Workflow
+          </TabsTrigger>
+          <TabsTrigger
             value="sessions"
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
           >
@@ -446,6 +453,10 @@ export default function PatientProfile() {
         {/* Overview Tab - AI Summary */}
         <TabsContent value="overview">
           <PatientOverview patient={patient} sessions={sessions} />
+        </TabsContent>
+
+        <TabsContent value="workflow">
+          <WorkflowMap patientId={patient.id} clientName={patient.name} onOpenDocuments={() => handleTabChange("documents")} />
         </TabsContent>
 
         <TabsContent value="sessions" className="space-y-4">
