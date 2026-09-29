@@ -65,7 +65,7 @@
     "allDocuments": "Documents",
     "myViews": "My Views",
     "mySessions": "Consultations",
-    "myPractice": "My Firm",
+    "myPractice": "My Business",
     "myAdmissions": "My Admissions",
     "biolog": "Biolog",
     "myBiolog": "My Biolog",
@@ -371,7 +371,7 @@
       "gpPlaceholder": "GP name",
       "labelReferredBy": "Referred By",
       "referralPlaceholder": "Referral source",
-      "sectionNextOfKin": "Next of Kin",
+      "sectionNextOfKin": "Beneficiaries",
       "labelKinName": "Name and Surname",
       "kinNamePlaceholder": "Full name",
       "labelNotes": "Notes",
@@ -548,7 +548,7 @@
     "openConsole": "Open console"
   },
   "myPractice": {
-    "tabPractice": "My Firm",
+    "tabPractice": "My Business",
     "tabReferrals": "Referrals",
     "tabCredentials": "Credentials",
     "tabRewards": "Rewards",
@@ -867,7 +867,7 @@
     "saved": "Saved",
     "sectionAddresses": "Addresses",
     "sectionEmergencyContacts": "Emergency Contacts",
-    "sectionNextOfKin": "Next of Kin",
+    "sectionNextOfKin": "Beneficiaries",
     "sectionInsurance": "Insurance / Provider",
     "sectionEmployer": "Employer",
     "sectionLifestyle": "Lifestyle",
@@ -1243,7 +1243,7 @@
     }
   },
   "practice": {
-    "title": "My Firm",
+    "title": "My Business",
     "subtitle": "Manage your personal and firm information",
     "status": {
       "saving": "Saving...",
@@ -1257,7 +1257,7 @@
       "cpdPoints": "CPD pts"
     },
     "tabs": {
-      "practice": "My Firm",
+      "practice": "My Business",
       "referrals": "Referrals",
       "credentials": "Credentials",
       "rewards": "My Rewards"

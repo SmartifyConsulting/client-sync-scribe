@@ -346,7 +346,7 @@ export default function PatientProfile() {
 
       {/* Stats Cards - hide when doctor views their own patient record */}
       {(patient as any).patient_user_id !== currentUserId && (
-        <div className="grid gap-2 grid-cols-2 md:grid-cols-4">
+        <div className="grid gap-2 grid-cols-2 md:grid-cols-3">
           <div className="rounded-lg bg-card p-2 shadow-sm border border-border/50">
             <div className="flex items-center justify-between">
               <p className="text-xs font-medium text-muted-foreground">{t("patientProfile.totalSessions")}</p>
@@ -375,18 +375,6 @@ export default function PatientProfile() {
             <p className="mt-1 text-sm font-bold text-foreground">
               {format(new Date(patient.created_at), "MMM yy")}
             </p>
-          </div>
-          {/* Vula Rewards */}
-          <div className="rounded-lg bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 p-2 shadow-sm border border-primary/40 dark:border-emerald-800/30 flex flex-col items-center justify-center gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
-            <div className="flex flex-col items-center sm:items-start min-w-0">
-              <p className="text-xs font-medium text-muted-foreground">{t("patientProfile.vulas")}</p>
-              <p className="mt-1 text-sm font-bold text-primary dark:text-primary">{lollipopCount}</p>
-            </div>
-            <img
-              src={vulaSymbol}
-              alt="Vulas"
-              className="h-7 w-7 md:h-8 md:w-8 object-contain shrink-0 mx-auto sm:mx-0"
-            />
           </div>
         </div>
       )}

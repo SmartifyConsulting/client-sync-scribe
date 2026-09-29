@@ -248,7 +248,7 @@ export function DoctorsOnProfile({ patientId, patientName }: DoctorsOnProfilePro
                   </div>
                   <div>
                     <p className="font-medium text-foreground">
-                      {doctor.doctor_profile?.full_name || "Unknown Doctor"}
+                      {doctor.doctor_profile?.full_name || "Unknown Wealth Manager"}
                       {isCurrentUser && (
                         <span className="ml-2 text-xs text-muted-foreground">(You)</span>
                       )}

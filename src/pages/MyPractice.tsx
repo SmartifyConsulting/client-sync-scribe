@@ -1196,7 +1196,7 @@ export default function MyPractice() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">My Firm</h1>
+          <h1 className="text-3xl font-bold text-foreground">My Business</h1>
           <p className="text-muted-foreground text-xs">Manage your personal and firm information</p>
         </div>
         <div className="text-sm text-muted-foreground flex items-center gap-1.5">
