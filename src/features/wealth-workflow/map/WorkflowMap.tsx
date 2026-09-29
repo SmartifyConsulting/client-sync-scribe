@@ -74,7 +74,7 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
       {onBackToLive && (
         <button onClick={onBackToLive} className="text-xs font-medium text-primary hover:underline">← Back to Live workspace</button>
       )}
-      <div className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-lg border bg-card p-3 text-sm sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-xl border border-border/70 bg-card px-4 py-2.5 text-[13px] sm:grid-cols-4">
         <Field label="Client" value={clientName ?? "—"} />
         <Field label="Current stage" value={curLabel} />
         <Field label="Status" value={statusText} danger={wf.status === "blocked"} />
@@ -86,8 +86,8 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
         )}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
-        <div className="space-y-3">{cards}</div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div className="space-y-2">{cards}</div>
         <div className="lg:sticky lg:top-4 lg:self-start">
           <WorkingWindow group={shownGroup} stepLabel={shownStep} isLive={isLive} viewer={viewer}
             blockers={wf.status === "blocked" ? wf.blockers : []}
@@ -104,8 +104,8 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
 function Field({ label, value, danger }: { label: string; value: string; danger?: boolean }) {
   return (
     <div>
-      <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className={danger ? "font-medium text-destructive" : "font-medium text-foreground"}>{value}</p>
+      <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
+      <p className={danger ? "text-destructive" : "text-foreground"}>{value}</p>
     </div>
   );
 }

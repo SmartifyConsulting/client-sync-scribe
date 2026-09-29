@@ -31,11 +31,9 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-lg border bg-card text-sm transition-shadow",
-        "border-t-4",
-        active && state !== "blocked" && "border-primary shadow-[0_0_0_3px_hsl(var(--primary)/0.15)]",
-        state === "blocked" && "border-destructive",
-        !active && "border-t-border",
+        "overflow-hidden rounded-xl border border-border/70 bg-card text-[13px] transition-shadow",
+        active && state !== "blocked" && "border-primary/50 shadow-sm",
+        state === "blocked" && "border-destructive/60",
         state === "not_applicable" && "opacity-50",
       )}
     >
@@ -43,22 +41,22 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
         <button onClick={onOpen} className="flex flex-1 items-center gap-2 text-left">
           <span
             className={cn(
-              "flex h-6 w-6 items-center justify-center rounded-full text-xs",
+              "flex h-5 w-5 items-center justify-center rounded-full text-[10px]",
               state === "completed" ? "bg-primary text-primary-foreground"
                 : active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
             )}
           >
             {state === "completed" ? <Check className="h-3.5 w-3.5" /> : g.n}
           </span>
-          <Icon className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium text-foreground">{g.title}</span>
+          <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="text-sm font-medium tracking-tight text-foreground">{g.title}</span>
           {state !== "pending" && (
             <span
               className={cn(
-                "ml-1 rounded px-2 py-0.5 text-[11px] font-medium",
-                state === "blocked" ? "bg-destructive text-destructive-foreground"
-                  : active ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground",
+                "ml-1 rounded-full border px-2 py-0 text-[10px] font-medium",
+                state === "blocked" ? "border-destructive/40 text-destructive"
+                  : active ? "border-primary/40 text-primary"
+                  : "border-border text-muted-foreground",
               )}
             >
               {state === "waiting" && view.waitingFor ? `Waiting for ${OWNER_LABEL[view.waitingFor] ?? view.waitingFor}` : stateLabel[state]}
@@ -77,7 +75,7 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
                 key={s.label}
                 onClick={onSelectStep ? () => onSelectStep(s.label) : undefined}
                 className={cn(
-                  "flex items-center gap-2 px-3 py-2",
+                  "flex items-center gap-2 px-3 py-1.5",
                   onSelectStep && "cursor-pointer hover:bg-muted/40",
                   s.state === "next" && "mx-1.5 my-1 rounded-lg border border-primary bg-primary/5 animate-throb",
                   selectedStep === s.label && s.state !== "next" && "bg-muted/60",

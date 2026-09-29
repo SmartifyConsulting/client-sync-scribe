@@ -33,7 +33,7 @@ export function WorkingWindow({ group, stepLabel, isLive, viewer, blockers, docu
   const status = step.state === "done" ? "Completed" : step.state === "next" ? "In progress" : step.state === "unconnected" ? "Not yet connected" : "Upcoming";
 
   return (
-    <div key={step.label} className="animate-fade-in overflow-hidden rounded-xl border bg-card">
+    <div key={step.label} className="animate-fade-in overflow-hidden rounded-xl border border-border/70 bg-card">
       <div className="flex items-center justify-between border-b bg-muted/40 px-4 py-2">
         <span className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
           <span className={cn("h-2 w-2 rounded-full", isLive ? "bg-primary animate-pulse" : "bg-muted-foreground/40")} />
@@ -42,12 +42,12 @@ export function WorkingWindow({ group, stepLabel, isLive, viewer, blockers, docu
         {!isLive && <button onClick={onBackToCurrent} className="text-xs font-medium text-primary hover:underline">Back to current</button>}
       </div>
 
-      <div className="space-y-4 p-4">
+      <div className="space-y-0 divide-y divide-border/60 p-5 [&>*]:py-3 [&>*:first-child]:pt-0">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">Step {group.group.n} · {group.group.title}</p>
           <div className="mt-1 flex items-center gap-2">
             <OwnerBadge owner={step.owner} />
-            <h3 className="text-base font-semibold text-foreground">{step.label}</h3>
+            <h3 className="text-[15px] font-medium tracking-tight text-foreground">{step.label}</h3>
           </div>
           <span className={cn("mt-2 inline-block rounded-full px-2 py-0.5 text-[10px] font-medium",
             step.state === "done" ? "bg-primary/10 text-primary" : step.state === "next" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
@@ -55,7 +55,7 @@ export function WorkingWindow({ group, stepLabel, isLive, viewer, blockers, docu
           </span>
         </div>
 
-        {g && <p className="text-sm text-foreground">{g.what}</p>}
+        {g && <p className="text-[13px] leading-relaxed text-muted-foreground">{g.what}</p>}
 
         <Row icon={User} title="Who acts">{WHO[step.owner] ?? step.owner}{mine && step.state !== "done" ? " (you)" : ""}</Row>
 
@@ -98,10 +98,9 @@ export function WorkingWindow({ group, stepLabel, isLive, viewer, blockers, docu
 
 function Row({ icon: Icon, title, children }: { icon: any; title: string; children: React.ReactNode }) {
   return (
-    <div className="flex gap-3 text-sm">
-      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-      <div className="min-w-0 flex-1">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">{title}</p>
+    <div className="text-[13px]">
+      <div className="min-w-0">
+        <p className="mb-1 text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{title}</p>
         <div className="text-foreground">{children}</div>
       </div>
     </div>
