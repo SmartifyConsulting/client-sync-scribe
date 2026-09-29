@@ -12,6 +12,16 @@
 9. **"Unknown Doctor"** becomes "Unknown Wealth Manager" everywhere.
 10. **Overview tab** – remove every medical frame and label (allergies, blood type, medications, vitals, medical aid, GP, lab results etc.). Physical State and Emotional State are merged into one **Financial Health Summary** panel.
 11. **Next of Kin** becomes **Beneficiaries**, and the Employer section moves above it.
+12. **My Business (Wealth Managers)** – remove Rewards and Referrals; replace Service Offerings and Pricing with **Targets and Commission** (monthly/annual targets for new business and premium, commission earned vs target by product and insurer).
+13. **Templates** – hide all current medical templates and add 7 compliance form templates, each tied to its workflow stage:
+    - Form 1 Introduction, Disclosure & Mandate (read-only, pre-filled from adviser/FSP profile, client e-signature, timestamp; blocks the next stage until signed)
+    - Form 2 Astute Authority & Consent (name, 13-digit SA ID with validation, client + adviser signatures; marks the portfolio pull as authorised)
+    - Form 3 Broker Change Letter (optional; insurer dropdown, policy numbers, client declaration; produces a PDF letter)
+    - Form 4 KYC & FICA (ID, proof of address, bank proof uploads; live face-scan step; adverse finding marks High Risk and locks onboarding)
+    - Form 5 Financial Needs Analysis wizard with "Single Need Only" switch that swaps in a signed disclaimer
+    - Form 6 Record of Advice (adviser's own-words summary, top-3 quote comparison, affordability checklist, client sign-off; submission blocked unless ROA is signed before the application)
+    - Form 7 Annual Review & Renewal Acknowledgment (premium increase display, "unchanged" / "material changes" choice, comment; unchanged is logged to the audit trail)
+
 
 ## Technical details
 - Brand: `BRAND` in src/lib/terminology.ts → "Holarc Wealth"; replace literals in ~30 src files, en.json/uiTranslations.ts, and email functions (_shared/email.ts, send-* functions, inform-document) then redeploy those functions together with brandEmail.ts.
