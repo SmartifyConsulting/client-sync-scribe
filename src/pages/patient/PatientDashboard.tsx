@@ -438,7 +438,7 @@ export default function PatientDashboard() {
                   { icon: Camera, text: t("patientDashboard.tip3"), link: "/patient/health-album" },
                   { icon: Calendar, text: t("patientDashboard.tip4"), link: "/patient/calendar" },
                 ].map((tip, i) => (
-                  <Link key={i} to={tip.link} className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-primary-dark/5 transition-colors group">
+                  <Link key={i} to={tip.link} className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-primary/5 transition-colors group">
                     <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary shrink-0">
                       <tip.icon className="h-3.5 w-3.5 text-primary" />
                     </div>

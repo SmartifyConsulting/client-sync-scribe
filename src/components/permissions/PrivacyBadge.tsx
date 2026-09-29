@@ -14,7 +14,7 @@ export function PrivacyBadge() {
   return (
     <HoverCard openDelay={200}>
       <HoverCardTrigger asChild>
-        <button className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-2.5 py-1 text-xs font-medium text-primary hover:bg-primary-dark/10 transition-colors">
+        <button className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-2.5 py-1 text-xs font-medium text-primary hover:bg-primary/10 transition-colors">
           <Shield className="h-3.5 w-3.5" />
           Privacy
         </button>

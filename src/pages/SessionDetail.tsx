@@ -437,7 +437,7 @@ export default function SessionDetail() {
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="inline-flex h-9 items-center justify-between gap-2 rounded-md border border-primary bg-primary px-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary-dark/90"
+                className="inline-flex h-9 items-center justify-between gap-2 rounded-md border border-primary bg-primary px-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
               >
                 Quick Actions
                 <ChevronDown className="h-4 w-4 opacity-80" />

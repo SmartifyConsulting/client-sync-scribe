@@ -800,7 +800,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
               "flex-1 min-w-0 h-7 rounded-lg text-xs font-semibold transition-colors border",
               selectedLetter === null
                 ? "bg-primary text-primary-foreground border-primary"
-                : "bg-transparent text-foreground border-neutral-500 hover:bg-primary-dark/10"
+                : "bg-transparent text-foreground border-neutral-500 hover:bg-primary/10"
             )}
           >
             All
@@ -820,7 +820,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                   hasPatients
                     ? selectedLetter === letter
                       ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-transparent text-foreground border-neutral-500 hover:bg-primary-dark/10"
+                      : "bg-transparent text-foreground border-neutral-500 hover:bg-primary/10"
                     : "bg-transparent text-muted-foreground/40 border-neutral-400 cursor-default"
                 )}
               >

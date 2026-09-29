@@ -225,7 +225,7 @@ export function RateNurseControl({ admissionId, recordTable, recordId, nurseId, 
               type="button"
               size="sm"
               variant="outline"
-              className="h-7 text-xs gap-1 border-primary/40 text-primary hover:bg-primary-dark/10"
+              className="h-7 text-xs gap-1 border-primary/40 text-primary hover:bg-primary/10"
               onClick={awardVulas}
               disabled={awarding}
             >

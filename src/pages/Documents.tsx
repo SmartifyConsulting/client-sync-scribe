@@ -579,7 +579,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                   className="group rounded-xl border border-primary bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30"
                 >
                   <div className="flex items-start justify-between mb-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent transition-colors group-hover:bg-primary-dark/10">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent transition-colors group-hover:bg-primary/10">
                       <LayoutTemplate className="h-5 w-5 text-accent-foreground group-hover:text-primary" />
                     </div>
                     <DropdownMenu>
@@ -624,7 +624,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                   className="group rounded-xl border border-primary bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30"
                 >
                   <div className="flex items-start justify-between mb-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent transition-colors group-hover:bg-primary-dark/10">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent transition-colors group-hover:bg-primary/10">
                       <LayoutTemplate className="h-5 w-5 text-accent-foreground group-hover:text-primary" />
                     </div>
                     <DropdownMenu>
@@ -741,7 +741,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div
-                      className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent transition-colors group-hover:bg-primary-dark/10"
+                      className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent transition-colors group-hover:bg-primary/10"
                       onClick={() => handleSelectTemplate(template)}
                     >
                       <FileText className="h-5 w-5 text-accent-foreground group-hover:text-primary" />

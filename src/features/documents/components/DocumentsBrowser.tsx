@@ -360,7 +360,7 @@ export function DocumentsBrowser({
                           <Eye className="h-4 w-4" />
                         </button>
                         <button
-                          className="h-7 w-7 rounded-full flex items-center justify-center text-primary hover:bg-primary-dark/10 transition-colors"
+                          className="h-7 w-7 rounded-full flex items-center justify-center text-primary hover:bg-primary/10 transition-colors"
                           title="Inform a colleague"
                           onClick={() => setInformDoc(doc)}
                         >

@@ -887,7 +887,7 @@ export default function PatientProfile() {
                     setSelectedTemplate(template);
                     setShowTemplateSelector(false);
                   }}
-                  className="flex items-start gap-3 p-4 rounded-xl border border-border hover:border-primary hover:bg-primary-dark/5 transition-all text-left"
+                  className="flex items-start gap-3 p-4 rounded-xl border border-border hover:border-primary hover:bg-primary/5 transition-all text-left"
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                     <FileText className="h-5 w-5 text-primary" />
