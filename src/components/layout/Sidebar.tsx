@@ -250,7 +250,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
    *  preview; only the system admin accounts (useV2Demo) can actually open them. */
   const V2_PATHS = ["/biolog", "/ask-maeve"];
   const withShiftRule = (items: (NavItem & { tour?: string })[]) => {
-    let next = hideMyShift ? items.filter((i) => i.to !== "/my-shift") : items;
+    let next = (hideMyShift ? items.filter((i) => i.to !== "/my-shift") : items).filter((i) => !isWealthHidden(i.to));
     if (!v2Demo) next = next.map((i) => (V2_PATHS.includes(i.to) ? { ...i, v2Locked: true } : i));
     return next;
   };
