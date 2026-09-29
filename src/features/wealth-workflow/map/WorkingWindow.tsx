@@ -89,7 +89,7 @@ export function WorkingWindow({ group, stepLabel, isLive, viewer, blockers, docu
           <Button className="w-full rounded-full" onClick={onOpenDocuments}>{g.clientAction}</Button>
         )}
         {!mine && step.state === "next" && (
-          <p className="rounded-lg bg-muted/50 p-2 text-xs text-muted-foreground">Waiting on {WHO[step.owner]?.toLowerCase() ?? step.owner}. This updates automatically.</p>
+          <p className="rounded-lg bg-muted/50 p-2 text-xs text-muted-foreground">Waiting on {step.owner === "system" ? "Holarc Wealth (automatic)" : WHO[step.owner]?.toLowerCase() ?? step.owner}. This updates automatically.</p>
         )}
       </div>
     </div>
