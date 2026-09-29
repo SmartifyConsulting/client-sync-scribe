@@ -4,6 +4,7 @@ import { BiologPanel } from "@/features/biolog/BiologPanel";
 import { useV2Demo } from "@/hooks/useV2Demo";
 import { PatientProgrammesTab } from "@/features/programmes/components/PatientProgrammesTab";
 import { WorkflowMap } from "@/features/wealth-workflow/map/WorkflowMap";
+import { LiveWorkspace } from "@/features/wealth-workflow/workspace/LiveWorkspace";
 
 import { useTranslation } from "react-i18next";
 import {
@@ -405,6 +406,7 @@ export default function PatientProfile() {
           >
             {t("patientProfile.tabOverview")}
           </TabsTrigger>
+          <TabsTrigger value="live" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5">Live</TabsTrigger>
           <TabsTrigger
             value="workflow"
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
@@ -457,7 +459,17 @@ export default function PatientProfile() {
         </TabsContent>
 
         <TabsContent value="workflow">
-          <WorkflowMap patientId={patient.id} clientName={patient.name} onOpenDocuments={() => handleTabChange("documents")} />
+          <WorkflowMap patientId={patient.id} clientName={patient.name} onOpenDocuments={() => handleTabChange("documents")}
+            initialGroup={searchParams.get("group") ?? undefined} onBackToLive={() => handleTabChange("live")} />
+        </TabsContent>
+
+        <TabsContent value="live">
+          <LiveWorkspace patientId={patient.id} clientName={patient.name}
+            onViewWorkflow={(g) => handleTabChange("workflow", g)}
+            onOpenDocuments={() => handleTabChange("documents")}
+            onOpenClientRecord={() => handleTabChange("details")}
+            onOpenMessages={() => navigate("/dashboard")}
+            onScheduleConsultation={() => navigate("/calendar")} />
         </TabsContent>
 
         <TabsContent value="sessions" className="space-y-4">
