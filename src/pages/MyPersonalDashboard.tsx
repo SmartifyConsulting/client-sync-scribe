@@ -59,8 +59,7 @@ interface DashboardTile {
 }
 
 const TILES: DashboardTile[] = [
-  { icon: FolderOpen, label: "My Documents", description: "All generated and uploaded documents", to: "/documents" },
-  { icon: FlaskConical, label: "Lab Results", description: "Lab requests and results", to: "/patient/lab-results" },
+  { icon: FolderOpen, label: "My Documents", description: "All generated and uploaded documents", to: "/my-future?tab=documents" },
   { icon: ListChecks, label: "My Actions", description: "To-dos and reminders", to: "/todos" },
   { icon: BedDouble, label: "My Admissions", description: "Hospital admissions", to: "/admissions" },
 ];

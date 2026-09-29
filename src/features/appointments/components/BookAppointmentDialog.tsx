@@ -274,10 +274,10 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
       <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {step === 1 && "Select a Doctor"}
-            {step === 2 && "Select a Service"}
+            {step === 1 && "Select your Wealth Manager"}
+            {step === 2 && "Choose a meeting type"}
             {step === 3 && "Choose Date & Time"}
-            {step === 4 && "Confirm Booking"}
+            {step === 4 && "Confirm your meeting"}
           </DialogTitle>
           <DialogDescription>
             Step {step} of 4
@@ -302,7 +302,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
                     <User className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <p className="font-medium text-foreground">{doc.full_name || "Doctor"}</p>
+                    <p className="font-medium text-foreground">{doc.full_name || "Wealth Manager"}</p>
                     {doc.specialty && <p className="text-sm text-muted-foreground">{doc.specialty}</p>}
                   </div>
                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -320,9 +320,9 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
               <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
             ) : services.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-muted-foreground mb-3">This wealth manager hasn't set up services yet.</p>
+                <p className="text-muted-foreground mb-3">This wealth manager hasn't set up meeting types yet.</p>
                 <Button onClick={() => { setSelectedService(null); setStep(3); }}>
-                  Continue without service
+                  Continue without a meeting type
                 </Button>
               </div>
             ) : (

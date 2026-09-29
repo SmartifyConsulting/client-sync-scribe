@@ -2065,6 +2065,8 @@ export type Database = {
       }
       client_financial_profiles: {
         Row: {
+          ai_summary: string | null
+          ai_summary_updated_at: string | null
           assets_liabilities: Json
           cash_flow: Json
           created_at: string
@@ -2077,6 +2079,8 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          ai_summary?: string | null
+          ai_summary_updated_at?: string | null
           assets_liabilities?: Json
           cash_flow?: Json
           created_at?: string
@@ -2089,6 +2093,8 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          ai_summary?: string | null
+          ai_summary_updated_at?: string | null
           assets_liabilities?: Json
           cash_flow?: Json
           created_at?: string
@@ -2105,6 +2111,44 @@ export type Database = {
             foreignKeyName: "client_financial_profiles_patient_id_fkey"
             columns: ["patient_id"]
             isOneToOne: true
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_life_events: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          event_date: string
+          event_type: string
+          id: string
+          notes: string | null
+          patient_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          event_date?: string
+          event_type: string
+          id?: string
+          notes?: string | null
+          patient_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          event_date?: string
+          event_type?: string
+          id?: string
+          notes?: string | null
+          patient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_life_events_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
             referencedRelation: "patients"
             referencedColumns: ["id"]
           },

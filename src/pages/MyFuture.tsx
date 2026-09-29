@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, lazy, Suspense } from "react";
+import { useSearchParams } from "react-router-dom";
+const PatientDocuments = lazy(() => import("@/pages/patient/PatientDocuments"));
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Loader2, Plus } from "lucide-react";
@@ -45,6 +46,8 @@ function Row({ cells }: { cells: React.ReactNode[] }) {
 
 export default function MyFuture() {
   const { user } = useAuth();
+  const [params, setParams] = useSearchParams();
+  const tab = params.get("tab") || "cover";
   const qc = useQueryClient();
   const { data, isLoading } = useClientWealth();
   const [claimType, setClaimType] = useState("");
@@ -58,7 +61,7 @@ export default function MyFuture() {
   if (!data?.patientId) {
     return (
       <div className="container mx-auto max-w-5xl p-4">
-        <h1 className="text-2xl font-bold text-foreground">My Future</h1>
+        <h1 className="text-3xl font-bold text-foreground">My Future</h1>
         <Empty text="Your client record isn't linked to this account yet. Ask your Wealth Manager to send you an invitation." />
       </div>
     );
@@ -97,17 +100,17 @@ export default function MyFuture() {
   return (
     <div className="container mx-auto max-w-5xl p-4 space-y-4">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">My Future</h1>
-        <p className="text-sm text-muted-foreground">Your cover, investments, retirement, claims and documents in one place.</p>
+        <h1 className="text-3xl font-bold text-foreground">My Future</h1>
+        <p className="text-xs text-muted-foreground">Your cover, investments, retirement, claims and documents in one place.</p>
       </div>
 
-      <Tabs defaultValue="cover">
-        <TabsList className="flex-wrap h-auto">
-          <TabsTrigger value="cover">My Cover</TabsTrigger>
-          <TabsTrigger value="investments">My Investments</TabsTrigger>
-          <TabsTrigger value="retirement">Retirement</TabsTrigger>
-          <TabsTrigger value="claims">Claims</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
+      <Tabs value={tab} onValueChange={(v) => setParams({ tab: v }, { replace: true })}>
+        <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+          <TabsTrigger value="cover" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5">My Cover</TabsTrigger>
+          <TabsTrigger value="investments" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5">My Investments</TabsTrigger>
+          <TabsTrigger value="retirement" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5">Retirement</TabsTrigger>
+          <TabsTrigger value="claims" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5">Claims</TabsTrigger>
+          <TabsTrigger value="documents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5">Documents</TabsTrigger>
         </TabsList>
 
         <TabsContent value="cover" className="space-y-4">
@@ -200,20 +203,10 @@ export default function MyFuture() {
           </Frame>
         </TabsContent>
 
-        <TabsContent value="documents">
-          <Frame title="Documents">
-            {data.documents.length ? (
-              <ul className="space-y-2">
-                {data.documents.map((d) => (
-                  <li key={d.id} className="flex items-center justify-between rounded-lg border border-border bg-background/60 p-3 text-xs">
-                    <span className="font-semibold truncate">{DOC_LABEL[d.document_kind] ?? d.name}</span>
-                    <span className="text-muted-foreground shrink-0">{format(new Date(d.created_at), "d MMM yyyy")}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : <Empty text="No documents yet. Signed documents will appear here." />}
-            <Link to="/patient/details?section=admin" className="mt-3 inline-block text-xs font-semibold text-primary">Open all documents →</Link>
-          </Frame>
+        <TabsContent value="documents" className="mt-4">
+          <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+            <PatientDocuments hideHeader />
+          </Suspense>
         </TabsContent>
       </Tabs>
     </div>
