@@ -38,6 +38,7 @@ import {
 import ReferralDoctors from "@/pages/ReferralDoctors";
 import MyRewards from "@/pages/patient/MyRewards";
 import { TargetsCommission } from "@/features/wealth-workflow/TargetsCommission";
+import { ComplianceForms } from "@/features/wealth-workflow/forms/ComplianceForms";
 
 import Patients from "@/pages/Patients";
 import DoctorInvoices from "@/pages/doctor/Invoices";
@@ -2127,7 +2128,7 @@ export default function MyPractice() {
 
         {/* === TEMPLATES TAB === */}
         <TabsContent value="templates" className="mt-4 my-practice-tab-body">
-          <Documents hideHeader />
+          <ComplianceForms />
         </TabsContent>
 
         {/* === REFERRALS TAB === */}
