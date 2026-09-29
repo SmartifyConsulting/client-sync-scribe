@@ -168,6 +168,8 @@ export function BottomNav() {
               ? location.pathname === "/patient/rewards"
               : item.section === "maeve"
               ? location.pathname.startsWith("/ask-maeve")
+              : item.section === "future"
+              ? location.pathname.startsWith("/my-future")
               : item.section === "sos"
               ? location.pathname.startsWith("/patient/holarchelp")
               : isOnDetails && currentSection === item.section;
