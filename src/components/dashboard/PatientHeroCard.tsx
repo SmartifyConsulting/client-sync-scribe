@@ -78,7 +78,16 @@ export function PatientHeroCard({
     if (profile?.avatar_url) setAvatarUrl(profile.avatar_url);
   }, [profile?.avatar_url]);
 
-  const fullName = profile?.full_name || (profileLoading ? "" : user?.email?.split("@")[0] || "");
+  // Never greet by the email handle ("georgia.client") — fall back to the linked client record's name.
+  const { data: recordName } = useQuery({
+    queryKey: ["hero-client-record-name", user?.id],
+    enabled: !!user?.id && !profile?.full_name && !profileLoading,
+    queryFn: async () => {
+      const { data } = await supabase.from("patients").select("name").eq("patient_user_id", user!.id).order("created_at").limit(1).maybeSingle();
+      return (data?.name as string) || "";
+    },
+  });
+  const fullName = profile?.full_name || recordName || "";
   // Strip an honorific ("Dr", "Prof", "Mr"…) so "Dr Gianna Buttons" greets "Gianna", not "Dr".
   const firstName =
     fullName
