@@ -137,13 +137,6 @@ export function StarRatingDialog({
           .single();
 
         if (session) {
-          await supabase.from('patient_rewards').insert({
-            patient_id: session.patient_id,
-            session_id: sessionId,
-            visit_category: 'Visit Rating',
-            lollipops_count: overallRating,
-            awarded_by: user.id,
-          });
         }
       } else {
         await supabase.from('doctor_rewards' as any).insert({

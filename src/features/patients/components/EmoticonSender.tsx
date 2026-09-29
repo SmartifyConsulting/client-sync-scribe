@@ -118,8 +118,8 @@ export function EmoticonSender({ recipientId, patientId, recipientName }: Emotic
       toast({
         title: `${emoticon} Check-in sent`,
         description: isAiFlagged
-          ? aiReason || "Sent (no Vulas — view the profile first, daily limit reached, or the note wasn't meaningful)"
-          : `Sent to ${recipientName} (+1 Vula)`,
+          ? aiReason || "Sent"
+          : `Sent to ${recipientName}`,
       });
 
       setMessage("");

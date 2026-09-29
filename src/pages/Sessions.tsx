@@ -747,7 +747,6 @@ export default function Sessions() {
     }
     steps.push("schedule");
     steps.push("invoice");
-    steps.push("vula");
 
     setPostSessionQueue(steps);
     setPostSessionIndex(0);
@@ -1416,7 +1415,7 @@ export default function Sessions() {
       <div>
         <h1 className="text-3xl font-bold text-foreground">{t("sessions.sessionMode")}</h1>
         <p className="mt-1 text-muted-foreground text-xs">
-          Record, transcribe, and generate AI summaries for patient sessions
+          Record, transcribe and summarise client consultations.
         </p>
       </div>
 
@@ -1430,7 +1429,7 @@ export default function Sessions() {
           </div>
           <h2 className="text-lg font-semibold text-foreground mb-1">Starting consultation...</h2>
           <p className="text-muted-foreground max-w-md text-sm">
-            {currentPatient?.name ? `Getting ready to record for ${currentPatient.name}.` : "Loading patient details..."}
+            {currentPatient?.name ? `Getting ready to record for ${currentPatient.name}.` : "Loading client details..."}
           </p>
         </div>
       )}
@@ -1445,12 +1444,12 @@ export default function Sessions() {
             )}
           </div>
           <h2 className="text-lg font-semibold text-foreground mb-1">
-            {currentPatient ? "Ready to Start" : "Select a Patient"}
+            {currentPatient ? "Ready to Start" : "Select a Client"}
           </h2>
           <p className="text-muted-foreground mb-4 max-w-md text-sm">
             {currentPatient
               ? "Begin a consultation to capture notes, record audio, and generate AI summaries."
-              : "Choose a patient to start a new consultation session."}
+              : "Choose a client to start a new consultation."}
           </p>
 
           {/* Patient Selector with Search */}
@@ -1466,7 +1465,7 @@ export default function Sessions() {
                   >
                     {selectedPatientId 
                       ? patients.find(p => p.id === selectedPatientId)?.name 
-                      : "Search patients..."}
+                      : "Search clients..."}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -1476,7 +1475,7 @@ export default function Sessions() {
                 >
                   <Command className="bg-transparent">
                     <CommandInput
-                      placeholder="Search by name..."
+                      placeholder="Search clients by name..."
                       className="h-11 text-sm placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
                     />
                     <CommandList className="max-h-[280px]">
@@ -1781,7 +1780,7 @@ export default function Sessions() {
                 {liveHintLoading
                   ? "Analysing the consultation…"
                   : (liveTranscript || transcript)
-                    ? "Listening — clinical guidance appears as you talk."
+                    ? "Listening — adviser notes appear as you talk."
                     : "Listening — no speech captured yet."}
               </p>
             ) : (
@@ -1798,10 +1797,9 @@ export default function Sessions() {
 
             <p className="mt-2 text-xs text-muted-foreground leading-snug">
               <span className="font-semibold text-foreground">
-                Private — Only visible to you. Not shared with the patient or other doctors.
+                Private — only visible to you. Not shared with the client or other advisers.
               </span>{" "}
-              AI-generated clinical notes are decision support only and must be reviewed by the
-              treating clinician.
+              AI notes support your advice and must be reviewed before you rely on them.
             </p>
           </div>
         </div>
