@@ -37,6 +37,7 @@ import {
 
 import ReferralDoctors from "@/pages/ReferralDoctors";
 import MyRewards from "@/pages/patient/MyRewards";
+import { TargetsCommission } from "@/features/wealth-workflow/TargetsCommission";
 
 import Patients from "@/pages/Patients";
 import DoctorInvoices from "@/pages/doctor/Invoices";
@@ -1280,22 +1281,10 @@ export default function MyPractice() {
             {t("documents.tabTemplates")}
           </TabsTrigger>
           <TabsTrigger
-            value="referrals"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
-          >
-            {t("myPractice.tabReferrals")}
-          </TabsTrigger>
-          <TabsTrigger
             value="certificates"
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
           >
             {t("myPractice.tabCredentials")}
-          </TabsTrigger>
-          <TabsTrigger
-            value="rewards"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
-          >
-            {t("myPractice.tabRewards")}
           </TabsTrigger>
         </TabsList>
 
@@ -1887,189 +1876,16 @@ export default function MyPractice() {
               </AccordionContent>
             </AccordionItem>
 
-           {/* Service Offerings & Pricing Accordion */}
-            <AccordionItem value="service-pricing" className="border-0">
+            {/* Targets & Commission */}
+            <AccordionItem value="targets-commission" className="border-0">
               <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-primary" />
-                  <h3 className="text-xs font-semibold text-primary-dark">Service Offerings & Pricing</h3>
+                  <h3 className="text-xs font-semibold text-primary-dark">Targets and Commission</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className={SECTION_CONTENT_CLASS}>
-                <p className="text-sm text-muted-foreground">Define your service types and default prices for invoicing.</p>
-                <div className="space-y-1.5">
-                  <Label>Currency</Label>
-                  <Select value={selectedCurrency} onValueChange={updateAllServicesCurrency}>
-                    <SelectTrigger className="w-[240px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CURRENCIES.map((c) => (
-                        <SelectItem key={c.code} value={c.code}>
-                          {c.symbol} - {c.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                {servicePrices.length > 0 && (
-                  <div className="space-y-2">
-                    {servicePrices.map((service) => (
-                      <div
-                        key={service.id}
-                        className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border"
-                      >
-                        {editingServiceId === service.id ? (
-                          <div className="flex-1 grid gap-2 sm:grid-cols-3 mr-3">
-                            <Input
-                              value={editingService.service_name}
-                              onChange={(e) => setEditingService({ ...editingService, service_name: e.target.value })}
-                            />
-                            <div className="relative">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-                                {getCurrencySymbol(selectedCurrency)}
-                              </span>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                value={editingService.default_price}
-                                onChange={(e) => setEditingService({ ...editingService, default_price: e.target.value })}
-                                className="pl-8"
-                              />
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="color"
-                                value={editingService.color || "#3b82f6"}
-                                onChange={(e) => setEditingService({ ...editingService, color: e.target.value })}
-                                className="h-8 w-10 rounded border border-border cursor-pointer"
-                              />
-                              <span className="text-xs text-muted-foreground">Color</span>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex-1 flex items-center gap-3">
-                            <div
-                              className="h-6 w-6 rounded-full border border-border shrink-0 cursor-pointer relative group"
-                              style={{ backgroundColor: service.color || "#3b82f6" }}
-                            >
-                              <input
-                                type="color"
-                                value={service.color || "#3b82f6"}
-                                onChange={async (e) => {
-                                  const newColor = e.target.value;
-                                  await supabase
-                                    .from("service_prices")
-                                    .update({ color: newColor } as any)
-                                    .eq("id", service.id);
-                                  setServicePrices(
-                                    servicePrices.map((s) => (s.id === service.id ? { ...s, color: newColor } : s)),
-                                  );
-                                }}
-                                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                              />
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <p className="font-medium text-sm text-foreground">{service.service_name}</p>
-                              </div>
-                              <p className="text-xs text-muted-foreground">
-                                {getCurrencySymbol(service.currency)} {Number(service.default_price).toFixed(2)}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-0.5">
-                          {editingServiceId === service.id ? (
-                            <>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={saveEditingService}
-                                disabled={isSavingService}
-                                className="h-7 w-7 text-success"
-                              >
-                                {isSavingService ? (
-                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                ) : (
-                                  <Check className="h-3.5 w-3.5" />
-                                )}
-                              </Button>
-                              <Button variant="ghost" size="icon" onClick={cancelEditingService} className="h-7 w-7">
-                                <X className="h-3.5 w-3.5" />
-                              </Button>
-                            </>
-                          ) : (
-                            <>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => startEditingService(service)}
-                                className="h-7 w-7"
-                              >
-                                <Pencil className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => removeServicePrice(service.id)}
-                                className="h-7 w-7 text-destructive"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <div className="space-y-3 p-3 border border-dashed border-border rounded-lg">
-                  <p className="text-sm font-medium text-foreground">Add New Service</p>
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    <div className="space-y-1.5">
-                      <Label>Service Name *</Label>
-                      <Input
-                        value={newService.service_name}
-                        onChange={(e) => setNewService({ ...newService, service_name: e.target.value })}
-                        placeholder="e.g., Consultation"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Price ({getCurrencySymbol(selectedCurrency)}) *</Label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                          {getCurrencySymbol(selectedCurrency)}
-                        </span>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={newService.default_price}
-                          onChange={(e) => setNewService({ ...newService, default_price: e.target.value })}
-                          className="pl-8"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Calendar Color</Label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="color"
-                          value={newService.color}
-                          onChange={(e) => setNewService({ ...newService, color: e.target.value })}
-                          className="h-10 w-12 rounded border border-border cursor-pointer"
-                        />
-                        <span className="text-xs text-muted-foreground">Used in calendar</span>
-                      </div>
-                    </div>
-                  </div>
-                  <Button size="sm" onClick={addServicePrice} disabled={isAddingService} className="gap-1.5">
-                    <Plus className="h-3.5 w-3.5" />
-                    {isAddingService ? "Adding..." : t("myPractice.addService")}
-                  </Button>
-                </div>
+                <TargetsCommission />
               </AccordionContent>
             </AccordionItem>
 
