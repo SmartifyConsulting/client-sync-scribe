@@ -10438,6 +10438,62 @@ export type Database = {
           },
         ]
       }
+      wealth_kyc_checks: {
+        Row: {
+          aml_result: string | null
+          created_at: string
+          decided_at: string | null
+          id: string
+          patient_id: string
+          pep_result: string | null
+          provider: string
+          raw: Json | null
+          session_id: string | null
+          session_url: string | null
+          status: string
+          updated_at: string
+          workflow_id: string
+        }
+        Insert: {
+          aml_result?: string | null
+          created_at?: string
+          decided_at?: string | null
+          id?: string
+          patient_id: string
+          pep_result?: string | null
+          provider?: string
+          raw?: Json | null
+          session_id?: string | null
+          session_url?: string | null
+          status?: string
+          updated_at?: string
+          workflow_id: string
+        }
+        Update: {
+          aml_result?: string | null
+          created_at?: string
+          decided_at?: string | null
+          id?: string
+          patient_id?: string
+          pep_result?: string | null
+          provider?: string
+          raw?: Json | null
+          session_id?: string | null
+          session_url?: string | null
+          status?: string
+          updated_at?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wealth_kyc_checks_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "wealth_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wealth_recommendations: {
         Row: {
           created_at: string
@@ -10507,6 +10563,71 @@ export type Database = {
           },
           {
             foreignKeyName: "wealth_recommendations_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "wealth_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wealth_signed_documents: {
+        Row: {
+          content_hash: string
+          content_html: string
+          created_at: string
+          doc_type: string
+          id: string
+          patient_id: string
+          seal_hash: string
+          signature_image: string
+          signed_at: string
+          signer_ip: string | null
+          signer_name: string
+          signer_user_id: string
+          title: string
+          user_agent: string | null
+          version: number
+          workflow_id: string
+        }
+        Insert: {
+          content_hash: string
+          content_html: string
+          created_at?: string
+          doc_type: string
+          id?: string
+          patient_id: string
+          seal_hash: string
+          signature_image: string
+          signed_at?: string
+          signer_ip?: string | null
+          signer_name: string
+          signer_user_id: string
+          title: string
+          user_agent?: string | null
+          version?: number
+          workflow_id: string
+        }
+        Update: {
+          content_hash?: string
+          content_html?: string
+          created_at?: string
+          doc_type?: string
+          id?: string
+          patient_id?: string
+          seal_hash?: string
+          signature_image?: string
+          signed_at?: string
+          signer_ip?: string | null
+          signer_name?: string
+          signer_user_id?: string
+          title?: string
+          user_agent?: string | null
+          version?: number
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wealth_signed_documents_workflow_id_fkey"
             columns: ["workflow_id"]
             isOneToOne: false
             referencedRelation: "wealth_workflows"
@@ -11805,6 +11926,10 @@ export type Database = {
       }
       wealth_derive_stage: { Args: { _workflow_id: string }; Returns: Json }
       wealth_has_doc: { Args: { _kind: string; _wf: string }; Returns: boolean }
+      wealth_onboarding_refresh: {
+        Args: { _workflow_id: string }
+        Returns: boolean
+      }
       wealth_present_recommendation: {
         Args: { _recommendation_id: string }
         Returns: Json
