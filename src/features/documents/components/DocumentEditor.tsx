@@ -237,13 +237,13 @@ export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave
         <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
           {/* Patient Selection */}
           <div className="space-y-2">
-            <Label htmlFor="patient">Select Patient (for auto-fill)</Label>
+            <Label htmlFor="patient">Select Client (for auto-fill)</Label>
             <Select value={selectedPatientId} onValueChange={setSelectedPatientId}>
               <SelectTrigger>
-                <SelectValue placeholder="Select a patient to auto-fill placeholders" />
+                <SelectValue placeholder="Select a client to auto-fill placeholders" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">No patient selected</SelectItem>
+                <SelectItem value="none">No client selected</SelectItem>
                 {patients.map((patient) => (
                   <SelectItem key={patient.id} value={patient.id}>
                     <span className="flex items-center gap-2">

@@ -18,6 +18,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { useV2Demo } from "@/hooks/useV2Demo";
 import { useTranslation } from "react-i18next";
+import { isWealthHidden } from "@/lib/terminology";
 
 const doctorNavItems = [
   { icon: LayoutDashboard, labelKey: "nav.home", to: "/doctor-dashboard" },
@@ -25,7 +26,7 @@ const doctorNavItems = [
   { icon: Briefcase, labelKey: "bottomNav.practice", to: "/practice" },
   { icon: Sparkles, labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
   { icon: Siren, labelKey: "nav.sos", to: "/doctor/holarchelp", danger: true },
-];
+].filter((i) => !isWealthHidden(i.to));
 
 const patientSections = [
   { icon: Handshake, labelKey: "nav.myHolarchy", section: "health", to: "/patient/details?section=health" },
@@ -33,7 +34,7 @@ const patientSections = [
   { icon: Gift, labelKey: "nav.myRewards", section: "rewards", to: "/patient/rewards" },
   { icon: Sparkles, labelKey: "nav.askMaeve", section: "maeve", to: "/ask-maeve", accent: true },
   { icon: Siren, labelKey: "nav.sos", section: "sos", to: "/patient/holarchelp", danger: true },
-];
+].filter((i) => !isWealthHidden(i.to));
 
 const adminNavItems = [
   { icon: Users, labelKey: "nav.users", to: "/admin/users" },
@@ -41,7 +42,7 @@ const adminNavItems = [
   { icon: Gift, labelKey: "nav.rewards", to: "/admin/gamification" },
   { icon: Siren, labelKey: "nav.sos", to: "/patient/holarchelp", danger: true },
   { icon: Home, labelKey: "bottomNav.exit", to: "/doctor-dashboard" },
-];
+].filter((i) => !isWealthHidden(i.to));
 
 export function BottomNav() {
   const { t } = useTranslation();

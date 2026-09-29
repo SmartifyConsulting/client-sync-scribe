@@ -1,4 +1,4 @@
-// Sends a branded Holarc Health password-reset email via Resend.
+// Sends a branded Indigro password-reset email via Resend.
 // Public endpoint: validates email format only. Always returns 200 to avoid
 // leaking which addresses are registered.
 
@@ -27,12 +27,12 @@ function brandedHtml(ctaUrl: string) {
     <tr><td align="center" style="padding:32px 16px">
       <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">
         <tr><td style="background:#E01837;padding:20px 24px">
-          <h1 style="margin:0;color:#fff;font-size:20px;font-weight:600">Holarc Health</h1>
+          <h1 style="margin:0;color:#fff;font-size:20px;font-weight:600">Indigro</h1>
         </td></tr>
         <tr><td style="padding:28px 24px">
           <h2 style="margin:0 0 12px;font-size:22px;color:#111">Reset your password</h2>
           <p style="margin:0 0 20px;font-size:15px;line-height:1.5;color:#374151">
-            We received a request to reset the password for your Holarc Health account.
+            We received a request to reset the password for your Indigro account.
             Click the button below to choose a new one. This link expires in 1 hour.
           </p>
           <p style="margin:0 0 24px">
@@ -43,7 +43,7 @@ function brandedHtml(ctaUrl: string) {
           </p>
         </td></tr>
         <tr><td style="background:#f9fafb;padding:16px 24px;text-align:center;font-size:12px;color:#6b7280">
-          © Holarc Health · <a href="${SITE_URL}" style="color:#0f766e;text-decoration:none">holarchealth.com</a>
+          © Indigro · <a href="${SITE_URL}" style="color:#0f766e;text-decoration:none">holarchealth.com</a>
         </td></tr>
       </table>
     </td></tr>
@@ -121,7 +121,7 @@ Deno.serve(async (req) => {
 
     const result = await sendEmail({
       to: email,
-      subject: "Reset your Holarc Health password",
+      subject: "Reset your Indigro password",
       html: brandedHtml(actionUrl),
     });
     const resendId =

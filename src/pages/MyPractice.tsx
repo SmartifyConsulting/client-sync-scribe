@@ -372,7 +372,7 @@ function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           rows={6}
-          placeholder="Tell patients about your background, philosophy of care, and what makes your practice unique…"
+          placeholder="Tell clients about your background, philosophy of care, and what makes your firm unique…"
         />
         <div className="flex items-center justify-between">
           <span className={cn("text-sm", overLimit ? "text-destructive" : "text-muted-foreground")}>
@@ -694,7 +694,7 @@ export default function MyPractice() {
       if (error) {
         setSavedStatus("idle");
         toast({
-          title: "Couldn't save your practice details",
+          title: "Couldn't save your firm details",
           description: (error as any)?.message || "Please check your connection and try again.",
           variant: "destructive",
         });
@@ -847,7 +847,7 @@ export default function MyPractice() {
           body: {
             recipientEmail: newPartner.email.trim(),
             senderName: profile?.full_name || "A colleague",
-            message: "You have been added as a practice partner.",
+            message: "You have been added as a firm partner.",
             isPracticePartner: true,
             partnerName: newPartner.full_name,
           },
@@ -1196,8 +1196,8 @@ export default function MyPractice() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">My Holarprac</h1>
-          <p className="text-muted-foreground text-xs">Manage your personal and practice information</p>
+          <h1 className="text-3xl font-bold text-foreground">My Firm</h1>
+          <p className="text-muted-foreground text-xs">Manage your personal and firm information</p>
         </div>
         <div className="text-sm text-muted-foreground flex items-center gap-1.5">
           {savedStatus === "saving" && (
@@ -1410,7 +1410,7 @@ export default function MyPractice() {
               <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
                 <div className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-primary" />
-                  <h3 className="text-xs font-semibold text-primary-dark">Practice Information</h3>
+                  <h3 className="text-xs font-semibold text-primary-dark">Firm Information</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className={SECTION_CONTENT_CLASS}>
@@ -1421,12 +1421,12 @@ export default function MyPractice() {
               {/* Practice Details */}
               <AccordionItem value="practice-basic-details" className="border-0 rounded-none bg-white">
                 <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
-                  <h4 className="text-xs font-semibold">Practice Details</h4>
+                  <h4 className="text-xs font-semibold">Firm Details</h4>
                 </AccordionTrigger>
                 <AccordionContent className={SECTION_CONTENT_CLASS}>
                   <div className="flex flex-wrap items-end gap-4">
                     <div className="space-y-1.5 w-40">
-                      <Label>Practice Number</Label>
+                      <Label>FSP Number</Label>
                       <Input
                         value={formData.practice_number}
                         onChange={(e) => setFormData({ ...formData, practice_number: e.target.value })}
@@ -1442,20 +1442,20 @@ export default function MyPractice() {
                       />
                     </div>
                     <div className="space-y-1.5 w-64">
-                      <Label>Address of Doctor's Rooms</Label>
+                      <Label>Address of Wealth Manager's Office</Label>
                       <Input
                         value={formData.practice_address}
                         onChange={(e) => setFormData({ ...formData, practice_address: e.target.value })}
-                        placeholder="e.g., 123 Medical Centre, Suite 4, Cape Town"
+                        placeholder="e.g., 123 Office, Suite 4, Cape Town"
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Practice Logo</Label>
+                      <Label>Firm Logo</Label>
                       <div className="flex items-center gap-3">
                         {profile?.logo_url && (
                           <img
                             src={profile.logo_url}
-                            alt="Practice logo"
+                            alt="Firm logo"
                             className="h-9 w-auto object-contain rounded border border-border p-1"
                           />
                         )}
@@ -1617,7 +1617,7 @@ export default function MyPractice() {
                                     body: {
                                       recipientEmail: partnerEmail,
                                       senderName: profile?.full_name || "A colleague",
-                                      message: "You have been invited to join Holarc as a practice partner.",
+                                      message: "You have been invited to join Indigro as a firm partner.",
                                       isPracticePartner: true,
                                       partnerName: partner.full_name,
                                     },
@@ -1678,7 +1678,7 @@ export default function MyPractice() {
 
                     {/* ── Existing user ── */}
                     <TabsContent value="existing" className="space-y-2 pt-3">
-                      <Label className="text-xs">Search Holarc users by name or registration #</Label>
+                      <Label className="text-xs">Search Indigro users by name or registration #</Label>
                       <Input
                         value={partnerSearch}
                         onChange={(e) => setPartnerSearch(e.target.value)}
@@ -1826,7 +1826,7 @@ export default function MyPractice() {
               {/* Practice Management Assistants */}
               <AccordionItem value="practice-assistants" className={SECTION_ITEM_CLASS}>
                 <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
-                  <h4 className="text-xs font-semibold">Practice Management Assistants</h4>
+                  <h4 className="text-xs font-semibold">Firm Management Assistants</h4>
                 </AccordionTrigger>
                 <AccordionContent className={SECTION_CONTENT_CLASS}>
                   <PracticeAssistants />
@@ -2318,7 +2318,7 @@ export default function MyPractice() {
         <TabsContent value="referrals" className="mt-4 space-y-4 my-practice-tab-body">
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="text-base font-semibold text-primary-dark">Referral Doctors</h3>
+              <h3 className="text-base font-semibold text-primary-dark">Referral Wealth Managers</h3>
             </div>
             <ReferralDoctors hideHeader />
           </div>

@@ -193,7 +193,7 @@ export function HeaderFooterTemplateForm({
           <div className="flex items-center gap-1.5">
             <label className="text-xs font-medium text-foreground shrink-0 w-14">Name *</label>
             <Input
-              placeholder="e.g., Practice Letterhead"
+              placeholder="e.g., Firm Letterhead"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="h-8 flex-1 text-sm"
@@ -222,11 +222,11 @@ export function HeaderFooterTemplateForm({
       <div className="px-2 py-1.5 rounded-lg bg-muted/50 border border-border">
         <div className="flex flex-wrap items-center gap-1">
           <span className="text-[10px] font-medium text-muted-foreground mr-0.5">Fields:</span>
-          <code className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">[DoctorName]</code>
-          <code className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">[DoctorSignature]</code>
-          <code className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">[PracticeNumber]</code>
-          <code className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">[DoctorNumber]</code>
-          <code className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">[PracticeAddress]</code>
+          <code className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">[Wealth ManagerName]</code>
+          <code className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">[Wealth ManagerSignature]</code>
+          <code className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">[FirmNumber]</code>
+          <code className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">[Wealth ManagerNumber]</code>
+          <code className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">[FirmAddress]</code>
           <code className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">[Date]</code>
         </div>
       </div>
@@ -246,7 +246,7 @@ export function HeaderFooterTemplateForm({
             <TemplateSectionEditor
               value={header.left}
               onChange={(v) => setHeader({ ...header, left: v })}
-              placeholder="Logo, practice name..."
+              placeholder="Logo, firm name..."
               rows={2}
               compact
             />
@@ -287,7 +287,7 @@ export function HeaderFooterTemplateForm({
             <TemplateSectionEditor
               value={footer.left}
               onChange={(v) => setFooter({ ...footer, left: v })}
-              placeholder="Practice details..."
+              placeholder="Firm details..."
               rows={2}
               compact
             />

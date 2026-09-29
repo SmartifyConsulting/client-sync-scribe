@@ -107,7 +107,7 @@ export default function Sessions() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <p className="text-muted-foreground">Loading sessions...</p>
+        <p className="text-muted-foreground">Loading consultations...</p>
       </div>
     );
   }
@@ -116,7 +116,7 @@ export default function Sessions() {
     <div className="flex-1 overflow-auto">
       <div className="max-w-4xl mx-auto space-y-6 p-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">My Sessions</h1>
+          <h1 className="text-3xl font-bold text-foreground">My Consultations</h1>
           <p className="text-muted-foreground text-xs mt-1">
             View your past and upcoming sessions with patients
           </p>
@@ -187,7 +187,7 @@ export default function Sessions() {
 
         {sessions.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">No sessions yet</p>
+            <p className="text-muted-foreground">No consultations yet</p>
           </div>
         )}
       </div>

@@ -435,7 +435,7 @@ export default function Sessions() {
     personalNotesSaveTimer.current = setTimeout(() => {
       try {
         localStorage.setItem(`session-personal-notes-draft:${patientId}`, personalNotes);
-        toast({ title: "Notes saved", description: "Your personal notes are saved for this session." });
+        toast({ title: "Notes saved", description: "Your personal notes are saved for this consultation." });
       } catch {
         toast({ title: "Error", description: "Failed to save personal notes", variant: "destructive" });
       }
@@ -866,8 +866,7 @@ export default function Sessions() {
       setActionPoints([]);
       toast({
         title: "Analysis didn't complete",
-        description:
-          "The AI analysis failed or timed out, so no summary, action points or documents were produced. Your recording and notes are saved — tap the mic and use AI Consult to retry.",
+        description: "The AI analysis failed or timed out, so no summary, action points or documents were produced. Your recording and notes are saved — tap the mic and use AI Consult to retry.",
         variant: "destructive",
       });
     }
@@ -912,7 +911,7 @@ export default function Sessions() {
     onEndSessionDetected: () => {
       console.log("End session detected via Web Speech API");
       if (!pendingCompletionRef.current) {
-        toast({ title: "🎤 Session ending detected", description: "Ending session automatically from voice cue." });
+        toast({ title: "🎤 Consultation ending detected", description: "Ending consultation automatically from voice cue." });
         pendingCompletionRef.current = true;
         setPendingTranscript(latestTranscriptRef.current);
         setTimeout(() => { if (isRecording) stopRecording(); }, 100);
@@ -934,7 +933,7 @@ export default function Sessions() {
       if (!pendingCompletionRef.current && isRecording && endPhrases.some(phrase => text.toLowerCase().includes(phrase))) {
         pendingCompletionRef.current = true;
         stopRecording();
-        toast({ title: "Session Ending", description: "End session detected in transcript" });
+        toast({ title: "Consultation Ending", description: "End consultation detected in transcript" });
       }
       
       // If pending completion (from voice detection), trigger session-complete (documents first)
@@ -1204,7 +1203,7 @@ export default function Sessions() {
     if (!pausedDraft) return;
     await deletePausedSession(pausedDraft.id);
     setPausedDraft(null);
-    toast({ title: "Paused session discarded" });
+    toast({ title: "Paused consultation discarded" });
   };
 
   /**
@@ -1429,7 +1428,7 @@ export default function Sessions() {
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent mb-3">
             <Loader2 className="h-6 w-6 text-accent-foreground animate-spin" />
           </div>
-          <h2 className="text-lg font-semibold text-foreground mb-1">Starting session...</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-1">Starting consultation...</h2>
           <p className="text-muted-foreground max-w-md text-sm">
             {currentPatient?.name ? `Getting ready to record for ${currentPatient.name}.` : "Loading patient details..."}
           </p>
@@ -1491,8 +1490,8 @@ export default function Sessions() {
                             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
                               <Users className="h-4 w-4 text-muted-foreground" />
                             </div>
-                            <p className="text-sm font-medium text-foreground">No patients found</p>
-                            <p className="text-xs text-muted-foreground">Try a different name or add a patient first.</p>
+                            <p className="text-sm font-medium text-foreground">No clients found</p>
+                            <p className="text-xs text-muted-foreground">Try a different name or add a client first.</p>
                           </div>
                         )}
                       </CommandEmpty>
@@ -1605,11 +1604,11 @@ export default function Sessions() {
           {currentPatient && (
             <div className="mt-6 w-full max-w-[54.6rem] text-left rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
               <div className="px-3 py-2 border-b bg-primary/5">
-                <h3 className="text-sm font-semibold text-foreground">Past Sessions</h3>
+                <h3 className="text-sm font-semibold text-foreground">Past Consultations</h3>
               </div>
               <div className="space-y-2 p-2">
                 {pastPatientSessions.length === 0 ? (
-                  <p className="p-3 text-xs text-muted-foreground">No previous sessions</p>
+                  <p className="p-3 text-xs text-muted-foreground">No previous consultations</p>
                 ) : (
                   pastPatientSessions.map((s: any) => (
                     <div key={s.id} className="rounded-lg border border-border p-3 hover:bg-muted/50 transition-colors">
@@ -1767,7 +1766,7 @@ export default function Sessions() {
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
                 <Sparkles className="h-4 w-4 text-primary" />
-                <p className="text-sm font-semibold text-primary-dark">Live AI Clinician</p>
+                <p className="text-sm font-semibold text-primary-dark">Live AI Consultation Assistant</p>
               </div>
               {liveHintLoading && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
             </div>
@@ -1786,7 +1785,7 @@ export default function Sessions() {
                     : "Listening — no speech captured yet."}
               </p>
             ) : (
-              <p className="text-xs text-muted-foreground">Live AI Clinician starts as soon as you record.</p>
+              <p className="text-xs text-muted-foreground">Live AI Consultation Assistant starts as soon as you record.</p>
             )}
             {(isRecording || liveHintLastRunAt) && (
               <p className="mt-1 text-[11px] text-muted-foreground">
@@ -1980,8 +1979,8 @@ export default function Sessions() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="prescription">Prescription</SelectItem>
-                  <SelectItem value="invoice">Invoice</SelectItem>
-                  <SelectItem value="medical_certificate">Medical Certificate</SelectItem>
+                  <SelectItem value="invoice">Fee statement</SelectItem>
+                  <SelectItem value="medical_certificate">Advice Letter</SelectItem>
                   <SelectItem value="referral_letter">Referral Letter</SelectItem>
                   <SelectItem value="general_letter">General Letter</SelectItem>
                   <SelectItem value="hospital_admission">Hospital Admission</SelectItem>
@@ -2027,7 +2026,7 @@ export default function Sessions() {
             </Button>
             {currentPatient && (
               <Button variant="outline" asChild>
-                <Link to={`/patients/${patientId}`}>View Patient Profile</Link>
+                <Link to={`/patients/${patientId}`}>View Client Profile</Link>
               </Button>
             )}
           </div>

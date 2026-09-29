@@ -256,7 +256,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
         description: `A patient has requested an appointment on ${format(startTime, "MMM d, yyyy")} at ${selectedSlot.label}${selectedService ? ` for ${selectedService.service_name}` : ""}.`,
       });
 
-      toast({ title: "Request Sent", description: "Your appointment request has been sent to the doctor." });
+      toast({ title: "Request Sent", description: "Your appointment request has been sent to the wealth manager." });
       onBooked();
       onOpenChange(false);
     } catch (err: any) {
@@ -290,7 +290,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
             {loading ? (
               <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
             ) : doctors.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">No connected doctors found. Connect with a doctor first.</p>
+              <p className="text-center text-muted-foreground py-8">No connected wealth managers found. Connect with a wealth manager first.</p>
             ) : (
               doctors.map((doc) => (
                 <button
@@ -320,7 +320,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
               <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
             ) : services.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-muted-foreground mb-3">This doctor hasn't set up services yet.</p>
+                <p className="text-muted-foreground mb-3">This wealth manager hasn't set up services yet.</p>
                 <Button onClick={() => { setSelectedService(null); setStep(3); }}>
                   Continue without service
                 </Button>
@@ -459,7 +459,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
             <div>
               <label className="text-sm font-medium text-foreground mb-1 block">Notes (optional)</label>
               <Textarea
-                placeholder="Any additional information for the doctor..."
+                placeholder="Any additional information for the wealth manager..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}

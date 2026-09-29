@@ -57,7 +57,7 @@ export function SessionGeneratedDocuments({
     <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
       <div className="flex items-center gap-2 mb-3">
         <Sparkles className="h-4 w-4 text-primary" />
-        <h3 className="text-sm font-semibold text-foreground">Documents from this session</h3>
+        <h3 className="text-sm font-semibold text-foreground">Documents from this consultation</h3>
         <Badge variant="secondary" className="text-[10px]">{documents.length}</Badge>
       </div>
 

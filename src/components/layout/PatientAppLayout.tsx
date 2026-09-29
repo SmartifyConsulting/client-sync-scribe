@@ -42,7 +42,7 @@ export function PatientAppLayout() {
         <div className="px-4 py-3 flex items-center justify-between max-w-7xl mx-auto w-full">
           {/* Left: Logo */}
           <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <img src={holarcLogo} alt="Holarc" className="h-10 w-auto object-contain" />
+            <img src={holarcLogo} alt="Indigro" className="h-10 w-auto object-contain" />
           </button>
 
           {/* Right: shared icons (Bug · Calendar · Mic · Bell · Avatar) */}
@@ -67,7 +67,7 @@ export function PatientAppLayout() {
       {/* Mobile support link */}
       <div className="md:hidden px-4 pb-24 -mt-4">
         <a
-          href="mailto:support@holarchealth.com?subject=Holarc%20Health%20Support"
+          href="mailto:support@holarchealth.com?subject=Indigro%20Support"
           className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-primary"
         >
           <LifeBuoy className="h-3.5 w-3.5" /> {t("common.support")}

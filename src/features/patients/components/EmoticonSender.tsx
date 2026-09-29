@@ -30,7 +30,7 @@ export function EmoticonSender({ recipientId, patientId, recipientName }: Emotic
     if (!message.trim()) {
       toast({
         title: "Check-In Message required",
-        description: "Write a short, meaningful note for your patient.",
+        description: "Write a short, meaningful note for your client.",
         variant: "destructive",
       });
       return;

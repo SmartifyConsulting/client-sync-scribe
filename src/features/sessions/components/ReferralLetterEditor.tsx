@@ -216,7 +216,7 @@ export function ReferralLetterEditor({
     if (!recipient) {
       toast({
         title: "No email address",
-        description: "Pick a referral doctor that has an email address on file.",
+        description: "Pick a referral wealth manager that has an email address on file.",
         variant: "destructive",
       });
       return;
@@ -367,7 +367,7 @@ export function ReferralLetterEditor({
                 }}
               >
                 <SelectTrigger id="referred-to-picker">
-                  <SelectValue placeholder="Pick from your referral doctors…" />
+                  <SelectValue placeholder="Pick from your referral wealth managers…" />
                 </SelectTrigger>
                 <SelectContent>
                   {referralOptions.map((o) => (
@@ -387,12 +387,12 @@ export function ReferralLetterEditor({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="clinical-history">Clinical History</Label>
+            <Label htmlFor="clinical-history">Advice History</Label>
             <Textarea
               id="clinical-history"
               value={clinicalHistory}
               onChange={(e) => setClinicalHistory(e.target.value)}
-              placeholder="Brief clinical history..."
+              placeholder="Brief advice history..."
               className="min-h-[80px]"
             />
           </div>

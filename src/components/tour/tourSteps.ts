@@ -7,51 +7,46 @@ export interface TourStep {
 export const doctorTourSteps: TourStep[] = [
   {
     target: "practice-settings",
-    title: "Your Practice",
+    title: "Your Firm",
     message:
-      "Add your practice details, logo, letterhead and billing info here. This information appears on every prescription, invoice and document you create.",
+      "Add your firm details, FSP number, logo and letterhead. They appear on every Record of Advice, fee statement and document you create.",
   },
   {
     target: "import-patients",
-    title: "Your Patients",
+    title: "Your Clients",
     message:
-      "Bring in your existing patient list. You can import from a spreadsheet, invite patients by phone or email, or add them one by one.",
+      "Create client profiles: import from a spreadsheet, invite clients by phone or email, or add them one by one. Each client's financial position, goals and existing products live on their profile.",
   },
   {
     target: "doctor-home",
-    title: "Sessions & Daily Digest",
+    title: "Consultations",
     message:
-      "From your Home dashboard you can start a recorded patient session — the AI will transcribe and summarise it — and listen to your Daily Digest of patient activity.",
+      "Start a recorded consultation from your dashboard. It is transcribed and summarised, and follow-up actions are drafted for your approval.",
   },
   {
     target: "doctor-briefing",
     title: "Today's Briefing",
     message:
-      "Your morning briefing summarises overnight patient activity. Tap play to hear it narrated, or read it inline. Use Skip on any item that isn't relevant — it won't come back tomorrow. Change Language in My Practice settings.",
+      "A summary of overnight client activity: decisions, signed ROAs, uploaded documents and insurer responses. Skip anything that isn't relevant.",
   },
   {
     target: "doctor-tasks",
-    title: "Your Tasks",
+    title: "Your Actions",
     message:
-      "Clinical to-dos the AI suggests during sessions land here for you to approve and tick off.",
+      "Actions from consultations and the workflow land here: needs analysis, quotes, recommendations, compliance, applications and annual reviews. Open a client's Live tab to see what is blocked or waiting.",
   },
 ];
 
 export const patientTourSteps: TourStep[] = [
   {
     target: "patient-holarchy",
-    title: "My Holarchy",
+    title: "My Profile",
     message:
-      "Your health information lives here — vitals, conditions, allergies, emergency contacts, your care team, insurance and pharmacies, plus your session and admission history.",
+      "Your details, financial information and wealth journey live here — from consultation to recommendation, application and your next annual review.",
   },
   {
     target: "patient-tasks",
-    title: "My Tasks",
-    message: "Reminders from your doctors — medications, exercises and follow-ups — appear here.",
-  },
-  {
-    target: "patient-sos",
-    title: "SOS",
-    message: "In an emergency, tap SOS to alert your nominated contacts and nearby providers.",
+    title: "My Actions",
+    message: "Things your Wealth Manager needs from you — documents to upload, your Record of Advice (ROA) to sign — appear here with the reason and due date.",
   },
 ];

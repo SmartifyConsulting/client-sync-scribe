@@ -185,7 +185,7 @@ export function PatientRequestsBadge() {
                 {format(parseISO(req.requested_start), "h:mm a")}
               </span>
             </div>
-            <p className="text-xs text-muted-foreground">Waiting for doctor's response...</p>
+            <p className="text-xs text-muted-foreground">Waiting for wealth manager's response...</p>
           </div>
         ))}
       </CardContent>

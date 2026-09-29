@@ -176,7 +176,7 @@ export function MedicalCertificateEditor({
     if (!startDate || !endDate || !medicalReason.trim()) {
       toast({
         title: "Missing Information",
-        description: "Please fill in the medical reason, start date and end date",
+        description: "Please fill in the financial reason, start date and end date",
         variant: "destructive",
       });
       return;
@@ -205,7 +205,7 @@ export function MedicalCertificateEditor({
       onSave({ content });
       toast({
         title: "Certificate Saved",
-        description: "The medical certificate has been saved",
+        description: "The advice letter has been saved",
       });
 
       // Auto-email to employer if patient allows
@@ -259,7 +259,7 @@ export function MedicalCertificateEditor({
   if (showPreview) {
     return (
       <DocumentPreview
-        title="Medical Certificate"
+        title="Advice Letter"
         subtitle={`Patient: ${patientName}`}
         content={generateContent()}
         logoUrl={profile?.logo_url || undefined}
@@ -281,7 +281,7 @@ export function MedicalCertificateEditor({
               <FileText className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-foreground">Medical Certificate</h2>
+              <h2 className="text-lg font-semibold text-foreground">Advice Letter</h2>
               <p className="text-sm text-muted-foreground">Patient: {patientName}</p>
             </div>
           </div>
@@ -327,12 +327,12 @@ export function MedicalCertificateEditor({
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="medical-reason">Medical Reason *</Label>
+            <Label htmlFor="medical-reason">Financial Reason *</Label>
             <Textarea
               id="medical-reason"
               value={medicalReason}
               onChange={(e) => setMedicalReason(e.target.value)}
-              placeholder="Describe the medical condition and reason for leave..."
+              placeholder="Describe the financial condition and reason for leave..."
               className="min-h-[120px]"
             />
           </div>

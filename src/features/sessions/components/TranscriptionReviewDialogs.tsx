@@ -72,7 +72,7 @@ export function MedCertReviewDialog({
         </DialogHeader>
         <div className="space-y-4">
           <div>
-            <Label>Patient Name</Label>
+            <Label>Client Name</Label>
             <Input value={formData.patient_name || ""} onChange={(e) => setFormData({ ...formData, patient_name: e.target.value })} />
           </div>
           <div>
@@ -272,7 +272,7 @@ export function ReferralReviewDialog({
             <Input value={formData.specialist_type} onChange={(e) => setFormData({ ...formData, specialist_type: e.target.value })} />
           </div>
           <div>
-            <Label>Doctor Name (if known)</Label>
+            <Label>Wealth Manager Name (if known)</Label>
             <Input value={formData.doctor_name || ""} onChange={(e) => setFormData({ ...formData, doctor_name: e.target.value })} />
           </div>
           <div>

@@ -728,8 +728,8 @@ export function PatientDetailsEditor({
         const chronicMeds = (meds || []).filter((m) => m.is_chronic && (m.name || "").trim());
         if (chronicMeds.length > 0 && !doctorId) {
           toast({
-            title: "Connect a doctor to track chronic meds",
-            description: "Add your doctor under My Healthcare so chronic meds appear under Rewards.",
+            title: "Connect a wealth manager to track chronic meds",
+            description: "Add your wealth manager under My Wealth management so chronic meds appear under Rewards.",
           });
           return;
         }
@@ -800,14 +800,14 @@ export function PatientDetailsEditor({
     async (data: typeof formData, surgeriesData: Surgery[]) => {
       if (!data.first_name.trim() && !data.last_name.trim()) return;
       if (!patient?.id) {
-        toast({ title: "Cannot save without a patient record", variant: "destructive" });
+        toast({ title: "Cannot save without a client record", variant: "destructive" });
         return;
       }
       // Employer becomes compulsory once medical insurance has been captured.
       if ((data.medical_aid?.trim() || data.medical_aid_number?.trim()) && !data.employer?.trim()) {
         toast({
           title: "Employer required",
-          description: "Employer details are required when medical insurance is captured.",
+          description: "Employer details are required when insurance is captured.",
           variant: "destructive",
         });
         return;
@@ -1703,7 +1703,7 @@ export function PatientDetailsEditor({
             <TabsContent value="overview" className="space-y-4 mt-4">
               <Tabs defaultValue="team">
                 <TabsList className="bg-neutral-600 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                  <TabsTrigger value="team" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Holarc Medical Team</TabsTrigger>
+                  <TabsTrigger value="team" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Indigro Financial Team</TabsTrigger>
                   <TabsTrigger value="careteam" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Personal Care Circle</TabsTrigger>
                   <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Insurance</TabsTrigger>
                   <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Pharmacies</TabsTrigger>
@@ -1713,14 +1713,14 @@ export function PatientDetailsEditor({
             {/* === INSURANCE SUB-TAB (view) === */}
             <TabsContent value="insurance" className="mt-4">
               <Collapsible defaultOpen className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
-                <SectionHeader icon={ShieldCheck} label="Medical Insurance" />
+                <SectionHeader icon={ShieldCheck} label="Insurance" />
                 <CollapsibleContent className="p-3">
                   <div className={FIELD_GRID_2_CLASS}>
                     <ViewField label="Insurance Provider" value={patient.medical_aid} />
                     <ViewField label="Insurance Product" value={patient.medical_insurance_product} />
                     <ViewField label="Insurance Number" value={patient.medical_aid_number} />
                     <ViewField label="Primary Member" value={patient.primary_member} />
-                    <ViewField label="Medical Aid Claims Email" value={patient.claims_email} />
+                    <ViewField label="Provider Claims Email" value={patient.claims_email} />
                   </div>
                 </CollapsibleContent>
               </Collapsible>
@@ -1776,8 +1776,8 @@ export function PatientDetailsEditor({
             {/* === MY HOLARC TEAM SUB-TAB (view) === */}
             <TabsContent value="team" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-[18px] font-semibold text-primary-dark">My Holarc Medical Team</h2>
-                <p className="text-xs text-muted-foreground">Your medical practitioners — the clinicians with access to your profile</p>
+                <h2 className="text-[18px] font-semibold text-primary-dark">My Indigro Financial Team</h2>
+                <p className="text-xs text-muted-foreground">Your financial wealth managers — the wealth managers with access to your profile</p>
               </div>
               <Suspense
                 fallback={
@@ -2214,9 +2214,9 @@ export function PatientDetailsEditor({
                   </Collapsible>
 
                   <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
-                    <SectionHeader icon={User} label="Family Doctor" />
+                    <SectionHeader icon={User} label="Family Wealth Manager" />
                     <CollapsibleContent className="p-3">
-                      <ViewField label="Family Doctor" value={patient.general_practitioner} />
+                      <ViewField label="Family Wealth Manager" value={patient.general_practitioner} />
                     </CollapsibleContent>
                   </Collapsible>
                 </div>
@@ -2230,8 +2230,8 @@ export function PatientDetailsEditor({
             {isSelfService && (
               <TabsContent value="tasks" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-[18px] font-semibold text-primary-dark">My Tasks</h2>
-                  <p className="text-xs text-muted-foreground">Manage your health tasks and to-dos</p>
+                  <h2 className="text-[18px] font-semibold text-primary-dark">My Actions</h2>
+                  <p className="text-xs text-muted-foreground">Manage your health actions and to-dos</p>
                 </div>
                 <Suspense
                   fallback={
@@ -2248,8 +2248,8 @@ export function PatientDetailsEditor({
             {isSelfService && (
               <TabsContent value="history" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-[18px] font-semibold text-primary-dark">My Sessions</h2>
-                  <p className="text-xs text-muted-foreground">Your consultation sessions. Record sessions with doctors not on the platform.</p>
+                  <h2 className="text-[18px] font-semibold text-primary-dark">My Consultations</h2>
+                  <p className="text-xs text-muted-foreground">Your consultation consultations. Record consultations with wealth managers not on the platform.</p>
                 </div>
                 <PatientSessionRecorder patientId={patient.id} patientName={patient.name} />
               </TabsContent>
@@ -2361,7 +2361,7 @@ export function PatientDetailsEditor({
           <TabsContent value="overview" className="space-y-4 mt-4">
             <Tabs defaultValue="team">
               <TabsList className="bg-neutral-600 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                <TabsTrigger value="team" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Holarc Medical Team</TabsTrigger>
+                <TabsTrigger value="team" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Indigro Financial Team</TabsTrigger>
                   <TabsTrigger value="careteam" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Personal Care Circle</TabsTrigger>
                 <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Insurance</TabsTrigger>
                 <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Pharmacies</TabsTrigger>
@@ -2379,7 +2379,7 @@ export function PatientDetailsEditor({
           {/* === INSURANCE SUB-TAB (EDIT) === */}
           <TabsContent value="insurance" className="mt-4">
             <Collapsible defaultOpen className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
-              <SectionHeader icon={ShieldCheck} label="Medical Insurance" />
+              <SectionHeader icon={ShieldCheck} label="Insurance" />
               <CollapsibleContent className="p-3">
                 {insuranceCaptured && !formData.employer?.trim() && (
                   <p className="mb-2 text-xs text-destructive">
@@ -2425,7 +2425,7 @@ export function PatientDetailsEditor({
                     />
                   </div>
                   <div className="space-y-1.5 sm:col-span-2">
-                    <Label>Medical Aid Claims Email</Label>
+                    <Label>Provider Claims Email</Label>
                     <Input
                       className="text-sm"
                       type="email"
@@ -2700,7 +2700,7 @@ export function PatientDetailsEditor({
                       type="email"
                       value={formData.email}
                       onChange={(e) => updateFormData({ email: e.target.value })}
-                      placeholder="patient@email.com"
+                      placeholder="client@email.com"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -3048,7 +3048,7 @@ export function PatientDetailsEditor({
                       onChange={(e) => updateFormData({ reporting_to_email: e.target.value })}
                       placeholder="manager@company.com"
                     />
-                    <p className="text-xs text-muted-foreground">Used for e-mailing of Medical Certificates</p>
+                    <p className="text-xs text-muted-foreground">Used for e-mailing of Advice Letters</p>
                   </div>
                 </div>
               </CollapsibleContent>
@@ -3060,7 +3060,7 @@ export function PatientDetailsEditor({
                 <Textarea
                   value={formData.notes}
                   onChange={(e) => updateFormData({ notes: e.target.value })}
-                  placeholder="General notes about this patient..."
+                  placeholder="General notes about this client..."
                   rows={4}
                   className="text-xs"
                 />
@@ -3545,7 +3545,7 @@ export function PatientDetailsEditor({
                                 className="text-sm"
                                 value={newCondition.diagnosed_by}
                                 onChange={(e) => setNewCondition((p) => ({ ...p, diagnosed_by: e.target.value }))}
-                                placeholder="Doctor name"
+                                placeholder="Wealth Manager name"
                               />
                             </div>
                             <div className="space-y-1.5">
@@ -3942,10 +3942,10 @@ export function PatientDetailsEditor({
 
                 {/* GP Search */}
                 <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
-                  <SectionHeader icon={User} label="Family Doctor" />
+                  <SectionHeader icon={User} label="Family Wealth Manager" />
                   <CollapsibleContent className="p-3">
                     <div className="space-y-1.5 relative">
-                      <Label>Family Doctor</Label>
+                      <Label>Family Wealth Manager</Label>
                       <Input
                         className="text-sm"
                         value={formData.general_practitioner}
@@ -4013,7 +4013,7 @@ export function PatientDetailsEditor({
                             </div>
                           ))}
                           <div className="px-3 py-2 border-t border-border">
-                            <p className="text-xs text-muted-foreground mb-1">Doctor not on the app?</p>
+                            <p className="text-xs text-muted-foreground mb-1">Wealth Manager not on the app?</p>
                             <div className="flex gap-1">
                               <Button
                                 variant="outline"
@@ -4060,8 +4060,8 @@ export function PatientDetailsEditor({
           {isSelfService && (
             <TabsContent value="tasks" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-[18px] font-semibold text-primary-dark">My Tasks</h2>
-                <p className="text-xs text-muted-foreground">Manage your health tasks and to-dos</p>
+                <h2 className="text-[18px] font-semibold text-primary-dark">My Actions</h2>
+                <p className="text-xs text-muted-foreground">Manage your health actions and to-dos</p>
               </div>
               <Suspense
                 fallback={
@@ -4078,8 +4078,8 @@ export function PatientDetailsEditor({
           {isSelfService && (
             <TabsContent value="history" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-[18px] font-semibold text-primary-dark">My Sessions</h2>
-                <p className="text-xs text-muted-foreground">Your consultation sessions</p>
+                <h2 className="text-[18px] font-semibold text-primary-dark">My Consultations</h2>
+                <p className="text-xs text-muted-foreground">Your consultation consultations</p>
               </div>
 
               <Suspense

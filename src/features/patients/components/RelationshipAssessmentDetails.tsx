@@ -87,7 +87,7 @@ export function RelationshipAssessmentDetails({
 
       {sessionEvidence.length > 0 && (
         <div className="rounded-lg border border-border bg-muted/20 p-3">
-          <p className="text-xs font-bold text-foreground mb-2">Evidence from sessions</p>
+          <p className="text-xs font-bold text-foreground mb-2">Evidence from consultations</p>
           <div className="grid gap-x-6 gap-y-3 md:grid-cols-2">
             {Object.entries(grouped).map(([key, items]) => (
               <div key={key} className="space-y-1.5">

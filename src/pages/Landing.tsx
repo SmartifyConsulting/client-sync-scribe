@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
-import capabilitiesAsset from "@/assets/holarc-capabilities-wave.png.asset.json";
 const holarcLogo = holarcLogoAsset.url;
 import { motion } from "framer-motion";
 import {
@@ -26,6 +25,7 @@ import {
   Activity,
   Hospital,
   Siren,
+  ShieldCheck,
   Ambulance,
   Building2,
   Smartphone,
@@ -59,12 +59,12 @@ const getPatientBenefits = (t: any) => [
   {
     icon: Shield,
     title: t("landing.patientBenefits.benefit3Title", "You're in Control"),
-    description: t("landing.patientBenefits.benefit3Description", "Decide exactly which doctors see your records. Grant or revoke access anytime with granular permissions."),
+    description: t("landing.patientBenefits.benefit3Description", "Decide exactly which wealth managers see your records. Grant or revoke access anytime with granular permissions."),
   },
   {
     icon: Calendar,
     title: t("landing.patientBenefits.benefit4Title", "Unified Appointments"),
-    description: t("landing.patientBenefits.benefit4Description", "All your healthcare appointments from every provider in one calendar—never miss a follow-up."),
+    description: t("landing.patientBenefits.benefit4Description", "All your wealth management appointments from every provider in one calendar—never miss a follow-up."),
   },
 ];
 
@@ -77,7 +77,7 @@ const getProviderBenefits = (t: any) => [
   {
     icon: Share2,
     title: t("landing.providerBenefits.benefit2Title", "Seamless Collaboration"),
-    description: t("landing.providerBenefits.benefit2Description", "Round Table notes enable real-time communication with other specialists caring for the same patient."),
+    description: t("landing.providerBenefits.benefit2Description", "Round Table notes enable real-time communication with other specialists caring for the same client."),
   },
   {
     icon: FileText,
@@ -86,13 +86,13 @@ const getProviderBenefits = (t: any) => [
   },
   {
     icon: Heart,
-    title: t("landing.providerBenefits.benefit4Title", "Better Patient Outcomes"),
-    description: t("landing.providerBenefits.benefit4Description", "Access complete patient history across all their providers—make informed decisions with the full picture."),
+    title: t("landing.providerBenefits.benefit4Title", "Better Client Outcomes"),
+    description: t("landing.providerBenefits.benefit4Description", "Access complete client history across all their providers—make informed decisions with the full picture."),
   },
   {
     icon: Ambulance,
     title: t("landing.providerBenefits.benefit5Title", "Emergency Service Providers"),
-    description: t("landing.providerBenefits.benefit5Description", "Emergency response crews onboard in minutes, accept SOS incidents with one tap, share live ETA, and arrive with the patient's full medical context."),
+    description: t("landing.providerBenefits.benefit5Description", "Emergency response crews onboard in minutes, accept SOS incidents with one tap, share live ETA, and arrive with the client's full financial context."),
   },
   {
     icon: Hospital,
@@ -102,14 +102,14 @@ const getProviderBenefits = (t: any) => [
 ];
 
 const ecosystemFeatures = [
-  "Patient-controlled access permissions",
-  "Multi-provider care coordination",
-  "Complete prescription history tracking",
-  "AI-powered medication conflict alerts",
-  "Unified appointment management",
+  "Client-controlled access permissions",
+  "Firm-wide client workflows",
+  "Versioned Records of Advice",
+  "Compliance and FICA tracking",
+  "Shared consultation calendar",
   "Secure document sharing",
-  "Real-time provider collaboration",
-  "Comprehensive health timeline",
+  "Application and underwriting tracking",
+  "Annual review scheduling",
 ];
 
 export default function Landing() {
@@ -188,11 +188,9 @@ export default function Landing() {
               <div className="w-full">
                 <div className="flex flex-col items-center lg:items-start">
                   <div className="inline-flex flex-col items-center mx-auto lg:mx-0">
-                    <img
-                      src={holarcLogo}
-                      alt="Holarc Health"
-                      className="h-28 sm:h-36 lg:h-44 w-auto"
-                    />
+                    <span className="font-display text-6xl sm:text-7xl lg:text-8xl font-semibold tracking-tight text-foreground" aria-label="Indigro">
+                      Indigro
+                    </span>
                     <p className="mt-5 font-mono text-xs sm:text-sm text-muted-foreground tracking-wider text-center">
                       {t("landing.hero.badge")} <span className="text-primary">/ [STATUS: ACTIVE]</span>
                     </p>
@@ -294,22 +292,7 @@ export default function Landing() {
             </motion.div>
           </div>
 
-          {/* MIDDLE BAND — capability graphic */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-center py-8 lg:py-12"
-          >
-            <img
-              src={capabilitiesAsset.url}
-              alt="Holarc capabilities: Voice Consultations, AI Summaries, Incentivized Adherence, Rewards, Round Table, Prescriptions, Hospital Admissions, Auto-Tasks, Unified Calendar, Emergency SOS, Emergency Response Dispatch, Hospital Network, Increased Governance"
-              loading="lazy"
-              width={1920}
-              height={720}
-              className="w-full max-w-[51rem] mx-auto h-auto"
-            />
-          </motion.div>
+          {/* MIDDLE BAND — capability graphic removed (healthcare artwork) */}
 
 
 
@@ -368,7 +351,7 @@ export default function Landing() {
               </div>
             </motion.div>
 
-            {/* Holarc Help (SOS) */}
+            {/* Compliance */}
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -377,7 +360,7 @@ export default function Landing() {
             >
               <div className="flex items-start gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E01837] text-white shrink-0">
-                  <Siren className="h-5 w-5" />
+                  <ShieldCheck className="h-5 w-5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-foreground text-sm">{t("landing.features.holarcHelp")}</p>
@@ -454,7 +437,7 @@ export default function Landing() {
               {t("landing.patientBenefits.sectionBadge")}
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              {t("landing.patientBenefits.sectionTitle")} <span className="text-primary">360°</span> {t("landing.patientBenefits.sectionTitleHighlight")}
+              {t("landing.patientBenefits.sectionTitle")} {t("landing.patientBenefits.sectionTitleHighlight")}
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               {t("landing.patientBenefits.sectionDescription")}
@@ -568,10 +551,7 @@ export default function Landing() {
                 <SelectContent>
                   <SelectItem value="patient">{t("landing.roleDialog.options.patient")}</SelectItem>
                   <SelectItem value="doctor">{t("landing.roleDialog.options.doctor")}</SelectItem>
-                  <SelectItem value="hospital">{t("landing.roleDialog.options.hospital")}</SelectItem>
-                  <SelectItem value="emergency">{t("landing.roleDialog.options.emergency")}</SelectItem>
                   <SelectItem value="insurance">{t("landing.roleDialog.options.insurance")}</SelectItem>
-                  <SelectItem value="pharmacy">{t("landing.roleDialog.options.pharmacy")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

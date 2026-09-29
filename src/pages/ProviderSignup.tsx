@@ -111,8 +111,7 @@ export default function ProviderSignup() {
         if (/already|registered|exists/i.test(authErr.message)) {
           toast({
             title: t("auth.provider.emailAlreadyRegistered"),
-            description:
-              "An account with this administrator email exists. Sign in first, then submit the application from your dashboard.",
+            description: "An account with this administrator email exists. Sign in first, then submit the application from your dashboard.",
             variant: "destructive",
           });
         } else {

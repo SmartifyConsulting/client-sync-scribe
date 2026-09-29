@@ -50,7 +50,7 @@ export function RelationshipInsightCard({ patientId }: { patientId: string }) {
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-2 flex-wrap">
           <Handshake className="h-4 w-4 text-primary" />
-          <h4 className="font-medium text-foreground">How to work with this patient</h4>
+          <h4 className="font-medium text-foreground">How to work with this client</h4>
           {/* TESTING ONLY — internal pattern number */}
           {assessment && (
             <span className="rounded-full border border-amber-400/60 bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400">

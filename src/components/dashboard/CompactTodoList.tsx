@@ -287,7 +287,7 @@ export function CompactTodoList() {
         }
       }, POLL_INTERVAL_MS);
 
-      toast({ title: "Listening...", description: "Speak your task — stops after a pause" });
+      toast({ title: "Listening...", description: "Speak your action — stops after a pause" });
     } catch {
       toast({ title: "Microphone access denied", variant: "destructive" });
     }
@@ -377,7 +377,7 @@ export function CompactTodoList() {
       setTodos([{ ...data, completed: false, priority: data.priority as "low" | "medium" | "high", is_auto_executed: false }, ...todos]);
       setNewTaskText("");
     } catch {
-      toast({ title: "Error", description: "Failed to add task", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to add action", variant: "destructive" });
     }
   };
 
@@ -399,7 +399,7 @@ export function CompactTodoList() {
       if (!user) return;
       await supabase.from("todos").delete().eq("user_id", user.id).eq("status", "completed");
       setTodos((prev) => prev.filter((t) => !t.completed));
-      toast({ title: "Completed tasks cleared" });
+      toast({ title: "Completed actions cleared" });
     } catch {
       toast({ title: "Error", variant: "destructive" });
     }
@@ -507,7 +507,7 @@ export function CompactTodoList() {
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Clear all completed tasks?</AlertDialogTitle>
+                  <AlertDialogTitle>Clear all completed actions?</AlertDialogTitle>
                   <AlertDialogDescription>
                     This permanently deletes your {completedCount} completed task{completedCount === 1 ? "" : "s"}. Active tasks are not affected.
                   </AlertDialogDescription>
@@ -668,7 +668,7 @@ export function CompactTodoList() {
       <Dialog open={!!viewTask} onOpenChange={(o) => { if (!o) setViewTask(null); }}>
         <DialogContent className="sm:max-w-[420px]">
           <DialogHeader>
-            <DialogTitle className="text-sm">Task</DialogTitle>
+            <DialogTitle className="text-sm">Action</DialogTitle>
           </DialogHeader>
           {viewTask && (
             <div className="space-y-2 text-sm">

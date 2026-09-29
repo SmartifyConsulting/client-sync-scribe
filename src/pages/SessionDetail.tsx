@@ -244,8 +244,8 @@ export default function SessionDetail() {
     if (!id) return;
     await deleteSession(id);
     toast({
-      title: "Session deleted",
-      description: "The session has been removed.",
+      title: "Consultation deleted",
+      description: "The consultation has been removed.",
     });
     navigate(-1);
   };
@@ -288,7 +288,7 @@ export default function SessionDetail() {
           Back
         </button>
         <div className="rounded-xl border border-primary bg-card p-8 text-center">
-          <p className="text-muted-foreground">Session not found</p>
+          <p className="text-muted-foreground">Consultation not found</p>
         </div>
       </div>
     );
@@ -409,7 +409,7 @@ export default function SessionDetail() {
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Session</AlertDialogTitle>
+                  <AlertDialogTitle>Delete Consultation</AlertDialogTitle>
                   <AlertDialogDescription>
                     This action cannot be undone. This will permanently delete the session record.
                   </AlertDialogDescription>
@@ -445,8 +445,8 @@ export default function SessionDetail() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuItem onSelect={() => setShowPrescriptionEditor(true)}><Pill className="mr-2 h-4 w-4" />Prescription</DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setShowInvoiceEditor(true)}><Receipt className="mr-2 h-4 w-4" />Invoice</DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setShowMedicalCertificateEditor(true)}><FileBadge className="mr-2 h-4 w-4" />Medical Certificate</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setShowInvoiceEditor(true)}><Receipt className="mr-2 h-4 w-4" />Fee statement</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setShowMedicalCertificateEditor(true)}><FileBadge className="mr-2 h-4 w-4" />Advice Letter</DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setShowReferralLetterEditor(true)}><FileText className="mr-2 h-4 w-4" />Referral Letter</DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setShowGeneralLetterEditor(true)}><FileEdit className="mr-2 h-4 w-4" />General Letter</DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setShowDrawingPad(true)}><PenTool className="mr-2 h-4 w-4" />Drawing Pad</DropdownMenuItem>
@@ -479,10 +479,10 @@ export default function SessionDetail() {
       <div className="rounded-xl border border-primary bg-primary/5 p-4">
         <div className="flex items-center gap-1.5">
           <Sparkles className="h-4 w-4 text-primary" />
-          <h2 className="text-sm font-semibold text-foreground">AI Clinician Notes</h2>
+          <h2 className="text-sm font-semibold text-foreground">AI Wealth Manager Notes</h2>
         </div>
         <p className="mt-1 mb-3 text-xs text-muted-foreground">
-          <span className="font-semibold text-foreground">Private — Only visible to you. Not shared with the patient or other doctors.</span>{" "}
+          <span className="font-semibold text-foreground">Private — Only visible to you. Not shared with the client or other wealth managers.</span>{" "}
           AI-generated clinical notes are decision support only and must be reviewed by the treating clinician.
         </p>
         <ClinicianNotesColumns notes={session.ai_diagnosis || session.notes} />
@@ -540,7 +540,7 @@ export default function SessionDetail() {
                 )}
               </div>
             </div>
-            <p className="mb-2 text-xs text-muted-foreground">Only visible to you. Not shared with the patient or other doctors.</p>
+            <p className="mb-2 text-xs text-muted-foreground">Only visible to you. Not shared with the client or other wealth managers.</p>
             <div className="max-h-[150px] overflow-y-auto">
               {editingPrivateNotes ? (
                 <Textarea
@@ -571,8 +571,8 @@ export default function SessionDetail() {
               <FileText className="h-3.5 w-3.5 text-primary" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-foreground">Session Documents</h2>
-              <p className="text-xs text-muted-foreground">Auto-generated documents from this session</p>
+              <h2 className="text-sm font-semibold text-foreground">Consultation Documents</h2>
+              <p className="text-xs text-muted-foreground">Auto-generated documents from this consultation</p>
             </div>
           </div>
           <div className="space-y-1">
@@ -626,7 +626,7 @@ export default function SessionDetail() {
       {/* Empty State */}
       {!session.summary && !session.transcript && (!session.action_points || session.action_points.length === 0) && (
         <div className="rounded-xl border border-primary bg-card p-8 text-center">
-          <p className="text-sm text-muted-foreground">No content recorded for this session yet.</p>
+          <p className="text-sm text-muted-foreground">No content recorded for this consultation yet.</p>
         </div>
       )}
 
@@ -659,7 +659,7 @@ export default function SessionDetail() {
           onClose={() => setShowInvoiceEditor(false)}
           onSave={(invoice) => {
             toast({
-              title: "Invoice created",
+              title: "Fee statement created",
               description: `Invoice #${invoice.invoice_number} has been created.`,
             });
           }}
@@ -675,8 +675,8 @@ export default function SessionDetail() {
           onClose={() => setShowMedicalCertificateEditor(false)}
           onSave={() => {
             toast({
-              title: "Medical Certificate created",
-              description: "The medical certificate has been saved.",
+              title: "Advice Letter created",
+              description: "The advice letter has been saved.",
             });
           }}
         />

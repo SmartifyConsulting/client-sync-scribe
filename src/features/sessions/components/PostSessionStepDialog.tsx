@@ -148,7 +148,7 @@ function DocStepDialog({
                 <Receipt className="h-5 w-5 text-primary" />
                 Invoice
               </DialogTitle>
-              <DialogDescription>Ready to review and send this session's invoice.</DialogDescription>
+              <DialogDescription>Ready to review and send this consultation's fee statement.</DialogDescription>
             </DialogHeader>
             <div className="rounded-lg border border-border bg-muted/30 p-6 text-center">
               <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Total</p>
@@ -325,7 +325,7 @@ function SummaryStepDialog({
           )}
           {clinicianNotes?.trim() && (
             <div className="space-y-2">
-              <p className="font-semibold">AI Clinician notes</p>
+              <p className="font-semibold">AI Consultation Assistant notes</p>
               <ClinicianNotesColumns notes={clinicianNotes} />
             </div>
           )}

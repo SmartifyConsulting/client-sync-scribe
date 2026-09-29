@@ -212,7 +212,7 @@ export function SessionPatientOverview({ patient, currentMedications = [], discS
     <div className="flex flex-col rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
       <div className="flex items-center gap-1.5 px-3 py-2 border-b bg-primary/5">
         <Stethoscope className="h-3.5 w-3.5 text-primary" />
-        <p className="text-xs font-medium text-foreground">Patient Overview</p>
+        <p className="text-xs font-medium text-foreground">Client Overview</p>
         <span className="text-[10px] text-muted-foreground ml-auto">Last 6 months</span>
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto p-3">
@@ -247,7 +247,7 @@ export function SessionPatientOverview({ patient, currentMedications = [], discS
             )}
           </div>
         ) : (
-          <p className="text-xs text-muted-foreground">No history available for this patient yet.</p>
+          <p className="text-xs text-muted-foreground">No history available for this client yet.</p>
         )}
       </div>
     </div>

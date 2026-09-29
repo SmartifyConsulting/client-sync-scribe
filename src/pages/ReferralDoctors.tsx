@@ -231,7 +231,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
 
   const handleSendInvite = async () => {
     if (!inviteEmail.trim()) {
-      toast({ title: "Email required", description: "Please enter the doctor's email address.", variant: "destructive" });
+      toast({ title: "Email required", description: "Please enter the wealth manager's email address.", variant: "destructive" });
       return;
     }
     setSendingInvite(true);
@@ -280,11 +280,11 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
     if (editingId) {
       const { error } = await supabase.from("referral_doctors").update(record).eq("id", editingId);
       if (error) toast({ title: "Error", description: "Failed to update", variant: "destructive" });
-      else toast({ title: "Updated", description: "Referral doctor updated" });
+      else toast({ title: "Updated", description: "Referral wealth manager updated" });
     } else {
       const { error } = await supabase.from("referral_doctors").insert({ ...record, user_id: user.id });
       if (error) toast({ title: "Error", description: "Failed to add", variant: "destructive" });
-      else toast({ title: "Added", description: "Referral doctor added" });
+      else toast({ title: "Added", description: "Referral wealth manager added" });
     }
     setSaving(false);
     resetForm();
@@ -320,7 +320,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
     const { error } = await supabase.from("referral_doctors").delete().eq("id", id);
     if (!error) {
       setDoctors(doctors.filter(d => d.id !== id));
-      toast({ title: "Removed", description: "Referral doctor removed" });
+      toast({ title: "Removed", description: "Referral wealth manager removed" });
     }
   };
 
@@ -351,7 +351,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Referrals</h1>
-            <p className="mt-1 text-muted-foreground text-xs">Manage doctors you refer patients to</p>
+            <p className="mt-1 text-muted-foreground text-xs">Manage wealth managers you refer clients to</p>
           </div>
           <Button size="sm" variant="outline" onClick={() => { resetForm(); setShowForm(true); }} className="gap-2">
             <Plus className="h-4 w-4" /> Add Doctor
@@ -360,7 +360,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
       )}
       {hideHeader && (
         <div className="flex items-center justify-between">
-          <p className="text-muted-foreground text-xs">Manage doctors you refer patients to</p>
+          <p className="text-muted-foreground text-xs">Manage wealth managers you refer clients to</p>
           <Button size="sm" onClick={() => { resetForm(); setShowForm(true); }} className="gap-1.5">
             <Plus className="h-3.5 w-3.5" /> Add Doctor
           </Button>
@@ -369,17 +369,17 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
 
       {showForm && !editingId && (
         <div className="rounded-xl border border-primary bg-card p-6 shadow-sm space-y-4">
-          <h3 className="font-semibold text-foreground">Add Referral Doctor</h3>
+          <h3 className="font-semibold text-foreground">Add Referral Wealth Manager</h3>
 
           {/* Search Step */}
           {addMode === "search" && (
             <div className="space-y-4">
               <div className="relative">
-                <Label>Search for a doctor on Holarc</Label>
+                <Label>Search for a wealth manager on Indigro</Label>
                 <div className="relative mt-1">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
-                    placeholder="Type doctor name..."
+                    placeholder="Type wealth manager name..."
                     value={profileSearch}
                     onChange={(e) => setProfileSearch(e.target.value)}
                     onFocus={() => profileSuggestions.length > 0 && setShowProfileSuggestions(true)}
@@ -413,7 +413,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
               {/* Not found → invite or manual */}
               {noSearchResults && (
                 <div className="rounded-lg border border-dashed border-border p-4 space-y-3 bg-muted/30">
-                  <p className="text-sm text-muted-foreground">Doctor not found on Holarc</p>
+                  <p className="text-sm text-muted-foreground">Wealth Manager not found on Indigro</p>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={() => setAddMode("invite")} className="gap-2">
                       <Mail className="h-4 w-4" /> Invite
@@ -442,12 +442,12 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
           {/* Invite Step */}
           {addMode === "invite" && (
             <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">Send an email invitation to join Holarc Health</p>
+              <p className="text-sm text-muted-foreground">Send an email invitation to join Indigro</p>
               <div className="space-y-2">
-                <Label>Doctor's Email</Label>
+                <Label>Wealth Manager's Email</Label>
                 <Input
                   type="email"
-                  placeholder="doctor@example.com"
+                  placeholder="wealth manager@example.com"
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                 />
@@ -482,7 +482,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
                     <Input value={customSpecialty} onChange={(e) => setCustomSpecialty(e.target.value)} placeholder="Enter specialty" className="mt-2" />
                   )}
                 </div>
-                <div className="space-y-2"><Label>Practice Number</Label><Input value={form.practice_number} onChange={(e) => setForm({ ...form, practice_number: e.target.value })} /></div>
+                <div className="space-y-2"><Label>FSP Number</Label><Input value={form.practice_number} onChange={(e) => setForm({ ...form, practice_number: e.target.value })} /></div>
                 <div className="space-y-2"><Label>Address</Label><Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
                 <div className="space-y-2"><Label>Email</Label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
                 <div className="space-y-2"><Label>Phone</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
@@ -499,7 +499,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
       {/* Edit form (always manual) */}
       {showForm && editingId && (
         <div className="rounded-xl border border-primary bg-card p-6 shadow-sm space-y-4">
-          <h3 className="font-semibold text-foreground">Edit Referral Doctor</h3>
+          <h3 className="font-semibold text-foreground">Edit Referral Wealth Manager</h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="space-y-2"><Label>First Name *</Label><Input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} /></div>
             <div className="space-y-2"><Label>Last Name *</Label><Input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} /></div>
@@ -516,7 +516,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
                 <Input value={customSpecialty} onChange={(e) => setCustomSpecialty(e.target.value)} placeholder="Enter specialty" className="mt-2" />
               )}
             </div>
-            <div className="space-y-2"><Label>Practice Number</Label><Input value={form.practice_number} onChange={(e) => setForm({ ...form, practice_number: e.target.value })} /></div>
+            <div className="space-y-2"><Label>FSP Number</Label><Input value={form.practice_number} onChange={(e) => setForm({ ...form, practice_number: e.target.value })} /></div>
             <div className="space-y-2"><Label>Address</Label><Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
             <div className="space-y-2"><Label>Email</Label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
             <div className="space-y-2"><Label>Phone</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
@@ -533,7 +533,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative w-full max-w-sm">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-            <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search doctors..." className="pl-8 h-9 text-sm" />
+            <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search wealth managers..." className="pl-8 h-9 text-sm" />
           </div>
           <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
             <SelectTrigger className="h-9 w-[200px] text-sm"><SelectValue placeholder="All Specialties" /></SelectTrigger>
@@ -551,7 +551,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
           {loading ? (
             <div className="p-10 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" /></div>
           ) : filtered.length === 0 && directoryMatches.length === 0 ? (
-            <div className="p-10 text-center text-muted-foreground rounded-xl border border-primary bg-card">No referral doctors found</div>
+            <div className="p-10 text-center text-muted-foreground rounded-xl border border-primary bg-card">No referral wealth managers found</div>
           ) : (
             filtered.map((doc) => (
               <div key={doc.id} className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-3">
@@ -581,7 +581,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
           {/* Doctors on Holarc Health who aren't in the saved list yet */}
           {!loading && directoryMatches.length > 0 && (
             <div className="space-y-2 pt-2">
-              <p className="text-xs font-medium text-muted-foreground">On Holarc Health</p>
+              <p className="text-xs font-medium text-muted-foreground">On Indigro</p>
               {directoryMatches.map((doc) => (
                 <div key={`dir-${doc.id}`} className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-primary/50 bg-card p-3">
                   <div className="flex items-center gap-3 min-w-0">

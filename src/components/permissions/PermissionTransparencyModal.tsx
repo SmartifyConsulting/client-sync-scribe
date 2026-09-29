@@ -155,7 +155,7 @@ export function PermissionTransparencyModal({
           <h4 className="text-sm font-semibold text-foreground mb-2">
             {t(
               "dialogs.otherPractitionersAccess",
-              "What other practitioners can access from your session",
+              "What other wealth managers can access from your consultation",
             )}
           </h4>
           <RowList allowed={getDoctorSharedItems(t)} denied={getDoctorPrivateItems(t)} />

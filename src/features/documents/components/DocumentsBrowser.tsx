@@ -275,7 +275,7 @@ export function DocumentsBrowser({
           <SelectContent>
             <SelectItem value="type">Group by Type</SelectItem>
             <SelectItem value="date">Group by Date</SelectItem>
-            <SelectItem value="patient">Group by Patient</SelectItem>
+            <SelectItem value="patient">Group by Client</SelectItem>
           </SelectContent>
         </Select>
       </div>

@@ -118,13 +118,13 @@ const DOC_TYPE_CONFIG: Record<
     icon: Pill,
   },
   invoice: {
-    label: "Invoice",
+    label: "Fee statement",
     color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
     borderColor: "border-amber-400",
     icon: Receipt,
   },
   medical_certificate: {
-    label: "Medical Certificate",
+    label: "Advice Letter",
     color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
     borderColor: "border-blue-400",
     icon: FileCheck,
@@ -188,7 +188,7 @@ const DOC_TYPE_CONFIG: Record<
 const FILTER_OPTIONS: { value: DocType | "all"; label: string }[] = [
   { value: "all", label: "All" },
   { value: "prescription", label: "Prescriptions" },
-  { value: "invoice", label: "Invoices" },
+  { value: "invoice", label: "Fee statements" },
   { value: "medical_certificate", label: "Certificates" },
   { value: "referral_letter", label: "Referrals" },
   { value: "general_letter", label: "Letters" },

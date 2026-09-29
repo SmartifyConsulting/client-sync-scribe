@@ -39,7 +39,7 @@ interface ImageComparisonDialogProps {
 const COMPARISON_TYPES = [
   { value: "wound_progression", label: "Wound Progression" },
   { value: "before_after_surgery", label: "Before/After Surgery" },
-  { value: "treatment_progress", label: "Treatment Progress" },
+  { value: "treatment_progress", label: "Recommendation Progress" },
   { value: "general", label: "General Comparison" },
 ];
 

@@ -134,7 +134,7 @@ export function PatientHealthPhotoStats({ patientId }: PatientHealthPhotoStatsPr
           <CardContent className="pt-4 text-center">
             <Dumbbell className="h-5 w-5 mx-auto mb-2 text-blue-600" />
             <p className="text-2xl font-bold text-blue-600">{totals.gym}</p>
-            <p className="text-xs text-muted-foreground">Gym Sessions</p>
+            <p className="text-xs text-muted-foreground">Gym Consultations</p>
           </CardContent>
         </Card>
         <Card>

@@ -237,7 +237,7 @@ Total: ${getCurrencySymbol(currency)} ${totalAmount.toFixed(2)}`;
       if (error) throw error;
 
       toast({
-        title: "Invoice Created",
+        title: "Fee statement Created",
         description: `Invoice ${invoiceNumber} has been created successfully`,
       });
 
@@ -262,7 +262,7 @@ Total: ${getCurrencySymbol(currency)} ${totalAmount.toFixed(2)}`;
   if (showPreview) {
     return (
       <DocumentPreview
-        title="Invoice"
+        title="Fee statement"
         subtitle={`Patient: ${patientName}`}
         content={generateContent()}
         logoUrl={profile?.logo_url || headerFooter?.header?.center?.imageUrl || undefined}
@@ -284,7 +284,7 @@ Total: ${getCurrencySymbol(currency)} ${totalAmount.toFixed(2)}`;
               <FileText className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-foreground">Create Invoice</h2>
+              <h2 className="text-lg font-semibold text-foreground">Create Fee statement</h2>
               <p className="text-sm text-muted-foreground">Patient: {patientName}</p>
             </div>
           </div>

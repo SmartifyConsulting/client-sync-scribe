@@ -46,7 +46,7 @@ export function RenewalRequestDialog({ open, onOpenChange, candidate, patientId,
 
   const handleSubmit = async () => {
     if (!doctorId) {
-      toast({ title: "Choose a doctor", description: "Please pick who should handle the renewal.", variant: "destructive" });
+      toast({ title: "Choose a wealth manager", description: "Please pick who should handle the renewal.", variant: "destructive" });
       return;
     }
     setSubmitting(true);
@@ -120,7 +120,7 @@ export function RenewalRequestDialog({ open, onOpenChange, candidate, patientId,
         },
       } as any);
 
-      toast({ title: "Renewal requested", description: "Your doctor has been notified." });
+      toast({ title: "Renewal requested", description: "Your wealth manager has been notified." });
       queryClient.invalidateQueries({ queryKey: ["prescription-renewals", patientId] });
       onOpenChange(false);
     } catch (err: any) {
@@ -164,10 +164,10 @@ export function RenewalRequestDialog({ open, onOpenChange, candidate, patientId,
 
         {/* Doctor selector */}
         <div className="space-y-1.5">
-          <Label htmlFor="renewal-doctor" className="text-xs">Assign to doctor</Label>
+          <Label htmlFor="renewal-doctor" className="text-xs">Assign to wealth manager</Label>
           <Select value={doctorId} onValueChange={setDoctorId}>
             <SelectTrigger id="renewal-doctor">
-              <SelectValue placeholder="Choose a doctor" />
+              <SelectValue placeholder="Choose a wealth manager" />
             </SelectTrigger>
             <SelectContent>
               {candidate.doctor_id && candidate.doctor_name && !doctors.some(d => d.doctor_id === candidate.doctor_id) && (

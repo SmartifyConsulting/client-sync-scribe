@@ -1,3 +1,4 @@
+import { isWealthHidden } from "@/lib/terminology";
 import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
@@ -79,17 +80,17 @@ const DOCTOR_TOP_ITEMS: (NavItem & { tour?: string })[] = [];
 
 const DOCTOR_SECTIONS: NavSection[] = [
   {
-    title: "My Holarprac",
+    title: "My Firm",
     items: [
       { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.dashboard", to: "/doctor-dashboard", tour: "doctor-home" },
-      { icon: Settings2, label: "My Practice", labelKey: "nav.myPractice", to: "/practice", tour: "practice-settings" },
+      { icon: Settings2, label: "My Firm", labelKey: "nav.myPractice", to: "/practice", tour: "practice-settings" },
       { icon: Clock, label: "My Shifts", labelKey: "nav.myShift", to: "/my-shift" },
-      { icon: Users, label: "My Patients", labelKey: "nav.myPatients", to: "/patients", tour: "import-patients" },
+      { icon: Users, label: "My Clients", labelKey: "nav.myPatients", to: "/patients", tour: "import-patients" },
       { icon: BedDouble, label: "Admissions", labelKey: "nav.admissions", to: "/admissions" },
-      { icon: Stethoscope, label: "Sessions", labelKey: "nav.mySessions", to: "/sessions" },
+      { icon: Stethoscope, label: "Consultations", labelKey: "nav.mySessions", to: "/sessions" },
       { icon: FolderOpen, label: "Documents", labelKey: "nav.allDocuments", to: "/documents" },
       { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
-      { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/todos", tour: "doctor-tasks" },
+      { icon: ListChecks, label: "My Actions", labelKey: "nav.myTasks", to: "/todos", tour: "doctor-tasks" },
       { icon: Users2, label: "Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
     ],
   },
@@ -115,10 +116,10 @@ const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: Activity, label: "My Biolog", labelKey: "nav.myBiolog", to: "/biolog" },
   { icon: BedDouble, label: "My Admissions", labelKey: "nav.myAdmissions", to: "/patient/admissions" },
   { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/patient/calendar" },
-  { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/patient/tasks", tour: "patient-tasks" },
+  { icon: ListChecks, label: "My Actions", labelKey: "nav.myTasks", to: "/patient/tasks", tour: "patient-tasks" },
   
   { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/patient/rewards" },
-  { icon: Sparkles, label: "Ask Holarc", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
+  { icon: Sparkles, label: "Ask Indigro", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true, tour: "patient-sos" },
 ];
 
@@ -147,9 +148,9 @@ const nurseNavItems: (NavItem & { tour?: string })[] = [
 
 /** Extra tools for a Practice Management Assistant, appended to their own menu. */
 const assistantNavItems: (NavItem & { tour?: string })[] = [
-  { icon: Users, label: "Practice Patients", labelKey: "nav.practicePatients", to: "/practice-patients" },
-  { icon: Calendar, label: "Practice Calendar", labelKey: "nav.practiceCalendar", to: "/calendar" },
-  { icon: ListChecks, label: "Practice Tasks", labelKey: "nav.practiceTasks", to: "/todos" },
+  { icon: Users, label: "Firm Clients", labelKey: "nav.practicePatients", to: "/practice-patients" },
+  { icon: Calendar, label: "Firm Calendar", labelKey: "nav.practiceCalendar", to: "/calendar" },
+  { icon: ListChecks, label: "Firm Actions", labelKey: "nav.practiceTasks", to: "/todos" },
 ];
 
 const adminNavItems: NavItem[] = [
@@ -250,7 +251,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
    *  preview; only the system admin accounts (useV2Demo) can actually open them. */
   const V2_PATHS = ["/biolog", "/ask-maeve"];
   const withShiftRule = (items: (NavItem & { tour?: string })[]) => {
-    let next = hideMyShift ? items.filter((i) => i.to !== "/my-shift") : items;
+    let next = (hideMyShift ? items.filter((i) => i.to !== "/my-shift") : items).filter((i) => !isWealthHidden(i.to));
     if (!v2Demo) next = next.map((i) => (V2_PATHS.includes(i.to) ? { ...i, v2Locked: true } : i));
     return next;
   };
@@ -260,7 +261,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     .filter((s) => s.items.length > 0);
 
   const baseNav = isOnAdminRoute && isAdmin
-    ? adminNavItems
+    ? adminNavItems.filter((i) => !isWealthHidden(i.to))
     : isNurseMenu
       ? withShiftRule(nurseNavItems)
       : isPatientMenu
@@ -445,7 +446,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     <aside className="fixed left-0 top-0 z-40 h-screen w-[252px] bg-sidebar">
       <div className="flex h-full flex-col">
         <div className="flex h-24 items-center gap-3 px-6">
-          <img src={holarcLogo} alt="Holarc Health" className="h-[82px] w-auto object-contain" />
+          <img src={holarcLogo} alt="Indigro" className="h-[82px] w-auto object-contain" />
         </div>
 
         {/* Navigation */}
@@ -502,7 +503,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               {(isDoctor || isNurse) && profileToggle}
               {(doctorInPatientMode || nurseInPatientMode) && (
                 <p className="mx-1 px-3 py-1.5 rounded-md bg-neutral-900 text-[10px] font-bold uppercase tracking-[0.14em] text-white">
-                  My Holarchy
+                  My Profile
                 </p>
               )}
               {visibleItems.map((item) => renderNavLink(item))}

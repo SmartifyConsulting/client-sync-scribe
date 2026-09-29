@@ -2,7 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { isWealthHidden } from "@/lib/terminology";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PatientAppLayout } from "@/components/layout/PatientAppLayout";
 import { useAuth } from "@/hooks/useAuth";
@@ -179,6 +180,13 @@ function RoleBasedRedirect() {
 
 }
 
+function WealthRouteGuard() {
+  const loc = useLocation();
+  const { isAdmin, isLoading } = useIsAdmin();
+  if (!isLoading && !isAdmin && isWealthHidden(loc.pathname)) return <Navigate to="/dashboard" replace />;
+  return null;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -191,7 +199,7 @@ const App = () => (
         >
           Skip to main content
         </a>
-        <SosAlertListener />
+        <WealthRouteGuard />
         <div id="main-content">
         <Routes>
           {/* Public routes */}

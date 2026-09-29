@@ -174,7 +174,7 @@ export function ListGroupToolbar<T>({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="date">Group by date</SelectItem>
-              <SelectItem value="patient">Group by patient</SelectItem>
+              <SelectItem value="patient">Group by client</SelectItem>
               {allowHospital && <SelectItem value="hospital">Group by hospital</SelectItem>}
             </SelectContent>
           </Select>

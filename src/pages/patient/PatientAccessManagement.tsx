@@ -29,9 +29,9 @@ interface PermissionOption {
 }
 
 const permissionOptions: PermissionOption[] = [
-  { id: "patient_info", label: "Patient Information", description: "View your personal and medical details" },
+  { id: "patient_info", label: "Client Information", description: "View your personal and financial details" },
   { id: "calendar", label: "Calendar", description: "View and manage your appointments" },
-  { id: "session_summaries", label: "Session Summaries", description: "View summaries from your consultations" },
+  { id: "session_summaries", label: "Consultation Summaries", description: "View summaries from your consultations" },
   { id: "prescription_history", label: "Documentation", description: "View your documents and records" },
 ];
 
@@ -283,7 +283,7 @@ export default function PatientAccessManagement() {
     <div className="space-y-6 animate-fade-in">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Invites</h1>
-        <p className="text-muted-foreground text-xs">Manage your doctor invitations and preferences</p>
+        <p className="text-muted-foreground text-xs">Manage your wealth manager invitations and preferences</p>
       </div>
 
       {/* Round Table Access */}
