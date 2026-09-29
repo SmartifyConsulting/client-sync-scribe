@@ -25,7 +25,7 @@ interface HealthPhoto {
 
 const CATEGORY_CONFIG = {
   gym: { label: 'Gym / Exercise', icon: Dumbbell, color: 'bg-blue-500', textColor: 'text-blue-600' },
-  healthy_meal: { label: 'Healthy Meal', icon: Utensils, color: 'bg-green-500', textColor: 'text-green-600' },
+  healthy_meal: { label: 'Healthy Meal', icon: Utensils, color: 'bg-sky-500', textColor: 'text-primary' },
   medication: { label: 'Medication', icon: Pill, color: 'bg-purple-500', textColor: 'text-purple-600' },
 };
 
@@ -188,7 +188,7 @@ export default function HealthAlbum() {
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
-            <p className="text-3xl font-bold text-green-600">{stats.healthy_meal}</p>
+            <p className="text-3xl font-bold text-primary">{stats.healthy_meal}</p>
             <p className="text-xs text-muted-foreground">Healthy Meals</p>
           </CardContent>
         </Card>
@@ -339,7 +339,7 @@ export default function HealthAlbum() {
               <span><strong>Gym (2 lollipops):</strong> Capture yourself at the gym, exercising, or doing any physical activity</span>
             </li>
             <li className="flex items-start gap-2">
-              <Utensils className="h-4 w-4 text-green-500 mt-0.5" />
+              <Utensils className="h-4 w-4 text-primary mt-0.5" />
               <span><strong>Healthy Meals (1 lollipop):</strong> Take a photo of nutritious meals with vegetables, fruits, or balanced foods</span>
             </li>
             <li className="flex items-start gap-2">

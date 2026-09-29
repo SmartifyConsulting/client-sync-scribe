@@ -292,7 +292,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
           {(doc as any).email_sent_at ? (
             <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
           ) : (
-            <Send className="h-4 w-4 text-green-600" />
+            <Send className="h-4 w-4 text-primary" />
           )}
         </Button>
         <Button

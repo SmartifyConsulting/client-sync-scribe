@@ -187,7 +187,7 @@ export default function PatientCalendar() {
             <Badge variant="secondary" className="text-xs">{apt.service_name}</Badge>
           )}
           {apt.service_price != null && apt.service_price > 0 && (
-            <Badge className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-0">
+            <Badge className="text-xs bg-sky-50 text-primary dark:bg-primary/15 dark:text-primary border-0">
               <DollarSign className="h-4 w-4 mr-0.5" />
               {formatCurrency(apt.service_price)}
             </Badge>

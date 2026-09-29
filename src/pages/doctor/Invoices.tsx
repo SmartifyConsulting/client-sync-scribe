@@ -143,7 +143,7 @@ function getStatusBadge(status: "issued" | "paid" | "overdue" | "archived") {
   switch (status) {
     case "paid":
       return (
-        <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/20 gap-1">
+        <Badge className="bg-sky-500/10 text-primary hover:bg-sky-500/20 gap-1">
           <CheckCircle className="h-4 w-4" />
           Paid
         </Badge>
@@ -1369,9 +1369,9 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                 <p className="text-sm text-muted-foreground">Total Amount</p>
                 <p className="text-xl font-bold">{getCurrencySymbol(invoiceCurrency)} {reportTotals.total.toFixed(2)}</p>
               </div>
-              <div className="rounded-lg border p-3 border-green-500/30 bg-green-500/5">
+              <div className="rounded-lg border p-3 border-primary/40 bg-sky-500/5">
                 <p className="text-sm text-muted-foreground">Paid</p>
-                <p className="text-xl font-bold text-green-600">{getCurrencySymbol(invoiceCurrency)} {reportTotals.paidTotal.toFixed(2)}</p>
+                <p className="text-xl font-bold text-primary">{getCurrencySymbol(invoiceCurrency)} {reportTotals.paidTotal.toFixed(2)}</p>
               </div>
               <div className="rounded-lg border p-3 border-amber-500/30 bg-amber-500/5">
                 <p className="text-sm text-muted-foreground">Outstanding</p>
@@ -1403,7 +1403,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                         <TableCell className="font-medium">{month.monthLabel}</TableCell>
                         <TableCell className="text-center">{month.invoices.length}</TableCell>
                         <TableCell className="text-right">{getCurrencySymbol(invoiceCurrency)} {month.total.toFixed(2)}</TableCell>
-                        <TableCell className="text-right text-green-600">{getCurrencySymbol(invoiceCurrency)} {month.paidTotal.toFixed(2)}</TableCell>
+                        <TableCell className="text-right text-primary">{getCurrencySymbol(invoiceCurrency)} {month.paidTotal.toFixed(2)}</TableCell>
                         <TableCell className="text-right text-amber-600">{getCurrencySymbol(invoiceCurrency)} {month.unpaidTotal.toFixed(2)}</TableCell>
                       </TableRow>
                     ))}
@@ -1412,7 +1412,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                       <TableCell>Total</TableCell>
                       <TableCell className="text-center">{reportTotals.invoiceCount}</TableCell>
                       <TableCell className="text-right">{getCurrencySymbol(invoiceCurrency)} {reportTotals.total.toFixed(2)}</TableCell>
-                      <TableCell className="text-right text-green-600">{getCurrencySymbol(invoiceCurrency)} {reportTotals.paidTotal.toFixed(2)}</TableCell>
+                      <TableCell className="text-right text-primary">{getCurrencySymbol(invoiceCurrency)} {reportTotals.paidTotal.toFixed(2)}</TableCell>
                       <TableCell className="text-right text-amber-600">{getCurrencySymbol(invoiceCurrency)} {reportTotals.unpaidTotal.toFixed(2)}</TableCell>
                     </TableRow>
                   </TableBody>
@@ -1491,8 +1491,8 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
         </div>
         <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/10">
-              <CheckCircle className="h-5 w-5 text-green-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-500/10">
+              <CheckCircle className="h-5 w-5 text-primary" />
             </div>
             <div>
               <p className="text-2xl font-bold text-foreground">{stats.paid}</p>
@@ -1546,7 +1546,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
       <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="bg-primary hover:bg-primary">
+            <TableRow className="bg-primary hover:bg-primary-dark">
               <TableHead className="text-primary-foreground">Fee statement #</TableHead>
               <TableHead className="text-primary-foreground">Client</TableHead>
               <TableHead className="text-primary-foreground">Description</TableHead>
@@ -1891,7 +1891,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                   variant="ghost"
                   size="icon"
                   onClick={() => setViewingInvoice(null)}
-                  className="text-primary-foreground hover:bg-primary-foreground/10"
+                  className="text-primary-foreground hover:bg-primary-dark-foreground/10"
                 >
                   <X className="h-5 w-5" />
                 </Button>
@@ -1982,8 +1982,8 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
 
             {/* Payment Info */}
             {viewingInvoice.paid_at && (
-              <div className="p-6 border-b border-border bg-green-500/5">
-                <div className="flex items-center gap-2 text-green-600">
+              <div className="p-6 border-b border-border bg-sky-500/5">
+                <div className="flex items-center gap-2 text-primary">
                   <CheckCircle className="h-5 w-5" />
                   <span className="font-medium">Paid on {format(new Date(viewingInvoice.paid_at), 'dd MMMM yyyy')}</span>
                 </div>

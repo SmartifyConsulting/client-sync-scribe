@@ -9,3 +9,10 @@
 - [ ] Other 24 languages (English-first decision)
 - [ ] Landing logo artwork / capability graphic (removed; need Indigro artwork)
 - [ ] Legal pages (T&C, BAA, consent) — left as-is, need legal review
+
+## Wealth roles & demo (Sep 2026)
+- [x] Resend key saved (RESEND_API_KEY)
+- [x] Sign-up "I am a..." limited to Client, Wealth Manager, FSP / Key Individual, Insurer
+- [x] Pastel green badges/buttons swapped to brand blue
+- [ ] Demo users + data tracing Client → Wealth Manager → FSP → Insurer
+- [ ] "View as" role switcher and enriched dashboards (from Indie)

@@ -22,7 +22,7 @@ export function AutosaveIndicator({
     );
   if (status === "saved")
     return (
-      <span className={`${base} text-emerald-600`}>
+      <span className={`${base} text-primary`}>
         <Check className="h-3 w-3" /> Saved
       </span>
     );

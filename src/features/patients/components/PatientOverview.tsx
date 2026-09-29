@@ -221,7 +221,7 @@ function ChronicAdherenceSection({ patientId, patientName }: { patientId: string
             onClick={handleCongratulate}
             disabled={congratulating}
             size="sm"
-            className="h-6 gap-1 px-2 text-[11px] bg-emerald-600 hover:bg-emerald-700"
+            className="h-6 gap-1 px-2 text-[11px] bg-primary hover:bg-primary-dark"
           >
             {congratulating ? (
               <Loader2 className="h-3 w-3 animate-spin" />
@@ -412,7 +412,7 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
     "text-primary border-primary",
     "text-blue-600 border-blue-500",
     "text-amber-600 border-amber-500",
-    "text-emerald-600 border-emerald-500",
+    "text-primary border-primary/40",
     "text-violet-600 border-violet-500",
     "text-slate-600 border-slate-500",
   ];
@@ -421,7 +421,7 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
     "bg-primary",
     "bg-blue-500",
     "bg-amber-500",
-    "bg-emerald-500",
+    "bg-sky-500",
     "bg-violet-500",
     "bg-slate-500",
   ];
@@ -596,7 +596,7 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
         }
 
         const colorMap = {
-          med: "bg-green-500/15 text-green-700 dark:text-green-400",
+          med: "bg-sky-500/15 text-primary dark:text-primary",
           symptom: "bg-amber-500/15 text-amber-700 dark:text-amber-400",
           condition: "bg-blue-500/15 text-blue-700 dark:text-blue-400",
         };
@@ -786,7 +786,7 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-green-500/15 text-green-700 dark:text-green-400 font-medium">
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-sky-500/15 text-primary dark:text-primary font-medium">
             <Pill className="h-4 w-4" />
             Medication
           </span>
@@ -951,8 +951,8 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
           </Collapsible>
         <Collapsible defaultOpen className="rounded-lg border border-primary bg-card p-2.5">
           <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
-            <ChevronDown className="h-3.5 w-3.5 text-green-600 transition-transform data-[state=closed]:rotate-[-90deg]" />
-            <Pill className="h-4 w-4 text-green-600" />
+            <ChevronDown className="h-3.5 w-3.5 text-primary transition-transform data-[state=closed]:rotate-[-90deg]" />
+            <Pill className="h-4 w-4 text-primary" />
             <h4 className="text-xs font-bold text-foreground">Medications</h4>
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-1.5">
@@ -961,7 +961,7 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
                 {summaryData.medications.map((med, i) => (
                   <li key={i} className="text-xs flex items-center justify-between gap-1.5 group">
                     <div className="flex items-start gap-2 flex-1">
-                      <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${med.status === "active" ? "bg-green-500" : "bg-muted-foreground/60"}`} />
+                      <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${med.status === "active" ? "bg-sky-500" : "bg-muted-foreground/60"}`} />
                       <div className={med.status === "inactive" ? "text-muted-foreground line-through decoration-muted-foreground/50" : ""}>
                         <span className={med.status === "inactive" ? "text-muted-foreground" : "text-foreground font-medium"}>{med.name}</span>
                         <span className="text-muted-foreground ml-2 text-xs no-underline">({extractYear(med.date)})</span>
@@ -980,7 +980,7 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
                       onClick={() => toggleStatus("medications", i)}
                     >
                       {med.status === "active" ? (
-                        <span className="flex items-center gap-1 text-xs text-green-600"><Check className="h-3 w-3" /> In Use</span>
+                        <span className="flex items-center gap-1 text-xs text-primary"><Check className="h-3 w-3" /> In Use</span>
                       ) : (
                         <span className="flex items-center gap-1 text-xs text-muted-foreground"><X className="h-3 w-3" /> Not Used</span>
                       )}

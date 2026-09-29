@@ -88,7 +88,7 @@ export function parseReport(text: string): Block[] {
 /** Rotating soft tints so each report section reads as its own framed block. */
 const SECTION_TINTS = [
   "border-primary/30 bg-primary/5",
-  "border-emerald-300/60 bg-emerald-50",
+  "border-primary/40 bg-sky-50",
   "border-sky-300/60 bg-sky-50",
   "border-amber-300/60 bg-amber-50",
   "border-violet-300/60 bg-violet-50",

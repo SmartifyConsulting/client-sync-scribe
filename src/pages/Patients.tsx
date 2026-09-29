@@ -870,7 +870,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                           <div className="flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs bg-[#E01837] text-white">
                             ME
                           </div>
-                          <div className={cn("h-2 w-2 rounded-full flex-shrink-0", mePatient.status === "active" ? "bg-emerald-500" : "bg-red-400")} />
+                          <div className={cn("h-2 w-2 rounded-full flex-shrink-0", mePatient.status === "active" ? "bg-sky-500" : "bg-red-400")} />
                           <span className="font-medium text-xs text-foreground group-hover:text-[#E01837] dark:group-hover:text-red-400 transition-colors whitespace-nowrap">
                             {mePatient.name.includes(',') ? mePatient.name : (() => {
                               const parts = mePatient.name.trim().split(/\s+/);
@@ -955,7 +955,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                             )}>
                               {patient.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                             </div>
-                            <div className={cn("h-2 w-2 rounded-full flex-shrink-0", patient.status === "active" ? "bg-emerald-500" : "bg-red-400")} />
+                            <div className={cn("h-2 w-2 rounded-full flex-shrink-0", patient.status === "active" ? "bg-sky-500" : "bg-red-400")} />
                             {patient.is_chronic && (
                               <TooltipProvider>
                                 <Tooltip>

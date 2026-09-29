@@ -296,7 +296,7 @@ export default function PatientProfile() {
             <div>
               <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
                 {patient.name}
-                <div className={cn("h-2.5 w-2.5 rounded-full flex-shrink-0", patient.status === "active" ? "bg-emerald-500" : "bg-red-400")} />
+                <div className={cn("h-2.5 w-2.5 rounded-full flex-shrink-0", patient.status === "active" ? "bg-sky-500" : "bg-red-400")} />
                 {isSamplePatient(patient) && <SampleBadge size="md" />}
               </h1>
 
@@ -377,10 +377,10 @@ export default function PatientProfile() {
             </p>
           </div>
           {/* Vula Rewards */}
-          <div className="rounded-lg bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 p-2 shadow-sm border border-emerald-200 dark:border-emerald-800/30 flex flex-col items-center justify-center gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+          <div className="rounded-lg bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 p-2 shadow-sm border border-primary/40 dark:border-emerald-800/30 flex flex-col items-center justify-center gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
             <div className="flex flex-col items-center sm:items-start min-w-0">
               <p className="text-xs font-medium text-muted-foreground">{t("patientProfile.vulas")}</p>
-              <p className="mt-1 text-sm font-bold text-emerald-600 dark:text-emerald-400">{lollipopCount}</p>
+              <p className="mt-1 text-sm font-bold text-primary dark:text-primary">{lollipopCount}</p>
             </div>
             <img
               src={vulaSymbol}

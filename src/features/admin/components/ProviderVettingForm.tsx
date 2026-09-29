@@ -160,9 +160,9 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
   };
 
   const frameClass =
-    "rounded-lg border-2 border-emerald-500/60 bg-emerald-50/40 dark:border-emerald-400/40 dark:bg-emerald-950/20 p-4 sm:p-5 space-y-4";
+    "rounded-lg border-2 border-primary/40 bg-sky-50/40 dark:border-primary/40 dark:bg-primary/15 p-4 sm:p-5 space-y-4";
   const sectionHeaderClass =
-    "flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300";
+    "flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-primary dark:text-primary";
 
   return (
     <div className="space-y-5">
@@ -258,7 +258,7 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
               <Button type="button" variant="ghost" size="sm" onClick={() => onFile(null)} disabled={disabled}>Remove</Button>
             </div>
           ) : (
-            <label className="flex items-center gap-2 rounded-lg border-2 border-dashed border-emerald-500/40 p-3 cursor-pointer hover:bg-background/40">
+            <label className="flex items-center gap-2 rounded-lg border-2 border-dashed border-primary/40 p-3 cursor-pointer hover:bg-background/40">
               <Upload className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">Click to upload license file</span>
               <input
@@ -353,7 +353,7 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
       )}
 
       {/* 6-hour SLA banner */}
-      <div className="rounded-md border border-emerald-500/40 bg-emerald-50/60 text-emerald-900 dark:border-emerald-400/30 dark:bg-emerald-950/30 dark:text-emerald-200 text-sm p-3 flex gap-2 items-start">
+      <div className="rounded-md border border-primary/40 bg-sky-50/60 text-primary dark:border-primary/40 dark:bg-primary/15 dark:text-primary text-sm p-3 flex gap-2 items-start">
         <Clock className="h-4 w-4 mt-0.5 shrink-0" />
         <span>
           We aim to approve all applications within <strong>6 hours</strong>. You'll receive a

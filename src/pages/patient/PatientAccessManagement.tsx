@@ -444,8 +444,8 @@ export default function PatientAccessManagement() {
                   className="flex flex-col gap-3 p-4 rounded-lg border border-border"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
-                      <CheckCircle className="h-5 w-5 text-green-600" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-50 dark:bg-primary/15">
+                      <CheckCircle className="h-5 w-5 text-primary" />
                     </div>
                     <div className="flex-1">
                       <p className="font-medium">
@@ -458,7 +458,7 @@ export default function PatientAccessManagement() {
                         Approved {format(new Date(invite.created_at), "MMM d, yyyy")}
                       </p>
                     </div>
-                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                    <Badge className="bg-sky-50 text-primary dark:bg-primary/15 dark:text-primary">
                       Approved
                     </Badge>
                   </div>

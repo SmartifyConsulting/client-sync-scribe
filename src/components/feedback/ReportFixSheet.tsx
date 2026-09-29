@@ -29,7 +29,7 @@ const STATUS_META: Record<ReportStatus, { className: string }> = {
   "Logged": { className: "bg-muted text-muted-foreground border-border" },
   "In Process": { className: "bg-amber-500/15 text-amber-700 border-amber-500/30" },
   "Review": { className: "bg-blue-500/15 text-blue-700 border-blue-500/30" },
-  "Closed": { className: "bg-green-500/15 text-green-700 border-green-500/30" },
+  "Closed": { className: "bg-sky-500/15 text-primary border-primary/40" },
 };
 
 interface ReportFixSheetProps {

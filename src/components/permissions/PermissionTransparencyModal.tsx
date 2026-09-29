@@ -109,14 +109,14 @@ export function PermissionTransparencyModal({
       {allowed.map((item) => (
         <li key={`ok-${item.label}`}>
           <div className="flex items-start gap-2">
-            <CheckCircle className="h-3.5 w-3.5 text-green-600 mt-0.5 shrink-0" />
+            <CheckCircle className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
             <span>{item.label}</span>
           </div>
           {item.subItems && (
             <ul className="mt-1 space-y-1 pl-5">
               {item.subItems.map((sub) => (
                 <li key={sub} className="flex items-start gap-2 text-muted-foreground">
-                  <CheckCircle className="h-3 w-3 text-green-600 mt-0.5 shrink-0" />
+                  <CheckCircle className="h-3 w-3 text-primary mt-0.5 shrink-0" />
                   <span>{sub}</span>
                 </li>
               ))}
@@ -144,7 +144,7 @@ export function PermissionTransparencyModal({
         {/* Column 1: what is shared / not shared with the care team */}
         <div>
           <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
-            <CheckCircle className="h-4 w-4 text-green-600" />
+            <CheckCircle className="h-4 w-4 text-primary" />
             {sharedHeading}
           </h4>
           <RowList allowed={sharedList} denied={privateList} />

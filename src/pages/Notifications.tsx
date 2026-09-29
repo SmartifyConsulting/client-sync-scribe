@@ -651,11 +651,11 @@ function NotificationList({
       case 'invitation_received':
         return <UserPlus className="h-5 w-5 text-primary" />;
       case 'invitation_accepted':
-        return <UserCheck className="h-5 w-5 text-green-500" />;
+        return <UserCheck className="h-5 w-5 text-primary" />;
       case 'emoticon_received':
         return <MessageCircle className="h-5 w-5 text-slate-500" />;
       case 'task_completed':
-        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+        return <CheckCircle2 className="h-5 w-5 text-primary" />;
       case 'session_completed':
         return <Star className="h-5 w-5 text-yellow-500" />;
       default:

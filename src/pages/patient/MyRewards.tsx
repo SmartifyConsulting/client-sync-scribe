@@ -420,7 +420,7 @@ export default function MyRewards({ embedded = false }: { embedded?: boolean } =
       <div className={cn("grid grid-cols-2 gap-2 md:gap-4", isDoctor ? "md:grid-cols-6" : "md:grid-cols-4")}>
         {isDoctor && (
           <>
-            <Card className="bg-gradient-to-br from-emerald-500 to-teal-400 dark:from-emerald-700/40 dark:to-teal-700/30 border-emerald-400 dark:border-emerald-600/40">
+            <Card className="bg-gradient-to-br from-emerald-500 to-teal-400 dark:from-emerald-700/40 dark:to-teal-700/30 border-primary/40 dark:border-emerald-600/40">
               <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -583,7 +583,7 @@ export default function MyRewards({ embedded = false }: { embedded?: boolean } =
                           </p>
                         </div>
                       </div>
-                      <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 text-xs">
+                      <Badge variant="secondary" className="bg-sky-50 text-primary dark:bg-primary/15 dark:text-primary text-xs">
                         +{reward.lollipops_count} <img src={vulaVouchersLogo} alt="Vula" className="h-3 w-auto object-contain inline-block ml-1" />
                       </Badge>
                     </div>
@@ -643,7 +643,7 @@ export default function MyRewards({ embedded = false }: { embedded?: boolean } =
                                   variant="secondary"
                                   className={
                                     it.amount >= 0
-                                      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+                                      ? "bg-sky-50 text-primary dark:bg-primary/15 dark:text-primary"
                                       : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
                                   }
                                 >

@@ -113,8 +113,8 @@ const DOC_TYPE_CONFIG: Record<
 > = {
   prescription: {
     label: "Prescription",
-    color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
-    borderColor: "border-emerald-400",
+    color: "bg-sky-50 text-primary dark:bg-primary/15 dark:text-primary",
+    borderColor: "border-primary/40",
     icon: Pill,
   },
   invoice: {
@@ -1032,7 +1032,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
                     <Button
                       variant="ghost"
                       size="icon"
-                      className={cn("h-7 w-7", doc.emailSentAt ? "text-muted-foreground cursor-not-allowed" : "text-green-600 hover:text-green-700")}
+                      className={cn("h-7 w-7", doc.emailSentAt ? "text-muted-foreground cursor-not-allowed" : "text-primary hover:text-primary")}
                       onClick={() => handleSendDocument(doc)}
                       disabled={!!doc.emailSentAt || sendingDocId === doc.id}
                       title={doc.emailSentAt ? "Already sent" : "Send document"}

@@ -721,6 +721,8 @@ export default function Auth() {
                 onValueChange={(v) => {
                   if (v === "patient" || v === "doctor") {
                     setUserRole(v as UserRole);
+                  } else if (v === "fsp") {
+                    setUserRole("doctor" as UserRole);
                   } else {
                     navigate(`/provider-signup?kind=${v}`);
                   }
@@ -732,10 +734,8 @@ export default function Auth() {
                 <SelectContent>
                   <SelectItem value="patient">Client</SelectItem>
                   <SelectItem value="doctor">Wealth Manager</SelectItem>
-                  <SelectItem value="hospital">Hospital</SelectItem>
-                  <SelectItem value="emergency">Emergency Service Provider</SelectItem>
-                  <SelectItem value="insurance">Insurance Company</SelectItem>
-                  <SelectItem value="pharmacy">Pharmacy</SelectItem>
+                  <SelectItem value="fsp">FSP / Key Individual</SelectItem>
+                  <SelectItem value="insurance">Insurer</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -874,6 +874,8 @@ export default function Auth() {
                 onValueChange={(v) => {
                   if (v === "patient" || v === "doctor") {
                     setUserRole(v as UserRole);
+                  } else if (v === "fsp") {
+                    setUserRole("doctor" as UserRole);
                   } else {
                     navigate(`/provider-signup?kind=${v}`);
                   }
@@ -885,10 +887,8 @@ export default function Auth() {
                 <SelectContent>
                   <SelectItem value="patient">Client</SelectItem>
                   <SelectItem value="doctor">Wealth Manager</SelectItem>
-                  <SelectItem value="hospital">Hospital</SelectItem>
-                  <SelectItem value="emergency">Emergency Service Provider</SelectItem>
-                  <SelectItem value="insurance">Insurance Company</SelectItem>
-                  <SelectItem value="pharmacy">Pharmacy</SelectItem>
+                  <SelectItem value="fsp">FSP / Key Individual</SelectItem>
+                  <SelectItem value="insurance">Insurer</SelectItem>
                 </SelectContent>
               </Select>
               {inviteToken && <p className="text-xs text-muted-foreground mt-2">You're registering via a wealth manager's invitation</p>}

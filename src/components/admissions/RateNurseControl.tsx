@@ -215,7 +215,7 @@ export function RateNurseControl({ admissionId, recordTable, recordId, nurseId, 
 
       {rating !== null && ratingRowId && !showComment && (
         awarded ? (
-          <p className="flex items-center gap-1 text-xs font-medium text-green-600 pl-1">
+          <p className="flex items-center gap-1 text-xs font-medium text-primary pl-1">
             <Check className="h-3 w-3" /> Awarded {rating} Vulas to {nurseName || "this nurse"}
           </p>
         ) : !awardDismissed ? (

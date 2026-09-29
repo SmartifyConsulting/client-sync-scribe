@@ -260,7 +260,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
     if (s.includes("neuro")) return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300";
     if (s.includes("paed") || s.includes("pedia")) return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300";
     if (s.includes("psych")) return "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300";
-    if (s.includes("general") || s.includes("gp") || s.includes("family")) return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300";
+    if (s.includes("general") || s.includes("gp") || s.includes("family")) return "bg-sky-50 text-primary dark:bg-primary/15 dark:text-primary";
     return "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300";
   };
 
@@ -561,7 +561,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
                                         {doctor.ownership && (
                                           <Badge
                                             variant="outline"
-                                            className={`text-xs capitalize ${doctor.ownership === 'public' ? 'border-green-500 text-green-700' : 'border-blue-500 text-blue-700'}`}
+                                            className={`text-xs capitalize ${doctor.ownership === 'public' ? 'border-primary/40 text-primary' : 'border-blue-500 text-blue-700'}`}
                                           >
                                             {doctor.ownership}
                                           </Badge>

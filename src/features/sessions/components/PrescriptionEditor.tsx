@@ -465,9 +465,9 @@ Signature: ___________________
 
             {/* Conflict Results */}
             {conflictCheckDone && conflicts.length === 0 && (
-              <div className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/30">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <span className="text-sm text-green-700 dark:text-green-400">
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-sky-500/10 border border-primary/40">
+                <CheckCircle className="h-4 w-4 text-primary" />
+                <span className="text-sm text-primary dark:text-primary">
                   No medication conflicts detected
                 </span>
               </div>

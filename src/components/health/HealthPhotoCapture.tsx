@@ -17,7 +17,7 @@ type PhotoCategory = 'gym' | 'healthy_meal' | 'medication';
 
 const CATEGORIES = [
   { id: 'gym' as PhotoCategory, label: 'Gym / Exercise', icon: Dumbbell, color: 'bg-blue-500', lollipops: 2 },
-  { id: 'healthy_meal' as PhotoCategory, label: 'Healthy Meal', icon: Utensils, color: 'bg-green-500', lollipops: 1 },
+  { id: 'healthy_meal' as PhotoCategory, label: 'Healthy Meal', icon: Utensils, color: 'bg-sky-500', lollipops: 1 },
   { id: 'medication' as PhotoCategory, label: 'Medication', icon: Pill, color: 'bg-purple-500', lollipops: 3 },
 ];
 
@@ -280,7 +280,7 @@ export function HealthPhotoCapture({ patientId, onPhotoSaved }: HealthPhotoCaptu
                 <div className={cn(
                   "p-3 rounded-lg text-sm",
                   validationResult.validation?.isValid && validationResult.validation?.category_match
-                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                    ? "bg-sky-50 text-primary dark:bg-primary/15 dark:text-primary"
                     : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
                 )}>
                   {validationResult.validation?.description}

@@ -342,7 +342,7 @@ export function DocumentsBrowser({
                         </p>
                       </div>
                       {hasAnalysis && (
-                        <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                        <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-primary">
                           <Sparkles className="h-3 w-3" /> AI described
                         </span>
                       )}

@@ -255,7 +255,7 @@ export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave
               </SelectContent>
             </Select>
             {selectedPatientId && selectedPatientId !== "none" && (
-              <p className="text-xs text-green-600">
+              <p className="text-xs text-primary">
                 ✓ Patient data has been auto-filled into the document
               </p>
             )}
