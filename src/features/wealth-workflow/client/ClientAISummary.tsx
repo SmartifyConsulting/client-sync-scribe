@@ -83,7 +83,7 @@ export function ClientAISummary({ patientId }: { patientId: string }) {
         <Loader2 className="h-5 w-5 animate-spin text-primary" />
       ) : (
         <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
-          {data?.summary || (busy ? "Building your summary…" : "No consultations or life events have been recorded yet.")}
+          {data?.summary?.replace(/\*\*/g, "") || (busy ? "Building your summary…" : "No consultations or life events have been recorded yet.")}
         </p>
       )}
       <p className="text-[11px] text-muted-foreground">Built from all consultations and life events. For information only — not financial advice.</p>
