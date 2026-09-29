@@ -1,4 +1,6 @@
 import { PatientProgrammesTab } from "@/features/programmes/components/PatientProgrammesTab";
+import { ClientAISummary } from "@/features/wealth-workflow/client/ClientAISummary";
+import { MyAdvisorsHistory } from "@/features/wealth-workflow/client/MyAdvisorsHistory";
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { LANGUAGES } from "@/lib/languages";
@@ -385,7 +387,7 @@ function AnimatedCounter({ target }: { target: number }) {
 }
 
 const SECTION_TABS: Record<string, string[]> = {
-  health: ["personal", "medical", "overview", "history", "documents", "labresults", "roundtable"],
+  health: ["personal", "medical", "overview", "history"],
   admin: ["calendar", "tasks", "programmes", "documents"],
 };
 
@@ -1563,12 +1565,12 @@ export function PatientDetailsEditor({
           )}
           {show("overview") && (
             <TabsTrigger value="overview" className={triggerClass}>
-              My Holarchy
+              My Advisors
             </TabsTrigger>
           )}
           {show("history") && (
             <TabsTrigger value="history" className={triggerClass}>
-              My Sessions
+              My Consults
             </TabsTrigger>
           )}
           {show("documents") && (
@@ -1702,124 +1704,8 @@ export function PatientDetailsEditor({
 
             {/* === MY HOLARCHY TAB (overview) === */}
             <TabsContent value="overview" className="space-y-4 mt-4">
-              <Tabs defaultValue="team">
-                <TabsList className="bg-neutral-600 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                  <TabsTrigger value="team" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Holarc Wealth Financial Team</TabsTrigger>
-                  <TabsTrigger value="careteam" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Personal Care Circle</TabsTrigger>
-                  <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Insurance</TabsTrigger>
-                  <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Pharmacies</TabsTrigger>
-                  <TabsTrigger value="hospitals" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Hospitals</TabsTrigger>
-                </TabsList>
-
-            {/* === INSURANCE SUB-TAB (view) === */}
-            <TabsContent value="insurance" className="mt-4">
-              <Collapsible defaultOpen className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
-                <SectionHeader icon={ShieldCheck} label="Insurance" />
-                <CollapsibleContent className="p-3">
-                  <div className={FIELD_GRID_2_CLASS}>
-                    <ViewField label="Insurance Provider" value={patient.medical_aid} />
-                    <ViewField label="Insurance Product" value={patient.medical_insurance_product} />
-                    <ViewField label="Insurance Number" value={patient.medical_aid_number} />
-                    <ViewField label="Primary Member" value={patient.primary_member} />
-                    <ViewField label="Provider Claims Email" value={patient.claims_email} />
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </TabsContent>
-
-            {/* === PHARMACIES SUB-TAB (view) === */}
-            <TabsContent value="pharmacies" className="mt-4">
-              <Collapsible defaultOpen className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
-                <SectionHeader icon={Store} label="Pharmacies" />
-                <CollapsibleContent className="p-3">
-                  {pharmacies.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">No pharmacies recorded</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {pharmacies.map((pharmacy) => (
-                        <div
-                          key={pharmacy.id}
-                          className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border border-border/50"
-                        >
-                          <div>
-                            <p className="text-xs font-medium text-foreground flex items-center gap-2">
-                              {pharmacy.name}
-                              {pharmacy.branch && (
-                                <span className="text-muted-foreground">({pharmacy.branch})</span>
-                              )}
-                              {pharmacy.is_primary && (
-                                <span className="text-xs bg-primary text-primary px-1.5 py-0.5 rounded-full font-medium">
-                                  Primary
-                                </span>
-                              )}
-                            </p>
-                            {pharmacy.email && (
-                              <p className="text-xs text-muted-foreground">{pharmacy.email}</p>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CollapsibleContent>
-              </Collapsible>
-            </TabsContent>
-
-
-            {/* === HOSPITALS SUB-TAB === */}
-            <TabsContent value="hospitals" className="mt-4">
-              <PreferredHospitals
-                value={((patient as any).preferred_hospitals as PreferredHospital[]) || []}
-                onChange={(next) => onSave({ preferred_hospitals: next } as any)}
-              />
-            </TabsContent>
-
-            {/* === MY HOLARC TEAM SUB-TAB (view) === */}
-            <TabsContent value="team" className="mt-4">
-              <div className="mb-4">
-                <h2 className="text-[18px] font-semibold text-primary-dark">My Holarc Wealth Financial Team</h2>
-                <p className="text-xs text-muted-foreground">Your financial wealth managers — the wealth managers with access to your profile</p>
-              </div>
-              <Suspense
-                fallback={
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                }
-              >
-                <MyDoctors hideHeader />
-              </Suspense>
-            </TabsContent>
-
-            {/* === MY HOLARC CARE TEAM SUB-TAB === */}
-            <TabsContent value="careteam" className="mt-4">
-              <div className="mb-4">
-                <h2 className="text-[18px] font-semibold text-primary-dark">My Personal Care Circle</h2>
-                <p className="text-xs text-muted-foreground">
-                  Friends and family you choose to share parts of your profile with
-                </p>
-              </div>
-              {isSelfService && emergencyContacts && onEmergencyContactsChange ? (
-                <EmergencyContactsInline
-                  patientId={patient.id}
-                  bare
-                  contacts={emergencyContacts}
-                  onChange={onEmergencyContactsChange}
-                  nokMembers={nokMembers}
-                  legacyNok={{
-                    name: formData.next_of_kin_name,
-                    phone: formData.next_of_kin_phone,
-                    email: formData.next_of_kin_email,
-                    relationship: formData.next_of_kin_relationship,
-                  }}
-                />
-              ) : (
-                <p className="text-sm text-muted-foreground italic">
-                  Only the patient can manage their Personal Care Circle.
-                </p>
-              )}
-            </TabsContent>
-              </Tabs>
+              <ClientAISummary patientId={patient.id} />
+              <MyAdvisorsHistory patientId={patient.id} />
             </TabsContent>
 
             {/* === PERSONAL / MEDICAL (top-level tabs) === */}
@@ -1994,8 +1880,8 @@ export function PatientDetailsEditor({
             {isSelfService && (
               <TabsContent value="history" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-[18px] font-semibold text-primary-dark">My Consultations</h2>
-                  <p className="text-xs text-muted-foreground">Your consultation consultations. Record consultations with wealth managers not on the platform.</p>
+                  <h2 className="text-[18px] font-semibold text-primary-dark">My Consults</h2>
+                  <p className="text-xs text-muted-foreground">Your consultations with your advisers. You can also record meetings with advisers not on Holarc Wealth.</p>
                 </div>
                 <PatientSessionRecorder patientId={patient.id} patientName={patient.name} />
               </TabsContent>
