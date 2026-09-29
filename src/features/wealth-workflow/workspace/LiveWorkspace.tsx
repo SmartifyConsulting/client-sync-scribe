@@ -16,9 +16,11 @@ interface Props {
   onOpenDocuments: () => void;
   onOpenDocument?: (id: string) => void;
   onOpenClientRecord?: () => void;
+  onOpenMessages?: () => void;
+  onScheduleConsultation?: () => void;
 }
 
-export function LiveWorkspace({ patientId, clientName, onViewWorkflow, onOpenDocuments, onOpenDocument, onOpenClientRecord }: Props) {
+export function LiveWorkspace({ patientId, clientName, onViewWorkflow, onOpenDocuments, onOpenDocument, onOpenClientRecord, onOpenMessages, onScheduleConsultation }: Props) {
   const ws = useLiveWorkspace(patientId);
   const { toast } = useToast();
   const qc = useQueryClient();
@@ -62,6 +64,8 @@ export function LiveWorkspace({ patientId, clientName, onViewWorkflow, onOpenDoc
       a.push({ label: "Changes", onClick: () => run(decide.mutateAsync({ recommendationId: i.recommendationId!, decision: "changes_requested" }), "New version drafted") });
       a.push({ label: "Declined", variant: "destructive", onClick: () => run(decide.mutateAsync({ recommendationId: i.recommendationId!, decision: "declined" }), "Declined") });
     }
+    if (i.kind === "message" && onOpenMessages) a.push({ label: "Reply", variant: "default", onClick: onOpenMessages });
+    if (i.kind === "annual_review" && onScheduleConsultation) a.push({ label: "Schedule consultation", onClick: onScheduleConsultation });
     if (i.kind === "annual_review") a.push({ label: "Start annual review", variant: "default", onClick: () => run(annual.mutateAsync({ workflowId: wf.id }), "Annual review started") });
     if (i.documentId && onOpenDocument) a.push({ label: "View ROA", onClick: () => onOpenDocument(i.documentId!) });
     if (i.kind === "requirement") a.push({ label: "Documents", onClick: onOpenDocuments });
@@ -132,7 +136,7 @@ export function LiveWorkspace({ patientId, clientName, onViewWorkflow, onOpenDoc
           {ws.blocked.length === 0 ? <Empty text="Nothing is blocked." /> : ws.blocked.map((b) => (
             <div key={b.stage} className="px-3 py-2.5 text-sm">
               <p className="font-semibold uppercase tracking-wide text-destructive">{b.stage} – blocked</p>
-              <p className="mt-1 text-xs text-muted-foreground">Missing:</p>
+              <p className="mt-1 text-xs text-muted-foreground">Reason:</p>
               <ul className="mt-0.5 space-y-0.5">
                 {b.missing.map((m) => <li key={m.id} className="text-sm">✕ {m.what} <span className="text-xs text-muted-foreground">({OWNER_LABEL[m.who] ?? m.who})</span></li>)}
               </ul>

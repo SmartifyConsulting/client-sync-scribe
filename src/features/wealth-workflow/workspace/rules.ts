@@ -16,19 +16,19 @@ export const PRIORITY_LABEL: Record<Priority, string> = {
 };
 
 /** WHY / NEXT copy keyed by requirement (engine blocker text) */
-export const REQUIREMENT_RULES: Record<string, { why: string; next: string; owner: string; group: string }> = {
-  "Client signature on current ROA": { why: "Required before the application can proceed.", next: "Application becomes ready for submission.", owner: "client", group: "presentation" },
-  "Proof of residence": { why: "FICA requirement for the application.", next: "Removes a blocker on the application.", owner: "client", group: "presentation" },
-  "Client ID document": { why: "FICA identity verification.", next: "Removes a blocker on the application.", owner: "client", group: "gateway" },
-  "KYC/FICA not completed": { why: "Regulatory requirement before any application.", next: "Compliance can be signed off.", owner: "key_individual", group: "presentation" },
-  "Bank validation not completed": { why: "Debit order must be validated.", next: "Compliance can be signed off.", owner: "operations", group: "presentation" },
-  "Required declarations not completed": { why: "Debit order and life declarations are mandatory.", next: "Compliance can be signed off.", owner: "client", group: "presentation" },
-  "Recommendation not accepted by client": { why: "The client must accept before documentation starts.", next: "Documentation becomes current.", owner: "client", group: "presentation" },
-  "Recommendation has not been presented to the client": { why: "The client cannot decide on an unpresented ROA.", next: "Client decision opens.", owner: "wealth_manager", group: "quotes" },
-  "No current recommendation to present": { why: "A recommendation and ROA are needed first.", next: "It can be presented to the client.", owner: "wealth_manager", group: "quotes" },
-  "Application not ready": { why: "The application must be ready before underwriting.", next: "Underwriting can start.", owner: "wealth_manager", group: "issuance" },
-  "Application not submitted": { why: "The insurer can only issue submitted applications.", next: "Awaiting the insurer's issue.", owner: "operations", group: "issuance" },
-  "Provider has not confirmed issue": { why: "Follow-up starts once the policy is issued.", next: "Follow-up and annual review get scheduled.", owner: "provider", group: "issuance" },
+export const REQUIREMENT_RULES: Record<string, { why: string; next: string; owner: string; group: string; reason?: string }> = {
+  "Client signature on current ROA": { reason: "Current ROA not signed", why: "Required before the application can proceed.", next: "Application becomes ready for submission.", owner: "client", group: "presentation" },
+  "Proof of residence": { reason: "Proof of residence missing", why: "FICA requirement for the application.", next: "Removes a blocker on the application.", owner: "client", group: "presentation" },
+  "Client ID document": { reason: "Client ID document missing", why: "FICA identity verification.", next: "Removes a blocker on the application.", owner: "client", group: "gateway" },
+  "KYC/FICA not completed": { reason: "FICA not completed", why: "Regulatory requirement before any application.", next: "Compliance can be signed off.", owner: "key_individual", group: "presentation" },
+  "Bank validation not completed": { reason: "Bank account not validated", why: "Debit order must be validated.", next: "Compliance can be signed off.", owner: "operations", group: "presentation" },
+  "Required declarations not completed": { reason: "Declarations not signed", why: "Debit order and life declarations are mandatory.", next: "Compliance can be signed off.", owner: "client", group: "presentation" },
+  "Recommendation not accepted by client": { reason: "Client has not accepted the recommendation", why: "The client must accept before documentation starts.", next: "Documentation becomes current.", owner: "client", group: "presentation" },
+  "Recommendation has not been presented to the client": { reason: "Recommendation not yet presented", why: "The client cannot decide on an unpresented ROA.", next: "Client decision opens.", owner: "wealth_manager", group: "quotes" },
+  "No current recommendation to present": { reason: "No recommendation prepared", why: "A recommendation and ROA are needed first.", next: "It can be presented to the client.", owner: "wealth_manager", group: "quotes" },
+  "Application not ready": { reason: "Application not ready", why: "The application must be ready before underwriting.", next: "Underwriting can start.", owner: "wealth_manager", group: "issuance" },
+  "Application not submitted": { reason: "Application not submitted", why: "The insurer can only issue submitted applications.", next: "Awaiting the insurer's issue.", owner: "operations", group: "issuance" },
+  "Provider has not confirmed issue": { reason: "Insurer has not confirmed issue", why: "Follow-up starts once the policy is issued.", next: "Follow-up and annual review get scheduled.", owner: "provider", group: "issuance" },
 };
 
 export const STAGE_TO_GROUP: Record<string, string> = {
