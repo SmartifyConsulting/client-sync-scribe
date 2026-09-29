@@ -31,7 +31,7 @@ export const WEALTH_HIDDEN_MODULES = [
   "/doctor/holarchelp", "/patient/holarchelp", "/holarchelp", "/provider/hospital", "/provider/ambulance",
   "/admissions", "/patient/admissions", "/patient/ward", "/my-shift", "/nurse-profile",
   "/prescriptions", "/patient/prescriptions", "/patient/lab-results", "/lab-results",
-  "/biolog", "/patient/rewards", "/vula", "/admin/gamification", "/ask-maeve",
+  "/biolog", "/patient/rewards", "/doctor/rewards", "/vula", "/admin/gamification", "/ask-maeve",
   "/doctor/round-tables", "/patient/round-table", "/patient/health-album",
 ];
 
