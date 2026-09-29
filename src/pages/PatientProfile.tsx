@@ -93,7 +93,8 @@ export default function PatientProfile() {
   const [mailboxId, setMailboxId] = useState<string | null>(null);
   const [showCompareDialog, setShowCompareDialog] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = searchParams.get("tab") || "details";
+  const rawTab = searchParams.get("tab") || "details";
+  const activeTab = rawTab === "live" ? "workflow" : rawTab;
   const handleTabChange = (value: string, group?: string) => {
     const next = new URLSearchParams(searchParams);
     next.set("tab", value);
@@ -394,12 +395,11 @@ export default function PatientProfile() {
           >
             {t("patientProfile.tabOverview")}
           </TabsTrigger>
-          <TabsTrigger value="live" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5">Live</TabsTrigger>
           <TabsTrigger
             value="workflow"
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
           >
-            Workflow
+            Live Workspace
           </TabsTrigger>
           <TabsTrigger
             value="sessions"
@@ -428,17 +428,9 @@ export default function PatientProfile() {
 
         <TabsContent value="workflow">
           <WorkflowMap patientId={patient.id} clientName={patient.name} onOpenDocuments={() => handleTabChange("documents")}
-            initialGroup={searchParams.get("group") ?? undefined} onBackToLive={() => handleTabChange("live")} />
+            initialGroup={searchParams.get("group") ?? undefined} />
         </TabsContent>
 
-        <TabsContent value="live">
-          <LiveWorkspace patientId={patient.id} clientName={patient.name}
-            onViewWorkflow={(g) => handleTabChange("workflow", g)}
-            onOpenDocuments={() => handleTabChange("documents")}
-            onOpenClientRecord={() => handleTabChange("details")}
-            onOpenMessages={() => navigate("/dashboard")}
-            onScheduleConsultation={() => navigate("/calendar")} />
-        </TabsContent>
 
         <TabsContent value="sessions" className="space-y-4">
           {sessionsLoading ? (

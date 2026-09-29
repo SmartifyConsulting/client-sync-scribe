@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FolderOpen, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useStartWorkflow } from "../hooks";
@@ -7,6 +7,8 @@ import { OWNER_LABEL } from "./groups";
 import { useWorkflowMap, type GroupView } from "./useWorkflowMap";
 import { WorkflowGroupCard } from "./WorkflowGroupCard";
 import { StageDetailSheet } from "./StageDetailSheet";
+import { WorkingWindow } from "./WorkingWindow";
+import { useWorkflowRealtime } from "../workspace/useWorkflowRealtime";
 
 interface Props {
   patientId: string;
@@ -14,11 +16,14 @@ interface Props {
   onOpenDocuments?: () => void;
   initialGroup?: string;
   onBackToLive?: () => void;
+  viewer?: "manager" | "client";
 }
 
 /** Wealth manager view: a read-only projection of the workflow engine. */
-export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGroup, onBackToLive }: Props) {
+export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGroup, onBackToLive, viewer = "manager" }: Props) {
   const m = useWorkflowMap(patientId);
+  useWorkflowRealtime(patientId, m.workflow?.id);
+  const [picked, setPicked] = useState<{ group: string; step: string } | null>(null);
   const start = useStartWorkflow();
   const { toast } = useToast();
   const [selected, setSelected] = useState<GroupView | null>(null);
@@ -51,8 +56,17 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
     ? `Awaiting ${OWNER_LABEL[current.waitingFor] ?? current.waitingFor}`
     : wf.status === "closed_declined" ? "Closed – declined" : wf.status === "blocked" ? "Blocked" : "In progress";
 
+  const liveGroup = m.groups.find((g) => g.steps.some((s) => s.state === "next")) ?? current ?? null;
+  const liveStep = liveGroup?.steps.find((s) => s.state === "next")?.label ?? null;
+  const shownGroup = picked ? m.groups.find((g) => g.group.key === picked.group) ?? null : liveGroup;
+  const shownStep = picked ? picked.step : liveStep;
+  const isLive = !picked || (picked.group === liveGroup?.group.key && picked.step === liveStep);
+
   const cards = m.groups.map((g) => (
-    <WorkflowGroupCard key={g.group.key} view={g} blockers={g.state === "blocked" ? wf.blockers : []} onOpen={() => setSelected(g)} />
+    <WorkflowGroupCard key={g.group.key} view={g} blockers={g.state === "blocked" ? wf.blockers : []}
+      onOpen={() => viewer === "manager" && setSelected(g)}
+      selectedStep={shownGroup?.group.key === g.group.key ? shownStep : null}
+      onSelectStep={(label) => setPicked({ group: g.group.key, step: label })} />
   ));
 
   return (
@@ -72,27 +86,13 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
         )}
       </div>
 
-      {/* Mobile / tablet: vertical list */}
-      <div className="space-y-3 lg:hidden">{cards}</div>
-
-      {/* Desktop: zig-zag two-column layout */}
-      <div className="hidden gap-x-10 gap-y-4 lg:grid lg:grid-cols-2">
-        <div className="space-y-6">
-          {cards[0]}
-          <button onClick={onOpenDocuments}
-            className="mx-auto flex h-40 w-44 flex-col items-center justify-center gap-2 rounded-lg bg-muted/60 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            <span className="flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-dashed border-muted-foreground/40">
-              <FolderOpen className="h-8 w-8" />
-            </span>
-            Documents
-          </button>
-          {cards[5]}
-          {cards[4]}
-        </div>
-        <div className="space-y-6 pt-12">
-          {cards[1]}
-          {cards[2]}
-          {cards[3]}
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+        <div className="space-y-3">{cards}</div>
+        <div className="lg:sticky lg:top-4 lg:self-start">
+          <WorkingWindow group={shownGroup} stepLabel={shownStep} isLive={isLive} viewer={viewer}
+            blockers={wf.status === "blocked" ? wf.blockers : []}
+            documents={(m.records?.docs ?? []) as any[]}
+            onBackToCurrent={() => setPicked(null)} onOpenDocuments={onOpenDocuments} />
         </div>
       </div>
 
