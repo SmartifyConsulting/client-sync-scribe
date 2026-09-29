@@ -138,7 +138,7 @@ export function useLiveWorkspace(patientId?: string) {
     if (blockList.length) {
       const missing = blockList.map((b): WorkspaceItem => {
         const r = REQUIREMENT_RULES[b];
-        return { id: `req-${b}`, kind: "requirement", what: b, who: r?.owner ?? "wealth_manager", priority: "blocked", why: r?.why, next: r?.next, group: r?.group ?? group };
+        return { id: `req-${b}`, kind: "requirement", what: r?.reason ?? b, who: r?.owner ?? "wealth_manager", priority: "blocked", why: r?.why, next: r?.next, group: r?.group ?? group };
       });
       const target = m.defs.find((d) => d.stage === (wf.status === "blocked" ? stage : nextStage))?.label ?? stage;
       blocked.push({ stage: target, group, missing });
@@ -159,11 +159,24 @@ export function useLiveWorkspace(patientId?: string) {
     if (wf.next_review_date) {
       const days = differenceInCalendarDays(new Date(wf.next_review_date), new Date());
       if (days <= 60) {
+        const app = (m.records?.apps ?? []).find((a: any) => a.status === "issued");
+        const acc = recs.find((r) => r.status === "accepted");
+        const pos = [acc && `Recommendation v${acc.version}${acc.title ? ` (${acc.title})` : ""}`, app && `Policy: ${app.product ?? "product"} with ${app.provider ?? "provider"}`].filter(Boolean).join(" · ");
         (days <= 14 ? now : next).push({
           id: "annual", kind: "annual_review", what: "Annual review due", who: "wealth_manager", due: wf.next_review_date,
-          priority: priorityFor(wf.next_review_date), why: "Reassess needs and cover every 12 months.", next: "A new consultation cycle starts.", group: "issuance",
+          priority: priorityFor(wf.next_review_date),
+          why: pos ? `Current position: ${pos}` : "Reassess needs and cover every 12 months.",
+          next: "Contact client, schedule consultation, then a new cycle starts.", group: "issuance",
         });
       }
+    }
+    // New cycle opened from an annual review: show the previous position
+    if (prior && (prior.rec || prior.app) && ["consultation", "information_required", "needs_analysis"].includes(stage)) {
+      next.push({
+        id: "prior", kind: "next", what: "Review previous financial position", who: "wealth_manager", priority: "normal",
+        why: [prior.rec && `Last accepted: v${prior.rec.version}${prior.rec.title ? ` (${prior.rec.title})` : ""}`, prior.app && `Policy: ${prior.app.product ?? ""} with ${prior.app.provider ?? ""}`].filter(Boolean).join(" · "),
+        next: "Prepare for the review consultation.", group: "gateway",
+      });
     }
 
     // Tasks
