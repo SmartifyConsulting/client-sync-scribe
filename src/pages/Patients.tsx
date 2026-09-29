@@ -819,8 +819,8 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                   "flex-1 min-w-0 h-7 rounded-lg text-xs font-semibold transition-colors border",
                   hasPatients
                     ? selectedLetter === letter
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-transparent text-foreground border-neutral-500 hover:bg-primary/10"
+                      ? "bg-brand-teal text-white border-brand-teal"
+                      : "bg-transparent text-brand-teal border-brand-teal hover:bg-brand-teal/10"
                     : "bg-transparent text-muted-foreground/40 border-neutral-400 cursor-default"
                 )}
               >
@@ -867,11 +867,11 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                     <tr className="group transition-colors bg-gray-100 hover:bg-gray-200/60 dark:bg-gray-800/20 dark:hover:bg-gray-800/30">
                       <td className="px-2 lg:px-4 py-2.5">
                         <Link to={`/patients/${mePatient.id}`} className="flex items-center gap-2.5">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs bg-[#E01837] text-white">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs bg-brand-teal text-white">
                             ME
                           </div>
                           <div className={cn("h-2 w-2 rounded-full flex-shrink-0", mePatient.status === "active" ? "bg-sky-500" : "bg-red-400")} />
-                          <span className="font-medium text-xs text-foreground group-hover:text-[#E01837] dark:group-hover:text-red-400 transition-colors whitespace-nowrap">
+                          <span className="font-medium text-xs text-foreground group-hover:text-brand-teal transition-colors whitespace-nowrap">
                             {mePatient.name.includes(',') ? mePatient.name : (() => {
                               const parts = mePatient.name.trim().split(/\s+/);
                               if (parts.length <= 1) return mePatient.name;

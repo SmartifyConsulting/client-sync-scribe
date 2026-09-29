@@ -57,6 +57,7 @@
     --muted: 216 24% 95%;               /* #F5F5F5 hover surface */
     --muted-foreground: 218 14% 42%;    /* #666 secondary text */
 
+    --brand-teal: 175 61% 52%;          /* #3AD0C4 */
     --accent: 200 48% 74%;              /* #9CC7DD soft sky (replaces pastel green) */
     --accent-foreground: 205 60% 20%;
 
@@ -171,6 +172,7 @@
     --muted: 222 22% 16%;
     --muted-foreground: 218 14% 62%;
 
+    --brand-teal: 175 61% 52%;
     --accent: 200 35% 28%;
     --accent-foreground: 200 48% 82%;
 
