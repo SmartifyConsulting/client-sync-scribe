@@ -62,6 +62,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
     if (!isAdmin || seeded) return;
     setSeeded(true);
     supabase.functions.invoke("admin-seed-test-users").catch(() => {});
+    supabase.functions.invoke("seed-wealth-demo").catch(() => {});
   }, [isAdmin, seeded]);
 
   const { data: unreadNotifCount = 0 } = useQuery({

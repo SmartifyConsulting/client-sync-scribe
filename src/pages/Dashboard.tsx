@@ -1,5 +1,6 @@
 import { Users, Calendar, TrendingUp, Clock, MessageSquare } from "lucide-react";
 import vulaVouchersLogo from "@/assets/vula-vouchers-logo-v3.png";
+import { WealthRoleOverview } from "@/features/wealth-workflow/WealthRoleOverview";
 import { CompactTodoList } from "@/components/dashboard/CompactTodoList";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -373,6 +374,7 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="lg:col-span-2 space-y-6">
+          {isDoctor && <WealthRoleOverview />}
           {isDoctor && <CompactTodoList />}
           {isDoctor && (
             <div className="hidden lg:block">
