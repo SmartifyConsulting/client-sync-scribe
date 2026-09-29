@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FolderOpen, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -12,14 +12,22 @@ interface Props {
   patientId: string;
   clientName?: string;
   onOpenDocuments?: () => void;
+  initialGroup?: string;
+  onBackToLive?: () => void;
 }
 
 /** Wealth manager view: a read-only projection of the workflow engine. */
-export function WorkflowMap({ patientId, clientName, onOpenDocuments }: Props) {
+export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGroup, onBackToLive }: Props) {
   const m = useWorkflowMap(patientId);
   const start = useStartWorkflow();
   const { toast } = useToast();
   const [selected, setSelected] = useState<GroupView | null>(null);
+  const [openedInitial, setOpenedInitial] = useState<string | undefined>();
+  useEffect(() => {
+    if (!initialGroup || openedInitial === initialGroup || !m.workflow) return;
+    const g = m.groups.find((x) => x.group.key === initialGroup);
+    if (g) { setSelected(g); setOpenedInitial(initialGroup); }
+  }, [initialGroup, openedInitial, m.workflow, m.groups]);
 
   if (m.loading) return <div className="flex h-32 items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>;
 
@@ -49,6 +57,9 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments }: Props) {
 
   return (
     <div className="space-y-4">
+      {onBackToLive && (
+        <button onClick={onBackToLive} className="text-xs font-medium text-primary hover:underline">← Back to Live workspace</button>
+      )}
       <div className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-lg border bg-card p-3 text-sm sm:grid-cols-4">
         <Field label="Client" value={clientName ?? "—"} />
         <Field label="Current stage" value={curLabel} />
