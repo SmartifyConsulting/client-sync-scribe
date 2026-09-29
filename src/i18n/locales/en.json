@@ -8,11 +8,11 @@
     },
     "provider": {
       "title": "Provider application",
-      "subtitle": "Register your organisation on Holarc Health. Applications are vetted before your administrator account is activated.",
+      "subtitle": "Register your organisation on Indigro Health. Applications are vetted before your administrator account is activated.",
       "organizationType": "Organisation type",
       "hospital": "Hospital",
       "emergency": "Emergency service provider",
-      "insurance": "Medical insurer",
+      "insurance": "Financial insurer",
       "pharmacy": "Pharmacy",
       "applicationLabel": "application",
       "formIncomplete": "Application incomplete",
@@ -60,17 +60,17 @@
   "nav": {
     "home": "Home",
     "performance": "Performance",
-    "myPatients": "My Patients",
+    "myPatients": "My Clients",
     "admissions": "Admissions",
     "allDocuments": "Documents",
     "myViews": "My Views",
-    "mySessions": "Sessions",
-    "myPractice": "My Practice",
+    "mySessions": "Consultations",
+    "myPractice": "My Firm",
     "myAdmissions": "My Admissions",
     "biolog": "Biolog",
     "myBiolog": "My Biolog",
     "myCalendar": "My Calendar",
-    "myTasks": "My Tasks",
+    "myTasks": "My Actions",
     "myDocuments": "My Documents",
     "myRoundTables": "Round Tables",
     "myRewards": "My Rewards",
@@ -134,7 +134,7 @@
   "topbar": {
     "reportBug": "Report Bug/Fix",
     "calendar": "Calendar",
-    "recordTask": "Record a Task",
+    "recordTask": "Record a Action",
     "notifications": "Notifications"
   },
   "userAdmin": {
@@ -244,28 +244,28 @@
     "greetingMorning": "Good morning",
     "greetingAfternoon": "Good afternoon",
     "greetingEvening": "Good evening",
-    "subtitle": "Here's what's happening with your practice today,",
-    "totalPatients": "Total Patients",
+    "subtitle": "Here's what's happening with your firm today,",
+    "totalPatients": "Total Clients",
     "thisWeek": "This Week",
-    "doctorRating": "Doctor Rating",
+    "doctorRating": "Wealth Manager Rating",
     "noRatings": "No ratings yet",
     "vulaVouchers": "Vulas",
     "myRoundTables": "My Round Tables",
     "searchRoundTable": "Search patient to start round table...",
-    "noPatientsFound": "No patients found",
+    "noPatientsFound": "No clients found",
     "todoList": "To-Do List",
-    "addTask": "Add a task...",
+    "addTask": "Add a action...",
     "active": "Active",
     "done": "Done",
-    "noActiveTasks": "No active tasks",
-    "noCompletedTasks": "No completed tasks",
+    "noActiveTasks": "No active actions",
+    "noCompletedTasks": "No completed actions",
     "recentActivity": "Recent Activity",
-    "sessionCompleted": "Session completed",
+    "sessionCompleted": "Consultation completed",
     "documentGenerated": "Document generated",
-    "taskCompleted": "Task completed",
+    "taskCompleted": "Action completed",
     "followUpSent": "Follow-up sent",
     "gettingStarted": "Getting started",
-    "addFirstPatient": "Add your first patient to get started",
+    "addFirstPatient": "Add your first client to get started",
     "justNow": "Just now"
   },
   "briefing": {
@@ -282,32 +282,32 @@
     "nextDay": "Next day",
     "translating": "Translating briefing...",
     "allergies": "Allergies",
-    "lastSession": "Last session",
-    "noPreviousSession": "No previous session notes",
+    "lastSession": "Last consultation",
+    "noPreviousSession": "No previous consultation notes",
     "unreadNote": "unread note",
     "unreadNotes": "unread notes"
   },
   "patients": {
-    "title": "Patients",
-    "subtitle": "Manage your patient profiles and history",
-    "searchPlaceholder": "Search patients...",
-    "addPatient": "Patient",
-    "addPatientFull": "Add Patient",
+    "title": "Clients",
+    "subtitle": "Manage your client profiles and history",
+    "searchPlaceholder": "Search clients...",
+    "addPatient": "Client",
+    "addPatientFull": "Add Client",
     "importPatients": "Import",
-    "noPatients": "No patients yet",
-    "noPatientsFound": "No patients found matching your search",
-    "noPatientsHint": "No patients yet. Add your first patient!",
+    "noPatients": "No clients yet",
+    "noPatientsFound": "No clients found matching your search",
+    "noPatientsHint": "No clients yet. Add your first client!",
     "allStatuses": "All statuses",
     "active": "Active",
     "inactive": "Inactive",
     "roundTables": "Round Tables",
-    "allSessions": "All Sessions",
+    "allSessions": "All Consultations",
     "filter": "Filter",
     "share": "Share",
     "viewProfile": "View Profile",
-    "startSession": "Start Session",
-    "deletePatient": "Delete Patient",
-    "colPatient": "Patient",
+    "startSession": "Start Consultation",
+    "deletePatient": "Delete Client",
+    "colPatient": "Client",
     "colContact": "Contact",
     "colLastSeen": "Last Seen",
     "colSince": "Since",
@@ -322,25 +322,25 @@
     "tabPending": "Pending",
     "button": {
       "roundTables": "Round Tables",
-      "allSessions": "All Sessions",
+      "allSessions": "All Consultations",
       "import": "Import",
-      "addPatient": "Patient",
-      "addNewPatient": "Add New Patient",
+      "addPatient": "Client",
+      "addNewPatient": "Add New Client",
       "invite": "Invite",
       "filter": "Filter",
       "clearFilters": "Clear all",
       "applyFilters": "Apply Filters"
     },
     "dialog": {
-      "title": "Add New Patient",
-      "description": "Enter patient information below"
+      "title": "Add New Client",
+      "description": "Enter client information below"
     },
     "form": {
       "sectionBasic": "Basic Information",
       "labelName": "Name *",
-      "searchPlaceholder": "Type patient name to search...",
-      "inviteFallbackText": "Patient not found on Holarc? Send an invitation",
-      "emailPlaceholder": "patient@email.com",
+      "searchPlaceholder": "Type client name to search...",
+      "inviteFallbackText": "Client not found on Indigro? Send an invitation",
+      "emailPlaceholder": "client@email.com",
       "labelEmail": "Email",
       "labelPhone": "Phone",
       "phonePlaceholder": "+1 (555) 123-4567",
@@ -355,7 +355,7 @@
       "employerPlaceholder": "Employer name",
       "labelOccupation": "Occupation",
       "occupationPlaceholder": "Occupation",
-      "sectionInsurance": "Medical Insurance Information",
+      "sectionInsurance": "Financial Insurance Information",
       "labelInsurance": "Medical Insurance",
       "insurancePlaceholder": "Insurance provider",
       "labelInsuranceProduct": "Medical Insurance Product",
@@ -366,7 +366,7 @@
       "primaryMemberPlaceholder": "Primary member name",
       "labelClaimsEmail": "Claims Email",
       "claimsEmailPlaceholder": "claims@insurance.com",
-      "sectionMedical": "Medical Information",
+      "sectionMedical": "Financial Information",
       "labelGP": "Family Doctor",
       "gpPlaceholder": "GP name",
       "labelReferredBy": "Referred By",
@@ -378,13 +378,13 @@
       "notesPlaceholder": "Any additional notes..."
     },
     "search": {
-      "placeholder": "Search patients..."
+      "placeholder": "Search clients..."
     },
     "alphabet": {
       "all": "All"
     },
     "table": {
-      "columnPatient": "Patient",
+      "columnPatient": "Client",
       "columnContact": "Contact",
       "columnLastSeen": "Last Seen",
       "columnSince": "Since",
@@ -392,17 +392,17 @@
       "noData": "—"
     },
     "menu": {
-      "startSession": "Start Session",
+      "startSession": "Start Consultation",
       "viewProfile": "View Profile",
-      "deletePatient": "Delete Patient"
+      "deletePatient": "Delete Client"
     },
     "badge": {
       "me": "ME",
-      "chronic": "Chronic Patient"
+      "chronic": "Chronic Client"
     },
     "empty": {
-      "search": "No patients found matching your search",
-      "default": "No patients yet. Add your first patient!"
+      "search": "No clients found matching your search",
+      "default": "No clients yet. Add your first client!"
     }
   },
   "calendar": {
@@ -419,15 +419,15 @@
     "allDay": "All-day",
     "noEvents": "No events",
     "myCalendar": "My Calendar",
-    "practiceCalendar": "Practice Calendar",
+    "practiceCalendar": "Firm Calendar",
     "googleCalendar": "Google Calendar",
     "disconnectGoogle": "Disconnect Google",
     "googleSyncCaption": "Google sync mirrors only your own appointments.",
     "book": "Book",
     "todaysSchedule": "Today's Schedule",
     "noAppointmentsToday": "No appointments scheduled for today",
-    "filterDoctor": "Filter doctor",
-    "allDoctors": "All doctors in practice",
+    "filterDoctor": "Filter wealth manager",
+    "allDoctors": "All wealth managers in firm",
     "months": {
       "january": "January",
       "february": "February",
@@ -485,14 +485,14 @@
     ]
   },
   "sessions": {
-    "title": "Sessions",
-    "sessionMode": "Session Mode",
-    "selectPatient": "Select a Patient",
+    "title": "Consultations",
+    "sessionMode": "Consultation Mode",
+    "selectPatient": "Select a Client",
     "readyToStart": "Ready to Start",
-    "searchByPatient": "Search by patient name...",
-    "newSession": "New Session",
-    "allSessions": "All Sessions",
-    "noPatientsFound": "No patients found.",
+    "searchByPatient": "Search by client name...",
+    "newSession": "New Consultation",
+    "allSessions": "All Consultations",
+    "noPatientsFound": "No clients found.",
     "searchByName": "Search by name...",
     "today": "Today",
     "lastWeek": "Last week",
@@ -502,10 +502,10 @@
     "recording": "Recording... Tap to stop",
     "paused": "Paused — tap play to resume",
     "transcribing": "Transcribing...",
-    "endSessionTip": "Say \"End Session\" to automatically stop recording",
+    "endSessionTip": "Say \"End Consultation\" to automatically stop recording",
     "generateAnalysis": "Generate Analysis",
     "regenerate": "Regenerate",
-    "currentSession": "Current Session"
+    "currentSession": "Current Consultation"
   },
   "roundTables": {
     "title": "My Round Tables",
@@ -548,23 +548,23 @@
     "openConsole": "Open console"
   },
   "myPractice": {
-    "tabPractice": "My Practice",
+    "tabPractice": "My Firm",
     "tabReferrals": "Referrals",
     "tabCredentials": "Credentials",
     "tabRewards": "Rewards",
     "aboutMe": "About Me",
-    "aboutMeHelper": "Share a short pitch about your practice and approach. Patients see this when viewing your profile. Maximum 600 words.",
+    "aboutMeHelper": "Share a short pitch about your firm and approach. Clients see this when viewing your profile. Maximum 600 words.",
     "wordCount": "{{count}} / 600 words",
     "save": "Save",
     "tabProfile": "Profile",
     "tabServices": "Services",
     "tabSchedule": "Schedule",
-    "tabPatients": "Patients",
-    "tabInvoices": "Invoices",
+    "tabPatients": "Clients",
+    "tabInvoices": "Fee statements",
     "tabRoundTables": "Round Tables",
     "tabDocuments": "Documents",
     "tabHospitals": "Hospital Affiliations",
-    "profileTitle": "Practice Profile",
+    "profileTitle": "Firm Profile",
     "profileDescription": "Manage your professional information and credentials",
     "basicInfo": "Basic Information",
     "name": "Full Name",
@@ -572,7 +572,7 @@
     "phone": "Phone",
     "specialty": "Specialty",
     "qualifications": "Qualifications",
-    "practiceNumber": "Practice Number",
+    "practiceNumber": "Firm Number",
     "bio": "Professional Bio",
     "credentials": "Credentials & Certifications",
     "addCredential": "Add Credential",
@@ -594,8 +594,8 @@
     "signatureDescription": "Create your digital signature for documents",
     "signatureFont": "Font Style",
     "signaturePreview": "Preview",
-    "practiceSettings": "Practice Settings",
-    "practiceLanguage": "Practice Language",
+    "practiceSettings": "Firm Settings",
+    "practiceLanguage": "Firm Language",
     "practiceTimezone": "Timezone",
     "consultationFee": "Default Consultation Fee",
     "teamMembers": "Team Members",
@@ -608,7 +608,7 @@
     "edit": "Edit",
     "add": "Add",
     "upload": "Upload",
-    "leave": "Leave Practice",
+    "leave": "Leave Firm",
     "savingProfile": "Saving profile...",
     "profileUpdated": "Profile updated successfully",
     "errorUpdatingProfile": "Error updating profile",
@@ -620,12 +620,12 @@
     "missingFields": "Please fill all required fields",
     "scheduleTitle": "Schedule",
     "setAvailability": "Set Your Availability",
-    "connectedPatients": "Connected Patients",
-    "invoicesTitle": "Invoices",
+    "connectedPatients": "Connected Clients",
+    "invoicesTitle": "Fee statements",
     "referralDoctors": "Referral Network",
     "noServices": "No services added yet",
     "noCredentials": "No credentials added yet",
-    "noPatients": "No patients connected yet"
+    "noPatients": "No clients connected yet"
   },
   "patientRewards": {
     "progressTitle": "Progress to Next Milestone",
@@ -635,12 +635,12 @@
     "empty": "No rewards yet. Start your health journey!"
   },
   "todo": {
-    "addNewTask": "Add New Task",
+    "addNewTask": "Add New Action",
     "tapToRecord": "Tap to record",
     "transcribing": "Transcribing...",
     "aiProcessing": "AI processing...",
     "listening": "Listening... stops after a pause",
-    "typeTask": "Or type your task here...",
+    "typeTask": "Or type your action here...",
     "add": "Add",
     "priority": "Priority:",
     "low": "Low",
@@ -652,7 +652,7 @@
     "all": "All",
     "approve": "Approve",
     "approveSave": "Approve & Save",
-    "noMatchingPatient": "No matching patient found",
+    "noMatchingPatient": "No matching client found",
     "verbs": {
       "review": "Review",
       "schedule": "Schedule",
@@ -663,23 +663,23 @@
       "email": "Email"
     },
     "nouns": {
-      "invoice": "Invoice",
+      "invoice": "Fee statement",
       "prescription": "Prescription",
       "letter": "Letter of recommendation",
       "appointment": "Appointment",
-      "certificate": "Medical certificate",
+      "certificate": "Financial certificate",
       "referral": "Referral",
       "admission": "Hospital admission",
       "report": "Report",
       "result": "Result"
     },
     "kinds": {
-      "invoice": "Invoice",
+      "invoice": "Fee statement",
       "prescription": "Prescription",
       "appointment": "Appointment",
       "followUp": "Follow-up",
       "recommendation": "Recommendation",
-      "medicalCertificate": "Medical certificate",
+      "medicalCertificate": "Financial certificate",
       "referral": "Referral",
       "laboratory": "Laboratory",
       "email": "Email",
@@ -689,7 +689,7 @@
       "claim": "Claim",
       "reminder": "Reminder",
       "urgent": "Urgent",
-      "task": "Task"
+      "task": "Action"
     },
     "actions": {
       "edit": "Edit",
@@ -711,7 +711,7 @@
     "newContent": "New Content Template",
     "searchContent": "Search content templates...",
     "createTemplate": "Create Template",
-    "patientDocuments": "Patient Documents",
+    "patientDocuments": "Client Documents",
     "searchDocuments": "Search documents...",
     "letterhead": "Letterhead:",
     "letterheadHeaderFooter": "Header and Footer",
@@ -738,8 +738,8 @@
     },
     "type": {
       "prescription": "Prescription",
-      "invoice": "Invoice",
-      "certificate": "Medical Certificate",
+      "invoice": "Fee statement",
+      "certificate": "Financial Certificate",
       "referral": "Referral Letter",
       "letter": "General Letter",
       "admission": "Hospital Admission",
@@ -764,7 +764,7 @@
     "filter": {
       "placeholder": "Filter by type",
       "prescriptions": "Prescriptions",
-      "invoices": "Invoices",
+      "invoices": "Fee statements",
       "certificates": "Certificates",
       "referrals": "Referrals",
       "letters": "Letters",
@@ -842,33 +842,33 @@
     "viewHistory": "View incident history"
   },
   "patientProfile": {
-    "backToPatients": "Back to Patients",
-    "patientNotFound": "Patient not found",
+    "backToPatients": "Back to Clients",
+    "patientNotFound": "Client not found",
     "schedule": "Schedule",
-    "startSession": "Start Session",
+    "startSession": "Start Consultation",
     "checkIn": "Check in",
-    "totalSessions": "Total Sessions",
+    "totalSessions": "Total Consultations",
     "lastSeen": "Last Seen",
     "since": "Since",
     "vulas": "Vulas",
     "tabDetails": "Details",
     "tabOverview": "Overview",
-    "tabSessions": "Sessions",
+    "tabSessions": "Consultations",
     "tabAdmissions": "Admissions",
-    "tabProviders": "Healthcare Providers",
+    "tabProviders": "Wealth Managers",
     "tabDocuments": "Documents",
     "tabRoundTable": "Round Table",
     "togglePersonal": "Personal Information",
-    "toggleMedical": "Medical Information",
+    "toggleMedical": "Financial Information",
     "personalHeading": "Personal Information",
     "personalHelper": "View and manage personal details",
-    "medicalHeading": "Medical Information",
-    "medicalHelper": "View and manage medical details",
+    "medicalHeading": "Financial Information",
+    "medicalHelper": "View and manage financial details",
     "saved": "Saved",
     "sectionAddresses": "Addresses",
     "sectionEmergencyContacts": "Emergency Contacts",
     "sectionNextOfKin": "Next of Kin",
-    "sectionInsurance": "Insurance / Medical Aid",
+    "sectionInsurance": "Insurance / Financial Aid",
     "sectionEmployer": "Employer",
     "sectionLifestyle": "Lifestyle",
     "sectionConsents": "Consents",
@@ -882,9 +882,9 @@
     "sectionLabResults": "Lab Results",
     "sectionGeneticMarkers": "Genetic Markers",
     "sectionMentalHealth": "Mental Health",
-    "aiSummaryTitle": "AI Patient Summary",
-    "aiSummarySubtitle": "Summarized from all session transcriptions and history",
-    "aiSummaryGenerating": "Generating AI summary of patient history...",
+    "aiSummaryTitle": "AI Client Summary",
+    "aiSummarySubtitle": "Summarized from all consultation transcriptions and history",
+    "aiSummaryGenerating": "Generating AI summary of client history...",
     "aiSummarySectionSummary": "Summary",
     "aiSummarySectionTimeline": "Timeline",
     "aiSummaryRefresh": "Refresh",
@@ -978,7 +978,7 @@
     "actionPanel": "Status Updates",
     "enRoute": "En Route",
     "arrived": "Arrived",
-    "patientLoaded": "Patient Loaded",
+    "patientLoaded": "Client Loaded",
     "toHospital": "En Route to Hospital",
     "arrivedAtHospital": "Arrived at Hospital",
     "resolveIncident": "Resolve Incident",
@@ -1218,18 +1218,18 @@
       "evening": "Good evening"
     },
     "subtitle": {
-      "practice": "Here's what's happening with your practice today,"
+      "practice": "Here's what's happening with your firm today,"
     },
     "profileCompletion": {
-      "title": "Complete your practitioner profile",
-      "message": "Add your specialty, practice number, HPCSA/registration number and practice address so patients can find you and your documents render correctly. All credentials are encrypted in transit and at rest, visible only to you and patients you connect with. Holarc Health is HIPAA- and POPIA-aligned and never sells or shares your data."
+      "title": "Complete your wealth manager profile",
+      "message": "Add your specialty, firm number, HPCSA/registration number and firm address so clients can find you and your documents render correctly. All credentials are encrypted in transit and at rest, visible only to you and clients you connect with. Indigro Health is HIPAA- and POPIA-aligned and never sells or shares your data."
     },
     "stats": {
-      "totalPatients": "Total Patients",
+      "totalPatients": "Total Clients",
       "thisWeek": "This Week",
       "changeThisMonth": "+12 this month",
       "trendLastWeek": "+8% from last week",
-      "doctorRating": "Doctor Rating",
+      "doctorRating": "Wealth Manager Rating",
       "noRatingsYet": "No ratings yet",
       "communicationAbbr": "Comm:",
       "expertiseAbbr": "Exp:",
@@ -1243,8 +1243,8 @@
     }
   },
   "practice": {
-    "title": "My Holarprac",
-    "subtitle": "Manage your personal and practice information",
+    "title": "My Firm",
+    "subtitle": "Manage your personal and firm information",
     "status": {
       "saving": "Saving...",
       "saved": "Saved"
@@ -1257,7 +1257,7 @@
       "cpdPoints": "CPD pts"
     },
     "tabs": {
-      "practice": "My Practice",
+      "practice": "My Firm",
       "referrals": "Referrals",
       "credentials": "Credentials",
       "rewards": "My Rewards"
@@ -1265,13 +1265,13 @@
     "accordion": {
       "aboutMe": "About Me",
       "personal": "Personal Information",
-      "practiceDetails": "Practice Information",
-      "sharedCalendar": "Shared Practice Calendar",
+      "practiceDetails": "Firm Information",
+      "sharedCalendar": "Shared Firm Calendar",
       "servicePricing": "Service Offerings & Pricing"
     },
     "aboutMe": {
-      "description": "Share a short pitch about your practice and approach. Patients see this when viewing your profile. Maximum 600 words.",
-      "placeholder": "Tell patients about your background, philosophy of care, and what makes your practice unique…",
+      "description": "Share a short pitch about your firm and approach. Clients see this when viewing your profile. Maximum 600 words.",
+      "placeholder": "Tell clients about your background, philosophy of care, and what makes your firm unique…",
       "wordLimit": "600 words"
     },
     "form": {
@@ -1283,24 +1283,24 @@
       "mobileNumber": "Mobile Number",
       "mobilePlaceholder": "82 123 4567",
       "primaryLanguage": "Primary Language",
-      "practiceNumber": "Practice Number",
+      "practiceNumber": "Firm Number",
       "practiceNumberPlaceholder": "e.g., PR123456",
       "registrationNumber": "Registration Number",
       "registrationPlaceholder": "e.g., MP123456",
-      "practiceAddress": "Address of Doctor's Rooms",
-      "addressPlaceholder": "e.g., 123 Medical Centre, Suite 4, Cape Town",
+      "practiceAddress": "Address of Wealth Manager's Rooms",
+      "addressPlaceholder": "e.g., 123 Financial Centre, Suite 4, Cape Town",
       "calendarColor": "Calendar Color",
       "colorPlaceholder": "#0EA5E9",
-      "colorDescription": "Used on the shared Practice Calendar so colleagues can see whose appointment a slot belongs to.",
-      "practiceLogo": "Practice Logo",
+      "colorDescription": "Used on the shared Firm Calendar so colleagues can see whose appointment a slot belongs to.",
+      "practiceLogo": "Firm Logo",
       "partnerName": "Full Name *",
-      "partnerNamePlaceholder": "Dr. Jane Doe",
+      "partnerNamePlaceholder": "Wealth Manager Jane Doe",
       "partnerRegNumber": "Registration Number *",
       "partnerRegPlaceholder": "e.g., MP654321",
       "partnerMobile": "Mobile (Optional)",
       "partnerEmail": "Email *",
       "partnerEmailPlaceholder": "partner@example.com",
-      "practiceName": "e.g., Cape Town Medical Centre",
+      "practiceName": "e.g., Cape Town Financial Centre",
       "colleagueEmail": "colleague@example.com",
       "currency": "Currency"
     },
@@ -1336,9 +1336,9 @@
       "partnerAdded": "Partner added",
       "partnerRemoved": "Partner removed",
       "partnerUpdated": "Partner updated",
-      "doctorHidden": "Doctor hidden",
+      "doctorHidden": "Wealth Manager hidden",
       "doctorHiddenDesc": "They won't appear in your active list. Historic records remain.",
-      "doctorRestored": "Doctor restored",
+      "doctorRestored": "Wealth Manager restored",
       "doctorRestoredDesc": "They're back in your active list.",
       "nameRequired": "Name required",
       "serviceAdded": "Service added",
@@ -1358,30 +1358,30 @@
       "pickColor": "Pick color"
     },
     "partners": {
-      "description": "Add partners of the same practice. Their information will be available on documents.",
+      "description": "Add partners of the same firm. Their information will be available on documents.",
       "regAbbr": "Reg:"
     },
     "practiceInfo": {
       "description": "This information appears on your document templates and letterheads."
     },
     "calendar": {
-      "description": "Share a single calendar across multiple doctors. Each doctor's appointments show in their assigned color. Google Calendar sync stays personal — only your own appointments mirror.",
+      "description": "Share a single calendar across multiple wealth managers. Each wealth manager's appointments show in their assigned color. Google Calendar sync stays personal — only your own appointments mirror.",
       "invitationPrefix": "Invitation to join",
-      "defaultPracticeName": "a practice",
+      "defaultPracticeName": "a firm",
       "invitationFrom": "From",
       "membersSection": "Members",
-      "inviteSection": "Invite a doctor by email",
+      "inviteSection": "Invite a wealth manager by email",
       "pendingInvites": "Pending invitations",
       "sentLabel": "Sent",
       "owner": "You are the owner",
       "member": "You are a member",
       "memberLabel": "member",
       "membersLabel": "members",
-      "createSection": "Create a Practice Calendar"
+      "createSection": "Create a Firm Calendar"
     },
     "dialog": {
-      "deletePracticeTitle": "Delete this practice calendar?",
-      "leavePracticeTitle": "Leave this practice?"
+      "deletePracticeTitle": "Delete this firm calendar?",
+      "leavePracticeTitle": "Leave this firm?"
     },
     "servicePricing": {
       "description": "Define your service types and default prices for invoicing."
@@ -1395,8 +1395,8 @@
     "subtitle": "Your health dashboard at a glance",
     "button": {
       "calendar": "Calendar",
-      "recordTask": "Record Task",
-      "allInvoices": "All Invoices",
+      "recordTask": "Record Action",
+      "allInvoices": "All Fee statements",
       "viewAll": "View All"
     },
     "section": {
@@ -1407,10 +1407,10 @@
       "earnVulas": "Earn More Vulas",
       "recentClaims": "Recent Claims",
       "documentation": "Documentation",
-      "assignedTasks": "Assigned Tasks"
+      "assignedTasks": "Assigned Actions"
     },
     "aiSummary": {
-      "empty": "No health summary available yet. Visit your doctor to build your health profile."
+      "empty": "No health summary available yet. Visit your wealth manager to build your health profile."
     },
     "appointments": {
       "empty": "No upcoming appointments."
@@ -1423,7 +1423,7 @@
       "tip4": "Keep visit streaks going"
     },
     "recentClaims": {
-      "subtitle": "Invoices submitted to your medical aid",
+      "subtitle": "Fee statements submitted to your financial aid",
       "empty": "No claims submitted recently."
     },
     "claims": {
@@ -1433,7 +1433,7 @@
       "subtitle": "View your documents and records"
     },
     "assignedTasks": {
-      "subtitle": "Complete tasks to earn Vulas"
+      "subtitle": "Complete actions to earn Vulas"
     },
     "task": {
       "dueLabel": "Due:",
@@ -1442,46 +1442,46 @@
     "welcomeTitle": "Welcome back",
     "welcomeSubtitle": "Your health dashboard at a glance",
     "calendar": "Calendar",
-    "recordTask": "Record Task",
+    "recordTask": "Record Action",
     "recentActivity": "Recent Activity",
     "aiSummaryTitle": "AI Health Summary",
-    "aiSummaryEmpty": "No health summary available yet. Visit your doctor to build your health profile.",
+    "aiSummaryEmpty": "No health summary available yet. Visit your wealth manager to build your health profile.",
     "appointmentsTitle": "Upcoming Appointments",
     "appointmentsEmpty": "No upcoming appointments.",
-    "doctorFallback": "Doctor",
+    "doctorFallback": "Wealth Manager",
     "vulaLabel": "My Vulas",
     "earnVulasTitle": "Earn More Vulas",
     "earnVulasDescription": "Tips to boost your rewards",
     "tip1": "Log daily medication intake",
-    "tip2": "Complete tasks from your doctor",
+    "tip2": "Complete actions from your wealth manager",
     "tip3": "Upload health photos regularly",
     "tip4": "Keep visit streaks going",
     "claimsTitle": "Recent Claims",
-    "claimsAllInvoices": "All Invoices",
-    "claimsDescription": "Invoices submitted to your medical aid",
+    "claimsAllInvoices": "All Fee statements",
+    "claimsDescription": "Fee statements submitted to your financial aid",
     "claimsEmpty": "No claims submitted recently.",
     "claimsSubmitted": "Submitted",
     "documentationTitle": "Documentation",
     "documentationDescription": "View your documents and records",
-    "tasksTitle": "Assigned Tasks",
+    "tasksTitle": "Assigned Actions",
     "tasksViewAll": "View All",
-    "tasksDescription": "Complete tasks to earn Vulas",
+    "tasksDescription": "Complete actions to earn Vulas",
     "tasksDue": "Due"
   },
   "myDoctors": {
-    "title": "My Healthcare Providers",
-    "subtitle": "Healthcare providers with access to your profile",
+    "title": "My Wealth Managers",
+    "subtitle": "Wealth management providers with access to your profile",
     "search": {
-      "title": "Find a Healthcare Provider on Holarc",
+      "title": "Find a Wealth Manager on Indigro",
       "description": "Filter by name, specialty, language — or any combination",
-      "namePlaceholder": "Doctor name, practice or registration #",
+      "namePlaceholder": "Wealth Manager name, firm or registration #",
       "specialtyPlaceholder": "Any specialty",
       "languagePlaceholder": "Any language",
       "allConnectedMessage": "All matching providers are already on your profile.",
-      "noResultsMessage": "No healthcare providers found matching your search."
+      "noResultsMessage": "No wealth managers found matching your search."
     },
     "group": {
-      "doctors": "Doctors",
+      "doctors": "Wealth Managers",
       "hospitals": "Hospitals",
       "ambulances": "Emergency Responders"
     },
@@ -1492,8 +1492,8 @@
       "columnAction": "Action"
     },
     "empty": {
-      "title": "No healthcare providers on your profile",
-      "subtitle": "Search for a healthcare provider above or use the invite button to connect."
+      "title": "No wealth managers on your profile",
+      "subtitle": "Search for a wealth manager above or use the invite button to connect."
     },
     "tab": {
       "active": "Active ({count})",
@@ -1523,8 +1523,8 @@
       "practiceNumber": "PR#:"
     },
     "dialog": {
-      "removeTitle": "Remove Healthcare Provider",
-      "removeMessage": "Are you sure you want to remove {name} from your healthcare providers? They will lose access to your health information."
+      "removeTitle": "Remove Wealth Manager",
+      "removeMessage": "Are you sure you want to remove {name} from your wealth managers? They will lose access to your health information."
     },
     "details": {
       "registrationLabel": "Registration #:",
@@ -1731,7 +1731,7 @@
     "status": {
       "enRoute": "En Route",
       "onScene": "On Scene",
-      "transporting": "Transporting Patient",
+      "transporting": "Transporting Client",
       "arrived": "Arrived at Hospital"
     },
     "statusCard": {
@@ -1748,7 +1748,7 @@
       "viewMap": "View Live Map"
     },
     "patient": {
-      "title": "Patient Status",
+      "title": "Client Status",
       "vitalStable": "✓ Patient vitals stable and normal"
     },
     "communication": {
@@ -1800,7 +1800,7 @@
     },
     "specialInstructions": {
       "title": "Special Instructions",
-      "placeholder": "Any special instructions for the crew (e.g., access notes, hazards, patient information)..."
+      "placeholder": "Any special instructions for the crew (e.g., access notes, hazards, client information)..."
     },
     "notifications": {
       "title": "Notifications will be sent to:",
@@ -2036,13 +2036,13 @@
       "getStarted": "Get Started"
     },
     "hero": {
-      "badge": "AI-powered · Patient-controlled · HIPAA-aligned",
-      "title": "A revolutionary healthcare ecosystem",
+      "badge": "AI-powered · Client-controlled · HIPAA-aligned",
+      "title": "A revolutionary wealth management ecosystem",
       "titleHighlight": "built around you.",
       "description": "Holarc is one connected platform where doctors run their entire practice and patients own their entire health story — from voice-recorded consultations and AI summaries, to video-verified medication adherence rewards, cross-specialist Round Tables, hospital admissions, prescriptions, billing, and a unified care calendar.",
       "cta": "Join the Ecosystem",
-      "doctorsButton": "Doctors",
-      "patientsButton": "Patients"
+      "doctorsButton": "Wealth Managers",
+      "patientsButton": "Clients"
     },
     "capabilities": {
       "voiceConsultations": "Voice Consultations",
@@ -2052,32 +2052,32 @@
       "roundTable": "Round Table",
       "prescriptions": "Prescriptions",
       "hospitalAdmissions": "Hospital Admissions",
-      "autoTasks": "Auto-Tasks",
+      "autoTasks": "Auto-Actions",
       "unifiedCalendar": "Unified Calendar",
       "emergencySOS": "Emergency SOS",
       "emergencyResponseDispatch": "Emergency Response Dispatch",
       "hospitalNetwork": "Hospital Network"
     },
     "mobile": {
-      "title": "Get Holarc on your phone",
+      "title": "Get Indigro on your phone",
       "description": "Available on iOS and Android — your full health story in your pocket.",
       "appStore": "App Store",
       "googlePlay": "Google Play"
     },
     "trustStrip": {
-      "patientAccess": "Patient-granted access",
+      "patientAccess": "Client-granted access",
       "collaboration": "Real-time collaboration",
-      "patientCentric": "Built around the patient"
+      "patientCentric": "Built around the client"
     },
     "features": {
-      "transcribedSessions": "Transcribed Sessions",
+      "transcribedSessions": "Transcribed Consultations",
       "transcribedDescription": "Voice transcribed in real time. AI extracts diagnoses, prescriptions and follow-up tasks automatically.",
       "medicationAdherence": "Medication Adherence",
       "medicationDescription": "Verified ingestion. Confidence scored. Provisional doses auto-approved monthly.",
       "rewardsEarned": "+5 Rewards earned",
       "roundTableFeature": "Round Table",
       "roundTableDescription": "Specialists coordinate per patient with shared notes and read-receipts.",
-      "aiAssistant": "AI Clinical Assistant",
+      "aiAssistant": "AI Advice Assistant",
       "aiAssistantDescription": "Patient history summaries · medication conflict alerts · imaging analysis · auto-generated documents.",
       "holarcHelp": "Holarc Help (SOS)",
       "holarcHelpDescription": "One-tap dispatch to nearby emergency responders and hospitals with live location, ETA tracking, and full medical context shared on arrival.",
@@ -2087,8 +2087,8 @@
       "roundTable": "Round Table"
     },
     "patientBenefits": {
-      "sectionBadge": "For Patients",
-      "sectionTitle": "Your Health.",
+      "sectionBadge": "For Clients",
+      "sectionTitle": "Your Wealth.",
       "sectionTitleHighlight": "View.",
       "sectionDescription": "Holarc gives you a complete 360-degree view of your health profile—every consultation, prescription, and clinical note from every provider, unified in one place and entirely under your control.",
       "benefit1Title": "Complete Health Picture",
@@ -2096,40 +2096,40 @@
       "benefit2Title": "Connect Your Care Team",
       "benefit2Description": "Invite specialists, GPs, and other providers to collaborate on your care with your full consent.",
       "benefit3Title": "You're in Control",
-      "benefit3Description": "Decide exactly which doctors see your records. Grant or revoke access anytime with granular permissions.",
+      "benefit3Description": "Decide exactly which wealth managers see your records. Grant or revoke access anytime with granular permissions.",
       "benefit4Title": "Unified Appointments",
-      "benefit4Description": "All your healthcare appointments from every provider in one calendar—never miss a follow-up."
+      "benefit4Description": "All your wealth management appointments from every provider in one calendar—never miss a follow-up."
     },
     "providerBenefits": {
-      "sectionBadge": "For Healthcare Providers",
-      "sectionTitle": "Practice with the Full Picture",
-      "sectionDescription": "When patients grant you access, you see everything—their complete history across all providers. Make better decisions with better information.",
+      "sectionBadge": "For Wealth Managers",
+      "sectionTitle": "Firm with the Full Picture",
+      "sectionDescription": "When clients grant you access, you see everything—their complete history across all providers. Make better decisions with better information.",
       "benefit1Title": "AI-Powered Insights",
       "benefit1Description": "Get comprehensive patient history summaries and medication conflict alerts before every consultation.",
       "benefit2Title": "Seamless Collaboration",
-      "benefit2Description": "Round Table notes enable real-time communication with other specialists caring for the same patient.",
+      "benefit2Description": "Round Table notes enable real-time communication with other specialists caring for the same client.",
       "benefit3Title": "Automated Documentation",
       "benefit3Description": "Voice-to-text notes, auto-populated templates, and AI summaries save hours of administrative work.",
-      "benefit4Title": "Better Patient Outcomes",
-      "benefit4Description": "Access complete patient history across all their providers—make informed decisions with the full picture.",
+      "benefit4Title": "Better Client Outcomes",
+      "benefit4Description": "Access complete client history across all their providers—make informed decisions with the full picture.",
       "benefit5Title": "Emergency Service Providers",
-      "benefit5Description": "Emergency response crews onboard in minutes, accept SOS incidents with one tap, share live ETA, and arrive with the patient's full medical context.",
+      "benefit5Description": "Emergency response crews onboard in minutes, accept SOS incidents with one tap, share live ETA, and arrive with the client's full financial context.",
       "benefit6Title": "Hospital Partners",
       "benefit6Description": "Hospitals receive inbound emergencies with prefilled patient summaries, manage admissions, and coordinate with referring doctors in real time."
     },
     "cta": {
-      "title": "Ready for Healthcare That Works Together?",
-      "description": "Join thousands of patients and providers building a better healthcare experience—one where your health story is complete, connected, and under your control.",
+      "title": "Ready for Wealth management That Works Together?",
+      "description": "Join thousands of clients and providers building a better wealth management experience—one where your health story is complete, connected, and under your control.",
       "button": "Get Started Today"
     },
     "roleDialog": {
-      "title": "Join Holarc",
+      "title": "Join Indigro",
       "description": "How will you use the platform?",
       "label": "I am a...",
       "placeholder": "Select user type",
       "options": {
-        "patient": "Patient",
-        "doctor": "Healthcare Provider",
+        "patient": "Client",
+        "doctor": "Wealth Manager",
         "hospital": "Hospital",
         "emergency": "Emergency Service Provider",
         "insurance": "Insurance Company",
@@ -2148,7 +2148,7 @@
     "typeLab": "Lab Results",
     "typeImaging": "Imaging",
     "typePrescription": "Prescriptions",
-    "typeReport": "Medical Reports",
+    "typeReport": "Financial Reports",
     "typeOther": "Other",
     "download": "Download",
     "delete": "Delete",
@@ -2162,9 +2162,9 @@
     "provider": "Provider",
     "actions": "Actions",
     "noDocuments": "No documents yet",
-    "noDocumentsDescription": "Documents will appear here as your healthcare providers upload them",
+    "noDocumentsDescription": "Documents will appear here as your wealth managers upload them",
     "uploadTitle": "Upload Document",
-    "uploadDescription": "Add a new medical document to your health record",
+    "uploadDescription": "Add a new financial document to your health record",
     "selectFile": "Select File",
     "fileName": "File Name",
     "documentTypeLabel": "Document Type",
@@ -2199,45 +2199,45 @@
       "errorInitializeTitle": "Could not load your record",
       "errorSaveTitle": "Could not save your details",
       "detailsUpdated": "Your details have been updated",
-      "recordSetupMessage": "We are setting up your patient record. Please check back in a moment."
+      "recordSetupMessage": "We are setting up your client record. Please check back in a moment."
     }
   },
   "dialogs": {
     "sharedWithCareTeam": "Shared with the Care Team",
     "privateNotShared": "Not Shared with Care Team",
-    "sharedWithPatientCareTeam": "Shared with the Patient's Care Team",
-    "privateToYourPractice": "Private to Your Practice",
-    "otherDoctorsWillSee": "Other doctors on this patient's care team will be able to see the items listed below.",
+    "sharedWithPatientCareTeam": "Shared with the Client's Care Team",
+    "privateToYourPractice": "Private to Your Firm",
+    "otherDoctorsWillSee": "Other wealth managers on this client's care team will be able to see the items listed below.",
     "dataSharing": "Data Sharing",
     "iUnderstand": "I Understand",
     "holisticHealthSharing": "Better care through shared context",
-    "holisticHealthDescription": "Sharing more of your health history helps every doctor on your care team give you safer, more informed treatment.",
-    "limitingAccessWarning": "Limiting what your care team can see may mean a doctor is missing important context for your treatment."
+    "holisticHealthDescription": "Sharing more of your health history helps every wealth manager on your care team give you safer, more informed recommendation.",
+    "limitingAccessWarning": "Limiting what your care team can see may mean a wealth manager is missing important context for your recommendation."
   },
   "permissions": {
-    "aiSessionSummaries": "AI Session Summaries",
-    "patientInformation": "Patient Information",
-    "medicalOverview": "Medical Overview",
+    "aiSessionSummaries": "AI Consultation Summaries",
+    "patientInformation": "Client Information",
+    "medicalOverview": "Financial Overview",
     "documents": "Documents",
     "prescriptions": "Prescriptions",
     "hospitalAdmissions": "Hospital Admissions",
-    "patientImages": "Patient Images",
-    "patientVideos": "Patient Videos",
+    "patientImages": "Client Images",
+    "patientVideos": "Client Videos",
     "testResults": "Test Results",
     "scans": "Scans",
-    "fullTranscriptions": "Full Session Transcriptions",
+    "fullTranscriptions": "Full Consultation Transcriptions",
     "rawAudioRecordings": "Raw Audio Recordings",
     "aiDiagnostics": "AI Diagnostics",
-    "clinicalDrawings": "Clinical Drawings",
-    "invoicesAndBilling": "Invoices and Billing",
-    "medicalCertificates": "Medical Certificates",
-    "doctorContribution": "This Doctor's Contribution",
+    "clinicalDrawings": "Advice Drawings",
+    "invoicesAndBilling": "Fee statements and Fees",
+    "medicalCertificates": "Financial Certificates",
+    "doctorContribution": "This Wealth Manager's Contribution",
     "visitSummary": "Visit Summary",
     "issuedPrescriptions": "Issued Prescriptions",
-    "medicalHistory": "Medical History",
+    "medicalHistory": "Financial History",
     "credentials": "Credentials",
     "aboutMe": "About Me",
-    "sessionHistory": "Session History",
+    "sessionHistory": "Consultation History",
     "draftNotes": "Draft Notes"
   }
 }
