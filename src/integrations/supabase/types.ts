@@ -10268,6 +10268,7 @@ export type Database = {
           decision_reason: string | null
           id: string
           presented_at: string | null
+          quote_expires_at: string | null
           roa_document_id: string | null
           status: string
           summary: string | null
@@ -10284,6 +10285,7 @@ export type Database = {
           decision_reason?: string | null
           id?: string
           presented_at?: string | null
+          quote_expires_at?: string | null
           roa_document_id?: string | null
           status?: string
           summary?: string | null
@@ -10300,6 +10302,7 @@ export type Database = {
           decision_reason?: string | null
           id?: string
           presented_at?: string | null
+          quote_expires_at?: string | null
           roa_document_id?: string | null
           status?: string
           summary?: string | null
