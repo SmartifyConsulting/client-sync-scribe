@@ -23,11 +23,11 @@ export function BillingPanel() {
 
   const plans = useQuery({
     queryKey: ["billing-plans"],
-    queryFn: async () => (await supabase.from("pricing_config").select("*").eq("currency" as any, "ZAR").order("price")).data ?? [],
+    queryFn: async () => (await (supabase as any).from("pricing_config").select("*").eq("currency" as any, "ZAR").order("price")).data ?? [],
   });
   const subs = useQuery({
     queryKey: ["billing-subs", user?.id], enabled: !!user,
-    queryFn: async () => (await supabase.from("subscriptions").select("*").eq("user_id", user!.id).eq("provider" as any, "payfast").order("created_at", { ascending: false })).data ?? [],
+    queryFn: async () => (await (supabase as any).from("subscriptions").select("*").eq("user_id", user!.id).eq("provider" as any, "payfast").order("created_at", { ascending: false })).data ?? [],
   });
   const history = useQuery({
     queryKey: ["billing-history", user?.id], enabled: !!user,
