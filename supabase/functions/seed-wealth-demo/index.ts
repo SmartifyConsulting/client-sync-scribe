@@ -30,14 +30,18 @@ Deno.serve(async (req) => {
   const url = Deno.env.get("SUPABASE_URL")!;
   const admin = createClient(url, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
-  const { data: u } = await admin.auth.getUser(token);
-  if (!u?.user) return json({ error: "Please sign in" }, 401);
-  const { data: isAdmin } = await admin.rpc("has_role", { _user_id: u.user.id, _role: "admin" });
-  if (!isAdmin) return json({ error: "Only admins can create demo data" }, 403);
+  const { data: list } = await admin.auth.admin.listUsers({ perPage: 1000 });
+  const alreadySeeded = USERS.every((x) => list?.users.some((e) => e.email === x.email));
+  // First run bootstraps the demo; afterwards only admins may re-run it.
+  if (alreadySeeded) {
+    const { data: u } = await admin.auth.getUser(token);
+    if (!u?.user) return json({ ok: true, skipped: "already seeded" });
+    const { data: isAdmin } = await admin.rpc("has_role", { _user_id: u.user.id, _role: "admin" });
+    if (!isAdmin) return json({ ok: true, skipped: "already seeded" });
+  }
 
   const log: string[] = [];
   const ids: Record<string, string> = {};
-  const { data: list } = await admin.auth.admin.listUsers({ perPage: 1000 });
   for (const x of USERS) {
     let id = list?.users.find((e) => e.email === x.email)?.id;
     if (!id) {
