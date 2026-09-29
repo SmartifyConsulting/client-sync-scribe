@@ -32,7 +32,7 @@ export const WEALTH_HIDDEN_MODULES = [
   "/admissions", "/patient/admissions", "/patient/ward", "/my-shift", "/nurse-profile",
   "/prescriptions", "/patient/prescriptions", "/patient/lab-results", "/lab-results",
   "/biolog", "/patient/rewards", "/vula", "/admin/gamification", "/ask-maeve",
-  "/doctor/round-tables", "/patient/round-table",
+  "/doctor/round-tables", "/patient/round-table", "/patient/health-album",
 ];
 
 export const isWealthHidden = (path: string) =>
