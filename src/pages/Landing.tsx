@@ -168,7 +168,7 @@ export default function Landing() {
         {/* Ambient background blobs */}
         <div className="pointer-events-none absolute inset-0 -z-10">
           <div className="absolute top-20 -left-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
-          <div className="absolute top-40 right-0 h-80 w-80 rounded-full bg-[#E01837]/10 blur-3xl" />
+          <div className="absolute top-40 right-0 h-80 w-80 rounded-full bg-primary-dark/10 blur-3xl" />
           <div className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
         </div>
 
@@ -218,8 +218,8 @@ export default function Landing() {
               <div className="relative grid grid-cols-2 gap-3 sm:gap-4">
                 {/* Adherence + Vulas */}
                 <div className="card-modern p-4 border border-border bg-card">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#E01837]/10 mb-2">
-                    <Video className="h-5 w-5 text-[#E01837]" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-dark/10 mb-2">
+                    <Video className="h-5 w-5 text-primary-dark" />
                   </div>
                   <p className="text-sm font-semibold text-foreground">{t("landing.features.medicationAdherence")}</p>
                   <p className="text-sm text-muted-foreground mt-0.5">
@@ -241,7 +241,7 @@ export default function Landing() {
                     {t("landing.features.roundTableDescription")}
                   </p>
                   <div className="mt-3 flex -space-x-1.5">
-                    {["bg-primary", "bg-[#E01837]", "bg-amber-500", "bg-teal-500"].map((c, i) => (
+                    {["bg-primary", "bg-primary-dark", "bg-muted-foreground", "bg-teal-500"].map((c, i) => (
                       <span key={i} className={`h-5 w-5 rounded-full border-2 border-background ${c}`} />
                     ))}
                   </div>
@@ -344,7 +344,7 @@ export default function Landing() {
                   <Activity className="h-3.5 w-3.5 text-primary" /> {t("landing.trustStrip.collaboration")}
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <Heart className="h-3.5 w-3.5 text-[#E01837]" /> {t("landing.trustStrip.patientCentric")}
+                  <ShieldCheck className="h-3.5 w-3.5 text-primary-dark" /> {t("landing.trustStrip.patientCentric")}
                 </span>
               </div>
             </motion.div>
@@ -354,7 +354,7 @@ export default function Landing() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.35 }}
-              className="lg:col-span-5 card-modern p-4 border border-[#E01837]/30 bg-gradient-to-br from-[#E01837]/5 to-[#E01837]/10"
+              className="lg:col-span-5 card-modern p-4 border border-primary-dark/30 bg-gradient-to-br from-primary-dark/5 to-primary-dark/10"
             >
               <div className="flex items-start gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shrink-0">
@@ -389,7 +389,7 @@ export default function Landing() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="rounded-2xl border-2 border-primary/40 bg-gradient-to-r from-primary/10 via-primary/5 to-[#E01837]/10 p-4 sm:p-5 shadow-lg"
+            className="rounded-2xl border-2 border-primary/40 bg-gradient-to-r from-primary/10 via-primary/5 to-primary-dark/10 p-4 sm:p-5 shadow-lg"
           >
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shrink-0">
