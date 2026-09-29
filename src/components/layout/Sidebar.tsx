@@ -469,9 +469,6 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                 if (sectionItems.length === 0) return null;
                 return (
                   <div key={section.title} className="space-y-1.5">
-                    <p className="mx-1 px-3 py-1.5 rounded-md bg-neutral-600 text-[10px] font-bold uppercase tracking-[0.14em] text-white">
-                      {section.title}
-                    </p>
                     {sectionItems.map((item) => renderNavLink(item))}
                   </div>
                 );
@@ -488,9 +485,6 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               <div className="space-y-1.5">{profileToggle}</div>
               {NURSE_SECTIONS.map((section) => (
                 <div key={section.title} className="space-y-1.5">
-                  <p className="mx-1 px-3 py-1.5 rounded-md bg-neutral-600 text-[10px] font-bold uppercase tracking-[0.14em] text-white">
-                    {section.title}
-                  </p>
                   {section.items.map((item) => renderNavLink(item))}
                 </div>
               ))}

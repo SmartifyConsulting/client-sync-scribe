@@ -46,11 +46,6 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
         <nav className="flex-1 px-4 pt-[1.5cm] py-1 space-y-4 overflow-y-auto font-size-preserve">
           {sections.map((section) => (
             <div key={section.id} className="space-y-1.5">
-              {section.title && (
-                <p className="mx-1 px-3 py-1.5 rounded-md bg-neutral-600 text-[10px] font-bold uppercase tracking-[0.14em] text-white">
-                  {t(section.titleKey, { defaultValue: section.title })}
-                </p>
-              )}
               {section.items.map((item) => {
                 const isActive = item.end
                   ? location.pathname === item.to
