@@ -39,7 +39,7 @@ const appAt = (s: string[]) => (c: MapContext) => c.apps.some((a) => s.includes(
 
 export const WORKFLOW_GROUPS: WorkflowGroup[] = [
   {
-    n: 1, key: "gateway", title: "Client Gateway", clientTitle: "Getting started", icon: ScanFace,
+    n: 1, key: "gateway", title: "Client Onboarding", clientTitle: "Getting started", icon: ScanFace,
     stages: ["consultation"],
     steps: [
       { owner: "client", label: "Scan QR or open secure link", done: past(1) },
