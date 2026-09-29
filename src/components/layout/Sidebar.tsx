@@ -1,3 +1,4 @@
+import { isWealthHidden } from "@/lib/terminology";
 import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
@@ -79,7 +80,7 @@ const DOCTOR_TOP_ITEMS: (NavItem & { tour?: string })[] = [];
 
 const DOCTOR_SECTIONS: NavSection[] = [
   {
-    title: "My Holarprac",
+    title: "My Firm",
     items: [
       { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.dashboard", to: "/doctor-dashboard", tour: "doctor-home" },
       { icon: Settings2, label: "My Practice", labelKey: "nav.myPractice", to: "/practice", tour: "practice-settings" },
@@ -260,7 +261,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     .filter((s) => s.items.length > 0);
 
   const baseNav = isOnAdminRoute && isAdmin
-    ? adminNavItems
+    ? adminNavItems.filter((i) => !isWealthHidden(i.to))
     : isNurseMenu
       ? withShiftRule(nurseNavItems)
       : isPatientMenu
