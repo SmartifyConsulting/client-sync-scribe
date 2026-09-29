@@ -18,7 +18,7 @@ import { SessionTitleEditor } from "../components/SessionTitleEditor";
 import { deleteMaeveSession } from "../lib/deleteSession";
 import { buildTranscript, downloadTranscript, transcriptFileName } from "../lib/transcript";
 import { downloadTranscriptPdf } from "../lib/maevePdf";
-import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
+import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
 import { toast } from "sonner";
 
 const logo = holarcLogoAsset.url;

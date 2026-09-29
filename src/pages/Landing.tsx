@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
+import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
 const holarcLogo = holarcLogoAsset.url;
 import { motion } from "framer-motion";
 import {
@@ -188,9 +188,7 @@ export default function Landing() {
               <div className="w-full">
                 <div className="flex flex-col items-center lg:items-start">
                   <div className="inline-flex flex-col items-center mx-auto lg:mx-0">
-                    <span className="font-display text-6xl sm:text-7xl lg:text-8xl font-semibold tracking-tight text-foreground" aria-label="Indigro">
-                      Indigro
-                    </span>
+                    <img src={holarcLogo} alt="Holarc Wealth" className="h-24 sm:h-32 lg:h-40 w-auto" />
                     <p className="mt-5 font-mono text-xs sm:text-sm text-muted-foreground tracking-wider text-center">
                       {t("landing.hero.badge")} <span className="text-primary">/ [STATUS: ACTIVE]</span>
                     </p>
