@@ -1,12 +1,13 @@
 # Fintech revamp: remove every medical trace
 
-Goal: the whole app looks and feels like a serious, professional fintech platform (think private banking / investment dashboards): navy-black, slate grey, deep blue and a restrained teal accent. No pink, no clinical visuals, no medical icons or wording.
+Goal: the whole app looks like a trustworthy fintech platform, but still friendly and warm. The middle ground between an approachable app and a serious private bank: calm colours, clean lines, softly rounded shapes. No pink, no clinical visuals, no medical icons or wording.
 
 ## 1. Visual system (one place, applied everywhere)
-- New palette: near-black navy for headers/sidebar, slate greys for surfaces, deep blue primary, teal as secondary accent, muted gold only for "premium"/awards. Crimson, terracotta, pink and "Maeve" colours are remapped to the new palette.
+- Palette, balanced: deep navy/ink for the sidebar and headings (serious), soft slate-grey backgrounds (calm), confident mid-blue for buttons (trust), friendly teal for positive states and highlights (warmth). Black only for text and key figures. Crimson, terracotta, pink and "Maeve" colours are remapped to the new palette.
 - Full dark mode to match (currently still old teal).
-- Typography: Sora for headings, Manrope for body, tabular numbers for all money and figures.
-- Tighter, sharper look: smaller corner radius, hairline borders, subtle shadows, denser data tables.
+- Typography: Sora for headings, Manrope for body (both friendly but crisp), tabular numbers for all money and figures.
+- Shapes and lines, middle ground: medium corner rounding (about 10px on cards, 8px on buttons — not pill-shaped, not sharp), thin 1px borders instead of heavy teal frames, soft low shadows, generous spacing so it doesn't feel dense.
+- Small friendly touches kept: soft tinted icon circles, gentle hover and fade-in motion, warm plain-language empty states.
 
 ## 2. Remove medical imagery and icons
 - Swap medical icons (stethoscope, heart pulse, pills, syringe, hospital, activity/heartbeat — about 116 files outside hidden modules) for finance equivalents (briefcase, line chart, wallet, shield, landmark, file-check).
