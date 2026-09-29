@@ -10290,6 +10290,60 @@ export type Database = {
           },
         ]
       }
+      wealth_claims: {
+        Row: {
+          application_id: string | null
+          attachment_path: string | null
+          claim_type: string
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          patient_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          application_id?: string | null
+          attachment_path?: string | null
+          claim_type: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          patient_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string | null
+          attachment_path?: string | null
+          claim_type?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          patient_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wealth_claims_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "wealth_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wealth_claims_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wealth_compliance_checks: {
         Row: {
           bank_validation_completed_at: string | null
