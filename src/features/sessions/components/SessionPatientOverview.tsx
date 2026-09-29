@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Loader2, Stethoscope } from "lucide-react";
+import { Loader2, Briefcase as Stethoscope } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface SessionPatientOverviewProps {

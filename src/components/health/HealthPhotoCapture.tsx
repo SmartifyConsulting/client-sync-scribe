@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from "react";
-import { Camera, X, Check, Loader2, Dumbbell, Utensils, Pill } from "lucide-react";
+import { Camera, X, Check, Loader2, Dumbbell, Utensils, Wallet as Pill } from "lucide-react";
 import { mapCameraError } from "@/lib/cameraErrors";
 
 import { Button } from "@/components/ui/button";

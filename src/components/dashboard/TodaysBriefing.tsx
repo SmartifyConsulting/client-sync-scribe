@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { Clock, User, Volume2, VolumeX, Loader2, AlertCircle, Play, Pause, Pill, Users, MessageCircle, ChevronLeft, ChevronRight, ChevronDown, SkipBack, SkipForward } from "lucide-react";
+import { Clock, User, Volume2, VolumeX, Loader2, AlertCircle, Play, Pause, Wallet as Pill, Users, MessageCircle, ChevronLeft, ChevronRight, ChevronDown, SkipBack, SkipForward } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";

@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { UserPlus, Loader2, Stethoscope } from "lucide-react";
+import { UserPlus, Loader2, Briefcase as Stethoscope } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { PermissionTransparencyModal } from "@/components/permissions/PermissionTransparencyModal";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";

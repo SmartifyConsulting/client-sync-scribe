@@ -23,7 +23,7 @@ import {
   Trash2,
   Save,
   Receipt,
-  Pill,
+  Wallet as Pill,
   FileCheck,
   Send,
   File,

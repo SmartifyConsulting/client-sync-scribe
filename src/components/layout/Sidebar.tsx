@@ -30,10 +30,10 @@ import {
   Eye,
   EyeOff,
   RotateCcw,
-  Activity,
+  TrendingUp as Activity,
   Sparkles,
   Lock,
-  Stethoscope,
+  Briefcase as Stethoscope,
   History,
   BarChart3,
 } from "lucide-react";

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FileText, Pill, Receipt, Users, Send, Pencil, Check, Save, Eye, Brain } from "lucide-react";
+import { FileText, Wallet as Pill, Receipt, Users, Send, Pencil, Check, Save, Eye, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {

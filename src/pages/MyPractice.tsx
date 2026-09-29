@@ -24,7 +24,7 @@ import {
   Building2,
   DollarSign,
   GraduationCap,
-  Stethoscope,
+  Briefcase as Stethoscope,
   Users2,
   Volume2,
   PenTool,

@@ -24,7 +24,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Hospital, Ambulance, ShieldAlert, Loader2, BarChart3, Plus, Pencil, Trash2, Users, Pill, Stethoscope, UserPlus, ShieldCheck } from "lucide-react";
+import { Landmark as Hospital, Building2 as Ambulance, ShieldAlert, Loader2, BarChart3, Plus, Pencil, Trash2, Users, Wallet as Pill, Briefcase as Stethoscope, UserPlus, ShieldCheck } from "lucide-react";
 import { InviteStaffDialog, type OrgType } from "@/modules/holarchelp/components/InviteStaffDialog";
 import { useAutosave } from "@/features/admin/hooks/useAutosave";
 import { AutosaveIndicator } from "@/features/admin/components/AutosaveIndicator";

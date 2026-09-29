@@ -25,8 +25,8 @@ import { SectionCountPill } from "@/components/ui/section-accordion";
 import { SectionHeader } from "@/features/patients/components/sectionStyles";
 import { Badge } from "@/components/ui/badge";
 import {
-  Hospital, FileText, Plus, Activity, Pill, FlaskConical, Scan, Loader2, ExternalLink,
-  Stethoscope, UserCog, Clock3, Users, Phone, DoorOpen, NotebookPen, UtensilsCrossed, Check, X as XIcon, Search,
+  Landmark as Hospital, FileText, Plus, TrendingUp as Activity, Wallet as Pill, FlaskConical, Scan, Loader2, ExternalLink,
+  Briefcase as Stethoscope, UserCog, Clock3, Users, Phone, DoorOpen, NotebookPen, UtensilsCrossed, Check, X as XIcon, Search,
   ChevronDown,
 } from "lucide-react";
 import { format } from "date-fns";

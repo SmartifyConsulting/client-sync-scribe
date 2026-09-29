@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Settings, LogOut, Share2, Stethoscope, HeartPulse, UserCog, ShieldCheck, Loader2 } from "lucide-react";
+import { Settings, LogOut, Share2, Briefcase as Stethoscope, LineChart as HeartPulse, UserCog, ShieldCheck, Loader2 } from "lucide-react";
 import { TEST_PROFILES } from "./testProfiles";
 import { useSeededProfileNames } from "./useSeededProfileNames";
 

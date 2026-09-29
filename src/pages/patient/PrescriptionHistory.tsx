@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FileText, Calendar, User, Pill, Download, Eye, Loader2 } from "lucide-react";
+import { FileText, Calendar, User, Wallet as Pill, Download, Eye, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

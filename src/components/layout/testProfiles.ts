@@ -1,4 +1,4 @@
-import { ShieldCheck, Stethoscope, HeartPulse, Building2, Ambulance, Syringe } from "lucide-react";
+import { ShieldCheck, Briefcase as Stethoscope, LineChart as HeartPulse, Building2, Building2 as Ambulance, FileCheck as Syringe } from "lucide-react";
 
 export type TestProfile = {
   email: string;

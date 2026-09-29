@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pill, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Wallet as Pill, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { usePrescriptionRenewals, type RenewalCandidate } from "@/features/patients/hooks/usePrescriptionRenewals";
 import { RenewalRequestDialog } from "./RenewalRequestDialog";
 

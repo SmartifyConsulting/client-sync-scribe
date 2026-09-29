@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Pill, Video, Camera, ChevronRight } from "lucide-react";
+import { Wallet as Pill, Video, Camera, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
