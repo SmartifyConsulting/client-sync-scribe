@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.is_hospital_member(uuid) FROM PUBLIC, anon;
