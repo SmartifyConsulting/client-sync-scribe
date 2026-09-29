@@ -1,1 +1,0 @@
-ALTER TABLE public.doctor_access_requests ADD COLUMN patient_name text;

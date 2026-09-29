@@ -1,1 +1,0 @@
-ALTER TABLE public.user_invitations ALTER COLUMN expires_at SET DEFAULT (now() + interval '100 years');

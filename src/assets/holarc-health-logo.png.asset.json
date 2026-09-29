@@ -1,11 +1,11 @@
 {
-  "version": 1,
   "asset_id": "1e6552bc-8bfd-4710-a276-5405784abec3",
-  "project_id": "e600b4cc-b952-4a2f-907d-5d99bd0a529f",
-  "url": "/__l5e/assets-v1/1e6552bc-8bfd-4710-a276-5405784abec3/holarc-health-logo.png",
-  "r2_key": "a/v1/e600b4cc-b952-4a2f-907d-5d99bd0a529f/1e6552bc-8bfd-4710-a276-5405784abec3/holarc-health-logo.png",
-  "original_filename": "holarc-health-logo.png",
-  "size": 480914,
   "content_type": "image/png",
-  "created_at": "2026-07-25T18:19:40Z"
+  "created_at": "2026-07-25T18:19:40Z",
+  "original_filename": "holarc-health-logo.png",
+  "project_id": "320b9905-9d0e-4ca1-af45-821272397de6",
+  "r2_key": "a/v1/320b9905-9d0e-4ca1-af45-821272397de6/1e6552bc-8bfd-4710-a276-5405784abec3/holarc-health-logo.png",
+  "size": 480914,
+  "url": "/__l5e/assets-v1/1e6552bc-8bfd-4710-a276-5405784abec3/holarc-health-logo.png",
+  "version": 1
 }

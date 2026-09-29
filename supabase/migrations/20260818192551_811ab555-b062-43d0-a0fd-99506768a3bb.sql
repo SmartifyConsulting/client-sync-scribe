@@ -1,1 +1,0 @@
-delete from public.sessions where id = '78e18453-713f-486e-b9f5-7324fe7b5884' and status = 'paused' and coalesce(transcript,'') = '' and coalesce(summary,'') = '';

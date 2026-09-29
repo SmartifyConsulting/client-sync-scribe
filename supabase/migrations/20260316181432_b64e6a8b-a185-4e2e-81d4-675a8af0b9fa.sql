@@ -1,1 +1,0 @@
-ALTER TABLE todos ADD COLUMN IF NOT EXISTS is_auto_executed boolean DEFAULT false;

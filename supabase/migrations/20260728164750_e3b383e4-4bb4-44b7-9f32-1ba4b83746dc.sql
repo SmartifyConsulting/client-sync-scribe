@@ -1,1 +1,0 @@
-ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS preferred_hospitals JSONB NOT NULL DEFAULT '[]'::jsonb;

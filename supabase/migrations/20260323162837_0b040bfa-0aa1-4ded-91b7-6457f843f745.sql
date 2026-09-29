@@ -1,1 +1,0 @@
-ALTER TABLE public.service_prices ADD COLUMN color text DEFAULT NULL;

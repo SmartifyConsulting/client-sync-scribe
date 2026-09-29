@@ -1,11 +1,11 @@
 {
-  "version": 1,
   "asset_id": "d23aab9e-ebdf-4834-8613-dba82aa0f94e",
-  "project_id": "e600b4cc-b952-4a2f-907d-5d99bd0a529f",
-  "url": "/__l5e/assets-v1/d23aab9e-ebdf-4834-8613-dba82aa0f94e/avatar-3.jpg",
-  "r2_key": "a/v1/e600b4cc-b952-4a2f-907d-5d99bd0a529f/d23aab9e-ebdf-4834-8613-dba82aa0f94e/avatar-3.jpg",
-  "original_filename": "avatar-3.jpg",
-  "size": 24740,
   "content_type": "image/jpeg",
-  "created_at": "2026-08-17T19:43:33Z"
+  "created_at": "2026-08-17T19:43:33Z",
+  "original_filename": "avatar-3.jpg",
+  "project_id": "320b9905-9d0e-4ca1-af45-821272397de6",
+  "r2_key": "a/v1/320b9905-9d0e-4ca1-af45-821272397de6/d23aab9e-ebdf-4834-8613-dba82aa0f94e/avatar-3.jpg",
+  "size": 24740,
+  "url": "/__l5e/assets-v1/d23aab9e-ebdf-4834-8613-dba82aa0f94e/avatar-3.jpg",
+  "version": 1
 }

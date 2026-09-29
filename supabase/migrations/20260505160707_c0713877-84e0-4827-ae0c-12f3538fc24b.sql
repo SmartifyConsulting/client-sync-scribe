@@ -1,1 +1,0 @@
-UPDATE public.profiles SET role = NULL WHERE id IN ('1474d918-3d23-44ce-8e6d-ea6f6c7ba395', '3e602516-a69a-48be-ab5e-9ddba4ed8524');

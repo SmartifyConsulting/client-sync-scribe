@@ -1,1 +1,0 @@
-revoke execute on function public.get_seeded_profile_names(text[]) from public, anon;

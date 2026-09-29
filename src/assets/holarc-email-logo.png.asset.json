@@ -1,11 +1,11 @@
 {
-  "version": 1,
   "asset_id": "b61ca18b-7d1a-4a2f-9445-cfbccf4c9b3e",
-  "project_id": "e600b4cc-b952-4a2f-907d-5d99bd0a529f",
-  "url": "/__l5e/assets-v1/b61ca18b-7d1a-4a2f-9445-cfbccf4c9b3e/holarc-email-logo.png",
-  "r2_key": "a/v1/e600b4cc-b952-4a2f-907d-5d99bd0a529f/b61ca18b-7d1a-4a2f-9445-cfbccf4c9b3e/holarc-email-logo.png",
-  "original_filename": "holarc-email-logo.png",
-  "size": 466862,
   "content_type": "image/png",
-  "created_at": "2026-08-17T14:35:19Z"
+  "created_at": "2026-08-17T14:35:19Z",
+  "original_filename": "holarc-email-logo.png",
+  "project_id": "320b9905-9d0e-4ca1-af45-821272397de6",
+  "r2_key": "a/v1/320b9905-9d0e-4ca1-af45-821272397de6/b61ca18b-7d1a-4a2f-9445-cfbccf4c9b3e/holarc-email-logo.png",
+  "size": 466862,
+  "url": "/__l5e/assets-v1/b61ca18b-7d1a-4a2f-9445-cfbccf4c9b3e/holarc-email-logo.png",
+  "version": 1
 }

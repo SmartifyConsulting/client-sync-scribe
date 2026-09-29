@@ -1,1 +1,0 @@
-UPDATE public.holarchelp_incidents SET status='cancelled', resolved_at=now() WHERE id='a6181217-0d71-4713-8c85-8e845e19e850';

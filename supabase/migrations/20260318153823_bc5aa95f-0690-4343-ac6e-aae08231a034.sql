@@ -1,1 +1,0 @@
-ALTER TABLE public.documents ADD COLUMN email_sent_at timestamptz;
