@@ -45,6 +45,10 @@ Deno.serve(async (req) => {
       "nurse.test@holarchealth.com",
 
       "2348167581572@phone.holarc.local",
+      "georgia.client@demo.holarcwealth.co.za",
+      "jaco.steyn@demo.holarcwealth.co.za",
+      "sipho.nkosi@demo.holarcwealth.co.za",
+      "underwriting@demo.momentum.co.za",
     ]);
     // The profile switcher only ever offers seeded demo accounts, and a caller
     // who is already signed in as one of them (or was switched into a real
