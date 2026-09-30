@@ -40,3 +40,10 @@
 - [x] Remove Vula awarding
 - [x] Hide My Clients from clients
 - [x] Client dashboard: existing frames with Indie wealth data
+
+## Partner systems (Marlin's login)
+- [x] Favicon replaced with blue heart
+- [x] Login details saved for Astute, XPLAN, Beeswax
+- [ ] Astute sign-in — blocked: need the actual Astute portal login address (astutefse.com is the public site)
+- [ ] XPLAN sync — blocked: XPLAN's data access needs an Iress "App ID" in addition to the login
+- [ ] Beeswax — blocked: user to explain its role (beeswax.com is an advertising platform — confirm it's the right one)
