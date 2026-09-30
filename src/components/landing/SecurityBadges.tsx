@@ -3,11 +3,6 @@ import { ShieldCheck, Lock, KeyRound, FileCheck } from "lucide-react";
 
 const BADGES = [
   {
-    icon: ShieldCheck,
-    title: "HIPAA-aligned",
-    desc: "Designed to meet US health data protection standards.",
-  },
-  {
     icon: Lock,
     title: "AES-256 Encryption",
     desc: "Records encrypted at rest and in transit, end-to-end.",
@@ -48,7 +43,7 @@ export function SecurityBadges() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
           {BADGES.map((b, i) => (
             <motion.div
               key={b.title}

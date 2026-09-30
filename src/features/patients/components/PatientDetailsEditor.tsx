@@ -5,7 +5,6 @@ import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react"
 import { useTranslation } from "react-i18next";
 import { LANGUAGES } from "@/lib/languages";
 import { PatientSessionRecorder } from "@/features/patients/components/PatientSessionRecorder";
-import { EmergencyContactsInline } from "@/features/patients/components/EmergencyContactsInline";
 import { DailyMedsInline } from "@/features/patients/components/DailyMedsInline";
 import { RelationshipProfileExercise } from "@/features/patients/components/RelationshipProfileExercise";
 import { useV2Demo } from "@/hooks/useV2Demo";
@@ -1823,24 +1822,6 @@ export function PatientDetailsEditor({
                 </CollapsibleContent>
               </Collapsible>
 
-              {/* Emergency Contacts (linked to NOK) — visible in view mode too */}
-              {isSelfService && emergencyContacts && onEmergencyContactsChange && (
-                <EmergencyContactsInline
-                  patientId={patient.id}
-                  flat
-                  contacts={emergencyContacts}
-                  onChange={onEmergencyContactsChange}
-                  nokMembers={nokMembers}
-                  legacyNok={{
-                    name: formData.next_of_kin_name,
-                    phone: formData.next_of_kin_phone,
-                    email: formData.next_of_kin_email,
-                    relationship: formData.next_of_kin_relationship,
-                  }}
-                />
-              )}
-
-
               <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                 <SectionHeader icon={StickyNote} label="General Notes" />
                 <CollapsibleContent className="p-3">
@@ -2447,21 +2428,6 @@ export function PatientDetailsEditor({
               </CollapsibleContent>
             </Collapsible>
 
-            {/* Emergency Contacts (linked to NOK) */}
-            {isSelfService && emergencyContacts && onEmergencyContactsChange && (
-              <EmergencyContactsInline
-                patientId={patient.id}
-                contacts={emergencyContacts}
-                onChange={onEmergencyContactsChange}
-                nokMembers={nokMembers}
-                legacyNok={{
-                  name: formData.next_of_kin_name,
-                  phone: formData.next_of_kin_phone,
-                  email: formData.next_of_kin_email,
-                  relationship: formData.next_of_kin_relationship,
-                }}
-              />
-            )}
 
 
             <Collapsible defaultOpen={false} className="bg-white overflow-hidden">

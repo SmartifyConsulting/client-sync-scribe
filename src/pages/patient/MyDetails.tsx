@@ -8,7 +8,6 @@ import { Patient } from "@/hooks/usePatients";
 import { useToast } from "@/hooks/use-toast";
 import { useMyRewards } from "@/hooks/usePatientRewards";
 import { EmergencyContact } from "@/features/patients/components/EmergencyContactsSection";
-import { ProfileCompletionBanner } from "@/components/profile/ProfileCompletionBanner";
 
 
 
@@ -202,8 +201,6 @@ export default function MyDetails() {
         <h1 className="text-3xl font-bold text-foreground">{heading.title}</h1>
         <p className="text-muted-foreground text-xs">{heading.subtitle}</p>
       </div>
-
-      {isIncomplete && section === "health" && <ProfileCompletionBanner />}
 
       {patient ? (
         <PatientDetailsEditor

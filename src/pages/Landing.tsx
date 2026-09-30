@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
-const holarcLogo = holarcLogoAsset.url;
+import { Logo } from "@/components/brand/Logo";
+import { useBrandMode } from "@/hooks/useBrandMode";
+import IndigroWelcome from "@/pages/IndigroWelcome";
 import { motion } from "framer-motion";
 import {
   Briefcase as Stethoscope,
@@ -116,6 +117,7 @@ export default function Landing() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const { mode: brandMode } = useBrandMode();
   const [showRoleDialog, setShowRoleDialog] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string>("patient");
 
@@ -123,6 +125,10 @@ export default function Landing() {
   if (!loading && user) {
     navigate("/dashboard");
     return null;
+  }
+
+  if (brandMode === "indigro") {
+    return <IndigroWelcome />;
   }
 
   const handleRoleSelect = (role: string) => {
@@ -188,7 +194,7 @@ export default function Landing() {
               <div className="w-full">
                 <div className="flex flex-col items-center lg:items-start">
                   <div className="inline-flex flex-col items-center mx-auto lg:mx-0">
-                    <img src={holarcLogo} alt="Holarc Wealth" className="h-24 sm:h-32 lg:h-40 w-auto" />
+                    <Logo size="hero" />
                     <p className="mt-5 font-mono text-xs sm:text-sm text-muted-foreground tracking-wider text-center">
                       {t("landing.hero.badge")} <span className="text-primary">/ [STATUS: ACTIVE]</span>
                     </p>
@@ -536,7 +542,7 @@ export default function Landing() {
       <Dialog open={showRoleDialog} onOpenChange={setShowRoleDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <img src={holarcLogo} alt="Holarc Wealth" className="mx-auto h-20 w-auto object-contain" />
+            <Logo size="lg" className="mx-auto" />
             <DialogTitle className="text-center text-2xl">{t("landing.roleDialog.title")}</DialogTitle>
             <DialogDescription className="text-center">{t("landing.roleDialog.description")}</DialogDescription>
           </DialogHeader>

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
-const holarcLogo = holarcLogoAsset.url;
+import { Logo } from "@/components/brand/Logo";
 import { Loader2, ArrowLeft, Shield, Eye, EyeOff, CheckCircle, Mail, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -108,7 +107,7 @@ export default function ForgotPassword() {
               onClick={() => navigate("/")}
               className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity"
             >
-              <img src={holarcLogo} alt="Holarc Wealth" className="h-[81px] w-auto" />
+              <Logo size="lg" />
             </button>
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">Reset Password</h1>
             <p className="text-muted-foreground mt-2 text-sm">

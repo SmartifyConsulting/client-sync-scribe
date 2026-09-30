@@ -3,8 +3,7 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Home, LifeBuoy } from "lucide-react";
-import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
-const holarcLogo = holarcLogoAsset.url;
+import { Logo } from "@/components/brand/Logo";
 
 const NotFound = () => {
   const { t } = useTranslation();
@@ -17,11 +16,7 @@ const NotFound = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md text-center">
-        <img
-          src={holarcLogo}
-          alt="Holarc Wealth"
-          className="mx-auto h-14 w-auto mb-6"
-        />
+        <Logo size="lg" className="mx-auto mb-6" />
         <p className="text-7xl sm:text-8xl font-bold text-primary leading-none mb-2">
           404
         </p>

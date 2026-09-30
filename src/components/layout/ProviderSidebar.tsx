@@ -1,7 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
-const holarcLogo = holarcLogoAsset.url;
+import { Logo } from "@/components/brand/Logo";
 import { cn } from "@/lib/utils";
 import { ArrowLeft } from "lucide-react";
 
@@ -27,10 +26,10 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
 
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-[252px] bg-sidebar">
+    <aside className="sidebar-chrome fixed left-0 top-0 z-40 h-screen w-[252px] bg-sidebar">
       <div className="flex h-full flex-col">
         <div className="flex h-24 items-center gap-3 px-6">
-          <img src={holarcLogo} alt="Holarc Wealth" className="h-[82px] w-auto object-contain" />
+          <Logo size="lg" />
         </div>
 
         {isAdmin && (

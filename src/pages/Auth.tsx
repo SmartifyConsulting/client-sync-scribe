@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
-const holarcLogo = holarcLogoAsset.url;
+import { Logo } from "@/components/brand/Logo";
+import { useBrandMode } from "@/hooks/useBrandMode";
 import {
   Mail, Lock, Loader2, User, Building2, MapPin, Plus, Trash2, Phone,
   Briefcase as Stethoscope, PenTool, UserCircle, Camera, ChevronLeft, ChevronRight, Globe,
@@ -29,7 +29,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 
 import { PasswordStrength } from "@/components/auth/PasswordStrength";
 import { cn } from "@/lib/utils";
-import { ShieldCheck, KeyRound } from "lucide-react";
+import { KeyRound } from "lucide-react";
 
 const DOCTOR_SPECIALTIES = [
   "General Practitioner", "Cardiologist", "Dermatologist", "Endocrinologist",
@@ -89,6 +89,13 @@ export default function Auth() {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { user, loading: authLoading, signIn, signUp, signInWithOtp, verifyOtp } = useAuth();
+  const { mode: brandMode } = useBrandMode();
+  const isIndigro = brandMode === "indigro";
+  // Matches Indigro's own welcome page: buttons/focus rings on this page use
+  // the brand teal as --primary, not the app's usual blue.
+  const indigroPageVars = isIndigro
+    ? ({ "--primary": "174 60% 54%", "--primary-foreground": "223 21% 16%", "--ring": "174 60% 54%" } as Record<string, string>)
+    : undefined;
 
   // If someone is already logged in, never show the sign-in/sign-up forms —
   // send them straight to their dashboard so they can't accidentally create
@@ -982,12 +989,12 @@ export default function Auth() {
   // Login form
   if (isLogin) {
     return (
-      <div className="min-h-screen flex flex-col bg-background">
+      <div className={cn("min-h-screen flex flex-col", isIndigro ? "bg-[#111418]" : "bg-background")} style={indigroPageVars}>
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="w-full max-w-md">
             <div className="text-center mb-6">
               <button type="button" onClick={() => navigate("/")} className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity">
-                <img src={holarcLogo} alt="Holarc Wealth" className="h-[117px] w-auto" />
+                <Logo size="hero" onDark={isIndigro} />
               </button>
             </div>
             {/* Sign In / Sign Up tabs */}
@@ -1197,20 +1204,20 @@ export default function Auth() {
               </div>
             </div>
             {/* Trust band — moved to bottom of sign-in box */}
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2.5">
-              <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
+            <div className={cn(
+              "mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-xl border px-3 py-2.5",
+              isIndigro ? "border-white/15 bg-white/5" : "border-primary/20 bg-primary/5",
+            )}>
+              <span className={cn("inline-flex items-center gap-1.5 text-sm font-medium", isIndigro ? "text-white" : "text-foreground")}>
                 <Lock className="h-3.5 w-3.5 text-primary" /> Your data is encrypted
               </span>
-              <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
+              <span className={cn("inline-flex items-center gap-1.5 text-sm font-medium", isIndigro ? "text-white" : "text-foreground")}>
                 <KeyRound className="h-3.5 w-3.5 text-primary" /> 2FA required
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
-                <ShieldCheck className="h-3.5 w-3.5 text-primary" /> HIPAA-aligned
               </span>
             </div>
           </div>
         </div>
-        <Footer />
+        {!isIndigro && <Footer />}
       </div>
     );
   }
@@ -1218,12 +1225,12 @@ export default function Auth() {
 
   // Signup wizard
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className={cn("min-h-screen flex flex-col", isIndigro ? "bg-[#111418]" : "bg-background")} style={indigroPageVars}>
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-6">
             <button type="button" onClick={() => navigate("/")} className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity">
-              <img src={holarcLogo} alt="Holarc Wealth" className="h-[117px] w-auto" />
+              <Logo size="hero" onDark={isIndigro} />
             </button>
           </div>
           {/* Sign In / Sign Up tabs */}
@@ -1251,7 +1258,7 @@ export default function Auth() {
           </div>
           <div className="text-center mb-3">
             <div className="mt-1"><Progress value={progress} className="h-1.5" /></div>
-            <p className="text-xs text-muted-foreground mt-1">Step {currentStep + 1} of {totalSteps}: {steps[currentStep]}</p>
+            <p className={cn("text-xs mt-1", isIndigro ? "text-white/70" : "text-muted-foreground")}>Step {currentStep + 1} of {totalSteps}: {steps[currentStep]}</p>
           </div>
           <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
             {userRole === "doctor" ? renderDoctorStep() : renderPatientStep()}
@@ -1275,20 +1282,20 @@ export default function Auth() {
             </div>
           </div>
           {/* Trust band — bottom of signup box */}
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2.5">
-            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
+          <div className={cn(
+            "mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-xl border px-3 py-2.5",
+            isIndigro ? "border-white/15 bg-white/5" : "border-primary/20 bg-primary/5",
+          )}>
+            <span className={cn("inline-flex items-center gap-1.5 text-sm font-medium", isIndigro ? "text-white" : "text-foreground")}>
               <Lock className="h-3.5 w-3.5 text-primary" /> Your data is encrypted
             </span>
-            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
+            <span className={cn("inline-flex items-center gap-1.5 text-sm font-medium", isIndigro ? "text-white" : "text-foreground")}>
               <KeyRound className="h-3.5 w-3.5 text-primary" /> 2FA required
-            </span>
-            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
-              <ShieldCheck className="h-3.5 w-3.5 text-primary" /> HIPAA-aligned
             </span>
           </div>
         </div>
       </div>
-      <Footer />
+      {!isIndigro && <Footer />}
     </div>
   );
 }

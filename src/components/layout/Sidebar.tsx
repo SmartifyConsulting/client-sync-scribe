@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
 import { useTranslation } from "react-i18next";
-import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
-const holarcLogo = holarcLogoAsset.url;
+import { Logo } from "@/components/brand/Logo";
+import { useBrandMode } from "@/hooks/useBrandMode";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -196,6 +196,7 @@ interface SidebarProps {
 
 export function Sidebar({ onNavigate }: SidebarProps) {
   const { t } = useTranslation();
+  const { mode: brandMode, toggle: toggleBrandMode } = useBrandMode();
   const { role, loading: roleLoading, isPatient, isAdmin } = useUserRole();
   const { isAssistant } = usePracticeAssistant();
   const { hasHospitalAffiliation, loading: affiliationLoading } = useHospitalAffiliation();
@@ -271,7 +272,9 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     : isNurseMenu
       ? withShiftRule(nurseNavItems)
       : isPatientMenu
-      ? withShiftRule(patientNavItems).filter((i) => !CLIENT_BLOCKED_PATHS.includes(i.to))
+      ? withShiftRule(patientNavItems)
+          .filter((i) => !CLIENT_BLOCKED_PATHS.includes(i.to))
+          .filter((i) => brandMode !== "indigro" || !isWealthHidden(i.to))
       : doctorItems;
 
 
@@ -368,7 +371,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                 ? "bg-red-600 text-white shadow-sm"
                 : item.accent
                   ? "bg-maeve-dark text-maeve-foreground shadow-sm"
-                  : "bg-primary text-primary-foreground shadow-sm"
+                  : "bg-white text-black shadow-sm"
               : item.danger
                 ? "bg-red-600 text-white border-red-600 hover:bg-red-700 hover:border-red-700"
                 : item.accent
@@ -449,10 +452,10 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 
   return (
 
-    <aside className="fixed left-0 top-0 z-40 h-screen w-[252px] bg-sidebar">
+    <aside className="sidebar-chrome fixed left-0 top-0 z-40 h-screen w-[252px] bg-sidebar">
       <div className="flex h-full flex-col">
         <div className="flex h-24 items-center gap-3 px-6">
-          <img src={holarcLogo} alt="Holarc Wealth" className="h-[82px] w-auto object-contain" />
+          <Logo size="lg" />
         </div>
 
         {/* Navigation */}
@@ -570,6 +573,31 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             </Popover>
           </div>
         )}
+
+        {/* Brand mode toggle — demo control for showing the client the Holarc/Indigro look */}
+        <div className="px-4 pb-2">
+          <button
+            type="button"
+            onClick={toggleBrandMode}
+            className="flex w-full items-center justify-between rounded-xl border border-border bg-muted/40 px-3 py-2 text-xs font-semibold text-muted-foreground hover:bg-muted transition-colors"
+            title="Switch between Holarc Wealth and indigro styling"
+          >
+            <span>{brandMode === "indigro" ? "indigro mode" : "Holarc mode"}</span>
+            <span
+              className={cn(
+                "relative h-5 w-9 shrink-0 rounded-full transition-colors",
+                brandMode === "indigro" ? "bg-primary" : "bg-border",
+              )}
+            >
+              <span
+                className={cn(
+                  "absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform",
+                  brandMode === "indigro" ? "translate-x-4" : "translate-x-0.5",
+                )}
+              />
+            </span>
+          </button>
+        </div>
 
         {/* Bottom Section - Account */}
         <div className="mt-auto px-2 pb-2">

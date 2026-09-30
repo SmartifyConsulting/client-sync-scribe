@@ -10,8 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
-import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
-const holarcLogo = holarcLogoAsset.url;
+import { Logo } from "@/components/brand/Logo";
 
 const STORAGE_PREFIX = "holarc_early_release_seen_";
 
@@ -46,11 +45,7 @@ export function EarlyReleaseNotice() {
       <DialogContent className="max-w-md">
         <DialogHeader>
           <div className="mx-auto mb-2 flex items-center gap-2">
-            <img
-              src={holarcLogo}
-              alt="Holarc Wealth"
-              className="h-10 w-auto object-contain"
-            />
+            <Logo size="md" />
             <span className="text-[10px] font-bold tracking-widest px-1.5 py-0.5 rounded bg-primary text-primary-foreground">
               BETA
             </span>

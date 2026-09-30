@@ -18,10 +18,8 @@ import { SessionTitleEditor } from "../components/SessionTitleEditor";
 import { deleteMaeveSession } from "../lib/deleteSession";
 import { buildTranscript, downloadTranscript, transcriptFileName } from "../lib/transcript";
 import { downloadTranscriptPdf } from "../lib/maevePdf";
-import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
+import { Logo } from "@/components/brand/Logo";
 import { toast } from "sonner";
-
-const logo = holarcLogoAsset.url;
 
 /** Loads every message of a past exploration so it can be exported. */
 async function loadMessages(sessionId: string): Promise<MaeveMessage[]> {
@@ -104,7 +102,7 @@ export default function AskMaeveHome() {
   return (
     <div className="mx-auto w-full max-w-3xl px-1">
       <div className="flex justify-center pb-4 pt-2">
-        <img src={logo} alt="Holarc Health" className="h-24 w-auto" />
+        <Logo size="hero" />
       </div>
 
       <div className="flex items-center gap-2">

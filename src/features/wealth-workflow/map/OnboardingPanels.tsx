@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { buildDocumentPdfBase64 } from "@/features/documents/utils/documentPdf";
-import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
+import { Logo } from "@/components/brand/Logo";
 import { SignaturePad } from "../forms/SignaturePad";
 import { disclosureHtml, loaHtml, sealedHtml } from "./onboardingTemplates";
 
@@ -144,7 +144,7 @@ function DocCard({ workflowId, doc, signed, viewer, clientName }: { workflowId: 
         <div className="mt-3">
           <p className="mb-1 text-[11px] text-muted-foreground">Sealed {fmt(signed.signed_at)}</p>
           <div className="rounded-xl border-[1.5px] border-foreground/70 bg-muted/20 p-4 text-[12px]">
-            <div className="inline-flex rounded-lg bg-background px-2 py-1"><img src={holarcLogoAsset.url} alt="Holarc Wealth" className="h-7" /></div>
+            <div className="inline-flex rounded-lg bg-background px-2 py-1"><Logo size="sm" /></div>
             <p className="my-3 text-center text-[12px] font-semibold tracking-[0.2em]">SEAL CERTIFICATE</p>
             <dl className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-1">
               <dt className="text-muted-foreground">Document</dt><dd>{doc.title}</dd>

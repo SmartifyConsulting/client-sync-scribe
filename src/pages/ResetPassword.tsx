@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
-const holarcLogo = holarcLogoAsset.url;
+import { Logo } from "@/components/brand/Logo";
 import { Lock, Loader2, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -144,7 +143,7 @@ export default function ResetPassword() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              <img src={holarcLogo} alt="Holarc Wealth" className="h-[81px] w-auto" />
+              <Logo size="lg" />
             </div>
             <h1 className="text-3xl font-bold text-foreground">Holarc Wealth</h1>
             <p className="text-muted-foreground mt-2">Set your new password</p>

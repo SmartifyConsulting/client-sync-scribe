@@ -7,8 +7,7 @@ import { TopBarIcons } from "./TopBarIcons";
 import { Footer } from "./Footer";
 import { PageTransition } from "./PageTransition";
 import { EarlyReleaseNotice } from "@/components/EarlyReleaseNotice";
-import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
-const holarcLogo = holarcLogoAsset.url;
+import { Logo } from "@/components/brand/Logo";
 import { useTranslation } from "react-i18next";
 
 
@@ -32,7 +31,7 @@ export function ProviderAppLayout({ portal, statsStrip }: ProviderAppLayoutProps
 
       {/* Mobile header (no sidebar drawer for providers yet — Holarc logo + TopBarIcons) */}
       <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-background border-b border-border md:hidden">
-        <img src={holarcLogo} alt="Holarc Wealth" className="h-10 w-auto object-contain" />
+        <Logo size="md" />
         <TopBarIcons variant="provider" />
       </header>
 

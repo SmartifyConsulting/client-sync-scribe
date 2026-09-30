@@ -7,8 +7,7 @@ import { Sidebar } from "./Sidebar";
 import { AnimatePresence } from "framer-motion";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { SubscriptionGateModal } from "@/components/auth/SubscriptionGateModal";
-import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
-const holarcLogo = holarcLogoAsset.url;
+import { Logo } from "@/components/brand/Logo";
 import { TopBarIcons } from "./TopBarIcons";
 import { useTranslation } from "react-i18next";
 
@@ -42,7 +41,7 @@ export function PatientAppLayout() {
         <div className="px-4 py-3 flex items-center justify-between max-w-7xl mx-auto w-full">
           {/* Left: Logo */}
           <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <img src={holarcLogo} alt="Holarc Wealth" className="h-10 w-auto object-contain" />
+            <Logo size="md" />
           </button>
 
           {/* Right: shared icons (Bug · Calendar · Mic · Bell · Avatar) */}

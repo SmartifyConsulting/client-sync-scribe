@@ -13,8 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
-const holarcLogo = holarcLogoAsset.url;
+import { Logo } from "@/components/brand/Logo";
 
 interface TwoFactorSetupProps {
   open: boolean;
@@ -149,7 +148,7 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
       <DialogContent className="sm:max-w-md max-h-[95vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-center mb-2">
-            <img src={holarcLogo} alt="Holarc Wealth" className="h-8 w-auto" />
+            <Logo size="sm" />
           </div>
           <p className="text-center text-sm uppercase tracking-wider text-muted-foreground">
             Account security · One-time setup

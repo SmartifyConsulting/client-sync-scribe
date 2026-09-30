@@ -36,9 +36,7 @@ import {
 import { SessionTitleEditor } from "./SessionTitleEditor";
 import { MaeveVoicePicker } from "./MaeveVoicePicker";
 
-import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
-
-const logo = holarcLogoAsset.url;
+import { Logo } from "@/components/brand/Logo";
 
 interface Props {
   sessionId: string;
@@ -339,7 +337,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
     return (
       <div className="mx-auto w-full max-w-2xl px-1 py-8">
         <div className="flex justify-center pb-5">
-          <img src={logo} alt="Holarc Health" className="h-24 w-auto" />
+          <Logo size="hero" />
         </div>
         <h1 className="flex items-center gap-2 font-display text-xl font-bold text-foreground">
           <Sparkles className="h-5 w-5 text-maeve" />
@@ -379,7 +377,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
   return (
     <div className="mx-auto flex h-[calc(100vh-11rem)] w-full max-w-3xl flex-col">
       <div className="flex justify-center pb-3">
-        <img src={logo} alt="Holarc Health" className="h-24 w-auto" />
+        <Logo size="hero" />
       </div>
 
       {/* Header */}

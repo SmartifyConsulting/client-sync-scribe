@@ -235,6 +235,136 @@
     --sidebar-border: 222 20% 16%;
     --sidebar-ring: 214 80% 64%;
   }
+
+  /* Indigro mode — colors converted 1:1 from Indigro's own design system
+     (c:\projects\indigo\src\styles.css) from oklch to this app's HSL triples,
+     since Tailwind here wraps tokens as hsl(var(--x)). Toggled via
+     [data-brand="indigro"] on <html>, set by useBrandMode(). */
+  [data-brand="indigro"] {
+    --background: 228 29% 97%;
+    --foreground: 223 21% 16%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 223 21% 16%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 223 21% 16%;
+
+    --primary: 207 100% 37%;             /* Indigro action blue #0069be */
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 207 100% 46%;
+    --primary-dark: 210 29% 24%;         /* Indigro deep slate-navy #2c3e50 */
+
+    --secondary: 208 55% 94%;
+    --secondary-foreground: 223 21% 16%;
+
+    --muted: 228 29% 97%;
+    --muted-foreground: 221 14% 41%;
+
+    --brand-teal: 174 60% 54%;           /* Indigro teal #44d0c1 */
+    --accent: 208 55% 94%;
+    --accent-foreground: 207 99% 32%;
+
+    --destructive: 0 61% 48%;
+    --destructive-foreground: 0 0% 100%;
+
+    --crimson: 210 29% 24%;
+    --crimson-foreground: 0 0% 100%;
+
+    --dark-orange: 210 29% 24%;
+    --dark-orange-foreground: 0 0% 100%;
+
+    --success: 152 65% 34%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 36 71% 42%;
+    --warning-foreground: 0 0% 100%;
+
+    --terracotta: 210 38% 15%;           /* Indigro navy-card #182736 */
+    --terracotta-foreground: 0 0% 100%;
+    --terracotta-light: 210 24% 36%;
+    --terracotta-dark: 210 38% 10%;
+
+    --maeve: 174 60% 54%;
+    --maeve-foreground: 210 38% 15%;
+    --maeve-dark: 176 100% 23%;
+
+    --border: 227 23% 92%;
+    --input: 223 19% 81%;
+    --ring: 207 100% 37%;
+
+    --gradient-sos: linear-gradient(135deg, hsl(210 29% 24%), hsl(207 100% 37%));
+
+    /* Menu bar / sidebar — Indigro's own app chrome is a dark navy header (bg-navy),
+       not a white rail, so the sidebar follows that here too. */
+    --sidebar-background: 214 17% 8%;            /* Indigro navy #111418 */
+    --sidebar-foreground: 210 37% 93%;
+    --sidebar-primary: 174 60% 54%;               /* Indigro teal #44d0c1 */
+    --sidebar-primary-foreground: 214 17% 8%;
+    --sidebar-accent: 210 29% 24%;                /* Indigro navy-muted #2c3e50 */
+    --sidebar-accent-foreground: 210 37% 93%;
+    --sidebar-border: 0 0% 100% / 10%;
+    --sidebar-ring: 174 60% 54%;
+  }
+
+  /* The sidebar's own nav items read plain --foreground/--muted-foreground/--muted/--border
+     (not --sidebar-*), so scope those tokens to dark-appropriate values for just the
+     sidebar's DOM subtree — everything inside inherits this without needing per-class edits. */
+  [data-brand="indigro"] .sidebar-chrome {
+    --foreground: 210 37% 93%;
+    --muted-foreground: 218 17% 66%;
+    --muted: 210 29% 24%;
+    --border: 0 0% 100% / 10%;
+    --card: 210 29% 24%;
+    --card-foreground: 210 37% 93%;
+  }
+
+  [data-brand="indigro"].dark,
+  .dark[data-brand="indigro"] {
+    --background: 220 21% 5%;
+    --foreground: 210 37% 93%;
+
+    --card: 210 22% 14%;
+    --card-foreground: 210 37% 93%;
+
+    --popover: 210 22% 14%;
+    --popover-foreground: 210 37% 93%;
+
+    --primary: 169 58% 56%;              /* Indigro dark-mode teal #4dd0b7 */
+    --primary-foreground: 220 21% 5%;
+
+    --secondary: 211 22% 19%;
+    --secondary-foreground: 210 37% 93%;
+
+    --muted: 211 22% 19%;
+    --muted-foreground: 218 17% 66%;
+
+    --brand-teal: 169 58% 56%;
+    --accent: 211 22% 19%;
+    --accent-foreground: 210 37% 93%;
+
+    --destructive: 1 81% 62%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 166 67% 44%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 79% 58%;
+    --warning-foreground: 0 0% 100%;
+
+    --border: 0 0% 100% / 10%;
+    --input: 0 0% 100% / 15%;
+    --ring: 169 58% 56%;
+
+    --sidebar-background: 210 22% 14%;
+    --sidebar-foreground: 210 37% 93%;
+    --sidebar-primary: 169 58% 56%;
+    --sidebar-primary-foreground: 220 21% 5%;
+    --sidebar-accent: 211 22% 19%;
+    --sidebar-accent-foreground: 210 37% 93%;
+    --sidebar-border: 0 0% 100% / 10%;
+    --sidebar-ring: 169 58% 56%;
+  }
 }
 
 @layer base {

@@ -8,10 +8,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Loader2, MapPin } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
+import { Logo } from "@/components/brand/Logo";
 import { triggerEmergencySOS, flushPendingSOS } from "../services/emergencyService";
-
-const logo = holarcLogoAsset.url;
 
 type Coords = { lat: number; lng: number };
 
@@ -130,7 +128,7 @@ export default function HolarcHelpHome() {
     <div className="mx-auto flex min-h-[calc(100vh-9rem)] max-w-md flex-col px-5">
       {/* Header */}
       <div className="flex justify-center pt-6">
-        <img src={logo} alt="Holarc Health" className="h-24 w-auto" />
+        <Logo size="hero" />
       </div>
 
       {/* Title */}
