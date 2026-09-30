@@ -7,10 +7,10 @@ export type TestProfile = {
   icon: any;
 };
 
-export const ADMIN_EMAIL = "info@georgiaadams.co.za";
+export const ADMIN_EMAIL = "nonastasia@gmail.com";
 
-/** The only two system admin accounts — used to gate V2-preview features. */
-export const SYSTEM_ADMIN_EMAILS = [ADMIN_EMAIL, "georgia.adams@smartify.co.za"];
+/** The only system admin account — used to gate V2-preview features. */
+export const SYSTEM_ADMIN_EMAILS = [ADMIN_EMAIL];
 
 /** Wealth demo accounts — the four roles used to trace one case end to end. */
 export const WEALTH_DEMO_PROFILES: TestProfile[] = [
@@ -22,8 +22,7 @@ export const WEALTH_DEMO_PROFILES: TestProfile[] = [
 
 export const TEST_PROFILES: TestProfile[] = [
   ...WEALTH_DEMO_PROFILES,
-  { email: "info@georgiaadams.co.za", name: "Georgia Adams", role: "Admin", icon: ShieldCheck },
-  { email: "georgia.adams@smartify.co.za", name: "Georgia Adams", role: "Admin", icon: ShieldCheck },
+  { email: "nonastasia@gmail.com", name: "Annie Admin", role: "Admin", icon: ShieldCheck },
   // `name` is only a fallback label — the switcher shows the live profiles.full_name
   // via useSeededProfileNames(), so renames in the app update the menu automatically.
   { email: "sme@smartify.co.za", name: "Dean Peterson", role: "Doctor", icon: Stethoscope },

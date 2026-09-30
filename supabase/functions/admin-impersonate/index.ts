@@ -26,12 +26,11 @@ Deno.serve(async (req) => {
     if (!email || !/^\S+@\S+\.\S+$/.test(email)) throw new Error("Valid email required");
 
     // Seeded test users may switch to any other seeded test profile (including
-    // Georgia Adams admin) without needing the admin role themselves. Any
-    // target outside this list still requires admin.
-    const REVERSE_ADMIN_EMAIL = "info@georgiaadams.co.za";
+    // the Admin Annie admin account) without needing the admin role themselves.
+    // Any target outside this list still requires admin.
+    const REVERSE_ADMIN_EMAIL = "nonastasia@gmail.com";
     const SEEDED_EMAILS = new Set([
-      "info@georgiaadams.co.za",
-      "georgia.adams@smartify.co.za",
+      "nonastasia@gmail.com",
       "sme@smartify.co.za",
       "dean.allie@gmail.com",
       "projectmanager@smartify.co.za",

@@ -7,7 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const ADMIN_EMAIL = "info@georgiaadams.co.za";
+const ADMIN_EMAIL = "nonastasia@gmail.com";
 
 const KIND_LABEL: Record<string, string> = {
   hospital: "Hospital",

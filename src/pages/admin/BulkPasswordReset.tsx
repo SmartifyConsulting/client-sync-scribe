@@ -18,7 +18,7 @@ const DEFAULT_EMAILS = [
   "sme@smartify.co.za",
   "paraskevoulasoldatos@gmail.com",
   "projectmanager@smartify.co.za",
-  "info@georgiaadams.co.za",
+  "nonastasia@gmail.com",
   "christina@smartify.co.za",
   "jeanprodromos@smartify.co.za",
 ].join("\n");

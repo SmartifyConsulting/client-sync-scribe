@@ -101,7 +101,7 @@ export function ProviderProfileMenu() {
             )}
             <div className="flex-1 min-w-0">
               <p className="text-xs font-medium text-foreground truncate">{t("topbar.switchToAdmin")}</p>
-              <p className="text-xs text-muted-foreground truncate">Georgia Adams · {ADMIN_EMAIL}</p>
+              <p className="text-xs text-muted-foreground truncate">Annie Admin · {ADMIN_EMAIL}</p>
             </div>
           </button>
         )}

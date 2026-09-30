@@ -30,6 +30,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import { PasswordStrength } from "@/components/auth/PasswordStrength";
 import { cn } from "@/lib/utils";
 import { KeyRound } from "lucide-react";
+import { TEST_PROFILES } from "@/components/layout/testProfiles";
 
 const DOCTOR_SPECIALTIES = [
   "General Practitioner", "Cardiologist", "Dermatologist", "Endocrinologist",
@@ -1024,6 +1025,26 @@ export default function Auth() {
 
               {!useOtp ? (
                 <form onSubmit={handleLogin} className="space-y-4">
+                  {/* Quick pick a seeded demo account — fills the email field
+                      only; the password is still typed, never stored here. */}
+                  <div className="space-y-2">
+                    <Label htmlFor="quick-login">Quick select a demo account</Label>
+                    <Select
+                      value=""
+                      onValueChange={(v) => { setLoginTab("email"); setLoginId(v); }}
+                    >
+                      <SelectTrigger id="quick-login">
+                        <SelectValue placeholder="Choose a user…" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TEST_PROFILES.map((p) => (
+                          <SelectItem key={p.email} value={p.email}>
+                            {p.name} — {p.role}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   {/* Email / Phone tab switch */}
                   <div className="grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
                     <button
