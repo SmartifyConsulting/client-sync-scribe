@@ -1,8 +1,8 @@
 {
-  "name": "Holarc Health",
-  "short_name": "Holarc",
+  "name": "Holarc Wealth",
+  "short_name": "Holarc Wealth",
   "id": "/",
-  "description": "Streamline your practice with Holarc Health. Manage clients, appointments, AI-powered session summaries, and automated follow-ups in one place.",
+  "description": "Wealth management for clients, advisers and firms.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
