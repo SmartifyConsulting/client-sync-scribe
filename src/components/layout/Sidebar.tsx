@@ -249,7 +249,10 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     nurseInPatientMode ||
     (!isDoctor && !isNurse && (isPatient || routeSaysPatient));
 
-  const isDoctorMenu = !isOnAdminRoute && !isPatientMenu && !isNurseMenu && !(isAdmin && isOnAdminRoute);
+  // Only a confirmed doctor/broker role renders the Business menu — an
+  // unresolved or unknown role must fall through to the safe client menu,
+  // never the other way around.
+  const isDoctorMenu = !isOnAdminRoute && isDoctor && !doctorInPatientMode;
 
   /** Doctors only see "My Shifts" once they're attached to a hospital. */
   const hideMyShift = isDoctorMenu && (affiliationLoading || !hasHospitalAffiliation);
@@ -271,11 +274,11 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     ? adminNavItems.filter((i) => !isWealthHidden(i.to))
     : isNurseMenu
       ? withShiftRule(nurseNavItems)
-      : isPatientMenu
-      ? withShiftRule(patientNavItems)
+      : isDoctor && !doctorInPatientMode
+      ? doctorItems
+      : withShiftRule(patientNavItems)
           .filter((i) => !CLIENT_BLOCKED_PATHS.includes(i.to))
-          .filter((i) => brandMode !== "indigro" || !isWealthHidden(i.to))
-      : doctorItems;
+          .filter((i) => brandMode !== "indigro" || !isWealthHidden(i.to));
 
 
 
