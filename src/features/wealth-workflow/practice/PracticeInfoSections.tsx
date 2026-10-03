@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { PracticeLogos } from "./PracticeLogos";
 import { usePracticeInfo, useSavePracticeInfo, type PracticeInfo, type Suppliers } from "./usePracticeInfo";
 
 export const FSCA_CATEGORIES = [
@@ -101,6 +102,9 @@ export function PracticeInfoSections() {
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-card">
       <Accordion type="multiple" className="divide-y divide-border">
+        <Section value="logos" title="Logos">
+          <PracticeLogos />
+        </Section>
         <Section value="planner" title="Planner Details">
           <Fields fields={PLANNER} d={d} setD={setD} /><SaveBar onSave={() => commit()} saving={saving} />
         </Section>
