@@ -33,12 +33,12 @@ function Frame({ title, icon, children }: { title: string; icon?: React.Componen
 }
 
 function Empty({ text }: { text: string }) {
-  return <p className="rounded-lg border border-dashed border-border p-4 text-center text-xs text-muted-foreground">{text}</p>;
+  return <p className="rounded-xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">{text}</p>;
 }
 
 function Row({ cells }: { cells: React.ReactNode[] }) {
   return (
-    <li className="grid grid-cols-2 sm:grid-cols-4 gap-2 rounded-lg border border-border bg-background/60 p-3 text-xs">
+    <li className="grid grid-cols-2 sm:grid-cols-4 gap-2 rounded-xl border border-border bg-background/60 p-3 text-xs">
       {cells.map((c, i) => <div key={i} className="min-w-0 truncate">{c}</div>)}
     </li>
   );

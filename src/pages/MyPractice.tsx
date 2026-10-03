@@ -1546,7 +1546,7 @@ export default function MyPractice() {
                   {partners.map((partner) => (
                     <div
                       key={partner.id}
-                      className="flex items-center justify-between p-3 bg-card rounded-lg border border-border"
+                      className="flex items-center justify-between p-3 bg-card rounded-xl border border-border"
                     >
                       {editingPartnerId === partner.id ? (
                         <div className="flex-1 grid gap-2 sm:grid-cols-3 mr-3">

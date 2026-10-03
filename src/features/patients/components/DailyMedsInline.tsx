@@ -133,7 +133,7 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
   };
 
   return (
-    <div className="rounded-lg border border-border/50 p-2.5 space-y-2">
+    <div className="rounded-xl border border-border/50 p-2.5 space-y-2">
       <div className="rounded-md border border-dashed border-border p-2 space-y-2">
         {!showCustom ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2">

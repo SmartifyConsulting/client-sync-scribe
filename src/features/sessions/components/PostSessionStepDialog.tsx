@@ -150,7 +150,7 @@ function DocStepDialog({
               </DialogTitle>
               <DialogDescription>Ready to review and send this consultation's fee statement.</DialogDescription>
             </DialogHeader>
-            <div className="rounded-lg border border-border bg-muted/30 p-6 text-center">
+            <div className="rounded-xl border border-border bg-muted/30 p-6 text-center">
               <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Total</p>
               <p className="text-2xl font-bold text-foreground">{extractInvoiceTotal(doc.content)}</p>
             </div>
@@ -179,7 +179,7 @@ function DocStepDialog({
               {doc.recipientName && <DialogDescription>For {doc.recipientName}</DialogDescription>}
             </DialogHeader>
 
-            <div className="max-h-[360px] overflow-y-auto rounded-lg border border-border bg-card p-4">
+            <div className="max-h-[360px] overflow-y-auto rounded-xl border border-border bg-card p-4">
               {editing ? (
                 <Textarea
                   value={draftContent}

@@ -231,7 +231,7 @@ export function AppointmentRequestsPanel() {
         </CardHeader>
         <CardContent className="space-y-3">
           {requests.map((req) => (
-            <div key={req.id} className="rounded-lg border border-border p-3 space-y-2">
+            <div key={req.id} className="rounded-xl border border-border p-3 space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-muted-foreground" />

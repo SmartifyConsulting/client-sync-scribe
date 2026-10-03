@@ -19,7 +19,7 @@ export default function MyWorkspace() {
         <WorkflowMap patientId={data.patientId} clientName={data.clientName} viewer="client"
           onOpenDocuments={() => navigate("/my-future?tab=documents")} />
       ) : (
-        <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">Your workspace will appear once your Wealth Manager starts your plan.</p>
+        <p className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">Your workspace will appear once your Wealth Manager starts your plan.</p>
       )}
     </div>
   );

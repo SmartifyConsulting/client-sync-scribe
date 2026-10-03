@@ -72,7 +72,7 @@ function permissionPill(status: string) {
 
 function StatusPill({ label, className }: { label: string; className: string }) {
   return (
-    <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wide ${className}`}>
+    <span className={`inline-flex rounded-full px-2 py-0.5 text-2xs font-bold tracking-wide ${className}`}>
       {label}
     </span>
   );
@@ -182,7 +182,7 @@ export default function NurseProfile() {
     <div className="mx-auto w-full max-w-5xl space-y-4 p-3 sm:p-4">
       {/* Header */}
       <div className="rounded-xl border border-primary bg-card p-4">
-        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Nurse Profile</p>
+        <p className="text-2xs font-bold uppercase tracking-[0.16em] text-muted-foreground">Nurse Profile</p>
         <div className="mt-2 flex items-center gap-3">
           <Avatar className="h-16 w-16 border-2 border-primary">
             <AvatarImage src={profile?.avatar_url ?? undefined} alt={nurse.full_name ?? "Nurse"} />
@@ -409,18 +409,18 @@ export default function NurseProfile() {
                         <StatusPill {...s} />
                       </div>
                       <p className="mt-1 text-xs text-muted-foreground">{c.issuer || "—"}</p>
-                      <p className="mt-1 text-[11px] text-muted-foreground">
+                      <p className="mt-1 text-2xs text-muted-foreground">
                         Obtained {c.obtained_on || "—"} · Expires {c.expires_on || "—"}
                       </p>
                       {c.verified_at && (
-                        <Badge variant="outline" className="mt-2 text-[10px]">Verified</Badge>
+                        <Badge variant="outline" className="mt-2 text-2xs">Verified</Badge>
                       )}
                     </Card>
                   );
                 })}
               </div>
             )}
-            <p className="mt-3 text-[11px] text-muted-foreground">
+            <p className="mt-3 text-2xs text-muted-foreground">
               Certificates are verified and approved by your hospital administrator.
             </p>
           </AccordionContent>
@@ -446,7 +446,7 @@ export default function NurseProfile() {
                 },
               ].map((s) => (
                 <Card key={s.label} className="rounded-xl border border-primary bg-card p-5">
-                  <p className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+                  <p className="flex items-center gap-1.5 text-2xs uppercase tracking-wider text-muted-foreground">
                     <Clock className="h-3 w-3" /> {s.label}
                   </p>
                   <p className="mt-1 text-lg font-bold">{s.value}</p>

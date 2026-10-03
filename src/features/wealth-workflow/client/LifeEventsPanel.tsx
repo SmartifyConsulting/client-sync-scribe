@@ -53,7 +53,7 @@ export function LifeEventsPanel({ patientId, workflowId }: { patientId: string |
     toast({ title: "Shared with your Wealth Manager" });
   };
 
-  const label = "text-[10px] font-semibold uppercase tracking-wide text-muted-foreground";
+  const label = "text-2xs font-semibold uppercase tracking-wide text-muted-foreground";
 
   return (
     <Panel title="Life events" icon={Sparkles}>
@@ -78,10 +78,10 @@ export function LifeEventsPanel({ patientId, workflowId }: { patientId: string |
             <Button size="sm" onClick={ask} disabled={asking || question.trim().length < 3}>{asking && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}Ask</Button>
             {answer && <Button size="sm" variant="ghost" onClick={share}>Share with my Wealth Manager</Button>}
           </div>
-          {answer && <p className="whitespace-pre-line rounded-md bg-muted/40 p-3 text-[13px] leading-relaxed text-foreground">{answer}</p>}
+          {answer && <p className="whitespace-pre-line rounded-md bg-muted/40 p-3 text-sm leading-relaxed text-foreground">{answer}</p>}
         </div>
       </div>
-      <p className="mt-4 border-t border-border pt-3 text-[11px] italic text-muted-foreground">{DISCLAIMER}</p>
+      <p className="mt-4 border-t border-border pt-3 text-2xs italic text-muted-foreground">{DISCLAIMER}</p>
     </Panel>
   );
 }

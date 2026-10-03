@@ -62,7 +62,7 @@ export function PreferredHospitals({ value, onChange, readOnly }: Props) {
               className="pl-8 h-9 text-xs"
             />
             {search.trim() && (
-              <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-lg border border-border bg-popover shadow-md">
+              <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-xl border border-border bg-popover shadow-md">
                 {isLoading ? (
                   <div className="flex items-center justify-center py-4">
                     <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -91,7 +91,7 @@ export function PreferredHospitals({ value, onChange, readOnly }: Props) {
           </div>
         )}
 
-        <div className="rounded-lg border border-border/60 overflow-hidden">
+        <div className="rounded-xl border border-border/60 overflow-hidden">
           {value.length === 0 ? (
             <p className="px-3 py-4 text-xs text-muted-foreground">No preferred hospitals selected</p>
           ) : (

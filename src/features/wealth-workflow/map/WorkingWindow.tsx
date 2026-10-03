@@ -84,23 +84,23 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
   return (
     <div key={step.label} className="animate-fade-in overflow-hidden rounded-xl border border-border/70 bg-card">
       <div className="flex items-center justify-between border-b bg-muted/40 px-4 py-2">
-        <span className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+        <span className="flex items-center gap-2 text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
           <span className={cn("h-2 w-2 rounded-full", isLive ? "bg-primary animate-pulse" : "bg-muted-foreground/40")} />
           Working window
         </span>
         {!isLive && <button onClick={onBackToCurrent} className="text-xs font-medium text-primary hover:underline">Back to current</button>}
       </div>
 
-      <div className="grid gap-5 p-5 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+      <div className="grid min-w-0 grid-cols-1 gap-5 p-4 md:p-5 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
         {/* Left: instructions */}
-        <div className="divide-y divide-border/60 [&>*]:py-3 [&>*:first-child]:pt-0 [&>*:last-child]:pb-0">
+        <div className="min-w-0 divide-y divide-border/60 [&>*]:py-3 [&>*:first-child]:pt-0 [&>*:last-child]:pb-0">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">Step {group.group.n} · {viewer === "client" ? group.group.clientTitle : group.group.title}</p>
+            <p className="text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Step {group.group.n} · {viewer === "client" ? group.group.clientTitle : group.group.title}</p>
             <div className="mt-1 flex items-center gap-2">
               <OwnerBadge owner={step.owner} label={who} />
-              <h3 className="text-[15px] font-medium tracking-tight text-foreground">{step.label}</h3>
+              <h3 className="text-base font-medium tracking-tight text-foreground">{step.label}</h3>
             </div>
-            <span className={cn("mt-2 inline-block rounded-full px-2 py-0.5 text-[10px] font-medium",
+            <span className={cn("mt-2 inline-block rounded-full px-2 py-0.5 text-2xs font-medium",
               step.state === "done" ? "bg-primary/10 text-primary" : step.state === "next" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
               {status}
             </span>
@@ -108,15 +108,15 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
 
           {isSign && viewer === "client" ? (
             <div>
-              <p className="text-[13px] leading-relaxed text-muted-foreground">Read and sign two documents:</p>
+              <p className="text-sm leading-relaxed text-muted-foreground">Read and sign two documents:</p>
               <ol className="mt-2 space-y-2.5">
                 {[
                   { title: "Disclosure Agreement", text: "Explains who we are and how we are paid." },
                   { title: "Letter of Authority (LOA)", text: "Lets your Wealth Manager request your policy information from insurers." },
                 ].map((item, i) => (
                   <li key={item.title} className="flex items-start gap-3">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground">{i + 1}</span>
-                    <p className="text-[13px] leading-relaxed">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-2xs font-semibold text-primary-foreground">{i + 1}</span>
+                    <p className="text-sm leading-relaxed">
                       <span className="font-semibold text-foreground">{item.title}</span>{" "}
                       <span className="text-muted-foreground">{item.text}</span>
                     </p>
@@ -125,11 +125,11 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
               </ol>
             </div>
           ) : (
-            t && <p className="text-[13px] leading-relaxed text-muted-foreground">{fillName(t.what, first)}</p>
+            t && <p className="text-sm leading-relaxed text-muted-foreground">{fillName(t.what, first)}</p>
           )}
 
           {blockers.length > 0 && step.state === "next" && (
-            <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-xs text-destructive">
+            <div className="rounded-xl border border-destructive/40 bg-destructive/5 p-3 text-xs text-destructive">
               <p className="flex items-center gap-1.5 font-semibold"><Lock className="h-3.5 w-3.5" /> On hold because</p>
               <ul className="mt-1 space-y-0.5">{blockers.map((b) => <li key={b}>{b}</li>)}</ul>
             </div>
@@ -173,8 +173,8 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
 
 function Row({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="text-[13px]">
-      <p className="mb-1 text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{title}</p>
+    <div className="text-sm">
+      <p className="mb-1 text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">{title}</p>
       <div className="text-foreground">{children}</div>
     </div>
   );

@@ -18,7 +18,7 @@ interface Props {
 }
 
 const SEVERITY_CHIP: Record<string, string> = {
-  low: "bg-emerald-100 text-emerald-700",
+  low: "bg-primary/10 text-primary",
   medium: "bg-amber-100 text-amber-700",
   high: "bg-orange-100 text-orange-700",
   critical: "bg-red-100 text-red-700",
@@ -128,7 +128,7 @@ export default function PatientIncidentHistory({ userId, title = "Emergency inci
         ) : (
           <div className="space-y-2">
             {rows.map((i) => (
-              <div key={i.id} className="rounded-lg border p-2.5 text-xs space-y-1">
+              <div key={i.id} className="rounded-xl border p-2.5 text-xs space-y-1">
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-semibold">{format(parseISO(i.created_at), "MMM d, yyyy h:mm a")}</span>
                   <div className="flex items-center gap-1.5">
@@ -141,7 +141,7 @@ export default function PatientIncidentHistory({ userId, title = "Emergency inci
                 </div>
                 <div className="text-muted-foreground">
                   Provider: <span className="text-foreground font-medium">{i.provider_name}</span>
-                  {i.auto_assigned && <span className="ml-1.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-xs font-bold text-emerald-800">AUTO</span>}
+                  {i.auto_assigned && <span className="ml-1.5 rounded-full bg-primary/10 px-1.5 py-0.5 text-xs font-bold text-primary">AUTO</span>}
                 </div>
                 {i.notes && <div className="text-sm">{i.notes}</div>}
                 <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-sm text-muted-foreground">

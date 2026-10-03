@@ -175,7 +175,7 @@ export function BackupCodesScreen({ onContinue }: Props) {
                   </p>
                 </div>
 
-                <div className="flex items-start gap-3 p-3 rounded-lg border border-border">
+                <div className="flex items-start gap-3 p-3 rounded-xl border border-border">
                   <Checkbox
                     id="ack"
                     checked={acknowledged}

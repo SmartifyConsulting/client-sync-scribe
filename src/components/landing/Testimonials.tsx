@@ -55,7 +55,7 @@ export function Testimonials() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: i * 0.1 }}
               viewport={{ once: true }}
-              className="rounded-2xl border border-border bg-card p-6 hover:border-primary/40 transition-colors flex flex-col"
+              className="rounded-xl border border-border bg-card p-6 hover:border-primary/40 transition-colors flex flex-col"
             >
               <Quote className="h-6 w-6 text-primary/50 mb-3" />
               <blockquote className="text-sm text-foreground leading-relaxed flex-1">

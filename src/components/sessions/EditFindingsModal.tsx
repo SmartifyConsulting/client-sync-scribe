@@ -51,8 +51,8 @@ export function EditFindingsModal({
 
         <div className="space-y-4 py-1">
           {fullDiagnosis && (
-            <div className="rounded-lg border border-border bg-muted/20 p-3 max-h-56 overflow-y-auto">
-              <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-primary">
+            <div className="rounded-xl border border-border bg-muted/20 p-3 max-h-56 overflow-y-auto">
+              <p className="mb-2 text-2xs font-bold uppercase tracking-wider text-primary">
                 AI Clinical Assessment (read-only)
               </p>
               <ClinicalReport text={fullDiagnosis} />
@@ -66,9 +66,9 @@ export function EditFindingsModal({
               onChange={(e) => onChange(e.target.value)}
               rows={8}
               placeholder="e.g. Reconsidering the antibiotic choice given the allergy history; stepping down the analgesia and adding physiotherapy over 4 weeks."
-              className="text-[12px]"
+              className="text-xs"
             />
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-2xs text-muted-foreground">
               These notes are saved with the session and carried into the document review steps,
               where you can amend the prescription or therapy strategy.
             </p>

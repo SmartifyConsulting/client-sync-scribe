@@ -325,7 +325,7 @@ Total: ${getCurrencySymbol(currency)} ${totalAmount.toFixed(2)}`;
             </div>
             
             {lineItems.map((item) => (
-              <div key={item.id} className="flex gap-2 items-start p-3 rounded-lg border border-border bg-muted/20">
+              <div key={item.id} className="flex gap-2 items-start p-3 rounded-xl border border-border bg-muted/20">
                 <div className="flex-1 space-y-2">
                   <Input
                     value={item.description}

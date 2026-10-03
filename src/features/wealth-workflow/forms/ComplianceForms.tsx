@@ -28,7 +28,7 @@ export function ComplianceForms() {
             <div className="min-w-0">
               <p className="text-xs font-semibold flex items-center gap-1.5"><FileSignature className="h-4 w-4 text-primary shrink-0" />Form {f.number}: {f.title}</p>
               <p className="text-xs text-muted-foreground mt-1">{f.when}</p>
-              <span className="inline-block mt-2 text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full bg-accent text-accent-foreground">{f.stage}</span>
+              <span className="inline-block mt-2 text-2xs uppercase font-semibold px-2 py-0.5 rounded-full bg-accent text-accent-foreground">{f.stage}</span>
             </div>
             <Button size="sm" variant="outline" className="text-xs shrink-0" onClick={() => setOpen(f)}>Complete</Button>
           </Card>
@@ -131,13 +131,13 @@ function FormDialog({ form, onClose }: { form: ComplianceForm; onClose: () => vo
             </Select>
           </div>
           {form.disclosure && (
-            <div className="rounded-lg border bg-muted/40 p-3 text-xs whitespace-pre-wrap max-h-56 overflow-y-auto">{form.disclosure(adviser)}</div>
+            <div className="rounded-xl border bg-muted/40 p-3 text-xs whitespace-pre-wrap max-h-56 overflow-y-auto">{form.disclosure(adviser)}</div>
           )}
           {form.id === "fna" && (
             <label className="flex items-center gap-2 text-sm font-medium"><Checkbox checked={!!v.singleNeed} onCheckedChange={(c) => set("singleNeed", !!c)} />Proceed as a Single Need Only (no full FNA requested by client)</label>
           )}
           {single && (
-            <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-xs">I confirm I have declined a full Financial Needs Analysis. I understand that advice is limited to the single need I have requested and may not identify other gaps in my financial position.</div>
+            <div className="rounded-xl border border-destructive/40 bg-destructive/5 p-3 text-xs">I confirm I have declined a full Financial Needs Analysis. I understand that advice is limited to the single need I have requested and may not identify other gaps in my financial position.</div>
           )}
           {form.fields.filter((f) => !(single && f.fnaOnly)).map((f) => (
             <div key={f.key} className="space-y-1.5">

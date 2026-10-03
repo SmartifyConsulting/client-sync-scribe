@@ -8,3 +8,5 @@
 - Shared page styles live in src/index.css `@layer components` (page-title, frame, tab-brand, data-table, empty-state) plus `PageHeader`; new screens use them instead of one-off sizes. Why: one consistent look across every screen.
 - Wealth Manager disclosure data lives in `wealth_practice_info` (one row per Wealth Manager) and feeds the LOA via the workflow owner. Why: documents always match the saved firm profile.
 - Claim status changes by clients are blocked by the `wealth_claims_status_guard` trigger. Why: only the firm sets claim outcomes.
+- Clients join only through an owner-generated invite (`wealth-client-invite` edge function: create/renew/preview/accept; tokens stored as SHA-256 in `wealth_client_invites`). Accept links `patients.patient_user_id`; `patients.user_id` is the Wealth Manager. Why: every client is tied to the inviting Wealth Manager and their Step 1 workflow.
+- Practice logos live in the private `practice-logos` bucket (`<user_id>/...`) and are embedded as data URLs in documents. Why: signed copies keep logos permanently.

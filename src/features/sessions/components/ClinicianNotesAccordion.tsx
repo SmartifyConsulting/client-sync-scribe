@@ -109,7 +109,7 @@ export function ClinicianNotesColumns({
           const tone = TONES[key];
           const count = section ? section.items.length + (section.groups?.reduce((n, g) => n + g.items.length, 0) || 0) : 0;
           return (
-            <div key={key} className={cn("rounded-lg border p-3 min-w-0", tone.frame)}>
+            <div key={key} className={cn("rounded-xl border p-3 min-w-0", tone.frame)}>
               <div className="mb-2 flex items-center gap-2 text-xs font-bold text-foreground">
                 <Icon className={cn("h-4 w-4 shrink-0", isSafety ? "text-destructive" : "text-primary")} />
                 <span className="truncate">{TITLES[key]}</span>
@@ -125,7 +125,7 @@ export function ClinicianNotesColumns({
         })}
       </div>
       {extras.map((section) => (
-        <div key={section.title} className="rounded-lg border border-border bg-card p-3">
+        <div key={section.title} className="rounded-xl border border-border bg-card p-3">
           <p className="mb-2 text-xs font-bold text-foreground">{section.title}</p>
           <SectionBody section={section} bullet="border-primary/40" />
         </div>
@@ -172,7 +172,7 @@ export function ClinicianNotesAccordion({
           <AccordionItem
             key={section.title}
             value={section.title}
-            className={cn("rounded-lg border overflow-hidden", tone.frame)}
+            className={cn("rounded-xl border overflow-hidden", tone.frame)}
           >
             <AccordionTrigger className="px-3 py-2 hover:no-underline">
               <span className="flex items-center gap-2 text-xs font-bold text-foreground">

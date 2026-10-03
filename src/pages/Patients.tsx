@@ -1,3 +1,4 @@
+import { NewClientInvite } from "@/features/wealth-workflow/invites/NewClientInvite";
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
@@ -416,7 +417,8 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
             </p>
           </div>
         )}
-        <div className="grid grid-cols-2 gap-2 ml-auto">
+        <div className="flex flex-wrap gap-2 ml-auto">
+          <NewClientInvite compact />
 
           <PatientImportDialog 
             trigger={
@@ -475,7 +477,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       )}
                       {/* Invite fallback when patient not found */}
                       {newPatient.name.length >= 3 && !searchingPatients && patientSuggestions.length === 0 && !selectedPatientUserId && (
-                        <div className="mt-3 rounded-lg border border-dashed border-border p-4 space-y-3 bg-muted/30">
+                        <div className="mt-3 rounded-xl border border-dashed border-border p-4 space-y-3 bg-muted/30">
                           <p className="text-sm text-muted-foreground">Client not found on Holarc Wealth? Send an invitation</p>
                           <div className="flex gap-2">
                             <Input

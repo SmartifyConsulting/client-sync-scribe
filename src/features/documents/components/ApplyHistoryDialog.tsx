@@ -269,7 +269,7 @@ export function ApplyHistoryDialog({
           ) : (
             <>
               {bullets.length > 0 && (
-                <div className="rounded-lg border border-border p-3">
+                <div className="rounded-xl border border-border p-3">
                   <p className="text-xs font-bold text-foreground mb-2">
                     Overview (added as dated bullet points)
                   </p>
@@ -292,7 +292,7 @@ export function ApplyHistoryDialog({
               )}
 
               {rows.map((row) => (
-                <div key={row.key} className="rounded-lg border border-border p-3">
+                <div key={row.key} className="rounded-xl border border-border p-3">
                   <p className="text-xs font-bold text-foreground mb-2">{row.label}</p>
                   <div className="space-y-1.5">
                     {row.items.map((item) => {

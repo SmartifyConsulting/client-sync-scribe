@@ -345,7 +345,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
       return (
         <div
           key={item.to}
-          className="flex items-center gap-2.5 rounded-xl border border-transparent px-3 py-1.5 text-[14px] font-semibold text-muted-foreground/60 cursor-not-allowed"
+          className="flex items-center gap-2.5 rounded-xl border border-transparent px-3 py-1.5 text-sm font-semibold text-muted-foreground/60 cursor-not-allowed"
           title="Coming soon — preview only"
         >
           <item.icon className="h-5 w-5 text-muted-foreground/60" />
@@ -435,7 +435,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               onNavigate?.();
             }}
             className={cn(
-              "flex-1 rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize transition-colors",
+              "flex-1 rounded-full px-2.5 py-1 text-2xs font-semibold capitalize transition-colors",
               active
                 ? "bg-sos text-sos-foreground"
                 : "bg-neutral-400/60 text-white hover:bg-neutral-500",
@@ -503,7 +503,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             <div className="space-y-1.5">
               {(isDoctor || isNurse) && profileToggle}
               {(doctorInPatientMode || nurseInPatientMode) && (
-                <p className="mx-1 px-3 py-1.5 rounded-md bg-neutral-900 text-[10px] font-bold uppercase tracking-[0.14em] text-white">
+                <p className="mx-1 px-3 py-1.5 rounded-md bg-neutral-900 text-2xs font-bold uppercase tracking-[0.14em] text-white">
                   My Profile
                 </p>
               )}

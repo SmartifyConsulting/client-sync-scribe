@@ -200,7 +200,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
                     <p className="font-medium text-foreground">{n.title}</p>
                     {n.description && <p className="text-xs text-muted-foreground mt-0.5">{n.description}</p>}
                   </div>
-                  <Button variant="ghost" size="sm" className="h-5 px-1 text-[9px] text-muted-foreground hover:text-destructive shrink-0" onClick={() => clearNotification(n.id)}>
+                  <Button variant="ghost" size="sm" className="h-5 px-1 text-2xs text-muted-foreground hover:text-destructive shrink-0" onClick={() => clearNotification(n.id)}>
                     {t("common.close")}
                   </Button>
                 </div>

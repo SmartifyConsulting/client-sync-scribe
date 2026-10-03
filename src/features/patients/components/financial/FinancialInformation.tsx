@@ -134,7 +134,7 @@ export function FinancialInformation({ patientId }: { patientId: string }) {
               {s.list && (
                 <div className="space-y-2">
                   {(v[s.list.key] ?? []).map((row: any, i: number) => (
-                    <div key={i} className="grid gap-2 sm:grid-cols-[repeat(auto-fit,minmax(140px,1fr))_auto] items-end rounded-lg border border-border p-2">
+                    <div key={i} className="grid gap-2 sm:grid-cols-[repeat(auto-fit,minmax(140px,1fr))_auto] items-end rounded-xl border border-border p-2">
                       {s.list!.cols.map((c) => (
                         <div key={c.key} className="space-y-1">
                           <Label className="text-xs">{c.label}</Label>

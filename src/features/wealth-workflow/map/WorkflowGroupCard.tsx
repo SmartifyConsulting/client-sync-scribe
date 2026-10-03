@@ -10,7 +10,7 @@ export function OwnerBadge({ owner, label }: { owner: string; label?: string }) 
   const safe = ["client", "advisor", "insurer", "system"].includes(key) ? key : "system";
   return (
     <span
-      className="inline-flex min-w-[64px] justify-center whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-medium tracking-wide"
+      className="inline-flex min-w-[64px] justify-center whitespace-nowrap rounded px-1.5 py-0.5 text-2xs font-medium tracking-wide"
       style={{ color: `hsl(var(--owner-${safe}))`, background: `hsl(var(--owner-${safe}-bg))` }}
     >
       {label ?? safe.toUpperCase()}
@@ -35,7 +35,7 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-xl border border-border/70 bg-card text-[13px] transition-shadow",
+        "overflow-hidden rounded-xl border border-border/70 bg-card text-sm transition-shadow",
         active && state !== "blocked" && "border-primary/50 shadow-sm",
         locked && "bg-muted/20",
         state === "blocked" && "border-destructive/60",
@@ -46,7 +46,7 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
         <button onClick={locked ? undefined : onOpen} disabled={locked} className="flex flex-1 items-center gap-2 text-left disabled:cursor-default">
           <span
             className={cn(
-              "flex h-5 w-5 items-center justify-center rounded-full text-[10px]",
+              "flex h-5 w-5 items-center justify-center rounded-full text-2xs",
               state === "completed" ? "bg-primary text-primary-foreground"
                 : active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
             )}
@@ -58,7 +58,7 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
           {!locked && (
             <span
               className={cn(
-                "ml-1 rounded-full border px-2 py-0 text-[10px] font-medium",
+                "ml-1 rounded-full border px-2 py-0 text-2xs font-medium",
                 state === "blocked" ? "border-destructive/40 text-destructive"
                   : active ? "border-primary/40 text-primary"
                   : "border-border text-muted-foreground",
@@ -90,7 +90,7 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
                   "flex items-center gap-2 px-3 py-1.5",
                   onSelectStep && reachable && "cursor-pointer hover:bg-muted/40",
                   !reachable && "opacity-50",
-                  s.state === "next" && "mx-1.5 my-1 rounded-lg border border-primary bg-primary/5 animate-throb",
+                  s.state === "next" && "mx-1.5 my-1 rounded-xl border border-primary bg-primary/5 animate-throb",
                   selectedStep === s.label && s.state !== "next" && "bg-muted/60",
                 )}
               >

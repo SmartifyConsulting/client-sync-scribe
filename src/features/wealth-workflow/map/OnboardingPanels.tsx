@@ -53,10 +53,10 @@ export function KycPanel({ workflowId, kyc, viewer, clientFirst }: { workflowId:
 
   if (viewer === "manager") {
     return (
-      <div className="rounded-lg border border-border/70 p-3 text-[13px]">
+      <div className="rounded-xl border border-border/70 p-3 text-sm">
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-1.5 font-medium"><ShieldCheck className="h-4 w-4 text-primary" /> Didit screening</span>
-          <span className={cn("rounded-full border px-2 text-[10px]", status === "approved" ? "border-primary/40 text-primary" : status === "declined" ? "border-destructive/40 text-destructive" : "border-border text-muted-foreground")}>
+          <span className={cn("rounded-full border px-2 text-2xs", status === "approved" ? "border-primary/40 text-primary" : status === "declined" ? "border-destructive/40 text-destructive" : "border-border text-muted-foreground")}>
             {status ? label[status] ?? status : `Waiting for ${clientFirst}`}
           </span>
         </div>
@@ -110,11 +110,19 @@ export function SignDocsPanel({ workflowId, signed, viewer, clientName }: { work
       const { data: wf } = await sbx.from("wealth_workflows").select("owner_user_id").eq("id", workflowId).maybeSingle();
       if (!wf?.owner_user_id) return null;
       const { data } = await sbx.from("wealth_practice_info").select("*").eq("user_id", wf.owner_user_id).maybeSingle();
-      return data ?? null;
+      if (!data) return null;
+      // Embed logos as data URLs so signed copies keep them permanently.
+      const embed = async (path?: string | null) => {
+        if (!path) return null;
+        const { data: blob } = await supabase.storage.from("practice-logos").download(path);
+        if (!blob) return null;
+        return await new Promise<string>((res) => { const r = new FileReader(); r.onload = () => res(String(r.result)); r.readAsDataURL(blob); });
+      };
+      return { ...data, __businessLogo: await embed(data.business_logo_path), __fspLogo: await embed(data.fsp_logo_path) };
     },
   });
   const docs = [
-    { type: "disclosure", title: "Disclosure Agreement", html: disclosureHtml(clientName, today) },
+    { type: "disclosure", title: "Disclosure Agreement", html: disclosureHtml(clientName, today, practice) },
     { type: "loa", title: "Letter of Authority (LOA)", html: loaHtml(clientName, today, practice) },
   ];
   return (
@@ -167,28 +175,28 @@ function DocCard({ workflowId, doc, signed, viewer, clientName }: { workflowId: 
         </span>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold text-foreground">{doc.title}</p>
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-2xs text-muted-foreground">
             {isSigned ? `Signed by ${signed?.signer_name ?? clientName}${signed ? ` · ${fmt(signed.signed_at)}` : ""}` : viewer === "client" ? "Waiting for your signature" : `Waiting for ${first} to sign`}
           </p>
         </div>
-        <span className={cn("mr-2 rounded-full border px-2.5 py-0.5 text-[10px] font-medium tracking-wide", isSigned ? "border-primary/40 bg-primary/10 text-primary" : "border-border text-muted-foreground")}>{isSigned ? "SIGNED" : "UNSIGNED"}</span>
+        <span className={cn("mr-2 rounded-full border px-2.5 py-0.5 text-2xs font-medium tracking-wide", isSigned ? "border-primary/40 bg-primary/10 text-primary" : "border-border text-muted-foreground")}>{isSigned ? "SIGNED" : "UNSIGNED"}</span>
       </AccordionTrigger>
       <AccordionContent className="px-4 pb-4">
         {/* Letterhead document frame — the same content used for PDF export and the signed record */}
-        <div className="overflow-hidden rounded-lg border border-border bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
           <div className="flex items-center justify-between border-b border-border/70 bg-muted/40 px-6 py-3">
             <Logo size="sm" />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Official Document</span>
+            <span className="text-2xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Official Document</span>
           </div>
           <div className="max-h-[28rem] overflow-y-auto bg-white" dangerouslySetInnerHTML={{ __html: html }} />
         </div>
 
         {signed && (
-          <div className="mt-3 rounded-lg border bg-muted/30 px-3 py-2 text-center">
-            <p className="text-left text-[10px] font-medium uppercase tracking-[0.14em] text-primary">Client</p>
+          <div className="mt-3 rounded-xl border bg-muted/30 px-3 py-2 text-center">
+            <p className="text-left text-2xs font-medium uppercase tracking-[0.14em] text-primary">Client</p>
             <img src={signed.signature_image} alt={`Signature of ${signed.signer_name}`} className="mx-auto h-12" />
             <div className="mx-auto h-px w-3/4 bg-border" />
-            <p className="mt-1 text-[11px] text-muted-foreground">Digitally signed · {fmt(signed.signed_at)}{signed.signer_ip ? ` · IP ${signed.signer_ip}` : ""}</p>
+            <p className="mt-1 text-2xs text-muted-foreground">Digitally signed · {fmt(signed.signed_at)}{signed.signer_ip ? ` · IP ${signed.signer_ip}` : ""}</p>
           </div>
         )}
 
@@ -205,7 +213,7 @@ function DocCard({ workflowId, doc, signed, viewer, clientName }: { workflowId: 
           {isSigned && !signed && (
             <span className="inline-flex h-8 items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3">
               <img src={`data:image/png;base64,${stampImage}`} alt="Your signature" className="h-5" />
-              <span className="text-[11px] font-medium text-primary">Signed</span>
+              <span className="text-2xs font-medium text-primary">Signed</span>
             </span>
           )}
         </div>
@@ -215,16 +223,16 @@ function DocCard({ workflowId, doc, signed, viewer, clientName }: { workflowId: 
         <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
           <DialogHeader><DialogTitle>Seal certificate</DialogTitle></DialogHeader>
           {signed && (
-            <div className="rounded-xl border-[1.5px] border-foreground/70 bg-muted/20 p-4 text-[12px]">
+            <div className="rounded-xl border-[1.5px] border-foreground/70 bg-muted/20 p-4 text-xs">
               <div className="inline-flex rounded-lg bg-background px-2 py-1"><Logo size="sm" /></div>
-              <p className="my-3 text-center text-[12px] font-semibold tracking-[0.2em]">SEAL CERTIFICATE</p>
+              <p className="my-3 text-center text-xs font-semibold tracking-[0.2em]">SEAL CERTIFICATE</p>
               <dl className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-1">
                 <dt className="text-muted-foreground">Document</dt><dd>{doc.title}</dd>
                 <dt className="text-muted-foreground">Signed by</dt><dd>{signed.signer_name}</dd>
                 <dt className="text-muted-foreground">IP address</dt><dd>{signed.signer_ip ?? "not recorded"}</dd>
                 <dt className="text-muted-foreground">Sealed</dt><dd className="break-all">{signed.signed_at}</dd>
               </dl>
-              <p className="mt-3 break-all text-center font-mono text-[9px] text-muted-foreground">Seal {signed.seal_hash}</p>
+              <p className="mt-3 break-all text-center font-mono text-2xs text-muted-foreground">Seal {signed.seal_hash}</p>
               <div className="mt-3 flex justify-end">
                 <Button size="sm" variant="outline" className="h-8 rounded-full text-xs" onClick={() => downloadPdf(html, `${doc.title} sealed`)}><Download className="mr-1 h-3.5 w-3.5" />Download</Button>
               </div>

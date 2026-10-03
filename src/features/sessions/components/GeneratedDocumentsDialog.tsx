@@ -122,7 +122,7 @@ export function GeneratedDocumentsDialog({
               )}
             </DialogHeader>
 
-            <div className="max-h-[360px] overflow-y-auto rounded-lg border border-border bg-card p-4">
+            <div className="max-h-[360px] overflow-y-auto rounded-xl border border-border bg-card p-4">
               {editing ? (
                 <Textarea
                   value={draftContent}
@@ -189,7 +189,7 @@ export function GeneratedDocumentsDialog({
                 return (
                   <div
                     key={doc.key}
-                    className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card"
+                    className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card"
                   >
                     <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 shrink-0">
                       <Icon className="h-4 w-4 text-primary" />
@@ -197,7 +197,7 @@ export function GeneratedDocumentsDialog({
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{doc.label}</p>
                       {doc.sent && (
-                        <Badge variant="secondary" className="text-[10px] bg-sky-50 text-primary dark:bg-primary/15 dark:text-primary mt-0.5">
+                        <Badge variant="secondary" className="text-2xs bg-sky-50 text-primary dark:bg-primary/15 dark:text-primary mt-0.5">
                           Sent
                         </Badge>
                       )}

@@ -250,7 +250,7 @@ export function InviteUserDialog() {
 
           {/* No Results - Email Option */}
           {searchMode === "email" && searchResults.length === 0 && searchQuery && (
-            <div className="rounded-lg border border-border p-4 bg-muted/50">
+            <div className="rounded-xl border border-border p-4 bg-muted/50">
               <div className="flex items-center gap-2 mb-2">
                 <Mail className="h-4 w-4 text-muted-foreground" />
                 <p className="text-sm font-medium">User not found on platform</p>
@@ -297,7 +297,7 @@ export function InviteUserDialog() {
 
           {/* Selected User Display */}
           {selectedUser && (
-            <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
+            <div className="rounded-xl border border-primary/30 bg-primary/5 p-3">
               <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10">
                   <AvatarImage src={selectedUser.avatar_url || undefined} />

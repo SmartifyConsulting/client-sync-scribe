@@ -321,7 +321,7 @@ export function EmotionalJournal({ patientId }: { patientId: string }) {
               </AccordionTrigger>
               <AccordionContent className={SECTION_CONTENT_CLASS}>
                 {grouped[b].map((e) => (
-                  <div key={e.id} className="rounded-lg border border-border p-3 space-y-2">
+                  <div key={e.id} className="rounded-xl border border-border p-3 space-y-2">
                     <div className="flex items-center justify-between">
                       <p className="text-xs font-bold text-foreground">
                         {format(parseISO(e.entry_date), "d MMM yyyy")}

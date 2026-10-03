@@ -1361,19 +1361,19 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
 
             {/* Report Summary */}
             <div className="grid gap-4 md:grid-cols-4 py-4">
-              <div className="rounded-lg border p-3">
+              <div className="rounded-xl border p-3">
                 <p className="text-sm text-muted-foreground">Total Fee statements</p>
                 <p className="text-xl font-bold">{reportTotals.invoiceCount}</p>
               </div>
-              <div className="rounded-lg border p-3">
+              <div className="rounded-xl border p-3">
                 <p className="text-sm text-muted-foreground">Total Amount</p>
                 <p className="text-xl font-bold">{getCurrencySymbol(invoiceCurrency)} {reportTotals.total.toFixed(2)}</p>
               </div>
-              <div className="rounded-lg border p-3 border-primary/40 bg-sky-500/5">
+              <div className="rounded-xl border p-3 border-primary/40 bg-sky-500/5">
                 <p className="text-sm text-muted-foreground">Paid</p>
                 <p className="text-xl font-bold text-primary">{getCurrencySymbol(invoiceCurrency)} {reportTotals.paidTotal.toFixed(2)}</p>
               </div>
-              <div className="rounded-lg border p-3 border-amber-500/30 bg-amber-500/5">
+              <div className="rounded-xl border p-3 border-amber-500/30 bg-amber-500/5">
                 <p className="text-sm text-muted-foreground">Outstanding</p>
                 <p className="text-xl font-bold text-amber-600">{getCurrencySymbol(invoiceCurrency)} {reportTotals.unpaidTotal.toFixed(2)}</p>
               </div>
@@ -1840,7 +1840,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
               <iframe
                 title={previewHtml.title}
                 srcDoc={previewHtml.html}
-                className="w-full h-[70vh] bg-card rounded-lg border border-border"
+                className="w-full h-[70vh] bg-card rounded-xl border border-border"
               />
             </div>
 

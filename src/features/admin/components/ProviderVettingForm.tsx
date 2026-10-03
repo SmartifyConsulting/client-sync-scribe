@@ -247,7 +247,7 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
           <Label>Certified copy of license</Label>
           <p className="text-xs text-muted-foreground">PDF, JPG or PNG — max {MAX_FILE_MB}MB. Required for vetting.</p>
           {values.license_file ? (
-            <div className="flex items-center justify-between rounded-lg border p-2.5 bg-background/60">
+            <div className="flex items-center justify-between rounded-xl border p-2.5 bg-background/60">
               <div className="flex items-center gap-2 min-w-0">
                 <FileText className="h-4 w-4 shrink-0 text-primary" />
                 <div className="min-w-0">
@@ -325,7 +325,7 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
       {showAccountOptions && (
         <section className="space-y-3 pt-2 border-t">
           <h3 className="text-sm font-semibold">Account options</h3>
-          <div className="flex items-center justify-between rounded-lg border p-3">
+          <div className="flex items-center justify-between rounded-xl border p-3">
             <div>
               <p className="text-sm font-medium">Auto-generate password</p>
               <p className="text-xs text-muted-foreground">14 chars, mixed case + digits + symbols</p>
@@ -340,7 +340,7 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
             </div>
           )}
           {mode !== "public" && (
-            <div className="flex items-center justify-between rounded-lg border p-3">
+            <div className="flex items-center justify-between rounded-xl border p-3">
               <div>
                 <p className="text-sm font-medium">Email credentials to administrator</p>
                 <p className="text-xs text-muted-foreground">Send the login + password by email</p>

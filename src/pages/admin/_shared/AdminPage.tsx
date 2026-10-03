@@ -15,7 +15,7 @@ export function AdminPage({ eyebrow, title, description, actions, children }: Ad
         <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[hsl(var(--admin-border-subtle))] pb-3">
           <div className="min-w-0">
             {eyebrow && (
-              <p className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--admin-text-tertiary))]">
+              <p className="text-2xs font-semibold uppercase tracking-[0.12em] text-[hsl(var(--admin-text-tertiary))]">
                 {eyebrow}
               </p>
             )}
@@ -23,7 +23,7 @@ export function AdminPage({ eyebrow, title, description, actions, children }: Ad
               {title}
             </h1>
             {description && (
-              <p className="text-[12.5px] text-[hsl(var(--admin-text-secondary))]">{description}</p>
+              <p className="text-xs text-[hsl(var(--admin-text-secondary))]">{description}</p>
             )}
           </div>
           {actions && <div className="flex items-center gap-2">{actions}</div>}

@@ -96,7 +96,7 @@ export function PatientSelfAdmissionsSection({ patientId, userId }: { patientId:
           <p className="text-xs text-muted-foreground">No admissions logged yet.</p>
         )}
         {items.map((a) => (
-          <div key={a.id} className="rounded-lg border border-border p-3 bg-muted/30">
+          <div key={a.id} className="rounded-xl border border-border p-3 bg-muted/30">
             <div className="flex items-start justify-between">
               <div>
                 <p className="font-medium text-sm">{a.hospital ?? "Hospital"}</p>

@@ -50,7 +50,7 @@ export function DevErLoginButton() {
   };
 
   return (
-    <div className="mt-4 rounded-lg border border-dashed border-muted-foreground/40 bg-muted/30 p-3">
+    <div className="mt-4 rounded-xl border border-dashed border-muted-foreground/40 bg-muted/30 p-3">
       <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
         {t("components.auth.dev_login.dev_only_label")}
       </p>

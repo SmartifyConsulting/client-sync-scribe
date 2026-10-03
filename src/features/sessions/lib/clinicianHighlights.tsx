@@ -85,7 +85,7 @@ export function renderClinicianHighlights(text: string): ReactNode {
 /** Small inline legend shown on the AI Clinician Notes heading row. */
 export function ClinicianLegend({ className }: { className?: string }) {
   return (
-    <span className={cn("flex flex-wrap items-center gap-2 text-[10px] font-medium", className)}>
+    <span className={cn("flex flex-wrap items-center gap-2 text-2xs font-medium", className)}>
       {CLINICIAN_LEGEND.map((l) => (
         <span key={l.key} className={cn("flex items-center gap-1", l.className)}>
           <span className="inline-block h-2 w-2 rounded-full bg-current" />

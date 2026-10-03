@@ -412,7 +412,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
 
               {/* Not found → invite or manual */}
               {noSearchResults && (
-                <div className="rounded-lg border border-dashed border-border p-4 space-y-3 bg-muted/30">
+                <div className="rounded-xl border border-dashed border-border p-4 space-y-3 bg-muted/30">
                   <p className="text-sm text-muted-foreground">Wealth Manager not found on Holarc Wealth</p>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={() => setAddMode("invite")} className="gap-2">

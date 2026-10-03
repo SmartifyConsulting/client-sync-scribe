@@ -152,7 +152,7 @@ export function DiscPersonalityCard({ patientId, hasSessions }: Props) {
               return (
                 <div
                   key={tile.key}
-                  className="rounded-lg border border-border bg-background p-3"
+                  className="rounded-xl border border-border bg-background p-3"
                 >
                   <div className="flex items-center justify-between gap-2 mb-1.5">
                     <span className="text-sm font-semibold text-foreground">

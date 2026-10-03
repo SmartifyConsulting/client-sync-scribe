@@ -182,7 +182,7 @@ export function VisitCategoryDialog({
               {displayCategories.map((cat) => (
                 <label
                   key={cat.id}
-                  className="flex items-start gap-2 p-2.5 rounded-lg border border-border hover:bg-accent/50 cursor-pointer transition-colors"
+                  className="flex items-start gap-2 p-2.5 rounded-xl border border-border hover:bg-accent/50 cursor-pointer transition-colors"
                 >
                   <Checkbox
                     checked={selectedCategories.has(cat.visit_category)}
@@ -191,7 +191,7 @@ export function VisitCategoryDialog({
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-foreground leading-tight">{cat.visit_category}</p>
-                    <span className="text-[11px] font-medium text-primary">
+                    <span className="text-2xs font-medium text-primary">
                       +{cat.lollipops_awarded} Ⓜ️
                     </span>
                   </div>

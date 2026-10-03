@@ -132,7 +132,7 @@ export default function Sessions() {
                 <AccordionItem
                   key={groupKey}
                   value={groupKey}
-                  className="rounded-lg border border-border bg-card shadow-sm"
+                  className="rounded-xl border border-border bg-card shadow-sm"
                 >
                   <AccordionTrigger
                     className="px-4 py-3 hover:no-underline"

@@ -185,7 +185,7 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
 
                     {qrCode && (
                       <div className="flex flex-col items-center gap-3">
-                        <div className="bg-white p-3 rounded-lg border border-border">
+                        <div className="bg-white p-3 rounded-xl border border-border">
                           <img
                             src={qrCode}
                             alt="QR code for two-factor authentication setup. Scan with your authenticator app."
@@ -210,7 +210,7 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
                             onClick={() => setSecretVisible((v) => !v)}
                             aria-label={secretVisible ? "Hide setup key" : "Show setup key"}
                             aria-pressed={secretVisible}
-                            className="p-2 rounded-lg border border-border hover:bg-muted transition-colors min-h-11 min-w-11 flex items-center justify-center"
+                            className="p-2 rounded-xl border border-border hover:bg-muted transition-colors min-h-11 min-w-11 flex items-center justify-center"
                           >
                             {secretVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                           </button>
@@ -323,7 +323,7 @@ function AuthenticatorDownload() {
       href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2"
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-3 text-xs font-medium text-foreground hover:bg-muted transition-colors min-h-12"
+      className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-3 py-3 text-xs font-medium text-foreground hover:bg-muted transition-colors min-h-12"
     >
       <Download className="h-4 w-4 text-primary" />
       <span>Google Authenticator — Android</span>
@@ -334,7 +334,7 @@ function AuthenticatorDownload() {
       href="https://apps.apple.com/app/google-authenticator/id388497605"
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-3 text-xs font-medium text-foreground hover:bg-muted transition-colors min-h-12"
+      className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-3 py-3 text-xs font-medium text-foreground hover:bg-muted transition-colors min-h-12"
     >
       <Apple className="h-4 w-4 text-primary" />
       <span>Google Authenticator — iPhone</span>
@@ -345,7 +345,7 @@ function AuthenticatorDownload() {
       href="https://authy.com/download/"
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-3 text-xs font-medium text-foreground hover:bg-muted transition-colors min-h-12"
+      className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-3 py-3 text-xs font-medium text-foreground hover:bg-muted transition-colors min-h-12"
     >
       <Download className="h-4 w-4 text-primary" />
       <span>Authy</span>
@@ -356,7 +356,7 @@ function AuthenticatorDownload() {
       href="https://www.microsoft.com/en-us/security/mobile-authenticator-app"
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-3 text-xs font-medium text-foreground hover:bg-muted transition-colors min-h-12"
+      className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-3 py-3 text-xs font-medium text-foreground hover:bg-muted transition-colors min-h-12"
     >
       <Shield className="h-4 w-4 text-primary" />
       <span>Microsoft Authenticator</span>
@@ -366,7 +366,7 @@ function AuthenticatorDownload() {
   const verb = isMobileUA() ? "Tap" : "Click";
 
   return (
-    <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
+    <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 space-y-2">
       <p className="text-xs font-semibold text-foreground">Don't have an authenticator app yet?</p>
       <p className="text-sm text-muted-foreground">
         {verb} below to install one of these authenticator apps, then come back here to scan the code.

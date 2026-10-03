@@ -18,8 +18,8 @@ export function ClientJourney({ patientId }: { patientId: string }) {
   else if (cur?.state === "current") message = "We're waiting for your Wealth Manager.";
 
   return (
-    <div className="rounded-lg border bg-card p-4 text-sm">
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Your wealth journey</p>
+    <div className="rounded-xl border bg-card p-4 text-sm">
+      <p className="text-2xs font-semibold uppercase tracking-wide text-muted-foreground">Your wealth journey</p>
       <p className="mt-1 font-medium text-foreground">{message}</p>
       <div className="mt-3">
         <WorkflowStepper groups={m.groups} viewer="client" />

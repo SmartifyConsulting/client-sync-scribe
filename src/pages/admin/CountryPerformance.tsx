@@ -178,7 +178,7 @@ export default function CountryPerformance() {
       <AdminPanel>
         <div className="flex flex-wrap items-end gap-3">
           <div className="space-y-1.5">
-            <Label className="text-[11.5px]">Country</Label>
+            <Label className="text-2xs">Country</Label>
             <Select value={country} onValueChange={setCountry}>
               <SelectTrigger className="h-9 w-52 text-xs">
                 <SelectValue />
@@ -193,7 +193,7 @@ export default function CountryPerformance() {
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label className="text-[11.5px]">From</Label>
+            <Label className="text-2xs">From</Label>
             <Input
               type="date"
               value={from}
@@ -202,7 +202,7 @@ export default function CountryPerformance() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-[11.5px]">To</Label>
+            <Label className="text-2xs">To</Label>
             <Input
               type="date"
               value={to}
@@ -224,7 +224,7 @@ export default function CountryPerformance() {
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
         {headline.map((item) => (
           <AdminPanel key={item.label}>
-            <p className="text-[11px] uppercase tracking-wide text-[hsl(var(--admin-text-tertiary))]">
+            <p className="text-2xs uppercase tracking-wide text-[hsl(var(--admin-text-tertiary))]">
               {item.label}
             </p>
             <p className="text-2xl font-bold text-[hsl(var(--admin-text-primary))]">
@@ -262,19 +262,19 @@ export default function CountryPerformance() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-[11.5px]">Name</TableHead>
-                  <TableHead className="text-[11.5px]">Role</TableHead>
-                  <TableHead className="text-[11.5px]">Signed up</TableHead>
-                  <TableHead className="text-[11.5px]">Last active</TableHead>
-                  <TableHead className="text-[11.5px]">Came back</TableHead>
-                  <TableHead className="text-right text-[11.5px]">Consults</TableHead>
-                  <TableHead className="text-right text-[11.5px]">Docs</TableHead>
-                  <TableHead className="text-right text-[11.5px]">Scripts</TableHead>
-                  <TableHead className="text-right text-[11.5px]">Appts</TableHead>
-                  <TableHead className="text-right text-[11.5px]">Check-ins</TableHead>
-                  <TableHead className="text-right text-[11.5px]">SOS</TableHead>
-                  <TableHead className="text-right text-[11.5px]">Login days</TableHead>
-                  <TableHead className="text-right text-[11.5px]">Minutes</TableHead>
+                  <TableHead className="text-2xs">Name</TableHead>
+                  <TableHead className="text-2xs">Role</TableHead>
+                  <TableHead className="text-2xs">Signed up</TableHead>
+                  <TableHead className="text-2xs">Last active</TableHead>
+                  <TableHead className="text-2xs">Came back</TableHead>
+                  <TableHead className="text-right text-2xs">Consults</TableHead>
+                  <TableHead className="text-right text-2xs">Docs</TableHead>
+                  <TableHead className="text-right text-2xs">Scripts</TableHead>
+                  <TableHead className="text-right text-2xs">Appts</TableHead>
+                  <TableHead className="text-right text-2xs">Check-ins</TableHead>
+                  <TableHead className="text-right text-2xs">SOS</TableHead>
+                  <TableHead className="text-right text-2xs">Login days</TableHead>
+                  <TableHead className="text-right text-2xs">Minutes</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

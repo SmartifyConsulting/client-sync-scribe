@@ -183,7 +183,7 @@ export function PatientHealthPhotoStats({ patientId }: PatientHealthPhotoStatsPr
                 <div
                   key={format(stat.month, 'yyyy-MM')}
                   className={cn(
-                    "p-4 rounded-lg border border-border",
+                    "p-4 rounded-xl border border-border",
                     index === 0 && "bg-primary/5 border-primary/20"
                   )}
                 >

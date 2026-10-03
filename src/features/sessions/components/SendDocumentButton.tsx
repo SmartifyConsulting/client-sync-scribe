@@ -243,7 +243,7 @@ export function SendDocumentButton({
                   <p className="text-sm font-semibold text-foreground flex items-center gap-1.5">
                     {p.name}
                     {p.is_primary && (
-                      <span className="text-[10px] font-medium text-primary uppercase tracking-wide">Primary</span>
+                      <span className="text-2xs font-medium text-primary uppercase tracking-wide">Primary</span>
                     )}
                   </p>
                   {p.branch && <p className="text-xs text-muted-foreground">{p.branch}</p>}

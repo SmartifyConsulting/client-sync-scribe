@@ -48,7 +48,7 @@ export default function DoctorTemplatesTab() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-10 text-center text-xs text-muted-foreground">
+        <div className="rounded-xl border border-dashed p-10 text-center text-xs text-muted-foreground">
           No templates found.
         </div>
       ) : (
@@ -67,7 +67,7 @@ export default function DoctorTemplatesTab() {
                 )}
                 <span
                   className={cn(
-                    "inline-block mt-2 text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full",
+                    "inline-block mt-2 text-2xs uppercase font-semibold px-2 py-0.5 rounded-full",
                     documentTypeBadgeClass(t.category || t.name),
                   )}
                 >

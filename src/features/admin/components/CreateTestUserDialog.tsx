@@ -275,7 +275,7 @@ export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
                 Copy it now if you need it. {result.emailed ? "We also emailed it to the user." : "Email was not sent."}
               </p>
             </div>
-            <div className="rounded-lg border bg-card p-3 font-mono text-sm space-y-1.5">
+            <div className="rounded-xl border bg-card p-3 font-mono text-sm space-y-1.5">
               <div><span className="text-muted-foreground">Email:</span> {result.email}</div>
               <div><span className="text-muted-foreground">Password:</span> <span className="font-bold">{result.password}</span></div>
             </div>
@@ -346,7 +346,7 @@ export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
               <Label htmlFor="ctu-name">Full name (optional)</Label>
               <Input id="ctu-name" value={fullName} onChange={(e) => setFullName(e.target.value)} />
             </div>
-            <div className="flex items-center justify-between rounded-lg border p-3">
+            <div className="flex items-center justify-between rounded-xl border p-3">
               <div>
                 <p className="text-sm font-medium">Auto-generate password</p>
                 <p className="text-xs text-muted-foreground">14 chars, mixed case + digits + symbols</p>
@@ -359,7 +359,7 @@ export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
                 <Input id="ctu-pwd" type="text" value={manualPassword} onChange={(e) => setManualPassword(e.target.value)} placeholder="Min 8 chars" />
               </div>
             )}
-            <div className="flex items-center justify-between rounded-lg border p-3">
+            <div className="flex items-center justify-between rounded-xl border p-3">
               <div>
                 <p className="text-sm font-medium">Email credentials to user</p>
                 <p className="text-xs text-muted-foreground">Send the login + password by email</p>

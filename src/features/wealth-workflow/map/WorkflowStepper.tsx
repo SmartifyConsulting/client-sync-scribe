@@ -46,7 +46,7 @@ export function WorkflowStepper({ groups, viewer, selectedKey, onSelect }: Props
             </div>
             <span
               className={cn(
-                "mt-1.5 max-w-[88px] text-center text-[11px] leading-tight",
+                "mt-1.5 max-w-[88px] text-center text-2xs leading-tight",
                 active || isSelected ? "font-semibold text-foreground" : locked ? "text-muted-foreground/70" : "text-muted-foreground",
               )}
             >

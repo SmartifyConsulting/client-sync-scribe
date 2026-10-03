@@ -404,21 +404,21 @@ export default function UsersTab({ kind }: UsersTabProps) {
               <TableRow key={u.user_id} className={isEditing ? "bg-[hsl(var(--admin-accent-soft))]" : ""}>
                 <TableCell>
                   {isEditing ? (
-                    <Input value={editState.first_name} onChange={(e) => setEditState((s) => ({ ...s, first_name: e.target.value }))} className="h-7 w-32 text-[12.5px]" />
+                    <Input value={editState.first_name} onChange={(e) => setEditState((s) => ({ ...s, first_name: e.target.value }))} className="h-7 w-32 text-xs" />
                   ) : (
                     <span className="font-medium text-[hsl(var(--admin-text-primary))]">{first || "—"}</span>
                   )}
                 </TableCell>
                 <TableCell>
                   {isEditing ? (
-                    <Input value={editState.last_name} onChange={(e) => setEditState((s) => ({ ...s, last_name: e.target.value }))} className="h-7 w-32 text-[12.5px]" />
+                    <Input value={editState.last_name} onChange={(e) => setEditState((s) => ({ ...s, last_name: e.target.value }))} className="h-7 w-32 text-xs" />
                   ) : (
                     <span>{last || "—"}</span>
                   )}
                 </TableCell>
                 <TableCell className="text-[hsl(var(--admin-text-secondary))]">
                   {isEditing ? (
-                    <Input value={editState.email} onChange={(e) => setEditState((s) => ({ ...s, email: e.target.value }))} className="h-7 w-52 text-[12.5px]" />
+                    <Input value={editState.email} onChange={(e) => setEditState((s) => ({ ...s, email: e.target.value }))} className="h-7 w-52 text-xs" />
                   ) : (
                     u.email
                   )}
@@ -438,7 +438,7 @@ export default function UsersTab({ kind }: UsersTabProps) {
                     onValueChange={(v) => handleRoleSelect(u, v as RawRole)}
                     disabled={roleSaving === u.user_id}
                   >
-                    <SelectTrigger className="h-7 w-[140px] text-[11.5px]">
+                    <SelectTrigger className="h-7 w-[140px] text-2xs">
                       {roleSaving === u.user_id ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       ) : (
@@ -559,9 +559,9 @@ export default function UsersTab({ kind }: UsersTabProps) {
                   <AccordionTrigger className="px-4 py-2.5 hover:no-underline hover:bg-[hsl(var(--admin-accent-soft))]">
                     <div className="flex items-center gap-2.5">
                       {kind !== "emergency" && (
-                        <span className="text-[14px] leading-none">{countryFlag(group)}</span>
+                        <span className="text-sm leading-none">{countryFlag(group)}</span>
                       )}
-                      <span className="text-[12.5px] font-semibold text-[hsl(var(--admin-text-primary))]">{group}</span>
+                      <span className="text-xs font-semibold text-[hsl(var(--admin-text-primary))]">{group}</span>
                       <span className="text-sm text-[hsl(var(--admin-text-tertiary))]">{rows.length}</span>
                     </div>
                   </AccordionTrigger>

@@ -409,8 +409,8 @@ export default function GamificationAdmin() {
           { label: "Max Vulas / visit", value: Math.max(...configs.map(c => c.lollipops_awarded), 0), tone: "text-[hsl(var(--admin-accent))]", showVula: true },
         ].map((s) => (
           <div key={s.label} className="admin-panel px-4 py-3">
-            <p className="text-[10.5px] font-medium uppercase tracking-wide text-[hsl(var(--admin-text-tertiary))]">{s.label}</p>
-            <p className={`mt-1 text-[20px] font-semibold tabular-nums flex items-center gap-1.5 ${s.tone}`}>
+            <p className="text-2xs font-medium uppercase tracking-wide text-[hsl(var(--admin-text-tertiary))]">{s.label}</p>
+            <p className={`mt-1 text-xl font-semibold tabular-nums flex items-center gap-1.5 ${s.tone}`}>
               {s.value}
               {s.showVula && <img src={vulaSymbol} alt="Vula" className="h-4 w-4 object-contain" />}
             </p>

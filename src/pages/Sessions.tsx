@@ -1515,7 +1515,7 @@ export default function Sessions() {
                               setPatientSelectorOpen(false);
                             }}
                           >
-                            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-muted-foreground">
+                            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-2xs font-semibold text-muted-foreground">
                               {initials || "?"}
                             </span>
                             <span className="flex-1 truncate text-left">{displayName}</span>
@@ -1563,7 +1563,7 @@ export default function Sessions() {
                 <Pause className="h-3.5 w-3.5" />
                 Paused session with {currentPatient.name}
               </p>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-2xs text-muted-foreground">
                 Paused {format(new Date(pausedDraft.pausedAt), "d MMM yyyy, HH:mm")} ·{" "}
                 {formatDuration(pausedDraft.elapsedSeconds)} recorded
               </p>
@@ -1610,7 +1610,7 @@ export default function Sessions() {
                   <p className="p-3 text-xs text-muted-foreground">No previous consultations</p>
                 ) : (
                   pastPatientSessions.map((s: any) => (
-                    <div key={s.id} className="rounded-lg border border-border p-3 hover:bg-muted/50 transition-colors">
+                    <div key={s.id} className="rounded-xl border border-border p-3 hover:bg-muted/50 transition-colors">
                       <button
                         onClick={() => navigate(`/sessions/${s.id}`)}
                         className="text-xs font-bold text-primary underline underline-offset-2 hover:text-primary/80"
@@ -1786,7 +1786,7 @@ export default function Sessions() {
               <p className="text-xs text-muted-foreground">Live AI Consultation Assistant starts as soon as you record.</p>
             )}
             {(isRecording || liveHintLastRunAt) && (
-              <p className="mt-1 text-[11px] text-muted-foreground">
+              <p className="mt-1 text-2xs text-muted-foreground">
                 {liveHintLastRunAt
                   ? `Last analysed at ${liveHintLastRunAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
                   : "Waiting for the first analysis…"}
@@ -1820,7 +1820,7 @@ export default function Sessions() {
                 <div className="rounded-xl border border-primary bg-card shadow-sm p-3">
                   <div className="flex items-center justify-between mb-1.5">
                     <p className="text-sm font-semibold text-foreground">Personal Notes</p>
-                    <span className="text-[10px] text-muted-foreground">Private</span>
+                    <span className="text-2xs text-muted-foreground">Private</span>
                   </div>
                   <Textarea
                     value={personalNotes}

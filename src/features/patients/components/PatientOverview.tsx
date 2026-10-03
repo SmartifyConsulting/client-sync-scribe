@@ -208,12 +208,12 @@ function ChronicAdherenceSection({ patientId, patientName }: { patientId: string
   };
 
   return (
-    <div className="rounded-lg border border-terracotta/30 bg-terracotta/5 px-2 py-1.5 space-y-1">
+    <div className="rounded-xl border border-terracotta/30 bg-terracotta/5 px-2 py-1.5 space-y-1">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 min-w-0">
           <Pill className="h-3.5 w-3.5 text-terracotta shrink-0" />
           <span className="text-xs font-bold text-foreground truncate">Chronic Medication Patient</span>
-          <Badge className="bg-terracotta/10 text-terracotta border-terracotta/30 text-[10px] px-1.5 py-0">
+          <Badge className="bg-terracotta/10 text-terracotta border-terracotta/30 text-2xs px-1.5 py-0">
             Chronic
           </Badge>
         </div>
@@ -222,7 +222,7 @@ function ChronicAdherenceSection({ patientId, patientName }: { patientId: string
             onClick={handleCongratulate}
             disabled={congratulating}
             size="sm"
-            className="h-6 gap-1 px-2 text-[11px] bg-primary hover:bg-primary-dark"
+            className="h-6 gap-1 px-2 text-2xs bg-primary hover:bg-primary-dark"
           >
             {congratulating ? (
               <Loader2 className="h-3 w-3 animate-spin" />
@@ -238,8 +238,8 @@ function ChronicAdherenceSection({ patientId, patientName }: { patientId: string
           {adherenceData.map((d, i) => (
             <div key={i} className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-card border border-border">
               <Flame className={`h-3 w-3 ${d.streak >= 7 ? "text-orange-500" : "text-muted-foreground"}`} />
-              <span className="text-[11px] font-medium">{d.prescription}</span>
-              <span className="text-[11px] font-bold text-foreground">{d.streak}d</span>
+              <span className="text-2xs font-medium">{d.prescription}</span>
+              <span className="text-2xs font-bold text-foreground">{d.streak}d</span>
             </div>
           ))}
         </div>
@@ -525,7 +525,7 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
                         <CollapsibleTrigger className="flex items-center gap-2 w-full text-left px-2 py-1 rounded-lg hover:bg-muted/50 transition-colors text-xs font-semibold text-muted-foreground">
                           <ChevronDown className="h-3.5 w-3.5 transition-transform data-[state=closed]:rotate-[-90deg]" />
                           {monthLabel}
-                          <Badge variant="secondary" className="ml-auto text-[10px]">
+                          <Badge variant="secondary" className="ml-auto text-2xs">
                             {monthItems.length}
                           </Badge>
                         </CollapsibleTrigger>
@@ -819,7 +819,7 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
             {summaryData.conflicts.map((conflict, i) => (
               <div
                 key={i}
-                className={`flex items-start gap-3 p-3 rounded-lg border ${
+                className={`flex items-start gap-3 p-3 rounded-xl border ${
                   conflict.severity === "high"
                     ? "bg-red-500/10 border-red-500/30"
                     : conflict.severity === "moderate"
@@ -875,7 +875,7 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
       {/* Clinical snapshot — four evenly sized cards */}
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4 items-start">
         
-          <Collapsible defaultOpen className="rounded-lg border border-red-500/30 bg-red-500/5 p-2.5">
+          <Collapsible defaultOpen className="rounded-xl border border-red-500/30 bg-red-500/5 p-2.5">
             <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
               <ChevronDown className="h-3.5 w-3.5 text-red-600 transition-transform data-[state=closed]:rotate-[-90deg]" />
               <AlertTriangle className="h-4 w-4 text-red-600" />
@@ -912,7 +912,7 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
             </CollapsibleContent>
           </Collapsible>
 
-          <Collapsible defaultOpen className="rounded-lg border border-primary bg-card p-2.5">
+          <Collapsible defaultOpen className="rounded-xl border border-primary bg-card p-2.5">
             <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
               <ChevronDown className="h-3.5 w-3.5 text-blue-600 transition-transform data-[state=closed]:rotate-[-90deg]" />
               <HeartPulse className="h-4 w-4 text-blue-600" />
@@ -950,7 +950,7 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
               )}
             </CollapsibleContent>
           </Collapsible>
-        <Collapsible defaultOpen className="rounded-lg border border-primary bg-card p-2.5">
+        <Collapsible defaultOpen className="rounded-xl border border-primary bg-card p-2.5">
           <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
             <ChevronDown className="h-3.5 w-3.5 text-primary transition-transform data-[state=closed]:rotate-[-90deg]" />
             <Pill className="h-4 w-4 text-primary" />
@@ -995,7 +995,7 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
           </CollapsibleContent>
         </Collapsible>
 
-        <Collapsible defaultOpen className="rounded-lg border border-primary bg-card p-2.5">
+        <Collapsible defaultOpen className="rounded-xl border border-primary bg-card p-2.5">
           <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
             <ChevronDown className="h-3.5 w-3.5 text-amber-600 transition-transform data-[state=closed]:rotate-[-90deg]" />
             <Activity className="h-4 w-4 text-amber-600" />

@@ -1,16 +1,22 @@
 /** Draft Disclosure Agreement and LOA templates. Wording is a placeholder for the firm to replace. */
 const NAVY = "#0f2742", INK = "#1e293b", MUTED = "#64748b", RULE = "#d8dee8";
-const wrap = (title: string, subtitle: string, body: string) => `<div id="holarc-document" style="font-family:'Helvetica Neue',Arial,sans-serif;color:${INK};background:#fff;padding:56px 60px;font-size:12.5px;line-height:1.7;max-width:820px;margin:0 auto">
+const esc = (x: unknown) => String(x ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
+const logo = (u?: string | null) => (u ? `<img src="${esc(u)}" alt="" style="max-height:46px;max-width:170px;object-fit:contain"/>` : "");
+const footer = (p: any) => p?.fsp_name
+  ? `${esc(p.fsp_name)} · Reg No ${esc(p.registration_number ?? "–")} · FSP ${esc(p.fsb_licence ?? "–")}<br/>${esc(p.firm_address ?? "")}${p.firm_website ? " · " + esc(p.firm_website) : ""}`
+  : "Masthead Financial Planning (Proprietary) Limited · Reg No 2010/019601/07 · FSP 43435<br/>1st Floor Park Terraces, Golf Park, Mowbray 7700 · www.mastheadfp.co.za";
+const wrap = (title: string, subtitle: string, body: string, p: any = null) => `<div id="holarc-document" style="font-family:'Helvetica Neue',Arial,sans-serif;color:${INK};background:#fff;padding:56px 60px;font-size:12.5px;line-height:1.7;max-width:820px;margin:0 auto">
+${p?.__businessLogo || p?.__fspLogo ? `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px">${logo(p.__businessLogo) || "<span></span>"}${logo(p.__fspLogo)}</div>` : ""}
 <div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid ${NAVY};padding-bottom:14px;margin-bottom:28px">
 <div><p style="margin:0;font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:${MUTED}">${subtitle}</p>
 <h1 style="margin:6px 0 0;font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:26px;color:${NAVY};letter-spacing:.01em">${title}</h1></div>
 <p style="margin:0;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:${NAVY};font-weight:600">Holarc Wealth</p></div>
 ${body}
-<div style="margin-top:36px;padding-top:12px;border-top:1px solid ${RULE};font-size:9.5px;color:${MUTED};text-align:center;line-height:1.5">Masthead Financial Planning (Proprietary) Limited · Reg No 2010/019601/07 · FSP 43435<br/>1st Floor Park Terraces, Golf Park, Mowbray 7700 · www.mastheadfp.co.za</div></div>`;
+<div style="margin-top:36px;padding-top:12px;border-top:1px solid ${RULE};font-size:9.5px;color:${MUTED};text-align:center;line-height:1.5">${footer(p)}</div></div>`;
 const h2 = (t: string) => `<h2 style="margin:26px 0 10px;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:${NAVY};font-weight:600">${t}</h2>`;
 const table = (rows: [string, string][]) => `<table style="width:100%;border-collapse:collapse;font-size:12px">${rows.map(([k, v]) => `<tr><td style="width:36%;padding:8px 12px 8px 0;border-bottom:1px solid ${RULE};color:${MUTED};vertical-align:top">${k}</td><td style="padding:8px 0;border-bottom:1px solid ${RULE};vertical-align:top">${v}</td></tr>`).join("")}</table>`;
 
-export function disclosureHtml(client: string, date: string) {
+export function disclosureHtml(client: string, date: string, p: any = null) {
   return wrap("Disclosure Agreement", "FAIS disclosure", `
 <p>This agreement is between <b>Holarc Wealth (Pty) Ltd</b> ("the FSP") and <b>${client}</b> ("the client"), dated ${date}.</p>
 <h3 style="margin:20px 0 6px;font-size:13px;color:#0f2742;font-weight:600">1. About the FSP</h3><p>The FSP is authorised under the Financial Advisory and Intermediary Services Act, 2002 (FAIS) to give advice and render intermediary services on long-term insurance, short-term insurance and investment products.</p>
@@ -19,7 +25,7 @@ export function disclosureHtml(client: string, date: string) {
 <h3 style="margin:20px 0 6px;font-size:13px;color:#0f2742;font-weight:600">4. Conflicts of interest</h3><p>Our conflict of interest management policy is available on request. We do not accept gifts or incentives that could influence our advice.</p>
 <h3 style="margin:20px 0 6px;font-size:13px;color:#0f2742;font-weight:600">5. Complaints</h3><p>Complaints can be sent to the FSP's compliance officer. If unresolved, you may contact the FAIS Ombud.</p>
 <h3 style="margin:20px 0 6px;font-size:13px;color:#0f2742;font-weight:600">6. Privacy</h3><p>Your personal information is processed in line with the Protection of Personal Information Act (POPIA) and only for the purpose of providing financial services to you.</p>
-<p>By signing, I confirm that I have read and understood this disclosure.</p>`);
+<p>By signing, I confirm that I have read and understood this disclosure.</p>`, p);
 }
 
 export function loaHtml(client: string, date: string, p: any = null) {
@@ -65,7 +71,7 @@ ${h2("Authority to view, obtain and share your information")}
 <p>I further acknowledge that this consent to obtain information on my behalf will remain effective until cancelled by me in writing.</p>
 <p>I further confirm that I have read and understood the contents of the above.</p></div>
 ${h2("Client declaration")}
-<p style="font-family:Georgia,serif;font-size:13px;line-height:1.8">I, <b>${client}</b>, hereby confirm that I have read and understood the contents of this document. I further confirm that all sections have been completed by me and reflect my intention.</p>`);
+<p style="font-family:Georgia,serif;font-size:13px;line-height:1.8">I, <b>${client}</b>, hereby confirm that I have read and understood the contents of this document. I further confirm that all sections have been completed by me and reflect my intention.</p>`, p);
 }
 
 export function sealedHtml(doc: { content_html: string; signature_image: string; signer_name: string; signed_at: string; signer_ip: string | null; seal_hash: string; title: string }) {

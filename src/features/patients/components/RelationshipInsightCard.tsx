@@ -53,7 +53,7 @@ export function RelationshipInsightCard({ patientId }: { patientId: string }) {
           <h4 className="font-medium text-foreground">How to work with this client</h4>
           {/* TESTING ONLY — internal pattern number */}
           {assessment && (
-            <span className="rounded-full border border-amber-400/60 bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400">
+            <span className="rounded-full border border-amber-400/60 bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 text-2xs font-bold text-amber-700 dark:text-amber-400">
               Type {assessment.pattern}
             </span>
           )}

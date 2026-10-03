@@ -651,7 +651,7 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
 }
 
 const Empty = ({ label }: { label: string }) => (
-  <div className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">{label}</div>
+  <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">{label}</div>
 );
 const Loader = () => (
   <div className="flex justify-center p-8"><Loader2 className="animate-spin h-5 w-5" /></div>

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { PracticeLogos } from "./PracticeLogos";
 import { usePracticeInfo, useSavePracticeInfo, type PracticeInfo, type Suppliers } from "./usePracticeInfo";
 
 export const FSCA_CATEGORIES = [
@@ -101,6 +102,9 @@ export function PracticeInfoSections() {
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-card">
       <Accordion type="multiple" className="divide-y divide-border">
+        <Section value="logos" title="Logos">
+          <PracticeLogos />
+        </Section>
         <Section value="planner" title="Planner Details">
           <Fields fields={PLANNER} d={d} setD={setD} /><SaveBar onSave={() => commit()} saving={saving} />
         </Section>
@@ -114,7 +118,7 @@ export function PracticeInfoSections() {
           <div className="grid gap-4 sm:grid-cols-4">
             {SUPPLIER_COLS.map((c) => (
               <div key={c.k} className="space-y-1">
-                <Label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{c.label}</Label>
+                <Label className="text-2xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{c.label}</Label>
                 <Textarea rows={9} className="text-xs" placeholder="One per line" value={(sup[c.k] ?? []).join("\n")}
                   onChange={(e) => setD({ ...d, product_suppliers: { ...sup, [c.k]: e.target.value.split("\n") } })} />
               </div>

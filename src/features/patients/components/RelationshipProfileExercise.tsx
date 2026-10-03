@@ -208,7 +208,7 @@ export function RelationshipProfileExercise({ patientId }: { patientId: string }
                   ? NONE_LABEL
                   : qs.options.find((o) => o.key === key)?.title ?? "—";
               return (
-                <div key={qs.id} className="rounded-lg border border-border bg-card p-3">
+                <div key={qs.id} className="rounded-xl border border-border bg-card p-3">
                   <p className="text-xs text-muted-foreground">{qs.heading}</p>
                   <p className="text-sm text-foreground mt-0.5">{label}</p>
                   {idx === 0 ? null : null}
@@ -236,7 +236,7 @@ export function RelationshipProfileExercise({ patientId }: { patientId: string }
             Retake
           </Button>
         </div>
-        <p className="text-[11px] text-muted-foreground leading-relaxed">{PRIVACY}</p>
+        <p className="text-2xs text-muted-foreground leading-relaxed">{PRIVACY}</p>
       </div>
     );
   }
@@ -252,7 +252,7 @@ export function RelationshipProfileExercise({ patientId }: { patientId: string }
         </div>
         <p className="text-sm text-foreground leading-relaxed">{INTRO}</p>
         <p className="text-sm text-muted-foreground leading-relaxed">{INTRO_2}</p>
-        <p className="text-[11px] text-muted-foreground leading-relaxed pt-1">{PRIVACY}</p>
+        <p className="text-2xs text-muted-foreground leading-relaxed pt-1">{PRIVACY}</p>
       </div>
 
       {QUESTION_SETS.map((qs, idx) => {

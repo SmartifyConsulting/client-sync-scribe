@@ -79,7 +79,7 @@ function DocumentCard({ doc, onPreview }: { doc: DocRow; onPreview: (doc: DocRow
           {doc.template_name && (
             <span
               className={cn(
-                "text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full shrink-0 max-w-[160px] truncate",
+                "text-2xs uppercase font-semibold px-2 py-0.5 rounded-full shrink-0 max-w-[160px] truncate",
                 documentTypeBadgeClass(doc.template_name),
               )}
             >
@@ -256,7 +256,7 @@ export default function DoctorDocumentsTab() {
       </div>
 
       {groups.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-10 text-center text-xs text-muted-foreground">
+        <div className="rounded-xl border border-dashed p-10 text-center text-xs text-muted-foreground">
           No documents yet.
         </div>
       ) : (

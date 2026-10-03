@@ -179,7 +179,7 @@ export function SessionResultPanels({
                         {assignee && <span className="ml-1.5 text-xs text-muted-foreground">— {assignee}</span>}
                       </span>
                       {isPointDone(point) && (
-                        <Badge className="bg-success text-success-foreground text-[10px] px-1.5 py-0 shrink-0">Done</Badge>
+                        <Badge className="bg-success text-success-foreground text-2xs px-1.5 py-0 shrink-0">Done</Badge>
                       )}
                     </li>
                   );

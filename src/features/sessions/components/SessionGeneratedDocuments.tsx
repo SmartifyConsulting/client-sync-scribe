@@ -58,7 +58,7 @@ export function SessionGeneratedDocuments({
       <div className="flex items-center gap-2 mb-3">
         <Sparkles className="h-4 w-4 text-primary" />
         <h3 className="text-sm font-semibold text-foreground">Documents from this consultation</h3>
-        <Badge variant="secondary" className="text-[10px]">{documents.length}</Badge>
+        <Badge variant="secondary" className="text-2xs">{documents.length}</Badge>
       </div>
 
       <div className="grid gap-3 md:grid-cols-2">
@@ -66,7 +66,7 @@ export function SessionGeneratedDocuments({
           const Icon = DOC_ICONS[doc.key];
           const busy = busyKey === doc.key;
           return (
-            <div key={doc.key} className="rounded-lg border border-border bg-background p-3 flex flex-col gap-2">
+            <div key={doc.key} className="rounded-xl border border-border bg-background p-3 flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0">
                   <Icon className="h-4 w-4 text-primary" />
@@ -74,11 +74,11 @@ export function SessionGeneratedDocuments({
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-foreground truncate">{doc.label}</p>
                   {doc.recipientName && (
-                    <p className="text-[11px] text-muted-foreground truncate">For {doc.recipientName}</p>
+                    <p className="text-2xs text-muted-foreground truncate">For {doc.recipientName}</p>
                   )}
                 </div>
                 {doc.sent && (
-                  <Badge variant="secondary" className="text-[10px] bg-sky-50 text-primary dark:bg-primary/15 dark:text-primary">
+                  <Badge variant="secondary" className="text-2xs bg-sky-50 text-primary dark:bg-primary/15 dark:text-primary">
                     Sent
                   </Badge>
                 )}

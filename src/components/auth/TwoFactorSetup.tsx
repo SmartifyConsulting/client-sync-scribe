@@ -172,34 +172,34 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
           </div>
         ) : step === "setup" ? (
           <div className="space-y-4">
-            <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
+            <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 space-y-2">
               <p className="text-xs font-semibold text-foreground">Don't have an authenticator app yet?</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <a
                   href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2"
                   target="_blank" rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-xs font-medium hover:bg-muted min-h-11"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-3 py-2.5 text-xs font-medium hover:bg-muted min-h-11"
                 >
                   <Download className="h-4 w-4 text-primary" /> Google Authenticator — Android
                 </a>
                 <a
                   href="https://apps.apple.com/app/google-authenticator/id388497605"
                   target="_blank" rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-xs font-medium hover:bg-muted min-h-11"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-3 py-2.5 text-xs font-medium hover:bg-muted min-h-11"
                 >
                   <Apple className="h-4 w-4 text-primary" /> Google Authenticator — iPhone
                 </a>
                 <a
                   href="https://authy.com/download/"
                   target="_blank" rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-xs font-medium hover:bg-muted min-h-11"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-3 py-2.5 text-xs font-medium hover:bg-muted min-h-11"
                 >
                   <Download className="h-4 w-4 text-primary" /> Authy
                 </a>
                 <a
                   href="https://www.microsoft.com/en-us/security/mobile-authenticator-app"
                   target="_blank" rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-xs font-medium hover:bg-muted min-h-11"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-3 py-2.5 text-xs font-medium hover:bg-muted min-h-11"
                 >
                   <Shield className="h-4 w-4 text-primary" /> Microsoft Authenticator
                 </a>
@@ -208,7 +208,7 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
 
             {qrCode && (
               <div className="flex flex-col items-center gap-3">
-                <div className="bg-white p-3 rounded-lg border border-border">
+                <div className="bg-white p-3 rounded-xl border border-border">
                   <img
                     src={qrCode}
                     alt="QR code for two-factor authentication setup. Scan with your authenticator app."
@@ -235,7 +235,7 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
                     onClick={() => setSecretVisible((v) => !v)}
                     aria-label={secretVisible ? "Hide setup key" : "Show setup key"}
                     aria-pressed={secretVisible}
-                    className="p-2 rounded-lg border border-border hover:bg-muted transition-colors min-h-11 min-w-11 flex items-center justify-center"
+                    className="p-2 rounded-xl border border-border hover:bg-muted transition-colors min-h-11 min-w-11 flex items-center justify-center"
                   >
                     {secretVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>

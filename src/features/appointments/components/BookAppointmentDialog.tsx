@@ -296,7 +296,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
                 <button
                   key={doc.doctor_id}
                   onClick={() => handleSelectDoctor(doc)}
-                  className="w-full flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors text-left"
+                  className="w-full flex items-center gap-3 p-3 rounded-xl border border-border hover:bg-muted/50 transition-colors text-left"
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
                     <User className="h-5 w-5 text-primary" />
@@ -339,7 +339,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
                       key={svc.id}
                       onClick={() => handleSelectService(svc)}
                       className={cn(
-                        "w-full flex items-center gap-3 p-3 rounded-lg border transition-colors text-left",
+                        "w-full flex items-center gap-3 p-3 rounded-xl border transition-colors text-left",
                         isSelected
                           ? "border-primary bg-primary/5"
                           : "border-border hover:bg-muted/50"
@@ -432,7 +432,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
           <div className="space-y-4 pt-2">
             <Button variant="ghost" size="sm" onClick={() => setStep(3)} className="mb-2">← Back</Button>
 
-            <div className="rounded-lg border border-border p-4 space-y-3">
+            <div className="rounded-xl border border-border p-4 space-y-3">
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">{selectedDoctor?.full_name}</span>

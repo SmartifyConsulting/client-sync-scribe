@@ -221,13 +221,13 @@ export function HeaderFooterTemplateForm({
       {/* Dynamic Fields Info */}
       <div className="px-2 py-1.5 rounded-lg bg-muted/50 border border-border">
         <div className="flex flex-wrap items-center gap-1">
-          <span className="text-[10px] font-medium text-muted-foreground mr-0.5">Fields:</span>
-          <code className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">[Wealth ManagerName]</code>
-          <code className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">[Wealth ManagerSignature]</code>
-          <code className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">[FirmNumber]</code>
-          <code className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">[Wealth ManagerNumber]</code>
-          <code className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">[FirmAddress]</code>
-          <code className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">[Date]</code>
+          <span className="text-2xs font-medium text-muted-foreground mr-0.5">Fields:</span>
+          <code className="text-2xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">[Wealth ManagerName]</code>
+          <code className="text-2xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">[Wealth ManagerSignature]</code>
+          <code className="text-2xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">[FirmNumber]</code>
+          <code className="text-2xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">[Wealth ManagerNumber]</code>
+          <code className="text-2xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">[FirmAddress]</code>
+          <code className="text-2xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">[Date]</code>
         </div>
       </div>
 
@@ -242,7 +242,7 @@ export function HeaderFooterTemplateForm({
         </CardHeader>
         <CardContent className="grid grid-cols-3 gap-2 px-3 pb-3">
           <div>
-            <label className="text-[10px] font-medium text-muted-foreground mb-0.5 block">Left</label>
+            <label className="text-2xs font-medium text-muted-foreground mb-0.5 block">Left</label>
             <TemplateSectionEditor
               value={header.left}
               onChange={(v) => setHeader({ ...header, left: v })}
@@ -252,7 +252,7 @@ export function HeaderFooterTemplateForm({
             />
           </div>
           <div>
-            <label className="text-[10px] font-medium text-muted-foreground mb-0.5 block">Center</label>
+            <label className="text-2xs font-medium text-muted-foreground mb-0.5 block">Center</label>
             <TemplateSectionEditor
               value={header.center}
               onChange={(v) => setHeader({ ...header, center: v })}
@@ -262,7 +262,7 @@ export function HeaderFooterTemplateForm({
             />
           </div>
           <div>
-            <label className="text-[10px] font-medium text-muted-foreground mb-0.5 block">Right</label>
+            <label className="text-2xs font-medium text-muted-foreground mb-0.5 block">Right</label>
             <TemplateSectionEditor
               value={header.right}
               onChange={(v) => setHeader({ ...header, right: v })}
@@ -283,7 +283,7 @@ export function HeaderFooterTemplateForm({
         </CardHeader>
         <CardContent className="grid grid-cols-3 gap-2 px-3 pb-3">
           <div>
-            <label className="text-[10px] font-medium text-muted-foreground mb-0.5 block">Left</label>
+            <label className="text-2xs font-medium text-muted-foreground mb-0.5 block">Left</label>
             <TemplateSectionEditor
               value={footer.left}
               onChange={(v) => setFooter({ ...footer, left: v })}
@@ -293,7 +293,7 @@ export function HeaderFooterTemplateForm({
             />
           </div>
           <div>
-            <label className="text-[10px] font-medium text-muted-foreground mb-0.5 block">Center</label>
+            <label className="text-2xs font-medium text-muted-foreground mb-0.5 block">Center</label>
             <TemplateSectionEditor
               value={footer.center}
               onChange={(v) => setFooter({ ...footer, center: v })}
@@ -303,7 +303,7 @@ export function HeaderFooterTemplateForm({
             />
           </div>
           <div>
-            <label className="text-[10px] font-medium text-muted-foreground mb-0.5 block">Right</label>
+            <label className="text-2xs font-medium text-muted-foreground mb-0.5 block">Right</label>
             <TemplateSectionEditor
               value={footer.right}
               onChange={(v) => setFooter({ ...footer, right: v })}
@@ -314,7 +314,7 @@ export function HeaderFooterTemplateForm({
           </div>
         </CardContent>
       </Card>}
-      {!mode?.includes("-only") && <p className="text-[10px] text-muted-foreground -mt-1">
+      {!mode?.includes("-only") && <p className="text-2xs text-muted-foreground -mt-1">
         Saving this Letterhead applies both the Header Card and Footer Card together by default wherever it's selected.
       </p>}
 

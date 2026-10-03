@@ -10388,6 +10388,72 @@ export type Database = {
           },
         ]
       }
+      wealth_client_invites: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          email: string | null
+          expires_at: string
+          first_name: string
+          id: string
+          last_name: string
+          owner_user_id: string
+          patient_id: string
+          phone: string | null
+          status: string
+          token_hash: string
+          workflow_id: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email?: string | null
+          expires_at?: string
+          first_name: string
+          id?: string
+          last_name: string
+          owner_user_id: string
+          patient_id: string
+          phone?: string | null
+          status?: string
+          token_hash: string
+          workflow_id?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email?: string | null
+          expires_at?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          owner_user_id?: string
+          patient_id?: string
+          phone?: string | null
+          status?: string
+          token_hash?: string
+          workflow_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wealth_client_invites_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wealth_client_invites_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "wealth_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wealth_compliance_checks: {
         Row: {
           bank_validation_completed_at: string | null
@@ -10496,6 +10562,7 @@ export type Database = {
       }
       wealth_practice_info: {
         Row: {
+          business_logo_path: string | null
           complaints_address: string | null
           compliance_email: string | null
           compliance_fax: string | null
@@ -10513,6 +10580,7 @@ export type Database = {
           fsb_licence: string | null
           fsca_categories: string[]
           fsp_legal_status: string | null
+          fsp_logo_path: string | null
           fsp_name: string | null
           id_number: string | null
           phone: string | null
@@ -10531,6 +10599,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          business_logo_path?: string | null
           complaints_address?: string | null
           compliance_email?: string | null
           compliance_fax?: string | null
@@ -10548,6 +10617,7 @@ export type Database = {
           fsb_licence?: string | null
           fsca_categories?: string[]
           fsp_legal_status?: string | null
+          fsp_logo_path?: string | null
           fsp_name?: string | null
           id_number?: string | null
           phone?: string | null
@@ -10566,6 +10636,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          business_logo_path?: string | null
           complaints_address?: string | null
           compliance_email?: string | null
           compliance_fax?: string | null
@@ -10583,6 +10654,7 @@ export type Database = {
           fsb_licence?: string | null
           fsca_categories?: string[]
           fsp_legal_status?: string | null
+          fsp_logo_path?: string | null
           fsp_name?: string | null
           id_number?: string | null
           phone?: string | null

@@ -129,7 +129,7 @@ export function ProfileSharesSection({ ownerUserId }: { ownerUserId: string }) {
         </p>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="rounded-lg border border-dashed border-border p-3 space-y-2">
+        <div className="rounded-xl border border-dashed border-border p-3 space-y-2">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <div>
               <Label className="text-sm">First name</Label>
@@ -170,7 +170,7 @@ export function ProfileSharesSection({ ownerUserId }: { ownerUserId: string }) {
           <p className="text-xs text-muted-foreground">No one has access yet.</p>
         )}
         {shares.map((s) => (
-          <div key={s.id} className="rounded-lg border border-border p-3 bg-muted/30">
+          <div key={s.id} className="rounded-xl border border-border p-3 bg-muted/30">
             <div className="flex items-start justify-between gap-2">
               <div>
                 <p className="font-medium text-sm">
