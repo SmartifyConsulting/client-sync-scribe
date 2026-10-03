@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Loader2 } from "lucide-react";
+import { Loader2, Users2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Panel } from "@/components/ui/Panel";
 
 /** History of every Wealth Manager / broker who has served this client. */
 export function MyAdvisorsHistory({ patientId }: { patientId: string }) {
@@ -32,8 +33,7 @@ export function MyAdvisorsHistory({ patientId }: { patientId: string }) {
   });
 
   return (
-    <section className="rounded-xl border border-primary bg-card p-4">
-      <h2 className="text-sm font-semibold text-foreground">My Advisors</h2>
+    <Panel title="My Advisors" icon={Users2}>
       <p className="text-xs text-muted-foreground mb-3">Every Wealth Manager who has looked after your affairs, over time.</p>
       {isLoading ? (
         <Loader2 className="h-5 w-5 animate-spin text-primary" />
@@ -58,6 +58,6 @@ export function MyAdvisorsHistory({ patientId }: { patientId: string }) {
           ))}
         </ol>
       )}
-    </section>
+    </Panel>
   );
 }

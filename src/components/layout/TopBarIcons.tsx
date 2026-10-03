@@ -1,4 +1,4 @@
-import { Bell, Mic, User, Settings, LogOut, Award, Share2, Briefcase as Stethoscope, LineChart as HeartPulse, Calendar as CalendarIcon, Gift, Bug, Scale, UserCog, ShieldCheck, Loader2 } from "lucide-react";
+import { Bell, Mic, User, Settings, LogOut, Award, Share2, Briefcase as Stethoscope, LineChart as HeartPulse, Calendar as CalendarIcon, Gift, Scale, UserCog, ShieldCheck, Loader2 } from "lucide-react";
 import { TEST_PROFILES, ADMIN_EMAIL } from "./testProfiles";
 import { useImpersonate } from "./useImpersonate";
 import { useEffect, useState } from "react";
@@ -13,7 +13,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
 import { ShareAppDialog } from "@/components/ShareAppDialog";
-import { ReportFixSheet } from "@/components/feedback/ReportFixSheet";
 import { useUserRole } from "@/hooks/useUserRole";
 import { cn } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -38,7 +37,6 @@ export interface TopBarIconsProps {
 export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
   const { t } = useTranslation();
   const isProvider = variant === "provider";
-  const [reportOpen, setReportOpen] = useState(false);
   const { profile } = useProfile();
   const { isDoctor, isEmergency } = useUserRole();
   const queryClient = useQueryClient();
@@ -137,24 +135,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
 
   return (
     <div className="flex items-center gap-2">
-      {/* Language switcher — sits immediately left of the bug-report icon */}
       <LanguageSwitcher />
-
-      {/* Bug/Fix Report */}
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              onClick={() => setReportOpen(true)}
-              className="h-9 w-9 rounded-full bg-primary flex items-center justify-center hover:opacity-80 transition-opacity"
-            >
-              <Bug className="h-4 w-4 text-white" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>{t("topbar.reportBug")}</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-      <ReportFixSheet open={reportOpen} onOpenChange={setReportOpen} />
 
       {!isProvider && (
         <>

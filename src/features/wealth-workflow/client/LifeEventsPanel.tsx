@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Panel } from "@/components/ui/Panel";
 
 const EVENTS = ["Marriage", "New baby", "New job", "Retirement", "Property purchase", "Divorce", "Death in the family", "Other"];
 const DISCLAIMER = "This is general guidance, not financial advice. Please speak to your Wealth Manager before making changes.";
@@ -51,21 +53,19 @@ export function LifeEventsPanel({ patientId, workflowId }: { patientId: string |
     toast({ title: "Shared with your Wealth Manager" });
   };
 
-  const label = "text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground";
+  const label = "text-[10px] font-semibold uppercase tracking-wide text-muted-foreground";
 
   return (
-    <section className="rounded-xl border border-border bg-card">
-      <header className="border-b border-border px-5 py-3">
-        <h2 className="text-sm font-semibold text-foreground">Life events</h2>
-        <p className="text-xs text-muted-foreground">Tell us what's changed and see how it might affect your cover.</p>
-      </header>
-      <div className="grid gap-6 p-5 md:grid-cols-2">
+    <Panel title="Life events" icon={Sparkles}>
+      <p className="-mt-2 mb-3 text-xs text-muted-foreground">Tell us what's changed and see how it might affect your cover.</p>
+      <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-3">
           <p className={label}>Capture an event</p>
           <div className="grid grid-cols-2 gap-2">
-            <select value={type} onChange={(e) => setType(e.target.value)} className="h-9 rounded-md border border-input bg-background px-2 text-sm">
-              {EVENTS.map((e) => <option key={e}>{e}</option>)}
-            </select>
+            <Select value={type} onValueChange={setType}>
+              <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+              <SelectContent>{EVENTS.map((e) => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent>
+            </Select>
             <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-9 text-sm" />
           </div>
           <Input placeholder="Short note (optional)" value={note} onChange={(e) => setNote(e.target.value)} className="h-9 text-sm" />
@@ -81,7 +81,7 @@ export function LifeEventsPanel({ patientId, workflowId }: { patientId: string |
           {answer && <p className="whitespace-pre-line rounded-md bg-muted/40 p-3 text-[13px] leading-relaxed text-foreground">{answer}</p>}
         </div>
       </div>
-      <p className="border-t border-border px-5 py-2 text-[11px] italic text-muted-foreground">{DISCLAIMER}</p>
-    </section>
+      <p className="mt-4 border-t border-border pt-3 text-[11px] italic text-muted-foreground">{DISCLAIMER}</p>
+    </Panel>
   );
 }

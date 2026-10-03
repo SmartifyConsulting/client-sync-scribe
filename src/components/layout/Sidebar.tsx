@@ -4,7 +4,6 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
 import { useTranslation } from "react-i18next";
 import { Logo } from "@/components/brand/Logo";
-import { useBrandMode } from "@/hooks/useBrandMode";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -36,6 +35,7 @@ import {
   Briefcase as Stethoscope,
   History,
   BarChart3,
+  FileText,
 } from "lucide-react";
 
 import { useUserRole } from "@/hooks/useUserRole";
@@ -117,7 +117,7 @@ const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.myPersonalDashboard", to: "/my-dashboard" },
   { icon: Users, label: "My Profile", labelKey: "nav.myHolarchy", to: "/patient/details?section=health", tour: "patient-holarchy" },
   { icon: Activity, label: "Live Workspace", labelKey: "nav.liveWorkspace", to: "/my-workspace" },
-  { icon: Activity, label: "My Future", labelKey: "nav.myFuture", to: "/my-future" },
+  { icon: FileText, label: "Claims", labelKey: "nav.myClaims", to: "/my-future?tab=claims" },
   { icon: FolderOpen, label: "Documents", labelKey: "nav.futureDocuments", to: "/my-future?tab=documents" },
   { icon: Activity, label: "My Biolog", labelKey: "nav.myBiolog", to: "/biolog" },
   { icon: BedDouble, label: "My Admissions", labelKey: "nav.myAdmissions", to: "/patient/admissions" },
@@ -196,7 +196,6 @@ interface SidebarProps {
 
 export function Sidebar({ onNavigate }: SidebarProps) {
   const { t } = useTranslation();
-  const { mode: brandMode, toggle: toggleBrandMode } = useBrandMode();
   const { role, loading: roleLoading, isPatient, isAdmin } = useUserRole();
   const { isAssistant } = usePracticeAssistant();
   const { hasHospitalAffiliation, loading: affiliationLoading } = useHospitalAffiliation();
@@ -272,9 +271,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     : isNurseMenu
       ? withShiftRule(nurseNavItems)
       : isPatientMenu
-      ? withShiftRule(patientNavItems)
-          .filter((i) => !CLIENT_BLOCKED_PATHS.includes(i.to))
-          .filter((i) => brandMode !== "indigro" || !isWealthHidden(i.to))
+      ? withShiftRule(patientNavItems).filter((i) => !CLIENT_BLOCKED_PATHS.includes(i.to))
       : doctorItems;
 
 
@@ -574,31 +571,6 @@ export function Sidebar({ onNavigate }: SidebarProps) {
           </div>
         )}
 
-        {/* Brand mode toggle — demo control for showing the client the Holarc/Indigro look */}
-        <div className="px-4 pb-2">
-          <button
-            type="button"
-            onClick={toggleBrandMode}
-            className="flex w-full items-center justify-between rounded-xl border border-border bg-muted/40 px-3 py-2 text-xs font-semibold text-muted-foreground hover:bg-muted transition-colors"
-            title="Switch between Holarc Wealth and indigro styling"
-          >
-            <span>{brandMode === "indigro" ? "indigro mode" : "Holarc mode"}</span>
-            <span
-              className={cn(
-                "relative h-5 w-9 shrink-0 rounded-full transition-colors",
-                brandMode === "indigro" ? "bg-primary" : "bg-border",
-              )}
-            >
-              <span
-                className={cn(
-                  "absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform",
-                  brandMode === "indigro" ? "translate-x-4" : "translate-x-0.5",
-                )}
-              />
-            </span>
-          </button>
-        </div>
-
         {/* Bottom Section - Account */}
         <div className="mt-auto px-2 pb-2">
           <AccountMenu
@@ -624,18 +596,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                   {loading ? (
                     <div className="h-3 w-20 rounded bg-muted animate-pulse" />
                   ) : (
-                    <>
-                      <p className="text-sm font-semibold text-foreground truncate">{profile?.full_name || t("nav.myProfile", "My Profile")}</p>
-                      {mailboxAddress && (
-                        <p
-                          className="text-[11px] text-muted-foreground break-all leading-tight"
-                          title={mailboxAddress}
-                        >
-                          {mailboxAddress}
-                        </p>
-                      )}
-
-                    </>
+                    <p className="text-sm font-semibold text-foreground truncate">{profile?.full_name || t("nav.myProfile", "My Profile")}</p>
                   )}
                 </div>
               </button>

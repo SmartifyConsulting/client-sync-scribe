@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
-import { SectionHeader } from "../sectionStyles";
+import { SectionHeader, FIELD_GRID_2_CLASS } from "../sectionStyles";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -122,7 +122,7 @@ export function FinancialInformation({ patientId }: { patientId: string }) {
             <SectionHeader icon={null} label={s.label} />
             <CollapsibleContent className="p-3 space-y-3">
               {s.fields && (
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className={FIELD_GRID_2_CLASS}>
                   {s.fields.map((f) => (
                     <div key={f.key} className={f.type === "textarea" ? "space-y-1.5 sm:col-span-2" : "space-y-1.5"}>
                       <Label className="text-xs">{f.label}</Label>

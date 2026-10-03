@@ -2,8 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Logo } from "@/components/brand/Logo";
-import { useBrandMode } from "@/hooks/useBrandMode";
-import IndigroWelcome from "@/pages/IndigroWelcome";
 import { motion } from "framer-motion";
 import {
   Briefcase as Stethoscope,
@@ -117,7 +115,6 @@ export default function Landing() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, loading } = useAuth();
-  const { mode: brandMode } = useBrandMode();
   const [showRoleDialog, setShowRoleDialog] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string>("patient");
 
@@ -125,10 +122,6 @@ export default function Landing() {
   if (!loading && user) {
     navigate("/dashboard");
     return null;
-  }
-
-  if (brandMode === "indigro") {
-    return <IndigroWelcome />;
   }
 
   const handleRoleSelect = (role: string) => {

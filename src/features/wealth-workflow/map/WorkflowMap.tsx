@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useStartWorkflow } from "../hooks";
 import { OWNER_LABEL } from "./groups";
 import { useWorkflowMap, type GroupView } from "./useWorkflowMap";
-import { WorkflowGroupCard } from "./WorkflowGroupCard";
+import { WorkflowStepper } from "./WorkflowStepper";
 import { StageDetailSheet } from "./StageDetailSheet";
 import { WorkingWindow } from "./WorkingWindow";
 import { useWorkflowRealtime } from "../workspace/useWorkflowRealtime";
@@ -62,41 +62,44 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
   const shownStep = picked ? picked.step : liveStep;
   const isLive = !picked || (picked.group === liveGroup?.group.key && picked.step === liveStep);
 
-  const clientFirst = (clientName ?? "").split(" ")[0] || "Client";
-  const cards = m.groups.map((g) => (
-    <WorkflowGroupCard key={g.group.key} view={g} blockers={g.state === "blocked" ? wf.blockers : []} viewer={viewer} clientFirst={clientFirst}
-      onOpen={() => viewer === "manager" && setSelected(g)}
-      selectedStep={shownGroup?.group.key === g.group.key ? shownStep : null}
-      onSelectStep={(label) => setPicked({ group: g.group.key, step: label })} />
-  ));
-
   return (
     <div className="space-y-4">
       {onBackToLive && (
         <button onClick={onBackToLive} className="text-xs font-medium text-primary hover:underline">← Back to Live workspace</button>
       )}
-      <div className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-xl border border-border/70 bg-card px-4 py-2.5 text-[13px] sm:grid-cols-4">
-        <Field label="Client" value={clientName ?? "—"} />
-        <Field label="Current stage" value={curLabel} />
-        <Field label="Status" value={statusText} danger={wf.status === "blocked"} />
-        <Field label="Next action" value={nextAction?.title ?? "—"} />
-        {wf.status === "blocked" && wf.blockers.length > 0 && (
-          <div className="col-span-full text-xs text-destructive">
-            <span className="font-semibold">Blocked: </span>{wf.blockers.join(" · ")}
-          </div>
-        )}
+      {viewer === "manager" && (
+        <div className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-xl border border-border/70 bg-card px-4 py-2.5 text-[13px] sm:grid-cols-4">
+          <Field label="Client" value={clientName ?? "—"} />
+          <Field label="Current stage" value={curLabel} />
+          <Field label="Status" value={statusText} danger={wf.status === "blocked"} />
+          <Field label="Next action" value={nextAction?.title ?? "—"} />
+          {wf.status === "blocked" && wf.blockers.length > 0 && (
+            <div className="col-span-full text-xs text-destructive">
+              <span className="font-semibold">Blocked: </span>{wf.blockers.join(" · ")}
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="rounded-xl border border-border/70 bg-card px-4 py-3">
+        <WorkflowStepper
+          groups={m.groups}
+          viewer={viewer}
+          selectedKey={shownGroup?.group.key}
+          onSelect={(key) => {
+            const g = m.groups.find((x) => x.group.key === key);
+            if (!g) return;
+            const step = g.steps.find((s) => s.state === "next")?.label ?? g.steps.find((s) => s.state === "done")?.label ?? g.steps[0]?.label ?? "";
+            setPicked({ group: key, step });
+          }}
+        />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="space-y-2">{cards}</div>
-        <div className="lg:sticky lg:top-4 lg:self-start">
-          <WorkingWindow group={shownGroup} stepLabel={shownStep} isLive={isLive} viewer={viewer}
-            clientName={clientName ?? "Client"} workflowId={wf.id} records={m.records}
-            blockers={wf.status === "blocked" ? wf.blockers : []}
-            documents={(m.records?.docs ?? []) as any[]}
-            onBackToCurrent={() => setPicked(null)} onOpenDocuments={onOpenDocuments} />
-        </div>
-      </div>
+      <WorkingWindow group={shownGroup} stepLabel={shownStep} isLive={isLive} viewer={viewer}
+        clientName={clientName ?? "Client"} workflowId={wf.id} records={m.records}
+        blockers={wf.status === "blocked" ? wf.blockers : []}
+        documents={(m.records?.docs ?? []) as any[]}
+        onBackToCurrent={() => setPicked(null)} onOpenDocuments={onOpenDocuments} />
 
       <StageDetailSheet view={selected} onClose={() => setSelected(null)} workflow={wf} defs={m.defs} recs={m.recs} records={m.records} />
     </div>

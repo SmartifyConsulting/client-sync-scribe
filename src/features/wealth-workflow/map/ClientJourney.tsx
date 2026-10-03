@@ -1,6 +1,5 @@
-import { ArrowRight, Check } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { useWorkflowMap } from "./useWorkflowMap";
+import { WorkflowStepper } from "./WorkflowStepper";
 
 /** Simplified client-facing view. No internal system steps. */
 export function ClientJourney({ patientId }: { patientId: string }) {
@@ -22,20 +21,9 @@ export function ClientJourney({ patientId }: { patientId: string }) {
     <div className="rounded-lg border bg-card p-4 text-sm">
       <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Your wealth journey</p>
       <p className="mt-1 font-medium text-foreground">{message}</p>
-      <ol className="mt-3 space-y-1.5">
-        {m.groups.filter((g) => g.state !== "not_applicable").map((g) => {
-          const done = g.state === "completed";
-          const active = ["current", "waiting", "blocked"].includes(g.state);
-          return (
-            <li key={g.group.key} className="flex items-center gap-2">
-              {done ? <Check className="h-4 w-4 text-primary" /> : active ? <ArrowRight className="h-4 w-4 text-primary" /> : <span className="h-4 w-4" />}
-              <span className={cn(done ? "text-muted-foreground" : active ? "font-semibold text-foreground" : "text-muted-foreground/70")}>
-                {g.group.clientTitle}
-              </span>
-            </li>
-          );
-        })}
-      </ol>
+      <div className="mt-3">
+        <WorkflowStepper groups={m.groups} viewer="client" />
+      </div>
     </div>
   );
 }

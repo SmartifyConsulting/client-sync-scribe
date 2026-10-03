@@ -1,4 +1,3 @@
-import { LifeEventsPanel } from "@/features/wealth-workflow/client/LifeEventsPanel";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FolderOpen,
@@ -42,6 +41,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PatientHeroCard } from "@/components/dashboard/PatientHeroCard";
+import { Panel } from "@/components/ui/Panel";
 import { useClientWealth, zar, zarShort } from "@/features/wealth-workflow/client/useClientWealth";
 import { EmotionalHeadline } from "@/components/dashboard/EmotionalHeadline";
 import { PeopleICareFor } from "@/components/dashboard/PeopleICareFor";
@@ -96,56 +96,6 @@ const INSIGHTS = [
   "Mum's medication was taken this morning.",
 ];
 
-function Panel({
-  title,
-  icon: Icon,
-  unlocked,
-  action,
-  onClick,
-  children,
-  className,
-}: {
-  title?: string;
-  icon?: LucideIcon;
-  unlocked: boolean;
-  action?: React.ReactNode;
-  onClick?: () => void;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <section
-      className={cn(
-        "rounded-xl border p-4 h-full",
-        unlocked ? "border-primary bg-card" : "border-border bg-muted/30 opacity-60",
-        className,
-      )}
-    >
-      {title && (
-        <header
-          className={cn("flex items-center justify-between gap-2 mb-3", onClick && "cursor-pointer")}
-          onClick={onClick}
-        >
-          <div className="flex items-center gap-2">
-            {Icon && (
-              <span
-                className={cn(
-                  "flex h-8 w-8 items-center justify-center rounded-lg",
-                  unlocked ? "bg-primary/10" : "bg-muted",
-                )}
-              >
-                <Icon className={cn("h-4 w-4", unlocked ? "text-primary" : "text-muted-foreground")} />
-              </span>
-            )}
-            <h2 className="text-sm font-semibold text-foreground">{title}</h2>
-          </div>
-          {action ?? (unlocked ? <ChevronRight className="h-4 w-4 text-muted-foreground" /> : <Lock className="h-3.5 w-3.5 text-muted-foreground" />)}
-        </header>
-      )}
-      {children}
-    </section>
-  );
-}
 
 export default function MyPersonalDashboard() {
   const { user } = useAuth();
@@ -265,8 +215,6 @@ export default function MyPersonalDashboard() {
     <div className="container mx-auto p-4 max-w-7xl space-y-4">
       {/* Hero: photo, greeting, Vulas, appointments */}
       <PatientHeroCard emotionalLine={GREETING_LINE[state]} />
-
-      <LifeEventsPanel patientId={w?.patientId ?? null} workflowId={w?.workflow?.id ?? null} />
 
       {/* Your Financial Protection + What's Happening */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
@@ -401,72 +349,6 @@ export default function MyPersonalDashboard() {
         </Panel>
       </div>
 
-      {/* Your Beneficiaries — in the former "People I care for" frame */}
-      <Panel title="Your Beneficiaries" icon={Users2} unlocked={unlocked} onClick={() => navigate("/patient/details?section=personal")}>
-        <EmotionalHeadline
-          emoji="🤝"
-          title={w?.beneficiaries.length ? "The people you're providing for" : "No beneficiaries nominated yet"}
-          sub="Who receives your benefits"
-        />
-        {w?.beneficiaries.length ? (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {w.beneficiaries.map((b, i) => (
-              <div key={i} className="rounded-lg border border-border bg-background/60 p-3">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                    {b.name.slice(0, 2).toUpperCase()}
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">{b.name}</p>
-                    <p className="text-[10px] text-muted-foreground">{b.relationship || "Beneficiary"}</p>
-                  </div>
-                </div>
-                <p className="mt-2 rounded-md bg-muted px-2 py-1 text-[11px] font-semibold text-primary">
-                  {b.share ? `${b.share}% share` : "Share not set"}
-                </p>
-              </div>
-            ))}
-          </div>
-        ) : null}
-        <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
-          <p className="text-xs font-semibold text-foreground">Peace of mind</p>
-          <p className="text-xs text-muted-foreground">
-            {w?.beneficiaries.length
-              ? w.beneficiaries.every((b) => b.share)
-                ? "All your nominations have a share allocated."
-                : "Some nominations don't have a share yet. Check them with your Wealth Manager."
-              : "Add your beneficiaries so your benefits go to the right people."}
-          </p>
-        </div>
-      </Panel>
-
-      {/* Claims + Recent Documents */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-        <Panel title="Claims" icon={FileText} unlocked={unlocked} onClick={() => navigate("/my-future")}>
-          {w?.claims.length ? (
-            <ul className="space-y-1.5">
-              {w.claims.slice(0, 3).map((c: any) => (
-                <li key={c.id} className="flex items-center justify-between rounded-lg border border-border bg-background/60 p-2 text-xs">
-                  <span className="font-semibold">{c.claim_type}</span>
-                  <span className="capitalize text-muted-foreground">{c.status}</span>
-                </li>
-              ))}
-            </ul>
-          ) : <p className="text-xs text-muted-foreground">No open claims. You can log one from My Future.</p>}
-        </Panel>
-        <Panel title="Recent Documents" icon={FolderOpen} unlocked={unlocked} onClick={() => navigate("/patient/details?section=admin")}>
-          {w?.documents.length ? (
-            <ul className="space-y-1.5">
-              {w.documents.slice(0, 4).map((d: any) => (
-                <li key={d.id} className="flex items-center justify-between gap-2 text-xs">
-                  <span className="font-semibold truncate">{d.name}</span>
-                  <span className="text-muted-foreground shrink-0">{format(new Date(d.created_at), "d MMM")}</span>
-                </li>
-              ))}
-            </ul>
-          ) : <p className="text-xs text-muted-foreground">No documents yet.</p>}
-        </Panel>
-      </div>
     </div>
   );
 }

@@ -14,6 +14,7 @@ import {
   Home,
   Sparkles,
   Activity,
+  FileText,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -33,7 +34,7 @@ const patientSections = [
   { icon: Handshake, labelKey: "nav.myHolarchy", section: "health", to: "/patient/details?section=health" },
   { icon: FolderOpen, labelKey: "bottomNav.myDesk", section: "admin", to: "/patient/details?section=admin" },
   { icon: Activity, labelKey: "nav.liveWorkspace", section: "workspace", to: "/my-workspace" },
-  { icon: Handshake, labelKey: "nav.myFuture", section: "future", to: "/my-future" },
+  { icon: FileText, labelKey: "nav.myClaims", section: "claims", to: "/my-future?tab=claims" },
   { icon: Gift, labelKey: "nav.myRewards", section: "rewards", to: "/patient/rewards" },
   { icon: Sparkles, labelKey: "nav.askMaeve", section: "maeve", to: "/ask-maeve", accent: true },
   { icon: Siren, labelKey: "nav.sos", section: "sos", to: "/patient/holarchelp", danger: true },
@@ -172,7 +173,7 @@ export function BottomNav() {
               ? location.pathname.startsWith("/ask-maeve")
               : item.section === "workspace"
               ? location.pathname.startsWith("/my-workspace")
-              : item.section === "future"
+              : item.section === "claims"
               ? location.pathname.startsWith("/my-future")
               : item.section === "sos"
               ? location.pathname.startsWith("/patient/holarchelp")

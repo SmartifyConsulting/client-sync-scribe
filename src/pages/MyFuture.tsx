@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 const PatientDocuments = lazy(() => import("@/pages/patient/PatientDocuments"));
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, ShieldCheck, Wallet as WalletIcon, TrendingUp, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Panel } from "@/components/ui/Panel";
 import { useClientWealth, num, zar } from "@/features/wealth-workflow/client/useClientWealth";
 
 const RETIREMENT = ["Retirement annuity", "Pension fund", "Provident fund", "Preservation fund"];
@@ -23,12 +24,11 @@ const DOC_LABEL: Record<string, string> = {
   policy_schedule: "Policy schedule",
 };
 
-function Frame({ title, children }: { title: string; children: React.ReactNode }) {
+function Frame({ title, icon, children }: { title: string; icon?: React.ComponentProps<typeof Panel>["icon"]; children: React.ReactNode }) {
   return (
-    <section className="rounded-xl border border-primary bg-card p-4">
-      <h2 className="text-sm font-semibold text-foreground mb-3">{title}</h2>
+    <Panel title={title} icon={icon}>
       {children}
-    </section>
+    </Panel>
   );
 }
 
@@ -114,7 +114,7 @@ export default function MyFuture() {
         </TabsList>
 
         <TabsContent value="cover" className="space-y-4">
-          <Frame title="Policies issued through your adviser">
+          <Frame title="Policies issued through your adviser" icon={ShieldCheck}>
             {data.issued.length ? (
               <ul className="space-y-2">
                 {data.issued.map((a) => (
@@ -127,7 +127,7 @@ export default function MyFuture() {
               </ul>
             ) : <Empty text="No policies have been issued through your adviser yet." />}
           </Frame>
-          <Frame title="Your existing cover">
+          <Frame title="Your existing cover" icon={ShieldCheck}>
             {risk.length ? (
               <ul className="space-y-2">
                 {risk.map((p, i) => (
@@ -139,7 +139,7 @@ export default function MyFuture() {
         </TabsContent>
 
         <TabsContent value="investments">
-          <Frame title="My Investments">
+          <Frame title="My Investments" icon={WalletIcon}>
             {investments.length ? (
               <ul className="space-y-2">
                 {investments.map((h, i) => (
@@ -151,7 +151,7 @@ export default function MyFuture() {
         </TabsContent>
 
         <TabsContent value="retirement" className="space-y-4">
-          <Frame title="Retirement savings">
+          <Frame title="Retirement savings" icon={TrendingUp}>
             {retirement.length ? (
               <ul className="space-y-2">
                 {retirement.map((h, i) => (
@@ -160,7 +160,7 @@ export default function MyFuture() {
               </ul>
             ) : <Empty text="No retirement funds captured yet." />}
           </Frame>
-          <Frame title="Your retirement goal">
+          <Frame title="Your retirement goal" icon={TrendingUp}>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
               <div><p className="text-muted-foreground">Target retirement age</p><p className="text-lg font-semibold">{data.goals.retirementAge ?? "Not set"}</p></div>
               <div><p className="text-muted-foreground">Desired income</p><p className="text-lg font-semibold">{data.goals.retirementIncome ? `${zar(data.goals.retirementIncome)} /month` : "Not set"}</p></div>
@@ -170,7 +170,7 @@ export default function MyFuture() {
         </TabsContent>
 
         <TabsContent value="claims" className="space-y-4">
-          <Frame title="Log a claim">
+          <Frame title="Log a claim" icon={FileText}>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label>Type of claim</Label>
@@ -192,7 +192,7 @@ export default function MyFuture() {
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />} Submit claim
             </Button>
           </Frame>
-          <Frame title="Your claims">
+          <Frame title="Your claims" icon={FileText}>
             {data.claims.length ? (
               <ul className="space-y-2">
                 {data.claims.map((c) => (

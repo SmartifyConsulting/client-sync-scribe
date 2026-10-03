@@ -1,6 +1,7 @@
 import { PatientProgrammesTab } from "@/features/programmes/components/PatientProgrammesTab";
 import { ClientAISummary } from "@/features/wealth-workflow/client/ClientAISummary";
 import { MyAdvisorsHistory } from "@/features/wealth-workflow/client/MyAdvisorsHistory";
+import { LifeEventsPanel } from "@/features/wealth-workflow/client/LifeEventsPanel";
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { LANGUAGES } from "@/lib/languages";
@@ -386,7 +387,7 @@ function AnimatedCounter({ target }: { target: number }) {
 }
 
 const SECTION_TABS: Record<string, string[]> = {
-  health: ["personal", "medical", "overview", "history"],
+  health: ["overview", "personal", "medical", "history", "lifeEvents"],
   admin: ["calendar", "tasks", "programmes"],
 };
 
@@ -1552,6 +1553,11 @@ export function PatientDetailsEditor({
     if (isSelfService && section) {
       return (
         <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+          {show("overview") && (
+            <TabsTrigger value="overview" className={triggerClass}>
+              Overview
+            </TabsTrigger>
+          )}
           {show("personal") && (
             <TabsTrigger value="personal" className={triggerClass}>
               {t("patientProfile.togglePersonal")}
@@ -1562,14 +1568,14 @@ export function PatientDetailsEditor({
               {t("patientProfile.toggleMedical")}
             </TabsTrigger>
           )}
-          {show("overview") && (
-            <TabsTrigger value="overview" className={triggerClass}>
-              My Advisors
-            </TabsTrigger>
-          )}
           {show("history") && (
             <TabsTrigger value="history" className={triggerClass}>
               My Consults
+            </TabsTrigger>
+          )}
+          {show("lifeEvents") && (
+            <TabsTrigger value="lifeEvents" className={triggerClass}>
+              Life Events
             </TabsTrigger>
           )}
           {show("documents") && (
@@ -1761,7 +1767,6 @@ export function PatientDetailsEditor({
                   <div className={FIELD_GRID_2_CLASS}>
                     <ViewField label="Employer" value={patient.employer} />
                     <ViewField label="Occupation" value={patient.occupation} />
-                    <ViewField label="Reporting To Email (Optional)" value={patient.reporting_to_email} />
                   </div>
                 </CollapsibleContent>
               </Collapsible>
@@ -1865,6 +1870,12 @@ export function PatientDetailsEditor({
                   <p className="text-xs text-muted-foreground">Your consultations with your advisers. You can also record meetings with advisers not on Holarc Wealth.</p>
                 </div>
                 <PatientSessionRecorder patientId={patient.id} patientName={patient.name} />
+              </TabsContent>
+            )}
+
+            {isSelfService && (
+              <TabsContent value="lifeEvents" className="mt-4">
+                <LifeEventsPanel patientId={patient.id} />
               </TabsContent>
             )}
 
@@ -1987,15 +1998,6 @@ export function PatientDetailsEditor({
             </div>
 
             <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
-            {v2Demo && (
-            <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
-              <SectionHeader icon={Sparkles} label="About Me" />
-              <CollapsibleContent className="p-3">
-                <RelationshipProfileExercise patientId={patient.id} />
-              </CollapsibleContent>
-            </Collapsible>
-            )}
-
             <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
               <SectionHeader icon={User} label="Personal Information" />
               <CollapsibleContent className="p-3">
@@ -2215,28 +2217,6 @@ export function PatientDetailsEditor({
                       onChange={(e) => updateFormData({ occupation: e.target.value })}
                       placeholder="Job title"
                     />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="industry">Industry</Label>
-                    <Input
-                      id="industry"
-                      className="text-sm"
-                      value={(formData as any).industry || ""}
-                      onChange={(e) => updateFormData({ industry: e.target.value } as any)}
-                      placeholder="e.g. Financial services"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="reporting_to_email">Reporting To Email (Optional)</Label>
-                    <Input
-                      id="reporting_to_email"
-                      className="text-sm"
-                      type="email"
-                      value={formData.reporting_to_email}
-                      onChange={(e) => updateFormData({ reporting_to_email: e.target.value })}
-                      placeholder="manager@company.com"
-                    />
-                    <p className="text-xs text-muted-foreground">Used for e-mailing of Advice Letters</p>
                   </div>
                 </div>
               </CollapsibleContent>
@@ -2503,6 +2483,12 @@ export function PatientDetailsEditor({
                   </div>
                 )}
               </Suspense>
+            </TabsContent>
+          )}
+
+          {isSelfService && (
+            <TabsContent value="lifeEvents" className="mt-4">
+              <LifeEventsPanel patientId={patient.id} />
             </TabsContent>
           )}
 

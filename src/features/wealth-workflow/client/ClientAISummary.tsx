@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Panel } from "@/components/ui/Panel";
 
 const LIFE_EVENTS = ["Marriage", "Divorce", "Birth or adoption", "New job", "Retirement", "Property purchase", "Inheritance", "Death in family", "Beneficiary change", "Policy issued", "Other"];
 
@@ -68,17 +69,21 @@ export function ClientAISummary({ patientId }: { patientId: string }) {
   };
 
   return (
-    <section className="rounded-xl border border-primary bg-card p-4 space-y-3">
-      <div className="flex items-center gap-2">
-        <Sparkles className="h-4 w-4 text-primary" />
-        <h2 className="text-sm font-semibold text-foreground">AI Summary</h2>
-        <span className="ml-auto text-[11px] text-muted-foreground">
-          {data?.updatedAt ? `Updated ${formatDistanceToNow(new Date(data.updatedAt), { addSuffix: true })}` : ""}
-        </span>
-        <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => run()} disabled={busy} aria-label="Refresh summary">
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-        </Button>
-      </div>
+    <Panel
+      title="AI Summary"
+      icon={Sparkles}
+      action={
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] text-muted-foreground">
+            {data?.updatedAt ? `Updated ${formatDistanceToNow(new Date(data.updatedAt), { addSuffix: true })}` : ""}
+          </span>
+          <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => run()} disabled={busy} aria-label="Refresh summary">
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+          </Button>
+        </div>
+      }
+    >
+      <div className="space-y-3">
       {isLoading ? (
         <Loader2 className="h-5 w-5 animate-spin text-primary" />
       ) : (
@@ -95,6 +100,7 @@ export function ClientAISummary({ patientId }: { patientId: string }) {
         <Input className="h-9 text-xs" placeholder="Notes (optional)" value={evNotes} onChange={(e) => setEvNotes(e.target.value)} />
         <Button size="sm" className="h-9 gap-1" onClick={addEvent} disabled={!evType}><Plus className="h-4 w-4" />Add</Button>
       </div>
-    </section>
+      </div>
+    </Panel>
   );
 }

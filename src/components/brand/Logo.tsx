@@ -1,8 +1,7 @@
 import { cn } from "@/lib/utils";
-import { useBrandMode } from "@/hooks/useBrandMode";
 
 /** Holarc Wealth mark: a teal rounded tile holding a simple navy "H". */
-function HolarcMark({ className }: { className?: string }) {
+export function LogoMark({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 32 32"
@@ -16,30 +15,6 @@ function HolarcMark({ className }: { className?: string }) {
       <rect x="11" y="14" width="10" height="4" rx="1.5" fill="#1E2A44" />
     </svg>
   );
-}
-
-/**
- * indigro mark: a teal rounded tile holding a stylised "i" (stem plus dot) whose dot is
- * lifted into an upward-pointing tick — copied from Indigro's own brand mark.
- */
-function IndigroMark({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 32 32"
-      className={cn("h-8 w-8 shrink-0", className)}
-      role="img"
-      aria-label="indigro"
-    >
-      <rect width="32" height="32" rx="8" fill="#44d0c1" />
-      <rect x="13.5" y="13" width="5" height="12" rx="2.5" fill="#111418" />
-      <path d="M13 8.6 L16 5.6 L19 8.6 L16 11.6 Z" fill="#111418" />
-    </svg>
-  );
-}
-
-export function LogoMark({ className }: { className?: string }) {
-  const { mode } = useBrandMode();
-  return mode === "indigro" ? <IndigroMark className={className} /> : <HolarcMark className={className} />;
 }
 
 const MARK_SIZE: Record<string, string> = {
@@ -65,7 +40,6 @@ export function Logo({
   onDark?: boolean;
   size?: "sm" | "md" | "lg" | "hero";
 }) {
-  const { mode } = useBrandMode();
   return (
     <span className={cn("inline-flex items-center gap-2", className)}>
       <LogoMark className={MARK_SIZE[size]} />
@@ -73,10 +47,10 @@ export function Logo({
         className={cn(
           "font-display font-bold leading-none tracking-tight",
           TEXT_SIZE[size],
-          onDark ? (mode === "indigro" ? "text-[#44d0c1]" : "text-white") : "text-foreground",
+          onDark ? "text-white" : "text-foreground",
         )}
       >
-        {mode === "indigro" ? "indigro" : "Holarc Wealth"}
+        Holarc Wealth
       </span>
     </span>
   );
