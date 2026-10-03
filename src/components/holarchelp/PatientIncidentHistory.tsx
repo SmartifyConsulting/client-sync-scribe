@@ -18,7 +18,7 @@ interface Props {
 }
 
 const SEVERITY_CHIP: Record<string, string> = {
-  low: "bg-primary text-primary",
+  low: "bg-primary/10 text-primary",
   medium: "bg-amber-100 text-amber-700",
   high: "bg-orange-100 text-orange-700",
   critical: "bg-red-100 text-red-700",
@@ -141,7 +141,7 @@ export default function PatientIncidentHistory({ userId, title = "Emergency inci
                 </div>
                 <div className="text-muted-foreground">
                   Provider: <span className="text-foreground font-medium">{i.provider_name}</span>
-                  {i.auto_assigned && <span className="ml-1.5 rounded-full bg-primary px-1.5 py-0.5 text-xs font-bold text-primary">AUTO</span>}
+                  {i.auto_assigned && <span className="ml-1.5 rounded-full bg-primary/10 px-1.5 py-0.5 text-xs font-bold text-primary">AUTO</span>}
                 </div>
                 {i.notes && <div className="text-sm">{i.notes}</div>}
                 <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-sm text-muted-foreground">
