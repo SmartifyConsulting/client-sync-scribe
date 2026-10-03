@@ -179,7 +179,7 @@ export default function PatientTasks() {
   return (
     <div className="space-y-6 p-4 md:p-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">
+        <h1 className="page-title">
           My Tasks
         </h1>
         <p className="text-muted-foreground text-xs">Actions assigned to you by your wealth managers</p>

@@ -301,7 +301,7 @@ export default function Profile() {
   return (
     <div className="space-y-4 animate-fade-in">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">My Profile</h1>
+        <h1 className="page-title">My Profile</h1>
         <p className="text-muted-foreground text-xs">Manage your financial information</p>
       </div>
 

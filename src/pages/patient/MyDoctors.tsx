@@ -403,7 +403,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
       {!hideHeader && (
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">My Wealth Managers</h1>
+            <h1 className="page-title">My Wealth Managers</h1>
             <p className="text-muted-foreground text-xs">
               Healthcare providers with access to your profile
             </p>

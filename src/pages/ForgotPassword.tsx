@@ -109,7 +109,7 @@ export default function ForgotPassword() {
             >
               <Logo size="lg" />
             </button>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">Reset Password</h1>
+            <h1 className="page-title">Reset Password</h1>
             <p className="text-muted-foreground mt-2 text-sm">
               Email accounts get a reset link by email. Phone accounts verify with the
               authenticator app.

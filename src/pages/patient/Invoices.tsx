@@ -235,7 +235,7 @@ export default function Invoices() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Fee statements</h1>
+        <h1 className="page-title">Fee statements</h1>
         <p className="text-muted-foreground text-xs">View and manage your financial fee statements</p>
       </div>
 

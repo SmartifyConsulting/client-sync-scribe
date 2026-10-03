@@ -186,7 +186,7 @@ export default function MySessions() {
     <div className="container mx-auto p-4 max-w-5xl">
       <div className="mb-6 flex items-start justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold text-foreground">
+          <h1 className="page-title">
             {t("nav.mySessions", "Consultations")}
           </h1>
           <p className="text-muted-foreground text-xs">

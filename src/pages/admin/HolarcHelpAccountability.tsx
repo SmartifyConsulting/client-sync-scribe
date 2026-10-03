@@ -208,7 +208,7 @@ export default function HolarcHelpAccountability() {
     <div className="container mx-auto p-4 sm:p-6 space-y-5">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Accountability</h1>
+          <h1 className="page-title">Accountability</h1>
           <p className="text-sm text-muted-foreground">Provider performance based on objective signals.</p>
         </div>
         <Link to="/admin/users">

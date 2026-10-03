@@ -295,7 +295,7 @@ export default function Dashboard() {
     <div className="space-y-4 md:space-y-8 animate-fade-in">
       {/* Header with Profile */}
       <div className="pb-2">
-        <h1 className="text-3xl font-bold text-foreground">
+        <h1 className="page-title">
           {greeting}{displayName ? `, ${displayName}` : ''}
         </h1>
         <p className="mt-2 text-muted-foreground text-xs">

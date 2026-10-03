@@ -43,7 +43,7 @@ export default function VulaWallet() {
           <img src={vulaSymbol} alt="Vula" className="h-20 w-20 mx-auto object-contain" />
 
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold text-foreground">{t("doctor.wallet.title")}</h1>
+            <h1 className="page-title">{t("doctor.wallet.title")}</h1>
             <p className="text-xs text-muted-foreground">{t("doctor.wallet.powered_by")}</p>
           </div>
 

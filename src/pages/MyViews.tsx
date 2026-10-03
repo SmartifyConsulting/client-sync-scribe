@@ -54,7 +54,7 @@ export default function MyViews() {
     <div className="space-y-4 p-4 md:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="flex items-center gap-2 text-xl font-semibold text-foreground">
+          <h1 className="page-title flex items-center gap-2">
             <Eye className="h-5 w-5 text-primary" />
             My Views
           </h1>

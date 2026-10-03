@@ -192,7 +192,7 @@ export default function DoctorAdmissions() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Admissions</h1>
+        <h1 className="page-title">Admissions</h1>
         <p className="text-xs text-muted-foreground">Hospital admissions for your patients</p>
       </div>
 

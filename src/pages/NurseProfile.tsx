@@ -189,7 +189,7 @@ export default function NurseProfile() {
             <AvatarFallback>{(nurse.full_name ?? "N").slice(0, 1)}</AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <h1 className="truncate text-3xl font-bold text-foreground">
+            <h1 className="page-title truncate">
               Good day, Nurse {surname || nurse.full_name}
             </h1>
             <p className="text-xs text-muted-foreground">

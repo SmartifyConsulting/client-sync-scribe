@@ -709,7 +709,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         {!hideHeader ? (
           <div>
-            <h1 className="text-3xl font-bold text-foreground">My Documents</h1>
+            <h1 className="page-title">My Documents</h1>
             <p className="text-muted-foreground text-xs">
               All your prescriptions, invoices, certificates and uploaded files — including X-rays, blood test results and other lab reports (upload as a file or photo below).
             </p>

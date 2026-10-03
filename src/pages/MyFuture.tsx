@@ -61,7 +61,7 @@ export default function MyFuture() {
   if (!data?.patientId) {
     return (
       <div className="container mx-auto max-w-5xl p-4">
-        <h1 className="text-3xl font-bold text-foreground">My Future</h1>
+        <h1 className="page-title">My Future</h1>
         <Empty text="Your client record isn't linked to this account yet. Ask your Wealth Manager to send you an invitation." />
       </div>
     );
@@ -100,7 +100,7 @@ export default function MyFuture() {
   return (
     <div className="container mx-auto max-w-5xl p-4 space-y-4">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">My Future</h1>
+        <h1 className="page-title">My Future</h1>
         <p className="text-xs text-muted-foreground">Your cover, investments, retirement, claims and documents in one place.</p>
       </div>
 

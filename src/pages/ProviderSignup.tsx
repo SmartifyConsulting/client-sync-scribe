@@ -239,7 +239,7 @@ export default function ProviderSignup() {
         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
           <Building2 className="h-8 w-8 text-primary" />
         </div>
-        <h1 className="text-center text-3xl font-extrabold">{t("auth.provider.title")}</h1>
+        <h1 className="page-title text-center">{t("auth.provider.title")}</h1>
         <p className="mt-3 text-center text-muted-foreground">
           {t("auth.provider.subtitle")}
         </p>
