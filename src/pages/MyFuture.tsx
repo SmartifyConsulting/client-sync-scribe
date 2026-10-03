@@ -193,6 +193,7 @@ export default function MyFuture() {
             </Button>
           </Frame>
           <Frame title="Your claims" icon={FileText}>
+            <a href="/claims" className="mb-2 inline-block text-xs font-medium text-primary hover:underline">View all claims →</a>
             {data.claims.length ? (
               <ul className="space-y-2">
                 {data.claims.map((c) => (
