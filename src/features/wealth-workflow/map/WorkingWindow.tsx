@@ -91,7 +91,7 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
         {!isLive && <button onClick={onBackToCurrent} className="text-xs font-medium text-primary hover:underline">Back to current</button>}
       </div>
 
-      <div className="grid gap-5 p-5 md:grid-cols-2">
+      <div className="grid gap-5 p-5 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
         {/* Left: instructions */}
         <div className="divide-y divide-border/60 [&>*]:py-3 [&>*:first-child]:pt-0 [&>*:last-child]:pb-0">
           <div>
