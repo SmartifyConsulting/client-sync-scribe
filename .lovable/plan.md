@@ -62,3 +62,14 @@ The Letter of Authority I just built will read these saved details instead of fi
 - The rename and the seed data are applied as data updates to profile `d1eeab28-…` (Jaco Steyn).
 - `MyPractice.tsx`: remove the `AboutMeAccordion`, `HospitalAffiliations`, `PracticeAssistants`, Partners, Signature and Narration sections from the render. The code stays in place. Also hide About Me in `DoctorProfileDialog` and `MyDoctors`.
 - `onboardingTemplates.loaHtml` takes the practice info record, with the current text kept as the fallback.
+
+---
+
+# 4. Billing for System Admin only
+- The **Billing** tab is removed from Wealth Managers' My Business screen.
+- Billing (subscriptions and PayFast) is shown only to System Admins, inside the Admin area.
+
+## Technical details
+- `MyPractice.tsx`: render the `billing` TabsTrigger and TabsContent only when `useIsAdmin()` is true. An old `?billing=` link falls back to the `practice` tab.
+- Add a Billing tab to the Admin page that renders the existing `BillingPanel`.
+- Also record this task in `roadmap.md`.
