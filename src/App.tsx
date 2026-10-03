@@ -34,6 +34,7 @@ import TodoList from "./pages/TodoList";
 import Notifications from "./pages/Notifications";
 import Connections from "./pages/Connections";
 import Auth from "./pages/Auth";
+import JoinInvite from "./pages/JoinInvite";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
@@ -214,6 +215,7 @@ const App = () => (
           {/* Public routes */}
           <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/join/:token" element={<JoinInvite />} />
           <Route path="/login" element={<Auth />} />
           <Route path="/signup" element={<Auth />} />
           <Route path="/onboarding" element={<Auth />} />

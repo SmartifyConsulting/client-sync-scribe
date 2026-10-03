@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import holarcLogo from "@/assets/holarc-logo.png";
+import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
+const holarcLogo = holarcLogoAsset.url;
 
 type Preview = { status: string; firstName: string; lastName: string; phone?: string; email?: string; managerName: string; fspName?: string | null; businessLogo?: string | null; fspLogo?: string | null };
 
