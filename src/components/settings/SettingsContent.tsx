@@ -289,21 +289,21 @@ export function SettingsContent() {
               <p className="text-muted-foreground text-sm">Manage your application preferences and integrations</p>
               {isPatientRole && (
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+                  <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/20">
                     <div className="flex-1 mr-3">
                       <p className="text-sm font-medium text-foreground">Auto-email fee statement to provider</p>
                       <p className="text-sm text-muted-foreground mt-0.5">When your wealth manager marks an fee statement as paid, it will be sent to your insurance claims email.</p>
                     </div>
                     <Switch checked={(profile as any)?.auto_email_invoice_to_insurance || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_invoice_to_insurance: c } as any); toast({ title: "Preference updated" }); }} />
                   </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+                  <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/20">
                     <div className="flex-1 mr-3">
                       <p className="text-sm font-medium text-foreground">Auto-email prescription to pharmacy</p>
                       <p className="text-sm text-muted-foreground mt-0.5">When your doctor saves a prescription, it will be sent to your primary pharmacy.</p>
                     </div>
                     <Switch checked={(profile as any)?.auto_email_prescription_to_pharmacy || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_prescription_to_pharmacy: c } as any); toast({ title: "Preference updated" }); }} />
                   </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+                  <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/20">
                     <div className="flex-1 mr-3">
                       <p className="text-sm font-medium text-foreground">Auto-email certificate to employer</p>
                       <p className="text-sm text-muted-foreground mt-0.5">When your wealth manager saves an advice letter, it will be sent to your employer.</p>
@@ -599,7 +599,7 @@ export function SettingsContent() {
             ) : paymentHistory.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">No payment history yet</p>
             ) : (
-              <div className="rounded-lg border border-border overflow-hidden">
+              <div className="rounded-xl border border-border overflow-hidden">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/50">
@@ -633,7 +633,7 @@ export function SettingsContent() {
             <DialogDescription>Select a billing cycle for your {planType} subscription. Payment is processed securely via PayPal.</DialogDescription>
           </DialogHeader>
           <RadioGroup value={selectedBillingCycle} onValueChange={(v) => setSelectedBillingCycle(v as "monthly" | "annual")} className="space-y-4 mt-4">
-            <div className={`relative flex items-start rounded-lg border p-4 cursor-pointer transition-colors ${selectedBillingCycle === "monthly" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"}`} onClick={() => setSelectedBillingCycle("monthly")}>
+            <div className={`relative flex items-start rounded-xl border p-4 cursor-pointer transition-colors ${selectedBillingCycle === "monthly" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"}`} onClick={() => setSelectedBillingCycle("monthly")}>
               <RadioGroupItem value="monthly" id="monthly" className="mt-1" />
               <div className="ml-3 flex-1">
                 <Label htmlFor="monthly" className="font-semibold text-foreground cursor-pointer">Monthly <span className="ml-2 text-primary">${plans.monthly.price}/{plans.monthly.period}</span></Label>
@@ -644,7 +644,7 @@ export function SettingsContent() {
                 </ul>
               </div>
             </div>
-            <div className={`relative flex items-start rounded-lg border p-4 cursor-pointer transition-colors ${selectedBillingCycle === "annual" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"}`} onClick={() => setSelectedBillingCycle("annual")}>
+            <div className={`relative flex items-start rounded-xl border p-4 cursor-pointer transition-colors ${selectedBillingCycle === "annual" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"}`} onClick={() => setSelectedBillingCycle("annual")}>
               <RadioGroupItem value="annual" id="annual" className="mt-1" />
               <div className="ml-3 flex-1">
                 <Label htmlFor="annual" className="font-semibold text-foreground cursor-pointer">Annual <span className="ml-2 text-primary">${plans.annual.price}/{plans.annual.period}</span> <Badge variant="secondary" className="ml-2 bg-sky-50 text-primary">Save ${plans.annual.savings}</Badge></Label>

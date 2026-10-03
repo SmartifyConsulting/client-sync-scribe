@@ -584,7 +584,7 @@ export default function CalendarView() {
         </div>
         <div className="flex gap-2 flex-wrap items-center">
           {practice && (
-            <div className="flex rounded-lg border border-border overflow-hidden shrink-0">
+            <div className="flex rounded-xl border border-border overflow-hidden shrink-0">
               {(['mine', 'practice'] as const).map((s) => (
                 <button
                   key={s}
@@ -785,7 +785,7 @@ export default function CalendarView() {
           </DialogContent>
         </Dialog>
         </div>
-        <div className="flex rounded-lg border border-border overflow-hidden shrink-0">
+        <div className="flex rounded-xl border border-border overflow-hidden shrink-0">
           {(["week", "month", "year"] as CalendarViewMode[]).map((view) => (
             <button
               key={view}

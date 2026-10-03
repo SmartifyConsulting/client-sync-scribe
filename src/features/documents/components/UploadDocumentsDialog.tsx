@@ -114,7 +114,7 @@ export function UploadDocumentsDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="rounded-lg border border-border bg-muted/30 p-2 space-y-1 max-h-24 overflow-y-auto">
+          <div className="rounded-xl border border-border bg-muted/30 p-2 space-y-1 max-h-24 overflow-y-auto">
             {files.map((f) => (
               <p key={f.name} className="flex items-center gap-2 text-xs text-foreground">
                 <FileText className="h-3.5 w-3.5 text-primary shrink-0" />
@@ -140,7 +140,7 @@ export function UploadDocumentsDialog({
                 }}
               />
             </div>
-            <div className="max-h-44 overflow-y-auto rounded-lg border border-border divide-y divide-border/50">
+            <div className="max-h-44 overflow-y-auto rounded-xl border border-border divide-y divide-border/50">
               {canCreate && (
                 <button
                   type="button"
@@ -179,7 +179,7 @@ export function UploadDocumentsDialog({
               onChange={(e) => setRecordDate(e.target.value)}
               className="h-9"
             />
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-2xs text-muted-foreground">
               File an older record under the date it was originally written.
             </p>
           </div>

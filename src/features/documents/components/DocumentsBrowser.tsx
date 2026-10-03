@@ -342,12 +342,12 @@ export function DocumentsBrowser({
                         </p>
                       </div>
                       {hasAnalysis && (
-                        <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-primary">
+                        <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-sky-50 px-2 py-0.5 text-2xs font-medium text-primary">
                           <Sparkles className="h-3 w-3" /> AI described
                         </span>
                       )}
                       {(doc as any).is_transcribed && (
-                        <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-medium text-violet-700">
+                        <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-violet-100 px-2 py-0.5 text-2xs font-medium text-violet-700">
                           <Sparkles className="h-3 w-3" /> AI transcribed
                         </span>
                       )}

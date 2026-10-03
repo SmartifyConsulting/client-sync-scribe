@@ -122,7 +122,7 @@ function ProcedureSearchInput({
         )}
       </div>
       {showDropdown && suggestions.length > 0 && (
-        <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto rounded-lg border border-border bg-popover shadow-md">
+        <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto rounded-xl border border-border bg-popover shadow-md">
           {suggestions.map((s) => (
             <button
               key={s.code}

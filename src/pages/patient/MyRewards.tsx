@@ -420,11 +420,11 @@ export default function MyRewards({ embedded = false }: { embedded?: boolean } =
       <div className={cn("grid grid-cols-2 gap-2 md:gap-4", isDoctor ? "md:grid-cols-6" : "md:grid-cols-4")}>
         {isDoctor && (
           <>
-            <Card className="bg-gradient-to-br from-emerald-500 to-teal-400 dark:from-emerald-700/40 dark:to-teal-700/30 border-primary/40 dark:border-emerald-600/40">
+            <Card className="bg-gradient-to-br from-primary to-teal-400 dark:from-primary/40 dark:to-teal-700/30 border-primary/40 dark:border-primary/40">
               <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs md:text-sm font-medium text-emerald-100">Doctor Vulas</p>
+                    <p className="text-xs md:text-sm font-medium text-primary">Doctor Vulas</p>
                     <p className="text-2xl md:text-4xl font-bold text-white">{doctorVulas}</p>
                   </div>
                   <Star className="h-8 w-8 text-white/90 shrink-0" />

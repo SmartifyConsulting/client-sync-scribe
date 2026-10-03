@@ -16,7 +16,7 @@ export function WorkspaceItemRow({ item, actions }: { item: Item; actions: ItemA
         <OwnerBadge owner={item.who} />
         {PRIORITY_LABEL[p] && (
           <span className={cn(
-            "rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase",
+            "rounded px-1.5 py-0.5 text-2xs font-semibold uppercase",
             p === "overdue" || p === "blocked" ? "bg-destructive/10 text-destructive"
               : p === "due_today" || p === "due_soon" ? "bg-[hsl(var(--owner-insurer-bg))] text-[hsl(var(--owner-insurer))]"
               : "bg-muted text-muted-foreground",

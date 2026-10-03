@@ -210,7 +210,7 @@ export default function PatientCalendar() {
   const monthsInYear = eachMonthOfInterval({ start: yearStart, end: yearEnd });
 
   const ViewToggle = () => (
-    <div className="flex rounded-lg border border-border overflow-hidden">
+    <div className="flex rounded-xl border border-border overflow-hidden">
       {(["week", "month", "year"] as CalendarViewMode[]).map((view) => (
         <button
           key={view}

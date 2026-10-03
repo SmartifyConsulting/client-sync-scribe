@@ -89,7 +89,7 @@ export function EmergencyContactsSection({ patientId, contacts, onChange }: Prop
           <p className="text-xs text-muted-foreground">No emergency contacts yet.</p>
         )}
         {contacts.map((c) => (
-          <div key={c.id} className="rounded-lg border border-border p-3 space-y-2 bg-muted/30">
+          <div key={c.id} className="rounded-xl border border-border p-3 space-y-2 bg-muted/30">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <div>
                 <Label className="text-sm">Name</Label>

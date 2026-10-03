@@ -547,7 +547,7 @@ export function PillBaselineCapture({
                 onValueChange={(v) => { setSkipNotifyTarget(v as any); setOverrideContact(false); }}
                 className="gap-2"
               >
-                <label htmlFor="sn-em" className="flex items-start gap-2 rounded-lg border bg-background p-2 cursor-pointer">
+                <label htmlFor="sn-em" className="flex items-start gap-2 rounded-xl border bg-background p-2 cursor-pointer">
                   <RadioGroupItem id="sn-em" value="emergency" className="mt-0.5" />
                   <div className="flex-1">
                     <p className="text-xs font-medium">Emergency contact</p>
@@ -558,7 +558,7 @@ export function PillBaselineCapture({
                     </p>
                   </div>
                 </label>
-                <label htmlFor="sn-nok" className="flex items-start gap-2 rounded-lg border bg-background p-2 cursor-pointer">
+                <label htmlFor="sn-nok" className="flex items-start gap-2 rounded-xl border bg-background p-2 cursor-pointer">
                   <RadioGroupItem id="sn-nok" value="nok" className="mt-0.5" />
                   <div className="flex-1">
                     <p className="text-xs font-medium">Next of kin</p>
@@ -569,7 +569,7 @@ export function PillBaselineCapture({
                     </p>
                   </div>
                 </label>
-                <label htmlFor="sn-none" className="flex items-start gap-2 rounded-lg border bg-background p-2 cursor-pointer">
+                <label htmlFor="sn-none" className="flex items-start gap-2 rounded-xl border bg-background p-2 cursor-pointer">
                   <RadioGroupItem id="sn-none" value="none" className="mt-0.5" />
                   <div className="flex-1">
                     <p className="text-xs font-medium">No one</p>
@@ -631,7 +631,7 @@ export function PillBaselineCapture({
                     key={m.value}
                     htmlFor={`im-${m.value}`}
                     className={
-                      "flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition-colors " +
+                      "flex items-start gap-3 rounded-xl border p-3 cursor-pointer transition-colors " +
                       (intakeMethod === m.value
                         ? "border-primary bg-primary/5"
                         : "border-border hover:bg-muted/40")
@@ -646,7 +646,7 @@ export function PillBaselineCapture({
                 ))}
               </RadioGroup>
             </div>
-            <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-800 dark:text-amber-300">
+            <div className="flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-800 dark:text-amber-300">
               <Info className="h-4 w-4 shrink-0 mt-0.5" />
               <p>
                 Most tablets and capsules should be swallowed whole. If you're unsure, check with
@@ -726,7 +726,7 @@ export function PillBaselineCapture({
               )}
             </div>
             {tabletBlob && tabletWarning && (
-              <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-2 text-xs text-amber-800 dark:text-amber-300 flex items-start gap-2">
+              <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-2 text-xs text-amber-800 dark:text-amber-300 flex items-start gap-2">
                 <Info className="h-4 w-4 mt-0.5 shrink-0" />
                 <p>{tabletWarning}</p>
               </div>

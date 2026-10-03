@@ -51,7 +51,7 @@ function RoleSection({ title, badgeLabel, monthly, annual, onChange }: RoleSecti
         {/* Monthly */}
         {monthly && (
           <div className="rounded-md border border-[hsl(var(--admin-border-subtle))] bg-[hsl(var(--admin-surface-muted))] p-4">
-            <p className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--admin-text-tertiary))] mb-2">
+            <p className="text-2xs font-semibold uppercase tracking-[0.12em] text-[hsl(var(--admin-text-tertiary))] mb-2">
               Monthly plan
             </p>
             <Input
@@ -60,7 +60,7 @@ function RoleSection({ title, badgeLabel, monthly, annual, onChange }: RoleSecti
               className="text-sm font-semibold border-0 border-b border-[hsl(var(--admin-border-strong))] rounded-none focus-visible:ring-0 focus-visible:border-[hsl(var(--admin-accent))] px-0 h-auto py-1 mb-4 bg-transparent"
             />
             <div className="flex items-baseline gap-1 mb-3">
-              <span className="text-[18px] text-[hsl(var(--admin-text-tertiary))]">$</span>
+              <span className="text-lg text-[hsl(var(--admin-text-tertiary))]">$</span>
               <Input
                 type="number"
                 step="0.01"
@@ -81,7 +81,7 @@ function RoleSection({ title, badgeLabel, monthly, annual, onChange }: RoleSecti
         {annual && (
           <div className="rounded-md border border-[hsl(var(--admin-accent))] bg-[hsl(var(--admin-surface))] p-4">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--admin-accent))]">
+              <p className="text-2xs font-semibold uppercase tracking-[0.12em] text-[hsl(var(--admin-accent))]">
                 Annual plan
               </p>
               <span className="text-xs font-semibold text-[hsl(var(--admin-accent))] uppercase tracking-wider">
@@ -94,7 +94,7 @@ function RoleSection({ title, badgeLabel, monthly, annual, onChange }: RoleSecti
               className="text-sm font-semibold border-0 border-b border-[hsl(var(--admin-border-strong))] rounded-none focus-visible:ring-0 focus-visible:border-[hsl(var(--admin-accent))] px-0 h-auto py-1 mb-4 bg-transparent"
             />
             <div className="flex items-baseline gap-1 mb-3">
-              <span className="text-[18px] text-[hsl(var(--admin-accent))]">$</span>
+              <span className="text-lg text-[hsl(var(--admin-accent))]">$</span>
               <Input
                 type="number"
                 step="0.01"

@@ -13,6 +13,7 @@ export default {
       },
     },
     extend: {
+      fontSize: { "2xs": ["0.6875rem", { lineHeight: "1rem" }] },
       fontFamily: {
         sans: ["Manrope Variable", "Manrope", "system-ui", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
         display: ["Sora Variable", "Sora", "system-ui", "sans-serif"],

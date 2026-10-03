@@ -200,7 +200,7 @@ export default function DoctorAdmissions() {
         type="single"
         value={scope}
         onValueChange={(v) => v && setScope(v as "mine" | "others")}
-        className="rounded-lg border border-border p-0.5"
+        className="rounded-xl border border-border p-0.5"
       >
         <ToggleGroupItem value="mine" className="h-8 px-3 text-xs">
           Admitted by me
@@ -227,7 +227,7 @@ export default function DoctorAdmissions() {
             </Button>
           }
           renderItem={(r: Row) => (
-            <div className="flex items-center gap-3 rounded-lg border border-border px-3 py-2">
+            <div className="flex items-center gap-3 rounded-xl border border-border px-3 py-2">
               <BedDouble className="h-4 w-4 shrink-0 text-primary" />
               <button
                 onClick={() => navigate(`/patients/${r.patient_id}`)}
@@ -242,9 +242,9 @@ export default function DoctorAdmissions() {
                 <p className="text-xs text-muted-foreground">
                   {r.admission_date ? format(new Date(r.admission_date), "d MMM yyyy") : "—"}
                 </p>
-                <p className="text-[11px] text-muted-foreground">{r.doctor_name}</p>
+                <p className="text-2xs text-muted-foreground">{r.doctor_name}</p>
               </div>
-              <Badge variant={r.discharge_date ? "secondary" : "default"} className="shrink-0 text-[10px]">
+              <Badge variant={r.discharge_date ? "secondary" : "default"} className="shrink-0 text-2xs">
                 {r.discharge_date ? "Discharged" : r.status || "Admitted"}
               </Badge>
               {r.doctor_id === currentUserId && (

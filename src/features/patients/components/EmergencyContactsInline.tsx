@@ -121,7 +121,7 @@ export function EmergencyContactsInline({ patientId, contacts, onChange, nokMemb
       {contacts.map((c) => {
         const perms = resolvePermissions(c as any);
         return (
-          <div key={c.id} className="rounded-lg border border-border p-2.5 space-y-2 bg-muted/30">
+          <div key={c.id} className="rounded-xl border border-border p-2.5 space-y-2 bg-muted/30">
             <div className={FIELD_GRID_2_CLASS}>
               <div>
                 <Label className="text-xs font-bold">Name</Label>

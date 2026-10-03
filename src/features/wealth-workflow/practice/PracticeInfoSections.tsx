@@ -118,7 +118,7 @@ export function PracticeInfoSections() {
           <div className="grid gap-4 sm:grid-cols-4">
             {SUPPLIER_COLS.map((c) => (
               <div key={c.k} className="space-y-1">
-                <Label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{c.label}</Label>
+                <Label className="text-2xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{c.label}</Label>
                 <Textarea rows={9} className="text-xs" placeholder="One per line" value={(sup[c.k] ?? []).join("\n")}
                   onChange={(e) => setD({ ...d, product_suppliers: { ...sup, [c.k]: e.target.value.split("\n") } })} />
               </div>

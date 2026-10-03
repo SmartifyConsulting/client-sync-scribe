@@ -157,7 +157,7 @@ export function ManualLogAdmissionDialog({ open, onOpenChange, patientId }: Prop
           </div>
 
           {/* Codes section */}
-          <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+          <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
             <Label className="text-sm font-semibold">Diagnosis / procedure codes (ICD-10, CPT, etc.)</Label>
             <p className="text-xs text-muted-foreground mb-2">Add a code and a matching description.</p>
             {codes.length > 0 && (

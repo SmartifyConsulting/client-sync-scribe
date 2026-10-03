@@ -65,7 +65,7 @@ export function WeighInCard({ patientId, canRecord }: { patientId: string; canRe
                 Record
               </Button>
             </div>
-            <label className="flex items-center gap-2 text-[11px] text-muted-foreground">
+            <label className="flex items-center gap-2 text-2xs text-muted-foreground">
               <Checkbox checked={award} onCheckedChange={(v) => setAward(!!v)} />
               Award {VULA_MATRIX.perKilogramLost} Vulas per kilogram lost
             </label>
@@ -73,7 +73,7 @@ export function WeighInCard({ patientId, canRecord }: { patientId: string; canRe
         )}
 
         {weighIns.length > 0 && (
-          <ul className="divide-y divide-border border-t border-border pt-1 text-[12px]">
+          <ul className="divide-y divide-border border-t border-border pt-1 text-xs">
             {weighIns.slice(0, 5).map((w) => (
               <li key={w.id} className="flex items-center justify-between py-1">
                 <span>{new Date(w.recorded_at).toLocaleDateString()}</span>

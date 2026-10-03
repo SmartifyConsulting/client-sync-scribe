@@ -165,7 +165,7 @@ export function PermissionTransparencyModal({
 
       {/* Patient-facing holistic nudge */}
       {isPatientFacing && !isDoctorMode && (
-        <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
+        <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
           <div className="flex items-start gap-3">
             <Heart className="h-5 w-5 text-primary mt-0.5 shrink-0" />
             <div>

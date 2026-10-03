@@ -267,7 +267,7 @@ export function ImageComparisonDialog({
 
             {/* Analysis Results */}
             {analysis && (
-              <div className="rounded-lg border bg-muted/30 p-4 space-y-2">
+              <div className="rounded-xl border bg-muted/30 p-4 space-y-2">
                 <h4 className="text-sm font-semibold flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-primary" />
                   AI Comparison Analysis

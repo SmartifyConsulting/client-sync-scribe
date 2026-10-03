@@ -298,7 +298,7 @@ export default function PatientAccessManagement() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between p-4 rounded-lg border border-border">
+          <div className="flex items-center justify-between p-4 rounded-xl border border-border">
             <div className="space-y-1">
               <Label htmlFor="round-table-toggle" className="font-medium">
                 Enable Round Table
@@ -334,7 +334,7 @@ export default function PatientAccessManagement() {
               {incomingInvitations.map((invitation) => (
                 <div
                   key={invitation.id}
-                  className="rounded-lg border border-border bg-amber-50/50 dark:bg-amber-900/10"
+                  className="rounded-xl border border-border bg-amber-50/50 dark:bg-amber-900/10"
                 >
                   {/* Doctor info row */}
                   <div className="flex items-center gap-4 p-4">
@@ -363,7 +363,7 @@ export default function PatientAccessManagement() {
                       {permissionOptions.map((perm) => (
                         <div
                           key={perm.id}
-                          className="flex items-start space-x-3 rounded-lg border border-border p-3 hover:bg-muted/50 transition-colors"
+                          className="flex items-start space-x-3 rounded-xl border border-border p-3 hover:bg-muted/50 transition-colors"
                         >
                           <Checkbox
                             id={`${invitation.id}-${perm.id}`}
@@ -441,7 +441,7 @@ export default function PatientAccessManagement() {
               {approvedInvites.map((invite) => (
                 <div
                   key={invite.id}
-                  className="flex flex-col gap-3 p-4 rounded-lg border border-border"
+                  className="flex flex-col gap-3 p-4 rounded-xl border border-border"
                 >
                   <div className="flex items-center gap-4">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-50 dark:bg-primary/15">

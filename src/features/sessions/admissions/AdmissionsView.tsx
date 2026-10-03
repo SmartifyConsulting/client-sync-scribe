@@ -276,10 +276,10 @@ function AdmissionDetail({
               <h2 className="text-xs font-bold text-primary-dark truncate uppercase tracking-wide">
                 {admission.hospital || "Hospital"}
               </h2>
-              <p className="text-[10px] font-medium text-foreground truncate">
+              <p className="text-2xs font-medium text-foreground truncate">
                 {(admission as any).title || admission.diagnosis || "Admission"}
               </p>
-              <p className="text-[10px] text-muted-foreground">
+              <p className="text-2xs text-muted-foreground">
                 Admitted {format(new Date(admission.admission_date), "dd MMM yyyy")}
                 {admission.discharge_date && ` · Discharged ${format(new Date(admission.discharge_date), "dd MMM yyyy")}`}
               </p>
@@ -296,7 +296,7 @@ function AdmissionDetail({
             )}
             <Badge
               variant={admission.status === "admitted" ? "default" : "secondary"}
-              className="uppercase tracking-wide text-[10px] px-1.5 py-0"
+              className="uppercase tracking-wide text-2xs px-1.5 py-0"
             >
               ● {admission.status}
             </Badge>
@@ -327,14 +327,14 @@ function AdmissionDetail({
           <div className="flex items-start gap-2 pt-2">
             <Stethoscope className="h-4 w-4 text-primary shrink-0 mt-0.5" />
             <div className="min-w-0">
-              <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">Admitting Doctor</p>
+              <p className="text-2xs uppercase tracking-wide text-muted-foreground font-semibold">Admitting Doctor</p>
               <p className="text-sm font-medium text-foreground truncate">{admittingDoctorName || "—"}</p>
             </div>
           </div>
           <div className="flex items-start gap-2 pt-2">
             <UserCog className="h-4 w-4 text-primary shrink-0 mt-0.5" />
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">Doctor on Call</p>
+              <p className="text-2xs uppercase tracking-wide text-muted-foreground font-semibold">Doctor on Call</p>
               {isHospitalStaff ? (
                 <Select
                   value={admission.doctor_on_call_id || ""}
@@ -355,7 +355,7 @@ function AdmissionDetail({
           <div className="flex items-start gap-2 pt-2">
             <Clock3 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
             <div className="min-w-0">
-              <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">Nurse on Shift</p>
+              <p className="text-2xs uppercase tracking-wide text-muted-foreground font-semibold">Nurse on Shift</p>
               <p className="text-sm font-medium text-foreground truncate">{currentShift?.nurse_name_snapshot || "Not assigned"}</p>
               {currentShift && (
                 <p className="text-xs text-muted-foreground">
@@ -377,7 +377,7 @@ function AdmissionDetail({
         </div>
 
         {/* Patient's needs note */}
-        <div className="rounded-lg border border-primary/20 bg-card p-2.5">
+        <div className="rounded-xl border border-primary/20 bg-card p-2.5">
           <div className="flex items-center gap-1.5 mb-1.5">
             <NotebookPen className="h-3.5 w-3.5 text-primary" />
             <span className="text-xs font-semibold text-foreground">Patient's Needs (for visiting family)</span>
@@ -417,7 +417,7 @@ function AdmissionDetail({
               {vitals.length > 0 && (
                 <div className="overflow-x-auto">
                   <div className="min-w-[560px]">
-                    <div className="grid grid-cols-[1fr_70px_90px_70px_70px_60px] gap-2 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    <div className="grid grid-cols-[1fr_70px_90px_70px_70px_60px] gap-2 px-2 py-1 text-2xs font-semibold uppercase tracking-wide text-muted-foreground">
                       <span>Recorded</span>
                       <span>HR</span>
                       <span>BP</span>
@@ -537,7 +537,7 @@ function AdmissionDetail({
               </div>
 
               {isHospitalStaff && (
-                <div className="rounded-lg border border-border/60 p-2.5 space-y-2">
+                <div className="rounded-xl border border-border/60 p-2.5 space-y-2">
                   <p className="text-xs font-semibold text-foreground">Log a meal</p>
                   <div className="flex flex-wrap items-center gap-2">
                     <Select value={mealSlot} onValueChange={(v) => setMealSlot(v as MealSlot)}>
@@ -582,7 +582,7 @@ function AdmissionDetail({
             <SectionHeader icon={Clock3} label="Shift Log" extra={<SectionCountPill count={shifts.length} />} />
             <CollapsibleContent className="p-3 space-y-3">
               {isHospitalStaff && (
-                <div className="rounded-lg border border-border/60 p-2.5 space-y-2">
+                <div className="rounded-xl border border-border/60 p-2.5 space-y-2">
                   <p className="text-xs font-semibold text-foreground">Start a new shift (hands off from current nurse)</p>
                   <div className="flex flex-wrap items-center gap-2">
                     <Select value={shiftNurseId} onValueChange={setShiftNurseId}>

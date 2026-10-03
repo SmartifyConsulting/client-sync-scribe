@@ -163,7 +163,7 @@ export function PatientSessionRecorder({ patientId, patientName }: Props) {
               key={s.id}
               type="button"
               onClick={() => navigate(`/sessions/${s.id}`)}
-              className="w-full text-left p-3 rounded-lg border border-border bg-card hover:bg-muted/50 flex items-start gap-3"
+              className="w-full text-left p-3 rounded-xl border border-border bg-card hover:bg-muted/50 flex items-start gap-3"
             >
               <Clock className="h-4 w-4 text-primary mt-0.5" />
               <div className="flex-1 min-w-0">

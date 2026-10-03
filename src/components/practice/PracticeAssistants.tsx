@@ -105,7 +105,7 @@ export function PracticeAssistants() {
       </p>
 
       {assistants.length === 0 && pending.length === 0 && (
-        <p className="rounded-lg border border-dashed border-border p-3 text-xs text-muted-foreground">
+        <p className="rounded-xl border border-dashed border-border p-3 text-xs text-muted-foreground">
           No assistants yet. Invite one by email below.
         </p>
       )}
@@ -115,7 +115,7 @@ export function PracticeAssistants() {
           {assistants.map((a) => (
             <div
               key={a.id}
-              className="flex items-center justify-between gap-2 rounded-lg border border-border bg-white p-3"
+              className="flex items-center justify-between gap-2 rounded-xl border border-border bg-white p-3"
             >
               <div className="flex min-w-0 items-center gap-2">
                 <UserCog className="h-4 w-4 shrink-0 text-primary" />
@@ -155,7 +155,7 @@ export function PracticeAssistants() {
           {pending.map((i) => (
             <div
               key={i.id}
-              className="flex items-center justify-between gap-2 rounded-lg border border-dashed border-border p-3"
+              className="flex items-center justify-between gap-2 rounded-xl border border-dashed border-border p-3"
             >
               <div className="flex min-w-0 items-center gap-2">
                 <Mail className="h-4 w-4 shrink-0 text-muted-foreground" />

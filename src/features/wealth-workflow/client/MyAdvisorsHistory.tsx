@@ -38,7 +38,7 @@ export function MyAdvisorsHistory({ patientId }: { patientId: string }) {
       {isLoading ? (
         <Loader2 className="h-5 w-5 animate-spin text-primary" />
       ) : data.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-border p-4 text-center text-xs text-muted-foreground">No advisers have been linked to your profile yet.</p>
+        <p className="rounded-xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">No advisers have been linked to your profile yet.</p>
       ) : (
         <ol className="relative border-l border-border ml-2 space-y-3">
           {data.map((a, i) => (
@@ -46,7 +46,7 @@ export function MyAdvisorsHistory({ patientId }: { patientId: string }) {
               <span className={`absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full ${a.active ? "bg-primary" : "bg-muted-foreground/40"}`} />
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-sm font-medium text-foreground">{a.name}</span>
-                <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${a.active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                <span className={`rounded-full px-1.5 py-0.5 text-2xs font-medium ${a.active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
                   {a.active ? "Current" : "Past"}
                 </span>
               </div>

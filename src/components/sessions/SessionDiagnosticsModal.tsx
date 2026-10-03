@@ -121,26 +121,26 @@ export function ClinicalReport({ text }: { text: string }) {
       {sections.map((s, i) => (
         <div
           key={i}
-          className={`rounded-lg border p-3 ${SECTION_TINTS[i % SECTION_TINTS.length]}`}
+          className={`rounded-xl border p-3 ${SECTION_TINTS[i % SECTION_TINTS.length]}`}
         >
           {s.heading && (
-            <h4 className="mb-2 text-[11px] font-bold uppercase tracking-wider text-primary">
+            <h4 className="mb-2 text-2xs font-bold uppercase tracking-wider text-primary">
               {s.heading}
             </h4>
           )}
-          <div className="space-y-2 text-[12px] leading-relaxed text-foreground">
+          <div className="space-y-2 text-xs leading-relaxed text-foreground">
             {s.blocks.map((b, j) =>
               b.kind === "bullet" ? (
                 <ul key={j} className="space-y-1 pl-1">
                   {b.items.map((item, k) => (
-                    <li key={k} className="flex gap-2 text-[12px] text-foreground/80">
+                    <li key={k} className="flex gap-2 text-xs text-foreground/80">
                       <span className="font-semibold leading-5 text-primary">•</span>
                       <span>{item}</span>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p key={j} className="text-[12px] text-foreground/80 text-justify">
+                <p key={j} className="text-xs text-foreground/80 text-justify">
                   {(b as { text: string }).text}
                 </p>
               )
@@ -182,28 +182,28 @@ export function SessionDiagnosticsModal({
         <div className="space-y-4 py-1">
           {/* Report letterhead line */}
           <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border pb-2">
-            <p className="text-[12px] font-semibold text-foreground">
+            <p className="text-xs font-semibold text-foreground">
               {patientName || "Patient"}
             </p>
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-2xs text-muted-foreground">
               {sessionDate || new Date().toLocaleDateString()}
             </p>
           </div>
 
           {waiting ? (
-            <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
               The AI Clinician is reviewing the session so far...
             </div>
           ) : fullDiagnosis ? (
             <ClinicalReport text={fullDiagnosis} />
           ) : (
-            <p className="text-[12px] text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               No assessment available yet for this session.
             </p>
           )}
 
-          <div className="flex gap-2 rounded-lg border border-amber-300/60 bg-amber-50 p-3">
+          <div className="flex gap-2 rounded-xl border border-amber-300/60 bg-amber-50 p-3">
             <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
             <p className="text-base text-muted-foreground leading-relaxed">
               This AI-generated assessment is clinical decision support only. It is

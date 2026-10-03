@@ -412,7 +412,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
       )}
 
       {showAccessReminder && (
-        <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
+        <div className="rounded-xl border border-primary/30 bg-primary/5 p-3">
           <div className="flex items-start gap-2">
             <Info className="h-4 w-4 text-primary mt-0.5 shrink-0" />
             <p className="text-xs text-foreground leading-relaxed">
@@ -539,7 +539,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
                                         <span className="font-medium text-foreground text-xs truncate flex items-center gap-1.5">
                                           {doctor.full_name || "Unknown"}
                                           {alreadyConnected && (
-                                            <Badge variant="outline" className="text-[10px] px-1 py-0 border-primary text-primary">Already connected</Badge>
+                                            <Badge variant="outline" className="text-2xs px-1 py-0 border-primary text-primary">Already connected</Badge>
                                           )}
                                         </span>
                                         <span className="text-xs text-muted-foreground flex items-center gap-1">

@@ -140,7 +140,7 @@ export function PatientRequestsBadge() {
       </CardHeader>
       <CardContent className="space-y-3">
         {proposedRequests.map((req) => (
-          <div key={req.id} className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
+          <div key={req.id} className="rounded-xl border border-primary/30 bg-primary/5 p-3 space-y-2">
             <div className="flex items-center justify-between">
               <span className="font-medium text-sm">{req.doctor_name}</span>
               <Badge className="bg-amber-100 text-amber-800 text-xs">New Time Proposed</Badge>
@@ -170,7 +170,7 @@ export function PatientRequestsBadge() {
           </div>
         ))}
         {pendingRequests.map((req) => (
-          <div key={req.id} className="rounded-lg border border-border p-3 space-y-1">
+          <div key={req.id} className="rounded-xl border border-border p-3 space-y-1">
             <div className="flex items-center justify-between">
               <span className="font-medium text-sm">{req.doctor_name}</span>
               <Badge variant="outline" className="text-xs">Pending</Badge>

@@ -38,7 +38,7 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
 
   if (!m.workflow) {
     return (
-      <div className="rounded-lg border bg-card p-6 text-center text-sm">
+      <div className="rounded-xl border bg-card p-6 text-center text-sm">
         <p className="text-muted-foreground">No wealth workflow for this client yet.</p>
         <Button className="mt-3" size="sm" disabled={start.isPending}
           onClick={() => start.mutate({ patientId }, { onError: (e: any) => toast({ title: "Could not start", description: e.message, variant: "destructive" }) })}>
@@ -68,7 +68,7 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
         <button onClick={onBackToLive} className="text-xs font-medium text-primary hover:underline">← Back to Live workspace</button>
       )}
       {viewer === "manager" && (
-        <div className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-xl border border-border/70 bg-card px-4 py-2.5 text-[13px] sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-xl border border-border/70 bg-card px-4 py-2.5 text-sm sm:grid-cols-4">
           <Field label="Client" value={clientName ?? "—"} />
           <Field label="Current stage" value={curLabel} />
           <Field label="Status" value={statusText} danger={wf.status === "blocked"} />
@@ -109,7 +109,7 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
 function Field({ label, value, danger }: { label: string; value: string; danger?: boolean }) {
   return (
     <div>
-      <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
+      <p className="text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
       <p className={danger ? "text-destructive" : "text-foreground"}>{value}</p>
     </div>
   );

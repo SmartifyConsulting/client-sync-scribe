@@ -197,7 +197,7 @@ export default function Documentation() {
               filteredPrescriptions.map((rx) => (
                 <div
                   key={rx.id}
-                  className="flex items-start gap-4 p-4 rounded-lg border border-border"
+                  className="flex items-start gap-4 p-4 rounded-xl border border-border"
                 >
                   <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
                     <Pill className="h-6 w-6 text-primary" />

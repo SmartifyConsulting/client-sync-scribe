@@ -98,7 +98,7 @@ export function TargetsCommission() {
         <p className="text-xs font-semibold">Issued policies: enter premium and commission</p>
         {apps.length === 0 && <p className="text-xs text-muted-foreground">No policies issued yet this year.</p>}
         {apps.map((a) => (
-          <div key={a.id} className="grid gap-2 sm:grid-cols-[1fr_140px_140px_auto] items-end rounded-lg border p-2">
+          <div key={a.id} className="grid gap-2 sm:grid-cols-[1fr_140px_140px_auto] items-end rounded-xl border p-2">
             <div className="text-xs"><p className="font-medium">{a.product}</p><p className="text-muted-foreground">{a.provider}{a.issued_at ? ` · ${new Date(a.issued_at).toLocaleDateString("en-ZA")}` : ""}</p></div>
             <div className="space-y-1"><Label className="text-xs">Premium / month (R)</Label><Input type="number" defaultValue={a.monthly_premium ?? ""} onChange={(e) => setEdits((p) => ({ ...p, [a.id]: { ...p[a.id], premium: e.target.value } }))} /></div>
             <div className="space-y-1"><Label className="text-xs">Commission (R)</Label><Input type="number" defaultValue={a.commission_amount ?? ""} onChange={(e) => setEdits((p) => ({ ...p, [a.id]: { ...p[a.id], commission: e.target.value } }))} /></div>

@@ -96,7 +96,7 @@ export function SessionDiscStrip({ patientId, inline = false }: Props) {
           return (
             <span
               key={d.key}
-              className={`rounded border px-1.5 py-0.5 text-[11px] ${d.chip}`}
+              className={`rounded border px-1.5 py-0.5 text-2xs ${d.chip}`}
             >
               <span className="font-bold">{d.letter}</span> {words.join(", ")}
             </span>
@@ -114,7 +114,7 @@ export function SessionDiscStrip({ patientId, inline = false }: Props) {
         <Brain className="h-3.5 w-3.5 text-primary" />
         <p className="text-xs font-medium text-foreground">Personality (DISC)</p>
         {profile?.primary_trait && (
-          <span className="text-[10px] text-muted-foreground ml-auto">
+          <span className="text-2xs text-muted-foreground ml-auto">
             {profile.primary_trait}
             {profile.secondary_trait ? ` / ${profile.secondary_trait}` : ""}
           </span>
@@ -133,7 +133,7 @@ export function SessionDiscStrip({ patientId, inline = false }: Props) {
               return (
                 <div key={d.key} className="flex items-start gap-2">
                   <span
-                    className={`shrink-0 rounded border px-1.5 py-0.5 text-[10px] font-bold ${d.chip}`}
+                    className={`shrink-0 rounded border px-1.5 py-0.5 text-2xs font-bold ${d.chip}`}
                   >
                     {d.letter} {score}
                   </span>
@@ -142,13 +142,13 @@ export function SessionDiscStrip({ patientId, inline = false }: Props) {
                       words.map((w) => (
                         <span
                           key={w}
-                          className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-foreground"
+                          className="rounded-full bg-muted px-2 py-0.5 text-2xs text-foreground"
                         >
                           {w}
                         </span>
                       ))
                     ) : (
-                      <span className="text-[11px] text-muted-foreground">low</span>
+                      <span className="text-2xs text-muted-foreground">low</span>
                     )}
                   </div>
                 </div>

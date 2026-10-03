@@ -236,7 +236,7 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
           {/* Dynamic Fields Info */}
           <div className="px-2 py-1.5 rounded-lg bg-muted/50 border border-border">
             <div className="flex flex-wrap items-center gap-1">
-              <span className="text-[10px] font-medium text-muted-foreground mr-0.5">Fields:</span>
+              <span className="text-2xs font-medium text-muted-foreground mr-0.5">Fields:</span>
               {[
                 "[PatientName]","[DoctorName]","[DoctorSignature]","[PracticeNumber]",
                 "[DoctorNumber]","[PracticeAddress]","[Date]","[PatientAddress]","[PatientDOB]",
@@ -249,7 +249,7 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
                     e.dataTransfer.effectAllowed = "copy";
                   }}
                   onClick={() => { navigator.clipboard?.writeText(token); }}
-                  className="inline-flex items-center gap-1 text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded cursor-grab active:cursor-grabbing select-none hover:bg-primary/20"
+                  className="inline-flex items-center gap-1 text-2xs bg-primary/10 text-primary px-1.5 py-0.5 rounded cursor-grab active:cursor-grabbing select-none hover:bg-primary/20"
                   title="Drag into the content area, or click to copy"
                 >
                   <GripVertical className="h-2.5 w-2.5 opacity-70" />
@@ -270,7 +270,7 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
                 for (const m of match) counts.set(m[1], (counts.get(m[1]) ?? 0) + 1);
                 const detectedSize = [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
                 return (
-                  <span className="text-[10px] text-muted-foreground">
+                  <span className="text-2xs text-muted-foreground">
                     Written in <span className="font-medium text-foreground">{detectedSize}pt</span>
                   </span>
                 );

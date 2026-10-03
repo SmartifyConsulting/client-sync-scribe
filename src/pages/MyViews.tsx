@@ -93,7 +93,7 @@ export default function MyViews() {
                   <Monitor className="h-4 w-4 text-primary" />
                 )}
                 <h2 className="text-sm font-semibold text-foreground">{outerKey}</h2>
-                <Badge variant="secondary" className="ml-auto text-[11px]">
+                <Badge variant="secondary" className="ml-auto text-2xs">
                   {Array.from(inner.values()).reduce((n, rows) => n + rows.length, 0)} views
                 </Badge>
               </div>
@@ -103,7 +103,7 @@ export default function MyViews() {
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm font-medium text-foreground">{viewer}</span>
-                      <Badge variant="outline" className="text-[10px] capitalize">
+                      <Badge variant="outline" className="text-2xs capitalize">
                         {rows[0].viewer_role}
                       </Badge>
                     </div>

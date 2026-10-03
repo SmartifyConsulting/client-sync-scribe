@@ -28,7 +28,7 @@ function SendOptions({ first, phone, email, url, manager }: { first: string; pho
   const text = message(first, manager, url);
   return (
     <div className="space-y-3">
-      <div className="rounded-lg border border-border bg-muted/30 p-3 text-xs break-all text-muted-foreground">{url}</div>
+      <div className="rounded-xl border border-border bg-muted/30 p-3 text-xs break-all text-muted-foreground">{url}</div>
       <div className="grid gap-2 sm:grid-cols-3">
         <Button asChild variant="default"><a href={`https://wa.me/${waNumber(phone)}?text=${encodeURIComponent(text)}`} target="_blank" rel="noreferrer"><MessageCircle className="h-4 w-4" />WhatsApp</a></Button>
         <Button asChild variant="outline"><a href={`mailto:${email ?? ""}?subject=${encodeURIComponent("Your Holarc Wealth onboarding link")}&body=${encodeURIComponent(text)}`}><Mail className="h-4 w-4" />Email</a></Button>
@@ -131,7 +131,7 @@ export function NewClientInvite({ compact = false }: { compact?: boolean }) {
           ) : (
             <div className="space-y-3">
               {missing.length > 0 && (
-                <div className="rounded-lg border border-border bg-muted/40 p-3 text-xs">
+                <div className="rounded-xl border border-border bg-muted/40 p-3 text-xs">
                   <p className="font-medium text-foreground">Complete your profile</p>
                   <p className="text-muted-foreground">Your client's Letter of Authority fills in from My Business. Missing: {missing.join(", ")}.</p>
                 </div>

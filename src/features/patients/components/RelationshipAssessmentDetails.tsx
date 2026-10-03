@@ -45,8 +45,8 @@ export function RelationshipAssessmentDetails({
   return (
     <div className={compact ? "space-y-2.5" : "space-y-3"}>
       {/* TESTING ONLY — internal pattern numbers */}
-      <div className="rounded-lg border border-dashed border-amber-400/60 bg-amber-50/60 dark:bg-amber-500/10 p-2.5">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+      <div className="rounded-xl border border-dashed border-amber-400/60 bg-amber-50/60 dark:bg-amber-500/10 p-2.5">
+        <p className="text-2xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
           Testing view
         </p>
         <p className="text-xs text-foreground">Probable pattern: Type {pattern}</p>
@@ -86,12 +86,12 @@ export function RelationshipAssessmentDetails({
       </div>
 
       {sessionEvidence.length > 0 && (
-        <div className="rounded-lg border border-border bg-muted/20 p-3">
+        <div className="rounded-xl border border-border bg-muted/20 p-3">
           <p className="text-xs font-bold text-foreground mb-2">Evidence from consultations</p>
           <div className="grid gap-x-6 gap-y-3 md:grid-cols-2">
             {Object.entries(grouped).map(([key, items]) => (
               <div key={key} className="space-y-1.5">
-                <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                <p className="text-2xs font-bold uppercase tracking-wide text-muted-foreground">
                   {new Date(items[0].session_date).toLocaleDateString()}
                 </p>
                 {items.map((e) => (

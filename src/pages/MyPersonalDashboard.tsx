@@ -232,14 +232,14 @@ export default function MyPersonalDashboard() {
               { label: "Monthly premiums", value: t?.monthlyPremiums ? zar(t.monthlyPremiums) : "—", note: "Across all policies" },
             ].map((f) => (
               <div key={f.label} className="min-w-0">
-                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{f.label}</p>
+                <p className="text-2xs uppercase tracking-wide text-muted-foreground">{f.label}</p>
                 <p className="text-sm font-semibold text-foreground">{f.value}</p>
-                <p className="text-[10px] text-muted-foreground">{f.note}</p>
+                <p className="text-2xs text-muted-foreground">{f.note}</p>
               </div>
             ))}
           </div>
           <div className="mt-3 border-t border-border pt-3">
-            <p className="text-[10px] uppercase tracking-wide text-primary font-bold mb-1.5">If something happened to you</p>
+            <p className="text-2xs uppercase tracking-wide text-primary font-bold mb-1.5">If something happened to you</p>
             <ul className="space-y-1 text-xs text-muted-foreground">
               <li>If you die: <span className="font-semibold text-foreground">{t?.lifeCover ? zar(t.lifeCover) : "no cover captured"}</span></li>
               <li>If you can't work: <span className="font-semibold text-foreground">{t?.incomeProtection ? `${zar(t.incomeProtection)} /month` : "no cover captured"}</span></li>
@@ -261,7 +261,7 @@ export default function MyPersonalDashboard() {
           <EmotionalHeadline emoji="📅" title="You're in the loop" sub="Nothing important is getting lost." />
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold mb-1">Coming up</p>
+              <p className="text-2xs uppercase tracking-wide text-muted-foreground font-semibold mb-1">Coming up</p>
               {comingUp.length ? (
                 <ul className="space-y-1">
                   {comingUp.map((c) => (
@@ -271,7 +271,7 @@ export default function MyPersonalDashboard() {
                       </span>
                       <div className="min-w-0">
                         <p className="text-xs font-semibold text-foreground">{c.title}</p>
-                        <p className="text-[10px] text-muted-foreground">{c.detail}</p>
+                        <p className="text-2xs text-muted-foreground">{c.detail}</p>
                       </div>
                     </li>
                   ))}
@@ -280,8 +280,8 @@ export default function MyPersonalDashboard() {
             </div>
             <div className="space-y-1">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">Today's To Do List</p>
-                <Button size="sm" variant="outline" className="h-6 gap-1 text-[10px] px-2" onClick={() => navigate("/patient/tasks")}>
+                <p className="text-2xs uppercase tracking-wide text-muted-foreground font-semibold">Today's To Do List</p>
+                <Button size="sm" variant="outline" className="h-6 gap-1 text-2xs px-2" onClick={() => navigate("/patient/tasks")}>
                   <ListChecks className="h-3 w-3" /> View
                 </Button>
               </div>
@@ -290,7 +290,7 @@ export default function MyPersonalDashboard() {
                   {w.todos.slice(0, 3).map((td: any) => (
                     <li key={td.id} className="text-xs">
                       <p className="font-semibold text-primary truncate">{td.title}</p>
-                      {td.due_date && <p className="text-[10px] text-muted-foreground">Due {format(new Date(td.due_date), "d MMM")}</p>}
+                      {td.due_date && <p className="text-2xs text-muted-foreground">Due {format(new Date(td.due_date), "d MMM")}</p>}
                     </li>
                   ))}
                 </ul>
@@ -299,20 +299,20 @@ export default function MyPersonalDashboard() {
           </div>
 
           <div className="mt-4 border-t border-border pt-3">
-            <p className="text-[10px] uppercase tracking-wide text-primary font-bold mb-2">Things worth your attention</p>
+            <p className="text-2xs uppercase tracking-wide text-primary font-bold mb-2">Things worth your attention</p>
             {attention.length ? (
               <ul className="space-y-1.5">
                 {attention.map((a) => (
-                  <li key={a.title} className="rounded-lg border border-border bg-background/60 p-2">
+                  <li key={a.title} className="rounded-xl border border-border bg-background/60 p-2">
                     <p className="text-xs font-semibold text-foreground">{a.title}</p>
-                    <p className="text-[11px] text-muted-foreground">{a.detail}</p>
+                    <p className="text-2xs text-muted-foreground">{a.detail}</p>
                   </li>
                 ))}
               </ul>
             ) : (
-              <div className="rounded-lg border border-dashed border-border bg-background/40 p-3 text-center">
+              <div className="rounded-xl border border-dashed border-border bg-background/40 p-3 text-center">
                 <p className="text-xs font-semibold text-foreground">All in order</p>
-                <p className="text-[10px] text-muted-foreground">We'll let you know when something needs a look.</p>
+                <p className="text-2xs text-muted-foreground">We'll let you know when something needs a look.</p>
               </div>
             )}
           </div>
@@ -330,7 +330,7 @@ export default function MyPersonalDashboard() {
               { label: "Debt", value: zar(t?.liabilities ?? 0) },
             ].map((f) => (
               <div key={f.label}>
-                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{f.label}</p>
+                <p className="text-2xs uppercase tracking-wide text-muted-foreground">{f.label}</p>
                 <p className="text-sm font-semibold text-foreground">{f.value}</p>
               </div>
             ))}
@@ -339,9 +339,9 @@ export default function MyPersonalDashboard() {
         </Panel>
         <Panel title="My Retirement" icon={TrendingUp} unlocked={unlocked} onClick={() => navigate("/my-future")}>
           <div className="grid grid-cols-3 gap-3">
-            <div><p className="text-[10px] uppercase tracking-wide text-muted-foreground">Saved</p><p className="text-sm font-semibold">{zar(t?.retirement ?? 0)}</p></div>
-            <div><p className="text-[10px] uppercase tracking-wide text-muted-foreground">Target age</p><p className="text-sm font-semibold">{w?.goals.retirementAge ?? "Not set"}</p></div>
-            <div><p className="text-[10px] uppercase tracking-wide text-muted-foreground">Risk profile</p><p className="text-sm font-semibold">{w?.goals.riskProfile ?? "Not set"}</p></div>
+            <div><p className="text-2xs uppercase tracking-wide text-muted-foreground">Saved</p><p className="text-sm font-semibold">{zar(t?.retirement ?? 0)}</p></div>
+            <div><p className="text-2xs uppercase tracking-wide text-muted-foreground">Target age</p><p className="text-sm font-semibold">{w?.goals.retirementAge ?? "Not set"}</p></div>
+            <div><p className="text-2xs uppercase tracking-wide text-muted-foreground">Risk profile</p><p className="text-sm font-semibold">{w?.goals.riskProfile ?? "Not set"}</p></div>
           </div>
           {w?.goals.retirementIncome ? (
             <p className="mt-3 text-xs text-muted-foreground">Aiming for {zar(w.goals.retirementIncome)} a month in retirement.</p>

@@ -90,7 +90,7 @@ export function MonthlyAdherenceSummary({ patientId }: MonthlyAdherenceSummaryPr
               return (
                 <div
                   key={month}
-                  className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/20 p-3"
+                  className="flex items-center justify-between gap-3 rounded-xl border border-border bg-muted/20 p-3"
                 >
                   <div>
                     <p className="text-sm font-medium text-foreground">

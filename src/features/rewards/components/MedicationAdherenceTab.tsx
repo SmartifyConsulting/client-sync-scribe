@@ -780,7 +780,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
               const expectedQty = Math.max(1, Number(rxNow?.quantity_per_dose) || parseQuantity(rxNow?.dosage));
               if (stage === "pill_check" && expectedQty > 1) {
                 return (
-                  <div className="rounded-lg border border-primary/30 bg-primary/5 p-2 text-xs text-foreground flex items-center gap-2">
+                  <div className="rounded-xl border border-primary/30 bg-primary/5 p-2 text-xs text-foreground flex items-center gap-2">
                     <Pill className="h-4 w-4 text-primary" />
                     Show <strong>all {expectedQty} tablets</strong> together in the frame.
                   </div>
@@ -827,7 +827,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
                 {pillCheckResult && (
                   <div
                     className={
-                      "rounded-lg border p-3 text-sm " +
+                      "rounded-xl border p-3 text-sm " +
                       (!pillCheckResult.isPillVisible
                         ? "border-destructive/40 bg-destructive/10 text-destructive"
                         : pillCheckResult.isMatch

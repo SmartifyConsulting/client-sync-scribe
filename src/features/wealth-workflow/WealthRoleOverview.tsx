@@ -102,9 +102,9 @@ export function WealthRoleOverview() {
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-lg border border-border p-2">
+    <div className="rounded-xl border border-border p-2">
       <p className="text-xl font-semibold text-foreground">{value}</p>
-      <p className="text-[11px] text-muted-foreground">{label}</p>
+      <p className="text-2xs text-muted-foreground">{label}</p>
     </div>
   );
 }

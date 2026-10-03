@@ -51,7 +51,7 @@ export function SecurityBadges() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: i * 0.08 }}
               viewport={{ once: true }}
-              className="rounded-2xl border border-border bg-card p-5 text-center hover:border-primary/40 transition-colors"
+              className="rounded-xl border border-border bg-card p-5 text-center hover:border-primary/40 transition-colors"
             >
               <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
                 <b.icon className="h-6 w-6 text-primary" />

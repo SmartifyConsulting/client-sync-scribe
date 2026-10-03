@@ -114,7 +114,7 @@ function PersonDetail({ person, onClose }: { person: CarePerson; onClose: () => 
           <div className="mt-2 grid grid-cols-2 gap-3">
             {person.metrics.map((m) => (
               <div key={m.label}>
-                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{m.label}</p>
+                <p className="text-2xs uppercase tracking-wide text-muted-foreground">{m.label}</p>
                 <p className="text-sm font-semibold text-foreground">{m.value}</p>
               </div>
             ))}
@@ -129,7 +129,7 @@ function PersonDetail({ person, onClose }: { person: CarePerson; onClose: () => 
           <div className="mt-2 space-y-3">
             {person.story.map((block) => (
               <div key={block.period}>
-                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{block.period}</p>
+                <p className="text-2xs uppercase tracking-wide text-muted-foreground">{block.period}</p>
                 <ul className="mt-1 space-y-0.5">
                   {block.items.map((item) => (
                     <li key={item} className="text-xs text-foreground">
@@ -172,7 +172,7 @@ export function PeopleICareFor({ unlocked }: { unlocked: boolean }) {
               key={p.id}
               type="button"
               onClick={() => setOpenPerson(p)}
-              className="h-full flex flex-col rounded-lg border border-border bg-background/60 p-3 text-left transition-colors hover:border-primary hover:bg-primary/5"
+              className="h-full flex flex-col rounded-xl border border-border bg-background/60 p-3 text-left transition-colors hover:border-primary hover:bg-primary/5"
             >
               <div className="flex items-center gap-2">
                 <span
@@ -185,12 +185,12 @@ export function PeopleICareFor({ unlocked }: { unlocked: boolean }) {
                 </span>
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-foreground truncate">{p.name}</p>
-                  <p className="text-[10px] text-muted-foreground truncate">{p.relation}</p>
+                  <p className="text-2xs text-muted-foreground truncate">{p.relation}</p>
                 </div>
               </div>
               <span
                 className={cn(
-                  "mt-2 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold",
+                  "mt-2 inline-flex rounded-full px-2 py-0.5 text-2xs font-semibold",
                   well ? "bg-primary/10 text-primary" : "bg-amber-500/15 text-amber-700 dark:text-amber-400",
                 )}
               >
@@ -198,12 +198,12 @@ export function PeopleICareFor({ unlocked }: { unlocked: boolean }) {
               </span>
               <ul className="mt-2 space-y-0.5">
                 {p.lines.map((l) => (
-                  <li key={l} className="text-[11px] text-muted-foreground">
+                  <li key={l} className="text-2xs text-muted-foreground">
                     {l}
                   </li>
                 ))}
               </ul>
-              <p className="mt-1.5 text-[11px] text-muted-foreground">
+              <p className="mt-1.5 text-2xs text-muted-foreground">
                 {well ? "Nothing needs your attention." : p.concern}
               </p>
               {!well && (
@@ -211,7 +211,7 @@ export function PeopleICareFor({ unlocked }: { unlocked: boolean }) {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="h-7 text-[11px]"
+                    className="h-7 text-2xs"
                     onClick={(e) => {
                       e.stopPropagation();
                       toast({ title: `Check in with ${p.name}`, description: "We'll let them know you're thinking of them." });
@@ -222,7 +222,7 @@ export function PeopleICareFor({ unlocked }: { unlocked: boolean }) {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="h-7 text-[11px]"
+                    className="h-7 text-2xs"
                     onClick={(e) => {
                       e.stopPropagation();
                       resolve(p.id);
@@ -239,7 +239,7 @@ export function PeopleICareFor({ unlocked }: { unlocked: boolean }) {
       </div>
 
       {allWell ? (
-        <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
+        <div className="mt-3 rounded-xl border border-primary/30 bg-primary/5 p-3">
           <p className="text-xs font-semibold text-foreground">🕊️ Peace of mind</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
             Everyone you're looking out for is doing well.{" "}
@@ -248,7 +248,7 @@ export function PeopleICareFor({ unlocked }: { unlocked: boolean }) {
           <p className="mt-0.5 text-xs text-muted-foreground">Nothing needs your attention.</p>
         </div>
       ) : (
-        <div className="mt-3 rounded-lg border border-amber-500/40 bg-amber-500/5 p-3">
+        <div className="mt-3 rounded-xl border border-amber-500/40 bg-amber-500/5 p-3">
           <p className="text-xs font-semibold text-foreground">🟠 Someone may need you</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
             {needsYou.map((p) => p.concern).join(" ")}

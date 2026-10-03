@@ -27,15 +27,15 @@ export function YouAreKnownCard({ values, communication, className }: Props) {
 
       <dl className="mt-3 space-y-2">
         <div>
-          <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">What matters to me</dt>
+          <dt className="text-2xs uppercase tracking-wide text-muted-foreground">What matters to me</dt>
           <dd className="text-xs font-medium text-foreground">{whatMatters.join(" · ")}</dd>
         </div>
         <div>
-          <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">How I like to communicate</dt>
+          <dt className="text-2xs uppercase tracking-wide text-muted-foreground">How I like to communicate</dt>
           <dd className="text-xs font-medium text-foreground">{howICommunicate.join(" · ")}</dd>
         </div>
         <div>
-          <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">My preferences</dt>
+          <dt className="text-2xs uppercase tracking-wide text-muted-foreground">My preferences</dt>
           <dd className="text-xs font-medium text-foreground">My story · My personality</dd>
         </div>
       </dl>

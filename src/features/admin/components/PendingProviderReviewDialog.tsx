@@ -140,7 +140,7 @@ export function PendingProviderReviewDialog({ open, ownerUserId, onClose, onActi
 
             <Section title="Certified license">
               {submission.license_file_path ? (
-                <div className="flex items-center justify-between rounded-lg border p-3 bg-muted/20">
+                <div className="flex items-center justify-between rounded-xl border p-3 bg-muted/20">
                   <div className="flex items-center gap-2 min-w-0">
                     <FileText className="h-5 w-5 text-primary shrink-0" />
                     <div className="min-w-0">
@@ -206,7 +206,7 @@ export function PendingProviderReviewDialog({ open, ownerUserId, onClose, onActi
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="space-y-1.5 rounded-lg border p-3">
+    <div className="space-y-1.5 rounded-xl border p-3">
       <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{title}</h4>
       <div className="space-y-1">{children}</div>
     </div>

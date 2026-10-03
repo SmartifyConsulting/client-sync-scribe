@@ -32,7 +32,7 @@ export function LiveWorkspace({ patientId, clientName, onViewWorkflow, onOpenDoc
   if (ws.loading) return <div className="flex h-32 items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>;
   if (!ws.workflow) {
     return (
-      <div className="rounded-lg border bg-card p-6 text-center text-sm">
+      <div className="rounded-xl border bg-card p-6 text-center text-sm">
         <p className="text-muted-foreground">No wealth workflow for this client yet.</p>
         <Button className="mt-3" size="sm" disabled={start.isPending} onClick={() => start.mutate({ patientId })}>Start workflow</Button>
       </div>
@@ -93,7 +93,7 @@ export function LiveWorkspace({ patientId, clientName, onViewWorkflow, onOpenDoc
   return (
     <div className="space-y-4">
       {/* Context strip */}
-      <div className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-lg border bg-card p-3 text-sm md:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-xl border bg-card p-3 text-sm md:grid-cols-3 xl:grid-cols-6">
         <Ctx label="Client" value={clientName ?? "—"} />
         <Ctx label="Consultation" value={ws.lastSession ? format(new Date(ws.lastSession.started_at ?? ws.lastSession.created_at), "d MMM yyyy") : "—"} />
         <Ctx label="Current stage" value={curLabel} />
@@ -125,7 +125,7 @@ export function LiveWorkspace({ patientId, clientName, onViewWorkflow, onOpenDoc
         <Section title="Waiting" count={ws.waiting.length}>
           {ws.waiting.length === 0 ? <Empty text="Not waiting on anyone." /> : Object.entries(waitingByOwner).map(([owner, items]) => (
             <div key={owner}>
-              <p className="bg-muted/40 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              <p className="bg-muted/40 px-3 py-1 text-2xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Waiting for {OWNER_LABEL[owner] ?? owner}
               </p>
               {items.map((i) => <WorkspaceItemRow key={i.id} item={i} actions={actionsFor(i)} />)}
@@ -166,7 +166,7 @@ export function LiveWorkspace({ patientId, clientName, onViewWorkflow, onOpenDoc
 function Ctx({ label, value, danger }: { label: string; value: string; danger?: boolean }) {
   return (
     <div className="min-w-0">
-      <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="text-2xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
       <p className={`truncate font-medium ${danger ? "text-destructive" : "text-foreground"}`}>{value}</p>
     </div>
   );
@@ -174,7 +174,7 @@ function Ctx({ label, value, danger }: { label: string; value: string; danger?: 
 
 function Section({ title, count, children, accent, danger }: { title: string; count: number; children: React.ReactNode; accent?: boolean; danger?: boolean }) {
   return (
-    <section className={`overflow-hidden rounded-lg border bg-card ${accent ? "border-t-2 border-t-primary" : ""} ${danger ? "border-t-2 border-t-destructive" : ""}`}>
+    <section className={`overflow-hidden rounded-xl border bg-card ${accent ? "border-t-2 border-t-primary" : ""} ${danger ? "border-t-2 border-t-destructive" : ""}`}>
       <header className="flex items-center gap-2 border-b px-3 py-2">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-foreground">{title}</h3>
         <span className="text-xs text-muted-foreground">{count}</span>

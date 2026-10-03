@@ -331,7 +331,7 @@ export default function PatientDashboard() {
               const icon = notif.type === "session_completed" ? Clock : notif.type === "document" ? FileText : notif.type === "reward" ? Trophy : Info;
               const Icon = icon;
               return (
-                <div key={notif.id} className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2 min-w-[200px] shrink-0">
+                <div key={notif.id} className="flex items-center gap-2 rounded-xl border border-border bg-muted/30 px-3 py-2 min-w-[200px] shrink-0">
                   <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary shrink-0">
                     <Icon className="h-3.5 w-3.5 text-primary" />
                   </div>
@@ -387,7 +387,7 @@ export default function PatientDashboard() {
             ) : (
               <div className="space-y-1.5">
                 {doctors.filter(d => d.nextAppointment).map(doc => (
-                  <div key={doc.id} className="flex items-center justify-between p-2.5 rounded-lg border border-border">
+                  <div key={doc.id} className="flex items-center justify-between p-2.5 rounded-xl border border-border">
                     <div>
                       <p className="text-xs font-medium text-foreground">{doc.doctor_profile?.full_name || t("patientDashboard.doctorFallback")}</p>
                       <p className="text-xs text-muted-foreground">{doc.nextAppointment ? format(parseISO(doc.nextAppointment), "MMM d, h:mm a") : ""}</p>
@@ -476,7 +476,7 @@ export default function PatientDashboard() {
               ) : (
                 <div className="space-y-1.5">
                   {recentClaims.map((claim: any) => (
-                    <div key={claim.id} className="flex items-center justify-between p-2.5 rounded-lg border border-border">
+                    <div key={claim.id} className="flex items-center justify-between p-2.5 rounded-xl border border-border">
                       <div>
                         <p className="text-xs font-medium text-foreground">#{claim.invoice_number}</p>
                         <p className="text-xs text-muted-foreground">
@@ -535,7 +535,7 @@ export default function PatientDashboard() {
           <CardContent>
             <div className="space-y-1.5">
               {assignedTasks.map((task) => (
-                <div key={task.id} className="flex items-center justify-between p-2.5 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                <div key={task.id} className="flex items-center justify-between p-2.5 rounded-xl border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium truncate">{task.title}</p>
                     {task.due_date && (

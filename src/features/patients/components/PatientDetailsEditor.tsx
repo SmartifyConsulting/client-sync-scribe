@@ -1717,7 +1717,7 @@ export function PatientDetailsEditor({
 <TabsContent value="personal" className="space-y-4 mt-4">
               <div className="mb-1 flex items-center justify-between">
                 <div>
-                  <h2 className="text-[18px] font-semibold text-primary-dark">{t("patientProfile.personalHeading")}</h2>
+                  <h2 className="text-lg font-semibold text-primary-dark">{t("patientProfile.personalHeading")}</h2>
                   <p className="text-xs text-muted-foreground">{t("patientProfile.personalHelper")}</p>
                 </div>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditing(true)}>
@@ -1838,7 +1838,7 @@ export function PatientDetailsEditor({
 
             {/* === MEDICAL INFORMATION TAB — TWO COLUMNS === */}
             <TabsContent value="medical" className="mt-4 space-y-3">
-              <div><h2 className="text-[18px] font-semibold text-primary-dark">Financial Information</h2><p className="text-xs text-muted-foreground">The facts behind the Financial Needs Analysis.</p></div>
+              <div><h2 className="text-lg font-semibold text-primary-dark">Financial Information</h2><p className="text-xs text-muted-foreground">The facts behind the Financial Needs Analysis.</p></div>
               <FinancialInformation patientId={patient.id} />
             </TabsContent>
 
@@ -1848,7 +1848,7 @@ export function PatientDetailsEditor({
             {isSelfService && (
               <TabsContent value="tasks" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-[18px] font-semibold text-primary-dark">My Actions</h2>
+                  <h2 className="text-lg font-semibold text-primary-dark">My Actions</h2>
                   <p className="text-xs text-muted-foreground">Manage your health actions and to-dos</p>
                 </div>
                 <Suspense
@@ -1866,7 +1866,7 @@ export function PatientDetailsEditor({
             {isSelfService && (
               <TabsContent value="history" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-[18px] font-semibold text-primary-dark">My Consults</h2>
+                  <h2 className="text-lg font-semibold text-primary-dark">My Consults</h2>
                   <p className="text-xs text-muted-foreground">Your consultations with your advisers. You can also record meetings with advisers not on Holarc Wealth.</p>
                 </div>
                 <PatientSessionRecorder patientId={patient.id} patientName={patient.name} />
@@ -1917,7 +1917,7 @@ export function PatientDetailsEditor({
             {isSelfService && (
               <TabsContent value="labresults" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-[18px] font-semibold text-primary-dark">Lab Results</h2>
+                  <h2 className="text-lg font-semibold text-primary-dark">Lab Results</h2>
                   <p className="text-xs text-muted-foreground">Lab requests and results shared by your care team.</p>
                 </div>
                 <Suspense
@@ -1935,7 +1935,7 @@ export function PatientDetailsEditor({
             {isSelfService && (
               <TabsContent value="roundtable" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-[18px] font-semibold text-primary-dark">My Round Table</h2>
+                  <h2 className="text-lg font-semibold text-primary-dark">My Round Table</h2>
                   <p className="text-xs text-muted-foreground">
                     Notes shared by your healthcare providers about your care
                   </p>
@@ -1991,7 +1991,7 @@ export function PatientDetailsEditor({
 <TabsContent value="personal" className="space-y-4 mt-4">
             <div className="mb-1 flex items-center justify-between">
               <div>
-                <h2 className="text-[18px] font-semibold text-primary-dark">{t("patientProfile.personalHeading")}</h2>
+                <h2 className="text-lg font-semibold text-primary-dark">{t("patientProfile.personalHeading")}</h2>
                 <p className="text-xs text-muted-foreground">{t("patientProfile.personalHelper")}</p>
               </div>
               <AutosaveStatus saving={saving} hasChanges={hasChanges} lastSavedAt={lastSavedAt} />
@@ -2279,7 +2279,7 @@ export function PatientDetailsEditor({
                 )}
 
                 {showAddNOK && (
-                  <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
+                  <div className="p-3 rounded-xl border border-primary/30 bg-primary/5 mb-3 space-y-2">
                     <div className={FIELD_GRID_2_CLASS}>
                       <div className="space-y-1.5">
                         <Label>Name *</Label>
@@ -2427,7 +2427,7 @@ export function PatientDetailsEditor({
 
           {/* === MEDICAL TAB (EDIT) === */}
           <TabsContent value="medical" className="mt-4 space-y-3">
-            <div><h2 className="text-[18px] font-semibold text-primary-dark">Financial Information</h2><p className="text-xs text-muted-foreground">The facts behind the Financial Needs Analysis.</p></div>
+            <div><h2 className="text-lg font-semibold text-primary-dark">Financial Information</h2><p className="text-xs text-muted-foreground">The facts behind the Financial Needs Analysis.</p></div>
             <FinancialInformation patientId={patient.id} />
           </TabsContent>
 
@@ -2437,7 +2437,7 @@ export function PatientDetailsEditor({
           {isSelfService && (
             <TabsContent value="tasks" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-[18px] font-semibold text-primary-dark">My Actions</h2>
+                <h2 className="text-lg font-semibold text-primary-dark">My Actions</h2>
                 <p className="text-xs text-muted-foreground">Manage your health actions and to-dos</p>
               </div>
               <Suspense
@@ -2455,7 +2455,7 @@ export function PatientDetailsEditor({
           {isSelfService && (
             <TabsContent value="history" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-[18px] font-semibold text-primary-dark">My Consultations</h2>
+                <h2 className="text-lg font-semibold text-primary-dark">My Consultations</h2>
                 <p className="text-xs text-muted-foreground">Your consultation consultations</p>
               </div>
 
@@ -2509,7 +2509,7 @@ export function PatientDetailsEditor({
           {isSelfService && (
             <TabsContent value="documents" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-[18px] font-semibold text-primary-dark">Documents</h2>
+                <h2 className="text-lg font-semibold text-primary-dark">Documents</h2>
                 <p className="text-xs text-muted-foreground">
                   All your prescriptions, invoices, certificates and uploaded files
                 </p>
@@ -2529,7 +2529,7 @@ export function PatientDetailsEditor({
           {isSelfService && (
             <TabsContent value="labresults" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-[18px] font-semibold text-primary-dark">Lab Results</h2>
+                <h2 className="text-lg font-semibold text-primary-dark">Lab Results</h2>
                 <p className="text-xs text-muted-foreground">Lab requests and results shared by your care team.</p>
               </div>
               <Suspense
@@ -2547,7 +2547,7 @@ export function PatientDetailsEditor({
           {isSelfService && (
             <TabsContent value="roundtable" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-[18px] font-semibold text-primary-dark">My Round Table</h2>
+                <h2 className="text-lg font-semibold text-primary-dark">My Round Table</h2>
                 <p className="text-xs text-muted-foreground">
                   Notes shared by your healthcare providers about your care
                 </p>

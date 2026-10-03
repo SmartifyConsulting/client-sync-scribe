@@ -175,7 +175,7 @@ export default function Claims() {
                     <td>{c.claim_type}</td>
                     <td className="text-muted-foreground">{appLabel(c.application_id)}</td>
                     <td className="max-w-[260px] truncate text-muted-foreground">{c.description || "—"}</td>
-                    <td><Badge variant="outline" className="rounded-full text-[10px] font-medium">{statusLabel(c.status)}</Badge></td>
+                    <td><Badge variant="outline" className="rounded-full text-2xs font-medium">{statusLabel(c.status)}</Badge></td>
                     <td className="whitespace-nowrap">{fmt(c.created_at)}</td>
                     <td className="whitespace-nowrap">{fmt(c.updated_at)}</td>
                     <td>{c.attachment_path && <Paperclip className="h-3.5 w-3.5 text-muted-foreground" />}</td>

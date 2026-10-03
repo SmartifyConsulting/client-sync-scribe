@@ -144,7 +144,7 @@ export function RenewalRequestDialog({ open, onOpenChange, candidate, patientId,
         </DialogHeader>
 
         {/* Read-only prescription summary */}
-        <div className="rounded-lg border border-border bg-muted/40 p-3 text-xs space-y-1">
+        <div className="rounded-xl border border-border bg-muted/40 p-3 text-xs space-y-1">
           <div className="font-semibold text-foreground">{candidate.medication}</div>
           {candidate.dosage && <div><span className="text-muted-foreground">Dosage:</span> {candidate.dosage}</div>}
           {candidate.frequency && <div><span className="text-muted-foreground">Frequency:</span> {candidate.frequency}</div>}

@@ -74,7 +74,7 @@ export function ClientAISummary({ patientId }: { patientId: string }) {
       icon={Sparkles}
       action={
         <div className="flex items-center gap-2">
-          <span className="text-[11px] text-muted-foreground">
+          <span className="text-2xs text-muted-foreground">
             {data?.updatedAt ? `Updated ${formatDistanceToNow(new Date(data.updatedAt), { addSuffix: true })}` : ""}
           </span>
           <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => run()} disabled={busy} aria-label="Refresh summary">
@@ -91,7 +91,7 @@ export function ClientAISummary({ patientId }: { patientId: string }) {
           {data?.summary?.replace(/\*\*/g, "") || (busy ? "Building your summary…" : "No consultations or life events have been recorded yet.")}
         </p>
       )}
-      <p className="text-[11px] text-muted-foreground">Built from all consultations and life events. For information only — not financial advice.</p>
+      <p className="text-2xs text-muted-foreground">Built from all consultations and life events. For information only — not financial advice.</p>
       <div className="flex flex-col sm:flex-row gap-2 border-t border-border pt-3">
         <Select value={evType} onValueChange={setEvType}>
           <SelectTrigger className="h-9 sm:w-48 text-xs"><SelectValue placeholder="Add a life event" /></SelectTrigger>

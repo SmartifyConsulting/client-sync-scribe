@@ -56,7 +56,7 @@ export function UploadProgressBar({
   const pct = state.stage === "done" ? 100 : Math.max(4, Math.min(100, state.percent));
 
   return (
-    <div className={cn("rounded-lg border border-border bg-card p-3 space-y-2", className)}>
+    <div className={cn("rounded-xl border border-border bg-card p-3 space-y-2", className)}>
       <div className="flex items-center justify-between gap-3">
         <p
           className={cn(
@@ -67,7 +67,7 @@ export function UploadProgressBar({
           {STAGE_LABEL[state.stage]}
           {state.fileName ? ` — ${state.fileName}` : ""}
         </p>
-        <p className="text-[11px] text-muted-foreground whitespace-nowrap">
+        <p className="text-2xs text-muted-foreground whitespace-nowrap">
           {state.total && state.total > 1 ? `File ${state.current} of ${state.total}` : null}
           {!indeterminate && !isError && state.stage !== "done" ? ` ${Math.round(pct)}%` : ""}
         </p>
@@ -88,7 +88,7 @@ export function UploadProgressBar({
       </div>
 
       {isError && state.message ? (
-        <p className="text-[11px] text-destructive">{state.message}</p>
+        <p className="text-2xs text-destructive">{state.message}</p>
       ) : null}
     </div>
   );

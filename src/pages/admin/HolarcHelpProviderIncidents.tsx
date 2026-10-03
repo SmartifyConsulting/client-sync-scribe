@@ -85,7 +85,7 @@ export default function HolarcHelpProviderIncidents() {
         <Card><CardContent className="p-3"><p className="text-sm text-muted-foreground">Avg rating</p><p className="text-xl font-bold">{totals.avgRating}</p></CardContent></Card>
       </div>
 
-      <div className="rounded-2xl border bg-card overflow-x-auto">
+      <div className="rounded-xl border bg-card overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>

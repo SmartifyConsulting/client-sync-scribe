@@ -265,7 +265,7 @@ export default function ProviderSignup() {
                 </p>
               </div>
 
-              <div className="rounded-lg border bg-card p-3 font-mono text-sm space-y-1.5">
+              <div className="rounded-xl border bg-card p-3 font-mono text-sm space-y-1.5">
                 <div>
                   <span className="text-muted-foreground">Email:</span> {result.email}
                 </div>

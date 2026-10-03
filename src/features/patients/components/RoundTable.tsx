@@ -222,7 +222,7 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
           <Plus className="h-4 w-4" /> New Topic
         </Button>
       ) : (
-        <div className="space-y-2 rounded-lg border border-primary/40 bg-muted/30 p-3">
+        <div className="space-y-2 rounded-xl border border-primary/40 bg-muted/30 p-3">
           <Input placeholder="Subject" value={subject} onChange={(e) => setSubject(e.target.value)} />
           <Textarea placeholder="Describe the case for the team..." value={body} onChange={(e) => setBody(e.target.value)} className="min-h-[90px]" />
           <div className="flex justify-end gap-2">
@@ -235,7 +235,7 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
       )}
 
       {topics.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-6 text-center text-xs text-muted-foreground">
+        <div className="rounded-xl border border-dashed p-6 text-center text-xs text-muted-foreground">
           No round table topics yet.
         </div>
       ) : (
@@ -256,13 +256,13 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
               <AccordionContent className="space-y-3">
                 {/* Opening message from the doctor who started the round table */}
                 <div className="flex items-end gap-2">
-                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-[10px] font-semibold text-primary">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-2xs font-semibold text-primary">
                     {initials(t.doctor_name)}
                   </div>
                   <div className="relative max-w-[78%] rounded-2xl rounded-bl-sm bg-primary px-3 py-2 text-xs text-primary-foreground">
                     <div className="mb-0.5 flex items-center gap-1">
                       <span className="text-xs font-semibold">{t.doctor_name}</span>
-                      <span className="ml-auto pl-2 text-[10px] opacity-80">
+                      <span className="ml-auto pl-2 text-2xs opacity-80">
                         {format(new Date(t.created_at), "MMM d, h:mm a")}
                       </span>
                     </div>
@@ -274,8 +274,8 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
                           className="min-h-[70px] bg-background text-xs text-foreground"
                         />
                         <div className="flex justify-end gap-1">
-                          <Button size="sm" variant="ghost" className="h-6 text-[11px] text-primary-foreground hover:text-primary-foreground" onClick={cancelEdit}>Cancel</Button>
-                          <Button size="sm" variant="secondary" className="h-6 text-[11px]" onClick={() => saveTopicEdit(t.id)}>Save</Button>
+                          <Button size="sm" variant="ghost" className="h-6 text-2xs text-primary-foreground hover:text-primary-foreground" onClick={cancelEdit}>Cancel</Button>
+                          <Button size="sm" variant="secondary" className="h-6 text-2xs" onClick={() => saveTopicEdit(t.id)}>Save</Button>
                         </div>
                       </div>
                     ) : (
@@ -311,7 +311,7 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
                       const tone = bubbleTone(m.doctor_id);
                       return (
                         <div key={m.id} className={`group flex items-end gap-2 ${mine ? "flex-row-reverse" : ""}`}>
-                          <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold ${tone.avatar}`}>
+                          <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-2xs font-semibold ${tone.avatar}`}>
                             {initials(m.doctor_name)}
                           </div>
                           <div
@@ -322,7 +322,7 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
                             <div className="mb-0.5 flex items-center gap-1">
                               <span className="text-xs font-semibold">{m.doctor_name}</span>
                               {onlineDoctors[m.doctor_id] && <Circle className="h-1.5 w-1.5 fill-primary text-primary" />}
-                              <span className="ml-auto pl-2 text-[10px] opacity-70">
+                              <span className="ml-auto pl-2 text-2xs opacity-70">
                                 {format(new Date(m.created_at), "MMM d, h:mm a")}
                                 {m.edited_at ? " · edited" : ""}
                               </span>
@@ -335,8 +335,8 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
                                   className="min-h-[60px] bg-background text-xs"
                                 />
                                 <div className="flex justify-end gap-1">
-                                  <Button size="sm" variant="ghost" className="h-6 text-[11px]" onClick={cancelEdit}>Cancel</Button>
-                                  <Button size="sm" className="h-6 text-[11px]" onClick={() => saveMessageEdit(m)}>Save</Button>
+                                  <Button size="sm" variant="ghost" className="h-6 text-2xs" onClick={cancelEdit}>Cancel</Button>
+                                  <Button size="sm" className="h-6 text-2xs" onClick={() => saveMessageEdit(m)}>Save</Button>
                                 </div>
                               </div>
                             ) : (

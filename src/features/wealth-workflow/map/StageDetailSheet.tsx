@@ -22,7 +22,7 @@ interface Props {
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <section className="space-y-1.5">
-    <h4 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{title}</h4>
+    <h4 className="text-2xs font-semibold uppercase tracking-wide text-muted-foreground">{title}</h4>
     {children}
   </section>
 );

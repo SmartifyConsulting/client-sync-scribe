@@ -382,7 +382,7 @@ Signature: ___________________
             </div>
             
             {medications.map((med, index) => (
-              <div key={med.id} className="p-3 rounded-lg border border-border bg-muted/20 space-y-3">
+              <div key={med.id} className="p-3 rounded-xl border border-border bg-muted/20 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-muted-foreground">Medication {index + 1}</span>
                   {medications.length > 1 && (
@@ -479,7 +479,7 @@ Signature: ___________________
                   <div
                     key={i}
                     className={cn(
-                      "p-3 rounded-lg border",
+                      "p-3 rounded-xl border",
                       conflict.severity === "high"
                         ? "bg-red-500/10 border-red-500/30"
                         : conflict.severity === "moderate"

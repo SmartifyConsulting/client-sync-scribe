@@ -350,7 +350,7 @@ export function DoctorAccessRequests() {
                     </ul>
                   </div>
                 </div>
-                <p className="text-[11px] leading-relaxed text-muted-foreground mt-3 border-t border-border pt-2">
+                <p className="text-2xs leading-relaxed text-muted-foreground mt-3 border-t border-border pt-2">
                   Access is granted per invitation and is revocable by the patient at any time.
                 </p>
               </div>
@@ -402,7 +402,7 @@ export function DoctorAccessRequests() {
               {ACCESS_ITEMS.map((item) => (
                 <li
                   key={item.label}
-                  className="flex items-start gap-3 rounded-lg border border-border bg-muted/30 px-3 py-2"
+                  className="flex items-start gap-3 rounded-xl border border-border bg-muted/30 px-3 py-2"
                 >
                   <item.icon className="h-4 w-4 mt-0.5 text-primary shrink-0" />
                   <div className="min-w-0">

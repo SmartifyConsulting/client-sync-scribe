@@ -57,7 +57,7 @@ function CountPill({ count }: { count: number }) {
   return (
     <span
       className={cn(
-        "text-[10px] font-semibold px-1.5 py-0 min-w-5 h-5 inline-flex items-center justify-center rounded-full",
+        "text-2xs font-semibold px-1.5 py-0 min-w-5 h-5 inline-flex items-center justify-center rounded-full",
         "bg-muted text-muted-foreground",
         "group-data-[state=open]:!bg-card group-data-[state=open]:!text-primary",
       )}
@@ -84,7 +84,7 @@ function SessionCard({ s, t }: { s: SessionRow; t: any }) {
 
             <span
               className={cn(
-                "text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full shrink-0",
+                "text-2xs uppercase font-semibold px-2 py-0.5 rounded-full shrink-0",
                 s.status === "completed"
                   ? "bg-success/10 text-success"
                   : s.status === "in_progress"

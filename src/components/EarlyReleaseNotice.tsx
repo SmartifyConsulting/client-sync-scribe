@@ -46,7 +46,7 @@ export function EarlyReleaseNotice() {
         <DialogHeader>
           <div className="mx-auto mb-2 flex items-center gap-2">
             <Logo size="md" />
-            <span className="text-[10px] font-bold tracking-widest px-1.5 py-0.5 rounded bg-primary text-primary-foreground">
+            <span className="text-2xs font-bold tracking-widest px-1.5 py-0.5 rounded bg-primary text-primary-foreground">
               BETA
             </span>
           </div>

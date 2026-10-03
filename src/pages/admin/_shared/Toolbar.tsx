@@ -26,7 +26,7 @@ export function Toolbar({
             value={searchValue ?? ""}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder={searchPlaceholder}
-            className="h-8 pl-8 text-[12.5px]"
+            className="h-8 pl-8 text-xs"
           />
         </div>
       )}

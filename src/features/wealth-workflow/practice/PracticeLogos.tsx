@@ -56,7 +56,7 @@ function LogoSlot({ kind, title, hint, url }: { kind: Kind; title: string; hint:
         <p className="text-sm font-medium text-foreground">{title}</p>
         <p className="text-xs text-muted-foreground">{hint}</p>
       </div>
-      <div className="flex h-24 items-center justify-center rounded-lg border border-dashed border-border bg-muted/30">
+      <div className="flex h-24 items-center justify-center rounded-xl border border-dashed border-border bg-muted/30">
         {url ? <img src={url} alt={title} className="max-h-20 max-w-[80%] object-contain" /> : <span className="text-xs text-muted-foreground">No logo yet</span>}
       </div>
       <input ref={ref} type="file" accept="image/png,image/jpeg,image/svg+xml" className="hidden"

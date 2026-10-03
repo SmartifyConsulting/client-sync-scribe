@@ -23,7 +23,7 @@ export function IncidentNumberBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full bg-emerald-200 px-2 py-0.5 text-xs font-semibold text-primary dark:bg-primary/15 dark:text-emerald-100",
+        "inline-flex items-center rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary dark:bg-primary/15 dark:text-primary",
         className,
       )}
     >

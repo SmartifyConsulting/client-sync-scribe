@@ -48,7 +48,7 @@ export function MailboxIntakeAddress({ className, compact }: { className?: strin
 
   return (
     <div
-      className={`flex items-center gap-2 rounded-lg border bg-muted/40 px-3 py-2 ${compact ? "min-w-0" : "flex-wrap"} ${className || ""}`}
+      className={`flex items-center gap-2 rounded-xl border bg-muted/40 px-3 py-2 ${compact ? "min-w-0" : "flex-wrap"} ${className || ""}`}
       title={compact ? `Email documents to ${address}` : undefined}
     >
       <Mail className="h-3.5 w-3.5 text-primary shrink-0" />
