@@ -51,7 +51,10 @@
 ## Oct 2026 — Claims, styles, firm profile, billing
 - [x] Claims page (/claims): create, read and update; only Wealth Managers can change status (enforced in the database)
 - [x] Shared style sheet (page-title, frame, tab-brand, data-table, empty-state); tab bars, page titles and hardcoded white/black swept
-- [ ] Style follow-up: ~290 one-off text-[Npx] sizes, mixed card corners (lg/xl/2xl), ~12 files with legacy green classes, and screens not yet moved onto PageHeader/frame
+- [x] Style follow-up: text scale, card rounding, greens, readable tabs, phone layout of Live Workspace
+- [ ] Remaining ~78 custom sizes in health-only/hidden screens; Wealth Manager screens not screenshot-checked (no WM test sign-in)
+- [x] Wealth Manager logos (business + FSP) on documents and sign-up page
+- [x] New Client button → Client ID, workflow, WhatsApp/email/copy link; /join sign-up lands on Live Workspace Step 1
 - [x] Marlin Moodley firm profile (all Introduction Letter fields), About Me / Partners / Assistants / Hospital Affiliations / Signature / Voice hidden
 - [x] Billing tab visible to System Admins only
 - [ ] Real Disclosure Agreement wording (blocked: waiting on the firm)
