@@ -7,7 +7,7 @@ const Body = z.object({
   workflowId: z.string().uuid(),
   docType: z.enum(["disclosure", "loa"]),
   title: z.string().min(1).max(200),
-  contentHtml: z.string().min(20).max(200_000),
+  contentHtml: z.string().min(20).max(6_000_000),
   signatureImage: z.string().startsWith("data:image/").max(500_000),
   signerName: z.string().min(1).max(200),
 });
