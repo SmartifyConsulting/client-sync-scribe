@@ -15,6 +15,13 @@
       "when": 1791070811354,
       "tag": "0001_wealth_claims_status_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791071294245,
+      "tag": "0002_wealth_logos_and_client_invites",
+      "breakpoints": true
     }
   ]
 }
