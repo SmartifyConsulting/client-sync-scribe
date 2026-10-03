@@ -10,7 +10,7 @@ import { BudgetDashboard } from "../../../components/BudgetDashboard";
 import { ProcedureKitsPanel } from "../../../components/ProcedureKitsPanel";
 import { PatientBillingPanel } from "../../../components/PatientBillingPanel";
 
-const TAB = "gap-1.5 data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5";
+const TAB = "gap-1.5 tab-brand whitespace-nowrap text-xs px-3 py-1.5";
 const VALID_TABS = ["stock", "stock-take", "kits", "requisitions", "purchase-orders", "billing", "budget"];
 
 /** Current calendar quarter as 'YYYY-Qn', e.g. '2026-Q3'. */

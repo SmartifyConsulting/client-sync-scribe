@@ -272,10 +272,10 @@ export function SettingsContent() {
     <div className="space-y-4 max-w-3xl">
       <Tabs defaultValue="preferences" className="w-full">
         <TabsList className="flex w-full flex-wrap bg-primary/80 justify-start rounded-lg">
-          <TabsTrigger value="preferences" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Preferences</TabsTrigger>
-          <TabsTrigger value="notifications" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Notifications</TabsTrigger>
-          <TabsTrigger value="security" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Security</TabsTrigger>
-          <TabsTrigger value="billing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Fees</TabsTrigger>
+          <TabsTrigger value="preferences" className="tab-brand text-xs">Preferences</TabsTrigger>
+          <TabsTrigger value="notifications" className="tab-brand text-xs">Notifications</TabsTrigger>
+          <TabsTrigger value="security" className="tab-brand text-xs">Security</TabsTrigger>
+          <TabsTrigger value="billing" className="tab-brand text-xs">Fees</TabsTrigger>
         </TabsList>
 
         {/* PREFERENCES */}

@@ -40,7 +40,7 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
 }
 
 const SUB_TAB =
-  "gap-1.5 data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5";
+  "gap-1.5 tab-brand whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5";
 
 /**
  * The bedside chart's Overview tab — mirrors the same information groupings

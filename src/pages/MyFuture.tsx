@@ -106,11 +106,11 @@ export default function MyFuture() {
 
       <Tabs value={tab} onValueChange={(v) => setParams({ tab: v }, { replace: true })}>
         <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-          <TabsTrigger value="cover" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5">My Cover</TabsTrigger>
-          <TabsTrigger value="investments" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5">My Investments</TabsTrigger>
-          <TabsTrigger value="retirement" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5">Retirement</TabsTrigger>
-          <TabsTrigger value="claims" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5">Claims</TabsTrigger>
-          <TabsTrigger value="documents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5">Documents</TabsTrigger>
+          <TabsTrigger value="cover" className="tab-brand whitespace-nowrap text-xs px-3 py-1.5">My Cover</TabsTrigger>
+          <TabsTrigger value="investments" className="tab-brand whitespace-nowrap text-xs px-3 py-1.5">My Investments</TabsTrigger>
+          <TabsTrigger value="retirement" className="tab-brand whitespace-nowrap text-xs px-3 py-1.5">Retirement</TabsTrigger>
+          <TabsTrigger value="claims" className="tab-brand whitespace-nowrap text-xs px-3 py-1.5">Claims</TabsTrigger>
+          <TabsTrigger value="documents" className="tab-brand whitespace-nowrap text-xs px-3 py-1.5">Documents</TabsTrigger>
         </TabsList>
 
         <TabsContent value="cover" className="space-y-4">

@@ -1275,25 +1275,25 @@ export default function MyPractice() {
         <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
           <TabsTrigger
             value="practice"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             {t("myPractice.tabPractice")}
           </TabsTrigger>
           <TabsTrigger
             value="templates"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             {t("documents.tabTemplates")}
           </TabsTrigger>
           <TabsTrigger
             value="certificates"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             {t("myPractice.tabCredentials")}
           </TabsTrigger>
           {isSystemAdmin && <TabsTrigger
             value="billing"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             Billing
           </TabsTrigger>}
@@ -1676,9 +1676,9 @@ export default function MyPractice() {
 
                   <Tabs defaultValue="existing">
                     <TabsList className="grid w-full grid-cols-3 bg-neutral-600">
-                      <TabsTrigger value="existing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">Select existing</TabsTrigger>
-                      <TabsTrigger value="invite" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">Invite by email</TabsTrigger>
-                      <TabsTrigger value="share" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">Share app link</TabsTrigger>
+                      <TabsTrigger value="existing" className="tab-brand whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">Select existing</TabsTrigger>
+                      <TabsTrigger value="invite" className="tab-brand whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">Invite by email</TabsTrigger>
+                      <TabsTrigger value="share" className="tab-brand whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">Share app link</TabsTrigger>
                     </TabsList>
 
                     {/* ── Existing user ── */}

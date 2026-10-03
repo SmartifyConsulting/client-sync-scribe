@@ -1806,11 +1806,11 @@ export default function Sessions() {
         <div className="mt-4">
             <Tabs defaultValue="personal">
               <TabsList className="mb-2 bg-neutral-600">
-                <TabsTrigger value="personal" className="gap-1.5 data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5">
+                <TabsTrigger value="personal" className="gap-1.5 tab-brand whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5">
                   <Lock className="h-3.5 w-3.5" />
                   Personal Notes
                 </TabsTrigger>
-                <TabsTrigger value="drawing" className="gap-1.5 data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5">
+                <TabsTrigger value="drawing" className="gap-1.5 tab-brand whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5">
                   <PenTool className="h-3.5 w-3.5" />
                   Drawing Pad
                 </TabsTrigger>

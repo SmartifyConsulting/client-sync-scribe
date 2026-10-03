@@ -31,7 +31,7 @@ export default function Biolog() {
   };
 
   const tabTriggerClass =
-    "data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5";
+    "tab-brand whitespace-nowrap text-xs px-3 py-1.5";
 
   return (
     <div className="animate-fade-in space-y-6">

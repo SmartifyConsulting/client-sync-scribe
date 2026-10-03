@@ -21,7 +21,7 @@ export function BiologPanel({
 }) {
   const [tab, setTab] = useState("today");
   const triggerClass =
-    "data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5";
+    "tab-brand whitespace-nowrap text-xs px-3 py-1.5";
 
   return (
     <Tabs value={tab} onValueChange={setTab} className="space-y-4">

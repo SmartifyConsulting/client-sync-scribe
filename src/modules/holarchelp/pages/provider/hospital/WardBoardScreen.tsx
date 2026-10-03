@@ -8,7 +8,7 @@ import { useProviderAccess } from "../../../components/ProviderGate";
 import TraumaBaysScreen from "./TraumaBaysScreen";
 import WardsScreen from "./WardsScreen";
 
-const TAB = "gap-1.5 data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5";
+const TAB = "gap-1.5 tab-brand whitespace-nowrap text-xs px-3 py-1.5";
 const VALID_TABS = ["trauma-bays", "wards", "icu", "theatre", "high-care"];
 
 const CAPACITY_TONE: Record<string, string> = {

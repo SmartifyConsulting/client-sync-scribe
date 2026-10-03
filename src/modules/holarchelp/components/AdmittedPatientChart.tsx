@@ -32,7 +32,7 @@ type IncidentLite = {
 };
 
 const TAB_TRIGGER =
-  "gap-1.5 data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5";
+  "gap-1.5 tab-brand whitespace-nowrap text-xs px-3 py-1.5";
 
 /** "ambulance" source means the patient arrived via an emergency/SOS
  *  transport — labelled as an Emergency Admission rather than the raw

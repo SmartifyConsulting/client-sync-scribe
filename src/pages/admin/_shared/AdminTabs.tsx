@@ -4,4 +4,4 @@ export const adminTabsListClass =
   "flex w-full flex-nowrap overflow-x-auto bg-primary justify-start";
 
 export const adminTabsTriggerClass =
-  "data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5";
+  "tab-brand whitespace-nowrap text-xs px-3 py-1.5";

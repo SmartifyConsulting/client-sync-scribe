@@ -385,37 +385,37 @@ export default function PatientProfile() {
         <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
           <TabsTrigger
             value="details"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             {t("patientProfile.tabDetails")}
           </TabsTrigger>
           <TabsTrigger
             value="overview"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             {t("patientProfile.tabOverview")}
           </TabsTrigger>
           <TabsTrigger
             value="workflow"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             Live Workspace
           </TabsTrigger>
           <TabsTrigger
             value="sessions"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             {t("patientProfile.tabSessions")}
           </TabsTrigger>
           <TabsTrigger
             value="doctors"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             {t("patientProfile.tabProviders")}
           </TabsTrigger>
           <TabsTrigger
             value="documents"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             {t("patientProfile.tabDocuments")}
           </TabsTrigger>
