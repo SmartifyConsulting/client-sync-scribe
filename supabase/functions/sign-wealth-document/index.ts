@@ -32,8 +32,8 @@ Deno.serve(async (req) => {
     if (!wf) return json({ error: "You don't have access to this workflow." }, 403);
 
     const admin = createClient(url, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-    const { data: pat } = await admin.from("patients").select("user_id").eq("id", wf.patient_id).maybeSingle();
-    if (pat?.user_id !== u.user.id) return json({ error: "Only the client can sign this document." }, 403);
+    const { data: pat } = await admin.from("patients").select("user_id, patient_user_id").eq("id", wf.patient_id).maybeSingle();
+    if ((pat?.patient_user_id ?? pat?.user_id) !== u.user.id) return json({ error: "Only the client can sign this document." }, 403);
     const { data: existing } = await admin.from("wealth_signed_documents").select("id").eq("workflow_id", p.workflowId).eq("doc_type", p.docType).maybeSingle();
     if (existing) return json({ error: "This document is already signed." }, 409);
 

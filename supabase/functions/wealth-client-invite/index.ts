@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
       await admin.from("wealth_client_invites").update({ status: "accepted", accepted_by: user.id, accepted_at: new Date().toISOString() }).eq("id", inv.id);
       if (inv.workflow_id) {
         await admin.from("wealth_workflow_transitions").insert({
-          workflow_id: inv.workflow_id, from_stage: "consultation", to_stage: "consultation", actor_type: "client",
+          workflow_id: inv.workflow_id, from_stage: "consultation", to_stage: "consultation", actor_type: "user",
           actor_user_id: user.id, reason: "Client opened secure link and signed in", related_record_type: "invite", related_record_id: inv.id,
         });
       }
