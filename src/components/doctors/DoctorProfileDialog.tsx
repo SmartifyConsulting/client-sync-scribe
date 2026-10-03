@@ -70,7 +70,7 @@ export function DoctorProfileDialog({
             )}
             {doctor?.practice_address && <div><span className="text-muted-foreground">Address:</span> {doctor.practice_address}</div>}
             {doctor?.mobile_number && <div><span className="text-muted-foreground">Phone:</span> {doctor.mobile_number}</div>}
-            <div className="pt-2 border-t">
+            <div className="hidden pt-2 border-t">
               <div className="text-muted-foreground mb-1 font-medium">About Me</div>
               {doctor?.about_me ? (
                 <p className="whitespace-pre-wrap leading-relaxed">{doctor.about_me}</p>

@@ -735,7 +735,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
             )}
             {detailsDoctor?.address && <div><span className="text-muted-foreground">Address:</span> {detailsDoctor.address}</div>}
             {detailsDoctor?.phone && <div><span className="text-muted-foreground">Phone:</span> {detailsDoctor.phone}</div>}
-            <div className="pt-2 border-t">
+            <div className="hidden pt-2 border-t">
               <div className="text-muted-foreground mb-1 font-medium">About Me</div>
               {detailsDoctor?.about_me ? (
                 <p className="whitespace-pre-wrap leading-relaxed">{detailsDoctor.about_me}</p>
