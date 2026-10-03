@@ -1,3 +1,4 @@
+import { NewClientInvite } from "@/features/wealth-workflow/invites/NewClientInvite";
 import { Users, Calendar, TrendingUp, Clock, MessageSquare } from "lucide-react";
 import vulaVouchersLogo from "@/assets/vula-vouchers-logo-v3.png";
 import { WealthRoleOverview } from "@/features/wealth-workflow/WealthRoleOverview";
@@ -294,7 +295,8 @@ export default function Dashboard() {
   return (
     <div className="space-y-4 md:space-y-8 animate-fade-in">
       {/* Header with Profile */}
-      <div className="pb-2">
+      <div className="pb-2 flex flex-wrap items-start justify-between gap-3">
+        <div>
         <h1 className="page-title">
           {greeting}{displayName ? `, ${displayName}` : ''}
         </h1>
@@ -302,12 +304,14 @@ export default function Dashboard() {
           {t("doctorDashboard.subtitle")}
           <span className="block md:inline"> {formattedDate}</span>
         </p>
+        </div>
+        {isDoctor && <NewClientInvite />}
       </div>
 
       {doctorIncomplete && (
         <ProfileCompletionBanner
           title="Complete your wealth manager profile"
-          message="Add your specialty, practice number, HPCSA/registration number and practice address so patients can find you and your documents render correctly. All credentials are encrypted in transit and at rest, visible only to you and patients you connect with. Holarc Health is HIPAA- and POPIA-aligned and never sells or shares your data."
+          message="Complete your firm details on My Business so your clients' documents fill in correctly. Your details are encrypted and visible only to you and your clients."
           onComplete={() => navigate("/profile")}
           storageKey="holarc_doctor_profile_banner_dismissed"
         />

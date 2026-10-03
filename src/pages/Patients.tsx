@@ -1,3 +1,4 @@
+import { NewClientInvite } from "@/features/wealth-workflow/invites/NewClientInvite";
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
@@ -416,7 +417,8 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
             </p>
           </div>
         )}
-        <div className="grid grid-cols-2 gap-2 ml-auto">
+        <div className="flex flex-wrap gap-2 ml-auto">
+          <NewClientInvite compact />
 
           <PatientImportDialog 
             trigger={
