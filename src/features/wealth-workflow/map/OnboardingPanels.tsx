@@ -110,11 +110,19 @@ export function SignDocsPanel({ workflowId, signed, viewer, clientName }: { work
       const { data: wf } = await sbx.from("wealth_workflows").select("owner_user_id").eq("id", workflowId).maybeSingle();
       if (!wf?.owner_user_id) return null;
       const { data } = await sbx.from("wealth_practice_info").select("*").eq("user_id", wf.owner_user_id).maybeSingle();
-      return data ?? null;
+      if (!data) return null;
+      // Embed logos as data URLs so signed copies keep them permanently.
+      const embed = async (path?: string | null) => {
+        if (!path) return null;
+        const { data: blob } = await supabase.storage.from("practice-logos").download(path);
+        if (!blob) return null;
+        return await new Promise<string>((res) => { const r = new FileReader(); r.onload = () => res(String(r.result)); r.readAsDataURL(blob); });
+      };
+      return { ...data, __businessLogo: await embed(data.business_logo_path), __fspLogo: await embed(data.fsp_logo_path) };
     },
   });
   const docs = [
-    { type: "disclosure", title: "Disclosure Agreement", html: disclosureHtml(clientName, today) },
+    { type: "disclosure", title: "Disclosure Agreement", html: disclosureHtml(clientName, today, practice) },
     { type: "loa", title: "Letter of Authority (LOA)", html: loaHtml(clientName, today, practice) },
   ];
   return (
