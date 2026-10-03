@@ -70,6 +70,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BillingPanel } from "@/features/billing/BillingPanel";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { PracticeInfoSections, FscaCategoriesCard } from "@/features/wealth-workflow/practice/PracticeInfoSections";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -1268,7 +1270,7 @@ export default function MyPractice() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue={new URLSearchParams(window.location.search).get("billing") ? "billing" : "practice"} className="w-full">
+      <Tabs defaultValue={isSystemAdmin && new URLSearchParams(window.location.search).get("billing") ? "billing" : "practice"} className="w-full">
         <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
           <TabsTrigger
             value="practice"
@@ -1288,26 +1290,26 @@ export default function MyPractice() {
           >
             {t("myPractice.tabCredentials")}
           </TabsTrigger>
-          <TabsTrigger
+          {isSystemAdmin && <TabsTrigger
             value="billing"
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
           >
             Billing
-          </TabsTrigger>
+          </TabsTrigger>}
         </TabsList>
 
-        <TabsContent value="billing" className="mt-4">
+        {isSystemAdmin && <TabsContent value="billing" className="mt-4">
           <BillingPanel />
-        </TabsContent>
+        </TabsContent>}
 
         {/* === PRACTICE TAB (Personal + Practice merged) === */}
         <TabsContent value="practice" className="mt-4 space-y-4 my-practice-tab-body">
           <div className="rounded-xl border border-neutral-400 bg-white shadow-sm overflow-hidden">
             <Accordion type="multiple" className="divide-y divide-white">
-              <AboutMeAccordion
+              {false && <AboutMeAccordion
                 value={(profile as any)?.about_me || ""}
                 onSave={async (v) => { await updateProfile({ about_me: v } as any); }}
-              />
+              />}
               {/* Personal Information */}
               <AccordionItem value="personal" className="border-0">
               <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
@@ -1484,7 +1486,7 @@ export default function MyPractice() {
               </AccordionItem>
 
               {/* Partners */}
-              <AccordionItem value="partners" className={SECTION_ITEM_CLASS}>
+              <AccordionItem value="partners" className={`${SECTION_ITEM_CLASS} hidden`}>
                 <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
                   <h4 className="text-xs font-semibold">Partners</h4>
                 </AccordionTrigger>
@@ -1825,7 +1827,7 @@ export default function MyPractice() {
               </AccordionItem>
 
               {/* Practice Management Assistants */}
-              <AccordionItem value="practice-assistants" className={SECTION_ITEM_CLASS}>
+              <AccordionItem value="practice-assistants" className={`${SECTION_ITEM_CLASS} hidden`}>
                 <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
                   <h4 className="text-xs font-semibold">Firm Management Assistants</h4>
                 </AccordionTrigger>
@@ -1835,7 +1837,7 @@ export default function MyPractice() {
               </AccordionItem>
 
               {/* Hospital Affiliations */}
-              <AccordionItem value="hospital-affiliations" className={SECTION_ITEM_CLASS}>
+              <AccordionItem value="hospital-affiliations" className={`${SECTION_ITEM_CLASS} hidden`}>
                 <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
                   <h4 className="text-xs font-semibold">Hospital Affiliations</h4>
                 </AccordionTrigger>
@@ -1902,7 +1904,7 @@ export default function MyPractice() {
             </AccordionItem>
 
           {/* Digital Signature Accordion */}
-            <AccordionItem value="signature" className="border-0">
+            <AccordionItem value="signature" className="hidden">
               <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
                 <div className="flex items-center gap-2">
                   <PenTool className="h-4 w-4 text-primary" />
@@ -2016,7 +2018,7 @@ export default function MyPractice() {
             </AccordionItem>
 
           {/* Voice Narration Settings Accordion */}
-            <AccordionItem value="voice" className="border-0">
+            <AccordionItem value="voice" className="hidden">
               <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
                 <div className="flex items-center gap-2">
                   <Volume2 className="h-4 w-4 text-primary" />
