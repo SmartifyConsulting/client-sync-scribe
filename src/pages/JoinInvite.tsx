@@ -6,8 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import holarcLogoAsset from "@/assets/holarc-wealth-logo.png.asset.json";
-const holarcLogo = holarcLogoAsset.url;
+import { Logo } from "@/components/brand/Logo";
 
 type Preview = { status: string; firstName: string; lastName: string; phone?: string; email?: string; managerName: string; fspName?: string | null; businessLogo?: string | null; fspLogo?: string | null };
 
@@ -61,7 +60,7 @@ export default function JoinInvite() {
     <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4">
       <div className="w-full max-w-md rounded-xl border border-border bg-card p-6 md:p-8 space-y-6 shadow-sm">
         <div className="flex items-center justify-between gap-4 min-h-12">
-          {preview?.businessLogo ? <img src={preview.businessLogo} alt="" className="max-h-12 max-w-[45%] object-contain" /> : <img src={holarcLogo} alt="Holarc Wealth" className="h-10 object-contain" />}
+          {preview?.businessLogo ? <img src={preview.businessLogo} alt="" className="max-h-12 max-w-[45%] object-contain" /> : <Logo />}
           {preview?.fspLogo && <img src={preview.fspLogo} alt="" className="max-h-12 max-w-[45%] object-contain" />}
         </div>
 
