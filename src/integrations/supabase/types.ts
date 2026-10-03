@@ -10494,6 +10494,114 @@ export type Database = {
           },
         ]
       }
+      wealth_practice_info: {
+        Row: {
+          complaints_address: string | null
+          compliance_email: string | null
+          compliance_fax: string | null
+          compliance_officer: string | null
+          compliance_phone: string | null
+          conflict_policy: string | null
+          created_at: string
+          directors: string | null
+          email_primary: string | null
+          email_secondary: string | null
+          experience_years: number | null
+          firm_address: string | null
+          firm_phone: string | null
+          firm_website: string | null
+          fsb_licence: string | null
+          fsca_categories: string[]
+          fsp_legal_status: string | null
+          fsp_name: string | null
+          id_number: string | null
+          phone: string | null
+          pi_cover: boolean | null
+          planner_name: string | null
+          planner_status: string | null
+          postal_address: string | null
+          product_suppliers: Json
+          qualification: string | null
+          registration_number: string | null
+          remuneration_basis: string | null
+          shareholding_statement: string | null
+          title: string | null
+          top_suppliers: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          complaints_address?: string | null
+          compliance_email?: string | null
+          compliance_fax?: string | null
+          compliance_officer?: string | null
+          compliance_phone?: string | null
+          conflict_policy?: string | null
+          created_at?: string
+          directors?: string | null
+          email_primary?: string | null
+          email_secondary?: string | null
+          experience_years?: number | null
+          firm_address?: string | null
+          firm_phone?: string | null
+          firm_website?: string | null
+          fsb_licence?: string | null
+          fsca_categories?: string[]
+          fsp_legal_status?: string | null
+          fsp_name?: string | null
+          id_number?: string | null
+          phone?: string | null
+          pi_cover?: boolean | null
+          planner_name?: string | null
+          planner_status?: string | null
+          postal_address?: string | null
+          product_suppliers?: Json
+          qualification?: string | null
+          registration_number?: string | null
+          remuneration_basis?: string | null
+          shareholding_statement?: string | null
+          title?: string | null
+          top_suppliers?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          complaints_address?: string | null
+          compliance_email?: string | null
+          compliance_fax?: string | null
+          compliance_officer?: string | null
+          compliance_phone?: string | null
+          conflict_policy?: string | null
+          created_at?: string
+          directors?: string | null
+          email_primary?: string | null
+          email_secondary?: string | null
+          experience_years?: number | null
+          firm_address?: string | null
+          firm_phone?: string | null
+          firm_website?: string | null
+          fsb_licence?: string | null
+          fsca_categories?: string[]
+          fsp_legal_status?: string | null
+          fsp_name?: string | null
+          id_number?: string | null
+          phone?: string | null
+          pi_cover?: boolean | null
+          planner_name?: string | null
+          planner_status?: string | null
+          postal_address?: string | null
+          product_suppliers?: Json
+          qualification?: string | null
+          registration_number?: string | null
+          remuneration_basis?: string | null
+          shareholding_statement?: string | null
+          title?: string | null
+          top_suppliers?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       wealth_recommendations: {
         Row: {
           created_at: string
