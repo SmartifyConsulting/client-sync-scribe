@@ -8,6 +8,13 @@
       "when": 1791070711632,
       "tag": "0000_wealth_practice_info",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791070811354,
+      "tag": "0001_wealth_claims_status_guard",
+      "breakpoints": true
     }
   ]
 }
