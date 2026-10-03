@@ -122,7 +122,7 @@ export function GeneratedDocumentsDialog({
               )}
             </DialogHeader>
 
-            <div className="max-h-[360px] overflow-y-auto rounded-lg border border-border bg-white p-4">
+            <div className="max-h-[360px] overflow-y-auto rounded-lg border border-border bg-card p-4">
               {editing ? (
                 <Textarea
                   value={draftContent}

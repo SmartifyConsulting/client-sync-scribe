@@ -1054,7 +1054,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         {!hideHeader && (
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Fee statements</h1>
+            <h1 className="page-title">Fee statements</h1>
             <p className="mt-1 text-muted-foreground text-xs">
               Manage and track all patient invoices
             </p>
@@ -1840,7 +1840,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
               <iframe
                 title={previewHtml.title}
                 srcDoc={previewHtml.html}
-                className="w-full h-[70vh] bg-white rounded-lg border border-border"
+                className="w-full h-[70vh] bg-card rounded-lg border border-border"
               />
             </div>
 
@@ -1884,7 +1884,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
             <div className="bg-primary text-primary-foreground p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-2xl font-bold">INVOICE</h1>
+                  <h1 className="page-title">INVOICE</h1>
                   <p className="text-primary-foreground/80 text-sm mt-1">{viewingInvoice.invoice_number}</p>
                 </div>
                 <Button

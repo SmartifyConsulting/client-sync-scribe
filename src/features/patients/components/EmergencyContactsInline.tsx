@@ -188,7 +188,7 @@ export function EmergencyContactsInline({ patientId, contacts, onChange, nokMemb
   if (bare) return body;
 
   return (
-    <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+    <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
       <SectionHeader icon={HeartHandshake} label="My Personal Care Circle" />
       <CollapsibleContent>{body}</CollapsibleContent>
     </Collapsible>

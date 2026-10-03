@@ -180,7 +180,7 @@ export default function PatientRoundTable({ hideHeader = false }: { hideHeader?:
     <div className="space-y-6">
       {!hideHeader && (
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Round Table</h1>
+          <h1 className="page-title">Round Table</h1>
           <p className="text-muted-foreground text-xs">
             The conversation between you and your healthcare providers about your care.
           </p>

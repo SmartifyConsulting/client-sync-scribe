@@ -377,7 +377,7 @@ function AdmissionDetail({
         </div>
 
         {/* Patient's needs note */}
-        <div className="rounded-lg border border-primary/20 bg-white p-2.5">
+        <div className="rounded-lg border border-primary/20 bg-card p-2.5">
           <div className="flex items-center gap-1.5 mb-1.5">
             <NotebookPen className="h-3.5 w-3.5 text-primary" />
             <span className="text-xs font-semibold text-foreground">Patient's Needs (for visiting family)</span>
@@ -409,8 +409,8 @@ function AdmissionDetail({
       {/* === Clinical sections === */}
       {expanded && (
       <div className="p-4">
-        <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
-          <Collapsible defaultOpen className="bg-white overflow-hidden">
+        <div className="patient-section-frame rounded-xl border border-border bg-card overflow-hidden divide-y divide-white">
+          <Collapsible defaultOpen className="bg-card overflow-hidden">
             <SectionHeader icon={Activity} label="Vitals" extra={<SectionCountPill count={vitals.length} />} />
             <CollapsibleContent className="p-3">
               {canEdit && <Button size="sm" variant="outline" className="mb-2" onClick={() => setShowVitals(true)}><Plus className="h-4 w-4 mr-1" /> Add Vitals</Button>}
@@ -458,7 +458,7 @@ function AdmissionDetail({
             </CollapsibleContent>
           </Collapsible>
 
-          <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+          <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
             <SectionHeader icon={Pill} label="Active Medications" extra={<SectionCountPill count={meds.length} />} />
             <CollapsibleContent className="p-3">
               {canEdit && <Button size="sm" variant="outline" className="mb-2" onClick={() => setShowMeds(true)}><Plus className="h-4 w-4 mr-1" /> Add Medication</Button>}
@@ -475,7 +475,7 @@ function AdmissionDetail({
             </CollapsibleContent>
           </Collapsible>
 
-          <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+          <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
             <SectionHeader icon={FlaskConical} label="Lab Results" extra={<SectionCountPill count={labs.length} />} />
             <CollapsibleContent className="p-3">
               {canEdit && <Button size="sm" variant="outline" className="mb-2" onClick={() => setShowLabs(true)}><Plus className="h-4 w-4 mr-1" /> Add Lab Result</Button>}
@@ -496,7 +496,7 @@ function AdmissionDetail({
             </CollapsibleContent>
           </Collapsible>
 
-          <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+          <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
             <SectionHeader icon={Scan} label="Imaging" extra={<SectionCountPill count={imaging.length} />} />
             <CollapsibleContent className="p-3">
               {canEdit && <Button size="sm" variant="outline" className="mb-2" onClick={() => setShowImaging(true)}><Plus className="h-4 w-4 mr-1" /> Add Imaging</Button>}
@@ -519,7 +519,7 @@ function AdmissionDetail({
           </Collapsible>
 
           {/* Diet & Meals */}
-          <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+          <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
             <SectionHeader icon={UtensilsCrossed} label="Diet & Meals" extra={<SectionCountPill count={meals.length} />} />
             <CollapsibleContent className="p-3 space-y-3">
               <div className="flex items-center gap-2">
@@ -578,7 +578,7 @@ function AdmissionDetail({
           </Collapsible>
 
           {/* Shift Log */}
-          <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+          <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
             <SectionHeader icon={Clock3} label="Shift Log" extra={<SectionCountPill count={shifts.length} />} />
             <CollapsibleContent className="p-3 space-y-3">
               {isHospitalStaff && (

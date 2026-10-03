@@ -328,7 +328,7 @@ export default function MyRewards({ embedded = false }: { embedded?: boolean } =
           )}
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-3xl font-bold text-foreground">My Rewards</h1>
+              <h1 className="page-title">My Rewards</h1>
               <button
                 onClick={() => setShowVulaExplainer(true)}
                 className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
@@ -451,7 +451,7 @@ export default function MyRewards({ embedded = false }: { embedded?: boolean } =
                 <p className="text-xs md:text-sm font-medium text-blue-100">Vulas</p>
                 <p className="text-2xl md:text-4xl font-bold text-white">{lollipopCount}</p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0">
+              <div className="h-12 w-12 rounded-full bg-card shadow-sm flex items-center justify-center shrink-0">
                 <img src={vulaVouchersLogo} alt="Vulas" className="h-8 w-8 object-contain" />
               </div>
             </div>
@@ -507,20 +507,20 @@ export default function MyRewards({ embedded = false }: { embedded?: boolean } =
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-neutral-600 flex w-full flex-nowrap overflow-x-auto justify-start">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
+          <TabsTrigger value="overview" className="tab-brand whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
             Overview
           </TabsTrigger>
           {patientRecord?.is_chronic && (
-            <TabsTrigger value="chronic-meds" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
+            <TabsTrigger value="chronic-meds" className="tab-brand whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
               <Pill className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
               Chronic Meds
             </TabsTrigger>
           )}
-          <TabsTrigger value="wins-streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
+          <TabsTrigger value="wins-streaks" className="tab-brand whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
             <Trophy className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
             Wins and Streaks
           </TabsTrigger>
-          <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
+          <TabsTrigger value="transfers" className="tab-brand whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
              Redeem
            </TabsTrigger>
          </TabsList>

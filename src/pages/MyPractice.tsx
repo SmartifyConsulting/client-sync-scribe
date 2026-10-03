@@ -70,6 +70,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BillingPanel } from "@/features/billing/BillingPanel";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { PracticeInfoSections, FscaCategoriesCard } from "@/features/wealth-workflow/practice/PracticeInfoSections";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -404,6 +406,7 @@ function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string
 // ── Main Component ──────────────────────────────────────────────────
 export default function MyPractice() {
   const { t } = useTranslation();
+  const { isAdmin: isSystemAdmin } = useIsAdmin() as any;
   const { toast } = useToast();
   const { user } = useAuth();
   const { profile, loading, fetchProfile, updateProfile, uploadLogo } = useProfile();
@@ -1185,7 +1188,7 @@ export default function MyPractice() {
     return (
       <div className="space-y-4 animate-fade-in">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Round Tables</h1>
+          <h1 className="page-title">Round Tables</h1>
           <p className="text-muted-foreground text-xs">View round table discussions you've contributed to</p>
         </div>
         <DoctorRoundTables />
@@ -1199,7 +1202,7 @@ export default function MyPractice() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">My Business</h1>
+          <h1 className="page-title">My Business</h1>
           <p className="text-muted-foreground text-xs">Manage your personal and firm information</p>
         </div>
         <div className="text-sm text-muted-foreground flex items-center gap-1.5">
@@ -1268,46 +1271,47 @@ export default function MyPractice() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue={new URLSearchParams(window.location.search).get("billing") ? "billing" : "practice"} className="w-full">
+      <Tabs defaultValue={isSystemAdmin && new URLSearchParams(window.location.search).get("billing") ? "billing" : "practice"} className="w-full">
         <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
           <TabsTrigger
             value="practice"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             {t("myPractice.tabPractice")}
           </TabsTrigger>
           <TabsTrigger
             value="templates"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             {t("documents.tabTemplates")}
           </TabsTrigger>
           <TabsTrigger
             value="certificates"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             {t("myPractice.tabCredentials")}
           </TabsTrigger>
-          <TabsTrigger
+          {isSystemAdmin && <TabsTrigger
             value="billing"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             Billing
-          </TabsTrigger>
+          </TabsTrigger>}
         </TabsList>
 
-        <TabsContent value="billing" className="mt-4">
+        {isSystemAdmin && <TabsContent value="billing" className="mt-4">
           <BillingPanel />
-        </TabsContent>
+        </TabsContent>}
 
         {/* === PRACTICE TAB (Personal + Practice merged) === */}
         <TabsContent value="practice" className="mt-4 space-y-4 my-practice-tab-body">
-          <div className="rounded-xl border border-neutral-400 bg-white shadow-sm overflow-hidden">
+          <PracticeInfoSections />
+          <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
             <Accordion type="multiple" className="divide-y divide-white">
-              <AboutMeAccordion
+              {false && <AboutMeAccordion
                 value={(profile as any)?.about_me || ""}
                 onSave={async (v) => { await updateProfile({ about_me: v } as any); }}
-              />
+              />}
               {/* Personal Information */}
               <AccordionItem value="personal" className="border-0">
               <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
@@ -1418,9 +1422,9 @@ export default function MyPractice() {
             <p className="text-sm text-muted-foreground">
               This information appears on your document templates and letterheads.
             </p>
-            <Accordion type="multiple" className="rounded-xl border border-primary bg-white overflow-hidden divide-y divide-primary">
+            <Accordion type="multiple" className="rounded-xl border border-primary bg-card overflow-hidden divide-y divide-primary">
               {/* Practice Details */}
-              <AccordionItem value="practice-basic-details" className="border-0 rounded-none bg-white">
+              <AccordionItem value="practice-basic-details" className="border-0 rounded-none bg-card">
                 <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
                   <h4 className="text-xs font-semibold">Firm Details</h4>
                 </AccordionTrigger>
@@ -1484,7 +1488,7 @@ export default function MyPractice() {
               </AccordionItem>
 
               {/* Partners */}
-              <AccordionItem value="partners" className={SECTION_ITEM_CLASS}>
+              <AccordionItem value="partners" className={`${SECTION_ITEM_CLASS} hidden`}>
                 <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
                   <h4 className="text-xs font-semibold">Partners</h4>
                 </AccordionTrigger>
@@ -1542,7 +1546,7 @@ export default function MyPractice() {
                   {partners.map((partner) => (
                     <div
                       key={partner.id}
-                      className="flex items-center justify-between p-3 bg-white rounded-lg border border-border"
+                      className="flex items-center justify-between p-3 bg-card rounded-lg border border-border"
                     >
                       {editingPartnerId === partner.id ? (
                         <div className="flex-1 grid gap-2 sm:grid-cols-3 mr-3">
@@ -1672,9 +1676,9 @@ export default function MyPractice() {
 
                   <Tabs defaultValue="existing">
                     <TabsList className="grid w-full grid-cols-3 bg-neutral-600">
-                      <TabsTrigger value="existing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">Select existing</TabsTrigger>
-                      <TabsTrigger value="invite" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">Invite by email</TabsTrigger>
-                      <TabsTrigger value="share" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">Share app link</TabsTrigger>
+                      <TabsTrigger value="existing" className="tab-brand whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">Select existing</TabsTrigger>
+                      <TabsTrigger value="invite" className="tab-brand whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">Invite by email</TabsTrigger>
+                      <TabsTrigger value="share" className="tab-brand whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">Share app link</TabsTrigger>
                     </TabsList>
 
                     {/* ── Existing user ── */}
@@ -1825,7 +1829,7 @@ export default function MyPractice() {
               </AccordionItem>
 
               {/* Practice Management Assistants */}
-              <AccordionItem value="practice-assistants" className={SECTION_ITEM_CLASS}>
+              <AccordionItem value="practice-assistants" className={`${SECTION_ITEM_CLASS} hidden`}>
                 <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
                   <h4 className="text-xs font-semibold">Firm Management Assistants</h4>
                 </AccordionTrigger>
@@ -1835,7 +1839,7 @@ export default function MyPractice() {
               </AccordionItem>
 
               {/* Hospital Affiliations */}
-              <AccordionItem value="hospital-affiliations" className={SECTION_ITEM_CLASS}>
+              <AccordionItem value="hospital-affiliations" className={`${SECTION_ITEM_CLASS} hidden`}>
                 <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
                   <h4 className="text-xs font-semibold">Hospital Affiliations</h4>
                 </AccordionTrigger>
@@ -1902,7 +1906,7 @@ export default function MyPractice() {
             </AccordionItem>
 
           {/* Digital Signature Accordion */}
-            <AccordionItem value="signature" className="border-0">
+            <AccordionItem value="signature" className="hidden">
               <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
                 <div className="flex items-center gap-2">
                   <PenTool className="h-4 w-4 text-primary" />
@@ -2016,7 +2020,7 @@ export default function MyPractice() {
             </AccordionItem>
 
           {/* Voice Narration Settings Accordion */}
-            <AccordionItem value="voice" className="border-0">
+            <AccordionItem value="voice" className="hidden">
               <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
                 <div className="flex items-center gap-2">
                   <Volume2 className="h-4 w-4 text-primary" />
@@ -2154,7 +2158,8 @@ export default function MyPractice() {
 
 
         {/* === CERTIFICATES TAB === */}
-        <TabsContent value="certificates" className="mt-4 my-practice-tab-body">
+        <TabsContent value="certificates" className="mt-4 space-y-4 my-practice-tab-body">
+          <FscaCategoriesCard />
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-base font-semibold text-primary-dark">Credentials</h3>

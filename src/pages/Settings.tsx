@@ -8,7 +8,7 @@ export default function Settings() {
     <div className="space-y-4 animate-fade-in max-w-3xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">{t("settingsPage.title")}</h1>
+          <h1 className="page-title">{t("settingsPage.title")}</h1>
           <p className="text-muted-foreground text-xs">{t("settingsPage.subtitle")}</p>
         </div>
         <ShareAppDialog />

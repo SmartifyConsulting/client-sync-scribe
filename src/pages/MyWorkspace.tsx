@@ -10,7 +10,7 @@ export default function MyWorkspace() {
   return (
     <div className="space-y-4 p-4 md:p-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Live Workspace</h1>
+        <h1 className="page-title">Live Workspace</h1>
         <p className="text-xs text-muted-foreground">See where your plan is, and what is needed next, as it happens.</p>
       </div>
       {isLoading ? (

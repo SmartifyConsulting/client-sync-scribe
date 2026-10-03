@@ -19,7 +19,7 @@ export function AdminPage({ eyebrow, title, description, actions, children }: Ad
                 {eyebrow}
               </p>
             )}
-            <h1 className="text-3xl font-bold tracking-tight text-[hsl(var(--admin-text-primary))]">
+            <h1 className="page-title text-[hsl(var(--admin-text-primary))]">
               {title}
             </h1>
             {description && (

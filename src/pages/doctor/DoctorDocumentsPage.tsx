@@ -6,7 +6,7 @@ export default function DoctorDocumentsPage() {
   return (
     <div className="space-y-3">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">{t("documents.title")}</h1>
+        <h1 className="page-title">{t("documents.title")}</h1>
         <p className="mt-1 text-muted-foreground text-xs">Manage client documents and reusable templates.</p>
       </div>
       <DoctorDocumentsTab />

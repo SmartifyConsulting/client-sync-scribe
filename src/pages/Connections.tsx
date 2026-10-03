@@ -343,7 +343,7 @@ export default function Connections() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Connections</h1>
+          <h1 className="page-title">Connections</h1>
           <p className="mt-1 text-muted-foreground text-xs">
             Manage your professional network and connections
           </p>
@@ -354,7 +354,7 @@ export default function Connections() {
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "connections" | "pending")}>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <TabsList className="bg-primary">
-            <TabsTrigger value="connections" className="gap-2 data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5">
+            <TabsTrigger value="connections" className="gap-2 tab-brand whitespace-nowrap text-xs px-3 py-1.5">
               <UserCheck className="h-4 w-4" />
               Connected
               {connections.length > 0 && (
@@ -363,7 +363,7 @@ export default function Connections() {
                 </Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="pending" className="gap-2 data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5">
+            <TabsTrigger value="pending" className="gap-2 tab-brand whitespace-nowrap text-xs px-3 py-1.5">
               <Clock className="h-4 w-4" />
               Pending
               {pendingInvitations.length > 0 && (

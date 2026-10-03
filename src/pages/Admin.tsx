@@ -7,30 +7,30 @@ import TodoList from "@/pages/TodoList";
 export default function Admin() {
   return (
     <div className="space-y-3">
-      <h1 className="text-3xl font-bold text-foreground">Admin</h1>
+      <h1 className="page-title">Admin</h1>
       <Tabs defaultValue="calendar" className="w-full">
         <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
           <TabsTrigger
             value="calendar"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap px-3 py-1.5"
+            className="tab-brand text-xs whitespace-nowrap px-3 py-1.5"
           >
             Calendar
           </TabsTrigger>
           <TabsTrigger
             value="todo"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap px-3 py-1.5"
+            className="tab-brand text-xs whitespace-nowrap px-3 py-1.5"
           >
             To-Do
           </TabsTrigger>
           <TabsTrigger
             value="invoices"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap px-3 py-1.5"
+            className="tab-brand text-xs whitespace-nowrap px-3 py-1.5"
           >
             Invoices
           </TabsTrigger>
           <TabsTrigger
             value="templates"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap px-3 py-1.5"
+            className="tab-brand text-xs whitespace-nowrap px-3 py-1.5"
           >
             Templates
           </TabsTrigger>

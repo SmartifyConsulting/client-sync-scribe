@@ -295,7 +295,7 @@ export default function PatientProfile() {
               {initials}
             </div>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
+              <h1 className="page-title flex items-center gap-2">
                 {patient.name}
                 <div className={cn("h-2.5 w-2.5 rounded-full flex-shrink-0", patient.status === "active" ? "bg-sky-500" : "bg-red-400")} />
                 {isSamplePatient(patient) && <SampleBadge size="md" />}
@@ -385,37 +385,37 @@ export default function PatientProfile() {
         <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
           <TabsTrigger
             value="details"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             {t("patientProfile.tabDetails")}
           </TabsTrigger>
           <TabsTrigger
             value="overview"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             {t("patientProfile.tabOverview")}
           </TabsTrigger>
           <TabsTrigger
             value="workflow"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             Live Workspace
           </TabsTrigger>
           <TabsTrigger
             value="sessions"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             {t("patientProfile.tabSessions")}
           </TabsTrigger>
           <TabsTrigger
             value="doctors"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             {t("patientProfile.tabProviders")}
           </TabsTrigger>
           <TabsTrigger
             value="documents"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             {t("patientProfile.tabDocuments")}
           </TabsTrigger>
@@ -925,7 +925,7 @@ export default function PatientProfile() {
             {editDocContent && (
               <div className="space-y-2">
                 <Label>Preview</Label>
-                <div className="border border-border rounded-lg p-4 bg-white">
+                <div className="border border-border rounded-lg p-4 bg-card">
                   <div
                     className="whitespace-pre-wrap text-sm text-foreground"
                     dangerouslySetInnerHTML={{ __html: renderFormattedContent(editDocContent) }}

@@ -25,19 +25,19 @@ export default function ProvidersScreen() {
         <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
           <TabsTrigger
             value="doctors"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             Doctors
           </TabsTrigger>
           <TabsTrigger
             value="nurses"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             Nurses
           </TabsTrigger>
           <TabsTrigger
             value="er"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             ER Providers
           </TabsTrigger>

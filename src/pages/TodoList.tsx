@@ -612,7 +612,7 @@ export default function TodoList() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">{t("nav.myTasks", "Actions")}</h1>
+          <h1 className="page-title">{t("nav.myTasks", "Actions")}</h1>
           <p className="mt-1 text-muted-foreground text-xs">Manage your actions with voice or text input — AI can auto-execute actions</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -758,7 +758,7 @@ export default function TodoList() {
 
       {/* Task List — grouped by date or patient */}
       {groups.every((g) => g.items.length === 0) ? (
-        <div className="rounded-xl border border-neutral-400 bg-card shadow-sm p-8 text-center text-muted-foreground text-sm">
+        <div className="rounded-xl border border-border bg-card shadow-sm p-8 text-center text-muted-foreground text-sm">
           {filter === "all" ? "No tasks yet. Add your first task with the Add Task button." : filter === "active" ? "No active tasks. Great job!" : "No completed tasks yet."}
         </div>
       ) : (

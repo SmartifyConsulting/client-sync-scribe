@@ -403,7 +403,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
       {!hideHeader && (
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">My Wealth Managers</h1>
+            <h1 className="page-title">My Wealth Managers</h1>
             <p className="text-muted-foreground text-xs">
               Healthcare providers with access to your profile
             </p>
@@ -650,11 +650,11 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
             </div>
             <Tabs defaultValue="active" className="w-full">
               <TabsList className="bg-primary">
-                <TabsTrigger value="active" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5">Active ({doctors.length})</TabsTrigger>
-                <TabsTrigger value="hidden" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5">Hidden ({hiddenDoctors.length})</TabsTrigger>
+                <TabsTrigger value="active" className="tab-brand whitespace-nowrap text-xs px-3 py-1.5">Active ({doctors.length})</TabsTrigger>
+                <TabsTrigger value="hidden" className="tab-brand whitespace-nowrap text-xs px-3 py-1.5">Hidden ({hiddenDoctors.length})</TabsTrigger>
               </TabsList>
               <TabsContent value="active" className="mt-3">
-                <div className="rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-border">
+                <div className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-border">
                   {doctors.length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-8">No active providers. Check the Hidden tab to restore one.</p>
                   ) : sortAccess(doctors).filter(matchesFilters).length === 0 ? (
@@ -669,7 +669,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
                 </div>
               </TabsContent>
               <TabsContent value="hidden" className="mt-3">
-                <div className="rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-border">
+                <div className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-border">
                   {hiddenDoctors.length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-8">No hidden or deactivated providers. Historic records always remain visible elsewhere.</p>
                   ) : sortAccess(hiddenDoctors).filter(matchesFilters).length === 0 ? (
@@ -735,7 +735,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
             )}
             {detailsDoctor?.address && <div><span className="text-muted-foreground">Address:</span> {detailsDoctor.address}</div>}
             {detailsDoctor?.phone && <div><span className="text-muted-foreground">Phone:</span> {detailsDoctor.phone}</div>}
-            <div className="pt-2 border-t">
+            <div className="hidden pt-2 border-t">
               <div className="text-muted-foreground mb-1 font-medium">About Me</div>
               {detailsDoctor?.about_me ? (
                 <p className="whitespace-pre-wrap leading-relaxed">{detailsDoctor.about_me}</p>

@@ -20,7 +20,7 @@ const NotFound = () => {
         <p className="text-7xl sm:text-8xl font-bold text-primary leading-none mb-2">
           404
         </p>
-        <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mb-3">
+        <h1 className="page-title mb-3">
           {t('notFound.title')}
         </h1>
         <p className="text-sm sm:text-base text-muted-foreground mb-8">

@@ -67,13 +67,13 @@ export default function ProviderApprovalAction() {
           {state.kind === "loading" && (
             <>
               <Loader2 className="h-10 w-10 animate-spin mx-auto text-primary" />
-              <h1 className="text-xl font-semibold">{t('admin.approval.processing')}</h1>
+              <h1 className="page-title">{t('admin.approval.processing')}</h1>
             </>
           )}
           {state.kind === "success" && state.action === "approve" && (
             <>
               <CheckCircle2 className="h-12 w-12 mx-auto text-primary" />
-              <h1 className="text-xl font-semibold">{t('admin.approval.approved')}</h1>
+              <h1 className="page-title">{t('admin.approval.approved')}</h1>
               <p className="text-muted-foreground">
                 {state.orgName ?? t('admin.approval.provider')} {t('admin.approval.approvedMessage')}
               </p>
@@ -82,7 +82,7 @@ export default function ProviderApprovalAction() {
           {state.kind === "success" && state.action === "reject" && (
             <>
               <XCircle className="h-12 w-12 mx-auto text-red-600" />
-              <h1 className="text-xl font-semibold">{t('admin.approval.rejected')}</h1>
+              <h1 className="page-title">{t('admin.approval.rejected')}</h1>
               <p className="text-muted-foreground">
                 {state.orgName ?? t('admin.approval.application')} {t('admin.approval.rejectedMessage')}
               </p>
@@ -91,7 +91,7 @@ export default function ProviderApprovalAction() {
           {state.kind === "error" && (
             <>
               <AlertTriangle className="h-12 w-12 mx-auto text-amber-600" />
-              <h1 className="text-xl font-semibold">{t('admin.approval.cannotProcess')}</h1>
+              <h1 className="page-title">{t('admin.approval.cannotProcess')}</h1>
               <p className="text-muted-foreground">{state.message}</p>
             </>
           )}

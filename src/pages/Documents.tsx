@@ -479,7 +479,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
       {!hideHeader && (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">{t("nav.myDocuments", "Documents")}</h1>
+            <h1 className="page-title">{t("nav.myDocuments", "Documents")}</h1>
             <p className="mt-1 text-muted-foreground text-xs">Manage header/footer layouts and content templates separately</p>
           </div>
         </div>
@@ -490,14 +490,14 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
         <TabsList className="bg-neutral-600">
           <TabsTrigger
             value="content"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white"
+            className="tab-brand"
           >
             <FileText className="h-4 w-4 mr-2" />
             {t("documents.tabContent")}
           </TabsTrigger>
           <TabsTrigger
             value="header-footer"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white"
+            className="tab-brand"
           >
             <LayoutTemplate className="h-4 w-4 mr-2" />
             {t("documents.tabHeaderFooter")}
@@ -1068,7 +1068,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
           </DialogHeader>
           {previewHFTemplate && (
             <div className="space-y-4">
-              <div className="border border-border rounded-lg p-6 bg-white">
+              <div className="border border-border rounded-lg p-6 bg-card">
                 {/* Header Preview */}
                 <div className="grid grid-cols-3 gap-4 pb-4 border-b border-gray-200 mb-4">
                   {renderHFSectionPreview(previewHFTemplate.header.left)}
@@ -1232,7 +1232,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
             {editDocContent && (
               <div className="space-y-2">
                 <Label>Preview</Label>
-                <div className="border border-border rounded-lg p-4 bg-white">
+                <div className="border border-border rounded-lg p-4 bg-card">
                   <div
                     className="whitespace-pre-wrap text-sm text-foreground"
                     dangerouslySetInnerHTML={{ __html: renderFormattedContent(editDocContent) }}

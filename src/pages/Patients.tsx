@@ -410,7 +410,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         {!hideHeader && (
           <div>
-            <h1 className="text-3xl font-bold text-foreground">{t("nav.myPatients", "Clients")}</h1>
+            <h1 className="page-title">{t("nav.myPatients", "Clients")}</h1>
             <p className="mt-1 text-muted-foreground text-xs">
               {t("patients.subtitle")}
             </p>
@@ -821,7 +821,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                     ? selectedLetter === letter
                       ? "bg-brand-teal text-white border-brand-teal"
                       : "bg-transparent text-brand-teal border-brand-teal hover:bg-brand-teal/10"
-                    : "bg-transparent text-muted-foreground/40 border-neutral-400 cursor-default"
+                    : "bg-transparent text-muted-foreground/40 border-border cursor-default"
                 )}
               >
                 {letter}
