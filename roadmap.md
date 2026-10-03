@@ -47,3 +47,11 @@
 - [ ] Astute sign-in — blocked: need the actual Astute portal login address (astutefse.com is the public site)
 - [ ] XPLAN sync — blocked: XPLAN's data access needs an Iress "App ID" in addition to the login
 - [ ] Beeswax — blocked: user to explain its role (beeswax.com is an advertising platform — confirm it's the right one)
+
+## Oct 2026 — Claims, styles, firm profile, billing
+- [x] Claims page (/claims): create, read and update; only Wealth Managers can change status (enforced in the database)
+- [x] Shared style sheet (page-title, frame, tab-brand, data-table, empty-state); tab bars, page titles and hardcoded white/black swept
+- [ ] Style follow-up: ~290 one-off text-[Npx] sizes, mixed card corners (lg/xl/2xl), ~12 files with legacy green classes, and screens not yet moved onto PageHeader/frame
+- [x] Marlin Moodley firm profile (all Introduction Letter fields), About Me / Partners / Assistants / Hospital Affiliations / Signature / Voice hidden
+- [x] Billing tab visible to System Admins only
+- [ ] Real Disclosure Agreement wording (blocked: waiting on the firm)
