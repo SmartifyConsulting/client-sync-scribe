@@ -406,6 +406,7 @@ function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string
 // ── Main Component ──────────────────────────────────────────────────
 export default function MyPractice() {
   const { t } = useTranslation();
+  const { isAdmin: isSystemAdmin } = useIsAdmin() as any;
   const { toast } = useToast();
   const { user } = useAuth();
   const { profile, loading, fetchProfile, updateProfile, uploadLogo } = useProfile();
@@ -1304,6 +1305,7 @@ export default function MyPractice() {
 
         {/* === PRACTICE TAB (Personal + Practice merged) === */}
         <TabsContent value="practice" className="mt-4 space-y-4 my-practice-tab-body">
+          <PracticeInfoSections />
           <div className="rounded-xl border border-neutral-400 bg-white shadow-sm overflow-hidden">
             <Accordion type="multiple" className="divide-y divide-white">
               {false && <AboutMeAccordion
@@ -2156,7 +2158,8 @@ export default function MyPractice() {
 
 
         {/* === CERTIFICATES TAB === */}
-        <TabsContent value="certificates" className="mt-4 my-practice-tab-body">
+        <TabsContent value="certificates" className="mt-4 space-y-4 my-practice-tab-body">
+          <FscaCategoriesCard />
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-base font-semibold text-primary-dark">Credentials</h3>
