@@ -1306,7 +1306,7 @@ export default function MyPractice() {
         {/* === PRACTICE TAB (Personal + Practice merged) === */}
         <TabsContent value="practice" className="mt-4 space-y-4 my-practice-tab-body">
           <PracticeInfoSections />
-          <div className="rounded-xl border border-neutral-400 bg-white shadow-sm overflow-hidden">
+          <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
             <Accordion type="multiple" className="divide-y divide-white">
               {false && <AboutMeAccordion
                 value={(profile as any)?.about_me || ""}
@@ -1422,9 +1422,9 @@ export default function MyPractice() {
             <p className="text-sm text-muted-foreground">
               This information appears on your document templates and letterheads.
             </p>
-            <Accordion type="multiple" className="rounded-xl border border-primary bg-white overflow-hidden divide-y divide-primary">
+            <Accordion type="multiple" className="rounded-xl border border-primary bg-card overflow-hidden divide-y divide-primary">
               {/* Practice Details */}
-              <AccordionItem value="practice-basic-details" className="border-0 rounded-none bg-white">
+              <AccordionItem value="practice-basic-details" className="border-0 rounded-none bg-card">
                 <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
                   <h4 className="text-xs font-semibold">Firm Details</h4>
                 </AccordionTrigger>
@@ -1546,7 +1546,7 @@ export default function MyPractice() {
                   {partners.map((partner) => (
                     <div
                       key={partner.id}
-                      className="flex items-center justify-between p-3 bg-white rounded-lg border border-border"
+                      className="flex items-center justify-between p-3 bg-card rounded-lg border border-border"
                     >
                       {editingPartnerId === partner.id ? (
                         <div className="flex-1 grid gap-2 sm:grid-cols-3 mr-3">

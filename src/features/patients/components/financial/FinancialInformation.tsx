@@ -114,7 +114,7 @@ export function FinancialInformation({ patientId }: { patientId: string }) {
     );
 
   return (
-    <div className="patient-section-frame rounded-xl border border-neutral-400 bg-card overflow-hidden divide-y divide-white">
+    <div className="patient-section-frame rounded-xl border border-border bg-card overflow-hidden divide-y divide-white">
       {SECTIONS.map((s) => {
         const v = sec(s.key);
         return (

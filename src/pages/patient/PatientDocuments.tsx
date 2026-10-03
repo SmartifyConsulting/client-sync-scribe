@@ -965,7 +965,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
           key={docGroupBy}
           className={cn(
             "patient-section-frame rounded-xl border overflow-hidden divide-y divide-white transition-colors",
-            isDragging ? "border-2 border-dashed border-primary bg-primary/5" : "border-neutral-400 bg-white",
+            isDragging ? "border-2 border-dashed border-primary bg-primary/5" : "border-border bg-card",
           )}
           onDragOver={(e) => {
             e.preventDefault();
@@ -975,7 +975,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
           onDrop={handleDrop}
         >
           {patientDocGroups.map((group) => (
-            <Collapsible key={group.key} defaultOpen={defaultOpenDocGroup.includes(group.key)} className="bg-white overflow-hidden">
+            <Collapsible key={group.key} defaultOpen={defaultOpenDocGroup.includes(group.key)} className="bg-card overflow-hidden">
               <SectionHeader icon={FileText} label={group.label} extra={<SectionCountPill count={group.items.length} />} />
               <CollapsibleContent className="p-3">
                 {group.items.length === 0 ? (
@@ -1256,7 +1256,7 @@ function renderHFCell(cell: HFCell | undefined) {
       )}
       {cell.text && (
         <div
-          className="whitespace-pre-wrap text-xs text-black"
+          className="whitespace-pre-wrap text-xs text-foreground"
           dangerouslySetInnerHTML={{ __html: renderFormattedContent(cell.text) }}
         />
       )}
@@ -1320,7 +1320,7 @@ function DocumentPreviewDialog({
           </DialogDescription>
         </DialogHeader>
         {doc && (
-          <div className="border border-border rounded-lg p-6 bg-white" style={{ fontFamily }}>
+          <div className="border border-border rounded-lg p-6 bg-card" style={{ fontFamily }}>
             {isLoading ? (
               <div className="flex items-center justify-center py-4">
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -1338,7 +1338,7 @@ function DocumentPreviewDialog({
             )}
 
             <div
-              className="whitespace-pre-wrap text-sm text-black min-h-[100px]"
+              className="whitespace-pre-wrap text-sm text-foreground min-h-[100px]"
               dangerouslySetInnerHTML={{ __html: renderFormattedContent(resolvedContent) }}
             />
 

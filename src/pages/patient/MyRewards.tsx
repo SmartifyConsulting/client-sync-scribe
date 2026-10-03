@@ -451,7 +451,7 @@ export default function MyRewards({ embedded = false }: { embedded?: boolean } =
                 <p className="text-xs md:text-sm font-medium text-blue-100">Vulas</p>
                 <p className="text-2xl md:text-4xl font-bold text-white">{lollipopCount}</p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0">
+              <div className="h-12 w-12 rounded-full bg-card shadow-sm flex items-center justify-center shrink-0">
                 <img src={vulaVouchersLogo} alt="Vulas" className="h-8 w-8 object-contain" />
               </div>
             </div>

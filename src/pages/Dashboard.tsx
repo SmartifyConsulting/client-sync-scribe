@@ -347,7 +347,7 @@ export default function Dashboard() {
         {false && isDoctor && (
           <Link
             to="/doctor/rewards"
-            className="col-span-2 min-h-[80px] md:min-h-[100px] flex items-center justify-center gap-2 rounded-2xl border-2 border-primary bg-white p-2 md:p-3 text-center shadow-card hover:shadow-card-hover transition-all duration-300"
+            className="col-span-2 min-h-[80px] md:min-h-[100px] flex items-center justify-center gap-2 rounded-2xl border-2 border-primary bg-card p-2 md:p-3 text-center shadow-card hover:shadow-card-hover transition-all duration-300"
           >
             <div className="flex flex-col items-center shrink-0">
               <p className="text-xl md:text-2xl font-bold text-blue-600 leading-none mb-1">{doctorVulas + patientVulas}</p>

@@ -181,7 +181,7 @@ export default function NurseProfile() {
   return (
     <div className="mx-auto w-full max-w-5xl space-y-4 p-3 sm:p-4">
       {/* Header */}
-      <div className="rounded-xl border border-primary bg-white p-4">
+      <div className="rounded-xl border border-primary bg-card p-4">
         <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Nurse Profile</p>
         <div className="mt-2 flex items-center gap-3">
           <Avatar className="h-16 w-16 border-2 border-primary">
@@ -366,7 +366,7 @@ export default function NurseProfile() {
               Your clinical permissions determine which clinical functions and patient information you can access
               within Holarc. They are set by your hospital administrator and are read-only here.
             </p>
-            <div className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+            <div className="rounded-xl border border-border bg-card overflow-hidden">
               <div className="flex items-center justify-between border-b bg-primary px-3 py-2 text-xs font-bold uppercase tracking-wider text-white">
                 <span>Role</span>
                 <span>{nurse.role_title || nurse.nursing_category || "Nurse"}</span>

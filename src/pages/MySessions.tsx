@@ -59,7 +59,7 @@ function CountPill({ count }: { count: number }) {
       className={cn(
         "text-[10px] font-semibold px-1.5 py-0 min-w-5 h-5 inline-flex items-center justify-center rounded-full",
         "bg-muted text-muted-foreground",
-        "group-data-[state=open]:!bg-white group-data-[state=open]:!text-primary",
+        "group-data-[state=open]:!bg-card group-data-[state=open]:!text-primary",
       )}
     >
       {count}

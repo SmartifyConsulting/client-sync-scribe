@@ -821,7 +821,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                     ? selectedLetter === letter
                       ? "bg-brand-teal text-white border-brand-teal"
                       : "bg-transparent text-brand-teal border-brand-teal hover:bg-brand-teal/10"
-                    : "bg-transparent text-muted-foreground/40 border-neutral-400 cursor-default"
+                    : "bg-transparent text-muted-foreground/40 border-border cursor-default"
                 )}
               >
                 {letter}

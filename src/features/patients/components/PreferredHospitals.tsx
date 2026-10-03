@@ -45,7 +45,7 @@ export function PreferredHospitals({ value, onChange, readOnly }: Props) {
   }, [hospitals, search, value]);
 
   return (
-    <Collapsible defaultOpen className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+    <Collapsible defaultOpen className="rounded-xl border border-border bg-card overflow-hidden">
       <SectionHeader icon={Building2} label="Preferred Hospitals" />
       <CollapsibleContent className="p-3 space-y-3">
         <p className="text-xs text-muted-foreground">

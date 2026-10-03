@@ -245,9 +245,9 @@ export default function PatientTasks() {
           {filteredTodos.length === 0 ? (
             <p className="text-xs text-muted-foreground px-1 py-6 text-center">No actions match your search.</p>
           ) : groupBy === "date" ? (
-            <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
+            <div className="patient-section-frame rounded-xl border border-border bg-card overflow-hidden divide-y divide-white">
               {dateGroups.map((group, idx) => (
-                <Collapsible key={group.key} defaultOpen={idx === 0} className="bg-white overflow-hidden">
+                <Collapsible key={group.key} defaultOpen={idx === 0} className="bg-card overflow-hidden">
                   <SectionHeader icon={Clock} label={group.label} extra={<SectionCountPill count={group.items.length} />} />
                   <CollapsibleContent className="p-3">
                     <div className="divide-y divide-border">
@@ -260,9 +260,9 @@ export default function PatientTasks() {
               ))}
             </div>
           ) : (
-            <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
+            <div className="patient-section-frame rounded-xl border border-border bg-card overflow-hidden divide-y divide-white">
               {pendingTodos.length > 0 && (
-                <Collapsible defaultOpen className="bg-white overflow-hidden">
+                <Collapsible defaultOpen className="bg-card overflow-hidden">
                   <SectionHeader icon={Clock} label="Pending" extra={<SectionCountPill count={pendingTodos.length} />} />
                   <CollapsibleContent className="p-3">
                     <div className="divide-y divide-border">
@@ -275,7 +275,7 @@ export default function PatientTasks() {
               )}
 
               {completedTodos.length > 0 && (
-                <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+                <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
                   <SectionHeader icon={CheckCircle2} label="Completed" extra={<SectionCountPill count={completedTodos.length} />} />
                   <CollapsibleContent className="p-3">
                     <div className="divide-y divide-border">
@@ -603,7 +603,7 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
               )}
               {isRecording && (
                 <div className="absolute top-2 right-2 flex items-center gap-1.5 bg-destructive/90 text-destructive-foreground px-2 py-1 rounded-full text-xs font-medium">
-                  <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
+                  <span className="h-2 w-2 rounded-full bg-card animate-pulse" />
                   {elapsed}s / {MAX_RECORDING_SECONDS}s
                 </div>
               )}

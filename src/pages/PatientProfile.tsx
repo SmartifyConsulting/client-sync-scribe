@@ -925,7 +925,7 @@ export default function PatientProfile() {
             {editDocContent && (
               <div className="space-y-2">
                 <Label>Preview</Label>
-                <div className="border border-border rounded-lg p-4 bg-white">
+                <div className="border border-border rounded-lg p-4 bg-card">
                   <div
                     className="whitespace-pre-wrap text-sm text-foreground"
                     dangerouslySetInnerHTML={{ __html: renderFormattedContent(editDocContent) }}

@@ -1840,7 +1840,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
               <iframe
                 title={previewHtml.title}
                 srcDoc={previewHtml.html}
-                className="w-full h-[70vh] bg-white rounded-lg border border-border"
+                className="w-full h-[70vh] bg-card rounded-lg border border-border"
               />
             </div>
 

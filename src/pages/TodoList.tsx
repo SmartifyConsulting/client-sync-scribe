@@ -758,7 +758,7 @@ export default function TodoList() {
 
       {/* Task List — grouped by date or patient */}
       {groups.every((g) => g.items.length === 0) ? (
-        <div className="rounded-xl border border-neutral-400 bg-card shadow-sm p-8 text-center text-muted-foreground text-sm">
+        <div className="rounded-xl border border-border bg-card shadow-sm p-8 text-center text-muted-foreground text-sm">
           {filter === "all" ? "No tasks yet. Add your first task with the Add Task button." : filter === "active" ? "No active tasks. Great job!" : "No completed tasks yet."}
         </div>
       ) : (

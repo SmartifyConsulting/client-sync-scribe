@@ -1617,13 +1617,13 @@ export function PatientDetailsEditor({
       <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
         <TabsTrigger
           value="personal"
-          className="whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black text-xs px-3 py-1.5"
+          className="whitespace-nowrap text-white data-[state=active]:bg-background data-[state=active]:text-foreground text-xs px-3 py-1.5"
         >
           {t("patientProfile.togglePersonal")}
         </TabsTrigger>
         <TabsTrigger
           value="medical"
-          className="whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black text-xs px-3 py-1.5"
+          className="whitespace-nowrap text-white data-[state=active]:bg-background data-[state=active]:text-foreground text-xs px-3 py-1.5"
         >
           {t("patientProfile.toggleMedical")}
         </TabsTrigger>
@@ -1725,8 +1725,8 @@ export function PatientDetailsEditor({
                 </Button>
               </div>
 
-              <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
-              <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+              <div className="patient-section-frame rounded-xl border border-border bg-card overflow-hidden divide-y divide-white">
+              <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
 
                 <SectionHeader icon={User} label="Personal Information" />
                 <CollapsibleContent className="p-3">
@@ -1748,7 +1748,7 @@ export function PatientDetailsEditor({
                 </CollapsibleContent>
               </Collapsible>
 
-              <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+              <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
                 <SectionHeader icon={MapPin} label="Addresses" />
                 <CollapsibleContent className="p-3">
                   <div className={FIELD_GRID_2_CLASS}>
@@ -1761,7 +1761,7 @@ export function PatientDetailsEditor({
                 </CollapsibleContent>
               </Collapsible>
 
-              <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+              <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
                 <SectionHeader icon={Briefcase} label="Employer" />
                 <CollapsibleContent className="p-3">
                   <div className={FIELD_GRID_2_CLASS}>
@@ -1771,7 +1771,7 @@ export function PatientDetailsEditor({
                 </CollapsibleContent>
               </Collapsible>
 
-              <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+              <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
                 <SectionHeader icon={Users} label="Beneficiaries" />
                 <CollapsibleContent className="p-3">
                   {nokMembers.length > 0 ? (
@@ -1827,7 +1827,7 @@ export function PatientDetailsEditor({
                 </CollapsibleContent>
               </Collapsible>
 
-              <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+              <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
                 <SectionHeader icon={StickyNote} label="General Notes" />
                 <CollapsibleContent className="p-3">
                   <p className="text-xs text-foreground whitespace-pre-wrap">{patient.notes || "No notes recorded"}</p>
@@ -1997,8 +1997,8 @@ export function PatientDetailsEditor({
               <AutosaveStatus saving={saving} hasChanges={hasChanges} lastSavedAt={lastSavedAt} />
             </div>
 
-            <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
-            <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+            <div className="patient-section-frame rounded-xl border border-border bg-card overflow-hidden divide-y divide-white">
+            <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
               <SectionHeader icon={User} label="Personal Information" />
               <CollapsibleContent className="p-3">
                 {/* Horizontal label/field rows: bold, one size smaller labels */}
@@ -2136,7 +2136,7 @@ export function PatientDetailsEditor({
               </CollapsibleContent>
             </Collapsible>
 
-            <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+            <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
               <SectionHeader icon={MapPin} label="Addresses" />
               <CollapsibleContent className="p-3">
                 <div className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
@@ -2186,7 +2186,7 @@ export function PatientDetailsEditor({
             </Collapsible>
 
             {/* Beneficiaries */}
-            <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+            <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
               <SectionHeader icon={Briefcase} label="Employer" />
               <CollapsibleContent className="p-3">
                 <div className={FIELD_GRID_2_CLASS}>
@@ -2222,7 +2222,7 @@ export function PatientDetailsEditor({
               </CollapsibleContent>
             </Collapsible>
 
-            <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+            <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
               <SectionHeader icon={Users} label="Beneficiaries" />
               <CollapsibleContent className="p-3">
                 <div className="flex justify-end mb-3">
@@ -2410,7 +2410,7 @@ export function PatientDetailsEditor({
 
 
 
-            <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+            <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
               <SectionHeader icon={StickyNote} label="General Notes" />
               <CollapsibleContent className="p-3">
                 <Textarea
