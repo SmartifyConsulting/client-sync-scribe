@@ -3,7 +3,7 @@ const NAVY = "#0f2742", INK = "#1e293b", MUTED = "#64748b", RULE = "#d8dee8";
 const esc = (x: unknown) => String(x ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 const logo = (u?: string | null) => (u ? `<img src="${esc(u)}" alt="" style="max-height:46px;max-width:170px;object-fit:contain"/>` : "");
 const footer = (p: any) => p?.fsp_name
-  ? `${esc(p.fsp_name)} · Reg No ${esc(p.registration_number ?? "–")} · FSP ${esc(p.fsb_licence ?? "–")}<br/>${esc(p.firm_address ?? "")}${p.website ? " · " + esc(p.website) : ""}`
+  ? `${esc(p.fsp_name)} · Reg No ${esc(p.registration_number ?? "–")} · FSP ${esc(p.fsb_licence ?? "–")}<br/>${esc(p.firm_address ?? "")}${p.firm_website ? " · " + esc(p.firm_website) : ""}`
   : "Masthead Financial Planning (Proprietary) Limited · Reg No 2010/019601/07 · FSP 43435<br/>1st Floor Park Terraces, Golf Park, Mowbray 7700 · www.mastheadfp.co.za";
 const wrap = (title: string, subtitle: string, body: string, p: any = null) => `<div id="holarc-document" style="font-family:'Helvetica Neue',Arial,sans-serif;color:${INK};background:#fff;padding:56px 60px;font-size:12.5px;line-height:1.7;max-width:820px;margin:0 auto">
 ${p?.__businessLogo || p?.__fspLogo ? `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px">${logo(p.__businessLogo) || "<span></span>"}${logo(p.__fspLogo)}</div>` : ""}
@@ -25,7 +25,7 @@ export function disclosureHtml(client: string, date: string, p: any = null) {
 <h3 style="margin:20px 0 6px;font-size:13px;color:#0f2742;font-weight:600">4. Conflicts of interest</h3><p>Our conflict of interest management policy is available on request. We do not accept gifts or incentives that could influence our advice.</p>
 <h3 style="margin:20px 0 6px;font-size:13px;color:#0f2742;font-weight:600">5. Complaints</h3><p>Complaints can be sent to the FSP's compliance officer. If unresolved, you may contact the FAIS Ombud.</p>
 <h3 style="margin:20px 0 6px;font-size:13px;color:#0f2742;font-weight:600">6. Privacy</h3><p>Your personal information is processed in line with the Protection of Personal Information Act (POPIA) and only for the purpose of providing financial services to you.</p>
-<p>By signing, I confirm that I have read and understood this disclosure.</p>`);
+<p>By signing, I confirm that I have read and understood this disclosure.</p>`, p);
 }
 
 export function loaHtml(client: string, date: string, p: any = null) {
@@ -71,7 +71,7 @@ ${h2("Authority to view, obtain and share your information")}
 <p>I further acknowledge that this consent to obtain information on my behalf will remain effective until cancelled by me in writing.</p>
 <p>I further confirm that I have read and understood the contents of the above.</p></div>
 ${h2("Client declaration")}
-<p style="font-family:Georgia,serif;font-size:13px;line-height:1.8">I, <b>${client}</b>, hereby confirm that I have read and understood the contents of this document. I further confirm that all sections have been completed by me and reflect my intention.</p>`);
+<p style="font-family:Georgia,serif;font-size:13px;line-height:1.8">I, <b>${client}</b>, hereby confirm that I have read and understood the contents of this document. I further confirm that all sections have been completed by me and reflect my intention.</p>`, p);
 }
 
 export function sealedHtml(doc: { content_html: string; signature_image: string; signer_name: string; signed_at: string; signer_ip: string | null; seal_hash: string; title: string }) {
