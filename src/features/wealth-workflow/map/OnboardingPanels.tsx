@@ -102,9 +102,19 @@ export function KycPanel({ workflowId, kyc, viewer, clientFirst }: { workflowId:
 /* ---------------- Disclosure + LOA ---------------- */
 export function SignDocsPanel({ workflowId, signed, viewer, clientName }: { workflowId: string; signed: any[]; viewer: Viewer; clientName: string }) {
   const today = new Date().toLocaleDateString("en-ZA", { day: "numeric", month: "long", year: "numeric" });
+  const { data: practice } = useQuery({
+    queryKey: ["workflow-practice-info", workflowId],
+    queryFn: async () => {
+      const sbx = supabase as any;
+      const { data: wf } = await sbx.from("wealth_workflows").select("owner_user_id").eq("id", workflowId).maybeSingle();
+      if (!wf?.owner_user_id) return null;
+      const { data } = await sbx.from("wealth_practice_info").select("*").eq("user_id", wf.owner_user_id).maybeSingle();
+      return data ?? null;
+    },
+  });
   const docs = [
     { type: "disclosure", title: "Disclosure Agreement", html: disclosureHtml(clientName, today) },
-    { type: "loa", title: "Letter of Authority (LOA)", html: loaHtml(clientName, today) },
+    { type: "loa", title: "Letter of Authority (LOA)", html: loaHtml(clientName, today, practice) },
   ];
   return (
     <Accordion type="multiple" className="space-y-3">

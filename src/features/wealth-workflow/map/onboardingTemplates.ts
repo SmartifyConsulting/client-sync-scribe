@@ -22,42 +22,45 @@ export function disclosureHtml(client: string, date: string) {
 <p>By signing, I confirm that I have read and understood this disclosure.</p>`);
 }
 
-export function loaHtml(client: string, date: string) {
-  const cats = ["1.1 Long-term Insurance – Category A","1.2 Short-term Insurance Personal Lines","1.3 Long-term Insurance – Category B1","1.4 Long-term Insurance – Category C","1.5 Retail Pension Benefits","1.6 Short-term Insurance Commercial Lines","1.7 Pension Fund Benefits","1.14 Participatory interests in Collective Investment Schemes","1.20 Long-term Insurance – Category B2","1.21 Long-term Insurance – Category B2-A","1.22 Long-term Insurance – Subcategory B1-A","1.23 Short-term Insurance Personal Lines A-1"];
+export function loaHtml(client: string, date: string, p: any = null) {
+  const v = (k: string, d: string) => (p?.[k] != null && p[k] !== "" ? String(p[k]) : d);
+  const sup = p?.product_suppliers;
+  const defaultCats = ["1.1 Long-term Insurance – Category A","1.2 Short-term Insurance Personal Lines","1.3 Long-term Insurance – Category B1","1.4 Long-term Insurance – Category C","1.5 Retail Pension Benefits","1.6 Short-term Insurance Commercial Lines","1.7 Pension Fund Benefits","1.14 Participatory interests in Collective Investment Schemes","1.20 Long-term Insurance – Category B2","1.21 Long-term Insurance – Category B2-A","1.22 Long-term Insurance – Subcategory B1-A","1.23 Short-term Insurance Personal Lines A-1"];
+  const cats: string[] = p?.fsca_categories?.length ? p.fsca_categories : defaultCats;
   const col = (t: string, items: string[]) => `<td style="vertical-align:top;padding:0 12px 0 0;width:33%"><p style="margin:0 0 6px;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:${MUTED}">${t}</p>${items.map((i) => `<div style="padding:3px 0;border-bottom:1px solid ${RULE}">${i}</div>`).join("")}</td>`;
   return wrap("Introduction &amp; Letter of Authority", "Prepared for " + client + " · " + date, `
 ${h2("Your planner")}
 ${table([
-  ["Planner", "Mr Marlin Moodley"],
-  ["Postal address", "49 Kenneth Road, Oak Park, Pietermaritzburg"],
-  ["Telephone", "082 323 4472"],
-  ["Email", "mmoodley@mastheadfp.co.za · marlin@marlinmoodley.co.za"],
-  ["Planner status", "Representative of the FSP by mandate"],
+  ["Planner", `${v("title", "Mr")} ${v("planner_name", "Marlin Moodley")}`],
+  ["Postal address", v("postal_address", "49 Kenneth Road, Oak Park, Pietermaritzburg")],
+  ["Telephone", v("phone", "082 323 4472")],
+  ["Email", [v("email_primary", "mmoodley@mastheadfp.co.za"), v("email_secondary", "marlin@marlinmoodley.co.za")].join(" · ")],
+  ["Planner status", v("planner_status", "Representative of the FSP by mandate")],
   ["Authorised FSCA product categories", cats.join("<br/>")],
-  ["PI cover", "Yes"],
-  ["Highest qualification", "Higher Diploma in Business Management"],
-  ["Experience", "17 years"],
+  ["PI cover", p ? (p.pi_cover ? "Yes" : "No") : "Yes"],
+  ["Highest qualification", v("qualification", "Higher Diploma in Business Management")],
+  ["Experience", `${v("experience_years", "17")} years`],
 ])}
 ${h2("The financial services provider")}
 ${table([
-  ["FSP and legal status", "Masthead Financial Planning (Pty) Ltd is a private company and licensed Financial Services Provider (FSP) which accepts responsibility for the business activities of the above representative and planner."],
-  ["Licence and registration", "FSB Licence No. 43435 · Reg. No. 2010/019601/07 · Tel 0861 737 858"],
-  ["Conflict of interest", "In accordance with legislation the FSP has implemented a Conflict of Interest Management Policy and keeps an updated disclosure register. This register informs you of all financial and ownership interests that the FSP/representative may become entitled to and lists the business relationships with product suppliers. It is available for inspection."],
-  ["Compliance officer", "Masthead (Pty) Ltd · Tel (021) 686 3588 · Fax (021) 686 3589 · compliance@masthead.co.za"],
-  ["Complaints", "Complaints must be addressed to the FSP in writing at P.O. Box 765, Howard Place, 7540. A copy of the FSP's Complaint Process is available on request."],
+  ["FSP and legal status", v("fsp_legal_status", "Masthead Financial Planning (Pty) Ltd is a private company and licensed Financial Services Provider (FSP) which accepts responsibility for the business activities of the above representative and planner.")],
+  ["Licence and registration", `FSP Licence No. ${v("fsb_licence", "43435")} · Reg. No. ${v("registration_number", "2010/019601/07")} · Tel ${v("firm_phone", "0861 737 858")}`],
+  ["Conflict of interest", v("conflict_policy", "In accordance with legislation the FSP has implemented a Conflict of Interest Management Policy and keeps an updated disclosure register. This register informs you of all financial and ownership interests that the FSP/representative may become entitled to and lists the business relationships with product suppliers. It is available for inspection.")],
+  ["Compliance officer", `${v("compliance_officer", "Masthead (Pty) Ltd")} · Tel ${v("compliance_phone", "(021) 686 3588")} · Fax ${v("compliance_fax", "(021) 686 3589")} · ${v("compliance_email", "compliance@masthead.co.za")}`],
+  ["Complaints", v("complaints_address", "Complaints must be addressed to the FSP in writing at P.O. Box 765, Howard Place, 7540. A copy of the FSP's Complaint Process is available on request.")],
 ])}
 ${h2("Product suppliers of the representative")}
 <table style="width:100%;border-collapse:collapse;font-size:11.5px"><tr>
-${col("Short term", ["Momentum Insure","Old Mutual Insure","Discovery Insure","One","CIA","ITOO","Safire","Brolink","Santam"])}
-${col("Life", ["Momentum","Discovery","Bidvest","Old Mutual","PPS","Brightrock","Sanlam","Liberty"])}
-${col("Investments", ["Momentum Wealth","Discovery Invest","Sygnia","Old Mutual Wealth","PPS Invest","Allan Gray","Glacier","Liberty"])}
+${col("Short term", sup?.short_term?.length ? sup.short_term : ["Momentum Insure","Old Mutual Insure","Discovery Insure","One","CIA","ITOO","Safire","Brolink","Santam"])}
+${col("Life", sup?.life?.length ? sup.life : ["Momentum","Discovery","Bidvest","Old Mutual","PPS","Brightrock","Sanlam","Liberty"])}
+${col("Investments", sup?.investments?.length ? sup.investments : ["Momentum Wealth","Discovery Invest","Sygnia","Old Mutual Wealth","PPS Invest","Allan Gray","Glacier","Liberty"])}
 </tr></table>
-<p style="margin:14px 0 0;font-size:11.5px;color:${MUTED}">Representatives are remunerated by means of commission paid by the product suppliers. The FSP does not hold more than 10% share in any of its product suppliers. The FSP received more than 32% of total remuneration during the preceding 12-month period from one product supplier: Old Mutual (32%).</p>
+<p style="margin:14px 0 0;font-size:11.5px;color:${MUTED}">${v("remuneration_basis", "Representatives are remunerated by means of commission paid by the product suppliers.")} ${v("shareholding_statement", "The FSP does not hold more than 10% share in any of its product suppliers.")} ${(p?.top_suppliers?.length ? p.top_suppliers : [{ name: "Old Mutual", percent: 32 }]).length ? "Product suppliers from which the FSP received more than 30% of total remuneration during the preceding 12 months: " + (p?.top_suppliers?.length ? p.top_suppliers : [{ name: "Old Mutual", percent: 32 }]).map((t: any) => `${t.name} (${t.percent ?? "–"}%)`).join(", ") + "." : ""}</p>
 ${h2("Authority to view, obtain and share your information")}
 <div style="font-family:Georgia,serif;font-size:13px;line-height:1.8">
 <p>I hereby acknowledge the following in my personal capacity:</p>
 <p>Sound and proper financial advice can only be provided with full disclosure of relevant information relating to appropriate personal, including private, information for the purposes of determining and advising on my/our financial situation and financial product experience and objectives, in the process of acquiring, servicing or maintaining any financial products, including but not limited to any information relating to or interest in any long-term insurance, unit trust or any other financial products or services, with any long-term insurer, unit trust manager or other financial institution.</p>
-<p>I accordingly confirm, for the purposes of providing the said sound and proper financial advice to me, that full permission and authority is granted to <b>Marlin Moodley</b> of <b>Masthead Financial Planning</b> to obtain any and all such information via The Financial Services Exchange (Pty) Ltd, trading as Astute, or any other institution providing a mechanism for the transmission of such information.</p>
+<p>I accordingly confirm, for the purposes of providing the said sound and proper financial advice to me, that full permission and authority is granted to <b>${v("planner_name", "Marlin Moodley")}</b> of <b>${v("fsp_name", "Masthead Financial Planning")}</b> to obtain any and all such information via The Financial Services Exchange (Pty) Ltd, trading as Astute, or any other institution providing a mechanism for the transmission of such information.</p>
 <p>I herewith give consent for the long-term insurer, short-term insurer and unit trust manager or other financial institution possessing such information to release such information to the said Authorised User via Astute, or any other mechanism; and I confirm that such Authorised User shall be acting on my behalf or in my interest and I waive any right to privacy only for the purposes as stated above.</p>
 <p>I further acknowledge that this consent to obtain information on my behalf will remain effective until cancelled by me in writing.</p>
 <p>I further confirm that I have read and understood the contents of the above.</p></div>
