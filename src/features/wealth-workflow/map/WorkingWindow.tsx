@@ -91,9 +91,9 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
         {!isLive && <button onClick={onBackToCurrent} className="text-xs font-medium text-primary hover:underline">Back to current</button>}
       </div>
 
-      <div className="grid gap-5 p-5 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+      <div className="grid min-w-0 grid-cols-1 gap-5 p-4 md:p-5 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
         {/* Left: instructions */}
-        <div className="divide-y divide-border/60 [&>*]:py-3 [&>*:first-child]:pt-0 [&>*:last-child]:pb-0">
+        <div className="min-w-0 divide-y divide-border/60 [&>*]:py-3 [&>*:first-child]:pt-0 [&>*:last-child]:pb-0">
           <div>
             <p className="text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Step {group.group.n} · {viewer === "client" ? group.group.clientTitle : group.group.title}</p>
             <div className="mt-1 flex items-center gap-2">
