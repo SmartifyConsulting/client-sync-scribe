@@ -167,6 +167,7 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
             </a>
           )}
           {isPersonal && reached && <PersonalInfoPanel patientId={records?.patientId} personal={records?.personal} />}
+          {isSchedule && reached && <ScheduleMeetingPanel appointments={records?.appointments ?? []} viewer={viewer} />}
           {isCapture && reached && (
             <CaptureFinancialsPanel patientId={records?.patientId} sessions={records?.sessions ?? []} financials={records?.financials} viewer={viewer} clientFirst={first} />
           )}
