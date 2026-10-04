@@ -13,6 +13,8 @@ import { buildDocumentPdfBase64 } from "@/features/documents/utils/documentPdf";
 import { Logo } from "@/components/brand/Logo";
 import { disclosureHtml, loaHtml, sealedHtml } from "./onboardingTemplates";
 import { renderSignaturePngBase64 } from "@/lib/signatureImage";
+import { flyToDocuments } from "./StepAvatar";
+import { useRef } from "react";
 import { SIGNATURE_FONTS } from "@/lib/signature";
 
 type Viewer = "manager" | "client";
@@ -87,40 +89,42 @@ export function KycPanel({ workflowId, kyc, viewer, clientFirst }: { workflowId:
     );
   }
 
-  // Client view: one plain sentence, one clear action, an icon showing what's expected.
-  const simpleText =
-    status === "approved" ? "You're verified."
-    : status === "declined" ? "That didn't go through. Please try again."
-    : status === "in_review" ? "We're reviewing it — we'll let you know."
-    : status ? "Finish the check in the window that opened."
-    : "Takes about 2 minutes. Have your ID and your camera ready.";
-
+  // Client view: a borderless frame that opens to show the Didit QR code.
+  // Once Didit approves, the frame folds away and the signing step follows.
+  if (status === "approved") {
+    return (
+      <div className="flex items-center gap-2 py-2 text-sm text-foreground animate-fade-in">
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500"><Check className="h-3.5 w-3.5 text-white" strokeWidth={5} /></span>
+        Identity verified
+      </div>
+    );
+  }
   return (
-    <div className={cn("flex items-center gap-4 rounded-xl border bg-card p-4", status === "approved" ? "border-primary/40" : "border-border/70")}>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-semibold text-foreground">Verify your identity</p>
-          {status === "approved" && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-2xs font-semibold text-white">
-              <Check className="h-3 w-3" /> Verified
-            </span>
-          )}
+    <AutoStartKyc status={status} sessionUrl={sessionUrl} busy={busy} onStart={() => call("start")}>
+      <div className="animate-scale-in origin-top flex flex-col items-center gap-3 py-2 text-center">
+        <p className="text-sm font-medium text-foreground">Scan with your phone to verify your identity</p>
+        <div className="flex h-44 w-44 items-center justify-center rounded-lg bg-white p-2">
+          {qr ? <img src={qr} alt="Didit verification QR code" className="h-full w-full" /> : <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />}
         </div>
-        <p className="mt-0.5 text-xs text-muted-foreground">{simpleText}</p>
-        {status !== "approved" && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Button size="sm" className="rounded-full" disabled={busy} onClick={() => call("start")}>
-              {busy && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}{status ? "Restart" : "Verify my identity"}
-            </Button>
-            {status && <Button size="sm" variant="outline" className="rounded-full" disabled={busy} onClick={() => call("refresh")}>I've finished</Button>}
-          </div>
-        )}
+        <p className="max-w-xs text-xs text-muted-foreground">
+          {status === "declined" ? "That didn't go through. Please scan again." : status === "in_review" ? "We're reviewing it — we'll let you know." : "Takes about 2 minutes. Have your ID ready. This page updates by itself when you're done."}
+        </p>
+        <div className="flex flex-wrap justify-center gap-2">
+          {sessionUrl && <Button size="sm" variant="outline" className="h-8 rounded-full text-xs" asChild><a href={sessionUrl} target="_blank" rel="noopener noreferrer">Continue on this device</a></Button>}
+          {status && <Button size="sm" variant="ghost" className="h-8 rounded-full text-xs" disabled={busy} onClick={() => call("refresh")}>I've finished</Button>}
+        </div>
       </div>
-      <div className={cn("flex h-14 w-14 shrink-0 items-center justify-center rounded-full", status === "approved" ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary")}>
-        {status === "approved" ? <Check className="h-7 w-7" strokeWidth={3} /> : <ScanFace className="h-7 w-7" />}
-      </div>
-    </div>
+    </AutoStartKyc>
   );
+}
+
+/** Opens a Didit session once when the frame first appears so the QR is ready. */
+function AutoStartKyc({ status, sessionUrl, busy, onStart, children }: { status: string | null; sessionUrl: string | null; busy: boolean; onStart: () => void; children: React.ReactNode }) {
+  const [tried, setTried] = useState(false);
+  useEffect(() => {
+    if (!tried && !sessionUrl && !busy && status !== "in_review") { setTried(true); onStart(); }
+  }, [tried, sessionUrl, busy, status, onStart]);
+  return <>{children}</>;
 }
 
 /* ---------------- Disclosure + LOA ---------------- */
@@ -162,6 +166,7 @@ function DocCard({ workflowId, doc, signed, viewer, clientName }: { workflowId: 
   const [busy, setBusy] = useState(false);
   // Optimistic stamp shown the instant signing succeeds, before the record refetches.
   const [localSig, setLocalSig] = useState<{ image: string; at: string } | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
   const qc = useQueryClient();
   const { toast } = useToast();
   const html = signed ? sealedHtml(signed) : doc.html;
@@ -186,13 +191,14 @@ function DocCard({ workflowId, doc, signed, viewer, clientName }: { workflowId: 
     setBusy(false);
     if (error) return toast({ title: "Not signed", description: await errMsg(error), variant: "destructive" });
     setLocalSig({ image: sig, at: new Date().toISOString() });
+    flyToDocuments(cardRef.current);
     qc.invalidateQueries({ queryKey: ["wealth-map-records"] });
     window.dispatchEvent(new CustomEvent("wealth-doc-signed"));
     toast({ title: `${doc.title} signed` });
   };
 
   return (
-    <AccordionItem value={doc.type} className="overflow-hidden rounded-xl border border-border/70 bg-card">
+    <AccordionItem ref={cardRef} value={doc.type} className="overflow-hidden rounded-xl border border-border/70 bg-card">
       <AccordionTrigger className="gap-3 !rounded-none !border-0 bg-transparent px-4 py-3 text-left hover:!bg-transparent hover:no-underline">
         <span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg", isSigned ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
           <FileText className="h-4.5 w-4.5" />
