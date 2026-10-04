@@ -71,7 +71,6 @@ export function WorkflowCanvas({ groups, blockers, viewer, clientFirst, docCount
         {["gateway", "needs", "portfolio", "quotes", "presentation", "issuance"].map((k, i) => (
           <div key={k}>{i > 0 && <Arrow dir="down" />}{card(k, true)}</div>
         ))}
-        <div className="pt-4"><DocumentsTile count={docCount} onOpen={onOpenDocuments} /></div>
       </div>
 
       {/* Larger screens: perimeter loop */}
@@ -80,7 +79,7 @@ export function WorkflowCanvas({ groups, blockers, viewer, clientFirst, docCount
         <div className="flex h-12 items-center"><Arrow dir="right" /></div>
         {card("needs")}
 
-        <div className="row-span-3 pt-7 pr-8"><DocumentsTile count={docCount} onOpen={onOpenDocuments} /></div>
+        <div className="row-span-3" />
         <div />
         <Arrow dir="down" />
         <div />

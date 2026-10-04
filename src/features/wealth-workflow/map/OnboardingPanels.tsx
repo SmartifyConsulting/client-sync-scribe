@@ -148,8 +148,8 @@ export function SignDocsPanel({ workflowId, signed, viewer, clientName }: { work
     },
   });
   const docs = [
-    { type: "disclosure", title: "Disclosure Agreement", html: disclosureHtml(clientName, today, practice) },
-    { type: "loa", title: "Letter of Authority (LOA)", html: loaHtml(clientName, today, practice) },
+    { type: "disclosure", title: "Disclosure Agreement", blurb: "Who we are and how we are paid", html: disclosureHtml(clientName, today, practice) },
+    { type: "loa", title: "Letter of Authority (LOA)", blurb: "Lets your Wealth Manager request your policy information", html: loaHtml(clientName, today, practice) },
   ];
   return (
     <div className="space-y-2">
@@ -160,7 +160,7 @@ export function SignDocsPanel({ workflowId, signed, viewer, clientName }: { work
   );
 }
 
-function DocCard({ workflowId, doc, signed, viewer, clientName }: { workflowId: string; doc: { type: string; title: string; html: string }; signed?: any; viewer: Viewer; clientName: string }) {
+function DocCard({ workflowId, doc, signed, viewer, clientName }: { workflowId: string; doc: { type: string; title: string; blurb?: string; html: string }; signed?: any; viewer: Viewer; clientName: string }) {
   const [cert, setCert] = useState(false);
   const [preview, setPreview] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -198,18 +198,19 @@ function DocCard({ workflowId, doc, signed, viewer, clientName }: { workflowId: 
   };
 
   return (
-    <div ref={cardRef} className="flex items-center gap-3 rounded-xl border border-border/70 bg-card px-3 py-2.5">
+    <div ref={cardRef} className="flex items-center gap-3 rounded-lg border border-border bg-card px-3 py-2.5 transition-colors hover:bg-muted/30">
       <span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg", isSigned ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
-        <FileText className="h-4 w-4" />
+        <FileText className="h-4 w-4" strokeWidth={1.75} />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-foreground">{doc.title}</p>
-        <p className="truncate text-2xs text-muted-foreground">
+        <p className="text-sm font-medium leading-snug text-foreground">{doc.title}</p>
+        {doc.blurb && !isSigned && <p className="text-xs leading-snug text-muted-foreground">{doc.blurb}</p>}
+        <p className="mt-0.5 text-2xs uppercase tracking-[0.12em] text-muted-foreground">
           {isSigned ? `Signed by ${signed?.signer_name ?? clientName}${signed ? ` · ${fmt(signed.signed_at)}` : ""} · filed in Documents` : viewer === "client" ? "Waiting for your signature" : `Waiting for ${first} to sign`}
         </p>
       </div>
-      <Button size="icon" variant="ghost" className="h-9 w-9 rounded-full" aria-label={`Preview ${doc.title}`} onClick={() => setPreview(true)}><Eye className="h-4 w-4" /></Button>
-      <Button size="icon" variant="ghost" className="h-9 w-9 rounded-full" aria-label={`Download ${doc.title}`} onClick={() => downloadPdf(html, doc.title)}><Download className="h-4 w-4" /></Button>
+      <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0 rounded-full text-muted-foreground hover:text-foreground" aria-label={`Preview ${doc.title}`} onClick={() => setPreview(true)}><Eye className="h-4 w-4" /></Button>
+      <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0 rounded-full text-muted-foreground hover:text-foreground" aria-label={`Download ${doc.title}`} onClick={() => downloadPdf(html, doc.title)}><Download className="h-4 w-4" /></Button>
       {signed && <Button size="icon" variant="ghost" className="h-9 w-9 rounded-full" aria-label="View seal certificate" onClick={() => setCert(true)}><ShieldCheck className="h-4 w-4" /></Button>}
       {!isSigned && viewer === "client" && (
         <Button size="sm" className="h-8 rounded-full px-4 text-xs" disabled={busy} onClick={sign}>
