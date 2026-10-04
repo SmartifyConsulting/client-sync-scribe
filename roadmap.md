@@ -58,3 +58,10 @@
 - [x] Marlin Moodley firm profile (all Introduction Letter fields), About Me / Partners / Assistants / Hospital Affiliations / Signature / Voice hidden
 - [x] Billing tab visible to System Admins only
 - [ ] Real Disclosure Agreement wording (blocked: waiting on the firm)
+
+## Workflow redesign (Oct 2026)
+- [x] Same step names for everyone; Needs Analysis is Step 2, Portfolio is Step 3
+- [x] Shared map + Live Workspace tray, pulse only on your own next action, chime + mute
+- [x] Marlin has 6 clients linked (Georgia with 3 policies)
+- [x] Astute sign-in verified (reaches CCP home)
+- [ ] Astute data pull: needs a real client request/response in Astute to map fields (Ccp/Request, Ccp/Response)

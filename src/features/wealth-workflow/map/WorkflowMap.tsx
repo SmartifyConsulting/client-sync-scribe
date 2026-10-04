@@ -1,11 +1,13 @@
-import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Loader2, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useStartWorkflow } from "../hooks";
 import { OWNER_LABEL } from "./groups";
 import { useWorkflowMap, type GroupView } from "./useWorkflowMap";
-import { WorkflowStepper } from "./WorkflowStepper";
+import { WorkflowCanvas } from "./WorkflowCanvas";
+import { LiveTray } from "./LiveTray";
+import { isChimeMuted, setChimeMuted, playChime } from "./chime";
 import { StageDetailSheet } from "./StageDetailSheet";
 import { WorkingWindow } from "./WorkingWindow";
 import { useWorkflowRealtime } from "../workspace/useWorkflowRealtime";
@@ -28,6 +30,19 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
   const { toast } = useToast();
   const [selected, setSelected] = useState<GroupView | null>(null);
   const [openedInitial, setOpenedInitial] = useState<string | undefined>();
+  const [muted, setMuted] = useState(isChimeMuted());
+  const clientFirst = (clientName ?? "Client").split(" ")[0] || "Client";
+  const liveKey = (() => {
+    const g = m.groups.find((x) => x.steps.some((s) => s.state === "next"));
+    const s = g?.steps.find((x) => x.state === "next");
+    return g && s ? `${g.group.key}:${s.label}` : "";
+  })();
+  const prevLive = useRef<string | null>(null);
+  useEffect(() => {
+    if (!m.workflow) return;
+    if (prevLive.current !== null && prevLive.current !== liveKey) { playChime(); setPicked(null); }
+    prevLive.current = liveKey;
+  }, [liveKey, m.workflow]);
   useEffect(() => {
     if (!initialGroup || openedInitial === initialGroup || !m.workflow) return;
     const g = m.groups.find((x) => x.group.key === initialGroup);
@@ -81,18 +96,27 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
         </div>
       )}
 
-      <div className="rounded-xl border border-border/70 bg-card px-4 py-3">
-        <WorkflowStepper
-          groups={m.groups}
-          viewer={viewer}
-          selectedKey={shownGroup?.group.key}
-          onSelect={(key) => {
-            const g = m.groups.find((x) => x.group.key === key);
-            if (!g) return;
-            const step = g.steps.find((s) => s.state === "next")?.label ?? g.steps.find((s) => s.state === "done")?.label ?? g.steps[0]?.label ?? "";
-            setPicked({ group: key, step });
-          }}
-        />
+      <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+        <div className="min-w-0 rounded-xl border border-border bg-card p-4">
+          <p className="mb-3 text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Workflow map</p>
+          <WorkflowCanvas groups={m.groups} blockers={wf.status === "blocked" ? wf.blockers : []} viewer={viewer}
+            clientFirst={clientFirst} docCount={(m.records?.docs ?? []).length + (m.records?.signed ?? []).length}
+            onOpenDocuments={onOpenDocuments}
+            onSelectStep={(group, step) => setPicked({ group, step })} />
+        </div>
+        <div className="min-w-0 rounded-xl border border-border bg-card p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <span className="flex items-center gap-2 text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-primary" /> Live workspace
+            </span>
+            <button type="button" onClick={() => { setChimeMuted(!muted); setMuted(!muted); }}
+              aria-label={muted ? "Turn sound on" : "Mute sound"} className="rounded-full p-1.5 text-muted-foreground hover:bg-muted">
+              {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+            </button>
+          </div>
+          <LiveTray groups={m.groups} viewer={viewer} clientFirst={clientFirst}
+            managerName="your Wealth Manager" nextTitle={nextAction?.title} />
+        </div>
       </div>
 
       <WorkingWindow group={shownGroup} stepLabel={shownStep} isLive={isLive} viewer={viewer}

@@ -90,7 +90,8 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
                   "flex items-center gap-2 px-3 py-1.5",
                   onSelectStep && reachable && "cursor-pointer hover:bg-muted/40",
                   !reachable && "opacity-50",
-                  s.state === "next" && "mx-1.5 my-1 rounded-xl border border-primary bg-primary/5 animate-throb",
+                  s.state === "next" && "mx-1.5 my-1 rounded-xl border border-primary bg-primary/5",
+                  s.state === "next" && (viewer === "client" ? s.owner === "client" : s.owner === "advisor") && "animate-throb",
                   selectedStep === s.label && s.state !== "next" && "bg-muted/60",
                 )}
               >
@@ -99,7 +100,7 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
                 </span>
                 <OwnerBadge owner={s.owner} label={ownerLabel(s.owner, viewer, clientFirst)} />
                 <span className={cn("flex-1", s.state === "done" ? "text-muted-foreground" : "text-foreground")}>{s.label}</span>
-                {s.state === "next" && <span className="text-xs font-medium text-primary">{s.owner === (viewer === "client" ? "client" : "advisor") ? "Your turn" : "Now"}</span>}
+                {s.state === "next" && <span className="text-xs font-medium text-primary">Next</span>}
               </li>
               );
             })}

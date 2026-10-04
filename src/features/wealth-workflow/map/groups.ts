@@ -42,7 +42,7 @@ const appAt = (s: string[]) => (c: MapContext) => c.apps.some((a) => s.includes(
 
 export const WORKFLOW_GROUPS: WorkflowGroup[] = [
   {
-    n: 1, key: "gateway", title: "Client Onboarding", clientTitle: "Getting started", icon: ScanFace,
+    n: 1, key: "gateway", title: "Client Onboarding", clientTitle: "Client Onboarding", icon: ScanFace,
     stages: ["consultation"],
     steps: [
       { owner: "client", label: "Scan QR or open secure link", done: (c) => past(1)(c) || c.clientLinked || !!c.kycStatus },
@@ -52,7 +52,18 @@ export const WORKFLOW_GROUPS: WorkflowGroup[] = [
     footer: "No advice until all checks pass",
   },
   {
-    n: 2, key: "portfolio", title: "Portfolio", clientTitle: "Your current cover", icon: Database,
+    n: 2, key: "needs", title: "Needs Analysis", clientTitle: "Needs Analysis", icon: ClipboardList,
+    stages: ["needs_analysis"],
+    steps: [
+      { owner: "advisor", label: "Capture facts and risk profile", done: past(2) },
+      { owner: "system", label: "Life, short-term and investment gaps" },
+      { owner: "system", label: "Estate duty estimate" },
+      { owner: "client", label: "Or: single-need disclaimer" },
+    ],
+    footer: "Same inputs, same result",
+  },
+  {
+    n: 3, key: "portfolio", title: "Portfolio", clientTitle: "Portfolio", icon: Database,
     stages: ["information_required"],
     steps: [
       { owner: "system", label: "Astute pull: life, disability, investments" },
@@ -63,18 +74,7 @@ export const WORKFLOW_GROUPS: WorkflowGroup[] = [
     footer: "Locked until the mandate is re-signed if another brokerage queries",
   },
   {
-    n: 3, key: "needs", title: "Needs Analysis", clientTitle: "Financial plan", icon: ClipboardList,
-    stages: ["needs_analysis"],
-    steps: [
-      { owner: "advisor", label: "Capture facts and risk profile", done: past(3) },
-      { owner: "system", label: "Life, short-term and investment gaps" },
-      { owner: "system", label: "Estate duty estimate" },
-      { owner: "client", label: "Or: single-need disclaimer" },
-    ],
-    footer: "Same inputs, same result",
-  },
-  {
-    n: 4, key: "quotes", title: "Quotes & ROA", clientTitle: "Recommendation", icon: FileText,
+    n: 4, key: "quotes", title: "Quotes & ROA", clientTitle: "Quotes & ROA", icon: FileText,
     stages: ["research_quotes", "recommendation"],
     steps: [
       { owner: "system", label: "Quote 6 insurers, rank top 3" },
@@ -85,7 +85,7 @@ export const WORKFLOW_GROUPS: WorkflowGroup[] = [
     footer: "Any change makes a new version, re-sign",
   },
   {
-    n: 5, key: "presentation", title: "Presentation", clientTitle: "Your decision & documents", icon: PenLine,
+    n: 5, key: "presentation", title: "Presentation", clientTitle: "Presentation", icon: PenLine,
     stages: ["client_presentation", "client_decision", "documentation", "compliance"],
     steps: [
       { owner: "advisor", label: "Present ROA and comparison", done: (c) => c.recs.some((r) => r.presented_at) },
@@ -101,7 +101,7 @@ export const WORKFLOW_GROUPS: WorkflowGroup[] = [
     footer: "Submission blocked until complete",
   },
   {
-    n: 6, key: "issuance", title: "Issuance & Review", clientTitle: "Policy issued & review", icon: CircleCheck,
+    n: 6, key: "issuance", title: "Issuance & Review", clientTitle: "Issuance & Review", icon: CircleCheck,
     stages: ["application", "underwriting", "submission", "issued", "follow_up", "annual_review"],
     steps: [
       { owner: "insurer", label: "Accept, decline or issue", done: appAt(["issued"]) },
