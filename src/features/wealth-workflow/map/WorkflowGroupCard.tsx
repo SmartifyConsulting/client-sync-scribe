@@ -53,7 +53,7 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
           </span>
           <Icon className="h-3.5 w-3.5 text-muted-foreground" />
           <span className={cn("text-xs font-medium tracking-tight", locked ? "text-muted-foreground" : "text-foreground")}>{viewer === "client" ? g.clientTitle : g.title}</span>
-          {!locked && (
+          {!locked && state !== "current" && (
             <span
               className={cn(
                 "ml-1 rounded-full border px-2 py-0 text-2xs font-medium",
@@ -72,7 +72,7 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
       </div>
       {open && (
         <>
-          <ul className="divide-y border-t">
+          <ul className="space-y-0.5 border-t py-1">
             {view.steps.map((s) => {
               const reachable = s.state === "done" || s.state === "next";
               return (
@@ -92,14 +92,13 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
                 <span className="flex w-4 flex-none items-center justify-center">
                   {s.state === "done" ? (
                     <span className={cn("flex h-4 w-4 items-center justify-center rounded-full", s.owner === "advisor" ? "bg-blue-500" : "bg-emerald-500")}>
-                      <Check className="h-2.5 w-2.5 text-white" />
+                      <Check className="h-3 w-3 text-white" strokeWidth={4} />
                     </span>
                   ) : s.state === "next" ? (
                     <span className="block h-2 w-2 rounded-full bg-primary" />
                   ) : null}
                 </span>
                 <span className={cn("flex-1", s.state === "done" ? "text-muted-foreground" : "text-foreground")}>{s.label}</span>
-                {s.state === "next" && <span className="text-xs font-medium text-primary">Next</span>}
               </li>
               );
             })}
