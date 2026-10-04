@@ -1,4 +1,4 @@
-import { Check, Lock, MinusCircle, PlusCircle } from "lucide-react";
+import { Check, Lock, MinusCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { OWNER_LABEL } from "./groups";
 import { ownerLabel } from "./stepGuidance";
@@ -66,7 +66,7 @@ export function LiveTray({ groups, viewer, clientFirst, managerName, nextTitle }
           <div key={g.group.key} className="rounded-xl border border-border p-1.5">
             <div className="flex items-center justify-between rounded-lg bg-foreground px-3 py-2 text-background">
               <span className="text-2xs font-semibold uppercase tracking-[0.15em]">{title}</span>
-              <PlusCircle className="hidden" /><MinusCircle className="h-4 w-4" />
+              <MinusCircle className="h-4 w-4" />
             </div>
             <ul className="mt-1.5 space-y-1.5 px-1.5">
               {doneSteps.map((s) => (
