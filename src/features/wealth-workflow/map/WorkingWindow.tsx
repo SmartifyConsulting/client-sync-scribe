@@ -82,7 +82,7 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
     ? (step.owner === "advisor" ? "Your Wealth Manager is working on this. You don't need to do anything yet." : step.owner === "insurer" ? "Your insurer is working on this. We'll update you here." : "Holarc Wealth is doing this automatically.")
     : (step.owner === "client" ? `Waiting for ${first}. This updates as soon as they act.` : step.owner === "insurer" ? "Waiting for the insurer." : "Holarc Wealth is doing this automatically.");
   const isKyc = step.label === "Complete KYC, AML and PEP screening";
-  const isSign = step.label === "Sign disclosure and LOA";
+  const isSign = step.label === "Sign Disclosure and LOA";
   const isAstute = step.label.startsWith("Astute pull");
   const isPersonal = step.label === "Complete personal information";
   const isCapture = step.label === "Record consultation and capture financials";
