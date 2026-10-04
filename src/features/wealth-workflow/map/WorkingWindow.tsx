@@ -22,9 +22,10 @@ interface Props {
   documents: { id: string; name: string; document_kind?: string }[];
   onBackToCurrent: () => void;
   onOpenDocuments?: () => void;
+  embedded?: boolean;
 }
 
-export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLive, viewer, clientName, workflowId, records, blockers, documents, onBackToCurrent, onOpenDocuments }: Props) {
+export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLive, viewer, clientName, workflowId, records, blockers, documents, onBackToCurrent, onOpenDocuments, embedded }: Props) {
   const propStep = propGroup?.steps.find((s) => s.label === propStepLabel);
   const first = clientName.split(" ")[0] || "The client";
 
@@ -93,8 +94,8 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
   const custom = isLater || isSchedule || isKyc || isSign || isAstute || isPersonal || isCapture || isVerify;
 
   return (
-    <div key={step.label} className="animate-fade-in overflow-hidden rounded-xl border border-border/70 bg-card">
-      <div className="flex items-center justify-between border-b bg-muted/40 px-4 py-2">
+    <div key={step.label} className={cn("animate-fade-in overflow-hidden", embedded ? "" : "rounded-xl border border-border/70 bg-card")}>
+      <div className={cn("flex", embedded && "hidden")} items-center justify-between border-b bg-muted/40 px-4 py-2">
         <span className="flex items-center gap-2 text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
           <span className={cn("h-2 w-2 rounded-full", isLive ? "bg-primary animate-pulse" : "bg-muted-foreground/40")} />
           Working window
