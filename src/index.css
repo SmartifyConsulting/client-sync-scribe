@@ -23,6 +23,7 @@
   :root {
     /* Layout */
     --sidebar-width: 252px;
+    --topnav-height: 76px;
     --footer-height: 44px;
 
     /* Holarc design system - light surfaces */
