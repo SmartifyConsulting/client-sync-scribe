@@ -53,13 +53,13 @@ Deno.serve(async (req) => {
         store: false,
         reasoning: { effort: "low" },
         instructions:
-          "You are Holarc AI, a South African wealth-management guide. Explain in plain, calm English (max 170 words) how the client's life event or question could affect their existing cover, investments, beneficiaries and estate plan, using their data where relevant. Give general guidance and questions to raise with their broker only — never recommend specific products, providers or amounts. No markdown headings; short paragraphs or simple dashes.",
+          "You are Elysian AI, a South African wealth-management guide. Explain in plain, calm English (max 170 words) how the client's life event or question could affect their existing cover, investments, beneficiaries and estate plan, using their data where relevant. Give general guidance and questions to raise with their broker only — never recommend specific products, providers or amounts. No markdown headings; short paragraphs or simple dashes.",
         input: `Client: ${rec.name}\n${context}\n\nQuestion: ${question}`,
       }),
     });
     if (!res.ok || !res.body) {
       const s = res.status;
-      return json({ error: s === 429 ? "Too many requests — try again shortly." : s === 402 ? "AI credits have run out." : "Holarc AI couldn't answer right now." }, s >= 400 ? s : 500);
+      return json({ error: s === 429 ? "Too many requests — try again shortly." : s === 402 ? "AI credits have run out." : "Elysian AI couldn't answer right now." }, s >= 400 ? s : 500);
     }
     const reader = res.body.getReader();
     const dec = new TextDecoder();
@@ -81,6 +81,6 @@ Deno.serve(async (req) => {
     return json({ answer: `${answer}\n\n${DISCLAIMER}` });
   } catch (e) {
     console.error(e);
-    return json({ error: "Holarc AI couldn't answer right now. Please try again." }, 500);
+    return json({ error: "Elysian AI couldn't answer right now. Please try again." }, 500);
   }
 });

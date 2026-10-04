@@ -39,7 +39,7 @@ export function LifeEventsPanel({ patientId, workflowId }: { patientId: string |
     setAsking(true); setAnswer(null);
     const { data, error } = await supabase.functions.invoke("life-event-advice", { body: { patientId, question } });
     setAsking(false);
-    if (error || data?.error) return toast({ title: "Holarc AI couldn't answer", description: data?.error ?? "Please try again.", variant: "destructive" });
+    if (error || data?.error) return toast({ title: "Elysian AI couldn't answer", description: data?.error ?? "Please try again.", variant: "destructive" });
     setAnswer(data.answer);
   };
 
@@ -72,7 +72,7 @@ export function LifeEventsPanel({ patientId, workflowId }: { patientId: string |
           <Button size="sm" variant="outline" onClick={save} disabled={saving}>{saving && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}Save event</Button>
         </div>
         <div className="space-y-3">
-          <p className={label}>Ask Holarc AI</p>
+          <p className={label}>Ask Elysian AI</p>
           <Textarea rows={2} placeholder="e.g. How does having a baby affect my policies?" value={question} onChange={(e) => setQuestion(e.target.value)} className="text-sm" />
           <div className="flex flex-wrap gap-2">
             <Button size="sm" onClick={ask} disabled={asking || question.trim().length < 3}>{asking && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}Ask</Button>

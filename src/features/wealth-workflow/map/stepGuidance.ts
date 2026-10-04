@@ -90,7 +90,7 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
   },
   "Record consultation and capture financials": {
     client: { what: "Your Wealth Manager meets with you and records the conversation. Your income, expenses, assets, debts, goals and attitude to risk are captured from that meeting, so you don't have to fill in forms.", required: ["A meeting with your Wealth Manager"] },
-    manager: { what: "Record your consultation with {name}, then capture their financial information from it. Holarc AI fills in cash flow, assets and liabilities, existing cover, investments, goals and estate details. Check it before {name} verifies it.", required: ["Recorded consultation or written notes"] },
+    manager: { what: "Record your consultation with {name}, then capture their financial information from it. Elysian AI fills in cash flow, assets and liabilities, existing cover, investments, goals and estate details. Check it before {name} verifies it.", required: ["Recorded consultation or written notes"] },
     unlocks: "Client verification of the financial information",
   },
   "Verify financial information": {
