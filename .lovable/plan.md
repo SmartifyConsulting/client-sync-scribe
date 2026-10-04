@@ -10,8 +10,14 @@
 - Guidance text and footers move with their steps.
 
 ## 2. Stepper display: the screenshot layout with Izenzo flow mechanics
-- **Left side:** the map from the screenshot. Step cards with role badges, linked by thin grey arrows, plus the Documents tile with its count.
+- **Same screen for everyone:** clients and Wealth Managers see the identical map on the left and the identical Live Workspace step list on the right, updated in real time. Only the wording ("you" or the client's name) changes with who is reading.
+- **Left side:** the map from the screenshot. Step cards with role badges, linked by thin grey arrows, plus the Documents tile with its count. The current step card shows "You are here" and its current sub-step reads "Next".
 - **Right side:** the step list. Finished steps show a tick and their completed sub-steps. The current step is open with the dark heading, its one current sub-step pulses, "then N more" sits under it and a Next box sits below. Later steps stay locked.
+- **Izenzo flow mechanics:**
+  - Only one thing pulses: the next action for the person viewing.
+  - When it's the other party's turn, the step shows "Waiting on ..." and nothing pulses on your screen.
+  - When a sub-step completes, it ticks over, the pulse moves to the next sub-step, and a short soft chime plays. A mute toggle sits in the workspace header and remembers your choice.
+  - When a whole step completes, it collapses with a tick and the next step unlocks and opens.
 - Only the current step opens. Clicking a locked or later sub-step does nothing.
 - The existing colours and fonts stay as they are.
 
