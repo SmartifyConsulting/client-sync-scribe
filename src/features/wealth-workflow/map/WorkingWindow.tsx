@@ -83,7 +83,7 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
   const isKyc = step.label === "KYC, AML and PEP Screening";
   const isSign = step.label === "Sign disclosure and LOA";
   const isAstute = step.label.startsWith("Astute pull");
-  const isPersonal = step.label === "Confirm personal information";
+  const isPersonal = step.label === "Complete personal information";
   const isCapture = step.label === "Record consultation and capture financials";
   const isVerify = step.label === "Verify financial information";
   const reached = step.state === "next" || step.state === "done";
