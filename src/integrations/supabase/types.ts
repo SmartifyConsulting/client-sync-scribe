@@ -2071,12 +2071,16 @@ export type Database = {
           cash_flow: Json
           created_at: string
           estate: Json
+          extracted_at: string | null
+          extracted_from_session_id: string | null
           goals_risk: Json
           investments: Json
           patient_id: string
           risk_portfolio: Json
           updated_at: string
           updated_by: string | null
+          verified_at: string | null
+          verified_by: string | null
         }
         Insert: {
           ai_summary?: string | null
@@ -2085,12 +2089,16 @@ export type Database = {
           cash_flow?: Json
           created_at?: string
           estate?: Json
+          extracted_at?: string | null
+          extracted_from_session_id?: string | null
           goals_risk?: Json
           investments?: Json
           patient_id: string
           risk_portfolio?: Json
           updated_at?: string
           updated_by?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Update: {
           ai_summary?: string | null
@@ -2099,12 +2107,16 @@ export type Database = {
           cash_flow?: Json
           created_at?: string
           estate?: Json
+          extracted_at?: string | null
+          extracted_from_session_id?: string | null
           goals_risk?: Json
           investments?: Json
           patient_id?: string
           risk_portfolio?: Json
           updated_at?: string
           updated_by?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: [
           {
@@ -12185,6 +12197,10 @@ export type Database = {
         Returns: Json
       }
       wealth_derive_stage: { Args: { _workflow_id: string }; Returns: Json }
+      wealth_financials_verify: {
+        Args: { _patient_id: string }
+        Returns: boolean
+      }
       wealth_has_doc: { Args: { _kind: string; _wf: string }; Returns: boolean }
       wealth_onboarding_refresh: {
         Args: { _workflow_id: string }
