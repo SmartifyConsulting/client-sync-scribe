@@ -883,8 +883,8 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
           variant="outline"
           className="shrink-0"
         >
-          <ToggleGroupItem value="date" className="text-xs px-3">Date</ToggleGroupItem>
           <ToggleGroupItem value="type" className="text-xs px-3">Type</ToggleGroupItem>
+          <ToggleGroupItem value="date" className="text-xs px-3">Date</ToggleGroupItem>
         </ToggleGroup>
       </div>
 
