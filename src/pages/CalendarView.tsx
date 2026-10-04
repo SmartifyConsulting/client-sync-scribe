@@ -393,7 +393,7 @@ export default function CalendarView() {
     if (conflicts.has(newAppointment.time)) {
       toast({
         title: "Time conflict",
-        description: `${selectedPatient?.name || "Patient"} already has an appointment at ${formatTimeSlot(newAppointment.time)}. Please select a different time.`,
+        description: `${selectedPatient?.name || "Client"} already has an appointment at ${formatTimeSlot(newAppointment.time)}. Please select a different time.`,
         variant: "destructive",
       });
       return;
@@ -448,6 +448,12 @@ export default function CalendarView() {
     setNewAppointment({ patientId: "", date: "", time: "", type: "session", notes: "" });
   };
 
+  const openCreateFor = (date: Date) => {
+    if (date < startOfToday()) return;
+    setNewAppointment((prev) => ({ ...prev, date: format(date, "yyyy-MM-dd") }));
+    setIsDialogOpen(true);
+  };
+
   const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
     setEditedEvent({ ...event });
@@ -457,7 +463,7 @@ export default function CalendarView() {
 
   const handleSaveEvent = async () => {
     if (!editedEvent || !user) return;
-    if (editedEvent.ownerId !== user.id) {
+    if (editedEvent.ownerId !== user.id && !(practice && editedEvent.practiceId === practice.id)) {
       toast({ title: "Read-only", description: "Only the owner can edit this appointment.", variant: "destructive" });
       return;
     }
@@ -477,7 +483,7 @@ export default function CalendarView() {
     if (timeValue && editConflicts.has(timeValue)) {
       toast({
         title: "Time conflict",
-        description: `This patient already has an appointment at ${editedEvent.time}. Please select a different time.`,
+        description: `This client already has an appointment at ${editedEvent.time}. Please select a different time.`,
         variant: "destructive",
       });
       return;
@@ -520,7 +526,7 @@ export default function CalendarView() {
 
   const handleDeleteEvent = async () => {
     if (!selectedEvent || !user) return;
-    if (selectedEvent.ownerId !== user.id) {
+    if (selectedEvent.ownerId !== user.id && !(practice && selectedEvent.practiceId === practice.id)) {
       toast({ title: "Read-only", description: "Only the owner can delete this appointment.", variant: "destructive" });
       return;
     }
@@ -650,12 +656,12 @@ export default function CalendarView() {
           <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6">
             <DialogHeader>
               <DialogTitle>
-                {scope === 'practice' ? 'Schedule on Practice Calendar' : 'Schedule New Appointment'}
+                {scope === 'practice' ? 'Schedule on Firm Calendar' : 'Schedule New Appointment'}
               </DialogTitle>
               <DialogDescription>
                 {scope === 'practice'
-                  ? 'Create a new appointment on the shared practice calendar'
-                  : 'Create a new appointment for a patient'}
+                  ? 'Create a new appointment on the shared firm calendar'
+                  : 'Create a new appointment for a client'}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 pt-4">
@@ -835,7 +841,7 @@ export default function CalendarView() {
                     return (
                       <div
                         key={day.toISOString()}
-                        onClick={() => setSelectedDate(day)}
+                        onClick={() => { setSelectedDate(day); openCreateFor(day); }}
                         className={cn(
                           "flex flex-col items-center p-3 rounded-lg transition-colors cursor-pointer min-h-[100px]",
                           isSameDay(day, selectedDate) ? "bg-primary text-primary-foreground" : today ? "bg-primary/10 text-primary" : "hover:bg-muted"
@@ -846,7 +852,7 @@ export default function CalendarView() {
                         {dayEvents.length > 0 && (
                           <div className="mt-2 space-y-1 w-full">
                             {dayEvents.slice(0, 2).map((event) => (
-                              <div key={event.id} className="text-xs truncate text-center opacity-80">
+                              <div key={event.id} onClick={(e) => { e.stopPropagation(); handleEventClick(event); }} className="text-xs truncate text-center opacity-80 hover:underline">
                                 {event.time} {(() => { const p = patients.find(pt => pt.id === event.patientId); if (!p) return ''; const parts = p.name.split(' '); return parts.map(w => w[0]).join('').toUpperCase(); })()}
                               </div>
                             ))}
@@ -895,8 +901,9 @@ export default function CalendarView() {
                   return (
                     <div
                       key={day}
+                      onClick={() => openCreateFor(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), day))}
                       className={cn(
-                        "aspect-square p-1 rounded-lg transition-colors",
+                        "aspect-square p-1 rounded-lg transition-colors cursor-pointer hover:bg-muted/50",
                         isToday && "bg-primary/10"
                       )}
                     >
@@ -925,7 +932,7 @@ export default function CalendarView() {
                             return (
                               <div
                                 key={event.id}
-                                onClick={() => handleEventClick(event)}
+                                onClick={(e) => { e.stopPropagation(); handleEventClick(event); }}
                                 className="flex items-center gap-1 truncate rounded px-1 py-0.5 text-xs cursor-pointer hover:opacity-80 transition-opacity"
                                 style={{
                                   backgroundColor: tileColor ? `${tileColor}22` : undefined,
@@ -1258,12 +1265,12 @@ export default function CalendarView() {
                     )}
 
                     {(() => {
-                      const isOwner = !!user && selectedEvent.ownerId === user.id;
+                      const isOwner = !!user && (selectedEvent.ownerId === user.id || (!!practice && selectedEvent.practiceId === practice.id));
                       if (!isOwner) {
                         return (
                           <div className="pt-4">
                             <p className="text-sm text-muted-foreground italic">
-                              Owned by {selectedEvent.ownerName ? `Dr ${selectedEvent.ownerName}` : 'another doctor'} — only they can change this.
+                              Owned by {selectedEvent.ownerName || 'another Wealth Manager'}. Only they can change this.
                             </p>
                             {selectedEvent.type !== "internal" && selectedEvent.patientId && (
                               <Button className="mt-3 w-full bg-primary hover:bg-primary-dark text-white" onClick={handleStartSession}>
