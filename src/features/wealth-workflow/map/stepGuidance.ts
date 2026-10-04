@@ -25,7 +25,7 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
     manager: { what: "{name} opens their secure onboarding link or scans the QR code, then signs in on their own device.", required: ["Send {name} the secure link or QR code", "{name} signs in to their account"] },
     unlocks: "Identity, AML and PEP screening",
   },
-  "KYC, AML and PEP Screening": {
+  "Complete KYC, AML and PEP screening": {
     client: {
       what: "Confirm your identity with Didit. You'll photograph your ID, take a quick live selfie, and be screened against anti-money-laundering (AML) and politically exposed person (PEP) lists. It takes about three minutes.",
       required: ["Your South African ID or passport", "A phone or computer with a camera", "Good light for your selfie"],
@@ -128,17 +128,17 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
     manager: { what: "{name} accepts the recommendation by signing the ROA.", required: ["{name} has reviewed the ROA"] },
     unlocks: "FICA and bank validation",
   },
-  "FICA documents and bank validation": {
+  "Upload FICA documents and confirm bank details": {
     client: { what: "Upload your identity and address documents (FICA) and confirm the bank account for your debit order.", required: ["Your ID document", "Proof of address, less than 3 months old", "A bank confirmation letter"], action: "Upload my documents" },
     manager: { what: "{name} uploads FICA documents and the bank account is validated.", required: ["ID document", "Proof of address (under 3 months)", "Bank confirmation letter"] },
     unlocks: "Debit order and declarations",
   },
-  "Debit order and life declaration": {
+  "Authorise debit order and sign life declaration": {
     client: { what: "Authorise your debit order and complete your life declaration.", required: ["Your debit order signature", "Your completed declaration"], action: "Complete my declarations" },
     manager: { what: "{name} authorises the debit order and completes the life declaration.", required: ["Signed debit order mandate", "Completed declaration"] },
     unlocks: "Health disclosure",
   },
-  "Health disclosure (encrypted)": {
+  "Complete health disclosure (encrypted)": {
     client: { what: "Share the health information your insurer needs. It is stored encrypted and only the insurer sees it.", required: ["Your completed disclosure form"], action: "Complete my disclosure" },
     manager: { what: "{name} completes the insurer's health disclosure. It is stored encrypted.", required: ["Completed disclosure form"] },
     unlocks: "Application submission",

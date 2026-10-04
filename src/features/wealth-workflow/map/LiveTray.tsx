@@ -1,4 +1,4 @@
-import { Check, Lock, MinusCircle } from "lucide-react";
+import { Check, Hourglass, Lock, MinusCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { OWNER_LABEL } from "./groups";
 import { ownerLabel } from "./stepGuidance";
@@ -14,6 +14,15 @@ interface Props {
 
 export const isMine = (owner: string, viewer: "manager" | "client") =>
   viewer === "client" ? owner === "client" : owner === "advisor" || owner === "wealth_manager";
+
+/** Same green/blue tick pill used for completed sub-steps on the workflow map. */
+function StepTick({ owner }: { owner: string }) {
+  return (
+    <span className={cn("flex h-4 w-4 flex-none items-center justify-center rounded-full", owner === "advisor" ? "bg-blue-500" : "bg-emerald-500")}>
+      <Check className="h-2.5 w-2.5 text-white" />
+    </span>
+  );
+}
 
 /** Live Workspace tray: completed steps ticked, current step open, later steps locked. */
 export function LiveTray({ groups, viewer, clientFirst, managerName }: Props) {
@@ -45,7 +54,7 @@ export function LiveTray({ groups, viewer, clientFirst, managerName }: Props) {
               <ul className="mt-1.5 space-y-1.5 px-1.5 pb-1">
                 {g.steps.map((s) => (
                   <li key={s.label} className="flex items-center gap-2 rounded-full border border-primary/60 bg-primary/5 px-3 py-1.5 text-xs text-muted-foreground">
-                    <Check className="h-3.5 w-3.5 text-primary" /> {s.label}
+                    <StepTick owner={s.owner} /> {s.label}
                   </li>
                 ))}
               </ul>
@@ -71,11 +80,12 @@ export function LiveTray({ groups, viewer, clientFirst, managerName }: Props) {
             <ul className="mt-1.5 space-y-1.5 px-1.5">
               {doneSteps.map((s) => (
                 <li key={s.label} className="flex items-center gap-2 rounded-full border border-primary/60 bg-primary/5 px-3 py-1.5 text-xs text-muted-foreground">
-                  <Check className="h-3.5 w-3.5 text-primary" /> {s.label}
+                  <StepTick owner={s.owner} /> {s.label}
                 </li>
               ))}
               {cur && (
                 <li className={cn("flex items-center gap-2 rounded-full border border-primary bg-primary/10 px-3 py-1.5 text-xs text-foreground", mine && "animate-throb")}>
+                  {!mine && <Hourglass className="h-3.5 w-3.5 flex-none animate-pulse-soft text-primary" aria-label="In progress" />}
                   <span className="text-2xs font-semibold text-muted-foreground">{ownerLabel(cur.owner, viewer, clientFirst)}</span>
                   {cur.label}
                 </li>
