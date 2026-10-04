@@ -15,6 +15,11 @@ export interface StepGuidance {
 }
 
 export const STEP_GUIDANCE: Record<string, StepGuidance> = {
+  "Wealth Manager sends secure link": {
+    client: { what: "Your Wealth Manager has started your plan and sent you a secure link to continue.", required: [] },
+    manager: { what: "You've started {name}'s plan. A secure onboarding link or QR code is ready to send them.", required: ["Share the secure link or QR code with {name}"] },
+    unlocks: "{name} opening their secure link and signing in",
+  },
   "Scan QR or open secure link": {
     client: { what: "Open the secure link or scan the QR code your Wealth Manager sent you, and sign in on your own device.", required: ["Your secure link or QR code", "Signing in with your own details"] },
     manager: { what: "{name} opens their secure onboarding link or scans the QR code, then signs in on their own device.", required: ["Send {name} the secure link or QR code", "{name} signs in to their account"] },

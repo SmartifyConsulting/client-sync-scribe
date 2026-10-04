@@ -1574,7 +1574,6 @@ export default function MyPractice() {
 
         {/* === CERTIFICATES TAB === */}
         <TabsContent value="certificates" className="mt-4 space-y-4 my-practice-tab-body">
-          <FscaCategoriesCard />
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-base font-semibold text-primary-dark">Credentials</h3>
@@ -1594,95 +1593,82 @@ export default function MyPractice() {
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              Track your professional credentials and CPD points.
+              Track your professional credentials.
             </p>
+          </div>
+          <FscaCategoriesCard />
+          <div className="space-y-3">
             {showCertForm && (
-              <div className="space-y-3 p-3 border border-dashed border-border rounded-lg">
-                <p className="text-sm font-medium">{editingCertId ? "Edit" : "Add"} Credential</p>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label>Credential Name <span className="text-destructive">*</span></Label>
-                    <Input
-                      value={certForm.certificate_name}
-                      onChange={(e) => setCertForm({ ...certForm, certificate_name: e.target.value })}
-                      placeholder="e.g., Advanced Cardiac Life Support"
-                    />
-                    {certErrors.certificate_name && <p className="text-xs text-destructive">{certErrors.certificate_name}</p>}
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Issuing Body <span className="text-destructive">*</span></Label>
-                    <Input
-                      value={certForm.issuing_body}
-                      onChange={(e) => setCertForm({ ...certForm, issuing_body: e.target.value })}
-                      placeholder="e.g., HPCSA"
-                    />
-                    {certErrors.issuing_body && <p className="text-xs text-destructive">{certErrors.issuing_body}</p>}
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Date Earned <span className="text-destructive">*</span></Label>
-                    <Input
-                      type="date"
-                      value={certForm.date_earned}
-                      onChange={(e) => setCertForm({ ...certForm, date_earned: e.target.value })}
-                    />
-                    {certErrors.date_earned && <p className="text-xs text-destructive">{certErrors.date_earned}</p>}
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>CPD Points <span className="text-destructive">*</span></Label>
-                    <Input
-                      type="number"
-                      min="0"
-                      value={certForm.cpd_points}
-                      onChange={(e) => setCertForm({ ...certForm, cpd_points: e.target.value })}
-                    />
-                    {certErrors.cpd_points && <p className="text-xs text-destructive">{certErrors.cpd_points}</p>}
-                  </div>
+              <div className="flex flex-wrap items-end gap-2 p-3 border border-dashed border-border rounded-lg">
+                <div className="space-y-1.5 flex-1 min-w-[160px]">
+                  <Label className="text-xs">Credential Name <span className="text-destructive">*</span></Label>
+                  <Input
+                    value={certForm.certificate_name}
+                    onChange={(e) => setCertForm({ ...certForm, certificate_name: e.target.value })}
+                    placeholder="e.g., Advanced Cardiac Life Support"
+                    className="h-9"
+                  />
                 </div>
-                <div className="space-y-1.5">
-                  <Label>Attach Certificate <span className="text-destructive">*</span></Label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      ref={certFileInputRef}
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png,.webp"
-                      className="hidden"
-                      onChange={(e) => setCertificateFile(e.target.files?.[0] || null)}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="gap-1.5"
-                      onClick={() => certFileInputRef.current?.click()}
-                    >
-                      <Upload className="h-3.5 w-3.5" />
-                      {certificateFile ? certificateFile.name : "Choose File"}
-                    </Button>
-                    {certificateFile && (
-                      <Button type="button" variant="ghost" size="sm" onClick={() => setCertificateFile(null)}>
-                        Remove
-                      </Button>
-                    )}
-                  </div>
-                  {certErrors.certificate_file && <p className="text-xs text-destructive">{certErrors.certificate_file}</p>}
+                <div className="space-y-1.5 flex-1 min-w-[140px]">
+                  <Label className="text-xs">Issuing Body <span className="text-destructive">*</span></Label>
+                  <Input
+                    value={certForm.issuing_body}
+                    onChange={(e) => setCertForm({ ...certForm, issuing_body: e.target.value })}
+                    placeholder="e.g., HPCSA"
+                    className="h-9"
+                  />
                 </div>
-                <div className="flex gap-2">
-                  <Button size="sm" onClick={handleCertSave} disabled={certSaving || certUploading}>
-                    {(certSaving || certUploading) && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />}
-                    {certUploading ? "Uploading..." : editingCertId ? "Update" : "Save"}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      setShowCertForm(false);
-                      setEditingCertId(null);
-                      setCertificateFile(null);
-                    }}
-                  >
-                    Cancel
-                  </Button>
+                <div className="space-y-1.5 w-[150px]">
+                  <Label className="text-xs">Date Earned <span className="text-destructive">*</span></Label>
+                  <Input
+                    type="date"
+                    value={certForm.date_earned}
+                    onChange={(e) => setCertForm({ ...certForm, date_earned: e.target.value })}
+                    className="h-9"
+                  />
                 </div>
+                <div className="space-y-1.5 w-[90px]">
+                  <Label className="text-xs">CPD Points <span className="text-destructive">*</span></Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    value={certForm.cpd_points}
+                    onChange={(e) => setCertForm({ ...certForm, cpd_points: e.target.value })}
+                    className="h-9"
+                  />
+                </div>
+                <input
+                  ref={certFileInputRef}
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png,.webp"
+                  className="hidden"
+                  onChange={(e) => setCertificateFile(e.target.files?.[0] || null)}
+                />
+                <Button type="button" variant="outline" size="sm" className="h-9 gap-1.5" onClick={() => certFileInputRef.current?.click()}>
+                  <Upload className="h-3.5 w-3.5" />
+                  {certificateFile ? certificateFile.name : "Attach"}
+                </Button>
+                <Button size="sm" className="h-9" onClick={handleCertSave} disabled={certSaving || certUploading}>
+                  {(certSaving || certUploading) && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />}
+                  {certUploading ? "Uploading..." : editingCertId ? "Update" : "Save"}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-9"
+                  onClick={() => {
+                    setShowCertForm(false);
+                    setEditingCertId(null);
+                    setCertificateFile(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+                {(certErrors.certificate_name || certErrors.issuing_body || certErrors.date_earned || certErrors.cpd_points || certErrors.certificate_file) && (
+                  <p className="w-full text-xs text-destructive">
+                    {certErrors.certificate_name || certErrors.issuing_body || certErrors.date_earned || certErrors.cpd_points || certErrors.certificate_file}
+                  </p>
+                )}
               </div>
             )}
             {certsLoading ? (
