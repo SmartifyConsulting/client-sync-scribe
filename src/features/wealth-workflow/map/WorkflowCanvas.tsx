@@ -2,6 +2,7 @@ import { FolderOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WorkflowGroupCard } from "./WorkflowGroupCard";
 import type { GroupView } from "./useWorkflowMap";
+import type { MapAvatars } from "./StepAvatar";
 
 /** Fine 1px grey connector with a small solid arrowhead. */
 function Arrow({ dir }: { dir: "right" | "down" | "up" | "left" }) {
@@ -25,7 +26,7 @@ function Arrow({ dir }: { dir: "right" | "down" | "up" | "left" }) {
 
 function DocumentsTile({ count, onOpen }: { count: number; onOpen?: () => void }) {
   return (
-    <button type="button" onClick={onOpen}
+    <button type="button" onClick={onOpen} id="wealth-docs-tile"
       className="flex w-full flex-col items-center justify-center gap-3 rounded-xl bg-muted/50 p-5 transition-colors hover:bg-muted">
       <span className="relative flex h-24 w-24 items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/40">
         <FolderOpen className="h-8 w-8 text-muted-foreground" />
@@ -44,17 +45,18 @@ interface Props {
   docCount: number;
   onOpenDocuments?: () => void;
   onSelectStep: (group: string, step: string) => void;
+  avatars?: MapAvatars;
 }
 
 /** Workflow map: six step frames linked by fine arrows, plus the Documents tile. */
-export function WorkflowCanvas({ groups, blockers, viewer, clientFirst, docCount, onOpenDocuments, onSelectStep }: Props) {
+export function WorkflowCanvas({ groups, blockers, viewer, clientFirst, docCount, onOpenDocuments, onSelectStep, avatars }: Props) {
   const by = (k: string) => groups.find((g) => g.group.key === k);
   const card = (k: string) => {
     const v = by(k);
     if (!v) return <div />;
     return (
       <WorkflowGroupCard key={`${k}-${v.state}`} view={v} blockers={blockers} onOpen={() => {}} viewer={viewer} clientFirst={clientFirst}
-        onSelectStep={(label) => onSelectStep(k, label)} />
+        avatars={avatars} onSelectStep={(label) => onSelectStep(k, label)} />
     );
   };
 
