@@ -95,15 +95,17 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
 
   return (
     <div key={step.label} className={cn("animate-fade-in overflow-hidden", embedded ? "" : "rounded-xl border border-border/70 bg-card")}>
-      <div className={cn("flex", embedded && "hidden")} items-center justify-between border-b bg-muted/40 px-4 py-2">
-        <span className="flex items-center gap-2 text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-          <span className={cn("h-2 w-2 rounded-full", isLive ? "bg-primary animate-pulse" : "bg-muted-foreground/40")} />
-          Working window
-        </span>
-        {!isLive && <button onClick={onBackToCurrent} className="text-xs font-medium text-primary hover:underline">Back to current</button>}
-      </div>
+      {!embedded && (
+        <div className="flex items-center justify-between border-b bg-muted/40 px-4 py-2">
+          <span className="flex items-center gap-2 text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+            <span className={cn("h-2 w-2 rounded-full", isLive ? "bg-primary animate-pulse" : "bg-muted-foreground/40")} />
+            Working window
+          </span>
+          {!isLive && <button onClick={onBackToCurrent} className="text-xs font-medium text-primary hover:underline">Back to current</button>}
+        </div>
+      )}
 
-      <div className="grid min-w-0 grid-cols-1 gap-5 p-4 md:p-5 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+      <div className={cn("grid min-w-0 grid-cols-1", embedded ? "gap-3 px-2 py-3" : "gap-5 p-4 md:p-5 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]")}>
         {/* Left: instructions */}
         <div className="min-w-0 divide-y divide-border/60 [&>*]:py-3 [&>*:first-child]:pt-0 [&>*:last-child]:pb-0">
           <div>
