@@ -20,7 +20,7 @@ export function useWorkflowRecords(workflowId?: string, patientId?: string) {
     queryKey: ["wealth-map-records", workflowId, patientId],
     enabled: !!workflowId && !!patientId,
     queryFn: async () => {
-      const [apps, comp, tasks, docs, kyc, signed, pat, holdings] = await Promise.all([
+      const [apps, comp, tasks, docs, kyc, signed, pat, holdings, fin, sessions] = await Promise.all([
         db.from("wealth_applications").select("*").eq("workflow_id", workflowId).order("created_at", { ascending: false }),
         db.from("wealth_compliance_checks").select("*").eq("workflow_id", workflowId).maybeSingle(),
         db.from("todos").select("id,title,status,due_date,owner_role,workflow_stage,priority")
@@ -28,9 +28,12 @@ export function useWorkflowRecords(workflowId?: string, patientId?: string) {
         db.from("documents").select("id,name,document_kind,created_at").eq("patient_id", patientId).not("document_kind", "is", null),
         db.from("wealth_kyc_checks").select("*").eq("workflow_id", workflowId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
         db.from("wealth_signed_documents").select("*").eq("workflow_id", workflowId).order("signed_at"),
-        db.from("patients").select("user_id").eq("id", patientId).maybeSingle(),
+        db.from("patients").select("user_id,patient_user_id,name,id_passport_number,dob,physical_address,address,postal_address,marital_status,marital_regime,phone,email").eq("id", patientId).maybeSingle(),
         db.from("wealth_portfolio_holdings").select("*").eq("patient_id", patientId).order("provider"),
+        db.from("client_financial_profiles").select("extracted_at,verified_at,extracted_from_session_id").eq("patient_id", patientId).maybeSingle(),
+        db.from("sessions").select("id,title,created_at,transcript,notes,summary").eq("patient_id", patientId).order("created_at", { ascending: false }).limit(10),
       ]);
+      const p = pat.data;
       return {
         apps: (apps.data ?? []) as any[],
         compliance: comp.data ?? null,
@@ -38,9 +41,13 @@ export function useWorkflowRecords(workflowId?: string, patientId?: string) {
         docs: (docs.data ?? []) as any[],
         kyc: kyc.data ?? null,
         signed: (signed.data ?? []) as any[],
-        clientLinked: !!pat.data?.user_id,
+        clientLinked: !!p?.patient_user_id,
         patientId,
+        personal: p ?? null,
+        personalDone: !!(p?.id_passport_number && p?.dob && (p?.physical_address || p?.address) && p?.marital_status),
         holdings: (holdings.data ?? []) as any[],
+        financials: fin.data ?? null,
+        sessions: ((sessions.data ?? []) as any[]).map((s) => ({ id: s.id, title: s.title, created_at: s.created_at, hasText: !!(s.transcript || s.notes || s.summary) })),
       };
     },
   });
@@ -67,6 +74,9 @@ export function useWorkflowMap(patientId?: string) {
     kycStatus: rec?.kyc?.status ?? null,
     signedDocs: new Set((rec?.signed ?? []).map((d: any) => d.doc_type)),
     holdingsCount: rec?.holdings?.length ?? 0,
+    personalDone: !!rec?.personalDone,
+    financialsExtracted: !!rec?.financials?.extracted_at,
+    financialsVerified: !!rec?.financials?.verified_at,
   };
 
   const closed = wf?.status === "closed_declined";

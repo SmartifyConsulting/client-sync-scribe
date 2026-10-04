@@ -6,6 +6,7 @@ import { OwnerBadge } from "./WorkflowGroupCard";
 import { STEP_GUIDANCE, fillName, ownerLabel } from "./stepGuidance";
 import { KycPanel, SignDocsPanel } from "./OnboardingPanels";
 import { AstutePanel } from "./AstutePanel";
+import { PersonalInfoPanel, CaptureFinancialsPanel, VerifyFinancialsPanel } from "./ProfilePanels";
 import type { GroupView } from "./useWorkflowMap";
 
 interface Props {
@@ -82,6 +83,11 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
   const isKyc = step.label === "KYC, AML and PEP Screening";
   const isSign = step.label === "Sign disclosure and LOA";
   const isAstute = step.label.startsWith("Astute pull");
+  const isPersonal = step.label === "Confirm personal information";
+  const isCapture = step.label === "Record consultation and capture financials";
+  const isVerify = step.label === "Verify financial information";
+  const reached = step.state === "next" || step.state === "done";
+  const custom = isKyc || isSign || isAstute || isPersonal || isCapture || isVerify;
 
   return (
     <div key={step.label} className="animate-fade-in overflow-hidden rounded-xl border border-border/70 bg-card">
@@ -154,8 +160,15 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
           {isAstute && (
             <AstutePanel patientId={records?.patientId} holdings={records?.holdings ?? []} viewer={viewer} />
           )}
+          {isPersonal && reached && <PersonalInfoPanel patientId={records?.patientId} personal={records?.personal} />}
+          {isCapture && reached && (
+            <CaptureFinancialsPanel patientId={records?.patientId} sessions={records?.sessions ?? []} financials={records?.financials} viewer={viewer} clientFirst={first} />
+          )}
+          {isVerify && reached && (
+            <VerifyFinancialsPanel patientId={records?.patientId} financials={records?.financials} viewer={viewer} clientFirst={first} />
+          )}
 
-          {!isKyc && !isSign && !isAstute && (
+          {!custom && (
             <Row title="Documents">
               {documents.length ? (
                 <ul className="mt-1 space-y-1">{documents.slice(0, 4).map((d) => <li key={d.id} className="truncate">{d.name}</li>)}</ul>
@@ -168,7 +181,7 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
             </Row>
           )}
 
-          {mine && step.state === "next" && t?.action && !isKyc && !isSign && !isAstute && (
+          {mine && step.state === "next" && t?.action && !custom && (
             <Button className="mt-3 w-full rounded-full" onClick={onOpenDocuments}>{t.action}</Button>
           )}
         </div>

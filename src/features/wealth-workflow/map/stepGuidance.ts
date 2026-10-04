@@ -68,10 +68,20 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
     manager: { what: "{name}'s consolidated profile is saved to the firm's CRM.", required: ["Portfolio data collected"] },
     unlocks: "Needs analysis",
   },
-  "Capture facts and risk profile": {
-    client: { what: "Your Wealth Manager records your financial details, goals and attitude to risk, usually in a meeting with you.", required: ["Your income and expenses", "Your assets and debts", "Your answers to the risk questions"] },
-    manager: { what: "Capture {name}'s financial facts, goals and risk profile.", required: ["Income and expenses", "Assets and liabilities", "Completed risk questionnaire"], action: "Open financial information" },
-    unlocks: "Gap calculations",
+  "Confirm personal information": {
+    client: { what: "Check and complete your personal details. We need these for identity verification (FICA) and to fill in your Letter of Authority.", required: ["ID or passport number", "Date of birth", "Residential address", "Marital status"] },
+    manager: { what: "{name} checks and completes their personal details: ID number, date of birth, address and marital status.", required: ["ID or passport number", "Date of birth", "Residential address", "Marital status"] },
+    unlocks: "Identity, AML and PEP screening",
+  },
+  "Record consultation and capture financials": {
+    client: { what: "Your Wealth Manager meets with you and records the conversation. Your income, expenses, assets, debts, goals and attitude to risk are captured from that meeting, so you don't have to fill in forms.", required: ["A meeting with your Wealth Manager"] },
+    manager: { what: "Record your consultation with {name}, then capture their financial information from it. Holarc AI fills in cash flow, assets and liabilities, existing cover, investments, goals and estate details. Check it before {name} verifies it.", required: ["Recorded consultation or written notes"] },
+    unlocks: "Client verification of the financial information",
+  },
+  "Verify financial information": {
+    client: { what: "Read the financial information captured from your meeting. Correct anything that's wrong or missing, then confirm it is complete and correct.", required: ["Check every section", "Confirm it is complete", "Confirm it is correct"] },
+    manager: { what: "{name} reviews the captured financial information and confirms it is complete and correct. Any later change needs a new confirmation.", required: ["{name}'s confirmation"] },
+    unlocks: "Step 3: Portfolio",
   },
   "Life, short-term and investment gaps": {
     client: { what: "We calculate the gap between the cover you have and the cover you need.", required: ["Nothing from you"] },
@@ -157,8 +167,7 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
 
 export const fillName = (s: string, name: string) => s.replace(/\{name\}/g, name);
 
-/** Who-label for a sub-step owner, from the reader's point of view. */
-export function ownerLabel(owner: string, viewer: "manager" | "client", clientFirst: string) {
-  if (viewer === "client") return ({ client: "You", advisor: "Your Wealth Manager", system: "Holarc Wealth", insurer: "Your insurer" } as Record<string, string>)[owner] ?? owner;
-  return ({ client: clientFirst, advisor: "You", system: "Holarc Wealth", insurer: "Insurer" } as Record<string, string>)[owner] ?? owner;
+/** Badge label for a sub-step owner. Fixed for everyone: colour tells who acts (green client, blue Wealth Manager). */
+export function ownerLabel(owner: string, _viewer?: "manager" | "client", _clientFirst?: string) {
+  return ({ client: "Client", advisor: "Wealth Manager", system: "System", insurer: "Insurer" } as Record<string, string>)[owner] ?? owner;
 }
