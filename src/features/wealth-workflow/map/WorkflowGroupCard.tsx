@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState, type ReactNode } from "react";
 import { Check, Lock, Repeat } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { OWNER_LABEL } from "./groups";
@@ -23,7 +23,7 @@ const stateLabel: Record<string, string> = {
   waiting: "Waiting", not_applicable: "Not applicable",
 };
 
-export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSelectStep, viewer = "manager", clientFirst = "Client", avatars }: { view: GroupView; blockers: string[]; onOpen: () => void; selectedStep?: string | null; onSelectStep?: (label: string) => void; viewer?: "manager" | "client"; clientFirst?: string; avatars?: MapAvatars }) {
+export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSelectStep, viewer = "manager", clientFirst = "Client", avatars, renderInline }: { renderInline?: (label: string) => ReactNode; view: GroupView; blockers: string[]; onOpen: () => void; selectedStep?: string | null; onSelectStep?: (label: string) => void; viewer?: "manager" | "client"; clientFirst?: string; avatars?: MapAvatars }) {
   const { group: g, state } = view;
   const active = state === "current" || state === "waiting" || state === "blocked";
   const locked = state === "pending";
@@ -67,7 +67,9 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
           <ul className="space-y-0.5 border-t py-1">
             {view.steps.map((s) => {
               const reachable = s.state === "done" || s.state === "next";
+              const inline = s.state === "next" ? renderInline?.(s.label) : null;
               return (
+              <Fragment key={s.label}>
               <li
                 key={s.label}
                 onClick={onSelectStep && reachable ? () => onSelectStep(s.label) : undefined}
@@ -93,6 +95,8 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
                 </span>
                 <span className={cn("flex-1", s.state === "done" ? "text-muted-foreground" : s.state === "next" ? "font-medium text-white" : "text-foreground")}>{s.label}</span>
               </li>
+              {inline && <li className="animate-fade-in px-2.5 pb-2 pt-1">{inline}</li>}
+              </Fragment>
               );
             })}
           </ul>

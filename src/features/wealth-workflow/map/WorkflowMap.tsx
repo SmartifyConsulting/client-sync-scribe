@@ -10,6 +10,7 @@ import { LiveTray } from "./LiveTray";
 import { isChimeMuted, setChimeMuted, playChime } from "./chime";
 import { StageDetailSheet } from "./StageDetailSheet";
 import { WorkingWindow } from "./WorkingWindow";
+import { KycPanel } from "./OnboardingPanels";
 import { useWorkflowRealtime } from "../workspace/useWorkflowRealtime";
 import { OwnerBadge } from "./WorkflowGroupCard";
 import { InsurerBadge } from "./insurerColors";
@@ -123,6 +124,7 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
           <WorkflowCanvas groups={m.groups} blockers={wf.status === "blocked" ? wf.blockers : []} viewer={viewer}
             clientFirst={clientFirst} docCount={(m.records?.docs ?? []).length + (m.records?.signed ?? []).length}
             onOpenDocuments={onOpenDocuments} avatars={avatars}
+            renderInline={viewer === "client" ? (label) => label === "Complete KYC, AML and PEP screening" ? <KycPanel workflowId={wf.id} kyc={m.records?.kyc} viewer="client" clientFirst={clientFirst} /> : null : undefined}
             onSelectStep={(group, step) => setPicked({ group, step })} />
           <div className="mt-3 flex flex-wrap items-center justify-end gap-1.5 border-t border-border/60 pt-2">
             <span className="mr-1 text-2xs uppercase tracking-[0.14em] text-muted-foreground">Legend</span>

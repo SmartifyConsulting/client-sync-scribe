@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils";
 import { WorkflowGroupCard } from "./WorkflowGroupCard";
 import type { GroupView } from "./useWorkflowMap";
 import type { MapAvatars } from "./StepAvatar";
+import type { ReactNode } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 /** Fine 1px grey connector with a small solid arrowhead. */
 function Arrow({ dir }: { dir: "right" | "down" | "up" | "left" }) {
@@ -46,17 +48,19 @@ interface Props {
   onOpenDocuments?: () => void;
   onSelectStep: (group: string, step: string) => void;
   avatars?: MapAvatars;
+  renderInline?: (stepLabel: string) => ReactNode;
 }
 
 /** Workflow map: six step frames linked by fine arrows, plus the Documents tile. */
-export function WorkflowCanvas({ groups, blockers, viewer, clientFirst, docCount, onOpenDocuments, onSelectStep, avatars }: Props) {
+export function WorkflowCanvas({ groups, blockers, viewer, clientFirst, docCount, onOpenDocuments, onSelectStep, avatars, renderInline }: Props) {
+  const isMobile = useIsMobile();
   const by = (k: string) => groups.find((g) => g.group.key === k);
-  const card = (k: string) => {
+  const card = (k: string, mobile = false) => {
     const v = by(k);
     if (!v) return <div />;
     return (
       <WorkflowGroupCard key={`${k}-${v.state}`} view={v} blockers={blockers} onOpen={() => {}} viewer={viewer} clientFirst={clientFirst}
-        avatars={avatars} onSelectStep={(label) => onSelectStep(k, label)} />
+        avatars={avatars} onSelectStep={(label) => onSelectStep(k, label)} renderInline={mobile === !!isMobile ? renderInline : undefined} />
     );
   };
 
@@ -65,7 +69,7 @@ export function WorkflowCanvas({ groups, blockers, viewer, clientFirst, docCount
       {/* Phone: one column, top to bottom */}
       <div className="space-y-0 md:hidden">
         {["gateway", "needs", "portfolio", "quotes", "presentation", "issuance"].map((k, i) => (
-          <div key={k}>{i > 0 && <Arrow dir="down" />}{card(k)}</div>
+          <div key={k}>{i > 0 && <Arrow dir="down" />}{card(k, true)}</div>
         ))}
         <div className="pt-4"><DocumentsTile count={docCount} onOpen={onOpenDocuments} /></div>
       </div>
