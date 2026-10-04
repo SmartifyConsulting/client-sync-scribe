@@ -19,6 +19,7 @@ export interface MapContext {
   personalDone: boolean;
   financialsExtracted: boolean;
   financialsVerified: boolean;
+  meetingScheduled: boolean;
 }
 
 export interface SubStep {
@@ -36,6 +37,8 @@ export interface WorkflowGroup {
   icon: LucideIcon;
   stages: WealthStage[];
   steps: SubStep[];
+  /** Simplified client-only view of technical steps (Wealth Manager always sees `steps`). */
+  clientSteps?: SubStep[];
   footer: string;
 }
 
@@ -61,6 +64,7 @@ export const WORKFLOW_GROUPS: WorkflowGroup[] = [
     n: 2, key: "needs", title: "Needs Analysis", clientTitle: "Needs Analysis", icon: ClipboardList,
     stages: ["needs_analysis"],
     steps: [
+      { owner: "advisor", label: "Schedule meeting to discuss current financial health", done: (c) => past(2)(c) || c.meetingScheduled || c.financialsExtracted },
       { owner: "advisor", label: "Record consultation and capture financials", done: (c) => past(2)(c) || c.financialsExtracted },
       { owner: "client", label: "Verify financial information", done: (c) => past(2)(c) || c.financialsVerified },
       { owner: "system", label: "Life, short-term and investment gaps", done: past(2) },
@@ -77,6 +81,7 @@ export const WORKFLOW_GROUPS: WorkflowGroup[] = [
       { owner: "system", label: "Cross-alert check" },
       { owner: "system", label: "Push profile to CRM" },
     ],
+    clientSteps: [{ owner: "advisor", label: "Marlin is accessing your current portfolios", done: () => undefined }],
     footer: "Locked until the mandate is re-signed if another brokerage queries",
   },
   {
@@ -88,6 +93,7 @@ export const WORKFLOW_GROUPS: WorkflowGroup[] = [
       { owner: "system", label: "Affordability check" },
       { owner: "system", label: "Generate ROA (versioned)", done: (c) => c.recs.some((r) => !!r.roa_document_id) },
     ],
+    clientSteps: [{ owner: "advisor", label: "Marlin is preparing your financial plan", done: () => undefined }],
     footer: "Any change makes a new version, re-sign",
   },
   {

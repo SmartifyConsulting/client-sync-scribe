@@ -20,7 +20,7 @@ export function useWorkflowRecords(workflowId?: string, patientId?: string) {
     queryKey: ["wealth-map-records", workflowId, patientId],
     enabled: !!workflowId && !!patientId,
     queryFn: async () => {
-      const [apps, comp, tasks, docs, kyc, signed, pat, holdings, fin, sessions] = await Promise.all([
+      const [apps, comp, tasks, docs, kyc, signed, pat, holdings, fin, sessions, appts] = await Promise.all([
         db.from("wealth_applications").select("*").eq("workflow_id", workflowId).order("created_at", { ascending: false }),
         db.from("wealth_compliance_checks").select("*").eq("workflow_id", workflowId).maybeSingle(),
         db.from("todos").select("id,title,status,due_date,owner_role,workflow_stage,priority")
@@ -32,6 +32,7 @@ export function useWorkflowRecords(workflowId?: string, patientId?: string) {
         db.from("wealth_portfolio_holdings").select("*").eq("patient_id", patientId).order("provider"),
         db.from("client_financial_profiles").select("extracted_at,verified_at,extracted_from_session_id").eq("patient_id", patientId).maybeSingle(),
         db.from("sessions").select("id,title,created_at,transcript,notes,summary").eq("patient_id", patientId).order("created_at", { ascending: false }).limit(10),
+        db.from("appointments").select("id,title,start_time").eq("patient_id", patientId).order("start_time", { ascending: false }).limit(5),
       ]);
       const p = pat.data;
       return {
@@ -47,13 +48,14 @@ export function useWorkflowRecords(workflowId?: string, patientId?: string) {
         personalDone: !!(p?.id_passport_number && p?.dob && (p?.physical_address || p?.address) && p?.marital_status),
         holdings: (holdings.data ?? []) as any[],
         financials: fin.data ?? null,
+        appointments: (appts.data ?? []) as any[],
         sessions: ((sessions.data ?? []) as any[]).map((s) => ({ id: s.id, title: s.title, created_at: s.created_at, hasText: !!(s.transcript || s.notes || s.summary) })),
       };
     },
   });
 }
 
-export function useWorkflowMap(patientId?: string) {
+export function useWorkflowMap(patientId?: string, viewer: "manager" | "client" = "manager") {
   const wfQ = useClientWorkflow(patientId);
   const wf = wfQ.data;
   const { data: defs = [] } = useStageDefs();
@@ -77,6 +79,7 @@ export function useWorkflowMap(patientId?: string) {
     personalDone: !!rec?.personalDone,
     financialsExtracted: !!rec?.financials?.extracted_at,
     financialsVerified: !!rec?.financials?.verified_at,
+    meetingScheduled: (rec?.appointments?.length ?? 0) > 0 || (rec?.sessions ?? []).some((x: any) => x.hasText),
   };
 
   const closed = wf?.status === "closed_declined";
@@ -97,7 +100,8 @@ export function useWorkflowMap(patientId?: string) {
     else state = "pending";
 
     let nextMarked = false;
-    const steps = g.steps.map((s) => {
+    const source = viewer === "client" && g.clientSteps ? g.clientSteps : g.steps;
+    const steps = source.map((s) => {
       const r = s.done ? s.done(ctx) : undefined;
       let st: StepState = r === true || (state === "completed" && r !== false) ? "done" : s.done ? "pending" : "unconnected";
       if (st !== "done" && !nextMarked && (state === "current" || state === "blocked" || state === "waiting")) {
