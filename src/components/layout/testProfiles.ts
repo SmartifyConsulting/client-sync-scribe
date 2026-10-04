@@ -1,4 +1,4 @@
-import { ShieldCheck, Briefcase as Stethoscope, LineChart as HeartPulse, Building2, Building2 as Ambulance, FileCheck as Syringe } from "lucide-react";
+import { ShieldCheck, Briefcase as Stethoscope, LineChart as HeartPulse, Building2 } from "lucide-react";
 
 export type TestProfile = {
   email: string;
@@ -23,20 +23,5 @@ export const WEALTH_DEMO_PROFILES: TestProfile[] = [
 export const TEST_PROFILES: TestProfile[] = [
   ...WEALTH_DEMO_PROFILES,
   { email: "info@georgiaadams.co.za", name: "Georgia Adams", role: "Admin", icon: ShieldCheck },
-  { email: "georgia.adams@smartify.co.za", name: "Georgia Adams", role: "Admin", icon: ShieldCheck },
-  // `name` is only a fallback label — the switcher shows the live profiles.full_name
-  // via useSeededProfileNames(), so renames in the app update the menu automatically.
-  { email: "sme@smartify.co.za", name: "Dean Peterson", role: "Doctor", icon: Stethoscope },
-
-  
-  { email: "projectmanager@smartify.co.za", name: "Sharon Kennedy", role: "Patient", icon: HeartPulse },
-  { email: "hospital.test@holarchealth.com", name: "Holarc General Hospital", role: "Hospital", icon: Building2 },
-  { email: "renken@smartify.co.za", name: "Renken", role: "ER Provider", icon: Ambulance },
-  { email: "er.test@holarchealth.com", name: "ER Provider (Test)", role: "ER Provider", icon: Ambulance },
-  
-  { email: "dr.buttons@smartify.co.za", name: "Matthew Buttons", role: "Doctor", icon: Stethoscope },
-  { email: "ga@firstserve.co.za", name: "Dr Gianna Buttons", role: "Doctor", icon: Stethoscope },
-  { email: "2348167581572@phone.holarc.local", name: "Samuel 0koli", role: "Patient", icon: HeartPulse },
-  { email: "nurse.test@holarchealth.com", name: "Nomvula Dlamini", role: "Nurse", icon: Syringe },
 ];
 
