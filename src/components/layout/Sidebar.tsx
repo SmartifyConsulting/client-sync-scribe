@@ -361,6 +361,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         to={item.to}
         onClick={onNavigate}
         data-tour={(item as any).tour}
+        data-nav-documents={item.label === "Documents" && isPatientMenu ? true : undefined}
         className={() =>
           cn(
             "flex items-center gap-2.5 rounded-xl border border-transparent px-3 py-1.5 text-sm font-semibold transition-all duration-200",
@@ -383,6 +384,11 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         {item.label === "Notifications" && unreadCount > 0 && (
           <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-xs font-semibold text-destructive-foreground">
             {unreadCount > 99 ? "99+" : unreadCount}
+          </span>
+        )}
+        {item.label === "Documents" && isPatientMenu && patientDocCount > 0 && (
+          <span data-nav-documents-badge className="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-xs font-semibold text-primary-foreground">
+            {patientDocCount > 99 ? "99+" : patientDocCount}
           </span>
         )}
       </NavLink>
@@ -415,6 +421,38 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     },
     refetchInterval: 30000,
   });
+
+  const { data: patientDocCount = 0, refetch: refetchPatientDocCount } = useQuery({
+    queryKey: ["patient-nav-doc-count"],
+    enabled: isPatientMenu,
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return 0;
+      const sbx = supabase as any;
+      const { data: patient } = await sbx.from("patients").select("id")
+        .or(`user_id.eq.${user.id},patient_user_id.eq.${user.id}`).maybeSingle();
+      if (!patient) return 0;
+      const [{ count: docsCount }, { data: workflows }] = await Promise.all([
+        sbx.from("documents").select("*", { count: "exact", head: true }).eq("patient_id", patient.id).not("document_kind", "is", null),
+        sbx.from("wealth_workflows").select("id").eq("patient_id", patient.id),
+      ]);
+      let signedCount = 0;
+      const workflowIds = (workflows ?? []).map((w: any) => w.id);
+      if (workflowIds.length) {
+        const { count } = await sbx.from("wealth_signed_documents").select("*", { count: "exact", head: true }).in("workflow_id", workflowIds);
+        signedCount = count || 0;
+      }
+      return (docsCount || 0) + signedCount;
+    },
+    refetchInterval: 30000,
+  });
+
+  useEffect(() => {
+    if (!isPatientMenu) return;
+    const handler = () => refetchPatientDocCount();
+    window.addEventListener("wealth-doc-signed", handler);
+    return () => window.removeEventListener("wealth-doc-signed", handler);
+  }, [isPatientMenu, refetchPatientDocCount]);
 
   /** Doctor|Patient (or Nurse|Patient) pill shown next to Dashboard so a
    *  clinician can switch the sidebar between their professional tools and

@@ -16,7 +16,7 @@ export const isMine = (owner: string, viewer: "manager" | "client") =>
   viewer === "client" ? owner === "client" : owner === "advisor" || owner === "wealth_manager";
 
 /** Live Workspace tray: completed steps ticked, current step open, later steps locked. */
-export function LiveTray({ groups, viewer, clientFirst, managerName, nextTitle }: Props) {
+export function LiveTray({ groups, viewer, clientFirst, managerName }: Props) {
   const visible = groups.filter((g) => g.state !== "not_applicable");
   return (
     <div className="space-y-2.5">
@@ -55,7 +55,6 @@ export function LiveTray({ groups, viewer, clientFirst, managerName, nextTitle }
 
         const doneSteps = g.steps.filter((s) => s.state === "done");
         const cur = g.steps.find((s) => s.state === "next");
-        const remaining = g.steps.filter((s) => s.state !== "done" && s !== cur).length;
         const mine = cur ? isMine(cur.owner, viewer) : false;
         const waitingOn = cur
           ? cur.owner === "client" ? (viewer === "client" ? "you" : clientFirst)
@@ -82,15 +81,10 @@ export function LiveTray({ groups, viewer, clientFirst, managerName, nextTitle }
                 </li>
               )}
             </ul>
-            {remaining > 0 && <p className="px-4 pt-2 text-2xs text-muted-foreground">then {remaining} more</p>}
             {cur && (
-              <div className="m-1.5 mt-2 rounded-lg border border-border px-3 py-2.5">
-                <p className="text-2xs text-muted-foreground">Next</p>
-                <p className="text-sm text-foreground">{nextTitle || cur.label}</p>
-                <p className="mt-1 text-2xs text-muted-foreground">
-                  {mine ? "Your turn" : `Waiting on ${waitingOn}`}
-                </p>
-              </div>
+              <p className="px-4 pb-2 pt-1 text-2xs text-muted-foreground">
+                {mine ? "Your turn" : `Waiting on ${waitingOn}`}
+              </p>
             )}
           </div>
         );

@@ -1570,7 +1570,7 @@ export function PatientDetailsEditor({
           )}
           {show("history") && (
             <TabsTrigger value="history" className={triggerClass}>
-              My Consults
+              My Meetings
             </TabsTrigger>
           )}
           {show("lifeEvents") && (
@@ -1866,7 +1866,7 @@ export function PatientDetailsEditor({
             {isSelfService && (
               <TabsContent value="history" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-primary-dark">My Consults</h2>
+                  <h2 className="text-lg font-semibold text-primary-dark">My Meetings</h2>
                   <p className="text-xs text-muted-foreground">Your consultations with your advisers. You can also record meetings with advisers not on Holarc Wealth.</p>
                 </div>
                 <PatientSessionRecorder patientId={patient.id} patientName={patient.name} />

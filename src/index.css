@@ -608,3 +608,22 @@ input::placeholder,
 textarea::placeholder {
   font-weight: 500;
 }
+
+/* ── Flying document: a signed/saved file animates from the center of the
+   screen into the Documents nav icon, where it bumps the badge count ── */
+@keyframes fly-to-doc {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translate(var(--fly-dx), var(--fly-dy)) scale(0.35); opacity: 0; }
+}
+.animate-fly-to-doc {
+  animation: fly-to-doc 0.85s cubic-bezier(0.3, 0, 0.4, 1) forwards;
+}
+@keyframes nav-badge-bump {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+.animate-nav-badge-bump {
+  animation: nav-badge-bump 0.5s ease-out;
+}

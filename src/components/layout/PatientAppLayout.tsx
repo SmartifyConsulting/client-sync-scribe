@@ -4,6 +4,7 @@ import { PageTransition } from "./PageTransition";
 import { BottomNav } from "./BottomNav";
 import { Footer } from "./Footer";
 import { Sidebar } from "./Sidebar";
+import { DocFlyAnimation } from "./DocFlyAnimation";
 import { AnimatePresence } from "framer-motion";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { SubscriptionGateModal } from "@/components/auth/SubscriptionGateModal";
@@ -80,6 +81,7 @@ export function PatientAppLayout() {
 
       <BottomNav />
       <RouteTipHost />
+      <DocFlyAnimation />
     </div>
   );
 }

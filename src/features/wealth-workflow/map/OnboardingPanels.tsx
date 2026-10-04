@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import QRCode from "qrcode";
 import { Download, FileText, Loader2, ShieldCheck, ScanFace, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -34,11 +35,13 @@ async function downloadPdf(html: string, name: string) {
 /* ---------------- KYC, AML and PEP ---------------- */
 export function KycPanel({ workflowId, kyc, viewer, clientFirst }: { workflowId: string; kyc: any; viewer: Viewer; clientFirst: string }) {
   const [busy, setBusy] = useState(false);
+  const [sessionUrl, setSessionUrl] = useState<string | null>(null);
+  const [qr, setQr] = useState<string | null>(null);
   const qc = useQueryClient();
   const { toast } = useToast();
   const status: string | null = kyc?.status ?? null;
   const label: Record<string, string> = {
-    started: viewer === "client" ? "Started. Finish the check in the Didit window" : `${clientFirst} has started the check`,
+    started: viewer === "client" ? "Started. Scan the QR code or finish in this window" : `${clientFirst} has started the check`,
     approved: "Passed", declined: "Not passed", in_review: viewer === "client" ? "Being reviewed. Your Wealth Manager will be in touch" : "Needs your review",
     abandoned: "Not finished",
   };
@@ -47,18 +50,31 @@ export function KycPanel({ workflowId, kyc, viewer, clientFirst }: { workflowId:
     const { data, error } = await supabase.functions.invoke("didit-session", { body: { workflowId, action, returnUrl: window.location.href } });
     setBusy(false);
     if (error) return toast({ title: "Identity check", description: await errMsg(error), variant: "destructive" });
-    if (data?.url) window.open(data.url, "_blank", "noopener");
+    if (data?.url) setSessionUrl(data.url);
     qc.invalidateQueries({ queryKey: ["wealth-map-records"] });
   };
+
+  useEffect(() => {
+    if (!sessionUrl) { setQr(null); return; }
+    let cancelled = false;
+    QRCode.toDataURL(sessionUrl, { width: 160, margin: 1 }).then((url) => { if (!cancelled) setQr(url); });
+    return () => { cancelled = true; };
+  }, [sessionUrl]);
 
   if (viewer === "manager") {
     return (
       <div className="rounded-xl border border-border/70 p-3 text-sm">
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-1.5 font-medium"><ShieldCheck className="h-4 w-4 text-primary" /> Didit screening</span>
-          <span className={cn("rounded-full border px-2 text-2xs", status === "approved" ? "border-primary/40 text-primary" : status === "declined" ? "border-destructive/40 text-destructive" : "border-border text-muted-foreground")}>
-            {status ? label[status] ?? status : `Waiting for ${clientFirst}`}
-          </span>
+          {status === "approved" ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-2xs font-semibold text-white">
+              <Check className="h-3 w-3" /> Verified
+            </span>
+          ) : (
+            <span className={cn("rounded-full border px-2 text-2xs", status === "declined" ? "border-destructive/40 text-destructive" : "border-border text-muted-foreground")}>
+              {status ? label[status] ?? status : `Waiting for ${clientFirst}`}
+            </span>
+          )}
         </div>
         {kyc && (
           <dl className="mt-2 grid grid-cols-2 gap-1 text-xs text-muted-foreground">
@@ -82,7 +98,14 @@ export function KycPanel({ workflowId, kyc, viewer, clientFirst }: { workflowId:
   return (
     <div className={cn("flex items-center gap-4 rounded-xl border bg-card p-4", status === "approved" ? "border-primary/40" : "border-border/70")}>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-foreground">Verify your identity</p>
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-semibold text-foreground">Verify your identity</p>
+          {status === "approved" && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-2xs font-semibold text-white">
+              <Check className="h-3 w-3" /> Verified
+            </span>
+          )}
+        </div>
         <p className="mt-0.5 text-xs text-muted-foreground">{simpleText}</p>
         {status !== "approved" && (
           <div className="mt-3 flex flex-wrap gap-2">
@@ -164,6 +187,7 @@ function DocCard({ workflowId, doc, signed, viewer, clientName }: { workflowId: 
     if (error) return toast({ title: "Not signed", description: await errMsg(error), variant: "destructive" });
     setLocalSig({ image: sig, at: new Date().toISOString() });
     qc.invalidateQueries({ queryKey: ["wealth-map-records"] });
+    window.dispatchEvent(new CustomEvent("wealth-doc-signed"));
     toast({ title: `${doc.title} signed` });
   };
 

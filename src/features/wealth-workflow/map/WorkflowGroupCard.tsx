@@ -18,7 +18,7 @@ export function OwnerBadge({ owner, label }: { owner: string; label?: string }) 
 }
 
 const stateLabel: Record<string, string> = {
-  completed: "Completed", current: "You are here", pending: "Pending", blocked: "Blocked",
+  completed: "Completed", pending: "Pending", blocked: "Blocked",
   waiting: "Waiting", not_applicable: "Not applicable",
 };
 
@@ -40,26 +40,19 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
         state === "not_applicable" && "opacity-50",
       )}
     >
-      <div className="flex items-center gap-1.5 px-2.5 py-1.5">
+      <div className={cn("flex items-center gap-1.5 bg-primary px-2.5 py-1.5", locked && "opacity-80")}>
         <button onClick={locked ? undefined : onOpen} disabled={locked} className="flex flex-1 items-center gap-2 text-left disabled:cursor-default">
-          <span
-            className={cn(
-              "flex h-5 w-5 items-center justify-center rounded-full text-2xs",
-              state === "completed" ? "bg-primary text-primary-foreground"
-                : active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
-            )}
-          >
-            {state === "completed" ? <Check className="h-3.5 w-3.5" /> : g.n}
+          <span className="flex items-center justify-center rounded-full bg-white px-2 py-0.5 text-2xs font-semibold text-primary">
+            {state === "completed" ? <Check className="h-3.5 w-3.5" /> : `Step ${g.n}`}
           </span>
-          <Icon className="h-3.5 w-3.5 text-muted-foreground" />
-          <span className={cn("text-xs font-medium tracking-tight", locked ? "text-muted-foreground" : "text-foreground")}>{viewer === "client" ? g.clientTitle : g.title}</span>
-          {!locked && (
+          <Icon className="h-3.5 w-3.5 text-primary-foreground" />
+          <span className="text-xs font-medium tracking-tight text-primary-foreground">{viewer === "client" ? g.clientTitle : g.title}</span>
+          {!locked && state !== "current" && (
             <span
               className={cn(
                 "ml-1 rounded-full border px-2 py-0 text-2xs font-medium",
-                state === "blocked" ? "border-destructive/40 text-destructive"
-                  : active ? "border-primary/40 text-primary"
-                  : "border-border text-muted-foreground",
+                state === "blocked" ? "border-destructive-foreground/50 text-destructive-foreground"
+                  : "border-primary-foreground/40 text-primary-foreground",
               )}
             >
               {state === "waiting" && view.waitingFor ? `Waiting for ${OWNER_LABEL[view.waitingFor] ?? view.waitingFor}` : stateLabel[state]}
@@ -67,7 +60,7 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
           )}
         </button>
         {locked ? (
-          <Lock aria-label="Locked until this step is reached" className="mx-1 h-3.5 w-3.5 text-muted-foreground/70" />
+          <Lock aria-label="Locked until this step is reached" className="mx-1 h-3.5 w-3.5 text-primary-foreground/70" />
         ) : null}
       </div>
       {open && (
@@ -99,7 +92,6 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
                   ) : null}
                 </span>
                 <span className={cn("flex-1", s.state === "done" ? "text-muted-foreground" : "text-foreground")}>{s.label}</span>
-                {s.state === "next" && <span className="text-xs font-medium text-primary">Next</span>}
               </li>
               );
             })}
