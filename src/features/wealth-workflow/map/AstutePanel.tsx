@@ -5,6 +5,7 @@ import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { safeInvoke } from "@/services/edge/safeInvoke";
+import { InsurerBadge } from "./insurerColors";
 
 const rand = (n: number | null) => (n == null ? "—" : `R${Number(n).toLocaleString("en-ZA", { maximumFractionDigits: 0 })}`);
 
@@ -50,7 +51,7 @@ export function AstutePanel({ patientId, holdings, viewer }: { patientId?: strin
             <tbody>
               {holdings.map((h) => (
                 <tr key={h.id} className="border-t">
-                  <td className="px-2 py-1.5 font-medium">{h.provider}</td>
+                  <td className="px-2 py-1.5"><InsurerBadge provider={h.provider} /></td>
                   <td className="px-2 py-1.5"><span className="block">{h.product ?? "—"}</span><span className="text-2xs text-muted-foreground">{h.policy_number}</span></td>
                   <td className="px-2 py-1.5">{h.status ?? "—"}</td>
                   <td className="px-2 py-1.5 text-right">{rand(h.premium)}{h.premium_frequency ? <span className="text-2xs text-muted-foreground"> /{h.premium_frequency.toLowerCase()}</span> : null}</td>

@@ -11,6 +11,8 @@ import { isChimeMuted, setChimeMuted, playChime } from "./chime";
 import { StageDetailSheet } from "./StageDetailSheet";
 import { WorkingWindow } from "./WorkingWindow";
 import { useWorkflowRealtime } from "../workspace/useWorkflowRealtime";
+import { OwnerBadge } from "./WorkflowGroupCard";
+import { InsurerBadge } from "./insurerColors";
 
 interface Props {
   patientId: string;
@@ -103,6 +105,14 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
             clientFirst={clientFirst} docCount={(m.records?.docs ?? []).length + (m.records?.signed ?? []).length}
             onOpenDocuments={onOpenDocuments}
             onSelectStep={(group, step) => setPicked({ group, step })} />
+          <div className="mt-3 flex flex-wrap items-center justify-end gap-1.5 border-t border-border/60 pt-2">
+            <span className="mr-1 text-2xs uppercase tracking-[0.14em] text-muted-foreground">Legend</span>
+            <OwnerBadge owner="client" label="Client" />
+            <OwnerBadge owner="advisor" label="Wealth Manager" />
+            <OwnerBadge owner="system" label="System" />
+            {Array.from(new Set((m.records?.holdings ?? []).map((h: any) => h.provider as string))).map((p) => <InsurerBadge key={p} provider={p} />)}
+            {!(m.records?.holdings ?? []).length && <OwnerBadge owner="insurer" label="Insurer" />}
+          </div>
         </div>
         <div className="min-w-0 rounded-xl border border-border bg-card p-4">
           <div className="mb-3 flex items-center justify-between">
