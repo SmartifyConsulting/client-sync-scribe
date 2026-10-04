@@ -82,7 +82,7 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
     ? (step.owner === "advisor" ? "Your Wealth Manager is working on this. You don't need to do anything yet." : step.owner === "insurer" ? "Your insurer is working on this. We'll update you here." : "Holarc Wealth is doing this automatically.")
     : (step.owner === "client" ? `Waiting for ${first}. This updates as soon as they act.` : step.owner === "insurer" ? "Waiting for the insurer." : "Holarc Wealth is doing this automatically.");
   const isKyc = step.label === "Complete KYC, AML and PEP screening";
-  const isSign = step.label === "Sign disclosure and LOA";
+  const isSign = step.label === "Sign Disclosure and LOA";
   const isAstute = step.label.startsWith("Astute pull");
   const isPersonal = step.label === "Complete personal information";
   const isCapture = step.label === "Record consultation and capture financials";
@@ -153,8 +153,7 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
 
         {/* Right: the activity itself */}
         <div className="border-t border-border/60 pt-3 md:border-t-0 md:border-l md:pl-5 md:pt-0">
-          {isKyc && viewer === "client" && step.state === "next" && <p className="text-sm text-muted-foreground">Scan the QR code shown under this step in the map to start your verification.</p>}
-          {isKyc && !(viewer === "client" && step.state === "next") && (step.state === "next" || step.state === "done") && (
+          {isKyc && (step.state === "next" || step.state === "done") && (
             <KycPanel workflowId={workflowId} kyc={records?.kyc} viewer={viewer} clientFirst={first} />
           )}
           {isSign && (step.state === "next" || step.state === "done") && (

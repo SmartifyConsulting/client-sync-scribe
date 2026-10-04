@@ -47,6 +47,14 @@ Deno.serve(async (req) => {
       signer_ip: ip, user_agent: req.headers.get("user-agent")?.slice(0, 300) ?? null, signed_at: signedAt, seal_hash: sealHash,
     }).select("id, doc_type, signed_at, seal_hash, signer_ip").single();
     if (error) throw error;
+    // Auto-file the signed copy in the client's Documents.
+    const at = new Date(signedAt).toLocaleString("en-ZA");
+    await admin.from("documents").insert({
+      user_id: pat?.user_id ?? u.user.id, patient_id: wf.patient_id, patient_name: p.signerName,
+      name: `${p.title} (signed) — ${p.signerName}`, template_name: p.title,
+      content: `${p.contentHtml}<div style="padding:24px 60px"><img src="${p.signatureImage.startsWith("data:") ? p.signatureImage : `data:image/png;base64,${p.signatureImage}`}" style="height:60px"/><p><b>${p.signerName}</b> · Digitally signed ${at}${ip ? ` · IP ${ip}` : ""}</p><p style="font-family:monospace;font-size:10px">Seal ${sealHash}</p></div>`,
+      document_kind: `${p.docType}_signed`, record_date: signedAt.slice(0, 10),
+    });
     await admin.rpc("wealth_onboarding_refresh", { _workflow_id: p.workflowId });
     return json({ signed: data });
   } catch (e) {

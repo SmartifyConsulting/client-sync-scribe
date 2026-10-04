@@ -37,7 +37,7 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
     },
     unlocks: "Signing the disclosure and LOA",
   },
-  "Sign disclosure and LOA": {
+  "Sign Disclosure and LOA": {
     client: {
       what: "Read and sign two documents. The Disclosure Agreement explains who we are and how we are paid. The Letter of Authority (LOA) lets your Wealth Manager request your policy information from insurers.",
       required: ["Sign the Disclosure Agreement", "Sign the Letter of Authority (LOA)"],

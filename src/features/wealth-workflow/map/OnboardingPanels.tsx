@@ -2,10 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import QRCode from "qrcode";
-import { Download, FileText, Loader2, ShieldCheck, ScanFace, Check } from "lucide-react";
+import { Download, Eye, FileText, Loader2, ShieldCheck, ScanFace, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -153,16 +152,17 @@ export function SignDocsPanel({ workflowId, signed, viewer, clientName }: { work
     { type: "loa", title: "Letter of Authority (LOA)", html: loaHtml(clientName, today, practice) },
   ];
   return (
-    <Accordion type="multiple" className="space-y-3" defaultValue={viewer === "client" ? docs.filter((d) => !signed.some((s) => s.doc_type === d.type)).map((d) => d.type) : []}>
+    <div className="space-y-2">
       {docs.map((d) => (
         <DocCard key={d.type} workflowId={workflowId} doc={d} signed={signed.find((s) => s.doc_type === d.type)} viewer={viewer} clientName={clientName} />
       ))}
-    </Accordion>
+    </div>
   );
 }
 
 function DocCard({ workflowId, doc, signed, viewer, clientName }: { workflowId: string; doc: { type: string; title: string; html: string }; signed?: any; viewer: Viewer; clientName: string }) {
   const [cert, setCert] = useState(false);
+  const [preview, setPreview] = useState(false);
   const [busy, setBusy] = useState(false);
   // Optimistic stamp shown the instant signing succeeds, before the record refetches.
   const [localSig, setLocalSig] = useState<{ image: string; at: string } | null>(null);
@@ -198,56 +198,42 @@ function DocCard({ workflowId, doc, signed, viewer, clientName }: { workflowId: 
   };
 
   return (
-    <AccordionItem ref={cardRef} value={doc.type} className="overflow-hidden rounded-xl border border-border/70 bg-card">
-      <AccordionTrigger className="gap-3 !rounded-none !border-0 bg-transparent px-4 py-3 text-left hover:!bg-transparent hover:no-underline">
-        <span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg", isSigned ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
-          <FileText className="h-4.5 w-4.5" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-foreground">{doc.title}</p>
-          <p className="text-2xs text-muted-foreground">
-            {isSigned ? `Signed by ${signed?.signer_name ?? clientName}${signed ? ` · ${fmt(signed.signed_at)}` : ""}` : viewer === "client" ? "Waiting for your signature" : `Waiting for ${first} to sign`}
-          </p>
-        </div>
-        <span className={cn("mr-2 rounded-full border px-2.5 py-0.5 text-2xs font-medium tracking-wide", isSigned ? "border-primary/40 bg-primary/10 text-primary" : "border-border text-muted-foreground")}>{isSigned ? "SIGNED" : "UNSIGNED"}</span>
-      </AccordionTrigger>
-      <AccordionContent className="px-4 pb-4">
-        {/* Letterhead document frame — the same content used for PDF export and the signed record */}
-        <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
-          <div className="flex items-center justify-between border-b border-border/70 bg-muted/40 px-6 py-3">
-            <Logo size="sm" />
-            <span className="text-2xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Official Document</span>
-          </div>
-          <div className="max-h-[28rem] overflow-y-auto bg-white" dangerouslySetInnerHTML={{ __html: html }} />
-        </div>
+    <div ref={cardRef} className="flex items-center gap-3 rounded-xl border border-border/70 bg-card px-3 py-2.5">
+      <span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg", isSigned ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
+        <FileText className="h-4 w-4" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold text-foreground">{doc.title}</p>
+        <p className="truncate text-2xs text-muted-foreground">
+          {isSigned ? `Signed by ${signed?.signer_name ?? clientName}${signed ? ` · ${fmt(signed.signed_at)}` : ""} · filed in Documents` : viewer === "client" ? "Waiting for your signature" : `Waiting for ${first} to sign`}
+        </p>
+      </div>
+      <Button size="icon" variant="ghost" className="h-9 w-9 rounded-full" aria-label={`Preview ${doc.title}`} onClick={() => setPreview(true)}><Eye className="h-4 w-4" /></Button>
+      <Button size="icon" variant="ghost" className="h-9 w-9 rounded-full" aria-label={`Download ${doc.title}`} onClick={() => downloadPdf(html, doc.title)}><Download className="h-4 w-4" /></Button>
+      {signed && <Button size="icon" variant="ghost" className="h-9 w-9 rounded-full" aria-label="View seal certificate" onClick={() => setCert(true)}><ShieldCheck className="h-4 w-4" /></Button>}
+      {!isSigned && viewer === "client" && (
+        <Button size="sm" className="h-8 rounded-full px-4 text-xs" disabled={busy} onClick={sign}>
+          {busy && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}Sign
+        </Button>
+      )}
+      {isSigned && <span className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-0.5 text-2xs font-medium text-primary"><Check className="h-3 w-3" strokeWidth={3} />Signed</span>}
 
-        {signed && (
-          <div className="mt-3 rounded-xl border bg-muted/30 px-3 py-2 text-center">
-            <p className="text-left text-2xs font-medium uppercase tracking-[0.14em] text-primary">Client</p>
-            <img src={signed.signature_image} alt={`Signature of ${signed.signer_name}`} className="mx-auto h-12" />
-            <div className="mx-auto h-px w-3/4 bg-border" />
-            <p className="mt-1 text-2xs text-muted-foreground">Digitally signed · {fmt(signed.signed_at)}{signed.signer_ip ? ` · IP ${signed.signer_ip}` : ""}</p>
+      <Dialog open={preview} onOpenChange={setPreview}>
+        <DialogContent className="max-h-[90vh] max-w-3xl overflow-hidden p-0">
+          <DialogHeader className="border-b px-5 py-3"><DialogTitle className="text-sm font-semibold">{doc.title}</DialogTitle></DialogHeader>
+          <div className="max-h-[70vh] overflow-y-auto bg-muted/40 p-4">
+            <div className="mx-auto overflow-hidden rounded-lg border border-border bg-white shadow-sm" dangerouslySetInnerHTML={{ __html: html }} />
           </div>
-        )}
-
-        <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
-          <Button size="sm" variant="outline" className="h-8 rounded-full text-xs" onClick={() => downloadPdf(html, doc.title)}><Download className="mr-1 h-3.5 w-3.5" />Download</Button>
-          {signed && (
-            <Button size="sm" variant="outline" className="h-8 rounded-full text-xs" onClick={() => setCert(true)}><FileText className="mr-1 h-3.5 w-3.5" />View certificate</Button>
-          )}
-          {!isSigned && viewer === "client" && (
-            <Button size="sm" className="h-8 rounded-full text-xs" disabled={busy} onClick={sign}>
-              {busy && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}Sign
-            </Button>
-          )}
-          {isSigned && !signed && (
-            <span className="inline-flex h-8 items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3">
-              <img src={`data:image/png;base64,${stampImage}`} alt="Your signature" className="h-5" />
-              <span className="text-2xs font-medium text-primary">Signed</span>
-            </span>
-          )}
-        </div>
-      </AccordionContent>
+          <div className="flex justify-end gap-2 border-t px-5 py-3">
+            <Button size="sm" variant="outline" className="h-8 rounded-full text-xs" onClick={() => downloadPdf(html, doc.title)}><Download className="mr-1 h-3.5 w-3.5" />Download</Button>
+            {!isSigned && viewer === "client" && (
+              <Button size="sm" className="h-8 rounded-full px-4 text-xs" disabled={busy} onClick={async () => { await sign(); setPreview(false); }}>
+                {busy && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}Sign
+              </Button>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={cert} onOpenChange={setCert}>
         <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
@@ -270,6 +256,6 @@ function DocCard({ workflowId, doc, signed, viewer, clientName }: { workflowId: 
           )}
         </DialogContent>
       </Dialog>
-    </AccordionItem>
+    </div>
   );
 }
