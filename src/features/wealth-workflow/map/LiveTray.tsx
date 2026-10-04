@@ -53,7 +53,7 @@ export function LiveTray({ groups, viewer, clientFirst, managerName }: Props) {
               </div>
               <ul className="mt-1.5 space-y-1.5 px-1.5 pb-1">
                 {g.steps.map((s) => (
-                  <li key={s.label} className="flex items-center gap-2 rounded-full border border-primary/60 bg-primary/5 px-3 py-1.5 text-xs text-muted-foreground">
+                  <li key={s.label} className="flex items-center gap-2 px-3 py-1.5 text-xs text-muted-foreground">
                     <StepTick owner={s.owner} /> {s.label}
                   </li>
                 ))}
@@ -79,14 +79,18 @@ export function LiveTray({ groups, viewer, clientFirst, managerName }: Props) {
             </div>
             <ul className="mt-1.5 space-y-1.5 px-1.5">
               {doneSteps.map((s) => (
-                <li key={s.label} className="flex items-center gap-2 rounded-full border border-primary/60 bg-primary/5 px-3 py-1.5 text-xs text-muted-foreground">
+                <li key={s.label} className="flex items-center gap-2 px-3 py-1.5 text-xs text-muted-foreground">
                   <StepTick owner={s.owner} /> {s.label}
                 </li>
               ))}
               {cur && (
-                <li className={cn("flex items-center gap-2 rounded-full border border-primary bg-primary/10 px-3 py-1.5 text-xs text-foreground", mine && "animate-throb")}>
-                  {!mine && <Hourglass className="h-3.5 w-3.5 flex-none animate-pulse-soft text-primary" aria-label="In progress" />}
-                  <span className="text-2xs font-semibold text-muted-foreground">{ownerLabel(cur.owner, viewer, clientFirst)}</span>
+                <li className={cn(
+                  "flex items-center gap-2 rounded-full px-3 py-1.5 text-xs text-white",
+                  cur.owner === "advisor" ? "bg-blue-500" : "bg-emerald-500",
+                  mine && "animate-throb",
+                )}>
+                  {!mine && <Hourglass className="h-3.5 w-3.5 flex-none animate-pulse-soft text-white" aria-label="In progress" />}
+                  <span className="text-2xs font-semibold text-white/80">{ownerLabel(cur.owner, viewer, clientFirst)}</span>
                   {cur.label}
                 </li>
               )}

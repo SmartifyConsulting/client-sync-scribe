@@ -75,7 +75,8 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
                   "flex items-center gap-1.5 px-2.5 py-1 text-xs",
                   onSelectStep && reachable && "cursor-pointer hover:bg-muted/40",
                   !reachable && "opacity-50",
-                  s.state === "next" && "mx-1 my-0.5 rounded-lg border border-primary bg-primary/5",
+                  s.state === "next" && "mx-1 my-0.5 rounded-full",
+                  s.state === "next" && (s.owner === "advisor" ? "bg-blue-500 text-white" : "bg-emerald-500 text-white"),
                   s.state === "next" && (viewer === "client" ? s.owner === "client" : s.owner === "advisor") && "animate-throb",
                   selectedStep === s.label && s.state !== "next" && "bg-muted/60",
                 )}
@@ -86,10 +87,10 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
                       <Check className="h-3 w-3 text-white" strokeWidth={4} />
                     </span>
                   ) : s.state === "next" ? (
-                    <span className="block h-2 w-2 rounded-full bg-primary" />
+                    <span className="block h-2 w-2 rounded-full bg-white" />
                   ) : null}
                 </span>
-                <span className={cn("flex-1", s.state === "done" ? "text-muted-foreground" : "text-foreground")}>{s.label}</span>
+                <span className={cn("flex-1", s.state === "done" ? "text-muted-foreground" : s.state === "next" ? "text-white" : "text-foreground")}>{s.label}</span>
               </li>
               );
             })}
