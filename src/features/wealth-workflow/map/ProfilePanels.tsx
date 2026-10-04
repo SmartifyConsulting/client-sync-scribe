@@ -193,7 +193,7 @@ export function CaptureFinancialsPanel({ patientId, sessions, financials, viewer
     <div className="space-y-3 text-sm">
       <p className="text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Record the meeting</p>
       {patientId && <RecordMeeting patientId={patientId} onDone={(sid) => { setSessionId(sid); refresh(qc); run(sid); }} />}
-      <p className="text-2xs text-muted-foreground">Holarc AI transcribes the meeting and fills in the financial information automatically.</p>
+      <p className="text-2xs text-muted-foreground">Elysian AI transcribes the meeting and fills in the financial information automatically.</p>
       <p className="pt-2 text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Or capture from an earlier consultation</p>
       {usable.length > 0 && (
         <div className="space-y-1.5">

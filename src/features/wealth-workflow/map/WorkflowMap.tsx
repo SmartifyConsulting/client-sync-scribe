@@ -111,19 +111,12 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
       {onBackToLive && (
         <button onClick={onBackToLive} className="text-xs font-medium text-primary hover:underline">← Back to Live workspace</button>
       )}
-      {viewer === "manager" && (
-        <div className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-xl border border-border/70 bg-card px-4 py-2.5 text-sm sm:grid-cols-4">
-          <Field label="Client" value={clientName ?? "—"} />
-          <Field label="Current stage" value={curLabel} />
-          <Field label="Status" value={statusText} danger={wf.status === "blocked"} />
-          <Field label="Next action" value={nextAction?.title ?? "—"} />
-          {wf.status === "blocked" && wf.blockers.length > 0 && (
-            <div className="col-span-full text-xs text-destructive">
-              <span className="font-semibold">Blocked: </span>{wf.blockers.join(" · ")}
-            </div>
-          )}
+      {viewer === "manager" && wf.status === "blocked" && wf.blockers.length > 0 && (
+        <div className="rounded-xl border border-destructive/40 bg-card px-4 py-2.5 text-xs text-destructive">
+          <span className="font-semibold">Blocked: </span>{wf.blockers.join(" · ")}
         </div>
       )}
+
 
       <div className="grid min-w-0 grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
         <div className="min-w-0 rounded-xl border border-border bg-card p-4">
