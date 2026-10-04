@@ -157,8 +157,7 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
 
 export const fillName = (s: string, name: string) => s.replace(/\{name\}/g, name);
 
-/** Who-label for a sub-step owner, from the reader's point of view. */
-export function ownerLabel(owner: string, viewer: "manager" | "client", clientFirst: string) {
-  if (viewer === "client") return ({ client: "You", advisor: "Your Wealth Manager", system: "Holarc Wealth", insurer: "Your insurer" } as Record<string, string>)[owner] ?? owner;
-  return ({ client: clientFirst, advisor: "You", system: "Holarc Wealth", insurer: "Insurer" } as Record<string, string>)[owner] ?? owner;
+/** Badge label for a sub-step owner. Fixed for everyone: colour tells who acts (green client, blue Wealth Manager). */
+export function ownerLabel(owner: string, _viewer?: "manager" | "client", _clientFirst?: string) {
+  return ({ client: "Client", advisor: "Wealth Manager", system: "System", insurer: "Insurer" } as Record<string, string>)[owner] ?? owner;
 }
