@@ -28,7 +28,6 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
   const locked = state === "pending";
   const [userOpen, setUserOpen] = useState<boolean | null>(null);
   const open = true; void userOpen;
-  const Icon = g.icon;
 
   return (
     <div
@@ -45,7 +44,6 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
           <span className="flex items-center justify-center rounded-full bg-black px-2 py-0.5 text-2xs font-semibold text-white">
             {state === "completed" ? <Check className="h-3.5 w-3.5" /> : `Step ${g.n}`}
           </span>
-          <Icon className="h-3.5 w-3.5 text-primary-foreground" />
           <span className="text-xs font-medium tracking-tight text-primary-foreground">{viewer === "client" ? g.clientTitle : g.title}</span>
           {!locked && state !== "current" && (
             <span
