@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Check, Globe } from "lucide-react";
+import { Check, Languages } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -53,12 +53,9 @@ export function LanguageSwitcher() {
             <PopoverTrigger asChild>
               <button
                 aria-label={t("common.changeLanguage", "Change language")}
-                className="h-9 w-9 rounded-full flex items-center justify-center text-white font-semibold transition-colors overflow-hidden border border-white/20 shadow-sm hover:opacity-90"
-                style={{ backgroundColor: "hsl(225 73% 38%)" }}
+                className="h-9 w-9 rounded-full flex items-center justify-center bg-primary text-primary-foreground transition-colors shadow-sm hover:opacity-90"
               >
-                <span aria-hidden className="text-base leading-none">
-                  {current?.flag || <Globe className="h-4 w-4" />}
-                </span>
+                <Languages aria-hidden className="h-4 w-4" />
               </button>
             </PopoverTrigger>
           </TooltipTrigger>

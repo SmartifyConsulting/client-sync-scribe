@@ -49,12 +49,8 @@ export function AppLayout() {
       <MobileHeader />
       
       {/* Main content */}
-      <main className="flex-1 pb-24 md:pb-0 md:ml-[var(--sidebar-width)]">
-        {/* Persistent top-right icons on desktop */}
-        <div className="hidden md:flex justify-end px-8 pt-4">
-          <TopBarIcons />
-        </div>
-        <div className="px-6 py-6 md:px-12 md:pt-2 md:pb-8 max-w-7xl mx-auto">
+      <main className="flex-1 pb-24 md:pb-0 md:pt-[var(--topnav-height)]">
+        <div className="px-6 py-6 md:px-8 md:pt-6 md:pb-8 w-full">
           <AnimatePresence mode="wait">
             <PageTransition key={location.pathname}>
               <Outlet />
