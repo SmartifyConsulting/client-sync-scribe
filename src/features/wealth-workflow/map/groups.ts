@@ -16,6 +16,9 @@ export interface MapContext {
   kycStatus: string | null;
   signedDocs: Set<string>;
   holdingsCount: number;
+  personalDone: boolean;
+  financialsExtracted: boolean;
+  financialsVerified: boolean;
 }
 
 export interface SubStep {
@@ -48,6 +51,7 @@ export const WORKFLOW_GROUPS: WorkflowGroup[] = [
     steps: [
       { owner: "advisor", label: "Marlin sends secure link", done: () => true },
       { owner: "client", label: "Scan QR or open secure link", done: (c) => past(1)(c) || c.clientLinked || !!c.kycStatus },
+      { owner: "client", label: "Confirm personal information", done: (c) => past(1)(c) || c.personalDone },
       { owner: "client", label: "KYC, AML and PEP Screening", done: (c) => past(1)(c) || c.kycStatus === "approved" },
       { owner: "client", label: "Sign disclosure and LOA", done: (c) => past(1)(c) || (c.signedDocs.has("disclosure") && c.signedDocs.has("loa")) },
     ],
@@ -57,10 +61,10 @@ export const WORKFLOW_GROUPS: WorkflowGroup[] = [
     n: 2, key: "needs", title: "Needs Analysis", clientTitle: "Needs Analysis", icon: ClipboardList,
     stages: ["needs_analysis"],
     steps: [
-      { owner: "advisor", label: "Capture facts and risk profile", done: past(2) },
-      { owner: "system", label: "Life, short-term and investment gaps" },
-      { owner: "system", label: "Estate duty estimate" },
-      { owner: "client", label: "Or: single-need disclaimer" },
+      { owner: "advisor", label: "Record consultation and capture financials", done: (c) => past(2)(c) || c.financialsExtracted },
+      { owner: "client", label: "Verify financial information", done: (c) => past(2)(c) || c.financialsVerified },
+      { owner: "system", label: "Life, short-term and investment gaps", done: past(2) },
+      { owner: "system", label: "Estate duty estimate", done: past(2) },
     ],
     footer: "Same inputs, same result",
   },
