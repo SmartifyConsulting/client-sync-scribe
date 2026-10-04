@@ -23,9 +23,12 @@ interface Props {
   onBackToCurrent: () => void;
   onOpenDocuments?: () => void;
   embedded?: boolean;
+  managerName?: string;
 }
 
-export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLive, viewer, clientName, workflowId, records, blockers, documents, onBackToCurrent, onOpenDocuments, embedded }: Props) {
+export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLive, viewer, clientName, workflowId, records, blockers, documents, onBackToCurrent, onOpenDocuments, embedded, managerName }: Props) {
+  const wmName = managerName && managerName !== "Wealth Manager" ? managerName : "";
+  const wm = (s: string) => wmName ? s.replace(/\b[Yy]our Wealth Manager\b/g, wmName).replace(/\bmy Wealth Manager\b/g, wmName) : s;
   const propStep = propGroup?.steps.find((s) => s.label === propStepLabel);
   const first = clientName.split(" ")[0] || "The client";
 
@@ -80,14 +83,14 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
   const who = ownerLabel(step.owner, viewer, first);
   const status = step.state === "done" ? "Completed" : step.state === "next" ? (mine ? "" : "In progress") : "Upcoming";
   const waitingText = viewer === "client"
-    ? (step.owner === "advisor" ? "Your Wealth Manager is working on this. You don't need to do anything yet." : step.owner === "insurer" ? "Your insurer is working on this. We'll update you here." : "Holarc Wealth is doing this automatically.")
+    ? (step.owner === "advisor" ? wm("Your Wealth Manager is working on this. You don't need to do anything yet.") : step.owner === "insurer" ? "Your insurer is working on this. We'll update you here." : "Holarc Wealth is doing this automatically.")
     : (step.owner === "client" ? `Waiting for ${first}. This updates as soon as they act.` : step.owner === "insurer" ? "Waiting for the insurer." : "Holarc Wealth is doing this automatically.");
   const isKyc = step.label === "Complete KYC, AML and PEP screening";
   const isSign = step.label === "Sign Disclosure and LOA";
   const isAstute = step.label.startsWith("Astute pull");
   const isPersonal = step.label === "Complete personal information";
   const isCapture = step.label === "Record consultation and capture financials";
-  const isSchedule = step.label === "Schedule meeting to discuss current financial health";
+  const isSchedule = step.label === 'Schedule "Review Financial Health" meeting';
   const isVerify = step.label === "Verify financial information";
   const reached = step.state === "next" || step.state === "done";
   const isLater = LATER_STEPS.has(step.label);
@@ -126,7 +129,7 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
               <ol className="mt-2 space-y-2.5">
                 {[
                   { title: "Disclosure Agreement", text: "Explains who we are and how we are paid." },
-                  { title: "Letter of Authority (LOA)", text: "Lets your Wealth Manager request your policy information from insurers." },
+                  { title: "Letter of Authority (LOA)", text: wm("Lets your Wealth Manager request your policy information from insurers.") },
                 ].map((item, i) => (
                   <li key={item.title} className="flex items-start gap-3">
                     <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-2xs font-semibold text-primary-foreground">{i + 1}</span>
@@ -139,7 +142,7 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
               </ol>
             </div>
           ) : (
-            t && <p className="text-sm leading-relaxed text-muted-foreground">{fillName(t.what, first)}</p>
+            t && <p className="text-sm leading-relaxed text-muted-foreground">{wm(fillName(t.what, first))}</p>
           )}
 
           {blockers.length > 0 && step.state === "next" && (

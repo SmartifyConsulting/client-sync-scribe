@@ -36,6 +36,13 @@
       "when": 1791148430402,
       "tag": "0004_wealth_portfolio_holdings",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791157583685,
+      "tag": "0005_firm_members_manage_shared_appointments",
+      "breakpoints": true
     }
   ]
 }

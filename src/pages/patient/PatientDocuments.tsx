@@ -250,7 +250,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
   const [isDragging, setIsDragging] = useState(false);
 
   // AI Analysis state
-  const [docGroupBy, setDocGroupBy] = useState<"date" | "type">("date");
+  const [docGroupBy, setDocGroupBy] = useState<"date" | "type">("type");
   const [docSearch, setDocSearch] = useState("");
   const [analyzingDocId, setAnalyzingDocId] = useState<string | null>(null);
   const [analysisDialog, setAnalysisDialog] = useState<UnifiedDocument | null>(null);
@@ -883,8 +883,8 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
           variant="outline"
           className="shrink-0"
         >
-          <ToggleGroupItem value="date" className="text-xs px-3">Date</ToggleGroupItem>
           <ToggleGroupItem value="type" className="text-xs px-3">Type</ToggleGroupItem>
+          <ToggleGroupItem value="date" className="text-xs px-3">Date</ToggleGroupItem>
         </ToggleGroup>
       </div>
 

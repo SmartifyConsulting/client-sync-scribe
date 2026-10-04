@@ -36,6 +36,9 @@ import {
   History,
   BarChart3,
   FileText,
+  Wallet,
+  ShieldCheck,
+  FolderOpen as ClientFolder,
 } from "lucide-react";
 
 import { useUserRole } from "@/hooks/useUserRole";
@@ -116,8 +119,11 @@ const CLIENT_BLOCKED_PATHS = ["/practice", "/patients"];
 
 const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.myPersonalDashboard", to: "/my-dashboard" },
-  { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/patient/details?section=health" },
   { icon: Activity, label: "Live Workspace", labelKey: "nav.liveWorkspace", to: "/my-workspace" },
+  { icon: User, label: "Personal Information", labelKey: "nav.clientPersonal", to: "/patient/details?section=personal" },
+  { icon: Wallet, label: "Financial Information", labelKey: "nav.clientFinancial", to: "/patient/details?section=financial" },
+  { icon: ShieldCheck, label: "Claims", labelKey: "nav.clientClaims", to: "/claims" },
+  { icon: ClientFolder, label: "Documents", labelKey: "nav.clientDocuments", to: "/patient/documents" },
   { icon: Activity, label: "My Biolog", labelKey: "nav.myBiolog", to: "/biolog" },
   { icon: BedDouble, label: "My Admissions", labelKey: "nav.myAdmissions", to: "/patient/admissions" },
   { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/patient/rewards" },
@@ -356,7 +362,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         to={item.to}
         onClick={onNavigate}
         data-tour={(item as any).tour}
-        data-nav-documents={item.label === "My Profile" && isPatientMenu ? true : undefined}
+        data-nav-documents={item.label === "Documents" && isPatientMenu ? true : undefined}
         className={() =>
           cn(
             "flex items-center gap-2.5 rounded-xl border border-transparent px-3 py-1.5 text-sm font-semibold transition-all duration-200",
@@ -381,7 +387,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
-        {item.label === "My Profile" && isPatientMenu && patientDocCount > 0 && (
+        {item.label === "Documents" && isPatientMenu && patientDocCount > 0 && (
           <span data-nav-documents-badge className="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-xs font-semibold text-primary-foreground">
             {patientDocCount > 99 ? "99+" : patientDocCount}
           </span>

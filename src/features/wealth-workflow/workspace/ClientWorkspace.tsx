@@ -4,10 +4,26 @@ import { ClientJourney } from "../map/ClientJourney";
 import { CLIENT_WAITING } from "./rules";
 import { useLiveWorkspace } from "./useLiveWorkspace";
 import { Panel } from "@/components/ui/Panel";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+
+/** First name of the client's Wealth Manager, for personal copy. */
+function useManagerFirst(patientId: string) {
+  return useQuery({
+    queryKey: ["wm-first", patientId],
+    queryFn: async () => {
+      const { data: p } = await supabase.from("patients").select("user_id").eq("id", patientId).maybeSingle();
+      if (!p?.user_id) return null;
+      const { data: pr } = await supabase.from("profiles").select("full_name").eq("id", p.user_id).maybeSingle();
+      return (pr?.full_name || "").split(" ")[0] || null;
+    },
+  }).data ?? null;
+}
 
 /** Simplified client workspace: journey, actions, waiting, recently completed. */
 export function ClientWorkspace({ patientId }: { patientId: string }) {
   const ws = useLiveWorkspace(patientId);
+  const wm = useManagerFirst(patientId);
   if (!ws.workflow) return null;
   const mine = ws.openTasks.filter((t) => t.owner_role === "client");
   const done = ws.completed.filter((c) => c.clientLabel).slice(0, 5);
@@ -30,7 +46,7 @@ export function ClientWorkspace({ patientId }: { patientId: string }) {
           </ul>
         </Panel>
         <Panel title="We're waiting for" icon={Clock}>
-          <p className="text-sm text-foreground">{CLIENT_WAITING[ws.workflow.current_stage] ?? "Your Wealth Manager is working on your plan."}</p>
+          <p className="text-sm text-foreground">{(CLIENT_WAITING[ws.workflow.current_stage] ?? "Your Wealth Manager is working on your plan.").replace("Your Wealth Manager", wm || "Your Wealth Manager")}</p>
         </Panel>
         <Panel title="Recently completed" icon={CheckCircle2}>
           {done.length === 0 ? <p className="text-xs text-muted-foreground">Nothing yet.</p> : (
