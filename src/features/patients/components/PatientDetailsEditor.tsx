@@ -96,6 +96,7 @@ import { isValidOptionalEmail } from "@/lib/validation";
 import vulaVouchersLogo from "@/assets/vula-vouchers-logo.png";
 
 const PatientDocuments = lazy(() => import("@/pages/patient/PatientDocuments"));
+const ClaimsPage = lazy(() => import("@/pages/Claims"));
 const TestResultsPanel = lazy(() =>
   import("@/modules/holarchelp/components/TestResultsPanel").then((m) => ({ default: m.TestResultsPanel })),
 );
@@ -387,7 +388,7 @@ function AnimatedCounter({ target }: { target: number }) {
 }
 
 const SECTION_TABS: Record<string, string[]> = {
-  health: ["overview", "personal", "medical", "history", "lifeEvents"],
+  health: ["overview", "personal", "medical", "history", "claims", "documents", "lifeEvents"],
   admin: ["calendar", "tasks", "programmes"],
 };
 
@@ -1573,14 +1574,19 @@ export function PatientDetailsEditor({
               My Meetings
             </TabsTrigger>
           )}
-          {show("lifeEvents") && (
-            <TabsTrigger value="lifeEvents" className={triggerClass}>
-              Life Events
+          {show("claims") && (
+            <TabsTrigger value="claims" className={triggerClass}>
+              Claims
             </TabsTrigger>
           )}
           {show("documents") && (
             <TabsTrigger value="documents" className={triggerClass}>
               Documents
+            </TabsTrigger>
+          )}
+          {show("lifeEvents") && (
+            <TabsTrigger value="lifeEvents" className={triggerClass}>
+              Life Events
             </TabsTrigger>
           )}
           {show("labresults") && (
@@ -2487,8 +2493,16 @@ export function PatientDetailsEditor({
           )}
 
           {isSelfService && (
-            <TabsContent value="lifeEvents" className="mt-4">
-              <LifeEventsPanel patientId={patient.id} />
+            <TabsContent value="claims" className="mt-4">
+              <Suspense
+                fallback={
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                }
+              >
+                <ClaimsPage />
+              </Suspense>
             </TabsContent>
           )}
 
@@ -2523,6 +2537,12 @@ export function PatientDetailsEditor({
               >
                 <PatientDocuments hideHeader />
               </Suspense>
+            </TabsContent>
+          )}
+
+          {isSelfService && (
+            <TabsContent value="lifeEvents" className="mt-4">
+              <LifeEventsPanel patientId={patient.id} />
             </TabsContent>
           )}
 
