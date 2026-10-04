@@ -26,7 +26,7 @@ function StepTick({ owner }: { owner: string }) {
 }
 
 /** Live Workspace tray: completed steps ticked, current step open, later steps locked. */
-export function LiveTray({ groups, viewer, clientFirst, managerName }: Props) {
+export function LiveTray({ groups, viewer, clientFirst, managerName, avatars }: Props) {
   const visible = groups.filter((g) => g.state !== "not_applicable");
   return (
     <div className="space-y-2.5">
