@@ -108,7 +108,7 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
       <div className={cn("grid min-w-0 grid-cols-1", embedded ? "gap-3 px-2 py-3" : "gap-5 p-4 md:p-5 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]")}>
         {/* Left: instructions */}
         <div className="min-w-0 divide-y divide-border/60 [&>*]:py-3 [&>*:first-child]:pt-0 [&>*:last-child]:pb-0">
-          <div>
+          <div className={cn(embedded && "hidden")}>
             <p className="text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Step {group.group.n} · {viewer === "client" ? group.group.clientTitle : group.group.title}</p>
             <div className="mt-1 flex items-center gap-2">
               <OwnerBadge owner={step.owner} label={who} />
@@ -155,7 +155,7 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
         </div>
 
         {/* Right: the activity itself */}
-        <div className="border-t border-border/60 pt-3 md:border-t-0 md:border-l md:pl-5 md:pt-0">
+        <div className={cn("border-t border-border/60 pt-3", !embedded && "md:border-t-0 md:border-l md:pl-5 md:pt-0")}>
           {isKyc && (step.state === "next" || step.state === "done") && (
             <KycPanel workflowId={workflowId} kyc={records?.kyc} viewer={viewer} clientFirst={first} />
           )}
