@@ -88,7 +88,7 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
   const isSchedule = step.label === "Schedule meeting to discuss current financial health";
   const isVerify = step.label === "Verify financial information";
   const reached = step.state === "next" || step.state === "done";
-  const custom = isKyc || isSign || isAstute || isPersonal || isCapture || isVerify;
+  const custom = isSchedule || isKyc || isSign || isAstute || isPersonal || isCapture || isVerify;
 
   return (
     <div key={step.label} className="animate-fade-in overflow-hidden rounded-xl border border-border/70 bg-card">
