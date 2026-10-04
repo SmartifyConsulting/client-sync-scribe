@@ -73,6 +73,21 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
     manager: { what: "{name} checks and completes their personal details: ID number, date of birth, address and marital status.", required: ["ID or passport number", "Date of birth", "Residential address", "Marital status"] },
     unlocks: "Identity, AML and PEP screening",
   },
+  "Schedule meeting to discuss current financial health": {
+    client: { what: "Your Wealth Manager will set up a meeting with you to talk through your current financial health: income, expenses, debts, savings and goals. You'll get the date and time here.", required: ["Be available for the meeting"] },
+    manager: { what: "Book a meeting with {name} to discuss their current financial health. When you meet, tap Record meeting so the conversation fills in their financial information.", required: ["Meeting date and time"] },
+    unlocks: "Recording the meeting and capturing financials",
+  },
+  "Marlin is accessing your current portfolios": {
+    client: { what: "Your Wealth Manager is gathering your existing policies and investments from the insurers and fund managers, using the authority you signed. You don't need to do anything.", required: [] },
+    manager: { what: "", required: [] },
+    unlocks: "Your financial plan",
+  },
+  "Marlin is preparing your financial plan": {
+    client: { what: "Your Wealth Manager is comparing options and preparing your recommendations and Record of Advice (ROA). You'll be asked to review it in Step 5.", required: [] },
+    manager: { what: "", required: [] },
+    unlocks: "Step 5: Presentation",
+  },
   "Record consultation and capture financials": {
     client: { what: "Your Wealth Manager meets with you and records the conversation. Your income, expenses, assets, debts, goals and attitude to risk are captured from that meeting, so you don't have to fill in forms.", required: ["A meeting with your Wealth Manager"] },
     manager: { what: "Record your consultation with {name}, then capture their financial information from it. Holarc AI fills in cash flow, assets and liabilities, existing cover, investments, goals and estate details. Check it before {name} verifies it.", required: ["Recorded consultation or written notes"] },

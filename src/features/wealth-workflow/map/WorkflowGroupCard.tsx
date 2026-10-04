@@ -28,7 +28,7 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
   const active = state === "current" || state === "waiting" || state === "blocked";
   const locked = state === "pending";
   const [userOpen, setUserOpen] = useState<boolean | null>(null);
-  const open = true; void userOpen;
+  const open = userOpen ?? active;
 
   return (
     <div
@@ -41,7 +41,7 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
       )}
     >
       <div className={cn("flex items-center gap-1.5 bg-primary px-2.5 py-1.5", locked && "opacity-80")}>
-        <button onClick={locked ? undefined : onOpen} disabled={locked} className="flex flex-1 items-center gap-2 text-left disabled:cursor-default">
+        <button onClick={locked ? undefined : () => { setUserOpen(!open); onOpen(); }} disabled={locked} className="flex flex-1 items-center gap-2 text-left disabled:cursor-default">
           <span className="flex items-center justify-center rounded-full bg-black px-2 py-0.5 text-2xs font-semibold text-white">
             {state === "completed" ? <Check className="h-3.5 w-3.5" strokeWidth={4} /> : `Step ${g.n}`}
           </span>

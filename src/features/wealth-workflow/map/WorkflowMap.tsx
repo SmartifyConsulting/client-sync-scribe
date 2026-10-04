@@ -28,7 +28,7 @@ interface Props {
 
 /** Wealth manager view: a read-only projection of the workflow engine. */
 export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGroup, onBackToLive, viewer = "manager" }: Props) {
-  const m = useWorkflowMap(patientId);
+  const m = useWorkflowMap(patientId, viewer);
   useWorkflowRealtime(patientId, m.workflow?.id);
   const [picked, setPicked] = useState<{ group: string; step: string } | null>(null);
   const start = useStartWorkflow();

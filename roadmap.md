@@ -65,3 +65,10 @@
 - [x] Marlin has 6 clients linked (Georgia with 3 policies)
 - [x] Astute sign-in verified (reaches CCP home)
 - [ ] Astute data pull: BLOCKED — Marlin's Astute account has 0 clients, 0 requests, 0 results; needs one real client request (ID + consent, may be billed) to map result fields
+
+## Live Workspace end-to-end (Oct 2026)
+- [x] Step 1 collapses / current step expands
+- [x] Step 2 "Schedule meeting" sub-step with booking link
+- [x] Record meeting button → transcribe → auto-capture financials
+- [x] Client sees simplified Steps 3–4
+- [ ] Working Window tools for Steps 4–6 sub-steps (guidance text only so far)
