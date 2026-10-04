@@ -65,7 +65,7 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
       </div>
       {open && (
         <>
-          <ul className="divide-y border-t">
+          <ul className="space-y-0.5 border-t py-1">
             {view.steps.map((s) => {
               const reachable = s.state === "done" || s.state === "next";
               return (
@@ -85,7 +85,7 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
                 <span className="flex w-4 flex-none items-center justify-center">
                   {s.state === "done" ? (
                     <span className={cn("flex h-4 w-4 items-center justify-center rounded-full", s.owner === "advisor" ? "bg-blue-500" : "bg-emerald-500")}>
-                      <Check className="h-2.5 w-2.5 text-white" />
+                      <Check className="h-3 w-3 text-white" strokeWidth={4} />
                     </span>
                   ) : s.state === "next" ? (
                     <span className="block h-2 w-2 rounded-full bg-primary" />

@@ -68,7 +68,7 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
     manager: { what: "{name}'s consolidated profile is saved to the firm's CRM.", required: ["Portfolio data collected"] },
     unlocks: "Needs analysis",
   },
-  "Confirm personal information": {
+  "Complete personal information": {
     client: { what: "Check and complete your personal details. We need these for identity verification (FICA) and to fill in your Letter of Authority.", required: ["ID or passport number", "Date of birth", "Residential address", "Marital status"] },
     manager: { what: "{name} checks and completes their personal details: ID number, date of birth, address and marital status.", required: ["ID or passport number", "Date of birth", "Residential address", "Marital status"] },
     unlocks: "Identity, AML and PEP screening",
