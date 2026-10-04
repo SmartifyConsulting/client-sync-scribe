@@ -73,7 +73,7 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
     manager: { what: "{name} checks and completes their personal details: ID number, date of birth, address and marital status.", required: ["ID or passport number", "Date of birth", "Residential address", "Marital status"] },
     unlocks: "Identity, AML and PEP screening",
   },
-  "Schedule "Review Financial Health" meeting": {
+  'Schedule "Review Financial Health" meeting': {
     client: { what: "Your Wealth Manager will set up a meeting with you to talk through your current financial health: income, expenses, debts, savings and goals. You'll get the date and time here.", required: ["Be available for the meeting"] },
     manager: { what: "Book a meeting with {name} to discuss their current financial health. When you meet, tap Record meeting so the conversation fills in their financial information.", required: ["Meeting date and time"] },
     unlocks: "Recording the meeting and capturing financials",

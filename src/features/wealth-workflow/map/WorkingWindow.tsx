@@ -87,7 +87,7 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
   const isAstute = step.label.startsWith("Astute pull");
   const isPersonal = step.label === "Complete personal information";
   const isCapture = step.label === "Record consultation and capture financials";
-  const isSchedule = step.label === "Schedule "Review Financial Health" meeting";
+  const isSchedule = step.label === 'Schedule "Review Financial Health" meeting';
   const isVerify = step.label === "Verify financial information";
   const reached = step.state === "next" || step.state === "done";
   const isLater = LATER_STEPS.has(step.label);
