@@ -1,4 +1,3 @@
-import { TopBarIcons } from "./TopBarIcons";
 import { isWealthHidden } from "@/lib/terminology";
 import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
@@ -484,16 +483,16 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 
   return (
 
-    <header className="sidebar-chrome fixed inset-x-0 top-0 z-40 h-[var(--topnav-height)] bg-sidebar">
-      <div className="flex h-full items-center gap-4 px-6">
-        <div className="flex shrink-0 items-center">
+    <aside className="sidebar-chrome fixed left-0 top-0 z-40 h-screen w-[252px] bg-sidebar">
+      <div className="flex h-full flex-col">
+        <div className="flex h-24 items-center gap-3 px-6">
           <Logo size="lg" onDark />
         </div>
 
         {/* Navigation */}
-        <nav className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto font-size-preserve [&>div]:flex [&>div]:items-center [&>div]:gap-1 [&_div.space-y-1\.5]:flex [&_div.space-y-1\.5]:items-center [&_div.space-y-1\.5]:gap-1 [&_div.space-y-1\.5]:space-y-0 [&_a]:whitespace-nowrap">
+        <nav className="flex-1 px-4 pt-[1.5cm] py-1 space-y-4 overflow-y-auto font-size-preserve">
           {loading ? (
-            <div className="flex items-center justify-center">
+            <div className="flex items-center justify-center py-12">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             </div>
           ) : isDoctorMenu ? (
@@ -551,15 +550,15 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 
         {/* Customise menu — doctors only */}
         {!loading && !isPatientMenu && !isNurseMenu && !isOnAdminRoute && (
-          <div className="shrink-0">
+          <div className="px-4 pb-1">
             <Popover>
               <PopoverTrigger asChild>
-                <button className="flex items-center gap-2 whitespace-nowrap rounded-xl px-3 py-1.5 text-xs font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors">
+                <button className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors">
                   <SlidersHorizontal className="h-3.5 w-3.5" />
                   Customise menu
                 </button>
               </PopoverTrigger>
-              <PopoverContent side="bottom" align="end" className="w-72 max-h-[70vh] overflow-y-auto">
+              <PopoverContent side="top" align="start" className="w-72 max-h-[70vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-xs font-semibold text-foreground">Customise menu</p>
                   <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={restoreAll}>
@@ -606,10 +605,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
           </div>
         )}
 
-        <div className="shrink-0">
-          <TopBarIcons />
-        </div>
       </div>
-    </header>
+    </aside>
   );
 }
