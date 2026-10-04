@@ -24,12 +24,12 @@ interface Props {
   initialGroup?: string;
   onBackToLive?: () => void;
   viewer?: "manager" | "client";
-  /** Replaces the workflow map on the left (e.g. the client profile). */
-  leftPanel?: ReactNode;
+  /** Kept for callers; the stepper + working window layout is always used. */
+  stepperLayout?: boolean;
 }
 
-/** Wealth manager view: a read-only projection of the workflow engine. */
-export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGroup, onBackToLive, viewer = "manager", leftPanel }: Props) {
+/** Live Workspace: step list on the left, working window for the active step on the right. */
+export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGroup, onBackToLive, viewer = "manager" }: Props) {
   const m = useWorkflowMap(patientId, viewer);
   useWorkflowRealtime(patientId, m.workflow?.id);
   const [picked, setPicked] = useState<{ group: string; step: string } | null>(null);
