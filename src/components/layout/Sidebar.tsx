@@ -374,7 +374,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                 ? "bg-red-600 text-white border-red-600 hover:bg-red-700 hover:border-red-700"
                 : item.accent
                   ? "bg-maeve text-maeve-foreground border-maeve hover:bg-maeve-dark hover:border-maeve-dark"
-                  : "text-foreground hover:border-primary",
+                  : "text-white hover:bg-white/20",
           )
         }
       >
