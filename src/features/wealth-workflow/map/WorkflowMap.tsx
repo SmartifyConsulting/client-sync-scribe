@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Loader2, Volume2, VolumeX } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import folderAsset from "@/assets/documents-folder-3d.png.asset.json";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useStartWorkflow } from "../hooks";
@@ -7,7 +8,7 @@ import { OWNER_LABEL } from "./groups";
 import { useWorkflowMap, type GroupView } from "./useWorkflowMap";
 import { WorkflowCanvas } from "./WorkflowCanvas";
 import { LiveTray } from "./LiveTray";
-import { isChimeMuted, setChimeMuted, playChime } from "./chime";
+import { playChime } from "./chime";
 import { StageDetailSheet } from "./StageDetailSheet";
 import { WorkingWindow } from "./WorkingWindow";
 import { useWorkflowRealtime } from "../workspace/useWorkflowRealtime";
@@ -35,7 +36,6 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
   const { toast } = useToast();
   const [selected, setSelected] = useState<GroupView | null>(null);
   const [openedInitial, setOpenedInitial] = useState<string | undefined>();
-  const [muted, setMuted] = useState(isChimeMuted());
   const clientFirst = (clientName ?? "Client").split(" ")[0] || "Client";
   const clientUid = m.records?.personal?.patient_user_id as string | undefined;
   const advisorUid = m.records?.personal?.user_id as string | undefined;
@@ -96,6 +96,12 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
   const liveStep = liveGroup?.steps.find((s) => s.state === "next")?.label ?? null;
   const shownGroup = picked ? m.groups.find((g) => g.group.key === picked.group) ?? null : liveGroup;
   const shownStep = picked ? picked.step : liveStep;
+  const docCount = (m.records?.docs ?? []).length + (m.records?.signed ?? []).length;
+  const renderWorking = (isLiveStep: boolean) => <WorkingWindow embedded group={shownGroup} stepLabel={shownStep} isLive={isLiveStep} viewer={viewer}
+        clientName={clientName ?? "Client"} workflowId={wf.id} records={m.records}
+        blockers={wf.status === "blocked" ? wf.blockers : []}
+        documents={(m.records?.docs ?? []) as any[]}
+        onBackToCurrent={() => setPicked(null)} onOpenDocuments={onOpenDocuments} />;
   const isLive = !picked || (picked.group === liveGroup?.group.key && picked.step === liveStep);
 
   return (
@@ -117,7 +123,7 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
         </div>
       )}
 
-      <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+      <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="min-w-0 rounded-xl border border-border bg-card p-4">
           <p className="mb-3 text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Workflow map</p>
           <WorkflowCanvas groups={m.groups} blockers={wf.status === "blocked" ? wf.blockers : []} viewer={viewer}
@@ -138,21 +144,24 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
             <span className="flex items-center gap-2 text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
               <span className="h-2 w-2 animate-pulse rounded-full bg-primary" /> Live workspace
             </span>
-            <button type="button" onClick={() => { setChimeMuted(!muted); setMuted(!muted); }}
-              aria-label={muted ? "Turn sound on" : "Mute sound"} className="rounded-full p-1.5 text-muted-foreground hover:bg-muted">
-              {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+            <button type="button" onClick={onOpenDocuments} aria-label="Open documents" title="Documents"
+              className="relative -my-2 rounded-lg p-0.5 transition-transform hover:scale-105">
+              <img src={folderAsset.url} alt="" className="h-10 w-10 object-contain" />
+              {docCount > 0 && <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">{docCount}</span>}
             </button>
           </div>
           <LiveTray groups={m.groups} viewer={viewer} clientFirst={clientFirst}
-            managerName="your Wealth Manager" avatars={avatars} nextTitle={nextAction?.title} />
+            managerName="your Wealth Manager" avatars={avatars} nextTitle={nextAction?.title}
+            working={isLive ? renderWorking(true) : undefined}
+            pickedWorking={!isLive ? <>
+              <button onClick={() => setPicked(null)} className="px-2 pt-1 text-xs font-medium text-primary hover:underline">← Back to current step</button>
+              <p className="px-2 pt-1 text-xs font-semibold text-foreground">{shownStep}</p>
+              {renderWorking(false)}
+            </> : undefined} />
         </div>
       </div>
 
-      <WorkingWindow group={shownGroup} stepLabel={shownStep} isLive={isLive} viewer={viewer}
-        clientName={clientName ?? "Client"} workflowId={wf.id} records={m.records}
-        blockers={wf.status === "blocked" ? wf.blockers : []}
-        documents={(m.records?.docs ?? []) as any[]}
-        onBackToCurrent={() => setPicked(null)} onOpenDocuments={onOpenDocuments} />
+
 
       <StageDetailSheet view={selected} onClose={() => setSelected(null)} workflow={wf} defs={m.defs} recs={m.recs} records={m.records} />
     </div>

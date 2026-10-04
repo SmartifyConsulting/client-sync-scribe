@@ -1,4 +1,5 @@
 import { Check, Hourglass, Lock, MinusCircle } from "lucide-react";
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { OWNER_LABEL } from "./groups";
 import { StepAvatar, type MapAvatars } from "./StepAvatar";
@@ -11,6 +12,10 @@ interface Props {
   managerName: string;
   nextTitle?: string | null;
   avatars?: MapAvatars;
+  /** Working panel embedded under the pulsing step. */
+  working?: ReactNode;
+  /** Working panel for a step the user picked from the map (not the live one). */
+  pickedWorking?: ReactNode;
 }
 
 export const isMine = (owner: string, viewer: "manager" | "client") =>
@@ -26,10 +31,11 @@ function StepTick({ owner }: { owner: string }) {
 }
 
 /** Live Workspace tray: completed steps ticked, current step open, later steps locked. */
-export function LiveTray({ groups, viewer, clientFirst, managerName, avatars }: Props) {
+export function LiveTray({ groups, viewer, clientFirst, managerName, avatars, working, pickedWorking }: Props) {
   const visible = groups.filter((g) => g.state !== "not_applicable");
   return (
     <div className="space-y-2.5">
+      {pickedWorking && <div className="rounded-xl border border-primary/40 bg-card p-1.5">{pickedWorking}</div>}
       {visible.map((g) => {
         const done = g.state === "completed";
         const active = ["current", "waiting", "blocked"].includes(g.state);
@@ -96,6 +102,7 @@ export function LiveTray({ groups, viewer, clientFirst, managerName, avatars }: 
                 </li>
               )}
             </ul>
+            {cur && working && <div className="px-1.5 pb-1">{working}</div>}
             {cur && !mine && (
               <p className="px-4 pb-2 pt-1 text-2xs text-muted-foreground">Waiting on {waitingOn}</p>
             )}
