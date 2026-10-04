@@ -24,12 +24,12 @@ interface Props {
   initialGroup?: string;
   onBackToLive?: () => void;
   viewer?: "manager" | "client";
-  /** Replaces the workflow map on the left (e.g. the client profile). */
-  leftPanel?: ReactNode;
+  /** Kept for callers; the stepper + working window layout is always used. */
+  stepperLayout?: boolean;
 }
 
-/** Wealth manager view: a read-only projection of the workflow engine. */
-export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGroup, onBackToLive, viewer = "manager", leftPanel }: Props) {
+/** Live Workspace: step list on the left, working window for the active step on the right. */
+export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGroup, onBackToLive, viewer = "manager" }: Props) {
   const m = useWorkflowMap(patientId, viewer);
   useWorkflowRealtime(patientId, m.workflow?.id);
   const [picked, setPicked] = useState<{ group: string; step: string } | null>(null);
@@ -124,30 +124,13 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
         </div>
       )}
 
-      <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-2">
-        {leftPanel ? <div className="min-w-0">{leftPanel}</div> : (
+      <div className="grid min-w-0 grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
         <div className="min-w-0 rounded-xl border border-border bg-card p-4">
-          <p className="mb-3 text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Workflow map</p>
-          <WorkflowCanvas groups={m.groups} blockers={wf.status === "blocked" ? wf.blockers : []} viewer={viewer}
-            clientFirst={clientFirst} docCount={docCount}
-            onOpenDocuments={onOpenDocuments} avatars={avatars}
-            onSelectStep={(group, step) => setPicked({ group, step })} />
-        </div>
-        )}
-        <div className="min-w-0 rounded-xl border border-border bg-card p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <span className="flex items-center gap-2 text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-primary" /> Live workspace
-            </span>
-            <button type="button" id="wealth-docs-tile" onClick={onOpenDocuments} aria-label="Open documents" title="Documents"
-              className="relative -my-2 rounded-lg p-0.5 transition-transform hover:scale-105">
-              <img src={folderAsset.url} alt="" className="h-10 w-10 object-contain" />
-              {<span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-2xs ring-2 ring-card font-semibold text-primary-foreground">{docCount}</span>}
-            </button>
-          </div>
+          <p className="mb-3 flex items-center gap-2 text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-primary" /> Steps
+          </p>
           <LiveTray groups={m.groups} viewer={viewer} clientFirst={clientFirst}
             managerName="your Wealth Manager" avatars={avatars} nextTitle={nextAction?.title}
-            working={isLive ? renderWorking(true) : undefined}
             history={(gk, step) => <WorkingWindow embedded group={m.groups.find((g) => g.group.key === gk) ?? null} stepLabel={step} isLive={false} viewer={viewer}
               clientName={clientName ?? "Client"} workflowId={wf.id} records={m.records} blockers={[]}
               documents={(m.records?.docs ?? []) as any[]} onBackToCurrent={() => {}} onOpenDocuments={onOpenDocuments} />}
@@ -157,12 +140,22 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
               <SolidBadge className="bg-blue-600">{avatars.advisor.name && avatars.advisor.name !== "Wealth Manager" ? avatars.advisor.name.split(" ")[0] : "Wealth Manager"}</SolidBadge>
               <SolidBadge className="bg-slate-600">System</SolidBadge>
               {Array.from(new Set((m.records?.holdings ?? []).map((h: any) => h.provider as string))).map((p) => <InsurerBadge key={p} provider={p} />)}
-            </>}
-            pickedWorking={!isLive ? <>
-              <button onClick={() => setPicked(null)} className="px-2 pt-1 text-xs font-medium text-primary hover:underline">← Back to current step</button>
-              <p className="px-2 pt-1 text-xs font-semibold text-foreground">{shownStep}</p>
-              {renderWorking(false)}
-            </> : undefined} />
+            </>} />
+        </div>
+        <div className="min-w-0 rounded-xl border border-border bg-card p-4 lg:sticky lg:top-4">
+          <div className="mb-3 flex items-center justify-between">
+            <span className="flex items-center gap-2 text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-primary" /> Working window
+              {shownStep && <span className="normal-case tracking-normal text-foreground">· {shownStep}</span>}
+            </span>
+            <button type="button" id="wealth-docs-tile" onClick={onOpenDocuments} aria-label="Open documents" title="Documents"
+              className="relative -my-2 rounded-lg p-0.5 transition-transform hover:scale-105">
+              <img src={folderAsset.url} alt="" className="h-10 w-10 object-contain" />
+              <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-2xs ring-2 ring-card font-semibold text-primary-foreground">{docCount}</span>
+            </button>
+          </div>
+          {!isLive && <button onClick={() => setPicked(null)} className="mb-2 text-xs font-medium text-primary hover:underline">← Back to current step</button>}
+          {renderWorking(isLive)}
         </div>
       </div>
 
