@@ -10346,6 +10346,47 @@ export type Database = {
           },
         ]
       }
+      wealth_audit_log: {
+        Row: {
+          action: string
+          actor_user_id: string | null
+          created_at: string
+          details: string | null
+          id: string
+          patient_id: string
+          record_id: string | null
+          record_type: string | null
+        }
+        Insert: {
+          action: string
+          actor_user_id?: string | null
+          created_at?: string
+          details?: string | null
+          id?: string
+          patient_id: string
+          record_id?: string | null
+          record_type?: string | null
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string | null
+          created_at?: string
+          details?: string | null
+          id?: string
+          patient_id?: string
+          record_id?: string | null
+          record_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wealth_audit_log_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wealth_claims: {
         Row: {
           application_id: string | null
@@ -12191,6 +12232,16 @@ export type Database = {
       wealth_assert_access: {
         Args: { _workflow_id: string }
         Returns: Record<string, unknown>
+      }
+      wealth_audit: {
+        Args: {
+          _action: string
+          _details: string
+          _id: string
+          _patient: string
+          _type: string
+        }
+        Returns: undefined
       }
       wealth_blockers: {
         Args: { _target_stage: string; _workflow_id: string }
