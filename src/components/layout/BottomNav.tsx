@@ -31,7 +31,6 @@ const doctorNavItems = [
 ].filter((i) => !isWealthHidden(i.to));
 
 const patientSections = [
-  { icon: Handshake, labelKey: "nav.myHolarchy", section: "health", to: "/patient/details?section=health" },
   { icon: FolderOpen, labelKey: "bottomNav.myDesk", section: "admin", to: "/patient/details?section=admin" },
   { icon: Activity, labelKey: "nav.liveWorkspace", section: "workspace", to: "/my-workspace" },
   { icon: FileText, labelKey: "nav.myClaims", section: "claims", to: "/claims" },
