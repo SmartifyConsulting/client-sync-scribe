@@ -74,3 +74,7 @@
 - [x] Working Window tools for Steps 5–6
 - [x] All map steps expanded (design request)
 - [ ] Step 4 Working Window tools (quotes, affordability)
+
+## Live Workspace documents
+- [ ] Disclosure Agreement + LOA rows in LW: preview (eye), download, sign, auto-file to Documents
+- [ ] Document previews: FSP logo top-left, WM logo top-right
