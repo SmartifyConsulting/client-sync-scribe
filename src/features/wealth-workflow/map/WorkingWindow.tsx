@@ -153,7 +153,8 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
 
         {/* Right: the activity itself */}
         <div className="border-t border-border/60 pt-3 md:border-t-0 md:border-l md:pl-5 md:pt-0">
-          {isKyc && (step.state === "next" || step.state === "done") && (
+          {isKyc && viewer === "client" && step.state === "next" && <p className="text-sm text-muted-foreground">Scan the QR code shown under this step in the map to start your verification.</p>}
+          {isKyc && !(viewer === "client" && step.state === "next") && (step.state === "next" || step.state === "done") && (
             <KycPanel workflowId={workflowId} kyc={records?.kyc} viewer={viewer} clientFirst={first} />
           )}
           {isSign && (step.state === "next" || step.state === "done") && (
