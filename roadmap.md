@@ -76,5 +76,5 @@
 - [ ] Step 4 Working Window tools (quotes, affordability)
 
 ## Live Workspace documents
-- [ ] Disclosure Agreement + LOA rows in LW: preview (eye), download, sign, auto-file to Documents
-- [ ] Document previews: FSP logo top-left, WM logo top-right
+- [x] Disclosure Agreement + LOA rows in LW: preview (eye), download, sign, auto-file to Documents
+- [x] Document previews: FSP logo top-left, WM logo top-right
