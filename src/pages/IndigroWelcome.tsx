@@ -29,7 +29,7 @@ const HERO = {
     },
   ],
   footnote:
-    "Life policies and investments carry risk and returns are not guaranteed. indigro supports, and does not replace, your FSP's own compliance responsibilities. Advice is provided by licensed financial services providers.",
+    "Life policies and investments carry risk and returns are not guaranteed. Elysian supports, and does not replace, your FSP's own compliance responsibilities. Advice is provided by licensed financial services providers.",
 } as const;
 
 export default function IndigroWelcome() {

@@ -412,11 +412,11 @@ export function SignInCard({ onSignUp }: { onSignUp?: () => void }) {
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2.5">
-        <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
+      <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-xl border border-white/15 bg-white/5 px-3 py-2.5">
+        <span className="inline-flex items-center gap-1.5 text-sm font-medium text-white">
           <Lock className="h-3.5 w-3.5 text-primary" /> Your data is encrypted
         </span>
-        <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
+        <span className="inline-flex items-center gap-1.5 text-sm font-medium text-white">
           <KeyRound className="h-3.5 w-3.5 text-primary" /> 2FA required
         </span>
       </div>

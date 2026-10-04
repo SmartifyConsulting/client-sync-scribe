@@ -973,7 +973,7 @@ export default function Auth() {
   // Already signed in — never show sign-in/sign-up while a session exists.
   if (authLoading || user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center bg-black">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -982,12 +982,12 @@ export default function Auth() {
   // Login form
   if (isLogin) {
     return (
-      <div className="min-h-screen flex flex-col bg-background">
+      <div className="min-h-screen flex flex-col bg-black">
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="w-full max-w-md">
             <div className="text-center mb-6">
               <button type="button" onClick={() => navigate("/")} className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity">
-                <Logo size="hero" />
+                <Logo size="lg" onDark />
               </button>
             </div>
             <SignInCard onSignUp={() => { setIsLogin(false); setCurrentStep(0); setAccountCreated(false); }} />
@@ -1001,12 +1001,12 @@ export default function Auth() {
 
   // Signup wizard
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-black">
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-6">
             <button type="button" onClick={() => navigate("/")} className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity">
-              <Logo size="hero" />
+              <Logo size="lg" onDark />
             </button>
           </div>
           {/* Sign In / Sign Up tabs */}
@@ -1034,7 +1034,7 @@ export default function Auth() {
           </div>
           <div className="text-center mb-3">
             <div className="mt-1"><Progress value={progress} className="h-1.5" /></div>
-            <p className="text-xs mt-1 text-muted-foreground">Step {currentStep + 1} of {totalSteps}: {steps[currentStep]}</p>
+            <p className="text-xs mt-1 text-white/70">Step {currentStep + 1} of {totalSteps}: {steps[currentStep]}</p>
           </div>
           <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
             {userRole === "doctor" ? renderDoctorStep() : renderPatientStep()}
@@ -1058,11 +1058,11 @@ export default function Auth() {
             </div>
           </div>
           {/* Trust band — bottom of signup box */}
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2.5">
-            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-xl border border-white/15 bg-white/5 px-3 py-2.5">
+            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-white">
               <Lock className="h-3.5 w-3.5 text-primary" /> Your data is encrypted
             </span>
-            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
+            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-white">
               <KeyRound className="h-3.5 w-3.5 text-primary" /> 2FA required
             </span>
           </div>

@@ -1,16 +1,21 @@
 import { cn } from "@/lib/utils";
+import elysianMark from "@/assets/brand/elysian-mark.png";
 
 /**
- * indigro mark: a teal rounded tile holding a stylised "i" whose dot is lifted
- * into an upward tick — growth and a checked, compliant record.
+ * Elysian mark: a teal rounded tile holding a white lotus flower with a
+ * diamond bud. Source image is a wide export with the square mark on the
+ * left followed by blank space, so it's cropped via CSS to just the mark.
  */
 export function LogoMark({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 32 32" className={cn("h-8 w-8 shrink-0", className)} role="img" aria-label="indigro">
-      <rect width="32" height="32" rx="8" className="fill-brand" />
-      <rect x="13.5" y="13" width="5" height="12" rx="2.5" className="fill-navy" />
-      <path d="M13 8.6 L16 5.6 L19 8.6 L16 11.6 Z" className="fill-navy" />
-    </svg>
+    <span className={cn("relative inline-block h-8 w-8 shrink-0 overflow-hidden rounded-[22%]", className)} role="img" aria-label="Elysian">
+      <img
+        src={elysianMark}
+        alt=""
+        className="absolute left-0 top-0 h-full w-auto max-w-none select-none"
+        draggable={false}
+      />
+    </span>
   );
 }
 
@@ -40,7 +45,7 @@ export function Logo({
       <span className={cn("inline-flex items-center gap-[0.1em] text-[51px] sm:text-[77px] lg:text-[80px] xl:text-[106px]", className)}>
         <LogoMark className="h-[1.33em] w-[1.33em]" />
         <span className={cn("font-display font-bold leading-none tracking-tight", onDark ? "text-brand" : "text-navy")}>
-          indigro
+          Elysian
         </span>
       </span>
     );
@@ -55,7 +60,7 @@ export function Logo({
           onDark ? "text-brand" : "text-foreground",
         )}
       >
-        indigro
+        Elysian
       </span>
     </span>
   );
