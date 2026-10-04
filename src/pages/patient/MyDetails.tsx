@@ -12,14 +12,14 @@ import { EmergencyContact } from "@/features/patients/components/EmergencyContac
 
 
 
-export default function MyDetails() {
+export default function MyDetails({ embedded = false }: { embedded?: boolean } = {}) {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const rawReturn = searchParams.get("returnTo");
   const returnTo = rawReturn && rawReturn.startsWith("/") && !rawReturn.startsWith("//") ? rawReturn : null;
   const rawSection = searchParams.get("section");
-  const section = rawSection === "home" ? "health" : rawSection || "health";
+  const section = embedded ? "workspace" : rawSection === "home" ? "health" : rawSection || "health";
   const [patient, setPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string>("");
@@ -186,7 +186,7 @@ export default function MyDetails() {
     );
   }
 
-  if (rawSection === "home") {
+  if (!embedded && rawSection === "home") {
     return <Navigate to="/patient/details?section=health" replace />;
   }
 
@@ -199,8 +199,9 @@ export default function MyDetails() {
   const heading = sectionHeading[section] || sectionHeading.health;
 
   return (
-    <div className="space-y-4 p-4 md:p-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <div className={embedded ? "space-y-3" : "space-y-4 p-4 md:p-6"}>
+      {embedded && <p className="text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">My Profile</p>}
+      {!embedded && <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="page-title">{heading.title}</h1>
           <p className="text-muted-foreground text-xs">{heading.subtitle}</p>
@@ -213,7 +214,7 @@ export default function MyDetails() {
             Saved — back to Live Workspace
           </button>
         )}
-      </div>
+      </div>}
 
       {patient ? (
         <PatientDetailsEditor
