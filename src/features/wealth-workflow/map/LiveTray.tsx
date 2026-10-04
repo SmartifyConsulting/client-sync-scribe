@@ -10,6 +10,7 @@ interface Props {
   clientFirst: string;
   managerName: string;
   nextTitle?: string | null;
+  avatars?: MapAvatars;
 }
 
 export const isMine = (owner: string, viewer: "manager" | "client") =>

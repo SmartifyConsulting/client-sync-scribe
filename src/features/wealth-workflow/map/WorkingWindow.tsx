@@ -76,7 +76,7 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
   const t = g ? g[viewer] : null;
   const mine = (viewer === "client" && step.owner === "client") || (viewer === "manager" && step.owner === "advisor");
   const who = ownerLabel(step.owner, viewer, first);
-  const status = step.state === "done" ? "Completed" : step.state === "next" ? (mine ? "Your turn" : "In progress") : "Upcoming";
+  const status = step.state === "done" ? "Completed" : step.state === "next" ? (mine ? "" : "In progress") : "Upcoming";
   const waitingText = viewer === "client"
     ? (step.owner === "advisor" ? "Your Wealth Manager is working on this. You don't need to do anything yet." : step.owner === "insurer" ? "Your insurer is working on this. We'll update you here." : "Holarc Wealth is doing this automatically.")
     : (step.owner === "client" ? `Waiting for ${first}. This updates as soon as they act.` : step.owner === "insurer" ? "Waiting for the insurer." : "Holarc Wealth is doing this automatically.");
@@ -108,10 +108,10 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
               <OwnerBadge owner={step.owner} label={who} />
               <h3 className="text-base font-medium tracking-tight text-foreground">{step.label}</h3>
             </div>
-            <span className={cn("mt-2 inline-block rounded-full px-2 py-0.5 text-2xs font-medium",
+            {status && <span className={cn("mt-2 inline-block rounded-full px-2 py-0.5 text-2xs font-medium",
               step.state === "done" ? "bg-primary/10 text-primary" : step.state === "next" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
               {status}
-            </span>
+            </span>}
           </div>
 
           {isSign && viewer === "client" ? (
