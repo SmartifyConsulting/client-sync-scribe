@@ -66,6 +66,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BillingPanel } from "@/features/billing/BillingPanel";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { PracticeInfoSections, FscaCategoriesCard } from "@/features/wealth-workflow/practice/PracticeInfoSections";
+import { PracticeLogos } from "@/features/wealth-workflow/practice/PracticeLogos";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -1544,7 +1545,20 @@ export default function MyPractice() {
 
         {/* === TEMPLATES TAB === */}
         <TabsContent value="templates" className="mt-4 my-practice-tab-body">
-          <ComplianceForms />
+          <Tabs defaultValue="logos" className="w-full">
+            <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
+              <TabsTrigger value="logos" className="tab-brand whitespace-nowrap text-xs px-3 py-1.5">Logos</TabsTrigger>
+              <TabsTrigger value="forms" className="tab-brand whitespace-nowrap text-xs px-3 py-1.5">Forms</TabsTrigger>
+            </TabsList>
+            <TabsContent value="logos" className="mt-4">
+              <div className="rounded-xl border border-border bg-card p-4">
+                <PracticeLogos />
+              </div>
+            </TabsContent>
+            <TabsContent value="forms" className="mt-4">
+              <ComplianceForms />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
         {/* === REFERRALS TAB === */}

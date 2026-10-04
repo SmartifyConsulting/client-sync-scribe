@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { PracticeLogos } from "./PracticeLogos";
 import { usePracticeInfo, useSavePracticeInfo, type PracticeInfo, type Suppliers } from "./usePracticeInfo";
 
 export const FSCA_CATEGORIES = [
@@ -84,7 +83,7 @@ function Section({ value, title, children }: { value: string; title: string; chi
       <AccordionTrigger className={SECTION_TRIGGER_TEAL_CLASS}>
         <h3 className="text-xs font-semibold text-primary-dark">{title}</h3>
       </AccordionTrigger>
-      <AccordionContent className="px-4 pb-4">{children}</AccordionContent>
+      <AccordionContent className="px-4 pb-4 pt-4">{children}</AccordionContent>
     </AccordionItem>
   );
 }
@@ -103,9 +102,6 @@ export function PracticeInfoSections() {
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-card">
       <Accordion type="multiple" className="divide-y divide-border">
-        <Section value="logos" title="Logos">
-          <PracticeLogos />
-        </Section>
         <Section value="planner" title="Planner Details">
           <Fields fields={PLANNER} d={d} setD={setD} /><SaveBar onSave={() => commit()} saving={saving} />
         </Section>
