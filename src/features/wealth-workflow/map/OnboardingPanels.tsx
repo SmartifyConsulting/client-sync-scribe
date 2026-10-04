@@ -153,7 +153,7 @@ export function SignDocsPanel({ workflowId, signed, viewer, clientName }: { work
     { type: "loa", title: "Letter of Authority (LOA)", html: loaHtml(clientName, today, practice) },
   ];
   return (
-    <Accordion type="multiple" className="space-y-3">
+    <Accordion type="multiple" className="space-y-3" defaultValue={viewer === "client" ? docs.filter((d) => !signed.some((s) => s.doc_type === d.type)).map((d) => d.type) : []}>
       {docs.map((d) => (
         <DocCard key={d.type} workflowId={workflowId} doc={d} signed={signed.find((s) => s.doc_type === d.type)} viewer={viewer} clientName={clientName} />
       ))}
