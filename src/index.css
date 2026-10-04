@@ -46,7 +46,7 @@
     --owner-insurer-bg: 40 90% 92%;
     --owner-system: 220 9% 40%;
     --owner-system-bg: 220 14% 94%;
-    --primary-foreground: 220 18% 7%;
+    --primary-foreground: 0 0% 100%;
     --primary-glow: 175 61% 56%;
     --primary-dark: 220 18% 7%;
 
@@ -164,7 +164,7 @@
     --owner-insurer-bg: 35 40% 16%;
     --owner-system: 220 10% 70%;
     --owner-system-bg: 220 10% 18%;
-    --primary-foreground: 220 18% 7%;
+    --primary-foreground: 0 0% 100%;
     --primary-glow: 175 61% 62%;
     --primary-dark: 175 61% 42%;
 

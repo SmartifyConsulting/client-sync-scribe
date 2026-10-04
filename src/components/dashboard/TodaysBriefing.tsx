@@ -186,61 +186,7 @@ export function TodaysBriefing() {
       if (appointmentsError) throw appointmentsError;
 
       if (!appointmentsData || appointmentsData.length === 0) {
-        // Use sample data for demo purposes - fetch real patient IDs (including demo patients)
-        const { data: realPatients } = await supabase
-          .from('patients')
-          .select('id, name, allergies')
-          .limit(3);
-
-        const sampleAppointments: AppointmentWithHistory[] = [
-          {
-            id: 'sample-1',
-            patientId: realPatients?.[0]?.id || '',
-            patientName: realPatients?.[0]?.name || 'Sarah Johnson',
-            startTime: new Date().toISOString(),
-            formattedTime: '9:00 AM',
-            lastSessionSummary: 'Patient reported improved sleep patterns after adjusting medication dosage. Anxiety levels have decreased, though work-related stress persists. Recommended continuing current treatment plan with follow-up in two weeks.',
-            allergies: realPatients?.[0]?.allergies || 'Penicillin, Sulfa drugs',
-            conditions: null,
-            lastPrescription: 'Sertraline 50mg daily',
-            linkedDoctors: [
-              { id: '', name: 'Dr. Emily Roberts', specialty: 'Psychiatrist' },
-              { id: '', name: 'Dr. James Wilson', specialty: 'Cardiologist' }
-            ],
-            unreadRoundTableNotes: [
-              { patientName: realPatients?.[0]?.name || 'Sarah Johnson', doctorName: 'Dr. Emily Roberts', content: 'Patient mentioned considering alternative therapy options. Worth discussing in next session.' }
-            ],
-          },
-          {
-            id: 'sample-2',
-            patientId: realPatients?.[1]?.id || '',
-            patientName: realPatients?.[1]?.name || 'Michael Chen',
-            startTime: new Date().toISOString(),
-            formattedTime: '10:30 AM',
-            lastSessionSummary: 'Follow-up on hypertension management. Blood pressure readings have stabilized with current medication. Patient adherent to low-sodium diet. Continue monitoring.',
-            allergies: realPatients?.[1]?.allergies || null,
-            conditions: null,
-            lastPrescription: 'Lisinopril 10mg daily',
-            linkedDoctors: [
-              { id: '', name: 'Dr. Sarah Thompson', specialty: 'Nephrologist' }
-            ],
-            unreadRoundTableNotes: [],
-          },
-          {
-            id: 'sample-3',
-            patientId: realPatients?.[2]?.id || '',
-            patientName: realPatients?.[2]?.name || 'Emma Williams',
-            startTime: new Date().toISOString(),
-            formattedTime: '2:00 PM',
-            lastSessionSummary: null,
-            allergies: realPatients?.[2]?.allergies || 'Latex',
-            conditions: null,
-            lastPrescription: null,
-            linkedDoctors: [],
-            unreadRoundTableNotes: [],
-          },
-        ];
-        setAppointments(sampleAppointments);
+        setAppointments([]);
         setLoading(false);
         return;
       }
