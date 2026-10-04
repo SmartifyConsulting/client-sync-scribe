@@ -392,6 +392,8 @@ const SECTION_TABS: Record<string, string[]> = {
   health: ["overview", "personal", "medical", "history", "claims", "documents", "lifeEvents"],
   admin: ["calendar", "tasks", "programmes"],
   workspace: ["personal", "medical", "claims"],
+  personal: ["personal"],
+  financial: ["medical"],
 };
 
 export function PatientDetailsEditor({
