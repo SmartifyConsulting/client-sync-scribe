@@ -122,9 +122,6 @@ const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: FolderOpen, label: "Documents", labelKey: "nav.futureDocuments", to: "/my-future?tab=documents" },
   { icon: Activity, label: "My Biolog", labelKey: "nav.myBiolog", to: "/biolog" },
   { icon: BedDouble, label: "My Admissions", labelKey: "nav.myAdmissions", to: "/patient/admissions" },
-  { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/patient/calendar" },
-  { icon: ListChecks, label: "My Actions", labelKey: "nav.myTasks", to: "/patient/tasks", tour: "patient-tasks" },
-  
   { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/patient/rewards" },
   { icon: Sparkles, label: "Ask Holarc Wealth", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true, tour: "patient-sos" },
