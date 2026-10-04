@@ -160,6 +160,11 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
           {isAstute && (
             <AstutePanel patientId={records?.patientId} holdings={records?.holdings ?? []} viewer={viewer} />
           )}
+          {isPersonal && reached && viewer === "client" && (
+            <a href="/patient/details?section=health&returnTo=/my-workspace" className="mb-3 inline-flex items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline">
+              Open my profile to complete personal information →
+            </a>
+          )}
           {isPersonal && reached && <PersonalInfoPanel patientId={records?.patientId} personal={records?.personal} />}
           {isCapture && reached && (
             <CaptureFinancialsPanel patientId={records?.patientId} sessions={records?.sessions ?? []} financials={records?.financials} viewer={viewer} clientFirst={first} />

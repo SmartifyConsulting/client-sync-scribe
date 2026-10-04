@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { useSearchParams, Navigate } from "react-router-dom";
+import { useSearchParams, Navigate, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +15,9 @@ import { EmergencyContact } from "@/features/patients/components/EmergencyContac
 export default function MyDetails() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const rawReturn = searchParams.get("returnTo");
+  const returnTo = rawReturn && rawReturn.startsWith("/") && !rawReturn.startsWith("//") ? rawReturn : null;
   const rawSection = searchParams.get("section");
   const section = rawSection === "home" ? "health" : rawSection || "health";
   const [patient, setPatient] = useState<Patient | null>(null);
@@ -197,9 +200,19 @@ export default function MyDetails() {
 
   return (
     <div className="space-y-4 p-4 md:p-6">
-      <div>
-        <h1 className="page-title">{heading.title}</h1>
-        <p className="text-muted-foreground text-xs">{heading.subtitle}</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="page-title">{heading.title}</h1>
+          <p className="text-muted-foreground text-xs">{heading.subtitle}</p>
+        </div>
+        {returnTo && (
+          <button
+            onClick={() => navigate(returnTo)}
+            className="rounded-full bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+          >
+            Saved — back to Live Workspace
+          </button>
+        )}
       </div>
 
       {patient ? (
