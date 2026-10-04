@@ -46,7 +46,7 @@ export const WORKFLOW_GROUPS: WorkflowGroup[] = [
     n: 1, key: "gateway", title: "Client Onboarding", clientTitle: "Client Onboarding", icon: ScanFace,
     stages: ["consultation"],
     steps: [
-      { owner: "advisor", label: "Wealth Manager sends secure link", done: () => true },
+      { owner: "advisor", label: "Marlin sends secure link", done: () => true },
       { owner: "client", label: "Scan QR or open secure link", done: (c) => past(1)(c) || c.clientLinked || !!c.kycStatus },
       { owner: "client", label: "KYC, AML and PEP Screening", done: (c) => past(1)(c) || c.kycStatus === "approved" },
       { owner: "client", label: "Sign disclosure and LOA", done: (c) => past(1)(c) || (c.signedDocs.has("disclosure") && c.signedDocs.has("loa")) },

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Check, Lock, Repeat } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { OWNER_LABEL } from "./groups";
-import { ownerLabel } from "./stepGuidance";
 import type { GroupView } from "./useWorkflowMap";
 
 export function OwnerBadge({ owner, label }: { owner: string; label?: string }) {
@@ -90,10 +89,15 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
                   selectedStep === s.label && s.state !== "next" && "bg-muted/60",
                 )}
               >
-                <span className="w-3 text-primary">
-                  {s.state === "done" ? <Check className="h-3.5 w-3.5" /> : s.state === "next" ? <span className="block h-2 w-2 rounded-full bg-primary" /> : null}
+                <span className="flex w-4 flex-none items-center justify-center">
+                  {s.state === "done" ? (
+                    <span className={cn("flex h-4 w-4 items-center justify-center rounded-full", s.owner === "advisor" ? "bg-blue-500" : "bg-emerald-500")}>
+                      <Check className="h-2.5 w-2.5 text-white" />
+                    </span>
+                  ) : s.state === "next" ? (
+                    <span className="block h-2 w-2 rounded-full bg-primary" />
+                  ) : null}
                 </span>
-                <OwnerBadge owner={s.owner} label={ownerLabel(s.owner, viewer, clientFirst)} />
                 <span className={cn("flex-1", s.state === "done" ? "text-muted-foreground" : "text-foreground")}>{s.label}</span>
                 {s.state === "next" && <span className="text-xs font-medium text-primary">Next</span>}
               </li>

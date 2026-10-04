@@ -15,7 +15,7 @@ export interface StepGuidance {
 }
 
 export const STEP_GUIDANCE: Record<string, StepGuidance> = {
-  "Wealth Manager sends secure link": {
+  "Marlin sends secure link": {
     client: { what: "Your Wealth Manager has started your plan and sent you a secure link to continue.", required: [] },
     manager: { what: "You've started {name}'s plan. A secure onboarding link or QR code is ready to send them.", required: ["Share the secure link or QR code with {name}"] },
     unlocks: "{name} opening their secure link and signing in",
