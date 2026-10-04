@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Loader2 } from "lucide-react";
 import folderAsset from "@/assets/documents-folder-3d.png.asset.json";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,6 @@ import { playChime } from "./chime";
 import { StageDetailSheet } from "./StageDetailSheet";
 import { WorkingWindow } from "./WorkingWindow";
 import { useWorkflowRealtime } from "../workspace/useWorkflowRealtime";
-import { OwnerBadge } from "./WorkflowGroupCard";
 import { InsurerBadge } from "./insurerColors";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,10 +24,12 @@ interface Props {
   initialGroup?: string;
   onBackToLive?: () => void;
   viewer?: "manager" | "client";
+  /** Replaces the workflow map on the left (e.g. the client profile). */
+  leftPanel?: ReactNode;
 }
 
 /** Wealth manager view: a read-only projection of the workflow engine. */
-export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGroup, onBackToLive, viewer = "manager" }: Props) {
+export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGroup, onBackToLive, viewer = "manager", leftPanel }: Props) {
   const m = useWorkflowMap(patientId, viewer);
   useWorkflowRealtime(patientId, m.workflow?.id);
   const [picked, setPicked] = useState<{ group: string; step: string } | null>(null);
@@ -124,21 +125,15 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
       )}
 
       <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-2">
+        {leftPanel ? <div className="min-w-0">{leftPanel}</div> : (
         <div className="min-w-0 rounded-xl border border-border bg-card p-4">
           <p className="mb-3 text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Workflow map</p>
           <WorkflowCanvas groups={m.groups} blockers={wf.status === "blocked" ? wf.blockers : []} viewer={viewer}
-            clientFirst={clientFirst} docCount={(m.records?.docs ?? []).length + (m.records?.signed ?? []).length}
+            clientFirst={clientFirst} docCount={docCount}
             onOpenDocuments={onOpenDocuments} avatars={avatars}
             onSelectStep={(group, step) => setPicked({ group, step })} />
-          <div className="mt-3 flex flex-wrap items-center justify-end gap-1.5 border-t border-border/60 pt-2">
-            <span className="mr-1 text-2xs uppercase tracking-[0.14em] text-muted-foreground">Legend</span>
-            <OwnerBadge owner="client" label="Client" />
-            <OwnerBadge owner="advisor" label="Wealth Manager" />
-            <OwnerBadge owner="system" label="System" />
-            {Array.from(new Set((m.records?.holdings ?? []).map((h: any) => h.provider as string))).map((p) => <InsurerBadge key={p} provider={p} />)}
-            {!(m.records?.holdings ?? []).length && <OwnerBadge owner="insurer" label="Insurer" />}
-          </div>
         </div>
+        )}
         <div className="min-w-0 rounded-xl border border-border bg-card p-4">
           <div className="mb-3 flex items-center justify-between">
             <span className="flex items-center gap-2 text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
@@ -153,6 +148,16 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
           <LiveTray groups={m.groups} viewer={viewer} clientFirst={clientFirst}
             managerName="your Wealth Manager" avatars={avatars} nextTitle={nextAction?.title}
             working={isLive ? renderWorking(true) : undefined}
+            history={(gk, step) => <WorkingWindow embedded group={m.groups.find((g) => g.group.key === gk) ?? null} stepLabel={step} isLive={false} viewer={viewer}
+              clientName={clientName ?? "Client"} workflowId={wf.id} records={m.records} blockers={[]}
+              documents={(m.records?.docs ?? []) as any[]} onBackToCurrent={() => {}} onOpenDocuments={onOpenDocuments} />}
+            legend={<>
+              <span className="mr-1 text-2xs uppercase tracking-[0.14em] text-muted-foreground">Legend</span>
+              <SolidBadge className="bg-emerald-600">{clientFirst}</SolidBadge>
+              <SolidBadge className="bg-blue-600">{avatars.advisor.name && avatars.advisor.name !== "Wealth Manager" ? avatars.advisor.name.split(" ")[0] : "Wealth Manager"}</SolidBadge>
+              <SolidBadge className="bg-slate-600">System</SolidBadge>
+              {Array.from(new Set((m.records?.holdings ?? []).map((h: any) => h.provider as string))).map((p) => <InsurerBadge key={p} provider={p} />)}
+            </>}
             pickedWorking={!isLive ? <>
               <button onClick={() => setPicked(null)} className="px-2 pt-1 text-xs font-medium text-primary hover:underline">← Back to current step</button>
               <p className="px-2 pt-1 text-xs font-semibold text-foreground">{shownStep}</p>
@@ -166,6 +171,10 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
       <StageDetailSheet view={selected} onClose={() => setSelected(null)} workflow={wf} defs={m.defs} recs={m.recs} records={m.records} />
     </div>
   );
+}
+
+function SolidBadge({ className, children }: { className: string; children: ReactNode }) {
+  return <span className={`rounded-full px-2 py-0.5 text-2xs font-semibold text-white ${className}`}>{children}</span>;
 }
 
 function Field({ label, value, danger }: { label: string; value: string; danger?: boolean }) {

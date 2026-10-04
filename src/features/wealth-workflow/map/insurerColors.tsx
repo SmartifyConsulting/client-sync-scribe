@@ -20,9 +20,8 @@ export function insurerColor(provider?: string | null) {
 export function InsurerBadge({ provider }: { provider: string }) {
   const c = insurerColor(provider);
   return (
-    <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded px-1.5 py-0.5 text-2xs font-medium"
-      style={{ color: `hsl(${c})`, background: `hsl(${c} / 0.1)` }}>
-      <span className="h-1.5 w-1.5 rounded-full" style={{ background: `hsl(${c})` }} />{provider}
+    <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-2xs font-semibold text-white"
+      style={{ background: `hsl(${c})` }}>{provider}
     </span>
   );
 }

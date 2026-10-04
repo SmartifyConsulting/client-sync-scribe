@@ -78,3 +78,11 @@
 ## Live Workspace documents
 - [x] Disclosure Agreement + LOA rows in LW: preview (eye), download, sign, auto-file to Documents
 - [x] Document previews: FSP logo top-left, WM logo top-right
+
+## Live Workspace layout v2
+- [x] Map replaced by My Profile (Personal, Financial, Claims) on the left
+- [x] All six steps listed; completed steps collapse and expand to show history
+- [x] Bold legend with client and Wealth Manager first names
+- [x] Overview + Life Events on dashboard; My Profile removed from menu
+- [x] Date of birth fills from SA ID
+- [ ] Copy Georgia's Astute policies to Georgia Demo (SQL script ready, not run)

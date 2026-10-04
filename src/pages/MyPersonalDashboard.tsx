@@ -42,6 +42,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { PatientHeroCard } from "@/components/dashboard/PatientHeroCard";
 import { Panel } from "@/components/ui/Panel";
+import { ClientAISummary } from "@/features/wealth-workflow/client/ClientAISummary";
+import { LifeEventsPanel } from "@/features/wealth-workflow/client/LifeEventsPanel";
 import { useClientWealth, zar, zarShort } from "@/features/wealth-workflow/client/useClientWealth";
 import { EmotionalHeadline } from "@/components/dashboard/EmotionalHeadline";
 import { PeopleICareFor } from "@/components/dashboard/PeopleICareFor";
@@ -215,6 +217,13 @@ export default function MyPersonalDashboard() {
     <div className="container mx-auto p-4 max-w-7xl space-y-4">
       {/* Hero: photo, greeting, Vulas, appointments */}
       <PatientHeroCard emotionalLine={GREETING_LINE[state]} />
+
+      {w?.patientId && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+          <ClientAISummary patientId={w.patientId} />
+          <div className="rounded-xl border border-border bg-card p-4"><LifeEventsPanel patientId={w.patientId} /></div>
+        </div>
+      )}
 
       {/* Your Financial Protection + What's Happening */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">

@@ -1,3 +1,4 @@
+import { dobFromSaId } from "@/lib/saId";
 import { PatientProgrammesTab } from "@/features/programmes/components/PatientProgrammesTab";
 import { ClientAISummary } from "@/features/wealth-workflow/client/ClientAISummary";
 import { MyAdvisorsHistory } from "@/features/wealth-workflow/client/MyAdvisorsHistory";
@@ -390,6 +391,7 @@ function AnimatedCounter({ target }: { target: number }) {
 const SECTION_TABS: Record<string, string[]> = {
   health: ["overview", "personal", "medical", "history", "claims", "documents", "lifeEvents"],
   admin: ["calendar", "tasks", "programmes"],
+  workspace: ["personal", "medical", "claims"],
 };
 
 export function PatientDetailsEditor({
@@ -2036,7 +2038,7 @@ export function PatientDetailsEditor({
                       id="id_passport_number"
                       className="text-sm"
                       value={formData.id_passport_number}
-                      onChange={(e) => updateFormData({ id_passport_number: e.target.value })}
+                      onChange={(e) => { const v = e.target.value; const dob = dobFromSaId(v); updateFormData(dob ? { id_passport_number: v, dob } as any : { id_passport_number: v }); }}
                       placeholder="ID or passport number"
                     />
                   </div>

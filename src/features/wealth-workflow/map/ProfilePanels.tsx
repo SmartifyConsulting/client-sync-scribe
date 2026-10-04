@@ -1,3 +1,4 @@
+import { dobFromSaId } from "@/lib/saId";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { CalendarPlus, CheckCircle2, Loader2, Mic, Sparkles, Square } from "lucide-react";
@@ -53,7 +54,7 @@ export function PersonalInfoPanel({ patientId, personal }: { patientId?: string;
     <div className="space-y-3 text-sm">
       <p className="text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Personal information</p>
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="ID or passport number *"><Input value={f.id_passport_number ?? ""} onChange={(e) => set("id_passport_number")(e.target.value)} /></Field>
+        <Field label="ID or passport number *"><Input value={f.id_passport_number ?? ""} onChange={(e) => { const v = e.target.value; const dob = dobFromSaId(v); setF((x) => ({ ...x, id_passport_number: v, ...(dob ? { dob } : {}) })); }} /></Field>
         <Field label="Date of birth *"><Input type="date" value={f.dob ?? ""} onChange={(e) => set("dob")(e.target.value)} /></Field>
         <Field label="Mobile number"><Input value={f.phone ?? ""} onChange={(e) => set("phone")(e.target.value)} /></Field>
         <Field label="Marital status *">
