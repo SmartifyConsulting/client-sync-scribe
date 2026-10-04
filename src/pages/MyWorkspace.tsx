@@ -1,7 +1,6 @@
 import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useClientWealth } from "@/features/wealth-workflow/client/useClientWealth";
-import MyDetails from "@/pages/patient/MyDetails";
 import { WorkflowMap } from "@/features/wealth-workflow/map/WorkflowMap";
 
 /** Client view of the shared Live Workspace for their own record. */
@@ -17,7 +16,7 @@ export default function MyWorkspace() {
       {isLoading ? (
         <div className="flex h-32 items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
       ) : data?.patientId ? (
-        <WorkflowMap patientId={data.patientId} clientName={data.clientName} viewer="client" leftPanel={<div className="rounded-xl border border-border bg-card p-4"><MyDetails embedded /></div>}
+        <WorkflowMap patientId={data.patientId} clientName={data.clientName} viewer="client" stepperLayout
           onOpenDocuments={() => navigate("/my-future?tab=documents")} />
       ) : (
         <p className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">Your workspace will appear once your Wealth Manager starts your plan.</p>
