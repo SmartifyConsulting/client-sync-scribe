@@ -1,7 +1,7 @@
 import { Check, Hourglass, Lock, MinusCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { OWNER_LABEL } from "./groups";
-import { ownerLabel } from "./stepGuidance";
+import { StepAvatar, type MapAvatars } from "./StepAvatar";
 import type { GroupView } from "./useWorkflowMap";
 
 interface Props {
