@@ -64,7 +64,7 @@ export const WORKFLOW_GROUPS: WorkflowGroup[] = [
     n: 2, key: "needs", title: "Needs Analysis", clientTitle: "Needs Analysis", icon: ClipboardList,
     stages: ["needs_analysis"],
     steps: [
-      { owner: "advisor", label: "Schedule meeting to discuss current financial health", done: (c) => past(2)(c) || c.meetingScheduled || c.financialsExtracted },
+      { owner: "advisor", label: "Schedule "Review Financial Health" meeting", done: (c) => past(2)(c) || c.meetingScheduled || c.financialsExtracted },
       { owner: "advisor", label: "Record consultation and capture financials", done: (c) => past(2)(c) || c.financialsExtracted },
       { owner: "client", label: "Verify financial information", done: (c) => past(2)(c) || c.financialsVerified },
       { owner: "system", label: "Life, short-term and investment gaps", done: past(2) },

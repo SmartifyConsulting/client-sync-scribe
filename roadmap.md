@@ -86,3 +86,10 @@
 - [x] Overview + Life Events on dashboard; My Profile removed from menu
 - [x] Date of birth fills from SA ID
 - [ ] Copy Georgia's Astute policies to Georgia Demo (SQL script ready, not run)
+
+## Oct 2026 — Personal touches, nav, calendar
+- [ ] Rename Step 2 meeting step to Schedule "Review Financial Health" meeting
+- [ ] Wealth Manager can create, edit and delete calendar appointments
+- [ ] Use the Wealth Manager's name instead of "Your Wealth Manager"
+- [ ] Documents grouped by Type by default; Type chip before Date
+- [ ] Client menu: Live Workspace under My Dashboard; Personal Info, Financial Info, Claims, Documents; no My Profile
