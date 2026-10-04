@@ -180,7 +180,8 @@ function DocCard({ workflowId, doc, signed, viewer, clientName }: { workflowId: 
   const sign = async () => {
     setBusy(true);
     const font = SIGNATURE_FONTS[Math.floor(Math.random() * SIGNATURE_FONTS.length)].value;
-    const sig = await renderSignaturePngBase64({ full_name: clientName, signature_font: font });
+    const raw = await renderSignaturePngBase64({ full_name: clientName, signature_font: font });
+    const sig = raw ? `data:image/png;base64,${raw}` : null;
     if (!sig) {
       setBusy(false);
       return toast({ title: "Not signed", description: "We couldn't generate your signature. Please try again.", variant: "destructive" });

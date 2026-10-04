@@ -10,7 +10,7 @@ ${p?.__businessLogo || p?.__fspLogo ? `<div style="display:flex;justify-content:
 <div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid ${NAVY};padding-bottom:14px;margin-bottom:28px">
 <div><p style="margin:0;font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:${MUTED}">${subtitle}</p>
 <h1 style="margin:6px 0 0;font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:26px;color:${NAVY};letter-spacing:.01em">${title}</h1></div>
-<p style="margin:0;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:${NAVY};font-weight:600">Holarc Wealth</p></div>
+<p style="margin:0;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:${NAVY};font-weight:600">${esc(p?.business_name || p?.fsp_name || "")}</p></div>
 ${body}
 <div style="margin-top:36px;padding-top:12px;border-top:1px solid ${RULE};font-size:9.5px;color:${MUTED};text-align:center;line-height:1.5">${footer(p)}</div></div>`;
 const h2 = (t: string) => `<h2 style="margin:26px 0 10px;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:${NAVY};font-weight:600">${t}</h2>`;
@@ -18,7 +18,7 @@ const table = (rows: [string, string][]) => `<table style="width:100%;border-col
 
 export function disclosureHtml(client: string, date: string, p: any = null) {
   return wrap("Disclosure Agreement", "FAIS disclosure", `
-<p>This agreement is between <b>Holarc Wealth (Pty) Ltd</b> ("the FSP") and <b>${client}</b> ("the client"), dated ${date}.</p>
+<p>This agreement is between <b>${esc(p?.fsp_name || "Masthead Financial Planning (Pty) Ltd")}</b> ("the FSP") and <b>${client}</b> ("the client"), dated ${date}.</p>
 <h3 style="margin:20px 0 6px;font-size:13px;color:#0f2742;font-weight:600">1. About the FSP</h3><p>The FSP is authorised under the Financial Advisory and Intermediary Services Act, 2002 (FAIS) to give advice and render intermediary services on long-term insurance, short-term insurance and investment products.</p>
 <h3 style="margin:20px 0 6px;font-size:13px;color:#0f2742;font-weight:600">2. Your Wealth Manager</h3><p>Your Wealth Manager acts under the supervision of the FSP's Key Individual and holds the qualifications required by FAIS.</p>
 <h3 style="margin:20px 0 6px;font-size:13px;color:#0f2742;font-weight:600">3. How we are paid</h3><p>We may earn commission set by legislation, an advice fee agreed with you in writing, or both. All costs will be shown in your Record of Advice before you decide.</p>
