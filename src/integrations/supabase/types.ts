@@ -10560,6 +10560,83 @@ export type Database = {
           },
         ]
       }
+      wealth_portfolio_holdings: {
+        Row: {
+          asset_value: number | null
+          category: string
+          created_at: string
+          disability_cover: number | null
+          dread_cover: number | null
+          id: string
+          life_cover: number | null
+          parties: string | null
+          patient_id: string
+          policy_number: string
+          premium: number | null
+          premium_frequency: string | null
+          product: string | null
+          provider: string
+          raw: Json
+          reference: string | null
+          source: string
+          start_date: string | null
+          status: string | null
+          synced_at: string
+        }
+        Insert: {
+          asset_value?: number | null
+          category?: string
+          created_at?: string
+          disability_cover?: number | null
+          dread_cover?: number | null
+          id?: string
+          life_cover?: number | null
+          parties?: string | null
+          patient_id: string
+          policy_number: string
+          premium?: number | null
+          premium_frequency?: string | null
+          product?: string | null
+          provider: string
+          raw?: Json
+          reference?: string | null
+          source?: string
+          start_date?: string | null
+          status?: string | null
+          synced_at?: string
+        }
+        Update: {
+          asset_value?: number | null
+          category?: string
+          created_at?: string
+          disability_cover?: number | null
+          dread_cover?: number | null
+          id?: string
+          life_cover?: number | null
+          parties?: string | null
+          patient_id?: string
+          policy_number?: string
+          premium?: number | null
+          premium_frequency?: string | null
+          product?: string | null
+          provider?: string
+          raw?: Json
+          reference?: string | null
+          source?: string
+          start_date?: string | null
+          status?: string | null
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wealth_portfolio_holdings_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wealth_practice_info: {
         Row: {
           business_logo_path: string | null

@@ -29,6 +29,13 @@
       "when": 1791072464391,
       "tag": "0003_onboarding_to_needs_analysis",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791148430402,
+      "tag": "0004_wealth_portfolio_holdings",
+      "breakpoints": true
     }
   ]
 }
