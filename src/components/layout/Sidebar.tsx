@@ -345,12 +345,12 @@ export function Sidebar({ onNavigate }: SidebarProps) {
       return (
         <div
           key={item.to}
-          className="flex items-center gap-2.5 rounded-xl border border-transparent px-3 py-1.5 text-sm font-semibold text-muted-foreground/60 cursor-not-allowed"
+          className="flex items-center gap-2.5 rounded-xl border border-transparent px-3 py-1.5 text-sm font-semibold text-white/40 cursor-not-allowed"
           title="Coming soon — preview only"
         >
-          <item.icon className="h-5 w-5 text-muted-foreground/60" />
+          <item.icon className="h-5 w-5 text-white/40" />
           <span className="flex-1">{t(item.labelKey, item.label)}</span>
-          <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
+          <Lock className="h-3.5 w-3.5 shrink-0 text-white/40" />
         </div>
       );
     }
@@ -453,7 +453,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     <aside className="sidebar-chrome fixed left-0 top-0 z-40 h-screen w-[252px] bg-sidebar">
       <div className="flex h-full flex-col">
         <div className="flex h-24 items-center gap-3 px-6">
-          <Logo size="lg" />
+          <Logo size="lg" onDark />
         </div>
 
         {/* Navigation */}
@@ -520,7 +520,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
           <div className="px-4 pb-1">
             <Popover>
               <PopoverTrigger asChild>
-                <button className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors">
+                <button className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors">
                   <SlidersHorizontal className="h-3.5 w-3.5" />
                   Customise menu
                 </button>
@@ -578,7 +578,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             align="start"
             alignOffset={0}
             trigger={
-              <button className="flex w-full items-center gap-3 px-4 py-3 rounded-xl hover:bg-muted/50 transition-colors">
+              <button className="flex w-full items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-colors">
                 <Avatar className="h-[3.2rem] w-[3.2rem] border-2 border-primary">
                   <AvatarImage
                     key={profile?.avatar_url}
@@ -595,9 +595,9 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                 </Avatar>
                 <div className="flex-1 min-w-0 text-left">
                   {loading ? (
-                    <div className="h-3 w-20 rounded bg-muted animate-pulse" />
+                    <div className="h-3 w-20 rounded bg-white/10 animate-pulse" />
                   ) : (
-                    <p className="text-sm font-semibold text-foreground truncate">{profile?.full_name || t("nav.myProfile", "My Profile")}</p>
+                    <p className="text-sm font-semibold text-white truncate">{profile?.full_name || t("nav.myProfile", "My Profile")}</p>
                   )}
                 </div>
               </button>

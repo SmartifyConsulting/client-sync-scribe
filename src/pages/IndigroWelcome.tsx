@@ -6,7 +6,7 @@ import { SignInCard } from "@/components/auth/SignInCard";
 import { useAuth } from "@/hooks/useAuth";
 
 const HERO = {
-  eyebrow: "Life cover · Investments · Governance",
+  eyebrow: "Financial Wellness",
   title: "Smart Governance for Portfolio Growth",
   subtitle:
     "For FSPs and their advisors: advise on life cover and investments, grow your clients' income, and show your Key Individual and the regulator that every step followed the rules.",

@@ -42,7 +42,7 @@ export const uiTranslations: Record<string, TranslationTree> = {
       delete: "Delete",
     },
     footer: {
-      copyright: "© {{year}} Holarc Wealth (Pty) Ltd. All rights reserved.",
+      copyright: "© {{year}} Elysian Financial Wealth (Pty) Ltd. All rights reserved.",
       terms: "Terms and Conditions",
       privacy: "Privacy & Consent",
       compliance: "Compliance",
@@ -649,7 +649,7 @@ export const uiTranslations: Record<string, TranslationTree> = {
   },
   fr: {
     common: { support: "Contacter le support", clearAll: "Tout effacer", noNotifications: "Aucune notification", install: "Installer", yes: "Oui", no: "Non", open: "Ouvrir", review: "Examiner", remove: "Retirer", invite: "Inviter", patient: "Patient", patients: "Patients", doctor: "Médecin", provider: "Prestataire", member: "Membre", crew: "Équipe", crewMember: "Membre d'équipe", anonymous: "Anonyme", ago: "il y a", max: "max", required: "obligatoire", beta: "Bêta", gotIt: "Compris", capacityUpdated: "Capacité mise à jour", and: "et", update: "Mettre à jour", create: "Créer", dismiss: "Fermer", cancel: "Annuler", loading: "Chargement…", close: "Fermer", delete: "Supprimer" },
-    footer: { copyright: "© {{year}} Holarc Wealth (Pty) Ltd. Tous droits réservés.", terms: "Conditions générales", privacy: "Confidentialité et consentement", compliance: "Conformité", legal: "Centre juridique" },
+    footer: { copyright: "© {{year}} Elysian Financial Wealth (Pty) Ltd. Tous droits réservés.", terms: "Conditions générales", privacy: "Confidentialité et consentement", compliance: "Conformité", legal: "Centre juridique" },
     topbar: { clearAll: "Tout effacer", noNotifications: "Aucune notification", switchProfile: "Changer de profil (admin)", switchToAdmin: "Passer à Admin", myRewards: "Mes récompenses", admin: "Admin", legalTerms: "Mentions légales", shareApp: "Partager l'app", doctor: "Médecin", patient: "Patient", er: "Urgences", hospital: "Hôpital" },
     settingsPage: { title: "Paramètres", subtitle: "Gérez vos préférences, la sécurité et la facturation" },
     earlyRelease: { title: "Bienvenue dans la version préliminaire", description: "Vous participez à une version préliminaire de Holarc Wealth. À mesure que nous développons et améliorons la plateforme, certaines fonctionnalités peuvent évoluer et des problèmes occasionnels peuvent survenir. Vos retours sont précieux et peuvent être envoyés via la fonction Bug Log près du bouton de notification." },
@@ -738,7 +738,7 @@ export const uiTranslations: Record<string, TranslationTree> = {
   },
   el: {
     common: { support: "Επικοινωνία υποστήριξης", clearAll: "Εκκαθάριση όλων", noNotifications: "Δεν υπάρχουν ειδοποιήσεις", install: "Εγκατάσταση", yes: "Ναι", no: "Όχι", open: "Άνοιγμα", review: "Έλεγχος", remove: "Αφαίρεση", invite: "Πρόσκληση", patient: "Ασθενής", patients: "Ασθενείς", doctor: "Ιατρός", provider: "Πάροχος", member: "Μέλος", crew: "Πλήρωμα", crewMember: "Μέλος πληρώματος", anonymous: "Ανώνυμος", ago: "πριν", max: "μέγ.", required: "απαιτείται", beta: "Beta", gotIt: "Εντάξει", capacityUpdated: "Η χωρητικότητα ενημερώθηκε" },
-    footer: { copyright: "© {{year}} Holarc Wealth (Pty) Ltd. Με επιφύλαξη παντός δικαιώματος.", terms: "Όροι και προϋποθέσεις", privacy: "Απόρρητο και συναίνεση", compliance: "Συμμόρφωση", legal: "Νομικό κέντρο" },
+    footer: { copyright: "© {{year}} Elysian Financial Wealth (Pty) Ltd. Με επιφύλαξη παντός δικαιώματος.", terms: "Όροι και προϋποθέσεις", privacy: "Απόρρητο και συναίνεση", compliance: "Συμμόρφωση", legal: "Νομικό κέντρο" },
     topbar: { clearAll: "Εκκαθάριση όλων", noNotifications: "Δεν υπάρχουν ειδοποιήσεις", switchProfile: "Αλλαγή προφίλ (διαχειριστής)", switchToAdmin: "Μετάβαση σε διαχειριστή", myRewards: "Οι ανταμοιβές μου", admin: "Διαχειριστής", legalTerms: "Νομικοί όροι", shareApp: "Κοινή χρήση εφαρμογής", doctor: "Ιατρός", patient: "Ασθενής", er: "Επείγοντα", hospital: "Νοσοκομείο" },
     settingsPage: { title: "Ρυθμίσεις", subtitle: "Διαχειριστείτε προτιμήσεις, ασφάλεια και χρέωση" },
     earlyRelease: { title: "Καλώς ήρθατε στην πρώιμη έκδοση", description: "Συμμετέχετε σε πρώιμη έκδοση του Holarc Wealth. Καθώς επεκτείνουμε και βελτιώνουμε την πλατφόρμα, ορισμένες λειτουργίες μπορεί να εξελιχθούν και περιστασιακά ζητήματα μπορεί να εμφανιστούν. Τα σχόλιά σας είναι πολύτιμα και μπορούν να υποβληθούν από τη λειτουργία Bug Log δίπλα στο κουμπί ειδοποιήσεων." },
