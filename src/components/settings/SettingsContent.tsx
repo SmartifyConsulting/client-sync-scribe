@@ -270,12 +270,12 @@ export function SettingsContent() {
 
   return (
     <div className="space-y-4 max-w-3xl">
-      <Tabs defaultValue="preferences" className="w-full">
+      <Tabs key={isPatientRole ? "client" : "staff"} defaultValue={isPatientRole ? "security" : "preferences"} className="w-full">
         <TabsList className="flex w-full flex-wrap bg-primary/80 justify-start rounded-lg">
-          <TabsTrigger value="preferences" className="tab-brand text-xs">Preferences</TabsTrigger>
-          <TabsTrigger value="notifications" className="tab-brand text-xs">Notifications</TabsTrigger>
+          {!isPatientRole && <TabsTrigger value="preferences" className="tab-brand text-xs">Preferences</TabsTrigger>}
+          {!isPatientRole && <TabsTrigger value="notifications" className="tab-brand text-xs">Notifications</TabsTrigger>}
           <TabsTrigger value="security" className="tab-brand text-xs">Security</TabsTrigger>
-          <TabsTrigger value="billing" className="tab-brand text-xs">Fees</TabsTrigger>
+          {!isPatientRole && <TabsTrigger value="billing" className="tab-brand text-xs">Fees</TabsTrigger>}
         </TabsList>
 
         {/* PREFERENCES */}
@@ -530,22 +530,6 @@ export function SettingsContent() {
               )}
               <div><Button variant="outline" onClick={() => (window.location.href = "/forgot-password")}>Change Password</Button></div>
               <Separator />
-              <div>
-                <Button
-                  variant="outline"
-                  onClick={async () => {
-                    if (!user) return;
-                    await supabase
-                      .from("profiles")
-                      .update({ tour_completed_at: null, tour_skipped_at: null } as any)
-                      .eq("id", user.id);
-                    toast({ title: "Tour reset", description: "Refresh the page to see the walkthrough again." });
-                  }}
-                >
-                  Replay app tour
-                </Button>
-                <p className="text-xs text-muted-foreground mt-2">Re-run the first-time walkthrough on your next page load.</p>
-              </div>
             </div>
           </div>
 
