@@ -6,6 +6,7 @@ import { OwnerBadge } from "./WorkflowGroupCard";
 import { STEP_GUIDANCE, fillName, ownerLabel } from "./stepGuidance";
 import { KycPanel, SignDocsPanel } from "./OnboardingPanels";
 import { AstutePanel } from "./AstutePanel";
+import { LaterStepPanel, LATER_STEPS } from "./LaterPanels";
 import { PersonalInfoPanel, CaptureFinancialsPanel, VerifyFinancialsPanel, ScheduleMeetingPanel } from "./ProfilePanels";
 import type { GroupView } from "./useWorkflowMap";
 
@@ -88,7 +89,8 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
   const isSchedule = step.label === "Schedule meeting to discuss current financial health";
   const isVerify = step.label === "Verify financial information";
   const reached = step.state === "next" || step.state === "done";
-  const custom = isSchedule || isKyc || isSign || isAstute || isPersonal || isCapture || isVerify;
+  const isLater = LATER_STEPS.has(step.label);
+  const custom = isLater || isSchedule || isKyc || isSign || isAstute || isPersonal || isCapture || isVerify;
 
   return (
     <div key={step.label} className="animate-fade-in overflow-hidden rounded-xl border border-border/70 bg-card">
@@ -167,6 +169,7 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
             </a>
           )}
           {isPersonal && reached && <PersonalInfoPanel patientId={records?.patientId} personal={records?.personal} />}
+          {isLater && reached && <LaterStepPanel label={step.label} viewer={viewer} workflowId={workflowId} records={records} clientFirst={first} onOpenDocuments={onOpenDocuments} />}
           {isSchedule && reached && <ScheduleMeetingPanel appointments={records?.appointments ?? []} viewer={viewer} />}
           {isCapture && reached && (
             <CaptureFinancialsPanel patientId={records?.patientId} sessions={records?.sessions ?? []} financials={records?.financials} viewer={viewer} clientFirst={first} />

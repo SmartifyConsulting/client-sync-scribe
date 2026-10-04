@@ -71,4 +71,6 @@
 - [x] Step 2 "Schedule meeting" sub-step with booking link
 - [x] Record meeting button → transcribe → auto-capture financials
 - [x] Client sees simplified Steps 3–4
-- [ ] Working Window tools for Steps 4–6 sub-steps (guidance text only so far)
+- [x] Working Window tools for Steps 5–6
+- [x] All map steps expanded (design request)
+- [ ] Step 4 Working Window tools (quotes, affordability)
