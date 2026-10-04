@@ -28,7 +28,7 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
   const active = state === "current" || state === "waiting" || state === "blocked";
   const locked = state === "pending";
   const [userOpen, setUserOpen] = useState<boolean | null>(null);
-  const open = userOpen ?? active;
+  const open = userOpen ?? true;
 
   return (
     <div
