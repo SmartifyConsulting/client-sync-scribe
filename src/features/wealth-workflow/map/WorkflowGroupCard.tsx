@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, ChevronDown, Lock, Repeat } from "lucide-react";
+import { Check, Lock, Repeat } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { OWNER_LABEL } from "./groups";
 import { ownerLabel } from "./stepGuidance";
@@ -28,21 +28,20 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
   const active = state === "current" || state === "waiting" || state === "blocked";
   const locked = state === "pending";
   const [userOpen, setUserOpen] = useState<boolean | null>(null);
-  const open = !locked && (userOpen ?? active);
-  const setOpen = (f: (o: boolean) => boolean) => !locked && setUserOpen(f(open));
+  const open = true; void userOpen;
   const Icon = g.icon;
 
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-xl border border-border/70 bg-card text-sm transition-shadow",
+        "overflow-hidden rounded-lg border border-border/70 bg-card text-xs transition-shadow",
         active && state !== "blocked" && "border-primary/50 shadow-sm",
-        locked && "bg-muted/20",
+        locked && "opacity-70",
         state === "blocked" && "border-destructive/60",
         state === "not_applicable" && "opacity-50",
       )}
     >
-      <div className="flex items-center gap-2 px-3 py-2.5">
+      <div className="flex items-center gap-1.5 px-2.5 py-1.5">
         <button onClick={locked ? undefined : onOpen} disabled={locked} className="flex flex-1 items-center gap-2 text-left disabled:cursor-default">
           <span
             className={cn(
@@ -54,7 +53,7 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
             {state === "completed" ? <Check className="h-3.5 w-3.5" /> : g.n}
           </span>
           <Icon className="h-3.5 w-3.5 text-muted-foreground" />
-          <span className={cn("text-sm font-medium tracking-tight", locked ? "text-muted-foreground" : "text-foreground")}>{viewer === "client" ? g.clientTitle : g.title}</span>
+          <span className={cn("text-xs font-medium tracking-tight", locked ? "text-muted-foreground" : "text-foreground")}>{viewer === "client" ? g.clientTitle : g.title}</span>
           {!locked && (
             <span
               className={cn(
@@ -70,11 +69,7 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
         </button>
         {locked ? (
           <Lock aria-label="Locked until this step is reached" className="mx-1 h-3.5 w-3.5 text-muted-foreground/70" />
-        ) : (
-          <button aria-label="Toggle" onClick={() => setOpen((o) => !o)} className="p-1 text-muted-foreground">
-            <ChevronDown className={cn("h-4 w-4 transition-transform", open && "rotate-180")} />
-          </button>
-        )}
+        ) : null}
       </div>
       {open && (
         <>
@@ -87,10 +82,10 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
                 onClick={onSelectStep && reachable ? () => onSelectStep(s.label) : undefined}
                 aria-disabled={!reachable}
                 className={cn(
-                  "flex items-center gap-2 px-3 py-1.5",
+                  "flex items-center gap-1.5 px-2.5 py-1 text-xs",
                   onSelectStep && reachable && "cursor-pointer hover:bg-muted/40",
                   !reachable && "opacity-50",
-                  s.state === "next" && "mx-1.5 my-1 rounded-xl border border-primary bg-primary/5",
+                  s.state === "next" && "mx-1 my-0.5 rounded-lg border border-primary bg-primary/5",
                   s.state === "next" && (viewer === "client" ? s.owner === "client" : s.owner === "advisor") && "animate-throb",
                   selectedStep === s.label && s.state !== "next" && "bg-muted/60",
                 )}
@@ -111,7 +106,7 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
               <ul className="mt-1 space-y-0.5">{blockers.map((b) => <li key={b}>✕ {b}</li>)}</ul>
             </div>
           )}
-          <div className="flex items-center gap-1.5 border-t px-3 py-2 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5 border-t px-2.5 py-1 text-2xs text-muted-foreground">
             {g.key === "issuance" ? <Repeat className="h-3.5 w-3.5" /> : g.key === "gateway" ? <Lock className="h-3.5 w-3.5" /> : null}
             {g.footer}
           </div>

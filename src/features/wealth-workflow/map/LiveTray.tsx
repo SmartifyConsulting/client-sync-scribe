@@ -26,6 +26,7 @@ export function LiveTray({ groups, viewer, clientFirst, managerName, nextTitle }
         const title = `Step ${g.group.n} · ${g.group.title}`;
 
         if (!done && !active) {
+          return null;
           return (
             <div key={g.group.key} className="flex items-center justify-between rounded-xl border border-border px-4 py-2.5">
               <span className="text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">{title}</span>
