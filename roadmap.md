@@ -64,4 +64,4 @@
 - [x] Shared map + Live Workspace tray, pulse only on your own next action, chime + mute
 - [x] Marlin has 6 clients linked (Georgia with 3 policies)
 - [x] Astute sign-in verified (reaches CCP home)
-- [ ] Astute data pull: needs a real client request/response in Astute to map fields (Ccp/Request, Ccp/Response)
+- [ ] Astute data pull: BLOCKED — Marlin's Astute account has 0 clients, 0 requests, 0 results; needs one real client request (ID + consent, may be billed) to map result fields
