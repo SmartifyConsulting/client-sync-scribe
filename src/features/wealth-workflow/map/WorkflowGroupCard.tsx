@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, ChevronDown, Lock, Repeat } from "lucide-react";
+import { Check, Lock, Repeat } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { OWNER_LABEL } from "./groups";
 import { ownerLabel } from "./stepGuidance";
@@ -29,7 +29,6 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
   const locked = state === "pending";
   const [userOpen, setUserOpen] = useState<boolean | null>(null);
   const open = true; void userOpen;
-  const setOpen = (f: (o: boolean) => boolean) => !locked && setUserOpen(f(open));
   const Icon = g.icon;
 
   return (
