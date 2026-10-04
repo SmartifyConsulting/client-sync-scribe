@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Loader2 } from "lucide-react";
 import folderAsset from "@/assets/documents-folder-3d.png.asset.json";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,6 @@ import { playChime } from "./chime";
 import { StageDetailSheet } from "./StageDetailSheet";
 import { WorkingWindow } from "./WorkingWindow";
 import { useWorkflowRealtime } from "../workspace/useWorkflowRealtime";
-import { OwnerBadge } from "./WorkflowGroupCard";
 import { InsurerBadge } from "./insurerColors";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,10 +24,12 @@ interface Props {
   initialGroup?: string;
   onBackToLive?: () => void;
   viewer?: "manager" | "client";
+  /** Replaces the workflow map on the left (e.g. the client profile). */
+  leftPanel?: ReactNode;
 }
 
 /** Wealth manager view: a read-only projection of the workflow engine. */
-export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGroup, onBackToLive, viewer = "manager" }: Props) {
+export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGroup, onBackToLive, viewer = "manager", leftPanel }: Props) {
   const m = useWorkflowMap(patientId, viewer);
   useWorkflowRealtime(patientId, m.workflow?.id);
   const [picked, setPicked] = useState<{ group: string; step: string } | null>(null);
@@ -170,6 +171,10 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
       <StageDetailSheet view={selected} onClose={() => setSelected(null)} workflow={wf} defs={m.defs} recs={m.recs} records={m.records} />
     </div>
   );
+}
+
+function SolidBadge({ className, children }: { className: string; children: ReactNode }) {
+  return <span className={`rounded-full px-2 py-0.5 text-2xs font-semibold text-white ${className}`}>{children}</span>;
 }
 
 function Field({ label, value, danger }: { label: string; value: string; danger?: boolean }) {
