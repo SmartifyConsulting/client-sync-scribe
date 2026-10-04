@@ -30,6 +30,8 @@ export default {
         raleway: ["Raleway", "sans-serif"],
       },
       colors: {
+        brand: "hsl(var(--brand-teal))",
+        navy: { DEFAULT: "hsl(var(--navy))", foreground: "hsl(var(--navy-foreground))" },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

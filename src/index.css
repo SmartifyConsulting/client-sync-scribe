@@ -36,7 +36,7 @@
     --popover-foreground: 222 38% 13%;
 
     /* Holarc teal #2DB0A6 */
-    --primary: 214 70% 40%;
+    --primary: 175 61% 46%;
     /* Wealth workflow owner badges */
     --owner-client: 175 59% 38%;
     --owner-client-bg: 175 55% 94%;
@@ -46,9 +46,9 @@
     --owner-insurer-bg: 40 90% 92%;
     --owner-system: 220 9% 40%;
     --owner-system-bg: 220 14% 94%;
-    --primary-foreground: 0 0% 100%;
-    --primary-glow: 214 70% 52%;
-    --primary-dark: 222 50% 22%;
+    --primary-foreground: 220 18% 7%;
+    --primary-glow: 175 61% 56%;
+    --primary-dark: 220 18% 7%;
 
     /* Neutral grays - secondary surfaces */
     --secondary: 216 24% 94%;           /* #F5F5F5 */
@@ -58,8 +58,10 @@
     --muted-foreground: 218 14% 42%;    /* #666 secondary text */
 
     --brand-teal: 175 61% 52%;          /* #3AD0C4 */
-    --accent: 200 48% 74%;              /* #9CC7DD soft sky (replaces pastel green) */
-    --accent-foreground: 205 60% 20%;
+    --navy: 220 18% 7%;
+    --navy-foreground: 0 0% 98%;
+    --accent: 175 45% 90%;              /* #9CC7DD soft sky (replaces pastel green) */
+    --accent-foreground: 220 18% 10%;
 
     /* Status colors */
     --destructive: 0 64% 50%;        /* #D32F2F */
@@ -112,7 +114,7 @@
     /* Borders */
     --border: 216 20% 87%;              /* #E0E0E0 */
     --input: 216 20% 85%;
-    --ring: 214 70% 40%;
+    --ring: 175 61% 46%;
 
     /* Tertiary/disabled text helpers */
     --text-tertiary: 0 0% 60%;       /* #999 */
@@ -133,27 +135,27 @@
     --shadow-elevated: 0 1px 2px rgb(13 13 13 / 0.06), 0 16px 40px -16px rgb(13 13 13 / 0.18);
 
     /* Sidebar - clean white */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 220 16% 36%;
-    --sidebar-primary: 214 70% 40%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 214 45% 95%;
-    --sidebar-accent-foreground: 214 70% 34%;
-    --sidebar-border: 216 20% 88%;
-    --sidebar-ring: 214 70% 40%;
+    --sidebar-background: 220 18% 7%;
+    --sidebar-foreground: 0 0% 82%;
+    --sidebar-primary: 175 61% 52%;
+    --sidebar-primary-foreground: 220 18% 7%;
+    --sidebar-accent: 220 14% 14%;
+    --sidebar-accent-foreground: 175 61% 60%;
+    --sidebar-border: 220 14% 16%;
+    --sidebar-ring: 175 61% 52%;
   }
 
   .dark {
-    --background: 222 35% 8%;
+    --background: 220 18% 6%;
     --foreground: 216 25% 94%;
 
-    --card: 222 30% 11%;
+    --card: 220 14% 10%;
     --card-foreground: 0 0% 95%;
 
-    --popover: 222 30% 11%;
+    --popover: 220 14% 10%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 214 80% 64%;
+    --primary: 175 61% 52%;
     --owner-client: 172 60% 60%;
     --owner-client-bg: 172 40% 16%;
     --owner-advisor: 214 80% 70%;
@@ -162,9 +164,9 @@
     --owner-insurer-bg: 35 40% 16%;
     --owner-system: 220 10% 70%;
     --owner-system-bg: 220 10% 18%;
-    --primary-foreground: 0 0% 5%;
-    --primary-glow: 214 80% 72%;
-    --primary-dark: 214 70% 52%;
+    --primary-foreground: 220 18% 7%;
+    --primary-glow: 175 61% 62%;
+    --primary-dark: 175 61% 42%;
 
     --secondary: 222 22% 16%;
     --secondary-foreground: 0 0% 90%;
@@ -215,7 +217,7 @@
 
     --border: 222 20% 20%;
     --input: 222 20% 20%;
-    --ring: 214 80% 64%;
+    --ring: 175 61% 52%;
 
     --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.2);
     --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
@@ -226,14 +228,14 @@
     --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 6px 16px rgb(0 0 0 / 0.3);
     --shadow-card-hover: 0 2px 8px 0 rgb(0 0 0 / 0.4), 0 12px 24px rgb(0 0 0 / 0.4);
 
-    --sidebar-background: 222 35% 9%;
+    --sidebar-background: 220 18% 5%;
     --sidebar-foreground: 0 0% 75%;
-    --sidebar-primary: 214 80% 64%;
-    --sidebar-primary-foreground: 0 0% 5%;
+    --sidebar-primary: 175 61% 52%;
+    --sidebar-primary-foreground: 220 18% 7%;
     --sidebar-accent: 214 30% 16%;
-    --sidebar-accent-foreground: 214 80% 74%;
+    --sidebar-accent-foreground: 175 61% 62%;
     --sidebar-border: 222 20% 16%;
-    --sidebar-ring: 214 80% 64%;
+    --sidebar-ring: 175 61% 52%;
   }
 }
 
