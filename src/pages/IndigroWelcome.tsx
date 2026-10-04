@@ -49,7 +49,7 @@ export default function IndigroWelcome() {
         </div>
 
         <section className="lg:col-start-1 lg:row-start-2 lg:self-center">
-          <h1 className="font-display text-4xl font-medium leading-[1.1] text-navy-foreground sm:text-5xl sm:leading-[1.1]">{HERO.title}</h1>
+          <h1 className="font-display text-4xl font-medium leading-[1.1] !text-navy-foreground sm:text-5xl sm:leading-[1.1]">{HERO.title}</h1>
           <p className="mt-4 max-w-xl text-base text-navy-foreground/70">{HERO.subtitle}</p>
 
           <div className="mt-8 grid gap-6 sm:grid-cols-2">
@@ -71,7 +71,7 @@ export default function IndigroWelcome() {
           <p className="mt-8 max-w-xl text-xs leading-5 text-navy-foreground/55">{HERO.footnote}</p>
         </section>
 
-        <section className="mt-10 w-full max-w-[520px] [&_.text-foreground]:text-navy-foreground [&_.bg-card_.text-foreground]:text-foreground lg:col-start-2 lg:row-start-2 lg:mt-0 lg:justify-self-end lg:self-center">
+        <section className="mt-10 w-full max-w-[520px] [&>div>div:last-child_.text-foreground]:!text-navy-foreground lg:col-start-2 lg:row-start-2 lg:mt-0 lg:justify-self-end lg:self-center">
           <SignInCard onSignUp={() => navigate("/auth?mode=signup")} />
         </section>
       </main>
