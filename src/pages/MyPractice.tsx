@@ -56,6 +56,7 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 import {
   SECTION_CONTENT_CLASS,
   SECTION_TRIGGER_ALWAYS_GREEN_CLASS,
+  SECTION_TRIGGER_TEAL_CLASS,
   SECTION_FRAME_CLASS,
   SECTION_ITEM_CLASS,
   SECTION_TRIGGER_CLASS,
@@ -1314,7 +1315,7 @@ export default function MyPractice() {
               />}
               {/* Personal Information */}
               <AccordionItem value="personal" className="border-0">
-              <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
+              <AccordionTrigger className={SECTION_TRIGGER_TEAL_CLASS}>
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-primary" />
                   <h3 className="text-xs font-semibold text-primary-dark">Personal Information</h3>
@@ -1412,7 +1413,7 @@ export default function MyPractice() {
 
           {/* Practice Details Accordion */}
             <AccordionItem value="practice-details" className="border-0">
-              <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
+              <AccordionTrigger className={SECTION_TRIGGER_TEAL_CLASS}>
                 <div className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-primary" />
                   <h3 className="text-xs font-semibold text-primary-dark">Firm Information</h3>
@@ -1853,7 +1854,7 @@ export default function MyPractice() {
 
            {/* Banking Details Accordion */}
             <AccordionItem value="banking-details" className="border-0">
-              <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
+              <AccordionTrigger className={SECTION_TRIGGER_TEAL_CLASS}>
                 <div className="flex items-center gap-2">
                   <Landmark className="h-4 w-4 text-primary" />
                   <h3 className="text-xs font-semibold text-primary-dark">Banking Details</h3>
@@ -1894,7 +1895,7 @@ export default function MyPractice() {
 
             {/* Targets & Commission */}
             <AccordionItem value="targets-commission" className="border-0">
-              <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
+              <AccordionTrigger className={SECTION_TRIGGER_TEAL_CLASS}>
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-primary" />
                   <h3 className="text-xs font-semibold text-primary-dark">Targets and Commission</h3>

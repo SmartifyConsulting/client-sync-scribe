@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { SECTION_TRIGGER_TEAL_CLASS } from "@/components/ui/section-accordion";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -80,7 +81,7 @@ function Fields({ fields, d, setD }: { fields: F[]; d: any; setD: (v: any) => vo
 function Section({ value, title, children }: { value: string; title: string; children: React.ReactNode }) {
   return (
     <AccordionItem value={value} className="border-0">
-      <AccordionTrigger className="px-4 py-3 hover:no-underline">
+      <AccordionTrigger className={SECTION_TRIGGER_TEAL_CLASS}>
         <h3 className="text-xs font-semibold text-primary-dark">{title}</h3>
       </AccordionTrigger>
       <AccordionContent className="px-4 pb-4">{children}</AccordionContent>

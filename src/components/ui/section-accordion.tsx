@@ -37,6 +37,19 @@ export const SECTION_TRIGGER_ALWAYS_GREEN_CLASS = cn(
 );
 
 /**
+ * Teal variant (matches the Holarc Wealth logo mark colour, #2DB0A6) that stays
+ * filled with white text in BOTH open and collapsed states. Used on My Practice's
+ * FSP info sections, scoped there only — everywhere else keeps the primary colour.
+ */
+export const SECTION_TRIGGER_TEAL_CLASS = cn(
+  "group px-4 py-2 hover:no-underline border-0 rounded-none",
+  "![background-color:#2DB0A6] hover:![background-color:#249186] !text-white",
+  "[&_*:not(.section-count-pill)]:!text-white",
+  "[&>svg]:!text-white",
+  "[&_.section-count-pill]:!bg-white [&_.section-count-pill]:!text-black",
+);
+
+/**
  * Medium-light grey date bar — used ONLY for the date-level headers on the
  * Dashboard To-Do List card and the My Round Tables card.
  * LOCKED — see mem://design/todo-accordion-and-row-spec.
