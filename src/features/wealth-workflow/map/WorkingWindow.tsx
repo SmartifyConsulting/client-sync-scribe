@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { OwnerBadge } from "./WorkflowGroupCard";
 import { STEP_GUIDANCE, fillName, ownerLabel } from "./stepGuidance";
 import { KycPanel, SignDocsPanel } from "./OnboardingPanels";
+import { AstutePanel } from "./AstutePanel";
 import type { GroupView } from "./useWorkflowMap";
 
 interface Props {
@@ -80,6 +81,7 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
     : (step.owner === "client" ? `Waiting for ${first}. This updates as soon as they act.` : step.owner === "insurer" ? "Waiting for the insurer." : "Holarc Wealth is doing this automatically.");
   const isKyc = step.label === "KYC, AML and PEP Screening";
   const isSign = step.label === "Sign disclosure and LOA";
+  const isAstute = step.label.startsWith("Astute pull");
 
   return (
     <div key={step.label} className="animate-fade-in overflow-hidden rounded-xl border border-border/70 bg-card">
@@ -149,7 +151,11 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
             <SignDocsPanel workflowId={workflowId} signed={records?.signed ?? []} viewer={viewer} clientName={clientName} />
           )}
 
-          {!isKyc && !isSign && (
+          {isAstute && (
+            <AstutePanel patientId={records?.patientId} holdings={records?.holdings ?? []} viewer={viewer} />
+          )}
+
+          {!isKyc && !isSign && !isAstute && (
             <Row title="Documents">
               {documents.length ? (
                 <ul className="mt-1 space-y-1">{documents.slice(0, 4).map((d) => <li key={d.id} className="truncate">{d.name}</li>)}</ul>
@@ -162,7 +168,7 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
             </Row>
           )}
 
-          {mine && step.state === "next" && t?.action && !isKyc && !isSign && (
+          {mine && step.state === "next" && t?.action && !isKyc && !isSign && !isAstute && (
             <Button className="mt-3 w-full rounded-full" onClick={onOpenDocuments}>{t.action}</Button>
           )}
         </div>

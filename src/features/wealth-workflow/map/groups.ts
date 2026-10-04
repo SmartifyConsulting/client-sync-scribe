@@ -15,6 +15,7 @@ export interface MapContext {
   clientLinked: boolean;
   kycStatus: string | null;
   signedDocs: Set<string>;
+  holdingsCount: number;
 }
 
 export interface SubStep {
@@ -67,7 +68,7 @@ export const WORKFLOW_GROUPS: WorkflowGroup[] = [
     n: 3, key: "portfolio", title: "Portfolio", clientTitle: "Portfolio", icon: Database,
     stages: ["information_required"],
     steps: [
-      { owner: "system", label: "Astute pull: life, disability, investments" },
+      { owner: "system", label: "Astute pull: life, disability, investments", done: (c) => past(3)(c) || c.holdingsCount > 0 },
       { owner: "system", label: "Insurer schedules and claims history" },
       { owner: "system", label: "Cross-alert check" },
       { owner: "system", label: "Push profile to CRM" },

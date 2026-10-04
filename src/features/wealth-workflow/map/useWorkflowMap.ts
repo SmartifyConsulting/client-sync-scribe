@@ -20,7 +20,7 @@ export function useWorkflowRecords(workflowId?: string, patientId?: string) {
     queryKey: ["wealth-map-records", workflowId, patientId],
     enabled: !!workflowId && !!patientId,
     queryFn: async () => {
-      const [apps, comp, tasks, docs, kyc, signed, pat] = await Promise.all([
+      const [apps, comp, tasks, docs, kyc, signed, pat, holdings] = await Promise.all([
         db.from("wealth_applications").select("*").eq("workflow_id", workflowId).order("created_at", { ascending: false }),
         db.from("wealth_compliance_checks").select("*").eq("workflow_id", workflowId).maybeSingle(),
         db.from("todos").select("id,title,status,due_date,owner_role,workflow_stage,priority")
@@ -29,6 +29,7 @@ export function useWorkflowRecords(workflowId?: string, patientId?: string) {
         db.from("wealth_kyc_checks").select("*").eq("workflow_id", workflowId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
         db.from("wealth_signed_documents").select("*").eq("workflow_id", workflowId).order("signed_at"),
         db.from("patients").select("user_id").eq("id", patientId).maybeSingle(),
+        db.from("wealth_portfolio_holdings").select("*").eq("patient_id", patientId).order("provider"),
       ]);
       return {
         apps: (apps.data ?? []) as any[],
@@ -38,6 +39,8 @@ export function useWorkflowRecords(workflowId?: string, patientId?: string) {
         kyc: kyc.data ?? null,
         signed: (signed.data ?? []) as any[],
         clientLinked: !!pat.data?.user_id,
+        patientId,
+        holdings: (holdings.data ?? []) as any[],
       };
     },
   });
@@ -63,6 +66,7 @@ export function useWorkflowMap(patientId?: string) {
     clientLinked: !!rec?.clientLinked,
     kycStatus: rec?.kyc?.status ?? null,
     signedDocs: new Set((rec?.signed ?? []).map((d: any) => d.doc_type)),
+    holdingsCount: rec?.holdings?.length ?? 0,
   };
 
   const closed = wf?.status === "closed_declined";
