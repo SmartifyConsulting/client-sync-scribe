@@ -18,8 +18,8 @@ export const isMine = (owner: string, viewer: "manager" | "client") =>
 /** Same green/blue tick pill used for completed sub-steps on the workflow map. */
 function StepTick({ owner }: { owner: string }) {
   return (
-    <span className={cn("flex h-4 w-4 flex-none items-center justify-center rounded-full", owner === "advisor" ? "bg-blue-500" : "bg-emerald-500")}>
-      <Check className="h-2.5 w-2.5 text-white" />
+    <span className={cn("flex h-[18px] w-[18px] flex-none items-center justify-center rounded-full", owner === "advisor" ? "bg-blue-500" : "bg-emerald-500")}>
+      <Check className="h-3.5 w-3.5 text-white" strokeWidth={5} />
     </span>
   );
 }
@@ -89,16 +89,14 @@ export function LiveTray({ groups, viewer, clientFirst, managerName }: Props) {
                   cur.owner === "advisor" ? "bg-blue-500" : "bg-emerald-500",
                   mine && "animate-throb",
                 )}>
-                  {!mine && <Hourglass className="h-3.5 w-3.5 flex-none animate-pulse-soft text-white" aria-label="In progress" />}
-                  <span className="text-2xs font-semibold text-white/80">{ownerLabel(cur.owner, viewer, clientFirst)}</span>
-                  {cur.label}
+                  <StepAvatar owner={cur.owner} avatars={avatars} className="-ml-1.5 ring-white" />
+                  <span className="font-medium">{cur.label}</span>
+                  {!mine && <Hourglass className="ml-auto h-3.5 w-3.5 flex-none animate-pulse-soft text-white" aria-label="In progress" />}
                 </li>
               )}
             </ul>
-            {cur && (
-              <p className="px-4 pb-2 pt-1 text-2xs text-muted-foreground">
-                {mine ? "Your turn" : `Waiting on ${waitingOn}`}
-              </p>
+            {cur && !mine && (
+              <p className="px-4 pb-2 pt-1 text-2xs text-muted-foreground">Waiting on {waitingOn}</p>
             )}
           </div>
         );
