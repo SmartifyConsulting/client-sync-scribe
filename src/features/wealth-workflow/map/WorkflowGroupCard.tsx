@@ -3,6 +3,7 @@ import { Check, Lock, Repeat } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { OWNER_LABEL } from "./groups";
 import type { GroupView } from "./useWorkflowMap";
+import { StepAvatar, type MapAvatars } from "./StepAvatar";
 
 export function OwnerBadge({ owner, label }: { owner: string; label?: string }) {
   const key = owner === "wealth_manager" ? "advisor" : owner === "provider" ? "insurer" : owner;
@@ -22,7 +23,7 @@ const stateLabel: Record<string, string> = {
   waiting: "Waiting", not_applicable: "Not applicable",
 };
 
-export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSelectStep, viewer = "manager", clientFirst = "Client" }: { view: GroupView; blockers: string[]; onOpen: () => void; selectedStep?: string | null; onSelectStep?: (label: string) => void; viewer?: "manager" | "client"; clientFirst?: string }) {
+export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSelectStep, viewer = "manager", clientFirst = "Client", avatars }: { view: GroupView; blockers: string[]; onOpen: () => void; selectedStep?: string | null; onSelectStep?: (label: string) => void; viewer?: "manager" | "client"; clientFirst?: string; avatars?: MapAvatars }) {
   const { group: g, state } = view;
   const active = state === "current" || state === "waiting" || state === "blocked";
   const locked = state === "pending";
@@ -42,7 +43,7 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
       <div className={cn("flex items-center gap-1.5 bg-primary px-2.5 py-1.5", locked && "opacity-80")}>
         <button onClick={locked ? undefined : onOpen} disabled={locked} className="flex flex-1 items-center gap-2 text-left disabled:cursor-default">
           <span className="flex items-center justify-center rounded-full bg-black px-2 py-0.5 text-2xs font-semibold text-white">
-            {state === "completed" ? <Check className="h-3.5 w-3.5" /> : `Step ${g.n}`}
+            {state === "completed" ? <Check className="h-3.5 w-3.5" strokeWidth={4} /> : `Step ${g.n}`}
           </span>
           <span className="text-xs font-medium tracking-tight text-primary-foreground">{viewer === "client" ? g.clientTitle : g.title}</span>
           {!locked && state !== "current" && (
@@ -81,16 +82,16 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
                   selectedStep === s.label && s.state !== "next" && "bg-muted/60",
                 )}
               >
-                <span className="flex w-4 flex-none items-center justify-center">
+                <span className="flex w-5 flex-none items-center justify-center">
                   {s.state === "done" ? (
-                    <span className={cn("flex h-4 w-4 items-center justify-center rounded-full", s.owner === "advisor" ? "bg-blue-500" : "bg-emerald-500")}>
-                      <Check className="h-3 w-3 text-white" strokeWidth={4} />
+                    <span className={cn("flex h-[18px] w-[18px] items-center justify-center rounded-full", s.owner === "advisor" ? "bg-blue-500" : "bg-emerald-500")}>
+                      <Check className="h-3.5 w-3.5 text-white" strokeWidth={5} />
                     </span>
                   ) : s.state === "next" ? (
-                    <span className="block h-2 w-2 rounded-full bg-white" />
+                    <StepAvatar owner={s.owner} avatars={avatars} className="-ml-1 ring-white" />
                   ) : null}
                 </span>
-                <span className={cn("flex-1", s.state === "done" ? "text-muted-foreground" : s.state === "next" ? "text-white" : "text-foreground")}>{s.label}</span>
+                <span className={cn("flex-1", s.state === "done" ? "text-muted-foreground" : s.state === "next" ? "font-medium text-white" : "text-foreground")}>{s.label}</span>
               </li>
               );
             })}

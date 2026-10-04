@@ -13,6 +13,9 @@ import { WorkingWindow } from "./WorkingWindow";
 import { useWorkflowRealtime } from "../workspace/useWorkflowRealtime";
 import { OwnerBadge } from "./WorkflowGroupCard";
 import { InsurerBadge } from "./insurerColors";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import type { MapAvatars } from "./StepAvatar";
 
 interface Props {
   patientId: string;
@@ -34,6 +37,22 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
   const [openedInitial, setOpenedInitial] = useState<string | undefined>();
   const [muted, setMuted] = useState(isChimeMuted());
   const clientFirst = (clientName ?? "Client").split(" ")[0] || "Client";
+  const clientUid = m.records?.personal?.patient_user_id as string | undefined;
+  const advisorUid = m.records?.personal?.user_id as string | undefined;
+  const { data: avatarRows } = useQuery({
+    queryKey: ["wealth-map-avatars", clientUid, advisorUid],
+    enabled: !!(clientUid || advisorUid),
+    queryFn: async () => {
+      const ids = [clientUid, advisorUid].filter(Boolean) as string[];
+      const { data } = await supabase.from("profiles").select("id,full_name,avatar_url").in("id", ids);
+      return data ?? [];
+    },
+  });
+  const findP = (id?: string) => (avatarRows ?? []).find((r: any) => r.id === id) as any;
+  const avatars: MapAvatars = {
+    client: { url: findP(clientUid)?.avatar_url, name: clientName ?? findP(clientUid)?.full_name ?? "Client" },
+    advisor: { url: findP(advisorUid)?.avatar_url, name: findP(advisorUid)?.full_name ?? "Wealth Manager" },
+  };
   const liveKey = (() => {
     const g = m.groups.find((x) => x.steps.some((s) => s.state === "next"));
     const s = g?.steps.find((x) => x.state === "next");
@@ -103,7 +122,7 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
           <p className="mb-3 text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Workflow map</p>
           <WorkflowCanvas groups={m.groups} blockers={wf.status === "blocked" ? wf.blockers : []} viewer={viewer}
             clientFirst={clientFirst} docCount={(m.records?.docs ?? []).length + (m.records?.signed ?? []).length}
-            onOpenDocuments={onOpenDocuments}
+            onOpenDocuments={onOpenDocuments} avatars={avatars}
             onSelectStep={(group, step) => setPicked({ group, step })} />
           <div className="mt-3 flex flex-wrap items-center justify-end gap-1.5 border-t border-border/60 pt-2">
             <span className="mr-1 text-2xs uppercase tracking-[0.14em] text-muted-foreground">Legend</span>
@@ -125,7 +144,7 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
             </button>
           </div>
           <LiveTray groups={m.groups} viewer={viewer} clientFirst={clientFirst}
-            managerName="your Wealth Manager" nextTitle={nextAction?.title} />
+            managerName="your Wealth Manager" avatars={avatars} nextTitle={nextAction?.title} />
         </div>
       </div>
 
