@@ -13,7 +13,7 @@ import MyWorkspace from "@/pages/MyWorkspace";
 import Claims from "@/pages/Claims";
 import { useProviderAccess } from "@/modules/holarchelp/components/ProviderGate";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
-import Landing from "./pages/Landing";
+import Landing from "./pages/IndigroWelcome";
 import Dashboard from "./pages/Dashboard";
 import Patients from "./pages/Patients";
 import PatientProfile from "./pages/PatientProfile";
