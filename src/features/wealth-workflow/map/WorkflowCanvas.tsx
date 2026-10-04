@@ -1,4 +1,3 @@
-import { FolderOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WorkflowGroupCard } from "./WorkflowGroupCard";
 import type { GroupView } from "./useWorkflowMap";
@@ -23,19 +22,6 @@ function Arrow({ dir }: { dir: "right" | "down" | "up" | "left" }) {
         </svg>
       )}
     </div>
-  );
-}
-
-function DocumentsTile({ count, onOpen }: { count: number; onOpen?: () => void }) {
-  return (
-    <button type="button" onClick={onOpen} id="wealth-docs-tile"
-      className="flex w-full flex-col items-center justify-center gap-3 rounded-xl bg-muted/50 p-5 transition-colors hover:bg-muted">
-      <span className="relative flex h-24 w-24 items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/40">
-        <FolderOpen className="h-8 w-8 text-muted-foreground" />
-        <span className="absolute -right-2.5 -top-2.5 flex h-6 min-w-6 items-center justify-center rounded-full bg-primary px-1.5 text-2xs font-semibold text-primary-foreground">{count}</span>
-      </span>
-      <span className="text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Documents</span>
-    </button>
   );
 }
 
@@ -71,7 +57,6 @@ export function WorkflowCanvas({ groups, blockers, viewer, clientFirst, docCount
         {["gateway", "needs", "portfolio", "quotes", "presentation", "issuance"].map((k, i) => (
           <div key={k}>{i > 0 && <Arrow dir="down" />}{card(k, true)}</div>
         ))}
-        <div className="pt-4"><DocumentsTile count={docCount} onOpen={onOpenDocuments} /></div>
       </div>
 
       {/* Larger screens: perimeter loop */}
@@ -80,7 +65,7 @@ export function WorkflowCanvas({ groups, blockers, viewer, clientFirst, docCount
         <div className="flex h-12 items-center"><Arrow dir="right" /></div>
         {card("needs")}
 
-        <div className="row-span-3 pt-7 pr-8"><DocumentsTile count={docCount} onOpen={onOpenDocuments} /></div>
+        <div className="row-span-3" />
         <div />
         <Arrow dir="down" />
         <div />

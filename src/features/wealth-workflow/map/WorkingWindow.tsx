@@ -120,7 +120,7 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
             </span>}
           </div>
 
-          {isSign && viewer === "client" ? (
+          {isSign && viewer === "client" && !embedded ? (
             <div>
               <p className="text-sm leading-relaxed text-muted-foreground">Read and sign two documents:</p>
               <ol className="mt-2 space-y-2.5">

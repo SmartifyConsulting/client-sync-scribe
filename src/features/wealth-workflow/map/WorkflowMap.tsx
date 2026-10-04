@@ -144,10 +144,10 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
             <span className="flex items-center gap-2 text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
               <span className="h-2 w-2 animate-pulse rounded-full bg-primary" /> Live workspace
             </span>
-            <button type="button" onClick={onOpenDocuments} aria-label="Open documents" title="Documents"
+            <button type="button" id="wealth-docs-tile" onClick={onOpenDocuments} aria-label="Open documents" title="Documents"
               className="relative -my-2 rounded-lg p-0.5 transition-transform hover:scale-105">
               <img src={folderAsset.url} alt="" className="h-10 w-10 object-contain" />
-              {docCount > 0 && <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">{docCount}</span>}
+              {<span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-2xs ring-2 ring-card font-semibold text-primary-foreground">{docCount}</span>}
             </button>
           </div>
           <LiveTray groups={m.groups} viewer={viewer} clientFirst={clientFirst}
