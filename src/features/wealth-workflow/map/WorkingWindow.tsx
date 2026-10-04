@@ -6,7 +6,7 @@ import { OwnerBadge } from "./WorkflowGroupCard";
 import { STEP_GUIDANCE, fillName, ownerLabel } from "./stepGuidance";
 import { KycPanel, SignDocsPanel } from "./OnboardingPanels";
 import { AstutePanel } from "./AstutePanel";
-import { PersonalInfoPanel, CaptureFinancialsPanel, VerifyFinancialsPanel } from "./ProfilePanels";
+import { PersonalInfoPanel, CaptureFinancialsPanel, VerifyFinancialsPanel, ScheduleMeetingPanel } from "./ProfilePanels";
 import type { GroupView } from "./useWorkflowMap";
 
 interface Props {
@@ -85,6 +85,7 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
   const isAstute = step.label.startsWith("Astute pull");
   const isPersonal = step.label === "Complete personal information";
   const isCapture = step.label === "Record consultation and capture financials";
+  const isSchedule = step.label === "Schedule meeting to discuss current financial health";
   const isVerify = step.label === "Verify financial information";
   const reached = step.state === "next" || step.state === "done";
   const custom = isKyc || isSign || isAstute || isPersonal || isCapture || isVerify;
