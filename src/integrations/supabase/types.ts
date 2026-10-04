@@ -10596,6 +10596,7 @@ export type Database = {
           title: string | null
           top_suppliers: Json
           updated_at: string
+          updated_by: string | null
           user_id: string
         }
         Insert: {
@@ -10633,6 +10634,7 @@ export type Database = {
           title?: string | null
           top_suppliers?: Json
           updated_at?: string
+          updated_by?: string | null
           user_id: string
         }
         Update: {
@@ -10670,6 +10672,7 @@ export type Database = {
           title?: string | null
           top_suppliers?: Json
           updated_at?: string
+          updated_by?: string | null
           user_id?: string
         }
         Relationships: []
