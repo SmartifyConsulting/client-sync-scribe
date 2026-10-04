@@ -150,7 +150,7 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
             working={isLive ? renderWorking(true) : undefined}
             history={(gk, step) => <WorkingWindow embedded group={m.groups.find((g) => g.group.key === gk) ?? null} stepLabel={step} isLive={false} viewer={viewer}
               clientName={clientName ?? "Client"} workflowId={wf.id} records={m.records} blockers={[]}
-              documents={(m.records?.docs ?? []) as any[]} onOpenDocuments={onOpenDocuments} />}
+              documents={(m.records?.docs ?? []) as any[]} onBackToCurrent={() => {}} onOpenDocuments={onOpenDocuments} />}
             legend={<>
               <span className="mr-1 text-2xs uppercase tracking-[0.14em] text-muted-foreground">Legend</span>
               <SolidBadge className="bg-emerald-600">{clientFirst}</SolidBadge>
