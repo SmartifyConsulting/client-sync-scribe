@@ -2,8 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight } from "lucide-react";
+import { Panel } from "@/components/ui/Panel";
+import { ArrowRight, Wallet } from "lucide-react";
 
 const fmt = (n: number) => `R${Math.round(n).toLocaleString("en-ZA")}`;
 
@@ -28,10 +28,9 @@ export function EarningsThisMonth() {
   const commission = apps.reduce((s, a) => s + Number(a.commission_amount || 0), 0);
 
   return (
-    <Card className="border-t-4 border-t-primary">
-      <CardHeader className="pb-2"><CardTitle className="text-base">Earnings for the Month</CardTitle></CardHeader>
-      <CardContent className="space-y-3">
-        <div className="grid grid-cols-3 gap-3 text-center">
+    <Panel title="Earnings for the Month" icon={Wallet}>
+      <div className="space-y-2">
+        <div className="grid grid-cols-3 gap-2 text-center">
           <Stat label="Policies issued" value={String(policies)} />
           <Stat label="Premium written" value={fmt(premium)} />
           <Stat label="Commission" value={fmt(commission)} />
@@ -39,8 +38,8 @@ export function EarningsThisMonth() {
         <Link to="/practice?tab=earnings" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
           View earnings &amp; targets <ArrowRight className="h-3 w-3" />
         </Link>
-      </CardContent>
-    </Card>
+      </div>
+    </Panel>
   );
 }
 

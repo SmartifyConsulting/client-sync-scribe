@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Clock, User, Video, MapPin } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CalendarDays, User, Video, MapPin } from "lucide-react";
+import { Panel } from "@/components/ui/Panel";
 import { supabase } from "@/integrations/supabase/client";
 import { format, startOfDay, addDays, isToday, isTomorrow } from "date-fns";
 
@@ -63,51 +63,48 @@ export function UpcomingMeetings() {
   }, []);
 
   return (
-    <Card className="border-t-4 border-t-primary">
-      <CardHeader className="pb-2"><CardTitle className="text-base">Upcoming Meetings</CardTitle></CardHeader>
-      <CardContent>
-        {loading ? (
-          <div className="animate-pulse space-y-2">
-            <div className="h-4 bg-muted rounded w-1/2" />
-            <div className="h-4 bg-muted rounded w-1/3" />
-          </div>
-        ) : meetings.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No meetings scheduled in the next 7 days.</p>
-        ) : (
-          <ul className="divide-y text-sm">
-            {meetings.map((m) => (
-              <li key={m.id} className="flex items-center gap-3 py-2">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent">
-                  <User className="h-4 w-4 text-accent-foreground" />
+    <Panel title="Upcoming Meetings" icon={CalendarDays}>
+      {loading ? (
+        <div className="animate-pulse space-y-2">
+          <div className="h-4 bg-muted rounded w-1/2" />
+          <div className="h-4 bg-muted rounded w-1/3" />
+        </div>
+      ) : meetings.length === 0 ? (
+        <p className="text-xs text-muted-foreground">No meetings scheduled in the next 7 days.</p>
+      ) : (
+        <ul className="divide-y text-xs">
+          {meetings.map((m) => (
+            <li key={m.id} className="flex items-center gap-2.5 py-1.5">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent">
+                <User className="h-3.5 w-3.5 text-accent-foreground" />
+              </div>
+              <div className="min-w-0 flex-1">
+                {m.patientId ? (
+                  <Link to={`/patients/${m.patientId}`} className="font-medium text-foreground hover:text-primary transition-colors truncate block">
+                    {m.patientName}
+                  </Link>
+                ) : (
+                  <span className="font-medium text-foreground truncate block">{m.patientName}</span>
+                )}
+                <div className="flex items-center gap-2 text-2xs text-muted-foreground">
+                  <span>{dayLabel(new Date(m.startTime))} · {format(new Date(m.startTime), "h:mm a")}</span>
+                  <span className="flex items-center gap-1">
+                    {m.type === "video" ? <Video className="h-3 w-3" /> : <MapPin className="h-3 w-3" />}
+                    {m.type === "video" ? "Video" : "In person"}
+                  </span>
                 </div>
-                <div className="min-w-0 flex-1">
-                  {m.patientId ? (
-                    <Link to={`/patients/${m.patientId}`} className="font-medium text-foreground hover:text-primary transition-colors truncate block">
-                      {m.patientName}
-                    </Link>
-                  ) : (
-                    <span className="font-medium text-foreground truncate block">{m.patientName}</span>
-                  )}
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span>{dayLabel(new Date(m.startTime))} · {format(new Date(m.startTime), "h:mm a")}</span>
-                    <span className="flex items-center gap-1">
-                      {m.type === "video" ? <Video className="h-3 w-3" /> : <MapPin className="h-3 w-3" />}
-                      {m.type === "video" ? "Video" : "In person"}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => navigate(`/calendar?date=${format(new Date(m.startTime), "yyyy-MM-dd")}`)}
-                  className="text-xs text-primary hover:underline shrink-0"
-                >
-                  View
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </CardContent>
-    </Card>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate(`/calendar?date=${format(new Date(m.startTime), "yyyy-MM-dd")}`)}
+                className="text-2xs text-primary hover:underline shrink-0"
+              >
+                View
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Panel>
   );
 }

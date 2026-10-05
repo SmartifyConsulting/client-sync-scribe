@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
+import { TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Panel } from "@/components/ui/Panel";
 import { Badge } from "@/components/ui/badge";
 
 export const STAGE_LABEL: Record<string, string> = {
@@ -32,29 +33,28 @@ export function PipelineOverview() {
   const blocked = wfs.filter((w) => w.status === "blocked");
 
   return (
-    <Card className="border-t-4 border-t-primary">
-      <CardHeader className="pb-2"><CardTitle className="text-base">Pipeline</CardTitle></CardHeader>
-      <CardContent className="space-y-3">
-        <div className="grid grid-cols-3 gap-3 text-center">
+    <Panel title="Pipeline" icon={TrendingUp}>
+      <div className="space-y-2">
+        <div className="grid grid-cols-3 gap-2 text-center">
           <Stat label="Active" value={wfs.length} />
           <Stat label="Blocked" value={blocked.length} />
           <Stat label="Issued" value={byStage.get("issued") ?? 0} />
         </div>
         <div className="flex flex-wrap gap-1.5">
           {[...byStage].map(([s, n]) => (
-            <Badge key={s} variant="outline">{STAGE_LABEL[s] ?? s} · {n}</Badge>
+            <Badge key={s} variant="outline" className="text-2xs">{STAGE_LABEL[s] ?? s} · {n}</Badge>
           ))}
-          {!wfs.length && <p className="text-sm text-muted-foreground">No clients moving through the pipeline yet.</p>}
+          {!wfs.length && <p className="text-xs text-muted-foreground">No clients moving through the pipeline yet.</p>}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </Panel>
   );
 }
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-xl border border-border p-2">
-      <p className="text-xl font-semibold text-foreground">{value}</p>
+      <p className="text-base font-semibold text-foreground">{value}</p>
       <p className="text-2xs text-muted-foreground">{label}</p>
     </div>
   );

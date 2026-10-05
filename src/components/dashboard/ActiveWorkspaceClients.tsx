@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
+import { Users2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Panel } from "@/components/ui/Panel";
 import { Badge } from "@/components/ui/badge";
 import { STAGE_LABEL } from "@/components/dashboard/PipelineOverview";
 
@@ -22,22 +23,19 @@ export function ActiveWorkspaceClients() {
   });
 
   return (
-    <Card className="border-t-4 border-t-primary">
-      <CardHeader className="pb-2"><CardTitle className="text-base">Active Workspace Clients</CardTitle></CardHeader>
-      <CardContent>
-        <ul className="divide-y text-sm">
-          {wfs.map((w) => (
-            <li key={w.id} className="flex items-center justify-between py-2">
-              <Link to={`/patients/${w.patient_id}?tab=live`} className="font-medium hover:underline">{w.patients?.name ?? "Client"}</Link>
-              <span className="flex items-center gap-2">
-                <span className="text-muted-foreground">{STAGE_LABEL[w.current_stage] ?? w.current_stage}</span>
-                {w.status === "blocked" && <Badge variant="destructive">Blocked</Badge>}
-              </span>
-            </li>
-          ))}
-          {!wfs.length && <li className="py-2 text-muted-foreground">No active clients yet.</li>}
-        </ul>
-      </CardContent>
-    </Card>
+    <Panel title="Active Workspace Clients" icon={Users2}>
+      <ul className="divide-y text-xs">
+        {wfs.map((w) => (
+          <li key={w.id} className="flex items-center justify-between py-1.5">
+            <Link to={`/patients/${w.patient_id}?tab=live`} className="font-medium hover:underline">{w.patients?.name ?? "Client"}</Link>
+            <span className="flex items-center gap-2">
+              <span className="text-muted-foreground">{STAGE_LABEL[w.current_stage] ?? w.current_stage}</span>
+              {w.status === "blocked" && <Badge variant="destructive" className="text-2xs">Blocked</Badge>}
+            </span>
+          </li>
+        ))}
+        {!wfs.length && <li className="py-1.5 text-muted-foreground">No active clients yet.</li>}
+      </ul>
+    </Panel>
   );
 }

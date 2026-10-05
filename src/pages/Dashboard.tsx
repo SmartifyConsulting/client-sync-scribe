@@ -9,6 +9,7 @@ import { EarningsThisMonth } from "@/components/dashboard/EarningsThisMonth";
 import { useProfile } from "@/hooks/useProfile";
 import { ProfileCompletionBanner } from "@/components/profile/ProfileCompletionBanner";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useGenerateWmActionItems } from "@/hooks/useGenerateWmActionItems";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -17,6 +18,7 @@ export default function Dashboard() {
   const { profile, loading: profileLoading } = useProfile();
   const { isDoctor, isPatient, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
+  useGenerateWmActionItems();
 
   const shouldRedirectPatient = !roleLoading && isPatient;
 
@@ -73,11 +75,11 @@ export default function Dashboard() {
       {/* WM dashboard: Action Items, Pipeline, Active Workspace Clients,
           Upcoming Meetings, Briefing for the day, Earnings for the month. */}
       <div className="grid gap-3 md:gap-6 grid-cols-1 lg:grid-cols-2">
+        <TodaysBriefing />
+        <ActiveWorkspaceClients />
         <CompactTodoList />
         <PipelineOverview />
-        <ActiveWorkspaceClients />
         <UpcomingMeetings />
-        <TodaysBriefing />
         <EarningsThisMonth />
       </div>
     </div>
