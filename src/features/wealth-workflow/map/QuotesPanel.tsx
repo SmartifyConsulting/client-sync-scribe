@@ -18,7 +18,7 @@ const R = (n?: number | null) => (n == null ? "—" : `R ${Math.round(Number(n))
 /** Step 3 and Step 4 outputs shown in the Working Window (instead of a repeated document list). */
 export const QUOTE_STEPS = new Set([
   "Insurer schedules and claims history", "Cross-alert check", "Push profile to CRM",
-  "Quote 6 insurers, rank top 3", "Select options and commentary", "Affordability check", "Generate ROA (versioned)",
+  "Quotes received, AI ranks top 3", "Select options and commentary", "Affordability check", "Generate ROA (versioned)",
 ]);
 
 const INSURERS = ["Discovery", "Old Mutual", "Sanlam", "Liberty", "Momentum", "Hollard"];
@@ -117,7 +117,7 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
     case "Push profile to CRM":
       return <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">The CRM (Iress XPLAN) isn't connected yet. The client profile is kept here until the connection is set up.</p>;
 
-    case "Quote 6 insurers, rank top 3":
+    case "Quotes received, AI ranks top 3":
       if (!quotes.length) {
         return isWM ? (
           <div className="space-y-3">

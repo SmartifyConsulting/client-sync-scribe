@@ -113,7 +113,7 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
     manager: { what: "If {name} only wants advice on one need, they sign a single-need disclaimer.", required: ["Signed single-need disclaimer from {name}"] },
     unlocks: "Quotes for the single need",
   },
-  "Quote 6 insurers, rank top 3": {
+  "Quotes received, AI ranks top 3": {
     client: { what: "We request quotes from six insurers and rank the best three for you.", required: ["Nothing from you"] },
     manager: { what: "Holarc Wealth requests quotes from six insurers and ranks the top three.", required: ["Completed needs analysis"] },
     unlocks: "Option selection",
