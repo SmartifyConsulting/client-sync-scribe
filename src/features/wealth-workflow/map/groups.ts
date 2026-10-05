@@ -10,6 +10,7 @@ export interface MapContext {
   apps: { status: string; review_date: string | null }[];
   compliance: {
     kyc_fica_status: string; bank_validation_status: string; bank_validation_required: boolean; declarations_status: string;
+    health_disclosure_status?: string;
   } | null;
   docKinds: Set<string>;
   clientLinked: boolean;
@@ -112,7 +113,7 @@ export const WORKFLOW_GROUPS: WorkflowGroup[] = [
           (!c.compliance.bank_validation_required || c.compliance.bank_validation_status === "completed"),
       },
       { owner: "client", label: "Authorise debit order and sign life declaration", done: (c) => c.compliance?.declarations_status === "completed" },
-      { owner: "client", label: "Complete health disclosure (encrypted)" },
+      { owner: "client", label: "Complete health disclosure (encrypted)", done: (c) => c.compliance?.health_disclosure_status === "completed" || c.compliance?.health_disclosure_status === "deferred_to_insurer" },
     ],
     footer: "Submission blocked until complete",
   },
@@ -122,7 +123,7 @@ export const WORKFLOW_GROUPS: WorkflowGroup[] = [
     steps: [
       { owner: "insurer", label: "Accept, decline or issue", done: appAt(["issued"]) },
       { owner: "system", label: "Policy schedule to portal and CRM", done: appAt(["issued"]) },
-      { owner: "system", label: "Schedule annual review", done: (c) => c.apps.some((a) => !!a.review_date) },
+      { owner: "client", label: "Choose your next meeting date", done: (c) => c.apps.some((a) => !!a.review_date) },
     ],
     footer: "Annual review booked automatically 12 months after issue",
   },

@@ -23,6 +23,8 @@ export const QUOTE_STEPS = new Set([
 
 const INSURERS = ["Discovery", "Old Mutual", "Sanlam", "Liberty", "Momentum", "Hollard"];
 const FACTORS = [1.0, 0.94, 1.08, 1.02, 0.97, 1.12];
+// Short-term products go through the insurer's own credit check instead of an affordability check.
+const SHORT_TERM_PRODUCTS = ["Short-term (assets)", "Car", "Car Insurance", "Home", "Home Insurance", "Short-term insurance"];
 
 export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }: {
   label: string; viewer: Viewer; workflowId: string; records: any; clientFirst: string;
@@ -194,6 +196,15 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
 
     case "Affordability check": {
       if (!selected.length) return <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">Select at least one option to check affordability.</p>;
+      const longTermSelected = selected.filter((q) => !SHORT_TERM_PRODUCTS.includes(q.product));
+      if (!longTermSelected.length) {
+        return (
+          <p className="flex items-center gap-2 rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
+            <CheckCircle2 className="h-4 w-4 text-[hsl(var(--owner-system))]" />
+            Not applicable — affordability checks only apply to long-term insurance. For short-term cover, the insurer runs a credit check instead.
+          </p>
+        );
+      }
       const pct = net ? (selPremium / net) * 100 : 0;
       const ok = net > 0 && selPremium <= Math.max(surplus, 0) && pct <= 15;
       return (

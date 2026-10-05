@@ -527,6 +527,16 @@ export function PatientDetailsEditor({
     blood_type: "",
     organ_donor: false,
     preferred_language: "",
+    title: "",
+    maiden_name: "",
+    religion: "",
+    smoker: "",
+    smoker_quantity: "",
+    highest_education: "",
+    self_employed: "",
+    business_name: "",
+    employer_years: "",
+    tax_reference_number: "",
   });
   const [organDonorOrgans, setOrganDonorOrgans] = useState<string[]>([]);
   const [surgeries, setSurgeries] = useState<Surgery[]>([]);
@@ -690,7 +700,17 @@ export function PatientDetailsEditor({
         blood_type: patient.blood_type || "",
         organ_donor: patient.organ_donor || false,
         preferred_language: (patient as any).preferred_language || "",
-      });
+        title: (patient as any).title || "",
+        maiden_name: (patient as any).maiden_name || "",
+        religion: (patient as any).religion || "",
+        smoker: (patient as any).smoker || "",
+        smoker_quantity: (patient as any).smoker_quantity || "",
+        highest_education: (patient as any).highest_education || "",
+        self_employed: (patient as any).self_employed || "",
+        business_name: (patient as any).business_name || "",
+        employer_years: (patient as any).employer_years || "",
+        tax_reference_number: (patient as any).tax_reference_number || "",
+      } as any);
       setOrganDonorOrgans(patient.organ_donor_organs || []);
       setSurgeries(patient.surgeries || []);
       setFamilyHistory(patient.family_history || []);
@@ -865,6 +885,16 @@ export function PatientDetailsEditor({
         organ_donor: data.organ_donor,
         organ_donor_organs: organDonorOrgans,
         preferred_language: data.preferred_language || null,
+        title: (data as any).title || null,
+        maiden_name: (data as any).maiden_name || null,
+        religion: (data as any).religion || null,
+        smoker: (data as any).smoker || null,
+        smoker_quantity: (data as any).smoker_quantity || null,
+        highest_education: (data as any).highest_education || null,
+        self_employed: (data as any).self_employed || null,
+        business_name: (data as any).business_name || null,
+        employer_years: (data as any).employer_years || null,
+        tax_reference_number: (data as any).tax_reference_number || null,
         next_of_kin_members: nokMembers,
         current_medications: currentMedications,
         conditions_diagnoses: conditionsDiagnoses,
@@ -2148,6 +2178,35 @@ export function PatientDetailsEditor({
                       placeholder="Referral source"
                     />
                   </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="title">Title</Label>
+                    <Input id="title" className="text-sm" value={(formData as any).title || ""} onChange={(e) => updateFormData({ title: e.target.value } as any)} placeholder="Mr / Mrs / Dr…" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="maiden_name">Maiden Name</Label>
+                    <Input id="maiden_name" className="text-sm" value={(formData as any).maiden_name || ""} onChange={(e) => updateFormData({ maiden_name: e.target.value } as any)} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="religion">Religion</Label>
+                    <Input id="religion" className="text-sm" value={(formData as any).religion || ""} onChange={(e) => updateFormData({ religion: e.target.value } as any)} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="highest_education">Highest Level of Education</Label>
+                    <Input id="highest_education" className="text-sm" value={(formData as any).highest_education || ""} onChange={(e) => updateFormData({ highest_education: e.target.value } as any)} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="smoker">Smoker</Label>
+                    <Select value={(formData as any).smoker || ""} onValueChange={(value) => updateFormData({ smoker: value } as any)}>
+                      <SelectTrigger id="smoker" className="text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
+                      <SelectContent><SelectItem value="Yes">Yes</SelectItem><SelectItem value="No">No</SelectItem></SelectContent>
+                    </Select>
+                  </div>
+                  {(formData as any).smoker === "Yes" && (
+                    <div className="space-y-1.5">
+                      <Label htmlFor="smoker_quantity">Quantity per Day</Label>
+                      <Input id="smoker_quantity" className="text-sm" value={(formData as any).smoker_quantity || ""} onChange={(e) => updateFormData({ smoker_quantity: e.target.value } as any)} />
+                    </div>
+                  )}
                 </div>
               </CollapsibleContent>
             </Collapsible>
@@ -2233,6 +2292,27 @@ export function PatientDetailsEditor({
                       onChange={(e) => updateFormData({ occupation: e.target.value })}
                       placeholder="Job title"
                     />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="employer_years">Number of Years</Label>
+                    <Input id="employer_years" className="text-sm" value={(formData as any).employer_years || ""} onChange={(e) => updateFormData({ employer_years: e.target.value } as any)} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="self_employed">Self Employed</Label>
+                    <Select value={(formData as any).self_employed || ""} onValueChange={(value) => updateFormData({ self_employed: value } as any)}>
+                      <SelectTrigger id="self_employed" className="text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
+                      <SelectContent><SelectItem value="Yes">Yes</SelectItem><SelectItem value="No">No</SelectItem></SelectContent>
+                    </Select>
+                  </div>
+                  {(formData as any).self_employed === "Yes" && (
+                    <div className="space-y-1.5">
+                      <Label htmlFor="business_name">Business Name</Label>
+                      <Input id="business_name" className="text-sm" value={(formData as any).business_name || ""} onChange={(e) => updateFormData({ business_name: e.target.value } as any)} />
+                    </div>
+                  )}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="tax_reference_number">Tax Reference Number</Label>
+                    <Input id="tax_reference_number" className="text-sm" value={(formData as any).tax_reference_number || ""} onChange={(e) => updateFormData({ tax_reference_number: e.target.value } as any)} />
                   </div>
                 </div>
               </CollapsibleContent>

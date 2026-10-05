@@ -168,9 +168,9 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
     manager: { what: "The issued schedule is sent to {name}'s portal and saved in the CRM.", required: ["Issued policy from the insurer"] },
     unlocks: "Annual review scheduling",
   },
-  "Schedule annual review": {
-    client: { what: "Your next annual review is booked for 12 months from now.", required: ["Nothing from you"] },
-    manager: { what: "{name}'s annual review is booked 12 months from issue.", required: ["Policy issue date"] },
+  "Choose your next meeting date": {
+    client: { what: "Tell us how often you'd like to meet, and pick your next meeting date — at most a year from now.", required: ["How often you'd like to meet", "Your next meeting date"], action: "Choose my next meeting date" },
+    manager: { what: "{name} chooses how often they'd like to meet and their next meeting date (compulsory, at most 12 months out). It's booked automatically.", required: ["{name} confirms their next meeting date"] },
     unlocks: "Renewal acknowledgement",
   },
   "Acknowledge renewal": {

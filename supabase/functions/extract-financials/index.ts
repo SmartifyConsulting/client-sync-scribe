@@ -21,6 +21,7 @@ Return ONLY a JSON object with these keys (omit anything not stated; never inven
  "goals_risk": {"retirement_age","retirement_income","risk_profile" (one of "Conservative","Moderately conservative","Moderate","Moderately aggressive","Aggressive"),"goals"},
  "estate": {"will_status" (one of "No will","Will in place","Will outdated"),"will_date","executor","trusts"},
  "car_insurance": {"current_insurer","monthly_premium","years_continuous_cover","vehicle_colour","has_claims" (one of "Yes","No"),"claim_date","claim_reason","wants_quote" (one of "Yes","No")},
+ "personal_info": {"title","maiden_name","religion","highest_education","self_employed" (one of "Yes","No"),"business_name","employer_years","tax_reference_number","smoker" (one of "Yes","No"),"smoker_quantity","marital_status","marital_regime","id_passport_number","dob" (YYYY-MM-DD),"physical_address","postal_address","next_of_kin_name","next_of_kin_phone","next_of_kin_email"},
  "general_notes": "Any other comment, context or remark from the meeting that doesn't fit one of the fields above — omit this key entirely if there's nothing like that."
 }
 Monthly figures unless stated otherwise. Keep it concise.`;
@@ -82,6 +83,18 @@ Deno.serve(async (req) => {
     }
     const { error } = await admin.from("client_financial_profiles").upsert(row, { onConflict: "patient_id" });
     if (error) { console.error(error); return json({ error: "Couldn't save the financial information." }, 500); }
+
+    // Auto-populate Personal Information from the first meeting — only fill
+    // blanks, never overwrite something the client or WM already entered.
+    if (facts.personal_info && typeof facts.personal_info === "object") {
+      const { data: currentPat } = await admin.from("patients").select("*").eq("id", patientId).maybeSingle();
+      const personalUpdate: Record<string, any> = {};
+      for (const [k, v] of Object.entries(facts.personal_info)) {
+        if (typeof v === "string" && v.trim() && !currentPat?.[k]) personalUpdate[k] = v.trim();
+      }
+      if (Object.keys(personalUpdate).length) await admin.from("patients").update(personalUpdate).eq("id", patientId);
+    }
+
     return json({ ok: true, sections: keys.filter((k) => row[k]) });
   } catch (e) {
     console.error(e);
