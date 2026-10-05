@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, CheckCircle2, Loader2, Plus, Sparkles, Trash2, PenLine } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Folder, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -212,7 +212,7 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
 
     case "Affordability check": {
       if (!selected.length) return <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">Select at least one option to check affordability.</p>;
-      const longTermSelected = selected.filter((q) => !SHORT_TERM_PRODUCTS.includes(q.product));
+      const longTermSelected = selected.filter((q) => !isShortTerm(q));
       if (!longTermSelected.length) {
         return (
           <p className="flex items-center gap-2 rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
