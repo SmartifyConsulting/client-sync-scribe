@@ -91,6 +91,7 @@ import ProviderRoutes from "./modules/holarchelp/routes-provider";
 import PublicTrack from "./modules/holarchelp/pages/PublicTrack";
 import HolarcHelpProviders from "./pages/admin/HolarcHelpProviders";
 import WealthUsers from "./pages/admin/WealthUsers";
+import ActivityLog from "./pages/ActivityLog";
 import HolarcHelpAccountability from "./pages/admin/HolarcHelpAccountability";
 import HolarcHelpProviderIncidents from "./pages/admin/HolarcHelpProviderIncidents";
 import SosAlertListener from "@/components/SosAlertListener";
@@ -313,6 +314,7 @@ const App = () => (
             <Route path="/cpd-certificates" element={<Navigate to="/profile" replace />} />
             <Route path="/expiring-recordings" element={<ExpiringRecordings />} />
             <Route path="/connections" element={<Connections />} />
+            <Route path="/activity-log" element={<ActivityLog />} />
             
             {/* Admin routes */}
             <Route path="/admin" element={<Admin />} />

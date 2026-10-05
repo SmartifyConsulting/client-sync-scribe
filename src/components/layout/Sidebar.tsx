@@ -96,6 +96,7 @@ const DOCTOR_SECTIONS: NavSection[] = [
       { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
       { icon: ListChecks, label: "My Actions", labelKey: "nav.myTasks", to: "/todos", tour: "doctor-tasks" },
       { icon: Users2, label: "Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
+      { icon: History, label: "Activity Log", labelKey: "nav.activityLog", to: "/activity-log" },
     ],
   },
 ];
