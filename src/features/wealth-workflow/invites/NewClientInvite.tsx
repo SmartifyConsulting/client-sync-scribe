@@ -21,7 +21,7 @@ const waNumber = (p?: string | null) => {
   return d.startsWith("0") ? "27" + d.slice(1) : d;
 };
 const message = (first: string, manager: string, url: string) =>
-  `Hi ${first}, this is ${manager}. Please open this secure link to set up your Holarc Wealth account and start your onboarding: ${url}`;
+  `Hi ${first}, this is ${manager}. Please open this secure link to set up your Elysian account and start your onboarding: ${url}`;
 
 function SendOptions({ first, phone, email, url, manager }: { first: string; phone?: string | null; email?: string | null; url: string; manager: string }) {
   const { toast } = useToast();
@@ -31,7 +31,7 @@ function SendOptions({ first, phone, email, url, manager }: { first: string; pho
       <div className="rounded-xl border border-border bg-muted/30 p-3 text-xs break-all text-muted-foreground">{url}</div>
       <div className="grid gap-2 sm:grid-cols-3">
         <Button asChild variant="default"><a href={`https://wa.me/${waNumber(phone)}?text=${encodeURIComponent(text)}`} target="_blank" rel="noreferrer"><MessageCircle className="h-4 w-4" />WhatsApp</a></Button>
-        <Button asChild variant="outline"><a href={`mailto:${email ?? ""}?subject=${encodeURIComponent("Your Holarc Wealth onboarding link")}&body=${encodeURIComponent(text)}`}><Mail className="h-4 w-4" />Email</a></Button>
+        <Button asChild variant="outline"><a href={`mailto:${email ?? ""}?subject=${encodeURIComponent("Your Elysian onboarding link")}&body=${encodeURIComponent(text)}`}><Mail className="h-4 w-4" />Email</a></Button>
         <Button variant="outline" onClick={() => { navigator.clipboard.writeText(url); toast({ title: "Link copied" }); }}><Copy className="h-4 w-4" />Copy link</Button>
       </div>
       <p className="text-xs text-muted-foreground">The link works once and expires in 14 days.</p>
@@ -103,7 +103,8 @@ export function NewClientInvite({ compact = false }: { compact?: boolean }) {
 
   const create = async () => {
     if (!f.firstName.trim() || !f.lastName.trim()) return toast({ title: "Name required", description: "Enter the client's first name and surname.", variant: "destructive" });
-    if (!f.phone.trim() && !f.email.trim()) return toast({ title: "Contact required", description: "Add a cell number or email so you can send the link.", variant: "destructive" });
+    if (!/^\S+@\S+\.\S+$/.test(f.email.trim())) return toast({ title: "Email required", description: "Enter the client's email address so they can sign in.", variant: "destructive" });
+    if (waNumber(f.phone).length < 10) return toast({ title: "Telephone required", description: "Enter the client's cell number, e.g. 082 123 4567.", variant: "destructive" });
     setBusy(true);
     const { data, error } = await supabase.functions.invoke("wealth-client-invite", { body: { action: "create", ...f, origin: window.location.origin } });
     setBusy(false);
@@ -140,9 +141,9 @@ export function NewClientInvite({ compact = false }: { compact?: boolean }) {
                 <div className="space-y-1.5"><Label>First name</Label><Input value={f.firstName} onChange={(e) => setF({ ...f, firstName: e.target.value })} /></div>
                 <div className="space-y-1.5"><Label>Surname</Label><Input value={f.lastName} onChange={(e) => setF({ ...f, lastName: e.target.value })} /></div>
               </div>
-              <div className="space-y-1.5"><Label>Cell number</Label><Input type="tel" placeholder="082 123 4567" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} /></div>
-              <div className="space-y-1.5"><Label>Email (optional)</Label><Input type="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /></div>
-              <Button className="w-full" disabled={busy} onClick={create}>{busy ? "Creating…" : "Create client and link"}</Button>
+              <div className="space-y-1.5"><Label>Email address</Label><Input type="email" required placeholder="client@example.com" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /></div>
+              <div className="space-y-1.5"><Label>Telephone</Label><Input type="tel" required placeholder="082 123 4567" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} /></div>
+              <Button className="w-full" disabled={busy} onClick={create}><Send className="h-4 w-4" />{busy ? "Creating…" : "Create client and send link"}</Button>
             </div>
           )}
         </DialogContent>
