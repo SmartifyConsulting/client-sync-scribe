@@ -18,6 +18,8 @@ interface Props {
   pickedWorking?: ReactNode;
   /** Renders the saved record of a completed sub-step. */
   history?: (groupKey: string, stepLabel: string) => ReactNode;
+  /** Output summary shown at the end of a completed step frame. */
+  output?: (groupKey: string) => ReactNode;
   /** Legend shown at the bottom of the tray. */
   legend?: ReactNode;
 }
@@ -53,7 +55,7 @@ function DoneStep({ groupKey, label, owner, history }: { groupKey: string; label
 }
 
 /** Live Workspace: every step listed; completed collapsed (expandable), current open, later locked. */
-export function LiveTray({ groups, viewer, clientFirst, managerName, avatars, working, pickedWorking, history, legend }: Props) {
+export function LiveTray({ groups, viewer, clientFirst, managerName, avatars, working, pickedWorking, history, output, legend }: Props) {
   const visible = groups.filter((g) => g.state !== "not_applicable");
   const [openDone, setOpenDone] = useState<Record<string, boolean>>({});
   return (
@@ -90,6 +92,7 @@ export function LiveTray({ groups, viewer, clientFirst, managerName, avatars, wo
                   {g.steps.map((s) => <DoneStep key={s.label} groupKey={g.group.key} label={s.label} owner={s.owner} history={history} />)}
                 </ul>
               )}
+              {isOpen && output?.(g.group.key)}
             </div>
           );
         }
