@@ -92,8 +92,18 @@ export default function JoinInvite() {
               <div className="space-y-3">
                 <p className="text-sm text-muted-foreground">Signed in as <b className="text-foreground">{user.email}</b>.</p>
                 {err && <p className="text-sm text-destructive">{err}</p>}
-                <Button className="w-full" disabled={busy} onClick={accept}>{busy ? "Linking…" : "Continue to onboarding"}</Button>
-                <button className="w-full text-xs text-muted-foreground underline" onClick={() => supabase.auth.signOut()}>Not you? Sign out</button>
+                {err?.includes("your own client invitation") ? (
+                  <>
+                    <p className="text-sm text-muted-foreground">This link is for {preview.firstName || "your client"} to create their own account. To test it, open the link in a private (incognito) window, or sign out below.</p>
+                    <Button className="w-full" onClick={async () => { await supabase.auth.signOut(); setErr(null); setMode("signup"); }}>Sign out and register as {preview.firstName || "the client"}</Button>
+                    <Button variant="outline" className="w-full" onClick={() => navigate("/practice")}>Back to My Clients</Button>
+                  </>
+                ) : (
+                  <>
+                    <Button className="w-full" disabled={busy} onClick={accept}>{busy ? "Linking…" : "Continue to onboarding"}</Button>
+                    <button className="w-full text-xs text-muted-foreground underline" onClick={() => supabase.auth.signOut()}>Not you? Sign out</button>
+                  </>
+                )}
               </div>
             ) : checkEmail ? (
               <p className="text-sm text-muted-foreground">We've sent a confirmation email to <b className="text-foreground">{f.email}</b>. Open it on this device to finish — you'll come straight back here.</p>
