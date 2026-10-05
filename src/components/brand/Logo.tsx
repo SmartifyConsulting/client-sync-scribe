@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import logoAsset from "@/assets/elysian-fs-logo-clear.png.asset.json";
+import logoNavy from "@/assets/elysian-logo-navy.png";
 
 const HEIGHT: Record<string, string> = {
   sm: "h-7",
@@ -21,7 +22,7 @@ export function Logo({
 }) {
   return (
     <span className={cn("inline-flex", className)}>
-      <img src={logoAsset.url} alt="Elysian" className={cn(HEIGHT[size], "w-auto max-w-full object-contain object-left")} />
+      <img src={onDark ? logoNavy : logoAsset.url} alt="Elysian" className={cn(HEIGHT[size], "w-auto max-w-full object-contain object-left")} />
     </span>
   );
 }

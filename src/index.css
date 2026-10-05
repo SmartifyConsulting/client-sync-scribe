@@ -60,7 +60,7 @@
     --muted-foreground: 218 14% 42%;    /* #666 secondary text */
 
     --brand-teal: 175 61% 52%;          /* #3AD0C4 */
-    --navy: 220 18% 7%;
+    --navy: 212 59% 13%;
     --navy-foreground: 0 0% 98%;
     --accent: 175 45% 90%;              /* #9CC7DD soft sky (replaces pastel green) */
     --accent-foreground: 220 18% 10%;
@@ -137,10 +137,10 @@
     --shadow-elevated: 0 1px 2px rgb(13 13 13 / 0.06), 0 16px 40px -16px rgb(13 13 13 / 0.18);
 
     /* Sidebar - clean white */
-    --sidebar-background: 220 18% 7%;
+    --sidebar-background: 212 59% 13%;
     --sidebar-foreground: 0 0% 82%;
     --sidebar-primary: 175 61% 52%;
-    --sidebar-primary-foreground: 220 18% 7%;
+    --sidebar-primary-foreground: 212 59% 13%;
     --sidebar-accent: 220 14% 14%;
     --sidebar-accent-foreground: 175 61% 60%;
     --sidebar-border: 220 14% 16%;
@@ -230,10 +230,10 @@
     --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 6px 16px rgb(0 0 0 / 0.3);
     --shadow-card-hover: 0 2px 8px 0 rgb(0 0 0 / 0.4), 0 12px 24px rgb(0 0 0 / 0.4);
 
-    --sidebar-background: 220 18% 5%;
+    --sidebar-background: 212 59% 10%;
     --sidebar-foreground: 0 0% 75%;
     --sidebar-primary: 175 61% 52%;
-    --sidebar-primary-foreground: 220 18% 7%;
+    --sidebar-primary-foreground: 212 59% 13%;
     --sidebar-accent: 214 30% 16%;
     --sidebar-accent-foreground: 175 61% 62%;
     --sidebar-border: 222 20% 16%;

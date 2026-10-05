@@ -976,7 +976,7 @@ export default function Auth() {
   // Already signed in — never show sign-in/sign-up while a session exists.
   if (authLoading || user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
+      <div className="min-h-screen flex items-center justify-center bg-navy">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -985,7 +985,7 @@ export default function Auth() {
   // Login form
   if (isLogin) {
     return (
-      <div className="min-h-screen flex flex-col bg-black">
+      <div className="min-h-screen flex flex-col bg-navy">
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="w-full max-w-md">
             <div className="text-center mb-6">
@@ -1004,7 +1004,7 @@ export default function Auth() {
 
   // Signup wizard
   return (
-    <div className="min-h-screen flex flex-col bg-black">
+    <div className="min-h-screen flex flex-col bg-navy">
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-6">
