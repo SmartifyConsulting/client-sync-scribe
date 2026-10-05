@@ -37,6 +37,7 @@ export const SectionHeader = ({
         titleClassName
       )}
     >
+      {Icon && <Icon className="h-4 w-4 shrink-0 text-white" />}
       {label}
     </h3>
     <div className="flex items-center gap-2">

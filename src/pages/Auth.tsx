@@ -27,6 +27,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 
 
 import { PasswordStrength } from "@/components/auth/PasswordStrength";
+import { getPasswordError } from "@/lib/passwordPolicy";
 import { SignInCard } from "@/components/auth/SignInCard";
 import { cn } from "@/lib/utils";
 import { KeyRound } from "lucide-react";
@@ -304,8 +305,10 @@ export default function Auth() {
   };
 
   const handleCreateAccount = async () => {
-    if (!password || password.length < 6) {
-      toast({ title: "Password too short", description: "Password must be at least 6 characters", variant: "destructive" });
+    const passwordError = getPasswordError(password, { name: firstName, email });
+    if (passwordError) {
+      toast({ title: "Choose a stronger password", description: passwordError, variant: "destructive" });
+      setTimeout(() => document.getElementById("password")?.focus(), 0);
       return false;
     }
     if (signupMethod === "email" && !email) {
@@ -835,7 +838,7 @@ export default function Auth() {
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => { setPassword(e.target.value); if (breachedPassword) setBreachedPassword(false); }} className={cn("pl-10 pr-10", breachedPassword && "border-destructive focus-visible:ring-destructive")} required minLength={6} disabled={accountCreated} aria-invalid={breachedPassword} />
+                <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => { setPassword(e.target.value); if (breachedPassword) setBreachedPassword(false); }} className={cn("pl-10 pr-10", breachedPassword && "border-destructive focus-visible:ring-destructive")} required minLength={8} disabled={accountCreated} aria-invalid={breachedPassword} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -941,7 +944,7 @@ export default function Auth() {
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => { setPassword(e.target.value); if (breachedPassword) setBreachedPassword(false); }} className={cn("pl-10 pr-10", breachedPassword && "border-destructive focus-visible:ring-destructive")} required minLength={6} disabled={accountCreated} aria-invalid={breachedPassword} />
+                <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => { setPassword(e.target.value); if (breachedPassword) setBreachedPassword(false); }} className={cn("pl-10 pr-10", breachedPassword && "border-destructive focus-visible:ring-destructive")} required minLength={8} disabled={accountCreated} aria-invalid={breachedPassword} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>

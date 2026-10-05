@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Logo } from "@/components/brand/Logo";
+import { getPasswordError } from "@/lib/passwordPolicy";
 
 type Preview = { status: string; fullName: string; email: string; role: "referral_agent" | "fsp" };
 const ROLE_LABEL: Record<Preview["role"], string> = { referral_agent: "Referral Agent", fsp: "FSP" };
@@ -54,7 +55,12 @@ export default function JoinTeamInvite() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErr(null); setBusy(true);
+    setErr(null);
+    if (mode === "signup") {
+      const passwordError = getPasswordError(f.password, { name: preview?.fullName, email: f.email });
+      if (passwordError) return setErr(passwordError);
+    }
+    setBusy(true);
     if (mode === "signup") {
       const { data, error } = await supabase.auth.signUp({
         email: f.email.trim(), password: f.password,

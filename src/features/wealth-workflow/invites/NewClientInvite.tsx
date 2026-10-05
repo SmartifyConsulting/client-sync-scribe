@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { usePracticeInfo } from "../practice/usePracticeInfo";
+import { cn } from "@/lib/utils";
 
 const REQUIRED = [
   ["planner_name", "Planner name"], ["phone", "Telephone"], ["email_primary", "Email"],
@@ -120,7 +121,7 @@ export function NewClientInvite({ compact = false }: { compact?: boolean }) {
   return (
     <>
       <div className="flex gap-2">
-        <Button className={compact ? "h-8 md:h-9 text-xs" : ""} onClick={() => setOpen(true)}><UserPlus className="h-4 w-4" />New Client</Button>
+        <Button className={cn("bg-black text-white hover:bg-black/90", compact ? "h-8 md:h-9 text-xs" : "")} onClick={() => setOpen(true)}><UserPlus className="h-4 w-4" />New Client</Button>
         <Button variant="outline" className={compact ? "h-8 md:h-9 text-xs" : ""} onClick={() => setListOpen(true)}>Invitations</Button>
       </div>
       <Dialog open={open} onOpenChange={close}>

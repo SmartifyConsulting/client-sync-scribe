@@ -20,6 +20,7 @@ Return ONLY a JSON object with these keys (omit anything not stated; never inven
  "investments": {"holdings":[{"kind" (one of "Retirement annuity","Pension fund","Provident fund","Preservation fund","Tax-free savings","Unit trusts","Endowment","Other"),"provider","value","contribution"}]},
  "goals_risk": {"retirement_age","retirement_income","risk_profile" (one of "Conservative","Moderately conservative","Moderate","Moderately aggressive","Aggressive"),"goals"},
  "estate": {"will_status" (one of "No will","Will in place","Will outdated"),"will_date","executor","trusts"},
+ "car_insurance": {"current_insurer","monthly_premium","years_continuous_cover","vehicle_colour","has_claims" (one of "Yes","No"),"claim_date","claim_reason","wants_quote" (one of "Yes","No")},
  "general_notes": "Any other comment, context or remark from the meeting that doesn't fit one of the fields above — omit this key entirely if there's nothing like that."
 }
 Monthly figures unless stated otherwise. Keep it concise.`;
@@ -72,7 +73,7 @@ Deno.serve(async (req) => {
     try { facts = JSON.parse(raw.replace(/^```json|```$/g, "").trim()); }
     catch { return json({ error: "Couldn't read the consultation. Please try again." }, 502); }
 
-    const keys = ["cash_flow", "assets_liabilities", "risk_portfolio", "investments", "goals_risk", "estate"];
+    const keys = ["cash_flow", "assets_liabilities", "risk_portfolio", "investments", "goals_risk", "estate", "car_insurance"];
     const { data: existing } = await admin.from("client_financial_profiles").select("*").eq("patient_id", patientId).maybeSingle();
     const row: Record<string, any> = { patient_id: patientId, updated_by: uid, extracted_at: new Date().toISOString(), extracted_from_session_id: sessionId ?? null };
     for (const k of keys) if (facts[k] && typeof facts[k] === "object") row[k] = { ...(existing?.[k] ?? {}), ...facts[k] };

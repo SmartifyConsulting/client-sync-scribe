@@ -9,49 +9,60 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Wallet, Landmark, ShieldCheck, TrendingUp, Target, ScrollText, Car, StickyNote, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-type Field = { key: string; label: string; type?: "number" | "text" | "date" | "textarea"; options?: string[] };
-type Col = { key: string; label: string; type?: "number" | "text"; options?: string[] };
-type SectionKey = "cash_flow" | "assets_liabilities" | "risk_portfolio" | "investments" | "goals_risk" | "estate";
-type SectionDef = { key: SectionKey; label: string; fields?: Field[]; list?: { key: string; label: string; cols: Col[] } };
+type Field = { key: string; label: string; type?: "number" | "text" | "date" | "textarea"; options?: string[]; placeholder?: string };
+type Col = { key: string; label: string; type?: "number" | "text"; options?: string[]; placeholder?: string };
+type SectionKey = "cash_flow" | "assets_liabilities" | "risk_portfolio" | "investments" | "goals_risk" | "estate" | "car_insurance";
+type SectionDef = { key: SectionKey; label: string; icon: any; fields?: Field[]; list?: { key: string; label: string; cols: Col[] } };
 const GENERAL_NOTES_KEY = "general_notes";
 
 const SECTIONS: SectionDef[] = [
-  { key: "cash_flow", label: "General & Cash Flow", fields: [
-    { key: "gross_income", label: "Gross monthly income (R)", type: "number" },
-    { key: "net_salary", label: "Net monthly salary (R)", type: "number" },
-    { key: "fixed_expenses", label: "Fixed monthly expenses (R)", type: "number" },
-    { key: "discretionary_expenses", label: "Discretionary monthly expenses (R)", type: "number" },
+  { key: "cash_flow", label: "General & Cash Flow", icon: Wallet, fields: [
+    { key: "gross_income", label: "Gross monthly income (R)", type: "number", placeholder: "e.g. 45000" },
+    { key: "net_salary", label: "Net monthly salary (R)", type: "number", placeholder: "e.g. 34000" },
+    { key: "fixed_expenses", label: "Fixed monthly expenses (R)", type: "number", placeholder: "Rent, loans, school fees…" },
+    { key: "discretionary_expenses", label: "Discretionary monthly expenses (R)", type: "number", placeholder: "Entertainment, shopping…" },
     { key: "tax_bracket", label: "Marginal tax bracket", options: ["18%", "26%", "31%", "36%", "39%", "41%", "45%"] },
   ] },
-  { key: "assets_liabilities", label: "Assets & Liabilities", list: { key: "items", label: "Item", cols: [
+  { key: "assets_liabilities", label: "Assets & Liabilities", icon: Landmark, list: { key: "items", label: "Item", cols: [
     { key: "kind", label: "Type", options: ["Property", "Vehicle", "Cash / savings", "Other asset", "Home loan (bond)", "Vehicle finance", "Credit card", "Personal loan", "Other debt"] },
-    { key: "description", label: "Description" },
+    { key: "description", label: "Description", placeholder: "e.g. Primary residence, Sandton" },
     { key: "value", label: "Value / balance (R)", type: "number" },
   ] } },
-  { key: "risk_portfolio", label: "Existing Risk Portfolio", list: { key: "policies", label: "Policy", cols: [
+  { key: "risk_portfolio", label: "Existing Risk Portfolio", icon: ShieldCheck, list: { key: "policies", label: "Policy", cols: [
     { key: "kind", label: "Cover type", options: ["Life cover", "Disability", "Income protection", "Severe illness", "Short-term (assets)", "Funeral"] },
-    { key: "insurer", label: "Insurer" },
+    { key: "insurer", label: "Insurer", placeholder: "e.g. Sanlam" },
     { key: "cover", label: "Cover amount (R)", type: "number" },
     { key: "premium", label: "Monthly premium (R)", type: "number" },
   ] } },
-  { key: "investments", label: "Investments & Retirement", list: { key: "holdings", label: "Investment", cols: [
+  { key: "car_insurance", label: "Car / Short-Term Insurance", icon: Car, fields: [
+    { key: "current_insurer", label: "Current insurer", placeholder: "e.g. Outsurance" },
+    { key: "monthly_premium", label: "Monthly premium (R)", type: "number" },
+    { key: "years_continuous_cover", label: "Years of continuous, uninterrupted cover", type: "number", placeholder: "e.g. 5" },
+    { key: "vehicle_colour", label: "Colour of vehicle(s)", placeholder: "e.g. White" },
+    { key: "has_claims", label: "Any previous claims?", options: ["Yes", "No"] },
+    { key: "claim_date", label: "When was the last claim?", type: "date" },
+    { key: "claim_reason", label: "What was the claim for?", placeholder: "e.g. Windscreen, collision…" },
+    { key: "wants_quote", label: "Wants a free, no-obligation quote?", options: ["Yes", "No"] },
+  ] },
+  { key: "investments", label: "Investments & Retirement", icon: TrendingUp, list: { key: "holdings", label: "Investment", cols: [
     { key: "kind", label: "Type", options: ["Retirement annuity", "Pension fund", "Provident fund", "Preservation fund", "Tax-free savings", "Unit trusts", "Endowment", "Other"] },
-    { key: "provider", label: "Provider" },
+    { key: "provider", label: "Provider", placeholder: "e.g. Allan Gray" },
     { key: "value", label: "Current value (R)", type: "number" },
     { key: "contribution", label: "Monthly contribution (R)", type: "number" },
   ] } },
-  { key: "goals_risk", label: "Goals & Risk Profile", fields: [
-    { key: "retirement_age", label: "Target retirement age", type: "number" },
+  { key: "goals_risk", label: "Goals & Risk Profile", icon: Target, fields: [
+    { key: "retirement_age", label: "Target retirement age", type: "number", placeholder: "e.g. 65" },
     { key: "retirement_income", label: "Desired retirement income (R / month)", type: "number" },
     { key: "risk_profile", label: "Investment risk tolerance", options: ["Conservative", "Moderately conservative", "Moderate", "Moderately aggressive", "Aggressive"] },
-    { key: "goals", label: "Financial goals", type: "textarea" },
+    { key: "goals", label: "Financial goals", type: "textarea", placeholder: "e.g. Save for children's tertiary education, buy a holiday home…" },
   ] },
-  { key: "estate", label: "Estate & Succession Planning", fields: [
+  { key: "estate", label: "Estate & Succession Planning", icon: ScrollText, fields: [
     { key: "will_status", label: "Will status", options: ["No will", "Will in place", "Will outdated"] },
     { key: "will_date", label: "Date of latest will", type: "date" },
-    { key: "executor", label: "Nominated executor" },
+    { key: "executor", label: "Nominated executor", placeholder: "Full name" },
     { key: "trusts", label: "Trusts", type: "textarea" },
   ] },
 ];
@@ -81,6 +92,18 @@ export function FinancialInformation({ patientId }: { patientId: string }) {
 
   const sec = (k: SectionKey) => data[k] ?? {};
   const set = (k: SectionKey, v: any) => setData((d) => ({ ...d, [k]: v }));
+
+  /** How much of a section is filled in — drives the progress pill in its header. */
+  const progress = (s: SectionDef): { filled: number; total: number } => {
+    const v = sec(s.key);
+    if (s.list) {
+      const rows: any[] = v[s.list.key] ?? [];
+      return { filled: rows.length, total: Math.max(rows.length, 1) };
+    }
+    const fields = s.fields ?? [];
+    return { filled: fields.filter((f) => v[f.key] !== undefined && v[f.key] !== null && v[f.key] !== "").length, total: fields.length };
+  };
+  const completedSections = SECTIONS.filter((s) => { const p = progress(s); return p.filled > 0; }).length;
 
   const summary = useMemo(() => {
     const cf = sec("cash_flow");
@@ -114,22 +137,38 @@ export function FinancialInformation({ patientId }: { patientId: string }) {
   const renderInput = (value: any, onChange: (v: any) => void, f: Field | Col) =>
     f.options ? (
       <Select value={value ?? ""} onValueChange={onChange}>
-        <SelectTrigger className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
+        <SelectTrigger className="h-9"><SelectValue placeholder="Select…" /></SelectTrigger>
         <SelectContent>{f.options.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
       </Select>
     ) : (f as Field).type === "textarea" ? (
-      <Textarea value={value ?? ""} onChange={(e) => onChange(e.target.value)} rows={3} />
+      <Textarea placeholder={f.placeholder} value={value ?? ""} onChange={(e) => onChange(e.target.value)} rows={3} />
     ) : (
-      <Input className="h-9" type={f.type === "number" ? "number" : (f as Field).type === "date" ? "date" : "text"} value={value ?? ""} onChange={(e) => onChange(e.target.value)} />
+      <Input className="h-9" placeholder={f.placeholder} type={f.type === "number" ? "number" : (f as Field).type === "date" ? "date" : "text"} value={value ?? ""} onChange={(e) => onChange(e.target.value)} />
     );
 
+  const ProgressPill = ({ filled, total }: { filled: number; total: number }) => (
+    <span className={cn(
+      "section-count-pill flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-semibold",
+      filled === 0 ? "bg-white/15 text-white/80" : filled >= total ? "bg-white text-primary" : "bg-white/25 text-white",
+    )}>
+      {filled >= total && total > 0 && <Check className="h-3 w-3" />}
+      {filled}/{total}
+    </span>
+  );
+
   return (
-    <div className="patient-section-frame rounded-xl border border-border bg-card overflow-hidden divide-y divide-white">
+    <div className="space-y-3">
+      <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-4 py-2.5 text-sm">
+        <span className="font-medium text-foreground">Needs Analysis progress</span>
+        <span className="text-muted-foreground">{completedSections} of {SECTIONS.length} sections started</span>
+      </div>
+      <div className="patient-section-frame rounded-xl border border-border bg-card overflow-hidden divide-y divide-white">
       {SECTIONS.map((s) => {
         const v = sec(s.key);
+        const p = progress(s);
         return (
           <Collapsible key={s.key} defaultOpen={false} className="bg-card overflow-hidden">
-            <SectionHeader icon={null} label={s.label} />
+            <SectionHeader icon={s.icon} label={s.label} extra={<ProgressPill filled={p.filled} total={p.total} />} />
             <CollapsibleContent className="p-3 space-y-3">
               {s.fields && (
                 <div className={FIELD_GRID_2_CLASS}>
@@ -189,7 +228,7 @@ export function FinancialInformation({ patientId }: { patientId: string }) {
         );
       })}
       <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
-        <SectionHeader icon={null} label="General Notes" />
+        <SectionHeader icon={StickyNote} label="General Notes" />
         <CollapsibleContent className="p-3 space-y-3">
           <p className="text-xs text-muted-foreground">Meeting commentary that doesn't belong under a specific field above.</p>
           <Textarea value={data[GENERAL_NOTES_KEY] ?? ""} onChange={(e) => setData((d) => ({ ...d, [GENERAL_NOTES_KEY]: e.target.value }))} rows={5} />
@@ -198,6 +237,7 @@ export function FinancialInformation({ patientId }: { patientId: string }) {
           </div>
         </CollapsibleContent>
       </Collapsible>
+      </div>
     </div>
   );
 }

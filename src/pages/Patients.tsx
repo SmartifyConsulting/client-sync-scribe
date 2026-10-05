@@ -448,13 +448,8 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
             }
             onImportComplete={() => fetchPatients()}
           />
+          {/* Legacy manual-entry dialog — superseded by NewClientInvite above; left mounted (closed) rather than deleting its form logic outright */}
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-1.5 h-8 md:h-9 text-xs md:text-xs">
-                <Plus className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                {t("patients.addPatient")}
-              </Button>
-            </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh]">
             <DialogHeader>
               <DialogTitle>Add New Client</DialogTitle>
