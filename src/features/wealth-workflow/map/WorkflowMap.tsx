@@ -1,3 +1,4 @@
+import { StepOutput } from "./StepOutput";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Loader2 } from "lucide-react";
 import { DocumentTray } from "./DocumentTray";
@@ -128,6 +129,7 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
             history={(gk, step) => <WorkingWindow embedded managerName={managerFirst} group={m.groups.find((g) => g.group.key === gk) ?? null} stepLabel={step} isLive={false} viewer={viewer}
               clientName={clientName ?? "Client"} workflowId={wf.id} records={m.records} blockers={[]}
               documents={(m.records?.docs ?? []) as any[]} onBackToCurrent={() => {}} onOpenDocuments={onOpenDocuments} />}
+            output={(gk) => <StepOutput groupKey={gk} records={m.records} recs={m.recs ?? []} />}
             legend={<>
               <span className="mr-1 text-2xs uppercase tracking-[0.14em] text-muted-foreground">Legend</span>
               <SolidBadge className="bg-emerald-600">{clientFirst}</SolidBadge>
