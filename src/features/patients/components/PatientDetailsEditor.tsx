@@ -1,6 +1,5 @@
 import { dobFromSaId } from "@/lib/saId";
 import { PatientProgrammesTab } from "@/features/programmes/components/PatientProgrammesTab";
-import { ClientAISummary } from "@/features/wealth-workflow/client/ClientAISummary";
 import { LifeEventsPanel } from "@/features/wealth-workflow/client/LifeEventsPanel";
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
@@ -390,7 +389,7 @@ function AnimatedCounter({ target }: { target: number }) {
 }
 
 const SECTION_TABS: Record<string, string[]> = {
-  health: ["overview", "personal", "medical", "healthrecords", "history", "claims", "documents", "lifeEvents", "logs"],
+  health: ["personal", "medical", "healthrecords", "history", "documents", "logs"],
   admin: ["calendar", "tasks", "programmes"],
   workspace: ["personal", "medical", "claims"],
   personal: ["personal"],
@@ -1598,11 +1597,6 @@ export function PatientDetailsEditor({
     if (isSelfService && section) {
       return (
         <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-          {show("overview") && (
-            <TabsTrigger value="overview" className={triggerClass}>
-              Overview
-            </TabsTrigger>
-          )}
           {show("personal") && (
             <TabsTrigger value="personal" className={triggerClass}>
               {t("patientProfile.togglePersonal")}
@@ -1766,11 +1760,6 @@ export function PatientDetailsEditor({
         <div className="rounded-xl border border-primary bg-card p-2 md:p-6 space-y-2 md:space-y-4">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             {renderTabsList()}
-
-            {/* === MY HOLARCHY TAB (overview) === */}
-            <TabsContent value="overview" className="space-y-4 mt-4">
-              <ClientAISummary patientId={patient.id} />
-            </TabsContent>
 
             {/* === PERSONAL / MEDICAL (top-level tabs) === */}
 <TabsContent value="personal" className="space-y-4 mt-4">
@@ -2044,11 +2033,6 @@ export function PatientDetailsEditor({
               </span>
             </div>
           )}
-
-          {/* === MY HOLARCHY TAB (EDIT, overview) === */}
-          <TabsContent value="overview" className="space-y-4 mt-4">
-            <ClientAISummary patientId={patient.id} />
-            </TabsContent>
 
             {/* === PERSONAL / MEDICAL (top-level tabs) === */}
 <TabsContent value="personal" className="space-y-4 mt-4">
