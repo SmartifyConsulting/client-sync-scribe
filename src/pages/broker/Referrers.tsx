@@ -1,12 +1,19 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Loader2, UserPlus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { PageHeader } from "@/components/ui/page-header";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const db = supabase as any;
 
@@ -70,9 +77,50 @@ export default function Referrers() {
 
   const zar = (n: number) => `R${Math.round(n).toLocaleString("en-ZA")}`;
 
+  // Create — invite a prospective referrer by email.
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteForm, setInviteForm] = useState({ name: "", email: "" });
+  const [inviting, setInviting] = useState(false);
+  const sendInvite = async () => {
+    if (!inviteForm.email.trim()) return;
+    setInviting(true);
+    try {
+      const { error } = await supabase.functions.invoke("send-user-invitation", {
+        body: {
+          recipientEmail: inviteForm.email.trim(),
+          isReferral: true,
+          message: `I'd like to invite you to refer clients to me on Holarc Wealth and earn commission on every policy that's issued.`,
+        },
+      });
+      if (error) throw error;
+      toast.success(`Invitation sent to ${inviteForm.email.trim()}`);
+      setInviteOpen(false);
+      setInviteForm({ name: "", email: "" });
+    } catch (e: any) {
+      toast.error(e.message || "Couldn't send the invitation.");
+    } finally {
+      setInviting(false);
+    }
+  };
+
+  // Delete — remove a custom commission rate, reverting that referrer to the default.
+  const [removeId, setRemoveId] = useState<string | null>(null);
+  const removeRate = async () => {
+    if (!removeId) return;
+    const { error } = await db.from("wealth_referrer_rates").delete().eq("broker_user_id", user!.id).eq("referrer_user_id", removeId);
+    setRemoveId(null);
+    if (error) return toast.error("Couldn't remove the custom rate.");
+    toast.success("Reverted to the default commission rate");
+    qc.invalidateQueries({ queryKey: ["broker-referrer-rates"] });
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <PageHeader title="Referrers" subtitle="Everyone referring clients to you, and the commission rate you offer each one." />
+      <PageHeader
+        title="Referrers"
+        subtitle="Everyone referring clients to you, and the commission rate you offer each one."
+        actions={<Button size="sm" onClick={() => setInviteOpen(true)}><UserPlus className="h-4 w-4 mr-1.5" />Invite referrer</Button>}
+      />
 
       <div className="rounded-xl border border-border bg-card overflow-x-auto">
         {referrals.isLoading ? (
@@ -88,6 +136,7 @@ export default function Referrers() {
                 <th className="px-4 py-2 font-medium">Accepted</th>
                 <th className="px-4 py-2 font-medium">Commission</th>
                 <th className="px-4 py-2 font-medium">Commission rate</th>
+                <th className="px-4 py-2 font-medium" />
               </tr>
             </thead>
             <tbody>
@@ -108,6 +157,11 @@ export default function Referrers() {
                       />
                       <span className="text-muted-foreground">%</span>
                     </div>
+                  </td>
+                  <td className="px-4 py-2">
+                    <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Remove custom rate for ${r.name}`} onClick={() => setRemoveId(r.id)}>
+                      <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+                    </Button>
                   </td>
                 </tr>
               ))}
@@ -142,6 +196,45 @@ export default function Referrers() {
           </div>
         </div>
       )}
+
+      <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Invite a referrer</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label>Name</Label>
+              <Input value={inviteForm.name} onChange={(e) => setInviteForm((f) => ({ ...f, name: e.target.value }))} placeholder="Optional" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Email</Label>
+              <Input type="email" required value={inviteForm.email} onChange={(e) => setInviteForm((f) => ({ ...f, email: e.target.value }))} placeholder="referrer@email.com" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setInviteOpen(false)} disabled={inviting}>Cancel</Button>
+            <Button onClick={sendInvite} disabled={inviting || !inviteForm.email.trim()}>
+              {inviting ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : null}Send invitation
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!removeId} onOpenChange={(o) => !o && setRemoveId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove custom commission rate?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This referrer reverts to the default commission rate. Their referral history and earned commission are not affected.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={removeRate}>Remove</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

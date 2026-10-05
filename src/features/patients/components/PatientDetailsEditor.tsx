@@ -1682,6 +1682,12 @@ export function PatientDetailsEditor({
         >
           {t("patientProfile.toggleMedical")}
         </TabsTrigger>
+        <TabsTrigger
+          value="healthrecords"
+          className="whitespace-nowrap text-white data-[state=active]:bg-background data-[state=active]:text-foreground text-xs px-3 py-1.5"
+        >
+          My Health Records
+        </TabsTrigger>
       </TabsList>
     );
   };
