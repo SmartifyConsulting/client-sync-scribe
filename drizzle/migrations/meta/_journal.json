@@ -64,6 +64,13 @@
       "when": 1791160979888,
       "tag": "0008_wealth_quotes",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791210879667,
+      "tag": "0009_wealth_quotes_ai_folders",
+      "breakpoints": true
     }
   ]
 }
