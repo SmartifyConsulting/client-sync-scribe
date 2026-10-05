@@ -36,8 +36,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 38% 13%;
 
-    /* Holarc teal #2DB0A6 */
-    --primary: 175 61% 46%;
+    /* Holarc brand accent #D1873C */
+    --primary: 30 61% 46%;
     /* Wealth workflow owner badges */
     /* Green is always the client, blue is always the Wealth Manager */
     --owner-client: 142 64% 32%;
@@ -49,7 +49,7 @@
     --owner-system: 220 9% 40%;
     --owner-system-bg: 220 14% 94%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 175 61% 56%;
+    --primary-glow: 30 61% 56%;
     --primary-dark: 220 18% 7%;
 
     /* Neutral grays - secondary surfaces */
@@ -59,10 +59,10 @@
     --muted: 216 24% 95%;               /* #F5F5F5 hover surface */
     --muted-foreground: 218 14% 42%;    /* #666 secondary text */
 
-    --brand-teal: 175 61% 52%;          /* #3AD0C4 */
+    --brand-teal: 30 61% 52%;           /* #D1873C */
     --navy: 212 59% 13%;
     --navy-foreground: 0 0% 98%;
-    --accent: 175 45% 90%;              /* #9CC7DD soft sky (replaces pastel green) */
+    --accent: 30 45% 90%;               /* soft tint of the brand accent */
     --accent-foreground: 220 18% 10%;
 
     /* Status colors */
@@ -116,7 +116,7 @@
     /* Borders */
     --border: 216 20% 87%;              /* #E0E0E0 */
     --input: 216 20% 85%;
-    --ring: 175 61% 46%;
+    --ring: 30 61% 46%;
 
     /* Tertiary/disabled text helpers */
     --text-tertiary: 0 0% 60%;       /* #999 */
@@ -139,12 +139,12 @@
     /* Sidebar - clean white */
     --sidebar-background: 212 59% 13%;
     --sidebar-foreground: 0 0% 82%;
-    --sidebar-primary: 175 61% 52%;
+    --sidebar-primary: 30 61% 52%;
     --sidebar-primary-foreground: 212 59% 13%;
     --sidebar-accent: 220 14% 14%;
-    --sidebar-accent-foreground: 175 61% 60%;
+    --sidebar-accent-foreground: 30 61% 60%;
     --sidebar-border: 220 14% 16%;
-    --sidebar-ring: 175 61% 52%;
+    --sidebar-ring: 30 61% 52%;
   }
 
   .dark {
@@ -157,7 +157,7 @@
     --popover: 220 14% 10%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 175 61% 52%;
+    --primary: 30 61% 52%;
     --owner-client: 142 55% 60%;
     --owner-client-bg: 142 40% 15%;
     --owner-advisor: 217 85% 70%;
@@ -167,8 +167,8 @@
     --owner-system: 220 10% 70%;
     --owner-system-bg: 220 10% 18%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 175 61% 62%;
-    --primary-dark: 175 61% 42%;
+    --primary-glow: 30 61% 62%;
+    --primary-dark: 30 61% 42%;
 
     --secondary: 222 22% 16%;
     --secondary-foreground: 0 0% 90%;
@@ -176,7 +176,7 @@
     --muted: 222 22% 16%;
     --muted-foreground: 218 14% 62%;
 
-    --brand-teal: 175 61% 52%;
+    --brand-teal: 30 61% 52%;
     --accent: 200 35% 28%;
     --accent-foreground: 200 48% 82%;
 
@@ -219,7 +219,7 @@
 
     --border: 222 20% 20%;
     --input: 222 20% 20%;
-    --ring: 175 61% 52%;
+    --ring: 30 61% 52%;
 
     --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.2);
     --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
@@ -232,12 +232,12 @@
 
     --sidebar-background: 212 59% 10%;
     --sidebar-foreground: 0 0% 75%;
-    --sidebar-primary: 175 61% 52%;
+    --sidebar-primary: 30 61% 52%;
     --sidebar-primary-foreground: 212 59% 13%;
     --sidebar-accent: 214 30% 16%;
-    --sidebar-accent-foreground: 175 61% 62%;
+    --sidebar-accent-foreground: 30 61% 62%;
     --sidebar-border: 222 20% 16%;
-    --sidebar-ring: 175 61% 52%;
+    --sidebar-ring: 30 61% 52%;
   }
 }
 
