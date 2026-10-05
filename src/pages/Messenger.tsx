@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { MessageThread } from "@/features/messenger/MessageThread";
+import { useUserRole } from "@/hooks/useUserRole";
 
 interface Thread { patientId: string; advisorId: string | null; advisorName: string; clientName: string; unread: number; last?: string }
 
@@ -42,7 +43,8 @@ export default function Messenger() {
     },
   });
 
-  const isClient = threads.length > 0 && threads.every((t) => t.advisorId !== me);
+  const { isPatient } = useUserRole() as any;
+  const isClient = threads.length > 0 ? threads.every((t) => t.advisorId !== me) : !!isPatient;
   const filtered = useMemo(() => threads.filter((t) => (isClient ? t.advisorName : t.clientName).toLowerCase().includes(q.toLowerCase())), [threads, q, isClient]);
   useEffect(() => { if (!active && threads[0]) setActive(threads[0].patientId); }, [threads, active]);
   const current = threads.find((t) => t.patientId === active);
@@ -63,7 +65,7 @@ export default function Messenger() {
           </div>
           <ul className="max-h-48 overflow-y-auto md:max-h-none">
             {isLoading && <li className="p-3 text-xs text-muted-foreground">Loading…</li>}
-            {!isLoading && filtered.length === 0 && <li className="p-3 text-xs text-muted-foreground">No conversations yet. Clients appear here once they've joined.</li>}
+            {!isLoading && filtered.length === 0 && <li className="p-3 text-xs text-muted-foreground">{isClient ? "You're not linked to a Wealth Manager yet. Ask them to send you an invite." : "No conversations yet. Clients appear here once they've joined."}</li>}
             {filtered.map((t) => (
               <li key={t.patientId}>
                 <button onClick={() => setActive(t.patientId)}
