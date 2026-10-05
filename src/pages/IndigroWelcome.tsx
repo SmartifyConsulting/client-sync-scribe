@@ -43,8 +43,8 @@ export default function IndigroWelcome() {
   return (
     <div className="min-h-screen bg-navy text-navy-foreground">
       <main className="mx-auto grid max-w-6xl items-start px-4 pb-16 pt-10 sm:px-8 lg:min-h-screen lg:grid-cols-[1.1fr_0.9fr] lg:content-center lg:gap-x-14 lg:pb-24 lg:pt-0">
-        <div className="lg:col-start-1 lg:row-start-1">
-          <Logo size="hero" onDark className="mb-8 leading-none [&_img]:!h-[5.2rem] sm:[&_img]:!h-[7.8rem] xl:[&_img]:!h-[9.1rem]" />
+        <div className="lg:col-start-1 lg:row-start-1 flex justify-center pt-8">
+          <Logo size="hero" onDark className="mb-8 leading-none [&_img]:!h-[10.92rem] sm:[&_img]:!h-[16.38rem] xl:[&_img]:!h-[19.11rem]" />
         </div>
 
         <section className="lg:col-start-1 lg:row-start-2 lg:self-center">

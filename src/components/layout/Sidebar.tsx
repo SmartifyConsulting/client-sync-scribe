@@ -501,8 +501,8 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 
     <aside className="sidebar-chrome fixed left-0 top-0 z-40 h-screen w-[252px] bg-sidebar">
       <div className="flex h-full flex-col">
-        <div className="flex h-24 items-center gap-3 px-6">
-          <Logo size="nav" onDark />
+        <div className="flex items-center justify-center gap-3 px-6 pt-4 pb-2">
+          <Logo size="nav" onDark className="[&_img]:!h-[9.3rem]" />
         </div>
 
         {/* Navigation */}
