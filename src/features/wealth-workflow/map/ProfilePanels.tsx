@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { safeInvoke } from "@/services/edge/safeInvoke";
 import { FinancialInformation } from "@/features/patients/components/financial/FinancialInformation";
+import { TranscriptButton } from "./DocumentTray";
 
 type Viewer = "manager" | "client";
 const db = supabase as any;
@@ -260,10 +261,12 @@ export function VerifyFinancialsPanel({ patientId, financials, viewer, clientFir
     <div className="space-y-3 text-sm">
       <p className="text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Captured from your meeting</p>
       <p className="text-xs text-muted-foreground">Open each section, correct anything that's wrong and press Save. Then confirm below.</p>
+      <p className="text-xs text-muted-foreground">The full meeting transcript is stored in your Documents folder, so you can see how each figure was captured.</p>
+      <TranscriptButton sessionId={financials?.extracted_from_session_id} patientId={patientId} />
       {patientId && <FinancialInformation patientId={patientId} />}
-      <div className="space-y-2 rounded-lg border border-border/70 p-3">
-        <label className="flex items-start gap-2 text-xs"><Checkbox checked={complete} onCheckedChange={(v) => setComplete(!!v)} className="mt-0.5" />I confirm this financial information is <strong>complete</strong>. Nothing important is missing.</label>
-        <label className="flex items-start gap-2 text-xs"><Checkbox checked={correct} onCheckedChange={(v) => setCorrect(!!v)} className="mt-0.5" />I confirm the figures, assets and debts above are <strong>correct</strong>.</label>
+      <div className="space-y-3 rounded-lg border border-border/70 p-3">
+        <label className="flex items-start gap-2.5 text-xs leading-relaxed"><Checkbox checked={complete} onCheckedChange={(v) => setComplete(!!v)} className="mt-0.5 shrink-0" /><span>I confirm this financial information is <strong>complete</strong>. Nothing important is missing.</span></label>
+        <label className="flex items-start gap-2.5 text-xs leading-relaxed"><Checkbox checked={correct} onCheckedChange={(v) => setCorrect(!!v)} className="mt-0.5 shrink-0" /><span>I confirm the figures, assets and debts above are <strong>correct</strong>.</span></label>
       </div>
       <Button className="w-full rounded-full" onClick={verify} disabled={busy || !complete || !correct}>
         {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}Confirm my financial information

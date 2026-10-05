@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Loader2 } from "lucide-react";
-import folderAsset from "@/assets/documents-folder-3d.png.asset.json";
+import { DocumentTray } from "./DocumentTray";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useStartWorkflow } from "../hooks";
@@ -142,11 +142,7 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
               <span className="h-2 w-2 animate-pulse rounded-full bg-primary" /> Working window
               {shownStep && <span className="normal-case tracking-normal text-foreground">· {shownStep}</span>}
             </span>
-            <button type="button" id="wealth-docs-tile" onClick={onOpenDocuments} aria-label="Open documents" title="Documents"
-              className="relative -my-2 rounded-lg p-0.5 transition-transform hover:scale-105">
-              <img src={folderAsset.url} alt="" className="h-10 w-10 object-contain" />
-              <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-2xs ring-2 ring-card font-semibold text-primary-foreground">{docCount}</span>
-            </button>
+            <DocumentTray patientId={patientId} count={docCount} />
           </div>
           {!isLive && <button onClick={() => setPicked(null)} className="mb-2 text-xs font-medium text-primary hover:underline">← Back to current step</button>}
           {renderWorking(isLive)}

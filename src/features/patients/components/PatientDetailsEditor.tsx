@@ -92,6 +92,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
 import { supabase } from "@/integrations/supabase/client";
+import { TransactionLogs } from "@/features/wealth-workflow/TransactionLogs";
 import { isValidOptionalEmail } from "@/lib/validation";
 
 import vulaVouchersLogo from "@/assets/vula-vouchers-logo.png";
@@ -392,7 +393,7 @@ const SECTION_TABS: Record<string, string[]> = {
   health: ["overview", "personal", "medical", "history", "claims", "documents", "lifeEvents"],
   admin: ["calendar", "tasks", "programmes"],
   workspace: ["personal", "medical", "claims"],
-  personal: ["personal"],
+  personal: ["personal", "logs"],
   financial: ["medical"],
 };
 
@@ -1583,6 +1584,11 @@ export function PatientDetailsEditor({
               Claims
             </TabsTrigger>
           )}
+          {show("logs") && (
+            <TabsTrigger value="logs" className={triggerClass}>
+              Transaction Logs
+            </TabsTrigger>
+          )}
           {show("documents") && (
             <TabsTrigger value="documents" className={triggerClass}>
               Documents
@@ -2493,6 +2499,12 @@ export function PatientDetailsEditor({
                   </div>
                 )}
               </Suspense>
+            </TabsContent>
+          )}
+
+          {isSelfService && (
+            <TabsContent value="logs" className="mt-4">
+              <TransactionLogs patientId={patient.id} />
             </TabsContent>
           )}
 
