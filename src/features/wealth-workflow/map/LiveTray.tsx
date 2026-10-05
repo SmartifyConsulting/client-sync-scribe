@@ -96,7 +96,7 @@ export function LiveTray({ groups, viewer, clientFirst, managerName, avatars, wo
         const waitingOn = cur
           ? cur.owner === "client" ? (viewer === "client" ? "you" : clientFirst)
             : cur.owner === "advisor" ? (viewer === "manager" ? "you" : managerName)
-            : cur.owner === "insurer" ? "the insurer" : "Holarc Wealth (automatic)"
+            : cur.owner === "insurer" ? "the insurer" : "Elysian (Pty) Ltd (automatic)"
           : g.waitingFor ? OWNER_LABEL[g.waitingFor] ?? g.waitingFor : null;
 
         return (
