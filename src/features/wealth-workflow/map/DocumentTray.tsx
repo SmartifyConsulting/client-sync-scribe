@@ -72,12 +72,21 @@ export function DocumentTray({ patientId, count }: { patientId?: string; count: 
     return () => document.removeEventListener("mousedown", h);
   }, [open, preview]);
 
+  // Izenzo-style "Filed!" bounce whenever a new document lands in the folder.
+  const prev = useRef(count);
+  const [filed, setFiled] = useState(false);
+  useEffect(() => {
+    if (count > prev.current) { setFiled(true); const t = setTimeout(() => setFiled(false), 1600); prev.current = count; return () => clearTimeout(t); }
+    prev.current = count;
+  }, [count]);
+
   return (
     <div ref={ref} className="relative">
       <button type="button" id="wealth-docs-tile" onClick={() => setOpen((o) => !o)} aria-label="Documents" aria-expanded={open} title="Documents"
-        className="relative -my-2 rounded-lg p-0.5 transition-transform hover:scale-105">
+        className={`relative -my-2 rounded-lg p-0.5 transition-transform hover:scale-105 ${filed ? "animate-bounce" : ""}`}>
         <img src={folderAsset.url} alt="" className="h-10 w-10 object-contain" />
         <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-2xs font-semibold text-primary-foreground ring-2 ring-card">{count}</span>
+        {filed && <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[hsl(var(--owner-client))] px-2 py-0.5 text-2xs font-semibold text-primary-foreground">Filed!</span>}
       </button>
       {open && (
         <div className="absolute right-0 top-12 z-40 w-80 rounded-xl border border-border bg-popover p-2 shadow-lg animate-in fade-in-0 zoom-in-95">
