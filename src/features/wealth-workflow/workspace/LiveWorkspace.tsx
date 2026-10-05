@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { format } from "date-fns";
 import { Check, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -8,6 +9,7 @@ import { usePresentRecommendation, useRecordDecision, useStartAnnualReview, useS
 import { OWNER_LABEL } from "../map/groups";
 import { WorkspaceItemRow, type ItemAction } from "./WorkspaceItem";
 import { useLiveWorkspace, type WorkspaceItem } from "./useLiveWorkspace";
+import { ScheduleMeetingPanel } from "./ScheduleMeetingPanel";
 
 interface Props {
   patientId: string;
@@ -17,11 +19,11 @@ interface Props {
   onOpenDocument?: (id: string) => void;
   onOpenClientRecord?: () => void;
   onOpenMessages?: () => void;
-  onScheduleConsultation?: () => void;
 }
 
-export function LiveWorkspace({ patientId, clientName, onViewWorkflow, onOpenDocuments, onOpenDocument, onOpenClientRecord, onOpenMessages, onScheduleConsultation }: Props) {
+export function LiveWorkspace({ patientId, clientName, onViewWorkflow, onOpenDocuments, onOpenDocument, onOpenClientRecord, onOpenMessages }: Props) {
   const ws = useLiveWorkspace(patientId);
+  const [scheduling, setScheduling] = useState(false);
   const { toast } = useToast();
   const qc = useQueryClient();
   const start = useStartWorkflow();
@@ -65,7 +67,7 @@ export function LiveWorkspace({ patientId, clientName, onViewWorkflow, onOpenDoc
       a.push({ label: "Declined", variant: "destructive", onClick: () => run(decide.mutateAsync({ recommendationId: i.recommendationId!, decision: "declined" }), "Declined") });
     }
     if (i.kind === "message" && onOpenMessages) a.push({ label: "Reply", variant: "default", onClick: onOpenMessages });
-    if (i.kind === "annual_review" && onScheduleConsultation) a.push({ label: "Schedule meeting", onClick: onScheduleConsultation });
+    if (i.kind === "annual_review") a.push({ label: "Schedule meeting", onClick: () => setScheduling(true) });
     if (i.kind === "annual_review") a.push({ label: "Start annual review", variant: "default", onClick: () => run(annual.mutateAsync({ workflowId: wf.id }), "Annual review started") });
     if (i.documentId && onOpenDocument) a.push({ label: "View ROA", onClick: () => onOpenDocument(i.documentId!) });
     if (i.kind === "requirement") a.push({ label: "Documents", onClick: onOpenDocuments });
@@ -92,6 +94,10 @@ export function LiveWorkspace({ patientId, clientName, onViewWorkflow, onOpenDoc
 
   return (
     <div className="space-y-4">
+      {scheduling && (
+        <ScheduleMeetingPanel patientId={patientId} clientName={clientName ?? "Client"} onClose={() => setScheduling(false)} />
+      )}
+
       {/* Context strip */}
       <div className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-xl border bg-card p-3 text-sm md:grid-cols-3 xl:grid-cols-6">
         <Ctx label="Client" value={clientName ?? "—"} />
