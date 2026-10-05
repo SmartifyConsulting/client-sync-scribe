@@ -711,7 +711,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
           <div>
             <h1 className="page-title">My Documents</h1>
             <p className="text-muted-foreground text-xs">
-              All your prescriptions, invoices, certificates and uploaded files — including X-rays, blood test results and other lab reports (upload as a file or photo below).
+              All your policy documents, Records of Advice, signed agreements and uploaded files — including statements, quotes and other financial records (upload as a file or photo below).
             </p>
           </div>
         ) : <div />}
