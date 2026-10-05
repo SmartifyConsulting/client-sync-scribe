@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import MyFuture from "@/pages/MyFuture";
 import MyWorkspace from "@/pages/MyWorkspace";
+import Messenger from "@/pages/Messenger";
 import Claims from "@/pages/Claims";
 import { useProviderAccess } from "@/modules/holarchelp/components/ProviderGate";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -291,6 +292,7 @@ const App = () => (
             <Route path="/my-dashboard" element={<MyPersonalDashboard />} />
             <Route path="/my-future" element={<MyFuture />} />
             <Route path="/my-workspace" element={<MyWorkspace />} />
+            <Route path="/messenger" element={<Messenger />} />
             <Route path="/claims" element={<Claims />} />
             <Route path="/my-shift" element={<MyShiftScreen />} />
             <Route path="/sessions/:id" element={<SessionDetail />} />
