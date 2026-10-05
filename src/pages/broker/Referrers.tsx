@@ -43,7 +43,7 @@ export default function Referrers() {
       name: nameFor(id),
       sent: mine.length,
       accepted: mine.filter((r: any) => r.status === "accepted").length,
-      earned: mine.reduce((s: number, r: any) => s + Number(r.actual_commission || 0), 0),
+      earned: mine.reduce((s: number, r: any) => s + Number(r.commission || 0), 0),
     };
   }), [referrerIds, referrals.data, names.data]);
 
@@ -55,6 +55,18 @@ export default function Referrers() {
     toast.success("Commission rate updated");
     qc.invalidateQueries({ queryKey: ["broker-referrer-rates"] });
   };
+
+  const [commissionEdits, setCommissionEdits] = useState<Record<string, string>>({});
+  const saveCommission = async (referralId: string, value: string) => {
+    const amount = value.trim() === "" ? null : Number(value);
+    if (amount !== null && Number.isNaN(amount)) return;
+    const { error } = await db.from("wealth_referrals").update({ commission: amount }).eq("id", referralId);
+    if (error) return toast.error("Couldn't save the commission.");
+    toast.success("Commission saved — the referrer has been notified.");
+    qc.invalidateQueries({ queryKey: ["broker-referrals"] });
+  };
+
+  const acceptedReferrals = useMemo(() => (referrals.data ?? []).filter((r: any) => r.status === "accepted"), [referrals.data]);
 
   const zar = (n: number) => `R${Math.round(n).toLocaleString("en-ZA")}`;
 
@@ -74,7 +86,7 @@ export default function Referrers() {
                 <th className="px-4 py-2 font-medium">Referrer</th>
                 <th className="px-4 py-2 font-medium">Referred</th>
                 <th className="px-4 py-2 font-medium">Accepted</th>
-                <th className="px-4 py-2 font-medium">Paid out</th>
+                <th className="px-4 py-2 font-medium">Commission</th>
                 <th className="px-4 py-2 font-medium">Commission rate</th>
               </tr>
             </thead>
@@ -103,6 +115,33 @@ export default function Referrers() {
           </table>
         )}
       </div>
+
+      {!!acceptedReferrals.length && (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Set commission per client</p>
+          <div className="rounded-xl border border-border bg-card divide-y">
+            {acceptedReferrals.map((r: any) => (
+              <div key={r.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">{r.client_name}</p>
+                  <p className="text-xs text-muted-foreground">Referred by {nameFor(r.referrer_user_id)}</p>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-muted-foreground">R</span>
+                  <Input
+                    className="h-7 w-24 text-xs"
+                    type="number" min={0} step={1}
+                    placeholder="0.00"
+                    value={commissionEdits[r.id] ?? (r.commission ?? "")}
+                    onChange={(e) => setCommissionEdits((v) => ({ ...v, [r.id]: e.target.value }))}
+                    onBlur={(e) => saveCommission(r.id, e.target.value)}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

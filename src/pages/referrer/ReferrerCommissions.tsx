@@ -26,33 +26,26 @@ export default function ReferrerCommissions() {
   const brokerName = (id: string) => (brokers.data ?? []).find((b: any) => b.id === id)?.full_name ?? "Broker";
 
   const groups = useMemo(() => {
-    const rows = (referrals.data ?? []).filter((r: any) => r.estimated_commission || r.actual_commission);
-    const byKey = new Map<string, { broker: string; month: string; pending: number; earned: number }>();
+    const rows = (referrals.data ?? []).filter((r: any) => r.commission != null);
+    const byKey = new Map<string, { broker: string; month: string; commission: number }>();
     for (const r of rows) {
       const key = `${r.broker_user_id}|${monthKey(r.decided_at ?? r.created_at)}`;
-      const g = byKey.get(key) ?? { broker: brokerName(r.broker_user_id), month: monthKey(r.decided_at ?? r.created_at), pending: 0, earned: 0 };
-      if (r.actual_commission) g.earned += Number(r.actual_commission);
-      else if (r.estimated_commission) g.pending += Number(r.estimated_commission);
+      const g = byKey.get(key) ?? { broker: brokerName(r.broker_user_id), month: monthKey(r.decided_at ?? r.created_at), commission: 0 };
+      g.commission += Number(r.commission);
       byKey.set(key, g);
     }
     return Array.from(byKey.values()).sort((a, b) => a.broker.localeCompare(b.broker));
   }, [referrals.data, brokers.data]);
 
-  const totals = useMemo(() => groups.reduce((acc, g) => ({ pending: acc.pending + g.pending, earned: acc.earned + g.earned }), { pending: 0, earned: 0 }), [groups]);
+  const total = useMemo(() => groups.reduce((s, g) => s + g.commission, 0), [groups]);
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <PageHeader title="Brokers & Commission" subtitle="What you're about to earn, and what you've already earned, grouped by broker and month." />
+      <PageHeader title="Brokers & Commission" subtitle="Commission from quotes, grouped by broker and month." />
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-2xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">About to earn</p>
-          <p className="mt-1 text-2xl font-semibold text-foreground">{zar(totals.pending)}</p>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-2xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Actually earned</p>
-          <p className="mt-1 text-2xl font-semibold text-primary">{zar(totals.earned)}</p>
-        </div>
+      <div className="rounded-xl border border-border bg-card p-4">
+        <p className="text-2xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Total commission</p>
+        <p className="mt-1 text-2xl font-semibold text-primary">{zar(total)}</p>
       </div>
 
       <div className="rounded-xl border border-border bg-card overflow-x-auto">
@@ -66,8 +59,7 @@ export default function ReferrerCommissions() {
               <tr className="border-b border-border/60 text-left text-muted-foreground">
                 <th className="px-4 py-2 font-medium">Broker</th>
                 <th className="px-4 py-2 font-medium">Month</th>
-                <th className="px-4 py-2 font-medium">About to earn</th>
-                <th className="px-4 py-2 font-medium">Earned</th>
+                <th className="px-4 py-2 font-medium">Commission</th>
               </tr>
             </thead>
             <tbody>
@@ -75,8 +67,7 @@ export default function ReferrerCommissions() {
                 <tr key={i} className="border-b border-border/40 last:border-0">
                   <td className="px-4 py-2 font-medium text-foreground">{g.broker}</td>
                   <td className="px-4 py-2 text-muted-foreground">{g.month}</td>
-                  <td className="px-4 py-2">{g.pending ? zar(g.pending) : "—"}</td>
-                  <td className="px-4 py-2 text-primary">{g.earned ? zar(g.earned) : "—"}</td>
+                  <td className="px-4 py-2 text-primary">{zar(g.commission)}</td>
                 </tr>
               ))}
             </tbody>

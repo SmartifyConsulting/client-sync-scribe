@@ -41,6 +41,7 @@ import ReferrerSignup from "./pages/ReferrerSignup";
 import ReferrerDashboard from "./pages/referrer/ReferrerDashboard";
 import ReferrerCommissions from "./pages/referrer/ReferrerCommissions";
 import BrokerReferrers from "./pages/broker/Referrers";
+import QuotesScreen from "./pages/broker/QuotesScreen";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
@@ -327,6 +328,7 @@ const App = () => (
             <Route path="/referrer-dashboard" element={<ReferrerDashboard />} />
             <Route path="/referrer-commissions" element={<ReferrerCommissions />} />
             <Route path="/referrers" element={<BrokerReferrers />} />
+            <Route path="/quotes-screen" element={<QuotesScreen />} />
             
             {/* Admin routes */}
             <Route path="/admin" element={<Admin />} />

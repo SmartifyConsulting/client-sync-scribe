@@ -102,10 +102,9 @@ export default function ReferrerDashboard() {
                   <Button size="sm" variant="outline" className="h-7 shrink-0 text-xs" onClick={() => openReassign(r)}>Try another broker</Button>
                 </div>
               )}
-              {(r.estimated_commission || r.actual_commission) && (
+              {r.commission != null && (
                 <p className="text-xs text-muted-foreground">
-                  {r.actual_commission ? <>Commission earned: <strong className="text-primary">{zar(r.actual_commission)}</strong></>
-                    : <>Estimated commission: <strong className="text-foreground">{zar(r.estimated_commission)}</strong></>}
+                  Commission: <strong className="text-primary">{zar(r.commission)}</strong>
                 </p>
               )}
             </div>
