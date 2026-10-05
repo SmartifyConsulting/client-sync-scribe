@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Users,
   Calendar,
+  MessageCircle,
   Settings2,
   Loader2,
   User,
@@ -388,11 +389,6 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         {item.label === "Notifications" && unreadCount > 0 && (
           <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-xs font-semibold text-destructive-foreground">
             {unreadCount > 99 ? "99+" : unreadCount}
-          </span>
-        )}
-        {item.label === "Documents" && isPatientMenu && patientDocCount > 0 && (
-          <span data-nav-documents-badge className="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-xs font-semibold text-primary-foreground">
-            {patientDocCount > 99 ? "99+" : patientDocCount}
           </span>
         )}
       </NavLink>

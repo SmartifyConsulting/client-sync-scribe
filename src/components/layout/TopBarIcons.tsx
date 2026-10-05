@@ -137,6 +137,51 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
     <div className="flex items-center gap-2">
       <LanguageSwitcher />
 
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button asChild variant="ghost" size="icon" className="h-9 w-9 rounded-full text-primary" aria-label="Calendar">
+              <Link to="/calendar"><CalendarIcon className="h-5 w-5" /></Link>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Calendar</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-full text-primary" aria-label="Notifications">
+            <Bell className="h-5 w-5" />
+            {unreadNotifCount > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-2xs font-semibold text-destructive-foreground">
+                {unreadNotifCount > 99 ? "99+" : unreadNotifCount}
+              </span>
+            )}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent align="end" className="w-80 p-0">
+          <div className="flex items-center justify-between border-b border-border px-3 py-2">
+            <span className="text-sm font-semibold">Notifications</span>
+            {recentNotifications.length > 0 && (
+              <button className="text-xs text-primary hover:underline" onClick={clearAllNotifications}>Mark all read</button>
+            )}
+          </div>
+          <ul className="max-h-80 overflow-y-auto">
+            {recentNotifications.length === 0 && <li className="px-3 py-6 text-center text-xs text-muted-foreground">You're all caught up.</li>}
+            {recentNotifications.map((n: any) => (
+              <li key={n.id} className="border-b border-border/60 last:border-0">
+                <button className="w-full px-3 py-2 text-left hover:bg-muted/60"
+                  onClick={() => { clearNotification(n.id); if (n.type === "message") navigate("/messenger"); else if (n.type?.startsWith("appointment")) navigate("/calendar"); }}>
+                  <span className="block text-xs font-medium">{n.title}</span>
+                  {n.description && <span className="block truncate text-xs text-muted-foreground">{n.description}</span>}
+                  <span className="block text-2xs text-muted-foreground">{new Date(n.created_at).toLocaleString("en-ZA", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </PopoverContent>
+      </Popover>
+
 
       {/* Account menu (avatar) */}
       <AccountMenu
