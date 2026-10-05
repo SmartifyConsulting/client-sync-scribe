@@ -16,7 +16,7 @@ const fmt = (d?: string | null) => (d ? new Date(d).toLocaleDateString("en-ZA", 
 export const LATER_STEPS = new Set([
   "Present ROA and comparison", "Sign ROA", "Upload FICA documents and confirm bank details",
   "Authorise debit order and sign life declaration", "Complete health disclosure (encrypted)",
-  "Accept, decline or issue", "Policy schedule to portal and CRM", "Schedule annual review", "Acknowledge renewal",
+  "Accept, decline or issue", "Policy schedule to portal and CRM", "Schedule annual review", "Schedule review meeting", "Acknowledge renewal",
 ]);
 
 function StatusRow({ label, done, hint }: { label: string; done: boolean; hint?: string }) {

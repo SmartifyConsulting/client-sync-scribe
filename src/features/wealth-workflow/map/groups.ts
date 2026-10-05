@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { CircleCheck, Database, FileText, ClipboardList, PenLine, ScanFace } from "lucide-react";
+import { CalendarClock, CircleCheck, Database, FileText, ClipboardList, PenLine, ScanFace } from "lucide-react";
 import type { WealthStage, WealthRecommendation } from "../types";
 
 export type BadgeOwner = "client" | "system" | "advisor" | "insurer";
@@ -114,11 +114,19 @@ export const WORKFLOW_GROUPS: WorkflowGroup[] = [
   },
   {
     n: 6, key: "issuance", title: "Issuance & Review", clientTitle: "Issuance & Review", icon: CircleCheck,
-    stages: ["application", "underwriting", "submission", "issued", "follow_up", "annual_review"],
+    stages: ["application", "underwriting", "submission", "issued", "follow_up"],
     steps: [
       { owner: "insurer", label: "Accept, decline or issue", done: appAt(["issued"]) },
-      { owner: "system", label: "Policy schedule to portal and CRM" },
+      { owner: "system", label: "Policy schedule to portal and CRM", done: appAt(["issued"]) },
       { owner: "system", label: "Schedule annual review", done: (c) => c.apps.some((a) => !!a.review_date) },
+    ],
+    footer: "Annual review booked automatically 12 months after issue",
+  },
+  {
+    n: 7, key: "annual_review", title: "Annual Review", clientTitle: "Annual Review", icon: CalendarClock,
+    stages: ["annual_review"],
+    steps: [
+      { owner: "advisor", label: "Schedule review meeting" },
       { owner: "client", label: "Acknowledge renewal" },
     ],
     footer: "Repeats every 12 months",
