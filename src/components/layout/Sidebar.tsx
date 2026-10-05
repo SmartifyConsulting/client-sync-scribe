@@ -165,7 +165,7 @@ const assistantNavItems: (NavItem & { tour?: string })[] = [
 
 const adminNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Home", labelKey: "nav.home", to: "/doctor-dashboard" },
-  { icon: Users, label: "Users", labelKey: "nav.users", to: "/admin/users" },
+  { icon: Users, label: "Users", labelKey: "nav.users", to: "/admin/wealth-users" },
   { icon: BarChart3, label: "Performance", labelKey: "nav.performance", to: "/admin/performance" },
   { icon: DollarSign, label: "Pricing", labelKey: "nav.pricing", to: "/admin/pricing" },
   { icon: Gift, label: "Rewards", labelKey: "nav.rewards", to: "/admin/gamification" },
@@ -289,7 +289,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   // For admins not currently on an admin route, surface an "Admin" entry so
   // they can always reach the admin section.
   const navItems = isAdmin && !isOnAdminRoute
-    ? [...withAssistant, { icon: UserCog, label: "Admin", labelKey: "nav.admin", to: "/admin/users" }]
+    ? [...withAssistant, { icon: UserCog, label: "Admin", labelKey: "nav.admin", to: "/admin/wealth-users" }]
     : withAssistant;
 
   const { preferences, savePreferences } = useSidebarPreferences();

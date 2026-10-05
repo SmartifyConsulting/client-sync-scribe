@@ -36,6 +36,7 @@ import Notifications from "./pages/Notifications";
 import Connections from "./pages/Connections";
 import Auth from "./pages/Auth";
 import JoinInvite from "./pages/JoinInvite";
+import JoinTeamInvite from "./pages/JoinTeamInvite";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
@@ -89,6 +90,7 @@ import HolarcHelpRoutes from "./modules/holarchelp/routes";
 import ProviderRoutes from "./modules/holarchelp/routes-provider";
 import PublicTrack from "./modules/holarchelp/pages/PublicTrack";
 import HolarcHelpProviders from "./pages/admin/HolarcHelpProviders";
+import WealthUsers from "./pages/admin/WealthUsers";
 import HolarcHelpAccountability from "./pages/admin/HolarcHelpAccountability";
 import HolarcHelpProviderIncidents from "./pages/admin/HolarcHelpProviderIncidents";
 import SosAlertListener from "@/components/SosAlertListener";
@@ -217,6 +219,7 @@ const App = () => (
           <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/join/:token" element={<JoinInvite />} />
+          <Route path="/join-team/:token" element={<JoinTeamInvite />} />
           <Route path="/login" element={<Auth />} />
           <Route path="/signup" element={<Auth />} />
           <Route path="/onboarding" element={<Auth />} />
@@ -318,6 +321,7 @@ const App = () => (
             <Route path="/admin/performance" element={<CountryPerformance />} />
             <Route path="/admin/bulk-password-reset" element={<BulkPasswordReset />} />
             <Route path="/admin/users" element={<HolarcHelpProviders />} />
+            <Route path="/admin/wealth-users" element={<WealthUsers />} />
             <Route path="/admin/holarchelp-providers" element={<Navigate to="/admin/users" replace />} />
             <Route path="/admin/holarchelp-accountability" element={<HolarcHelpAccountability />} />
             <Route path="/admin/holarchelp-providers/:type/:id/incidents" element={<HolarcHelpProviderIncidents />} />
