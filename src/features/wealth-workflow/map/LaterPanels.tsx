@@ -3,6 +3,10 @@ import { CalendarClock, CheckCircle2, FileText, Loader2, Lock, Upload } from "lu
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { DocCard, useWorkflowPractice } from "./OnboardingPanels";
+import { roaHtml } from "./onboardingTemplates";
 import { usePresentRecommendation, useRecordDecision, useRecommendationHistory, useStartAnnualReview } from "../hooks";
 
 type Viewer = "manager" | "client";
@@ -47,6 +51,20 @@ export function LaterStepPanel({ label, viewer, workflowId, records, clientFirst
   const apps: any[] = records?.apps ?? [];
   const docKinds = new Set<string>((records?.docs ?? []).map((d: any) => d.document_kind));
 
+  const { data: practice } = useWorkflowPractice(workflowId);
+  const { data: roaDoc } = useQuery({
+    queryKey: ["roa-doc", current?.roa_document_id],
+    enabled: !!current?.roa_document_id,
+    queryFn: async () => (await (supabase as any).from("documents").select("content, created_at").eq("id", current!.roa_document_id).maybeSingle()).data,
+  });
+  const clientName = records?.clientName || clientFirst;
+  const RoaCard = current?.roa_document_id && roaDoc ? (
+    <DocCard workflowId={workflowId} viewer={viewer} clientName={clientName} signable={false}
+      status={current.status === "accepted" ? `Accepted ${fmt(current.decided_at)} · filed in Documents` : `Version ${current.version} · filed in Documents`}
+      doc={{ type: "roa", title: `Record of Advice v${current.version}`, blurb: current.summary ?? undefined,
+        html: roaHtml(roaDoc.content || "", clientName, new Date(roaDoc.created_at).toLocaleDateString("en-ZA", { day: "numeric", month: "long", year: "numeric" }), current.version, practice) }} />
+  ) : null;
+
   const run = async (p: Promise<unknown>, ok: string) => {
     try { await p; toast({ title: ok }); }
     catch (e: any) { toast({ title: "That didn't go through", description: e?.message ?? "Please try again.", variant: "destructive" }); }
@@ -71,7 +89,7 @@ export function LaterStepPanel({ label, viewer, workflowId, records, clientFirst
       return (
         <div className="space-y-3">
           {RecCard}
-          {current?.roa_document_id && <DocsLink viewer={viewer} onOpenDocuments={onOpenDocuments} label="Open Record of Advice (ROA)" />}
+          {RoaCard}
           {viewer === "manager" && current?.status === "draft" && (
             <Button className="w-full rounded-full" disabled={present.isPending} onClick={() => run(present.mutateAsync(current.id), `Presented to ${clientFirst}`)}>
               {present.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Present to {clientFirst}
@@ -83,7 +101,7 @@ export function LaterStepPanel({ label, viewer, workflowId, records, clientFirst
       return (
         <div className="space-y-3">
           {RecCard}
-          {current?.roa_document_id && <DocsLink viewer={viewer} onOpenDocuments={onOpenDocuments} label="Read the ROA" />}
+          {RoaCard}
           {viewer === "client" && current?.status === "presented" ? (
             <div className="grid gap-2">
               <Button className="rounded-full" disabled={decide.isPending} onClick={() => run(decide.mutateAsync({ recommendationId: current.id, decision: "accepted" }), "Thank you. Your acceptance is recorded.")}>I accept this advice</Button>

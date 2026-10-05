@@ -86,7 +86,8 @@ export function sealedHtml(doc: { content_html: string; signature_image: string;
 
 /** Record of Advice in the same executive, dual-logo layout as the Disclosure and LOA. Restyles stored ROA body HTML. */
 export function roaHtml(body: string, client: string, date: string, version: number | string, p: any = null) {
-  if (body.includes('id="holarc-document"')) body = body.replace(/^[\s\S]*?<!--roa-body-->|<!--\/roa-body-->[\s\S]*$/g, "");
+  const inner = body.match(/<!--roa-body-->([\s\S]*?)<!--\/roa-body-->/);
+  if (inner) body = inner[1];
   const th = `padding:9px 10px;text-align:left;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:${MUTED};font-weight:600;border-bottom:1.5px solid ${NAVY}`;
   const td = `padding:9px 10px;border-bottom:1px solid ${RULE}`;
   const styled = body
