@@ -109,8 +109,12 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
   };
 
   const rerank = async (rows: any[]) => {
-    const sorted = [...rows].sort((a, b) => Number(a.monthly_premium) - Number(b.monthly_premium));
-    for (let i = 0; i < sorted.length; i++) await db.from("wealth_quotes").update({ rank: i + 1 }).eq("id", sorted[i].id);
+    const byType: Record<string, any[]> = {};
+    rows.forEach((r) => { (byType[r.cover_type ?? "General"] ??= []).push(r); });
+    for (const list of Object.values(byType)) {
+      const sorted = [...list].sort((a, b) => Number(a.monthly_premium) - Number(b.monthly_premium));
+      for (let i = 0; i < sorted.length; i++) await db.from("wealth_quotes").update({ rank: i + 1 }).eq("id", sorted[i].id);
+    }
   };
 
   switch (label) {
