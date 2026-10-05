@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { buildDocumentPdfBase64 } from "@/features/documents/utils/documentPdf";
+import { PdfFromHtml } from "@/features/documents/components/PdfFromHtml";
 import { Logo } from "@/components/brand/Logo";
 import { disclosureHtml, loaHtml, sealedHtml } from "./onboardingTemplates";
 import { renderSignaturePngBase64 } from "@/lib/signatureImage";
@@ -228,8 +229,8 @@ export function DocCard({ workflowId, doc, signed, viewer, clientName, signable 
       <Dialog open={preview} onOpenChange={setPreview}>
         <DialogContent className="max-h-[90vh] max-w-3xl overflow-hidden p-0">
           <DialogHeader className="border-b px-5 py-3"><DialogTitle className="text-sm font-semibold">{doc.title}</DialogTitle></DialogHeader>
-          <div className="max-h-[70vh] overflow-y-auto bg-muted/40 p-4">
-            <div className="mx-auto overflow-hidden rounded-lg border border-border bg-white shadow-sm" dangerouslySetInnerHTML={{ __html: html }} />
+          <div className="bg-muted/40 p-4">
+            {preview && <PdfFromHtml html={html} title={doc.title} />}
           </div>
           <div className="flex justify-end gap-2 border-t px-5 py-3">
             <Button size="sm" variant="outline" className="h-8 rounded-full text-xs" onClick={() => downloadPdf(html, doc.title)}><Download className="mr-1 h-3.5 w-3.5" />Download</Button>
