@@ -1,10 +1,11 @@
 import { cn } from "@/lib/utils";
-import logoAsset from "@/assets/elysian-logo.png.asset.json";
+import logoAsset from "@/assets/elysian-fs-logo.png.asset.json";
 
 const HEIGHT: Record<string, string> = {
   sm: "h-7",
   md: "h-9",
   lg: "h-12",
+  nav: "h-[4.65rem]",
   hero: "h-16 sm:h-24 xl:h-28",
 };
 
@@ -16,7 +17,7 @@ export function Logo({
 }: {
   className?: string;
   onDark?: boolean;
-  size?: "sm" | "md" | "lg" | "hero";
+  size?: "sm" | "md" | "lg" | "nav" | "hero";
 }) {
   return (
     <span className={cn("inline-flex", className)}>
