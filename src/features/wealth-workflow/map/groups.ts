@@ -20,6 +20,8 @@ export interface MapContext {
   financialsExtracted: boolean;
   financialsVerified: boolean;
   meetingScheduled: boolean;
+  quotesCount?: number;
+  selectedQuotes?: number;
 }
 
 export interface SubStep {
@@ -88,9 +90,9 @@ export const WORKFLOW_GROUPS: WorkflowGroup[] = [
     n: 4, key: "quotes", title: "Quotes & ROA", clientTitle: "Quotes & ROA", icon: FileText,
     stages: ["research_quotes", "recommendation"],
     steps: [
-      { owner: "system", label: "Quote 6 insurers, rank top 3" },
-      { owner: "advisor", label: "Select options and commentary", done: anyRec },
-      { owner: "system", label: "Affordability check" },
+      { owner: "advisor", label: "Quote 6 insurers, rank top 3", done: (c) => past(4)(c) || (c.quotesCount ?? 0) > 0 || anyRec(c) },
+      { owner: "advisor", label: "Select options and commentary", done: (c) => past(4)(c) || (c.selectedQuotes ?? 0) > 0 || anyRec(c) },
+      { owner: "system", label: "Affordability check", done: (c) => past(4)(c) || (c.selectedQuotes ?? 0) > 0 || anyRec(c) },
       { owner: "system", label: "Generate ROA (versioned)", done: (c) => c.recs.some((r) => !!r.roa_document_id) },
     ],
     clientSteps: [{ owner: "advisor", label: "Marlin is preparing your financial plan", done: () => undefined }],

@@ -10855,6 +10855,62 @@ export type Database = {
         }
         Relationships: []
       }
+      wealth_quotes: {
+        Row: {
+          commentary: string | null
+          cover_amount: number | null
+          created_at: string
+          created_by: string
+          id: string
+          insurer: string
+          method: string
+          monthly_premium: number
+          product: string
+          rank: number | null
+          selected: boolean
+          updated_at: string
+          workflow_id: string
+        }
+        Insert: {
+          commentary?: string | null
+          cover_amount?: number | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          insurer: string
+          method: string
+          monthly_premium: number
+          product: string
+          rank?: number | null
+          selected?: boolean
+          updated_at?: string
+          workflow_id: string
+        }
+        Update: {
+          commentary?: string | null
+          cover_amount?: number | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          insurer?: string
+          method?: string
+          monthly_premium?: number
+          product?: string
+          rank?: number | null
+          selected?: boolean
+          updated_at?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wealth_quotes_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "wealth_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wealth_recommendations: {
         Row: {
           created_at: string
@@ -12303,6 +12359,14 @@ export type Database = {
       wealth_has_doc: { Args: { _kind: string; _wf: string }; Returns: boolean }
       wealth_is_party: {
         Args: { _patient: string; _uid: string }
+        Returns: boolean
+      }
+      wealth_is_workflow_owner: {
+        Args: { _uid: string; _wf: string }
+        Returns: boolean
+      }
+      wealth_is_workflow_party: {
+        Args: { _uid: string; _wf: string }
         Returns: boolean
       }
       wealth_messages_mark_read: {
