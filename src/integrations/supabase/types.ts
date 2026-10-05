@@ -3115,6 +3115,47 @@ export type Database = {
           },
         ]
       }
+      holarc_health_links: {
+        Row: {
+          last_error: string | null
+          patient_id: string
+          payload: Json
+          remote_patient_id: string | null
+          request_id: string | null
+          status: string
+          synced_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          last_error?: string | null
+          patient_id: string
+          payload?: Json
+          remote_patient_id?: string | null
+          request_id?: string | null
+          status?: string
+          synced_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          last_error?: string | null
+          patient_id?: string
+          payload?: Json
+          remote_patient_id?: string | null
+          request_id?: string | null
+          status?: string
+          synced_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "holarc_health_links_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: true
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       holarchelp_ambulance_members: {
         Row: {
           accepted_at: string | null

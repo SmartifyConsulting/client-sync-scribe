@@ -1,3 +1,4 @@
+import { HolarcHealthRecords } from "./HolarcHealthRecords";
 import { dobFromSaId } from "@/lib/saId";
 import { PatientProgrammesTab } from "@/features/programmes/components/PatientProgrammesTab";
 import { LifeEventsPanel } from "@/features/wealth-workflow/client/LifeEventsPanel";
@@ -1340,7 +1341,7 @@ export function PatientDetailsEditor({
   const handleCancel = () => {
     const fn = patient.first_name || splitName(patient.name).first;
     const ln = patient.last_name || splitName(patient.name).last;
-    setFormData({
+    setFormData({ ...(formData as any),
       first_name: fn,
       last_name: ln,
       email: patient.email || "",
@@ -1892,8 +1893,9 @@ export function PatientDetailsEditor({
 
             {/* === MY HEALTH RECORDS TAB === */}
             <TabsContent value="healthrecords" className="mt-4 space-y-3">
-              <div><h2 className="text-lg font-semibold text-primary-dark">My Health Records</h2><p className="text-xs text-muted-foreground">Medical records and reports shared with your Wealth Manager for underwriting.</p></div>
-              <DocumentUploadList patientId={patient.id} documentKind="Health Record" addLabel="Upload health record" />
+              <div><h2 className="text-lg font-semibold text-primary-dark">My Health Records</h2><p className="text-xs text-muted-foreground">Chronic conditions, chronic medication and hospital admissions from Holarc Health, plus reports shared for underwriting.</p></div>
+              <HolarcHealthRecords patientId={patient.id} />
+<DocumentUploadList patientId={patient.id} documentKind="Health Record" addLabel="Upload health record" />
             </TabsContent>
 
 
@@ -2530,8 +2532,9 @@ export function PatientDetailsEditor({
 
           {/* === MY HEALTH RECORDS TAB (EDIT) === */}
           <TabsContent value="healthrecords" className="mt-4 space-y-3">
-            <div><h2 className="text-lg font-semibold text-primary-dark">My Health Records</h2><p className="text-xs text-muted-foreground">Medical records and reports shared with your Wealth Manager for underwriting.</p></div>
-            <DocumentUploadList patientId={patient.id} documentKind="Health Record" addLabel="Upload health record" />
+            <div><h2 className="text-lg font-semibold text-primary-dark">My Health Records</h2><p className="text-xs text-muted-foreground">Chronic conditions, chronic medication and hospital admissions from Holarc Health, plus reports shared for underwriting.</p></div>
+            <HolarcHealthRecords patientId={patient.id} />
+<DocumentUploadList patientId={patient.id} documentKind="Health Record" addLabel="Upload health record" />
           </TabsContent>
 
 
