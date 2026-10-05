@@ -21,7 +21,12 @@ export function useClientDocuments(patientId?: string) {
       const [signed, sessions, files] = await Promise.all([
         db.from("wealth_signed_documents").select("*").eq("patient_id", patientId).order("signed_at", { ascending: false }),
         db.from("sessions").select("id,title,transcript,created_at").eq("patient_id", patientId).not("transcript", "is", null).order("created_at", { ascending: false }),
-        db.from("documents").select("id,name,content,media_url,created_at").eq("patient_id", patientId).order("created_at", { ascending: false }).limit(50),
+        // Exclude *_signed rows: sign-wealth-document auto-files a copy of every
+        // signed Disclosure/LOA into `documents` for the firm's records, but
+        // the authoritative signed copy is already listed from
+        // wealth_signed_documents above — including both here doubled every
+        // signed document in the tray.
+        db.from("documents").select("id,name,content,media_url,created_at,document_kind").eq("patient_id", patientId).not("document_kind", "in", "(loa_signed,disclosure_signed)").order("created_at", { ascending: false }).limit(50),
       ]);
       return [
         ...((signed.data ?? []) as any[]).map((d) => ({ id: d.id, kind: "signed" as const, title: `${d.title} (signed v${d.version})`, date: d.signed_at, html: sealedHtml(d) })),
