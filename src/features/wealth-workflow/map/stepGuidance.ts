@@ -114,13 +114,13 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
     unlocks: "Quotes for the single need",
   },
   "Quotes received, AI ranks top 3": {
-    client: { what: "We request quotes from six insurers and rank the best three for you.", required: ["Nothing from you"] },
-    manager: { what: "Holarc Wealth requests quotes from six insurers and ranks the top three.", required: ["Completed needs analysis"] },
-    unlocks: "Option selection",
+    client: { what: "Quotes come back from insurers and are sorted by type of cover. The best three in each are shortlisted for you.", required: ["Nothing from you"] },
+    manager: { what: "Add the quotes insurers returned. Elysian AI files them by cover type, picks the top three in each folder and explains why.", required: ["Returned insurer quotes, with premium and excess"] },
+    unlocks: "Broker review of the AI's picks",
   },
   "Select options and commentary": {
-    client: { what: "Your Wealth Manager chooses the options they recommend and explains why.", required: ["Nothing from you yet"] },
-    manager: { what: "Select the recommended options for {name} and write your reasons.", required: ["Ranked quotes", "Reasons for the recommendation"] },
+    client: { what: "Your Wealth Manager reviews the shortlist, chooses the options they recommend and explains why.", required: ["Nothing from you yet"] },
+    manager: { what: "Accept Elysian AI's top three for {name}, or tick different quotes, and add your reasons.", required: ["AI-ranked quotes", "Reasons for the recommendation"] },
     unlocks: "Affordability check",
   },
   "Affordability check": {
