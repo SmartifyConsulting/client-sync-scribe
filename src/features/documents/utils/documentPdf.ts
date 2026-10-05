@@ -66,3 +66,23 @@ export async function buildDocumentPdfBase64(html: string): Promise<string | nul
 
 export const pdfFileName = (label: string): string =>
   `${label.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "document"}.pdf`;
+
+/** Builds a PDF from HTML and returns an object URL (caller revokes it). */
+export async function buildDocumentPdfUrl(html: string): Promise<string | null> {
+  const b64 = await buildDocumentPdfBase64(html);
+  if (!b64) return null;
+  const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+  return URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+}
+
+/** Builds a PDF from HTML and downloads it. */
+export async function downloadHtmlAsPdf(html: string, label: string): Promise<boolean> {
+  const url = await buildDocumentPdfUrl(html);
+  if (!url) return false;
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = pdfFileName(label);
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  return true;
+}

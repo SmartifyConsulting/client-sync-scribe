@@ -4,6 +4,9 @@ import { Download, Eye, FileSignature, FileText, Mic } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import folderAsset from "@/assets/documents-folder-3d.png.asset.json";
+import { PdfFromHtml } from "@/features/documents/components/PdfFromHtml";
+import { downloadHtmlAsPdf } from "@/features/documents/utils/documentPdf";
+import { sealedHtml } from "./onboardingTemplates";
 
 const db = supabase as any;
 type Doc = { id: string; kind: "signed" | "transcript" | "file"; title: string; date: string; html?: string; text?: string; url?: string };
@@ -16,39 +19,42 @@ export function useClientDocuments(patientId?: string) {
     enabled: !!patientId,
     queryFn: async (): Promise<Doc[]> => {
       const [signed, sessions, files] = await Promise.all([
-        db.from("wealth_signed_documents").select("id,title,content_html,signed_at,version").eq("patient_id", patientId).order("signed_at", { ascending: false }),
+        db.from("wealth_signed_documents").select("*").eq("patient_id", patientId).order("signed_at", { ascending: false }),
         db.from("sessions").select("id,title,transcript,created_at").eq("patient_id", patientId).not("transcript", "is", null).order("created_at", { ascending: false }),
         db.from("documents").select("id,name,content,media_url,created_at").eq("patient_id", patientId).order("created_at", { ascending: false }).limit(50),
       ]);
       return [
-        ...((signed.data ?? []) as any[]).map((d) => ({ id: d.id, kind: "signed" as const, title: `${d.title} (signed v${d.version})`, date: d.signed_at, html: d.content_html })),
+        ...((signed.data ?? []) as any[]).map((d) => ({ id: d.id, kind: "signed" as const, title: `${d.title} (signed v${d.version})`, date: d.signed_at, html: sealedHtml(d) })),
         ...((sessions.data ?? []) as any[]).map((s) => ({ id: s.id, kind: "transcript" as const, title: `${s.title || "Consultation"} transcript`, date: s.created_at, text: s.transcript })),
-        ...((files.data ?? []) as any[]).map((f) => ({ id: f.id, kind: "file" as const, title: f.name || "Document", date: f.created_at, text: f.content || undefined, url: f.media_url || undefined })),
+        ...((files.data ?? []) as any[]).map((f) => {
+          const c: string | undefined = f.content || undefined;
+          const isHtml = !!c && /<[a-z][\s\S]*>/i.test(c);
+          return { id: f.id, kind: "file" as const, title: f.name || "Document", date: f.created_at, html: isHtml ? c : undefined, text: isHtml ? undefined : c, url: f.media_url || undefined };
+        }),
       ].sort((a, b) => +new Date(b.date) - +new Date(a.date));
     },
   });
 }
 
-export function downloadDoc(d: Doc) {
-  if (d.url && !d.html && !d.text) { window.open(d.url, "_blank", "noopener,noreferrer"); return; }
-  const isHtml = !!d.html;
-  const blob = new Blob([isHtml ? d.html! : d.text ?? ""], { type: isHtml ? "text/html" : "text/plain" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `${d.title.replace(/[^\w\- ]+/g, "")}.${isHtml ? "html" : "txt"}`;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const textHtml = (title: string, text: string) =>
+  `<div id="holarc-document" style="width:794px;padding:48px 56px;background:#fff;font-family:Georgia,serif;color:#111"><h2 style="font-size:18px;margin:0 0 12px">${esc(title)}</h2><div style="white-space:pre-wrap;font-size:12px;line-height:1.6">${esc(text)}</div></div>`;
+const docHtml = (d: Doc) => d.html ?? (d.text ? textHtml(d.title, d.text) : null);
+
+export async function downloadDoc(d: Doc) {
+  const html = docHtml(d);
+  if (!html) { if (d.url) window.open(d.url, "_blank", "noopener,noreferrer"); return; }
+  await downloadHtmlAsPdf(html, d.title);
 }
 
 export function DocPreviewDialog({ doc, onClose }: { doc: Doc | null; onClose: () => void }) {
+  const html = doc ? docHtml(doc) : null;
   return (
     <Dialog open={!!doc} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-3xl">
         <DialogHeader><DialogTitle className="text-base">{doc?.title}</DialogTitle></DialogHeader>
-        {doc?.html ? (
-          <iframe title={doc.title} srcDoc={doc.html} className="h-[70vh] w-full rounded-lg border border-border bg-card" />
-        ) : doc?.text ? (
-          <pre className="max-h-[70vh] overflow-auto whitespace-pre-wrap rounded-lg border border-border bg-muted/30 p-4 font-sans text-xs leading-relaxed">{doc.text}</pre>
+        {doc && html ? (
+          <PdfFromHtml html={html} title={doc.title} />
         ) : doc?.url ? (
           <iframe title={doc.title} src={doc.url} className="h-[70vh] w-full rounded-lg border border-border" />
         ) : <p className="text-sm text-muted-foreground">No preview available.</p>}
