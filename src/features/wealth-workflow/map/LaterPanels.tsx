@@ -160,6 +160,31 @@ function HealthDisclosureChoice({ viewer, workflowId, status, clientFirst }: { v
   );
 }
 
+/** Policy documents an insurer sent back (filed automatically via the
+ *  Step 4 email reply pipeline, tagged "Issued Policy"). */
+function IssuedPolicyDocs({ patientId }: { patientId?: string }) {
+  const { data } = useQuery({
+    queryKey: ["issued-policy-docs", patientId],
+    enabled: !!patientId,
+    queryFn: async () => (await (supabase as any).from("documents").select("id,name,created_at").eq("patient_id", patientId).eq("document_kind", "Issued Policy").order("created_at", { ascending: false })).data ?? [],
+  });
+  if (!data?.length) return null;
+  return (
+    <div className="space-y-1.5">
+      <p className="text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Issued policy documents</p>
+      <ul className="space-y-1">
+        {data.map((d: any) => (
+          <li key={d.id} className="flex items-center gap-2 rounded-lg border border-border/60 px-3 py-1.5 text-xs">
+            <FileText className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+            <span className="truncate">{d.name}</span>
+            <span className="ml-auto shrink-0 text-2xs text-muted-foreground">{fmt(d.created_at)}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function DocsLink({ viewer, onOpenDocuments, label = "Open documents" }: { viewer: Viewer; onOpenDocuments?: () => void; label?: string }) {
   return viewer === "client" ? (
     <Button asChild variant="outline" className="w-full rounded-full"><Link to="/patient/documents"><Upload className="mr-2 h-4 w-4" />{label}</Link></Button>
@@ -286,6 +311,7 @@ export function LaterStepPanel({ label, viewer, workflowId, records, clientFirst
           ) : (
             <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">No application submitted yet.</p>
           )}
+          {label === "Policy schedule to portal and CRM" && <IssuedPolicyDocs patientId={records?.patientId} />}
           {label === "Policy schedule to portal and CRM" && <DocsLink viewer={viewer} onOpenDocuments={onOpenDocuments} label="Open policy schedules" />}
         </div>
       );

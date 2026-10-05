@@ -126,33 +126,39 @@ async function verifySvixSignature(
 }
 
 const SCHEDULES_CLAIMS_KINDS = ["Policy History", "Claims History"];
-const QUOTE_COVER_KINDS = ["Quote — Car", "Quote — Home", "Quote — Life", "Quote — Disability", "Quote — Other"];
+// "Issued Policy" covers a later reply on the same quote thread once the
+// policy has actually been taken up — distinct from the original quotation.
+const QUOTE_COVER_KINDS = ["Quote — Car", "Quote — Home", "Quote — Life", "Quote — Disability", "Quote — Other", "Issued Policy"];
 
 /** Best-effort filing: classifies an insurer attachment from its filename and
  *  the surrounding email context (no document content parsing/OCR). */
 async function classifyInsurerDocument(kind: "schedules_claims" | "quotes", filename: string, subject: string, bodyText: string): Promise<string> {
   const options = kind === "quotes" ? QUOTE_COVER_KINDS : SCHEDULES_CLAIMS_KINDS;
+  const fallback = kind === "quotes" ? "Quote — Other" : "Claims History";
   const apiKey = Deno.env.get("LOVABLE_API_KEY");
-  if (!apiKey) return options[options.length - 1];
+  if (!apiKey) return fallback;
   try {
+    const guidance = kind === "quotes"
+      ? ` Use "Issued Policy" only when the document confirms the policy has actually been taken up / issued / a policy number assigned (e.g. "welcome letter", "policy schedule", "cover confirmed") — not a quotation, estimate or premium indication. Otherwise classify the quote by cover type.`
+      : "";
     const r = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "openai/gpt-6-astra",
         input: [
-          { role: "system", content: `Classify an insurer document into exactly one of: ${options.join(", ")}. Reply with only that label, nothing else.` },
+          { role: "system", content: `Classify an insurer document into exactly one of: ${options.join(", ")}. Reply with only that label, nothing else.${guidance}` },
           { role: "user", content: `Filename: ${filename}\nEmail subject: ${subject}\nEmail body: ${bodyText.slice(0, 2000)}` },
         ],
       }),
     });
-    if (!r.ok) return options[options.length - 1];
+    if (!r.ok) return fallback;
     const out = await r.json();
     const text: string = (out.output_text ?? (out.output ?? []).flatMap((o: any) => o.content ?? []).map((c: any) => c.text ?? "").join("")).trim();
-    return options.find((o) => text.toLowerCase().includes(o.toLowerCase())) ?? options[options.length - 1];
+    return options.find((o) => text.toLowerCase().includes(o.toLowerCase())) ?? fallback;
   } catch (e) {
     console.error("Classification failed", e);
-    return options[options.length - 1];
+    return fallback;
   }
 }
 
