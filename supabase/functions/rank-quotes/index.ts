@@ -26,27 +26,45 @@ Deno.serve(async (req) => {
 
     const prompt = `You are a South African insurance broker's assistant. For each quote, assign a cover_type from ${COVER_TYPES.join(", ")} (use the given cover_type if set). Then, within EACH cover_type folder, choose the top 3 quotes (fewer if the folder has fewer) for the client. Brokers weigh: cheapest monthly premium, the value of the excess (lower excess is better for short-term cover), cover amount, and any other significant game-changing variable favourable to the client. For each top-3 quote give ai_rank (1-3) and a concise one or two sentence reason in plain English explaining WHY, comparing to the alternatives. Quotes not in the top 3 get ai_rank null and reason null.\n\nQuotes:\n${JSON.stringify(quotes)}`;
 
-    const ai = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const ai = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
       method: "POST",
-      headers: { Authorization: `Bearer ${Deno.env.get("LOVABLE_API_KEY")}`, "Content-Type": "application/json" },
+      headers: { "Lovable-API-Key": Deno.env.get("LOVABLE_API_KEY")!, "X-Lovable-AIG-SDK": "fetch", "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [{ role: "user", content: prompt }],
-        tools: [{ type: "function", function: {
-          name: "rank", description: "Folder and rank quotes",
-          parameters: { type: "object", properties: { quotes: { type: "array", items: { type: "object", properties: {
-            id: { type: "string" }, cover_type: { type: "string", enum: COVER_TYPES },
-            ai_rank: { type: ["integer", "null"] }, reason: { type: ["string", "null"] },
-          }, required: ["id", "cover_type", "ai_rank", "reason"] } } }, required: ["quotes"] },
-        } }],
-        tool_choice: { type: "function", function: { name: "rank" } },
+        model: "openai/gpt-6-astra",
+        input: [{ role: "user", content: prompt }],
+        stream: true, store: false,
+        reasoning: { effort: "low" },
+        text: { format: { type: "json_schema", name: "rank", strict: true, schema: {
+          type: "object", additionalProperties: false, required: ["quotes"],
+          properties: { quotes: { type: "array", items: { type: "object", additionalProperties: false,
+            required: ["id", "cover_type", "ai_rank", "reason"],
+            properties: {
+              id: { type: "string" }, cover_type: { type: "string", enum: COVER_TYPES },
+              ai_rank: { type: ["integer", "null"] }, reason: { type: ["string", "null"] },
+            } } } },
+        } } },
       }),
     });
     if (ai.status === 429) return json({ error: "Elysian AI is busy. Please try again in a minute." }, 429);
     if (ai.status === 402) return json({ error: "AI credits have run out. Please top up to continue." }, 402);
-    if (!ai.ok) return json({ error: "Elysian AI couldn't rank the quotes. Please try again." }, 500);
-    const out = await ai.json();
-    const args = JSON.parse(out.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments ?? "{}");
+    if (!ai.ok || !ai.body) return json({ error: "Elysian AI couldn't rank the quotes. Please try again." }, 500);
+    // Consume SSE stream, collecting output text deltas.
+    let text = "", buf = "";
+    const reader = ai.body.pipeThrough(new TextDecoderStream()).getReader();
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += value;
+      let i;
+      while ((i = buf.indexOf("\n")) >= 0) {
+        const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1);
+        if (!line.startsWith("data:")) continue;
+        const d = line.slice(5).trim();
+        if (!d || d === "[DONE]") continue;
+        try { const ev = JSON.parse(d); if (ev.type === "response.output_text.delta") text += ev.delta ?? ""; } catch { /* partial */ }
+      }
+    }
+    const args = JSON.parse(text || "{}");
     const ids = new Set(quotes.map((q: any) => q.id));
     for (const r of args.quotes ?? []) {
       if (!ids.has(r.id)) continue;
