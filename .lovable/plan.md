@@ -14,8 +14,8 @@
 5. **Affordability check** runs on Marlin's final choices (existing rule kept), then the ROA step unlocks as today.
 6. Client view unchanged: still "Marlin is preparing your financial plan".
 
-## Open question
-- Keep the 15% of net income / available surplus affordability rule, or use another?
+## Confirmed
+- Affordability rule stays: 15% of net income or available surplus.
 
 ## Technical details
 - Migration: add `cover_type`, `excess`, `ai_rank`, `ai_reason`, `broker_overridden` to `wealth_quotes` (existing RLS and audit trigger cover them).
