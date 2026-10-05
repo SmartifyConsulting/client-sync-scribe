@@ -108,7 +108,9 @@ export function NewClientInvite({ compact = false }: { compact?: boolean }) {
     setBusy(true);
     const { data, error } = await supabase.functions.invoke("wealth-client-invite", { body: { action: "create", ...f, origin: window.location.origin } });
     setBusy(false);
-    if (error || data?.error) return toast({ title: "Couldn't create client", description: data?.error ?? "Please try again.", variant: "destructive" });
+    let msg = data?.error as string | undefined;
+    if (error && !msg) { try { msg = (await (error as any).context?.json())?.error; } catch { /* ignore */ } }
+    if (error || data?.error) return toast({ title: "Couldn't create client", description: msg ?? "Please try again.", variant: "destructive" });
     setResult(data.url);
     qc.invalidateQueries({ queryKey: ["client-invites"] });
     qc.invalidateQueries({ queryKey: ["patients"] });
