@@ -86,15 +86,14 @@ const DOCTOR_SECTIONS: NavSection[] = [
     items: [
       { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.dashboard", to: "/doctor-dashboard", tour: "doctor-home" },
       { icon: Settings2, label: "My Business", labelKey: "nav.myPractice", to: "/practice", tour: "practice-settings" },
-      { icon: DollarSign, label: "Earnings", labelKey: "nav.earnings", to: "/earnings" },
       { icon: Clock, label: "My Shifts", labelKey: "nav.myShift", to: "/my-shift" },
       { icon: Users, label: "My Clients", labelKey: "nav.myPatients", to: "/patients", tour: "import-patients" },
+      { icon: UserPlus, label: "Referrers", labelKey: "nav.referrers", to: "/referrers" },
       { icon: BedDouble, label: "Admissions", labelKey: "nav.admissions", to: "/admissions" },
       { icon: Stethoscope, label: "Meetings", labelKey: "nav.mySessions", to: "/sessions" },
       { icon: FolderOpen, label: "Documents", labelKey: "nav.allDocuments", to: "/documents" },
       { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
       { icon: Users2, label: "Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
-      { icon: UserPlus, label: "Referrers", labelKey: "nav.referrers", to: "/referrers" },
     ],
   },
 ];

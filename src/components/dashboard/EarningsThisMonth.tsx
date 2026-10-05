@@ -36,7 +36,7 @@ export function EarningsThisMonth() {
           <Stat label="Premium written" value={fmt(premium)} />
           <Stat label="Commission" value={fmt(commission)} />
         </div>
-        <Link to="/earnings" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+        <Link to="/practice?tab=earnings" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
           View earnings &amp; targets <ArrowRight className="h-3 w-3" />
         </Link>
       </CardContent>

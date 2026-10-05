@@ -42,7 +42,6 @@ import ReferrerDashboard from "./pages/referrer/ReferrerDashboard";
 import ReferrerCommissions from "./pages/referrer/ReferrerCommissions";
 import BrokerReferrers from "./pages/broker/Referrers";
 import QuotesScreen from "./pages/broker/QuotesScreen";
-import Earnings from "./pages/broker/Earnings";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
@@ -330,7 +329,7 @@ const App = () => (
             <Route path="/referrer-commissions" element={<ReferrerCommissions />} />
             <Route path="/referrers" element={<BrokerReferrers />} />
             <Route path="/quotes-screen" element={<QuotesScreen />} />
-            <Route path="/earnings" element={<Earnings />} />
+            <Route path="/earnings" element={<Navigate to="/practice?tab=earnings" replace />} />
             
             {/* Admin routes */}
             <Route path="/admin" element={<Admin />} />

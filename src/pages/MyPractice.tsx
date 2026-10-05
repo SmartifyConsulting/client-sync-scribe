@@ -34,6 +34,7 @@ import {
 import ReferralDoctors from "@/pages/ReferralDoctors";
 import MyRewards from "@/pages/patient/MyRewards";
 import { ComplianceForms } from "@/features/wealth-workflow/forms/ComplianceForms";
+import { TargetsCommission } from "@/features/wealth-workflow/TargetsCommission";
 
 import Patients from "@/pages/Patients";
 import DoctorInvoices from "@/pages/doctor/Invoices";
@@ -1266,7 +1267,16 @@ export default function MyPractice() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue={isSystemAdmin && new URLSearchParams(window.location.search).get("billing") ? "billing" : "practice"} className="w-full">
+      <Tabs
+        defaultValue={
+          isSystemAdmin && new URLSearchParams(window.location.search).get("billing")
+            ? "billing"
+            : new URLSearchParams(window.location.search).get("tab") === "earnings"
+              ? "earnings"
+              : "practice"
+        }
+        className="w-full"
+      >
         <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
           <TabsTrigger
             value="practice"
@@ -1285,6 +1295,12 @@ export default function MyPractice() {
             className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             {t("myPractice.tabCredentials")}
+          </TabsTrigger>
+          <TabsTrigger
+            value="earnings"
+            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
+          >
+            Earnings
           </TabsTrigger>
           {isSystemAdmin && <TabsTrigger
             value="billing"
@@ -1733,6 +1749,11 @@ export default function MyPractice() {
               </Table>
             )}
           </div>
+        </TabsContent>
+
+        {/* === EARNINGS TAB === */}
+        <TabsContent value="earnings" className="mt-4 my-practice-tab-body">
+          <TargetsCommission />
         </TabsContent>
 
         {/* === REWARDS TAB === */}
