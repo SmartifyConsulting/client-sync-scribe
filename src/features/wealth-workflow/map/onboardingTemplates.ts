@@ -83,3 +83,30 @@ export function sealedHtml(doc: { content_html: string; signature_image: string;
 <p>Document: ${doc.title}<br/>Signed by: ${doc.signer_name}<br/>Sealed: ${doc.signed_at}<br/>IP address: ${doc.signer_ip ?? "not recorded"}</p>
 <p style="font-family:monospace;word-break:break-all;text-align:center">Seal ${doc.seal_hash}</p></div></div>`;
 }
+
+/** Record of Advice in the same executive, dual-logo layout as the Disclosure and LOA. Restyles stored ROA body HTML. */
+export function roaHtml(body: string, client: string, date: string, version: number | string, p: any = null) {
+  if (body.includes('id="holarc-document"')) body = body.replace(/^[\s\S]*?<!--roa-body-->|<!--\/roa-body-->[\s\S]*$/g, "");
+  const th = `padding:9px 10px;text-align:left;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:${MUTED};font-weight:600;border-bottom:1.5px solid ${NAVY}`;
+  const td = `padding:9px 10px;border-bottom:1px solid ${RULE}`;
+  const styled = body
+    .replace(/<h2[^>]*>[\s\S]*?<\/h2>/i, "")
+    .replace(/<p>\s*<b>Client:[\s\S]*?<\/p>/i, "")
+    .replace(/<p><i>Demo document[\s\S]*?<\/p>/i, "")
+    .replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, (_m, t) => h2(t))
+    .replace(/<table[^>]*>/gi, `<table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:4px">`)
+    .replace(/<tr>(\s*<th)/i, "<tr>$1")
+    .replace(/<th>/gi, `<th style="${th}">`)
+    .replace(/<td>/gi, `<td style="${td}">`)
+    .replace(/<ul>/gi, `<ul style="margin:0;padding-left:18px">`)
+    .replace(/<li>/gi, `<li style="margin:4px 0">`);
+  const planner = p?.planner_name ? `${p.title ? p.title + " " : ""}${p.planner_name}` : "Your Wealth Manager";
+  const intro = table([
+    ["Client", esc(client)],
+    ["Prepared by", `${esc(planner)}${p?.fsp_name ? ", representative of " + esc(p.fsp_name) : ""}`],
+    ["Date", esc(date)],
+    ["Version", `v${esc(version)} · any change creates a new version that must be re-signed`],
+  ]);
+  return wrap("Record of Advice", `Prepared for ${esc(client)} · ${esc(date)}`, `${intro}<!--roa-body-->${styled}<!--/roa-body-->
+<p style="margin:28px 0 0;font-size:11px;color:${MUTED}">This Record of Advice is issued in terms of the FAIS General Code of Conduct. Please read it carefully before accepting. Premiums and costs are as quoted by the product supplier and may change before issue.</p>`, p);
+}
