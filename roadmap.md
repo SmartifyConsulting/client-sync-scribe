@@ -100,4 +100,4 @@
 - [x] Step 6 auto-schedules annual review 12 months after issue; Step 7 Annual Review
 - [x] Calendar + notifications back in top bar; Documents nav count removed
 - [x] Clients can read their WM's name (no more "Your Wealth Manager")
-- [ ] Option A/B quoting selector, per-step output cards, legend tick colours
+- [x] Option A/B quoting selector, per-step output cards (Steps 3–4), legend tick colours
