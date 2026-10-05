@@ -25,9 +25,13 @@ interface Props {
 export const isMine = (owner: string, viewer: "manager" | "client") =>
   viewer === "client" ? owner === "client" : owner === "advisor" || owner === "wealth_manager";
 
+/** Tick colours match the legend badges: client green, Wealth Manager blue, System slate, insurer amber. */
+export const ownerSolid = (owner: string) =>
+  owner === "advisor" || owner === "wealth_manager" ? "bg-blue-600" : owner === "client" ? "bg-emerald-600" : owner === "insurer" ? "bg-amber-600" : "bg-slate-600";
+
 function StepTick({ owner }: { owner: string }) {
   return (
-    <span className={cn("flex h-[18px] w-[18px] flex-none items-center justify-center rounded-full", owner === "advisor" ? "bg-blue-600" : "bg-emerald-600")}>
+    <span className={cn("flex h-[18px] w-[18px] flex-none items-center justify-center rounded-full", ownerSolid(owner))}>
       <Check className="h-3.5 w-3.5 text-white" strokeWidth={5} />
     </span>
   );
@@ -110,7 +114,7 @@ export function LiveTray({ groups, viewer, clientFirst, managerName, avatars, wo
               {cur && (
                 <li className={cn(
                   "flex items-center gap-2 rounded-full px-3 py-1.5 text-xs text-white",
-                  cur.owner === "advisor" ? "bg-blue-600" : "bg-emerald-600",
+                  ownerSolid(cur.owner),
                   mine && "animate-throb",
                 )}>
                   <StepAvatar owner={cur.owner} avatars={avatars} className="-ml-1.5 ring-white" />

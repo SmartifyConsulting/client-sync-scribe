@@ -1,3 +1,4 @@
+import { ownerSolid } from "./LiveTray";
 import { Fragment, useState, type ReactNode } from "react";
 import { Check, Lock, Repeat } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -79,14 +80,14 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
                   onSelectStep && reachable && "cursor-pointer hover:bg-muted/40",
                   !reachable && "opacity-50",
                   s.state === "next" && "mx-1 my-0.5 rounded-full",
-                  s.state === "next" && (s.owner === "advisor" ? "bg-blue-500 text-white" : "bg-emerald-500 text-white"),
+                  s.state === "next" && cn(ownerSolid(s.owner), "text-white"),
                   s.state === "next" && (viewer === "client" ? s.owner === "client" : s.owner === "advisor") && "animate-throb",
                   selectedStep === s.label && s.state !== "next" && "bg-muted/60",
                 )}
               >
                 <span className="flex w-5 flex-none items-center justify-center">
                   {s.state === "done" ? (
-                    <span className={cn("flex h-[18px] w-[18px] items-center justify-center rounded-full", s.owner === "advisor" ? "bg-blue-500" : "bg-emerald-500")}>
+                    <span className={cn("flex h-[18px] w-[18px] items-center justify-center rounded-full", ownerSolid(s.owner))}>
                       <Check className="h-3.5 w-3.5 text-white" strokeWidth={5} />
                     </span>
                   ) : s.state === "next" ? (
