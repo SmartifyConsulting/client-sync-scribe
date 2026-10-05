@@ -116,7 +116,7 @@ export default function WealthUsers() {
           members.data.map((m) => {
             const nonAdminRole = (m.roles.find((r) => r !== "admin") ?? "doctor") as TeamRole;
             return (
-              <div key={m.id} className="flex items-center justify-between gap-3 px-4 py-3">
+              <div key={String(m.id)} className="flex items-center justify-between gap-3 px-4 py-3">
                 <div className="min-w-0">
                   <p className="text-sm font-medium truncate">{m.name}</p>
                   <div className="mt-0.5 flex gap-1.5">
