@@ -90,7 +90,7 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
   const isSign = step.label === "Sign Disclosure and LOA";
   const isAstute = step.label.startsWith("Astute pull");
   const isPersonal = step.label === "Complete personal information";
-  const isCapture = step.label === "Record consultation and capture financials";
+  const isCapture = step.label === "Record meeting and capture financials";
   const isSchedule = step.label === 'Schedule "Review Financial Health" meeting';
   const isVerify = step.label === "Verify financial information";
   const reached = step.state === "next" || step.state === "done";

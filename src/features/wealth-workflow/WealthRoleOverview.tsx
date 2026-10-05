@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 const STAGE_LABEL: Record<string, string> = {
-  consultation: "Consultation", information_required: "Information required", needs_analysis: "Needs analysis",
+  consultation: "Meeting", information_required: "Information required", needs_analysis: "Needs analysis",
   research_quotes: "Quotes", recommendation: "Recommendation", client_presentation: "Presentation",
   client_decision: "Client decision", documentation: "Documentation", compliance: "Compliance",
   application: "Application", underwriting: "Underwriting", submission: "Submission", issued: "Issued",

@@ -25,7 +25,7 @@ export function useClientDocuments(patientId?: string) {
       ]);
       return [
         ...((signed.data ?? []) as any[]).map((d) => ({ id: d.id, kind: "signed" as const, title: `${d.title} (signed v${d.version})`, date: d.signed_at, html: sealedHtml(d) })),
-        ...((sessions.data ?? []) as any[]).map((s) => ({ id: s.id, kind: "transcript" as const, title: `${s.title || "Consultation"} transcript`, date: s.created_at, text: s.transcript })),
+        ...((sessions.data ?? []) as any[]).map((s) => ({ id: s.id, kind: "transcript" as const, title: `${s.title || "Meeting"} transcript`, date: s.created_at, text: s.transcript })),
         ...((files.data ?? []) as any[]).map((f) => {
           const c: string | undefined = f.content || undefined;
           const isHtml = !!c && /<[a-z][\s\S]*>/i.test(c);
@@ -129,7 +129,7 @@ export function TranscriptButton({ sessionId, patientId }: { sessionId?: string 
     let q = db.from("sessions").select("id,title,transcript,created_at").not("transcript", "is", null);
     q = sessionId ? q.eq("id", sessionId) : q.eq("patient_id", patientId).order("created_at", { ascending: false }).limit(1);
     const { data } = await q.maybeSingle();
-    if (data) setDoc({ id: data.id, kind: "transcript", title: `${data.title || "Consultation"} transcript`, date: data.created_at, text: data.transcript });
+    if (data) setDoc({ id: data.id, kind: "transcript", title: `${data.title || "Meeting"} transcript`, date: data.created_at, text: data.transcript });
   };
   return (
     <>

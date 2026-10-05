@@ -38,7 +38,6 @@ import {
   BarChart3,
   FileText,
   Wallet,
-  ShieldCheck,
   FolderOpen as ClientFolder,
 } from "lucide-react";
 
@@ -95,7 +94,6 @@ const DOCTOR_SECTIONS: NavSection[] = [
       { icon: FileText, label: "Claims", labelKey: "nav.myClaims", to: "/claims" },
       { icon: FolderOpen, label: "Documents", labelKey: "nav.allDocuments", to: "/documents" },
       { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
-      { icon: MessageCircle, label: "Messenger", labelKey: "nav.messenger", to: "/messenger" },
       { icon: ListChecks, label: "My Actions", labelKey: "nav.myTasks", to: "/todos", tour: "doctor-tasks" },
       { icon: Users2, label: "Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
     ],
@@ -104,6 +102,7 @@ const DOCTOR_SECTIONS: NavSection[] = [
 
 
 const DOCTOR_BOTTOM_ITEMS: (NavItem & { tour?: string })[] = [
+  { icon: MessageCircle, label: "Messenger", labelKey: "nav.messenger", to: "/messenger" },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/doctor/holarchelp", danger: true },
 ];
 
@@ -124,14 +123,13 @@ const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: Activity, label: "Live Workspace", labelKey: "nav.liveWorkspace", to: "/my-workspace" },
   { icon: User, label: "Personal Information", labelKey: "nav.clientPersonal", to: "/patient/details?section=personal" },
   { icon: Wallet, label: "Financial Information", labelKey: "nav.clientFinancial", to: "/patient/details?section=financial" },
-  { icon: ShieldCheck, label: "Claims", labelKey: "nav.clientClaims", to: "/claims" },
   { icon: ClientFolder, label: "Documents", labelKey: "nav.clientDocuments", to: "/patient/documents" },
-  { icon: MessageCircle, label: "Messenger", labelKey: "nav.messenger", to: "/messenger" },
   { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
   { icon: Activity, label: "My Biolog", labelKey: "nav.myBiolog", to: "/biolog" },
   { icon: BedDouble, label: "My Admissions", labelKey: "nav.myAdmissions", to: "/patient/admissions" },
   { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/patient/rewards" },
   { icon: Sparkles, label: "Ask Holarc Wealth", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
+  { icon: MessageCircle, label: "Messenger", labelKey: "nav.messenger", to: "/messenger" },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true, tour: "patient-sos" },
 ];
 

@@ -40,7 +40,7 @@ export const STAGE_TO_GROUP: Record<string, string> = {
 
 /** Milestone copy for completed transitions (manager view / client view) */
 export const MILESTONE: Record<string, { wm: string; client?: string }> = {
-  information_required: { wm: "Consultation completed", client: "Consultation completed" },
+  information_required: { wm: "Meeting completed", client: "Meeting completed" },
   needs_analysis: { wm: "Information received" },
   research_quotes: { wm: "FNA completed", client: "Financial Needs Analysis" },
   recommendation: { wm: "Quotes researched", client: "Recommendation being prepared" },

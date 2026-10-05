@@ -2471,8 +2471,8 @@ export function PatientDetailsEditor({
           {isSelfService && (
             <TabsContent value="history" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-lg font-semibold text-primary-dark">My Consultations</h2>
-                <p className="text-xs text-muted-foreground">Your consultation consultations</p>
+                <h2 className="text-lg font-semibold text-primary-dark">My Meetings</h2>
+                <p className="text-xs text-muted-foreground">Your meetings with your Wealth Manager</p>
               </div>
 
               <Suspense

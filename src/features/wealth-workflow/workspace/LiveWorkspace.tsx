@@ -65,7 +65,7 @@ export function LiveWorkspace({ patientId, clientName, onViewWorkflow, onOpenDoc
       a.push({ label: "Declined", variant: "destructive", onClick: () => run(decide.mutateAsync({ recommendationId: i.recommendationId!, decision: "declined" }), "Declined") });
     }
     if (i.kind === "message" && onOpenMessages) a.push({ label: "Reply", variant: "default", onClick: onOpenMessages });
-    if (i.kind === "annual_review" && onScheduleConsultation) a.push({ label: "Schedule consultation", onClick: onScheduleConsultation });
+    if (i.kind === "annual_review" && onScheduleConsultation) a.push({ label: "Schedule meeting", onClick: onScheduleConsultation });
     if (i.kind === "annual_review") a.push({ label: "Start annual review", variant: "default", onClick: () => run(annual.mutateAsync({ workflowId: wf.id }), "Annual review started") });
     if (i.documentId && onOpenDocument) a.push({ label: "View ROA", onClick: () => onOpenDocument(i.documentId!) });
     if (i.kind === "requirement") a.push({ label: "Documents", onClick: onOpenDocuments });
@@ -95,7 +95,7 @@ export function LiveWorkspace({ patientId, clientName, onViewWorkflow, onOpenDoc
       {/* Context strip */}
       <div className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-xl border bg-card p-3 text-sm md:grid-cols-3 xl:grid-cols-6">
         <Ctx label="Client" value={clientName ?? "—"} />
-        <Ctx label="Consultation" value={ws.lastSession ? format(new Date(ws.lastSession.started_at ?? ws.lastSession.created_at), "d MMM yyyy") : "—"} />
+        <Ctx label="Meeting" value={ws.lastSession ? format(new Date(ws.lastSession.started_at ?? ws.lastSession.created_at), "d MMM yyyy") : "—"} />
         <Ctx label="Current stage" value={curLabel} />
         <Ctx label="Status" value={status} danger={wf.status === "blocked"} />
         <Ctx label="Next action" value={nextAction} />

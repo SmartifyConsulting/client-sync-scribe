@@ -201,7 +201,7 @@ export function CaptureFinancialsPanel({ patientId, sessions, financials, viewer
           <Label className="text-xs">Recorded consultation</Label>
           <Select value={sessionId} onValueChange={setSessionId}>
             <SelectTrigger><SelectValue placeholder="Choose a consultation" /></SelectTrigger>
-            <SelectContent>{usable.map((s) => <SelectItem key={s.id} value={s.id}>{s.title || "Consultation"} · {fmt(s.created_at)}</SelectItem>)}</SelectContent>
+            <SelectContent>{usable.map((s) => <SelectItem key={s.id} value={s.id}>{s.title || "Meeting"} · {fmt(s.created_at)}</SelectItem>)}</SelectContent>
           </Select>
         </div>
       )}
