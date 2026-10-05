@@ -41,7 +41,7 @@ import {
 import { PatientHeroCard } from "@/components/dashboard/PatientHeroCard";
 import { Panel } from "@/components/ui/Panel";
 import { ClientAISummary } from "@/features/wealth-workflow/client/ClientAISummary";
-import { useClientWealth, zar, zarShort } from "@/features/wealth-workflow/client/useClientWealth";
+import { useClientWealth, zar, zarShort, num } from "@/features/wealth-workflow/client/useClientWealth";
 import { EmotionalHeadline } from "@/components/dashboard/EmotionalHeadline";
 import { PeopleICareFor } from "@/components/dashboard/PeopleICareFor";
 import { NextMeetingWithWM } from "@/components/dashboard/NextMeetingWithWM";
@@ -236,6 +236,28 @@ export default function MyPersonalDashboard() {
               <li>If you can't work: <span className="font-semibold text-foreground">{t?.incomeProtection ? `${zar(t.incomeProtection)} /month` : "no cover captured"}</span></li>
               <li>When you retire: <span className="font-semibold text-foreground">{zar(t?.retirement ?? 0)} saved so far</span></li>
             </ul>
+          </div>
+
+          <div className="mt-3 border-t border-border pt-3">
+            <p className="text-2xs uppercase tracking-wide text-primary font-bold mb-1.5">Your policies</p>
+            {(w?.issued.length || w?.policies.length) ? (
+              <ul className="space-y-1.5">
+                {w.issued.map((a: any) => (
+                  <li key={a.id} className="flex items-center justify-between gap-2 text-xs">
+                    <span className="min-w-0 truncate"><span className="font-semibold text-foreground">{a.product}</span> <span className="text-muted-foreground">· {a.provider}</span></span>
+                    <span className="shrink-0 text-muted-foreground">{a.monthly_premium ? `${zar(num(a.monthly_premium))}/mo` : "—"}</span>
+                  </li>
+                ))}
+                {w.policies.map((p: any, i: number) => (
+                  <li key={`captured-${i}`} className="flex items-center justify-between gap-2 text-xs">
+                    <span className="min-w-0 truncate"><span className="font-semibold text-foreground">{p.kind}</span>{p.insurer ? <span className="text-muted-foreground"> · {p.insurer}</span> : null}</span>
+                    <span className="shrink-0 text-muted-foreground">{p.premium ? `${zar(num(p.premium))}/mo` : "—"}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs text-muted-foreground">No existing policies captured yet.</p>
+            )}
           </div>
         </Panel>
 
