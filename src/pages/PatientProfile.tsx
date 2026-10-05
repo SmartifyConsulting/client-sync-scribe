@@ -419,7 +419,13 @@ export default function PatientProfile() {
           >
             {t("patientProfile.tabDocuments")}
           </TabsTrigger>
+          <TabsTrigger value="logs" className="tab-brand whitespace-nowrap text-xs px-3 py-1.5">
+            Transaction Logs
+          </TabsTrigger>
         </TabsList>
+        <TabsContent value="logs">
+          <TransactionLogs patientId={patient.id} />
+        </TabsContent>
 
         {/* Overview Tab - AI Summary */}
         <TabsContent value="overview">
