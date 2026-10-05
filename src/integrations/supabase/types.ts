@@ -10893,10 +10893,15 @@ export type Database = {
       }
       wealth_quotes: {
         Row: {
+          ai_rank: number | null
+          ai_reason: string | null
+          broker_overridden: boolean
           commentary: string | null
           cover_amount: number | null
+          cover_type: string | null
           created_at: string
           created_by: string
+          excess: number | null
           id: string
           insurer: string
           method: string
@@ -10908,10 +10913,15 @@ export type Database = {
           workflow_id: string
         }
         Insert: {
+          ai_rank?: number | null
+          ai_reason?: string | null
+          broker_overridden?: boolean
           commentary?: string | null
           cover_amount?: number | null
+          cover_type?: string | null
           created_at?: string
           created_by?: string
+          excess?: number | null
           id?: string
           insurer: string
           method: string
@@ -10923,10 +10933,15 @@ export type Database = {
           workflow_id: string
         }
         Update: {
+          ai_rank?: number | null
+          ai_reason?: string | null
+          broker_overridden?: boolean
           commentary?: string | null
           cover_amount?: number | null
+          cover_type?: string | null
           created_at?: string
           created_by?: string
+          excess?: number | null
           id?: string
           insurer?: string
           method?: string
