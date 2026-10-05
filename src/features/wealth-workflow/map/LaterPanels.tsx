@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DocCard, useWorkflowPractice } from "./OnboardingPanels";
 import { roaHtml } from "./onboardingTemplates";
+import { RoaNegotiation } from "./RoaNegotiation";
 import { usePresentRecommendation, useRecordDecision, useRecommendationHistory, useStartAnnualReview } from "../hooks";
 
 type Viewer = "manager" | "client";
@@ -102,14 +103,15 @@ export function LaterStepPanel({ label, viewer, workflowId, records, clientFirst
         <div className="space-y-3">
           {RecCard}
           {RoaCard}
-          {viewer === "client" && current?.status === "presented" ? (
-            <div className="grid gap-2">
-              <Button className="rounded-full" disabled={decide.isPending} onClick={() => run(decide.mutateAsync({ recommendationId: current.id, decision: "accepted" }), "Thank you. Your acceptance is recorded.")}>I accept this advice</Button>
-              <Button variant="outline" className="rounded-full" disabled={decide.isPending} onClick={() => run(decide.mutateAsync({ recommendationId: current.id, decision: "changes_requested" }), "Your Wealth Manager will prepare a new version.")}>I'd like changes</Button>
-            </div>
+          {current?.status === "accepted" ? (
+            <p className="text-xs text-muted-foreground">Accepted {fmt(current.decided_at)}.</p>
+          ) : current && (current.status === "presented" || current.status === "changes_requested" || current.status === "draft") ? (
+            <RoaNegotiation viewer={viewer} patientId={records?.patientId} workflowId={workflowId} recs={recs} current={current}
+              clientFirst={clientFirst} onAccept={() => run(decide.mutateAsync({ recommendationId: current.id, decision: "accepted" }), "Thank you. Your acceptance is recorded.")}
+              accepting={decide.isPending} />
           ) : (
             <p className="text-xs text-muted-foreground">
-              {current?.status === "accepted" ? `Accepted ${fmt(current.decided_at)}.` : viewer === "manager" ? `Waiting for ${clientFirst} to accept the advice.` : "You'll be able to accept once it's presented to you."}
+              {viewer === "manager" ? `Waiting for ${clientFirst} to review the advice.` : "You'll be able to respond once the advice is presented to you."}
             </p>
           )}
         </div>
