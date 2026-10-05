@@ -7,6 +7,7 @@ import { STEP_GUIDANCE, fillName, ownerLabel } from "./stepGuidance";
 import { KycPanel, SignDocsPanel } from "./OnboardingPanels";
 import { AstutePanel } from "./AstutePanel";
 import { LaterStepPanel, LATER_STEPS } from "./LaterPanels";
+import { QuotesPanel, QUOTE_STEPS } from "./QuotesPanel";
 import { PersonalInfoPanel, CaptureFinancialsPanel, VerifyFinancialsPanel, ScheduleMeetingPanel } from "./ProfilePanels";
 import type { GroupView } from "./useWorkflowMap";
 
@@ -94,7 +95,8 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
   const isVerify = step.label === "Verify financial information";
   const reached = step.state === "next" || step.state === "done";
   const isLater = LATER_STEPS.has(step.label);
-  const custom = isLater || isSchedule || isKyc || isSign || isAstute || isPersonal || isCapture || isVerify;
+  const isQuote = QUOTE_STEPS.has(step.label);
+  const custom = isQuote || isLater || isSchedule || isKyc || isSign || isAstute || isPersonal || isCapture || isVerify;
 
   return (
     <div key={step.label} className={cn("animate-fade-in overflow-hidden", embedded ? "" : "rounded-xl border border-border/70 bg-card")}>
@@ -175,6 +177,7 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
             </a>
           )}
           {isPersonal && reached && <PersonalInfoPanel patientId={records?.patientId} personal={records?.personal} />}
+          {isQuote && reached && <QuotesPanel label={step.label} viewer={viewer} workflowId={workflowId} records={records} clientFirst={first} />}
           {isLater && reached && <LaterStepPanel label={step.label} viewer={viewer} workflowId={workflowId} records={records} clientFirst={first} clientFullName={clientName} onOpenDocuments={onOpenDocuments} />}
           {isSchedule && reached && <ScheduleMeetingPanel appointments={records?.appointments ?? []} viewer={viewer} />}
           {isCapture && reached && (
