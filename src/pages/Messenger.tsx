@@ -22,9 +22,9 @@ export default function Messenger() {
     refetchInterval: 15000,
     queryFn: async (): Promise<Thread[]> => {
       const { data: pts } = await (supabase as any).from("patients")
-        .select("id, full_name, user_id, patient_user_id")
+        .select("id, name, user_id, patient_user_id")
         .or(`patient_user_id.eq.${me},and(user_id.eq.${me},patient_user_id.not.is.null)`)
-        .order("full_name");
+        .order("name");
       const rows = (pts ?? []) as any[];
       const advisorIds = [...new Set(rows.map((r) => r.user_id).filter(Boolean))];
       const { data: profs } = advisorIds.length ? await supabase.from("profiles").select("id, full_name").in("id", advisorIds) : { data: [] as any[] };
@@ -35,7 +35,7 @@ export default function Messenger() {
         return {
           patientId: r.id, advisorId: r.user_id,
           advisorName: (profs ?? []).find((p: any) => p.id === r.user_id)?.full_name || "Wealth Manager",
-          clientName: r.full_name || "Client",
+          clientName: r.name || "Client",
           unread: own.filter((m: any) => !m.read_at && m.sender_id !== me).length,
           last: own[0]?.body,
         };
