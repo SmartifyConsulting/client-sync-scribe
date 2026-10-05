@@ -71,7 +71,7 @@ export default function JoinInvite() {
           <>
             <div className="space-y-1">
               <h1 className="page-title">Welcome{preview.firstName ? `, ${preview.firstName}` : ""}</h1>
-              <p className="page-subtitle">{preview.managerName}{preview.fspName ? ` of ${preview.fspName}` : ""} has invited you to Holarc Wealth. Create your account to start onboarding — your first step is a quick identity and screening check.</p>
+              <p className="page-subtitle">{preview.managerName}{preview.fspName ? ` of ${preview.fspName}` : ""} has invited you to Elysian. Create your account to start onboarding — your first step is a quick identity and screening check.</p>
             </div>
 
             {authLoading ? null : user ? (
