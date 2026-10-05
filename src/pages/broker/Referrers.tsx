@@ -36,7 +36,7 @@ export default function Referrers() {
   const nameFor = (id: string) => (names.data ?? []).find((n: any) => n.id === id)?.full_name ?? "Referrer";
   const rateFor = (id: string) => (rates.data ?? []).find((r: any) => r.referrer_user_id === id)?.commission_rate ?? 10;
 
-  const rows = useMemo(() => referrerIds.map((id) => {
+  const rows = useMemo(() => (referrerIds as string[]).map((id: string) => {
     const mine = (referrals.data ?? []).filter((r: any) => r.referrer_user_id === id);
     return {
       id,
