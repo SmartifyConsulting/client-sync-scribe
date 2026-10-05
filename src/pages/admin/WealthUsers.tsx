@@ -113,8 +113,8 @@ export default function WealthUsers() {
         ) : !members.data?.length ? (
           <p className="py-12 text-center text-sm text-muted-foreground">No team members yet.</p>
         ) : (
-          members.data.map((m) => {
-            const nonAdminRole = (m.roles.find((r) => r !== "admin") ?? "doctor") as TeamRole;
+          members.data.map((m: any) => {
+            const nonAdminRole = (m.roles.find((r: string) => r !== "admin") ?? "doctor") as TeamRole;
             return (
               <div key={m.id} className="flex items-center justify-between gap-3 px-4 py-3">
                 <div className="min-w-0">

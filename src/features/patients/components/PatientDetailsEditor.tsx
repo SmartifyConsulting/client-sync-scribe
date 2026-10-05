@@ -1332,7 +1332,7 @@ export function PatientDetailsEditor({
   const handleCancel = () => {
     const fn = patient.first_name || splitName(patient.name).first;
     const ln = patient.last_name || splitName(patient.name).last;
-    setFormData({
+    setFormData((prev) => ({ ...prev,
       first_name: fn,
       last_name: ln,
       email: patient.email || "",
@@ -1367,7 +1367,7 @@ export function PatientDetailsEditor({
       blood_type: patient.blood_type || "",
       organ_donor: patient.organ_donor || false,
       preferred_language: (patient as any).preferred_language || "",
-    });
+    }));
     setOrganDonorOrgans(patient.organ_donor_organs || []);
     setSurgeries(patient.surgeries || []);
     setFamilyHistory(patient.family_history || []);
