@@ -127,9 +127,9 @@ function AutoStartKyc({ status, sessionUrl, busy, onStart, children }: { status:
 }
 
 /* ---------------- Disclosure + LOA ---------------- */
-export function SignDocsPanel({ workflowId, signed, viewer, clientName }: { workflowId: string; signed: any[]; viewer: Viewer; clientName: string }) {
-  const today = new Date().toLocaleDateString("en-ZA", { day: "numeric", month: "long", year: "numeric" });
-  const { data: practice } = useQuery({
+/** Wealth Manager's saved firm profile (with logos embedded as data URLs) for branding client documents. */
+export function useWorkflowPractice(workflowId: string) {
+  return useQuery({
     queryKey: ["workflow-practice-info", workflowId],
     queryFn: async () => {
       const sbx = supabase as any;
@@ -147,6 +147,11 @@ export function SignDocsPanel({ workflowId, signed, viewer, clientName }: { work
       return { ...data, __businessLogo: await embed(data.business_logo_path), __fspLogo: await embed(data.fsp_logo_path) };
     },
   });
+}
+
+export function SignDocsPanel({ workflowId, signed, viewer, clientName }: { workflowId: string; signed: any[]; viewer: Viewer; clientName: string }) {
+  const today = new Date().toLocaleDateString("en-ZA", { day: "numeric", month: "long", year: "numeric" });
+  const { data: practice } = useWorkflowPractice(workflowId);
   const docs = [
     { type: "disclosure", title: "Disclosure Agreement", blurb: "Who we are and how we are paid", html: disclosureHtml(clientName, today, practice) },
     { type: "loa", title: "Letter of Authority (LOA)", blurb: "Lets your Wealth Manager request your policy information", html: loaHtml(clientName, today, practice) },
@@ -160,7 +165,7 @@ export function SignDocsPanel({ workflowId, signed, viewer, clientName }: { work
   );
 }
 
-function DocCard({ workflowId, doc, signed, viewer, clientName }: { workflowId: string; doc: { type: string; title: string; blurb?: string; html: string }; signed?: any; viewer: Viewer; clientName: string }) {
+export function DocCard({ workflowId, doc, signed, viewer, clientName, signable = true, status }: { workflowId: string; doc: { type: string; title: string; blurb?: string; html: string }; signed?: any; viewer: Viewer; clientName: string; signable?: boolean; status?: string }) {
   const [cert, setCert] = useState(false);
   const [preview, setPreview] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -207,18 +212,18 @@ function DocCard({ workflowId, doc, signed, viewer, clientName }: { workflowId: 
         <p className="text-sm font-medium leading-snug text-foreground">{doc.title}</p>
         {doc.blurb && !isSigned && <p className="text-xs leading-snug text-muted-foreground">{doc.blurb}</p>}
         <p className="mt-0.5 text-2xs uppercase tracking-[0.12em] text-muted-foreground">
-          {isSigned ? `Signed by ${signed?.signer_name ?? clientName}${signed ? ` · ${fmt(signed.signed_at)}` : ""} · filed in Documents` : viewer === "client" ? "Waiting for your signature" : `Waiting for ${first} to sign`}
+          {status ?? (isSigned ? `Signed by ${signed?.signer_name ?? clientName}${signed ? ` · ${fmt(signed.signed_at)}` : ""} · filed in Documents` : viewer === "client" ? "Waiting for your signature" : `Waiting for ${first} to sign`)}
         </p>
       </div>
       <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0 rounded-full text-muted-foreground hover:text-foreground" aria-label={`Preview ${doc.title}`} onClick={() => setPreview(true)}><Eye className="h-4 w-4" /></Button>
       <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0 rounded-full text-muted-foreground hover:text-foreground" aria-label={`Download ${doc.title}`} onClick={() => downloadPdf(html, doc.title)}><Download className="h-4 w-4" /></Button>
       {signed && <Button size="icon" variant="ghost" className="h-9 w-9 rounded-full" aria-label="View seal certificate" onClick={() => setCert(true)}><ShieldCheck className="h-4 w-4" /></Button>}
-      {!isSigned && viewer === "client" && (
+      {signable && !isSigned && viewer === "client" && (
         <Button size="sm" className="h-8 rounded-full px-4 text-xs" disabled={busy} onClick={sign}>
           {busy && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}Sign
         </Button>
       )}
-      {isSigned && <span className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-0.5 text-2xs font-medium text-primary"><Check className="h-3 w-3" strokeWidth={3} />Signed</span>}
+      {signable && isSigned && <span className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-0.5 text-2xs font-medium text-primary"><Check className="h-3 w-3" strokeWidth={3} />Signed</span>}
 
       <Dialog open={preview} onOpenChange={setPreview}>
         <DialogContent className="max-h-[90vh] max-w-3xl overflow-hidden p-0">
@@ -228,7 +233,7 @@ function DocCard({ workflowId, doc, signed, viewer, clientName }: { workflowId: 
           </div>
           <div className="flex justify-end gap-2 border-t px-5 py-3">
             <Button size="sm" variant="outline" className="h-8 rounded-full text-xs" onClick={() => downloadPdf(html, doc.title)}><Download className="mr-1 h-3.5 w-3.5" />Download</Button>
-            {!isSigned && viewer === "client" && (
+            {signable && !isSigned && viewer === "client" && (
               <Button size="sm" className="h-8 rounded-full px-4 text-xs" disabled={busy} onClick={async () => { await sign(); setPreview(false); }}>
                 {busy && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}Sign
               </Button>
