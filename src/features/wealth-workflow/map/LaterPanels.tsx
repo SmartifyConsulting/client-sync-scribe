@@ -32,6 +32,32 @@ function StatusRow({ label, done, hint }: { label: string; done: boolean; hint?:
   );
 }
 
+/** Shows the front/back ID images Didit captured, once per client, so a
+ *  manager can confirm them without re-requesting the ID at FICA stage. */
+function IdOnFile({ patientId }: { patientId?: string }) {
+  const { data } = useQuery({
+    queryKey: ["patient-id-images", patientId],
+    enabled: !!patientId,
+    queryFn: async () => {
+      const sbx = supabase as any;
+      const { data: pat } = await sbx.from("patients").select("id_document_front_path, id_document_back_path").eq("id", patientId).maybeSingle();
+      if (!pat?.id_document_front_path && !pat?.id_document_back_path) return null;
+      const sign = async (path?: string | null) => path ? (await sbx.storage.from("identity-documents").createSignedUrl(path, 3600)).data?.signedUrl ?? null : null;
+      return { front: await sign(pat.id_document_front_path), back: await sign(pat.id_document_back_path) };
+    },
+  });
+  if (!data) return null;
+  return (
+    <div className="rounded-lg border border-border/60 p-3">
+      <p className="mb-2 text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">ID on file (from identity check)</p>
+      <div className="flex gap-2">
+        {data.front && <img src={data.front} alt="ID front" className="h-16 w-24 rounded border border-border object-cover" />}
+        {data.back && <img src={data.back} alt="ID back" className="h-16 w-24 rounded border border-border object-cover" />}
+      </div>
+    </div>
+  );
+}
+
 function DocsLink({ viewer, onOpenDocuments, label = "Open documents" }: { viewer: Viewer; onOpenDocuments?: () => void; label?: string }) {
   return viewer === "client" ? (
     <Button asChild variant="outline" className="w-full rounded-full"><Link to="/patient/documents"><Upload className="mr-2 h-4 w-4" />{label}</Link></Button>
@@ -124,8 +150,9 @@ export function LaterStepPanel({ label, viewer, workflowId, records, clientFirst
             <StatusRow label="Bank details confirmed" done={!comp?.bank_validation_required || comp?.bank_validation_status === "completed"} hint={!comp?.bank_validation_required ? "Not needed" : undefined} />
           </ul>
           <p className="text-xs text-muted-foreground">
-            {viewer === "client" ? "Upload a copy of your ID, proof of address (less than 3 months old) and a bank statement or bank letter." : `${clientFirst} uploads ID, proof of address and bank confirmation.`}
+            {viewer === "client" ? "Your ID is already on file from your identity check — just upload a Bank Account Verification Letter and a Proof of Residential Address no older than 3 months." : `${clientFirst} uploads a Bank Account Verification Letter and Proof of Address (ID already on file from their identity check).`}
           </p>
+          {viewer === "manager" && <IdOnFile patientId={records?.patientId} />}
           <DocsLink viewer={viewer} onOpenDocuments={onOpenDocuments} label={viewer === "client" ? "Upload my documents" : "Open documents"} />
         </div>
       );

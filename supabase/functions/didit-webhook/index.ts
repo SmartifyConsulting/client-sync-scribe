@@ -25,6 +25,34 @@ async function hmac(secret: string, body: string) {
   return Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+/** Didit's decision payload shape varies by plan/version — check the common
+ *  locations for the captured ID image URLs rather than assuming one path. */
+function findIdImageUrls(d: any): { front?: string; back?: string } {
+  const idv = d?.id_verification ?? d?.decision?.id_verification ?? {};
+  return {
+    front: idv.front_image ?? idv.front_image_url ?? idv.images?.front ?? d?.front_image,
+    back: idv.back_image ?? idv.back_image_url ?? idv.images?.back ?? d?.back_image,
+  };
+}
+
+async function storeIdImage(admin: any, patientId: string, side: "front" | "back", url?: string): Promise<string | null> {
+  if (!url) return null;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const contentType = res.headers.get("content-type") || "image/jpeg";
+    const ext = contentType.includes("png") ? "png" : "jpg";
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    const path = `${patientId}/${side}.${ext}`;
+    const { error } = await admin.storage.from("identity-documents").upload(path, bytes, { contentType, upsert: true });
+    if (error) { console.error(`Failed to store ${side} ID image`, error); return null; }
+    return path;
+  } catch (e) {
+    console.error(`Failed to fetch ${side} ID image`, e);
+    return null;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   const raw = await req.text();
@@ -41,6 +69,28 @@ Deno.serve(async (req) => {
   if (!chk) return json({ ok: true, ignored: true });
   const m = mapDidit(d);
   await admin.from("wealth_kyc_checks").update({ ...m, raw: d, decided_at: m.status === "started" ? null : new Date().toISOString() }).eq("id", chk.id);
+
+  // Save the front/back ID images once per client so FICA doesn't need to
+  // re-request them later.
+  const { data: wf } = await admin.from("wealth_workflows").select("patient_id").eq("id", chk.workflow_id).maybeSingle();
+  if (wf?.patient_id) {
+    const { data: pat } = await admin.from("patients").select("id_document_front_path, id_document_back_path").eq("id", wf.patient_id).maybeSingle();
+    if (!pat?.id_document_front_path || !pat?.id_document_back_path) {
+      const urls = findIdImageUrls(d);
+      const [frontPath, backPath] = await Promise.all([
+        storeIdImage(admin, wf.patient_id, "front", urls.front),
+        storeIdImage(admin, wf.patient_id, "back", urls.back),
+      ]);
+      if (frontPath || backPath) {
+        await admin.from("patients").update({
+          id_document_front_path: frontPath ?? pat?.id_document_front_path ?? null,
+          id_document_back_path: backPath ?? pat?.id_document_back_path ?? null,
+          id_document_captured_at: new Date().toISOString(),
+        }).eq("id", wf.patient_id);
+      }
+    }
+  }
+
   if (m.status === "in_review" || m.status === "declined") {
     await admin.from("todos").insert({
       workflow_id: chk.workflow_id, title: m.status === "declined" ? "Identity screening failed – contact the client" : "Review identity screening result",

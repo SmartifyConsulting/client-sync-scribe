@@ -125,6 +125,37 @@ async function verifySvixSignature(
     .some((candidate) => timingSafeEqual(candidate, expected));
 }
 
+const SCHEDULES_CLAIMS_KINDS = ["Policy History", "Claims History"];
+const QUOTE_COVER_KINDS = ["Quote — Car", "Quote — Home", "Quote — Life", "Quote — Disability", "Quote — Other"];
+
+/** Best-effort filing: classifies an insurer attachment from its filename and
+ *  the surrounding email context (no document content parsing/OCR). */
+async function classifyInsurerDocument(kind: "schedules_claims" | "quotes", filename: string, subject: string, bodyText: string): Promise<string> {
+  const options = kind === "quotes" ? QUOTE_COVER_KINDS : SCHEDULES_CLAIMS_KINDS;
+  const apiKey = Deno.env.get("LOVABLE_API_KEY");
+  if (!apiKey) return options[options.length - 1];
+  try {
+    const r = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "openai/gpt-6-astra",
+        input: [
+          { role: "system", content: `Classify an insurer document into exactly one of: ${options.join(", ")}. Reply with only that label, nothing else.` },
+          { role: "user", content: `Filename: ${filename}\nEmail subject: ${subject}\nEmail body: ${bodyText.slice(0, 2000)}` },
+        ],
+      }),
+    });
+    if (!r.ok) return options[options.length - 1];
+    const out = await r.json();
+    const text: string = (out.output_text ?? (out.output ?? []).flatMap((o: any) => o.content ?? []).map((c: any) => c.text ?? "").join("")).trim();
+    return options.find((o) => text.toLowerCase().includes(o.toLowerCase())) ?? options[options.length - 1];
+  } catch (e) {
+    console.error("Classification failed", e);
+    return options[options.length - 1];
+  }
+}
+
 async function resendGet(path: string): Promise<Response> {
   const lovableKey = Deno.env.get("LOVABLE_API_KEY");
   const resendKey = Deno.env.get("RESEND_API_KEY");
@@ -207,6 +238,7 @@ serve(async (req) => {
     );
 
     console.log("Inbound email", { emailId, recipients, from: sender, subject });
+    const bodyText = email.text || email.html || "No content";
 
     // --- Resolve the mailbox owner from any recipient alias ---
     let profile: { id: string; full_name: string | null } | null = null;
@@ -245,6 +277,70 @@ serve(async (req) => {
 
     console.log("Matched mailbox to user", profile.id);
 
+    // --- Step 3 / Step 4 document requests: match [REF:token] in the subject
+    // back to the request that was sent, so attachments get filed into the
+    // right client's folders instead of the generic documents list. ---
+    const refMatch = subject.match(/\[REF:([0-9a-f]{10,20})\]/i);
+    if (refMatch) {
+      const { data: reqRow } = await supabase
+        .from("wealth_document_requests")
+        .select("*")
+        .eq("reply_token", refMatch[1].toLowerCase())
+        .eq("broker_user_id", profile.id)
+        .maybeSingle();
+
+      if (reqRow) {
+        let meta: ResendAttachmentMeta[] = Array.isArray(email.attachments) ? email.attachments : [];
+        if (emailId && webhookSecret && !meta.some((a) => a.download_url)) {
+          const res = await resendGet(`/emails/receiving/${emailId}/attachments`);
+          if (res.ok) {
+            const list = await res.json();
+            if (Array.isArray(list?.data)) meta = list.data;
+          }
+        }
+
+        const filedIds: string[] = [];
+        for (const [index, att] of meta.entries()) {
+          const name = safeFileName(att.filename || "", index);
+          const contentType = att.content_type || "application/octet-stream";
+          let bytes: Uint8Array;
+          try {
+            if (att.download_url) {
+              const r = await fetch(att.download_url);
+              if (!r.ok) continue;
+              bytes = new Uint8Array(await r.arrayBuffer());
+            } else if (typeof (att as { content?: string }).content === "string") {
+              bytes = base64ToBytes((att as { content: string }).content);
+            } else continue;
+          } catch { continue; }
+          if (bytes.byteLength > MAX_ATTACHMENT_BYTES) continue;
+
+          const kind = await classifyInsurerDocument(reqRow.kind, name, subject, bodyText);
+
+          const path = `${profile.id}/${reqRow.id}/${name}`;
+          const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, bytes, { contentType, upsert: true });
+          if (upErr) { console.error("Insurer attachment upload failed", name, upErr.message); continue; }
+
+          const { data: doc } = await supabase.from("documents").insert({
+            user_id: profile.id, patient_id: reqRow.patient_id, name,
+            content: `Received from ${sender} — ${subject}`,
+            document_kind: kind, request_id: reqRow.id,
+            attachments: [{ name, path, size: bytes.byteLength, contentType }],
+          }).select("id").single();
+          if (doc) filedIds.push(doc.id);
+        }
+
+        await supabase.from("wealth_document_requests").update({ status: "documents_received" }).eq("id", reqRow.id);
+        await supabase.from("notifications").insert({
+          user_id: profile.id, type: "document_received",
+          title: reqRow.kind === "quotes" ? "Quote received" : "Policy documents received",
+          description: `${sender} sent ${filedIds.length} document${filedIds.length === 1 ? "" : "s"} — filed automatically.`,
+        });
+
+        return json({ success: true, matchedRequest: reqRow.id, filed: filedIds.length });
+      }
+    }
+
     // Link the document to the user's own patient record when they have one,
     // so it surfaces in patient-scoped document views too.
     const { data: patientRow } = await supabase
@@ -256,7 +352,6 @@ serve(async (req) => {
       .maybeSingle();
 
     // --- Build document body ---
-    const bodyText = email.text || email.html || "No content";
     const skipped: string[] = [];
 
     const documentContent = [

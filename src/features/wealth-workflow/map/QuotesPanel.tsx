@@ -9,6 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { useRecommendationHistory } from "../hooks";
+import { DocumentRequestComposer } from "./DocumentRequestComposer";
 
 type Viewer = "manager" | "client";
 const db = supabase as any;
@@ -83,16 +84,23 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
 
   switch (label) {
     case "Insurer schedules and claims history":
-      return holdings.length ? (
-        <ul className="space-y-1.5 text-xs">
-          {holdings.map((h) => (
-            <li key={h.id} className="flex justify-between rounded-lg border border-border/60 px-3 py-2">
-              <span>{h.provider}<span className="block text-2xs text-muted-foreground">{h.product} · {h.policy_number ?? "no policy number"}</span></span>
-              <span className="text-right">{R(h.premium)}<span className="block text-2xs capitalize text-muted-foreground">{h.status ?? ""}</span></span>
-            </li>
-          ))}
-        </ul>
-      ) : <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">No policy schedules found yet.</p>;
+      return (
+        <div className="space-y-3">
+          {holdings.length ? (
+            <ul className="space-y-1.5 text-xs">
+              {holdings.map((h) => (
+                <li key={h.id} className="flex justify-between rounded-lg border border-border/60 px-3 py-2">
+                  <span>{h.provider}<span className="block text-2xs text-muted-foreground">{h.product} · {h.policy_number ?? "no policy number"}</span></span>
+                  <span className="text-right">{R(h.premium)}<span className="block text-2xs capitalize text-muted-foreground">{h.status ?? ""}</span></span>
+                </li>
+              ))}
+            </ul>
+          ) : <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">No policy schedules found yet.</p>}
+          {isWM && records?.patientId && (
+            <DocumentRequestComposer kind="schedules_claims" workflowId={workflowId} patientId={records.patientId} clientName={clientFirst} />
+          )}
+        </div>
+      );
     case "Cross-alert check": {
       const cats = holdings.reduce((m: Record<string, number>, h) => { const k = h.category ?? "other"; m[k] = (m[k] ?? 0) + 1; return m; }, {});
       const dup = Object.entries(cats).filter(([, n]) => (n as number) > 1);
@@ -144,6 +152,9 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
                 </Button>
               </div>
             </div>
+            {records?.patientId && (
+              <DocumentRequestComposer kind="quotes" workflowId={workflowId} patientId={records.patientId} clientName={clientFirst} />
+            )}
           </div>
         ) : <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">Quotes are being gathered from insurers.</p>;
       }

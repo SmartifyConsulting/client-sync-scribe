@@ -22,6 +22,8 @@ export interface MapContext {
   meetingScheduled: boolean;
   quotesCount?: number;
   selectedQuotes?: number;
+  schedulesRequested?: boolean;
+  quotesRequested?: boolean;
 }
 
 export interface SubStep {
@@ -79,7 +81,7 @@ export const WORKFLOW_GROUPS: WorkflowGroup[] = [
     stages: ["information_required"],
     steps: [
       { owner: "system", label: "Astute pull: life, disability, investments", done: (c) => past(3)(c) || c.holdingsCount > 0 },
-      { owner: "system", label: "Insurer schedules and claims history" },
+      { owner: "advisor", label: "Insurer schedules and claims history", done: (c) => past(3)(c) || !!c.schedulesRequested },
       { owner: "system", label: "Cross-alert check" },
       { owner: "system", label: "Push profile to CRM" },
     ],
@@ -90,7 +92,7 @@ export const WORKFLOW_GROUPS: WorkflowGroup[] = [
     n: 4, key: "quotes", title: "Quotes & ROA", clientTitle: "Quotes & ROA", icon: FileText,
     stages: ["research_quotes", "recommendation"],
     steps: [
-      { owner: "advisor", label: "Quote 6 insurers, rank top 3", done: (c) => past(4)(c) || (c.quotesCount ?? 0) > 0 || anyRec(c) },
+      { owner: "advisor", label: "Quote 6 insurers, rank top 3", done: (c) => past(4)(c) || !!c.quotesRequested || (c.quotesCount ?? 0) > 0 || anyRec(c) },
       { owner: "advisor", label: "Select options and commentary", done: (c) => past(4)(c) || (c.selectedQuotes ?? 0) > 0 || anyRec(c) },
       { owner: "system", label: "Affordability check", done: (c) => past(4)(c) || (c.selectedQuotes ?? 0) > 0 || anyRec(c) },
       { owner: "system", label: "Generate ROA (versioned)", done: (c) => c.recs.some((r) => !!r.roa_document_id) },

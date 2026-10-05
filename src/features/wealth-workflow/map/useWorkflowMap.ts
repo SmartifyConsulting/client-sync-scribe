@@ -20,7 +20,7 @@ export function useWorkflowRecords(workflowId?: string, patientId?: string) {
     queryKey: ["wealth-map-records", workflowId, patientId],
     enabled: !!workflowId && !!patientId,
     queryFn: async () => {
-      const [apps, comp, tasks, docs, kyc, signed, pat, holdings, fin, sessions, appts, quotes] = await Promise.all([
+      const [apps, comp, tasks, docs, kyc, signed, pat, holdings, fin, sessions, appts, quotes, docRequests] = await Promise.all([
         db.from("wealth_applications").select("*").eq("workflow_id", workflowId).order("created_at", { ascending: false }),
         db.from("wealth_compliance_checks").select("*").eq("workflow_id", workflowId).maybeSingle(),
         db.from("todos").select("id,title,status,due_date,owner_role,workflow_stage,priority")
@@ -34,6 +34,7 @@ export function useWorkflowRecords(workflowId?: string, patientId?: string) {
         db.from("sessions").select("id,title,created_at,transcript,notes,summary").eq("patient_id", patientId).order("created_at", { ascending: false }).limit(10),
         db.from("appointments").select("id,title,start_time").eq("patient_id", patientId).order("start_time", { ascending: false }).limit(5),
         db.from("wealth_quotes").select("*").eq("workflow_id", workflowId).order("rank", { ascending: true, nullsFirst: false }),
+        db.from("wealth_document_requests").select("kind").eq("workflow_id", workflowId),
       ]);
       const p = pat.data;
       return {
@@ -52,6 +53,7 @@ export function useWorkflowRecords(workflowId?: string, patientId?: string) {
         quotes: (quotes.data ?? []) as any[],
         appointments: (appts.data ?? []) as any[],
         sessions: ((sessions.data ?? []) as any[]).map((s) => ({ id: s.id, title: s.title, created_at: s.created_at, hasText: !!(s.transcript || s.notes || s.summary) })),
+        docRequests: (docRequests.data ?? []) as any[],
       };
     },
   });
@@ -84,6 +86,8 @@ export function useWorkflowMap(patientId?: string, viewer: "manager" | "client" 
     quotesCount: rec?.quotes?.length ?? 0,
     selectedQuotes: (rec?.quotes ?? []).filter((q: any) => q.selected).length,
     meetingScheduled: (rec?.appointments?.length ?? 0) > 0 || (rec?.sessions ?? []).some((x: any) => x.hasText),
+    schedulesRequested: (rec?.docRequests ?? []).some((r: any) => r.kind === "schedules_claims"),
+    quotesRequested: (rec?.docRequests ?? []).some((r: any) => r.kind === "quotes"),
   };
 
   const closed = wf?.status === "closed_declined";
