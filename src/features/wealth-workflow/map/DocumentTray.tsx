@@ -39,21 +39,53 @@ export function useClientDocuments(patientId?: string) {
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const textHtml = (title: string, text: string) =>
   `<div id="holarc-document" style="width:794px;padding:48px 56px;background:#fff;font-family:Georgia,serif;color:#111"><h2 style="font-size:18px;margin:0 0 12px">${esc(title)}</h2><div style="white-space:pre-wrap;font-size:12px;line-height:1.6">${esc(text)}</div></div>`;
-const docHtml = (d: Doc) => d.html ?? (d.text ? textHtml(d.title, d.text) : null);
+
+// Speaker-coloured transcript: teal for the Wealth Manager, black for the client.
+const BROKER_COLOR = "#2DB0A6";
+const CLIENT_COLOR = "#111111";
+const transcriptHtml = (title: string, segments: { speaker: string; text: string }[]) => {
+  const body = segments.map((s) => {
+    const isBroker = s.speaker === "broker";
+    return `<p style="margin:0 0 10px;font-size:12px;line-height:1.6"><span style="display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${isBroker ? BROKER_COLOR : CLIENT_COLOR}">${isBroker ? "Wealth Manager" : "Client"}</span><span style="color:${isBroker ? BROKER_COLOR : CLIENT_COLOR}">${esc(s.text)}</span></p>`;
+  }).join("");
+  return `<div id="holarc-document" style="width:794px;padding:48px 56px;background:#fff;font-family:Georgia,serif"><h2 style="font-size:18px;margin:0 0 16px;color:#111">${esc(title)}</h2>${body}</div>`;
+};
+
+/** Best-effort speaker split for a transcript; falls back to a plain (uncoloured) block on failure. */
+async function buildTranscriptHtml(d: Doc): Promise<string> {
+  if (!d.text) return textHtml(d.title, "");
+  const { data, error } = await supabase.functions.invoke("format-transcript", { body: { text: d.text } });
+  if (error || !data?.segments?.length) return textHtml(d.title, d.text);
+  return transcriptHtml(d.title, data.segments);
+}
+
+const docHtml = (d: Doc) => d.html ?? (d.text && d.kind !== "transcript" ? textHtml(d.title, d.text) : null);
 
 export async function downloadDoc(d: Doc) {
+  if (d.kind === "transcript" && d.text) return downloadHtmlAsPdf(await buildTranscriptHtml(d), d.title);
   const html = docHtml(d);
   if (!html) { if (d.url) window.open(d.url, "_blank", "noopener,noreferrer"); return; }
   await downloadHtmlAsPdf(html, d.title);
 }
 
 export function DocPreviewDialog({ doc, onClose }: { doc: Doc | null; onClose: () => void }) {
-  const html = doc ? docHtml(doc) : null;
+  const [transcriptHtmlState, setTranscriptHtmlState] = useState<string | null>(null);
+  useEffect(() => {
+    if (doc?.kind === "transcript" && doc.text) {
+      setTranscriptHtmlState(null);
+      buildTranscriptHtml(doc).then(setTranscriptHtmlState);
+    } else {
+      setTranscriptHtmlState(null);
+    }
+  }, [doc]);
+  const html = doc?.kind === "transcript" ? transcriptHtmlState : doc ? docHtml(doc) : null;
   return (
     <Dialog open={!!doc} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-3xl">
         <DialogHeader><DialogTitle className="text-base">{doc?.title}</DialogTitle></DialogHeader>
-        {doc && html ? (
+        {doc?.kind === "transcript" && !html ? (
+          <p className="py-8 text-center text-sm text-muted-foreground">Formatting transcript…</p>
+        ) : doc && html ? (
           <PdfFromHtml html={html} title={doc.title} />
         ) : doc?.url ? (
           <iframe title={doc.title} src={doc.url} className="h-[70vh] w-full rounded-lg border border-border" />

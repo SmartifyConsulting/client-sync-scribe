@@ -19,7 +19,8 @@ Return ONLY a JSON object with these keys (omit anything not stated; never inven
  "risk_portfolio": {"policies":[{"kind" (one of "Life cover","Disability","Income protection","Severe illness","Short-term (assets)","Funeral"),"insurer","cover","premium"}]},
  "investments": {"holdings":[{"kind" (one of "Retirement annuity","Pension fund","Provident fund","Preservation fund","Tax-free savings","Unit trusts","Endowment","Other"),"provider","value","contribution"}]},
  "goals_risk": {"retirement_age","retirement_income","risk_profile" (one of "Conservative","Moderately conservative","Moderate","Moderately aggressive","Aggressive"),"goals"},
- "estate": {"will_status" (one of "No will","Will in place","Will outdated"),"will_date","executor","trusts"}
+ "estate": {"will_status" (one of "No will","Will in place","Will outdated"),"will_date","executor","trusts"},
+ "general_notes": "Any other comment, context or remark from the meeting that doesn't fit one of the fields above — omit this key entirely if there's nothing like that."
 }
 Monthly figures unless stated otherwise. Keep it concise.`;
 
@@ -75,6 +76,9 @@ Deno.serve(async (req) => {
     const { data: existing } = await admin.from("client_financial_profiles").select("*").eq("patient_id", patientId).maybeSingle();
     const row: Record<string, any> = { patient_id: patientId, updated_by: uid, extracted_at: new Date().toISOString(), extracted_from_session_id: sessionId ?? null };
     for (const k of keys) if (facts[k] && typeof facts[k] === "object") row[k] = { ...(existing?.[k] ?? {}), ...facts[k] };
+    if (typeof facts.general_notes === "string" && facts.general_notes.trim()) {
+      row.general_notes = existing?.general_notes ? `${existing.general_notes}\n\n${facts.general_notes.trim()}` : facts.general_notes.trim();
+    }
     const { error } = await admin.from("client_financial_profiles").upsert(row, { onConflict: "patient_id" });
     if (error) { console.error(error); return json({ error: "Couldn't save the financial information." }, 500); }
     return json({ ok: true, sections: keys.filter((k) => row[k]) });

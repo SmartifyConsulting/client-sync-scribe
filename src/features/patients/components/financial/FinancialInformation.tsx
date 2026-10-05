@@ -15,6 +15,7 @@ type Field = { key: string; label: string; type?: "number" | "text" | "date" | "
 type Col = { key: string; label: string; type?: "number" | "text"; options?: string[] };
 type SectionKey = "cash_flow" | "assets_liabilities" | "risk_portfolio" | "investments" | "goals_risk" | "estate";
 type SectionDef = { key: SectionKey; label: string; fields?: Field[]; list?: { key: string; label: string; cols: Col[] } };
+const GENERAL_NOTES_KEY = "general_notes";
 
 const SECTIONS: SectionDef[] = [
   { key: "cash_flow", label: "General & Cash Flow", fields: [
@@ -101,6 +102,15 @@ export function FinancialInformation({ patientId }: { patientId: string }) {
     qc.invalidateQueries({ queryKey: ["client-financial-profile", patientId] });
   };
 
+  const saveNotes = async () => {
+    setSaving(GENERAL_NOTES_KEY);
+    const { error } = await (supabase as any).from("client_financial_profiles").upsert({ patient_id: patientId, general_notes: data[GENERAL_NOTES_KEY] ?? null }, { onConflict: "patient_id" });
+    setSaving(null);
+    if (error) return toast.error("Couldn't save. You may not have access to this client's record.");
+    toast.success("Saved");
+    qc.invalidateQueries({ queryKey: ["client-financial-profile", patientId] });
+  };
+
   const renderInput = (value: any, onChange: (v: any) => void, f: Field | Col) =>
     f.options ? (
       <Select value={value ?? ""} onValueChange={onChange}>
@@ -178,6 +188,16 @@ export function FinancialInformation({ patientId }: { patientId: string }) {
           </Collapsible>
         );
       })}
+      <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
+        <SectionHeader icon={null} label="General Notes" />
+        <CollapsibleContent className="p-3 space-y-3">
+          <p className="text-xs text-muted-foreground">Meeting commentary that doesn't belong under a specific field above.</p>
+          <Textarea value={data[GENERAL_NOTES_KEY] ?? ""} onChange={(e) => setData((d) => ({ ...d, [GENERAL_NOTES_KEY]: e.target.value }))} rows={5} />
+          <div className="flex justify-end">
+            <Button size="sm" onClick={saveNotes} disabled={saving === GENERAL_NOTES_KEY}>{saving === GENERAL_NOTES_KEY ? "Saving…" : "Save"}</Button>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
     </div>
   );
 }
