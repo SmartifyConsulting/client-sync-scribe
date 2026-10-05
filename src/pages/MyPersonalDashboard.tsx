@@ -30,10 +30,8 @@ import { useProfile } from "@/hooks/useProfile";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { resolvePermissions } from "@/features/patients/lib/careTeamPermissions";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,6 +44,7 @@ import { ClientAISummary } from "@/features/wealth-workflow/client/ClientAISumma
 import { useClientWealth, zar, zarShort } from "@/features/wealth-workflow/client/useClientWealth";
 import { EmotionalHeadline } from "@/components/dashboard/EmotionalHeadline";
 import { PeopleICareFor } from "@/components/dashboard/PeopleICareFor";
+import { NextMeetingWithWM } from "@/components/dashboard/NextMeetingWithWM";
 import {
   derivePatientState,
   EMOTIONAL_HEADLINE,
@@ -200,17 +199,6 @@ export default function MyPersonalDashboard() {
 
   const { data: w } = useClientWealth();
   const t = w?.totals;
-  const comingUp: { title: string; detail: string }[] = [];
-  const nextReview = w?.workflow?.next_review_date || w?.issued.find((a: any) => a.review_date)?.review_date;
-  if (nextReview) comingUp.push({ title: "Annual review", detail: format(new Date(nextReview), "d MMM yyyy") });
-  if (w?.stageLabel) comingUp.push({ title: "Next step", detail: w.stageLabel });
-  const attention: { title: string; detail: string }[] = [];
-  if (w?.patientId) {
-    if (!w.totals.incomeProtection) attention.push({ title: "Review your income protection", detail: "No income protection is captured. Your income is often your biggest asset." });
-    if (!w.beneficiaries.length || w.beneficiaries.some((b) => !b.share)) attention.push({ title: "Beneficiary nomination", detail: "Make sure every beneficiary has a share allocated." });
-    if (w.profile.estate?.will_status && w.profile.estate.will_status !== "Will in place") attention.push({ title: "Your will", detail: `Status: ${w.profile.estate.will_status}. Speak to your Wealth Manager.` });
-    if (w.workflow?.status === "blocked") attention.push({ title: "Something is waiting on you", detail: "Your journey is paused. Check your To Do list." });
-  }
 
   return (
     <div className="container mx-auto p-4 max-w-7xl space-y-4">
@@ -251,73 +239,15 @@ export default function MyPersonalDashboard() {
           </div>
         </Panel>
 
-        <Panel
-          title="What's Happening"
-          icon={CalendarDays}
-          unlocked={unlocked}
-          action={
-            <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs" onClick={() => navigate("/my-future")}>
-              <FolderOpen className="h-3.5 w-3.5" /> My Future
-            </Button>
-          }
-        >
-          <EmotionalHeadline emoji="📅" title="You're in the loop" sub="Nothing important is getting lost." />
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-2xs uppercase tracking-wide text-muted-foreground font-semibold mb-1">Coming up</p>
-              {comingUp.length ? (
-                <ul className="space-y-1">
-                  {comingUp.map((c) => (
-                    <li key={c.title} className="flex items-start gap-1.5">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-lg shrink-0 bg-primary/10">
-                        <CalendarDays className="h-3.5 w-3.5 text-primary" />
-                      </span>
-                      <div className="min-w-0">
-                        <p className="text-xs font-semibold text-foreground">{c.title}</p>
-                        <p className="text-2xs text-muted-foreground">{c.detail}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : <p className="text-xs text-muted-foreground">Nothing scheduled yet.</p>}
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-2xs uppercase tracking-wide text-muted-foreground font-semibold">Today's To Do List</p>
-                <Button size="sm" variant="outline" className="h-6 gap-1 text-2xs px-2" onClick={() => navigate("/patient/tasks")}>
-                  <ListChecks className="h-3 w-3" /> View
-                </Button>
-              </div>
-              {w?.todos.length ? (
-                <ul className="space-y-1">
-                  {w.todos.slice(0, 3).map((td: any) => (
-                    <li key={td.id} className="text-xs">
-                      <p className="font-semibold text-primary truncate">{td.title}</p>
-                      {td.due_date && <p className="text-2xs text-muted-foreground">Due {format(new Date(td.due_date), "d MMM")}</p>}
-                    </li>
-                  ))}
-                </ul>
-              ) : <p className="text-xs text-muted-foreground">Nothing needs your action right now.</p>}
-            </div>
-          </div>
-
+        <Panel title="What's Happening" icon={CalendarDays} unlocked={unlocked}>
+          <EmotionalHeadline
+            emoji="📍"
+            title={w?.stageLabel || "Getting started"}
+            sub="Where your Live Workspace is right now"
+          />
           <div className="mt-4 border-t border-border pt-3">
-            <p className="text-2xs uppercase tracking-wide text-primary font-bold mb-2">Things worth your attention</p>
-            {attention.length ? (
-              <ul className="space-y-1.5">
-                {attention.map((a) => (
-                  <li key={a.title} className="rounded-xl border border-border bg-background/60 p-2">
-                    <p className="text-xs font-semibold text-foreground">{a.title}</p>
-                    <p className="text-2xs text-muted-foreground">{a.detail}</p>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="rounded-xl border border-dashed border-border bg-background/40 p-3 text-center">
-                <p className="text-xs font-semibold text-foreground">All in order</p>
-                <p className="text-2xs text-muted-foreground">We'll let you know when something needs a look.</p>
-              </div>
-            )}
+            <p className="text-2xs uppercase tracking-wide text-muted-foreground font-semibold mb-2">Next meeting</p>
+            <NextMeetingWithWM />
           </div>
         </Panel>
       </div>
@@ -325,12 +255,14 @@ export default function MyPersonalDashboard() {
       {/* My Wealth + My Retirement */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
         <Panel title="My Wealth" icon={WalletIcon} unlocked={unlocked} onClick={() => navigate("/my-future")}>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {[
               { label: "Net worth", value: zar(t?.netWorth ?? 0) },
               { label: "Investments", value: zar(t?.investments ?? 0) },
               { label: "Tax-free savings", value: zar(t?.taxFree ?? 0) },
               { label: "Debt", value: zar(t?.liabilities ?? 0) },
+              { label: "Monthly premiums", value: zar(t?.monthlyPremiums ?? 0) },
+              { label: "Total monthly expense", value: zar(t?.monthlyExpenses ?? 0) },
             ].map((f) => (
               <div key={f.label}>
                 <p className="text-2xs uppercase tracking-wide text-muted-foreground">{f.label}</p>

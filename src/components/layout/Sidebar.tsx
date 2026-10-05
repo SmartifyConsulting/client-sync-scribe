@@ -99,6 +99,7 @@ const DOCTOR_SECTIONS: NavSection[] = [
       { icon: Users2, label: "Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
       { icon: UserPlus, label: "Referrers", labelKey: "nav.referrers", to: "/referrers" },
       { icon: FileText, label: "Quotes", labelKey: "nav.quotesScreen", to: "/quotes-screen" },
+      { icon: DollarSign, label: "Earnings", labelKey: "nav.earnings", to: "/earnings" },
       { icon: History, label: "Activity Log", labelKey: "nav.activityLog", to: "/activity-log" },
     ],
   },

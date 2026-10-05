@@ -30,6 +30,7 @@ export interface ClientWealth {
     severeIllness: number;
     disability: number;
     monthlyPremiums: number;
+    monthlyExpenses: number;
     investments: number;
     retirement: number;
     taxFree: number;
@@ -110,6 +111,7 @@ export function useClientWealth(explicitPatientId?: string) {
           disability: sumKind("Disability"),
           monthlyPremiums:
             policies.reduce((s, p) => s + num(p.premium), 0) + issued.reduce((s, a) => s + num(a.monthly_premium), 0),
+          monthlyExpenses: num(profile.cash_flow?.fixed_expenses) + num(profile.cash_flow?.discretionary_expenses),
           investments: holdings.filter((h) => !RETIREMENT.includes(h.kind)).reduce((s, h) => s + num(h.value), 0),
           retirement: holdings.filter((h) => RETIREMENT.includes(h.kind)).reduce((s, h) => s + num(h.value), 0),
           taxFree: holdings.filter((h) => h.kind === "Tax-free savings").reduce((s, h) => s + num(h.value), 0),
@@ -132,7 +134,7 @@ function emptyWealth(): ClientWealth {
   return {
     patientId: null, clientName: "", profile: {}, policies: [], holdings: [], issued: [], workflow: null, stageLabel: null,
     todos: [], documents: [], claims: [], beneficiaries: [],
-    totals: { lifeCover: 0, incomeProtection: 0, severeIllness: 0, disability: 0, monthlyPremiums: 0, investments: 0, retirement: 0, taxFree: 0, assets: 0, liabilities: 0, netWorth: 0 },
+    totals: { lifeCover: 0, incomeProtection: 0, severeIllness: 0, disability: 0, monthlyPremiums: 0, monthlyExpenses: 0, investments: 0, retirement: 0, taxFree: 0, assets: 0, liabilities: 0, netWorth: 0 },
     goals: {},
   };
 }

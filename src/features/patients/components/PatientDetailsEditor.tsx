@@ -390,10 +390,10 @@ function AnimatedCounter({ target }: { target: number }) {
 }
 
 const SECTION_TABS: Record<string, string[]> = {
-  health: ["overview", "personal", "medical", "history", "claims", "documents", "lifeEvents"],
+  health: ["overview", "personal", "medical", "history", "claims", "documents", "lifeEvents", "logs"],
   admin: ["calendar", "tasks", "programmes"],
   workspace: ["personal", "medical", "claims"],
-  personal: ["personal", "logs"],
+  personal: ["personal"],
   financial: ["medical"],
 };
 
@@ -1616,7 +1616,7 @@ export function PatientDetailsEditor({
           )}
           {show("logs") && (
             <TabsTrigger value="logs" className={triggerClass}>
-              Activity Log
+              History
             </TabsTrigger>
           )}
           {show("documents") && (
@@ -1756,7 +1756,6 @@ export function PatientDetailsEditor({
             {/* === MY HOLARCHY TAB (overview) === */}
             <TabsContent value="overview" className="space-y-4 mt-4">
               <ClientAISummary patientId={patient.id} />
-              <MyAdvisorsHistory patientId={patient.id} />
             </TabsContent>
 
             {/* === PERSONAL / MEDICAL (top-level tabs) === */}
