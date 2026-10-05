@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Users,
   Calendar,
+  MessageCircle,
   Settings2,
   Loader2,
   User,
@@ -94,6 +95,7 @@ const DOCTOR_SECTIONS: NavSection[] = [
       { icon: FileText, label: "Claims", labelKey: "nav.myClaims", to: "/claims" },
       { icon: FolderOpen, label: "Documents", labelKey: "nav.allDocuments", to: "/documents" },
       { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
+      { icon: MessageCircle, label: "Messenger", labelKey: "nav.messenger", to: "/messenger" },
       { icon: ListChecks, label: "My Actions", labelKey: "nav.myTasks", to: "/todos", tour: "doctor-tasks" },
       { icon: Users2, label: "Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
     ],
@@ -124,6 +126,8 @@ const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: Wallet, label: "Financial Information", labelKey: "nav.clientFinancial", to: "/patient/details?section=financial" },
   { icon: ShieldCheck, label: "Claims", labelKey: "nav.clientClaims", to: "/claims" },
   { icon: ClientFolder, label: "Documents", labelKey: "nav.clientDocuments", to: "/patient/documents" },
+  { icon: MessageCircle, label: "Messenger", labelKey: "nav.messenger", to: "/messenger" },
+  { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
   { icon: Activity, label: "My Biolog", labelKey: "nav.myBiolog", to: "/biolog" },
   { icon: BedDouble, label: "My Admissions", labelKey: "nav.myAdmissions", to: "/patient/admissions" },
   { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/patient/rewards" },
@@ -385,11 +389,6 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         {item.label === "Notifications" && unreadCount > 0 && (
           <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-xs font-semibold text-destructive-foreground">
             {unreadCount > 99 ? "99+" : unreadCount}
-          </span>
-        )}
-        {item.label === "Documents" && isPatientMenu && patientDocCount > 0 && (
-          <span data-nav-documents-badge className="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-xs font-semibold text-primary-foreground">
-            {patientDocCount > 99 ? "99+" : patientDocCount}
           </span>
         )}
       </NavLink>

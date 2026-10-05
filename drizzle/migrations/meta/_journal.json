@@ -50,6 +50,13 @@
       "when": 1791158373949,
       "tag": "0006_wealth_audit_log_and_actor_fix",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791160481256,
+      "tag": "0007_wealth_messenger_and_annual_review",
+      "breakpoints": true
     }
   ]
 }

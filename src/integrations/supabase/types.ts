@@ -10613,6 +10613,54 @@ export type Database = {
           },
         ]
       }
+      wealth_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          kind: string
+          patient_id: string
+          read_at: string | null
+          recommendation_id: string | null
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          kind?: string
+          patient_id: string
+          read_at?: string | null
+          recommendation_id?: string | null
+          sender_id?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          patient_id?: string
+          read_at?: string | null
+          recommendation_id?: string | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wealth_messages_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wealth_messages_recommendation_id_fkey"
+            columns: ["recommendation_id"]
+            isOneToOne: false
+            referencedRelation: "wealth_recommendations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wealth_portfolio_holdings: {
         Row: {
           asset_value: number | null
@@ -12253,6 +12301,14 @@ export type Database = {
         Returns: boolean
       }
       wealth_has_doc: { Args: { _kind: string; _wf: string }; Returns: boolean }
+      wealth_is_party: {
+        Args: { _patient: string; _uid: string }
+        Returns: boolean
+      }
+      wealth_messages_mark_read: {
+        Args: { _patient: string }
+        Returns: undefined
+      }
       wealth_onboarding_refresh: {
         Args: { _workflow_id: string }
         Returns: boolean

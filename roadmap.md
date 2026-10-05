@@ -93,3 +93,11 @@
 - [x] Use the Wealth Manager's name instead of "Your Wealth Manager"
 - [x] Documents grouped by Type by default; Type chip before Date
 - [x] Client menu: Live Workspace under My Dashboard; Personal Info, Financial Info, Claims, Documents; no My Profile
+
+## Messenger / ROA negotiation / Annual review (Oct 2026)
+- [x] Messenger on nav (client + WM), audited, append-only, realtime, notifications
+- [x] ROA change conversation (request ⇄ counter ⇄ agree) then WM redraft
+- [x] Step 6 auto-schedules annual review 12 months after issue; Step 7 Annual Review
+- [x] Calendar + notifications back in top bar; Documents nav count removed
+- [x] Clients can read their WM's name (no more "Your Wealth Manager")
+- [ ] Option A/B quoting selector, per-step output cards, legend tick colours

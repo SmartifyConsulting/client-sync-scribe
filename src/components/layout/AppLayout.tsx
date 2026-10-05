@@ -30,7 +30,7 @@ export function AppLayout() {
   // admin role and are visiting an admin route — admins use this layout —
   // or they're on My Dashboard, which is shared across every role and lives
   // in this layout's route group regardless of who's viewing it.
-  const isSharedDashboard = location.pathname === "/my-dashboard" || location.pathname.startsWith("/my-future") || location.pathname.startsWith("/my-workspace") || location.pathname.startsWith("/claims");
+  const isSharedDashboard = location.pathname === "/my-dashboard" || location.pathname.startsWith("/my-future") || location.pathname.startsWith("/my-workspace") || location.pathname.startsWith("/claims") || location.pathname.startsWith("/messenger") || location.pathname.startsWith("/calendar");
   if (!roleLoading && isPatient && !(isAdmin && isAdminRoute) && !isSharedDashboard) {
     return <Navigate to="/patient/details" replace />;
   }
