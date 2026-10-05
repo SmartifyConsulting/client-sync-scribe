@@ -57,6 +57,13 @@
       "when": 1791160481256,
       "tag": "0007_wealth_messenger_and_annual_review",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791160979888,
+      "tag": "0008_wealth_quotes",
+      "breakpoints": true
     }
   ]
 }
