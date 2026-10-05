@@ -31,12 +31,26 @@ export default function JoinInvite() {
   }, [token]);
 
   const accept = async () => {
-    setBusy(true);
+    setBusy(true); setErr(null);
     const { data, error } = await supabase.functions.invoke("wealth-client-invite", { body: { action: "accept", token } });
     setBusy(false);
-    if (error || data?.error) return setErr(data?.error ?? "We couldn't link your account. Please try again.");
+    if (error || data?.error) {
+      let msg: string | undefined = data?.error;
+      try { msg = msg ?? (await (error as any)?.context?.json?.())?.error; } catch { /* ignore */ }
+      return setErr(msg ?? "We couldn't link your account. Please try again.");
+    }
     navigate("/my-workspace", { replace: true });
   };
+
+  // Once a client has signed up or signed in on this page, link them automatically.
+  const [autoTried, setAutoTried] = useState(false);
+  useEffect(() => {
+    if (!autoTried && user && preview && (mode === "signup" ? f.password : f.password) && f.email.trim().toLowerCase() === user.email?.toLowerCase()) {
+      setAutoTried(true);
+      accept();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, preview]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
