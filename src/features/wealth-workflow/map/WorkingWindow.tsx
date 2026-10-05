@@ -83,8 +83,8 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
   const who = ownerLabel(step.owner, viewer, first);
   const status = step.state === "done" ? "Completed" : step.state === "next" ? (mine ? "" : "In progress") : "Upcoming";
   const waitingText = viewer === "client"
-    ? (step.owner === "advisor" ? wm("Your Wealth Manager is working on this. You don't need to do anything yet.") : step.owner === "insurer" ? "Your insurer is working on this. We'll update you here." : "Holarc Wealth is doing this automatically.")
-    : (step.owner === "client" ? `Waiting for ${first}. This updates as soon as they act.` : step.owner === "insurer" ? "Waiting for the insurer." : "Holarc Wealth is doing this automatically.");
+    ? (step.owner === "advisor" ? wm("Your Wealth Manager is working on this. You don't need to do anything yet.") : step.owner === "insurer" ? "Your insurer is working on this. We'll update you here." : "Elysian (Pty) Ltd is doing this automatically.")
+    : (step.owner === "client" ? `Waiting for ${first}. This updates as soon as they act.` : step.owner === "insurer" ? "Waiting for the insurer." : "Elysian (Pty) Ltd is doing this automatically.");
   const isKyc = step.label === "Complete KYC, AML and PEP screening";
   const isSign = step.label === "Sign Disclosure and LOA";
   const isAstute = step.label.startsWith("Astute pull");

@@ -1586,7 +1586,7 @@ export function PatientDetailsEditor({
           )}
           {show("logs") && (
             <TabsTrigger value="logs" className={triggerClass}>
-              Transaction Logs
+              Activity Log
             </TabsTrigger>
           )}
           {show("documents") && (

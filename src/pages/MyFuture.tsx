@@ -1,6 +1,5 @@
 import { useState, lazy, Suspense } from "react";
 import { useSearchParams } from "react-router-dom";
-const PatientDocuments = lazy(() => import("@/pages/patient/PatientDocuments"));
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Loader2, Plus, ShieldCheck, Wallet as WalletIcon, TrendingUp, FileText } from "lucide-react";
@@ -101,7 +100,7 @@ export default function MyFuture() {
     <div className="container mx-auto max-w-5xl p-4 space-y-4">
       <div>
         <h1 className="page-title">My Future</h1>
-        <p className="text-xs text-muted-foreground">Your cover, investments, retirement, claims and documents in one place.</p>
+        <p className="text-xs text-muted-foreground">Your cover, investments, retirement and claims in one place.</p>
       </div>
 
       <Tabs value={tab} onValueChange={(v) => setParams({ tab: v }, { replace: true })}>
@@ -110,7 +109,6 @@ export default function MyFuture() {
           <TabsTrigger value="investments" className="tab-brand whitespace-nowrap text-xs px-3 py-1.5">My Investments</TabsTrigger>
           <TabsTrigger value="retirement" className="tab-brand whitespace-nowrap text-xs px-3 py-1.5">Retirement</TabsTrigger>
           <TabsTrigger value="claims" className="tab-brand whitespace-nowrap text-xs px-3 py-1.5">Claims</TabsTrigger>
-          <TabsTrigger value="documents" className="tab-brand whitespace-nowrap text-xs px-3 py-1.5">Documents</TabsTrigger>
         </TabsList>
 
         <TabsContent value="cover" className="space-y-4">
@@ -202,12 +200,6 @@ export default function MyFuture() {
               </ul>
             ) : <Empty text="You haven't logged any claims." />}
           </Frame>
-        </TabsContent>
-
-        <TabsContent value="documents" className="mt-4">
-          <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-            <PatientDocuments hideHeader />
-          </Suspense>
         </TabsContent>
       </Tabs>
     </div>
