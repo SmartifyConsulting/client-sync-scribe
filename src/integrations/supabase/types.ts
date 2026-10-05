@@ -2073,6 +2073,7 @@ export type Database = {
           estate: Json
           extracted_at: string | null
           extracted_from_session_id: string | null
+          general_notes: string | null
           goals_risk: Json
           investments: Json
           patient_id: string
@@ -2091,6 +2092,7 @@ export type Database = {
           estate?: Json
           extracted_at?: string | null
           extracted_from_session_id?: string | null
+          general_notes?: string | null
           goals_risk?: Json
           investments?: Json
           patient_id: string
@@ -2109,6 +2111,7 @@ export type Database = {
           estate?: Json
           extracted_at?: string | null
           extracted_from_session_id?: string | null
+          general_notes?: string | null
           goals_risk?: Json
           investments?: Json
           patient_id?: string
@@ -7670,6 +7673,7 @@ export type Database = {
           allergies: string | null
           allergies_structured: Json | null
           blood_type: string | null
+          business_name: string | null
           chronic_medications: string | null
           claims_email: string | null
           conditions_diagnoses: Json | null
@@ -7685,17 +7689,20 @@ export type Database = {
           emergency_contact_relationship: string | null
           emergency_contacts: Json | null
           employer: string | null
+          employer_years: string | null
           family_history: Json | null
           first_name: string | null
           gender: string | null
           general_practitioner: string | null
           height_cm: number | null
+          highest_education: string | null
           id: string
           id_passport_number: string | null
           industry: string | null
           is_chronic: boolean | null
           is_sample: boolean
           last_name: string | null
+          maiden_name: string | null
           marital_regime: string | null
           marital_status: string | null
           medical_aid: string | null
@@ -7724,10 +7731,16 @@ export type Database = {
           preferred_language: string | null
           primary_member: string | null
           referred_by: string | null
+          religion: string | null
           reporting_to_email: string | null
           same_as_physical: boolean | null
+          self_employed: string | null
+          smoker: string | null
+          smoker_quantity: string | null
           status: string
           surgeries: Json | null
+          tax_reference_number: string | null
+          title: string | null
           updated_at: string
           user_id: string
           weight_kg: number | null
@@ -7737,6 +7750,7 @@ export type Database = {
           allergies?: string | null
           allergies_structured?: Json | null
           blood_type?: string | null
+          business_name?: string | null
           chronic_medications?: string | null
           claims_email?: string | null
           conditions_diagnoses?: Json | null
@@ -7752,17 +7766,20 @@ export type Database = {
           emergency_contact_relationship?: string | null
           emergency_contacts?: Json | null
           employer?: string | null
+          employer_years?: string | null
           family_history?: Json | null
           first_name?: string | null
           gender?: string | null
           general_practitioner?: string | null
           height_cm?: number | null
+          highest_education?: string | null
           id?: string
           id_passport_number?: string | null
           industry?: string | null
           is_chronic?: boolean | null
           is_sample?: boolean
           last_name?: string | null
+          maiden_name?: string | null
           marital_regime?: string | null
           marital_status?: string | null
           medical_aid?: string | null
@@ -7791,10 +7808,16 @@ export type Database = {
           preferred_language?: string | null
           primary_member?: string | null
           referred_by?: string | null
+          religion?: string | null
           reporting_to_email?: string | null
           same_as_physical?: boolean | null
+          self_employed?: string | null
+          smoker?: string | null
+          smoker_quantity?: string | null
           status?: string
           surgeries?: Json | null
+          tax_reference_number?: string | null
+          title?: string | null
           updated_at?: string
           user_id: string
           weight_kg?: number | null
@@ -7804,6 +7827,7 @@ export type Database = {
           allergies?: string | null
           allergies_structured?: Json | null
           blood_type?: string | null
+          business_name?: string | null
           chronic_medications?: string | null
           claims_email?: string | null
           conditions_diagnoses?: Json | null
@@ -7819,17 +7843,20 @@ export type Database = {
           emergency_contact_relationship?: string | null
           emergency_contacts?: Json | null
           employer?: string | null
+          employer_years?: string | null
           family_history?: Json | null
           first_name?: string | null
           gender?: string | null
           general_practitioner?: string | null
           height_cm?: number | null
+          highest_education?: string | null
           id?: string
           id_passport_number?: string | null
           industry?: string | null
           is_chronic?: boolean | null
           is_sample?: boolean
           last_name?: string | null
+          maiden_name?: string | null
           marital_regime?: string | null
           marital_status?: string | null
           medical_aid?: string | null
@@ -7858,10 +7885,16 @@ export type Database = {
           preferred_language?: string | null
           primary_member?: string | null
           referred_by?: string | null
+          religion?: string | null
           reporting_to_email?: string | null
           same_as_physical?: boolean | null
+          self_employed?: string | null
+          smoker?: string | null
+          smoker_quantity?: string | null
           status?: string
           surgeries?: Json | null
+          tax_reference_number?: string | null
+          title?: string | null
           updated_at?: string
           user_id?: string
           weight_kg?: number | null
@@ -10515,6 +10548,7 @@ export type Database = {
           created_at: string
           declarations_completed_at: string | null
           declarations_status: string
+          health_disclosure_status: string
           id: string
           kyc_fica_completed_at: string | null
           kyc_fica_status: string
@@ -10528,6 +10562,7 @@ export type Database = {
           created_at?: string
           declarations_completed_at?: string | null
           declarations_status?: string
+          health_disclosure_status?: string
           id?: string
           kyc_fica_completed_at?: string | null
           kyc_fica_status?: string
@@ -10541,6 +10576,7 @@ export type Database = {
           created_at?: string
           declarations_completed_at?: string | null
           declarations_status?: string
+          health_disclosure_status?: string
           id?: string
           kyc_fica_completed_at?: string | null
           kyc_fica_status?: string
@@ -11082,6 +11118,48 @@ export type Database = {
           updated_at?: string
           user_id?: string
           year?: number
+        }
+        Relationships: []
+      }
+      wealth_team_invites: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          full_name: string
+          id: string
+          owner_user_id: string
+          role: Database["public"]["Enums"]["user_role"]
+          status: string
+          token_hash: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          full_name: string
+          id?: string
+          owner_user_id: string
+          role: Database["public"]["Enums"]["user_role"]
+          status?: string
+          token_hash: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          full_name?: string
+          id?: string
+          owner_user_id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          status?: string
+          token_hash?: string
         }
         Relationships: []
       }
@@ -12440,6 +12518,8 @@ export type Database = {
         | "pharmacy_staff"
         | "nurse"
         | "insurer_staff"
+        | "referral_agent"
+        | "fsp"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -12598,6 +12678,8 @@ export const Constants = {
         "pharmacy_staff",
         "nurse",
         "insurer_staff",
+        "referral_agent",
+        "fsp",
       ],
     },
   },
