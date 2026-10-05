@@ -37,6 +37,10 @@ import Connections from "./pages/Connections";
 import Auth from "./pages/Auth";
 import JoinInvite from "./pages/JoinInvite";
 import JoinTeamInvite from "./pages/JoinTeamInvite";
+import ReferrerSignup from "./pages/ReferrerSignup";
+import ReferrerDashboard from "./pages/referrer/ReferrerDashboard";
+import ReferrerCommissions from "./pages/referrer/ReferrerCommissions";
+import BrokerReferrers from "./pages/broker/Referrers";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
@@ -150,7 +154,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function RoleBasedRedirect() {
-  const { isPatient, isEmergency, isNurse, hasDoctorRole, hasPatientRole, loading } = useUserRole();
+  const { isPatient, isEmergency, isNurse, isReferralAgent, hasDoctorRole, hasPatientRole, loading } = useUserRole();
   const { providerType, loading: providerLoading } = useProviderAccess();
   const { isAdmin, isLoading: adminLoading } = useIsAdmin();
 
@@ -182,6 +186,10 @@ function RoleBasedRedirect() {
 
   if (hasDoctorRole) {
     return <Navigate to="/doctor-dashboard" replace />;
+  }
+
+  if (isReferralAgent) {
+    return <Navigate to="/referrer-dashboard" replace />;
   }
 
   return <Navigate to="/my-dashboard" replace />;
@@ -221,6 +229,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/join/:token" element={<JoinInvite />} />
           <Route path="/join-team/:token" element={<JoinTeamInvite />} />
+          <Route path="/referrer-signup" element={<ReferrerSignup />} />
           <Route path="/login" element={<Auth />} />
           <Route path="/signup" element={<Auth />} />
           <Route path="/onboarding" element={<Auth />} />
@@ -315,6 +324,9 @@ const App = () => (
             <Route path="/expiring-recordings" element={<ExpiringRecordings />} />
             <Route path="/connections" element={<Connections />} />
             <Route path="/activity-log" element={<ActivityLog />} />
+            <Route path="/referrer-dashboard" element={<ReferrerDashboard />} />
+            <Route path="/referrer-commissions" element={<ReferrerCommissions />} />
+            <Route path="/referrers" element={<BrokerReferrers />} />
             
             {/* Admin routes */}
             <Route path="/admin" element={<Admin />} />

@@ -15,6 +15,7 @@ import {
   User,
   LucideIcon,
   DollarSign,
+  UserPlus,
   Gift,
   UserCog,
   FolderOpen,
@@ -96,6 +97,7 @@ const DOCTOR_SECTIONS: NavSection[] = [
       { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
       { icon: ListChecks, label: "My Actions", labelKey: "nav.myTasks", to: "/todos", tour: "doctor-tasks" },
       { icon: Users2, label: "Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
+      { icon: UserPlus, label: "Referrers", labelKey: "nav.referrers", to: "/referrers" },
       { icon: History, label: "Activity Log", labelKey: "nav.activityLog", to: "/activity-log" },
     ],
   },
@@ -155,6 +157,12 @@ const NURSE_BOTTOM_ITEMS: (NavItem & { tour?: string })[] = [
 const nurseNavItems: (NavItem & { tour?: string })[] = [
   ...NURSE_SECTIONS.flatMap((s) => s.items),
   ...NURSE_BOTTOM_ITEMS,
+];
+
+/** Referral Agents only need their own referral pipeline and earnings. */
+const referrerNavItems: (NavItem & { tour?: string })[] = [
+  { icon: UserPlus, label: "My Referrals", labelKey: "nav.myReferrals", to: "/referrer-dashboard" },
+  { icon: DollarSign, label: "Brokers & Commission", labelKey: "nav.referrerCommissions", to: "/referrer-commissions" },
 ];
 
 /** Extra tools for a Practice Management Assistant, appended to their own menu. */
@@ -253,7 +261,8 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     nurseInPatientMode ||
     (!isDoctor && !isNurse && (isPatient || routeSaysPatient));
 
-  const isDoctorMenu = !isOnAdminRoute && !isPatientMenu && !isNurseMenu && !(isAdmin && isOnAdminRoute);
+  const isReferrerMenu = role === "referral_agent";
+  const isDoctorMenu = !isOnAdminRoute && !isPatientMenu && !isNurseMenu && !isReferrerMenu && !(isAdmin && isOnAdminRoute);
 
   /** Doctors only see "My Shifts" once they're attached to a hospital. */
   const hideMyShift = isDoctorMenu && (affiliationLoading || !hasHospitalAffiliation);
@@ -275,6 +284,8 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     ? adminNavItems.filter((i) => !isWealthHidden(i.to))
     : isNurseMenu
       ? withShiftRule(nurseNavItems)
+      : isReferrerMenu
+      ? referrerNavItems
       : isPatientMenu
       ? withShiftRule(patientNavItems).filter((i) => !CLIENT_BLOCKED_PATHS.includes(i.to))
       : doctorItems;

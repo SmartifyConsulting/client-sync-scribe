@@ -12,6 +12,7 @@ import { DoctorAccessRequests } from "@/components/doctor/DoctorAccessRequests";
 import { DoctorRoundTables } from "@/components/doctor/DoctorRoundTables";
 import { useProfile } from "@/hooks/useProfile";
 import { ProfileCompletionBanner } from "@/components/profile/ProfileCompletionBanner";
+import { ReferralPipeline } from "@/components/dashboard/ReferralPipeline";
 
 
 import { useUserRole } from "@/hooks/useUserRole";
@@ -378,6 +379,7 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="lg:col-span-2 space-y-6">
+          {isDoctor && <ReferralPipeline />}
           {isDoctor && <WealthRoleOverview />}
           {isDoctor && <CompactTodoList />}
           {isDoctor && (

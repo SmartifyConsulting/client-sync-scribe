@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
-export type UserRole = 'doctor' | 'patient' | 'admin' | 'emergency' | 'nurse' | null;
+export type UserRole = 'doctor' | 'patient' | 'admin' | 'emergency' | 'nurse' | 'referral_agent' | 'fsp' | null;
 type ResolvedRole = Exclude<UserRole, null>;
-type RawRole = 'doctor' | 'patient' | 'admin' | 'hospital_staff' | 'ambulance_staff' | 'blood_bank' | 'nurse';
+type RawRole = 'doctor' | 'patient' | 'admin' | 'hospital_staff' | 'ambulance_staff' | 'blood_bank' | 'nurse' | 'referral_agent' | 'fsp';
 const EMERGENCY_RAW: RawRole[] = ['hospital_staff', 'ambulance_staff', 'blood_bank'];
 
 // Module-level cache so navigating across layout groups (which remounts the
@@ -79,7 +79,7 @@ export function useUserRole() {
         const profileRole = profileData?.role as ResolvedRole | undefined;
         if (profileRole) normalized.push(profileRole);
         for (const r of rawRoles) {
-          if (r === 'doctor' || r === 'patient' || r === 'admin' || r === 'nurse') {
+          if (r === 'doctor' || r === 'patient' || r === 'admin' || r === 'nurse' || r === 'referral_agent' || r === 'fsp') {
             if (!normalized.includes(r)) normalized.push(r);
           }
         }
@@ -100,7 +100,11 @@ export function useUserRole() {
                 ? 'emergency'
                 : normalized.includes('admin')
                   ? 'admin'
-                  : null);
+                  : normalized.includes('referral_agent')
+                    ? 'referral_agent'
+                    : normalized.includes('fsp')
+                      ? 'fsp'
+                      : null);
 
         roleCache.set(user.id, { role: effectiveRole, availableRoles: normalized });
         setAvailableRoles(normalized);
@@ -126,6 +130,8 @@ export function useUserRole() {
     isPatient: role === 'patient',
     isEmergency: role === 'emergency',
     isNurse: role === 'nurse',
+    isReferralAgent: role === 'referral_agent',
+    isFsp: role === 'fsp',
     hasNurseRole: availableRoles.includes('nurse'),
     isAdmin: availableRoles.includes('admin'),
     hasDoctorRole: availableRoles.includes('doctor'),
