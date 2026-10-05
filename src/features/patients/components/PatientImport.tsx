@@ -281,7 +281,7 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
         setParsedPatients(data.patients);
         toast({
           title: "AI Processing Complete",
-          description: `Found ${data.patients.length} patient${data.patients.length === 1 ? "" : "s"} to import`,
+          description: `Found ${data.patients.length} client${data.patients.length === 1 ? "" : "s"} to import`,
         });
       } else {
         toast({
@@ -414,7 +414,7 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
         setParsedPatients(patients);
         toast({
           title: "File processed",
-          description: `Found ${patients.length} patient${patients.length === 1 ? "" : "s"} to import`,
+          description: `Found ${patients.length} client${patients.length === 1 ? "" : "s"} to import`,
         });
       }
     } catch (error) {
@@ -532,7 +532,7 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
     if (successCount > 0) {
       toast({
         title: "Import completed",
-        description: `Successfully imported ${successCount} patient${successCount === 1 ? "" : "s"}${failedCount > 0 ? `. ${failedCount} failed.` : ""}`,
+        description: `Successfully imported ${successCount} client${successCount === 1 ? "" : "s"}${failedCount > 0 ? `. ${failedCount} failed.` : ""}`,
       });
       onImportComplete?.();
     } else {
@@ -621,7 +621,7 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-primary" />
               <p className="text-sm font-medium text-foreground">
-                Preview ({parsedPatients.length} patient{parsedPatients.length === 1 ? "" : "s"})
+                Preview ({parsedPatients.length} client{parsedPatients.length === 1 ? "" : "s"})
               </p>
             </div>
             <Button variant="ghost" size="sm" onClick={clearData}>
@@ -692,7 +692,7 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
               ) : (
                 <Check className="h-4 w-4" />
               )}
-              {isImporting ? "Importing..." : "Import Patients"}
+              {isImporting ? "Importing..." : "Import Clients"}
             </Button>
             <Button variant="outline" onClick={clearData} disabled={isImporting}>
               Cancel
@@ -709,7 +709,7 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
             <div>
               <p className="font-medium text-foreground">Import Complete</p>
               <p className="text-sm text-muted-foreground">
-                {importResults.success} patient{importResults.success === 1 ? "" : "s"} imported successfully
+                {importResults.success} client{importResults.success === 1 ? "" : "s"} imported successfully
                 {importResults.failed > 0 && (
                   <span className="text-destructive"> · {importResults.failed} failed</span>
                 )}
@@ -717,7 +717,7 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
             </div>
           </div>
           <Button variant="outline" onClick={clearData}>
-            Import More Patients
+            Import More Clients
           </Button>
         </div>
       )}
@@ -773,10 +773,10 @@ export function PatientImportDialog({ trigger, onImportComplete }: PatientImport
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            Import Patients
+            Import Clients
           </DialogTitle>
           <DialogDescription>
-            Import patients from spreadsheets or text notes using AI-powered field detection
+            Import clients from spreadsheets or text notes using AI-powered field detection
           </DialogDescription>
         </DialogHeader>
         <PatientImport onImportComplete={handleComplete} />
