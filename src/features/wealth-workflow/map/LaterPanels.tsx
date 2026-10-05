@@ -39,8 +39,8 @@ function DocsLink({ viewer, onOpenDocuments, label = "Open documents" }: { viewe
   );
 }
 
-export function LaterStepPanel({ label, viewer, workflowId, records, clientFirst, onOpenDocuments }: {
-  label: string; viewer: Viewer; workflowId: string; records: any; clientFirst: string; onOpenDocuments?: () => void;
+export function LaterStepPanel({ label, viewer, workflowId, records, clientFirst, clientFullName, onOpenDocuments }: {
+  label: string; viewer: Viewer; workflowId: string; records: any; clientFirst: string; clientFullName?: string; onOpenDocuments?: () => void;
 }) {
   const { data: recs = [] } = useRecommendationHistory(workflowId);
   const present = usePresentRecommendation();
@@ -57,7 +57,7 @@ export function LaterStepPanel({ label, viewer, workflowId, records, clientFirst
     enabled: !!current?.roa_document_id,
     queryFn: async () => (await (supabase as any).from("documents").select("content, created_at").eq("id", current!.roa_document_id).maybeSingle()).data,
   });
-  const clientName = records?.clientName || clientFirst;
+  const clientName = clientFullName || clientFirst;
   const RoaCard = current?.roa_document_id && roaDoc ? (
     <DocCard workflowId={workflowId} viewer={viewer} clientName={clientName} signable={false}
       status={current.status === "accepted" ? `Accepted ${fmt(current.decided_at)} · filed in Documents` : `Version ${current.version} · filed in Documents`}

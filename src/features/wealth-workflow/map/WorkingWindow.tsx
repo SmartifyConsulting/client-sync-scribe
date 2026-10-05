@@ -175,26 +175,13 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
             </a>
           )}
           {isPersonal && reached && <PersonalInfoPanel patientId={records?.patientId} personal={records?.personal} />}
-          {isLater && reached && <LaterStepPanel label={step.label} viewer={viewer} workflowId={workflowId} records={records} clientFirst={first} onOpenDocuments={onOpenDocuments} />}
+          {isLater && reached && <LaterStepPanel label={step.label} viewer={viewer} workflowId={workflowId} records={records} clientFirst={first} clientFullName={clientName} onOpenDocuments={onOpenDocuments} />}
           {isSchedule && reached && <ScheduleMeetingPanel appointments={records?.appointments ?? []} viewer={viewer} />}
           {isCapture && reached && (
             <CaptureFinancialsPanel patientId={records?.patientId} sessions={records?.sessions ?? []} financials={records?.financials} viewer={viewer} clientFirst={first} />
           )}
           {isVerify && reached && (
             <VerifyFinancialsPanel patientId={records?.patientId} financials={records?.financials} viewer={viewer} clientFirst={first} />
-          )}
-
-          {!custom && (
-            <Row title="Documents">
-              {documents.length ? (
-                <ul className="mt-1 space-y-1">{documents.slice(0, 4).map((d) => <li key={d.id} className="truncate">{d.name}</li>)}</ul>
-              ) : <span className="text-muted-foreground">No documents yet</span>}
-              {onOpenDocuments && (
-                <button onClick={onOpenDocuments} className="mt-1 flex items-center gap-1 text-xs font-medium text-primary hover:underline">
-                  <FolderOpen className="h-3.5 w-3.5" /> Open documents
-                </button>
-              )}
-            </Row>
           )}
 
           {mine && step.state === "next" && t?.action && !custom && (
