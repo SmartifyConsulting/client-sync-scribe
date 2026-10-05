@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { SectionHeader, FIELD_GRID_2_CLASS } from "../sectionStyles";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Plus, Trash2, Wallet, Landmark, ShieldCheck, TrendingUp, Target, ScrollText, Car, StickyNote, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DocumentUploadList } from "./DocumentUploadList";
 
 type Field = { key: string; label: string; type?: "number" | "text" | "date" | "textarea"; options?: string[]; placeholder?: string };
 type Col = { key: string; label: string; type?: "number" | "text"; options?: string[]; placeholder?: string };
@@ -32,7 +34,7 @@ const SECTIONS: SectionDef[] = [
     { key: "value", label: "Value / balance (R)", type: "number" },
   ] } },
   { key: "risk_portfolio", label: "Existing Risk Portfolio", icon: ShieldCheck, list: { key: "policies", label: "Policy", cols: [
-    { key: "kind", label: "Cover type", options: ["Life cover", "Disability", "Income protection", "Severe illness", "Short-term (assets)", "Funeral"] },
+    { key: "kind", label: "Cover type", options: ["Life cover", "Disability", "Income protection", "Severe illness", "Short Term Insurance", "Funeral"] },
     { key: "insurer", label: "Insurer", placeholder: "e.g. Sanlam" },
     { key: "cover", label: "Cover amount (R)", type: "number" },
     { key: "premium", label: "Monthly premium (R)", type: "number" },
@@ -77,6 +79,7 @@ export function estateDuty(netEstate: number) {
 }
 
 export function FinancialInformation({ patientId }: { patientId: string }) {
+  const { user } = useAuth();
   const qc = useQueryClient();
   const q = useQuery({
     queryKey: ["client-financial-profile", patientId],
@@ -116,6 +119,17 @@ export function FinancialInformation({ patientId }: { patientId: string }) {
     return { surplus, assets, liabs, net, duty: estateDuty(net) };
   }, [data]);
 
+  const logChange = async (sectionLabel: string) => {
+    if (!user) return;
+    await supabase.from("wealth_audit_log").insert({
+      patient_id: patientId,
+      actor_user_id: user.id,
+      action: `Financial information updated — ${sectionLabel}`,
+      record_type: "client_financial_profiles",
+      record_id: patientId,
+    } as any);
+  };
+
   const save = async (k: SectionKey) => {
     setSaving(k);
     const { error } = await (supabase as any).from("client_financial_profiles").upsert({ patient_id: patientId, [k]: sec(k) }, { onConflict: "patient_id" });
@@ -123,6 +137,7 @@ export function FinancialInformation({ patientId }: { patientId: string }) {
     if (error) return toast.error("Couldn't save. You may not have access to this client's record.");
     toast.success("Saved");
     qc.invalidateQueries({ queryKey: ["client-financial-profile", patientId] });
+    await logChange(SECTIONS.find((s) => s.key === k)?.label ?? k);
   };
 
   const saveNotes = async () => {
@@ -132,6 +147,7 @@ export function FinancialInformation({ patientId }: { patientId: string }) {
     if (error) return toast.error("Couldn't save. You may not have access to this client's record.");
     toast.success("Saved");
     qc.invalidateQueries({ queryKey: ["client-financial-profile", patientId] });
+    await logChange("General Notes");
   };
 
   const renderInput = (value: any, onChange: (v: any) => void, f: Field | Col) =>
@@ -157,8 +173,8 @@ export function FinancialInformation({ patientId }: { patientId: string }) {
   );
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-4 py-2.5 text-sm">
+    <div className="space-y-2">
+      <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm">
         <span className="font-medium text-foreground">Needs Analysis progress</span>
         <span className="text-muted-foreground">{completedSections} of {SECTIONS.length} sections started</span>
       </div>
@@ -169,7 +185,7 @@ export function FinancialInformation({ patientId }: { patientId: string }) {
         return (
           <Collapsible key={s.key} defaultOpen={false} className="bg-card overflow-hidden">
             <SectionHeader icon={s.icon} label={s.label} extra={<ProgressPill filled={p.filled} total={p.total} />} />
-            <CollapsibleContent className="p-3 space-y-3">
+            <CollapsibleContent className="p-2 space-y-2">
               {s.fields && (
                 <div className={FIELD_GRID_2_CLASS}>
                   {s.fields.map((f) => (
@@ -180,7 +196,7 @@ export function FinancialInformation({ patientId }: { patientId: string }) {
                   ))}
                 </div>
               )}
-              {s.list && (
+              {s.list && s.key !== "assets_liabilities" && (
                 <div className="space-y-2">
                   {(v[s.list.key] ?? []).map((row: any, i: number) => (
                     <div key={i} className="grid gap-2 sm:grid-cols-[repeat(auto-fit,minmax(140px,1fr))_auto] items-end rounded-xl border border-border p-2">
@@ -204,6 +220,46 @@ export function FinancialInformation({ patientId }: { patientId: string }) {
                 </div>
               )}
 
+              {s.list && s.key === "assets_liabilities" && (() => {
+                const rows: any[] = v[s.list!.key] ?? [];
+                const allIdx = rows.map((_, i) => i);
+                const assetIdx = allIdx.filter((i) => !LIAB.includes(rows[i]?.kind));
+                const liabIdx = allIdx.filter((i) => LIAB.includes(rows[i]?.kind));
+                const updateRow = (i: number, c: string, nv: any) => {
+                  const next = [...rows]; next[i] = { ...next[i], [c]: nv }; set(s.key, { ...v, [s.list!.key]: next });
+                };
+                const removeRow = (i: number) => {
+                  const next = [...rows]; next.splice(i, 1); set(s.key, { ...v, [s.list!.key]: next });
+                };
+                const addRow = (defaultKind: string) => set(s.key, { ...v, [s.list!.key]: [...rows, { kind: defaultKind }] });
+                const group = (label: string, idxs: number[], defaultKind: string) => (
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{label}</p>
+                    {idxs.length === 0 && <p className="text-xs text-muted-foreground">None captured yet.</p>}
+                    {idxs.map((i) => (
+                      <div key={i} className="grid gap-2 sm:grid-cols-[repeat(auto-fit,minmax(140px,1fr))_auto] items-end rounded-xl border border-border p-2">
+                        {s.list!.cols.map((c) => (
+                          <div key={c.key} className="space-y-1">
+                            <Label className="text-xs">{c.label}</Label>
+                            {renderInput(rows[i][c.key], (nv) => updateRow(i, c.key, nv), c)}
+                          </div>
+                        ))}
+                        <Button variant="ghost" size="icon" aria-label="Remove" onClick={() => removeRow(i)}><Trash2 className="h-4 w-4" /></Button>
+                      </div>
+                    ))}
+                    <Button variant="outline" size="sm" onClick={() => addRow(defaultKind)}>
+                      <Plus className="h-4 w-4 mr-1" />Add {label.slice(0, -1).toLowerCase()}
+                    </Button>
+                  </div>
+                );
+                return (
+                  <div className="space-y-4">
+                    {group("Assets", assetIdx, "Other asset")}
+                    {group("Liabilities", liabIdx, "Other debt")}
+                  </div>
+                );
+              })()}
+
               {s.key === "cash_flow" && <p className="text-sm">Monthly surplus: <strong className={summary.surplus < 0 ? "text-destructive" : "text-primary-dark"}>{zar(summary.surplus)}</strong></p>}
               {s.key === "assets_liabilities" && (
                 <p className="text-sm">Assets {zar(summary.assets)} · Liabilities {zar(summary.liabs)} · <strong className="text-primary-dark">Net worth (incl. investments) {zar(summary.net)}</strong></p>
@@ -217,8 +273,14 @@ export function FinancialInformation({ patientId }: { patientId: string }) {
                 </div>
               )}
               {s.key === "estate" && (
-                <p className="text-sm">Estimated estate duty: <strong className="text-primary-dark">{zar(summary.duty)}</strong>
-                  <span className="block text-xs text-muted-foreground">Guide only: 20% on the net estate above R3.5m and 25% above R30m. Excludes executor fees, CGT and spousal deductions.</span></p>
+                <>
+                  <p className="text-sm">Estimated estate duty: <strong className="text-primary-dark">{zar(summary.duty)}</strong>
+                    <span className="block text-xs text-muted-foreground">Guide only: 20% on the net estate above R3.5m and 25% above R30m. Excludes executor fees, CGT and spousal deductions.</span></p>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Last Will and Testament</Label>
+                    <DocumentUploadList patientId={patientId} documentKind="Will" addLabel="Upload will" />
+                  </div>
+                </>
               )}
               <div className="flex justify-end">
                 <Button size="sm" onClick={() => save(s.key)} disabled={saving === s.key}>{saving === s.key ? "Saving…" : "Save"}</Button>
@@ -229,7 +291,7 @@ export function FinancialInformation({ patientId }: { patientId: string }) {
       })}
       <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
         <SectionHeader icon={StickyNote} label="General Notes" />
-        <CollapsibleContent className="p-3 space-y-3">
+        <CollapsibleContent className="p-2 space-y-2">
           <p className="text-xs text-muted-foreground">Meeting commentary that doesn't belong under a specific field above.</p>
           <Textarea value={data[GENERAL_NOTES_KEY] ?? ""} onChange={(e) => setData((d) => ({ ...d, [GENERAL_NOTES_KEY]: e.target.value }))} rows={5} />
           <div className="flex justify-end">

@@ -70,6 +70,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FinancialInformation } from "./financial/FinancialInformation";
+import { DocumentUploadList } from "./financial/DocumentUploadList";
 import { PreferredHospitals, type PreferredHospital } from "./PreferredHospitals";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -389,7 +390,7 @@ function AnimatedCounter({ target }: { target: number }) {
 }
 
 const SECTION_TABS: Record<string, string[]> = {
-  health: ["overview", "personal", "medical", "history", "claims", "documents", "lifeEvents", "logs"],
+  health: ["overview", "personal", "medical", "healthrecords", "history", "claims", "documents", "lifeEvents", "logs"],
   admin: ["calendar", "tasks", "programmes"],
   workspace: ["personal", "medical", "claims"],
   personal: ["personal"],
@@ -902,11 +903,20 @@ export function PatientDetailsEditor({
       } as any);
       // Sync chronic meds → prescriptions so they appear under Rewards
       await syncChronicMedsToPrescriptions(currentMedications);
+      if (userId) {
+        await supabase.from("wealth_audit_log").insert({
+          patient_id: patient.id,
+          actor_user_id: userId,
+          action: "Personal information updated",
+          record_type: "patients",
+          record_id: patient.id,
+        } as any);
+      }
       setSaving(false);
       setHasChanges(false);
       setLastSavedAt(Date.now());
     },
-    [onSave, pharmacies, familyHistory, organDonorOrgans, nokMembers, currentMedications, conditionsDiagnoses, allergiesStructured, syncChronicMedsToPrescriptions, patient?.id, toast],
+    [onSave, pharmacies, familyHistory, organDonorOrgans, nokMembers, currentMedications, conditionsDiagnoses, allergiesStructured, syncChronicMedsToPrescriptions, patient?.id, toast, userId],
   );
 
   useEffect(() => {
@@ -1603,6 +1613,11 @@ export function PatientDetailsEditor({
               {t("patientProfile.toggleMedical")}
             </TabsTrigger>
           )}
+          {show("healthrecords") && (
+            <TabsTrigger value="healthrecords" className={triggerClass}>
+              My Health Records
+            </TabsTrigger>
+          )}
           {show("history") && (
             <TabsTrigger value="history" className={triggerClass}>
               My Meetings
@@ -1611,11 +1626,6 @@ export function PatientDetailsEditor({
           {show("claims") && (
             <TabsTrigger value="claims" className={triggerClass}>
               Claims
-            </TabsTrigger>
-          )}
-          {show("logs") && (
-            <TabsTrigger value="logs" className={triggerClass}>
-              History
             </TabsTrigger>
           )}
           {show("documents") && (
@@ -1651,6 +1661,11 @@ export function PatientDetailsEditor({
           {show("programmes") && (
             <TabsTrigger value="programmes" className={triggerClass}>
               Programmes
+            </TabsTrigger>
+          )}
+          {show("logs") && (
+            <TabsTrigger value="logs" className={triggerClass}>
+              Activity Log
             </TabsTrigger>
           )}
         </TabsList>
@@ -1773,7 +1788,7 @@ export function PatientDetailsEditor({
               <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
 
                 <SectionHeader icon={User} label="Personal Information" />
-                <CollapsibleContent className="p-3">
+                <CollapsibleContent className="p-2">
                   <div className={FIELD_GRID_2_CLASS}>
                     <ViewField label="First Name(s)" value={patient.first_name || splitName(patient.name).first} />
                     <ViewField label="Last Name" value={patient.last_name || splitName(patient.name).last} />
@@ -1794,7 +1809,7 @@ export function PatientDetailsEditor({
 
               <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
                 <SectionHeader icon={MapPin} label="Addresses" />
-                <CollapsibleContent className="p-3">
+                <CollapsibleContent className="p-2">
                   <div className={FIELD_GRID_2_CLASS}>
                     <ViewField label="Physical Address" value={patient.physical_address || patient.address} />
                     <ViewField
@@ -1807,7 +1822,7 @@ export function PatientDetailsEditor({
 
               <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
                 <SectionHeader icon={Briefcase} label="Employer" />
-                <CollapsibleContent className="p-3">
+                <CollapsibleContent className="p-2">
                   <div className={FIELD_GRID_2_CLASS}>
                     <ViewField label="Employer" value={patient.employer} />
                     <ViewField label="Occupation" value={patient.occupation} />
@@ -1817,7 +1832,7 @@ export function PatientDetailsEditor({
 
               <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
                 <SectionHeader icon={Users} label="Beneficiaries" />
-                <CollapsibleContent className="p-3">
+                <CollapsibleContent className="p-2">
                   {nokMembers.length > 0 ? (
                     <div className="space-y-2">
                       {nokMembers.map((nok) => (
@@ -1873,7 +1888,7 @@ export function PatientDetailsEditor({
 
               <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
                 <SectionHeader icon={StickyNote} label="General Notes" />
-                <CollapsibleContent className="p-3">
+                <CollapsibleContent className="p-2">
                   <p className="text-xs text-foreground whitespace-pre-wrap">{patient.notes || "No notes recorded"}</p>
                 </CollapsibleContent>
               </Collapsible>
@@ -1886,6 +1901,11 @@ export function PatientDetailsEditor({
               <FinancialInformation patientId={patient.id} />
             </TabsContent>
 
+            {/* === MY HEALTH RECORDS TAB === */}
+            <TabsContent value="healthrecords" className="mt-4 space-y-3">
+              <div><h2 className="text-lg font-semibold text-primary-dark">My Health Records</h2><p className="text-xs text-muted-foreground">Medical records and reports shared with your Wealth Manager for underwriting.</p></div>
+              <DocumentUploadList patientId={patient.id} documentKind="Health Record" addLabel="Upload health record" />
+            </TabsContent>
 
 
             {/* === TASKS TAB === */}
@@ -2043,10 +2063,14 @@ export function PatientDetailsEditor({
             <div className="patient-section-frame rounded-xl border border-border bg-card overflow-hidden divide-y divide-white">
             <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
               <SectionHeader icon={User} label="Personal Information" />
-              <CollapsibleContent className="p-3">
+              <CollapsibleContent className="p-2">
                 {/* Horizontal label/field rows: bold, one size smaller labels */}
                 <div className={FIELD_GRID_2_CLASS}>
 
+                  <div className="space-y-1.5">
+                    <Label htmlFor="title">Title</Label>
+                    <Input id="title" className="text-sm" value={(formData as any).title || ""} onChange={(e) => updateFormData({ title: e.target.value } as any)} placeholder="Mr / Mrs / Dr…" />
+                  </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="first_name">First Name(s) *</Label>
                     <Input
@@ -2066,6 +2090,10 @@ export function PatientDetailsEditor({
                       onChange={(e) => updateFormData({ last_name: e.target.value })}
                       placeholder="Last name"
                     />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="maiden_name">Maiden Name</Label>
+                    <Input id="maiden_name" className="text-sm" value={(formData as any).maiden_name || ""} onChange={(e) => updateFormData({ maiden_name: e.target.value } as any)} />
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="id_passport_number">ID/Passport Number</Label>
@@ -2176,14 +2204,6 @@ export function PatientDetailsEditor({
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="title">Title</Label>
-                    <Input id="title" className="text-sm" value={(formData as any).title || ""} onChange={(e) => updateFormData({ title: e.target.value } as any)} placeholder="Mr / Mrs / Dr…" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="maiden_name">Maiden Name</Label>
-                    <Input id="maiden_name" className="text-sm" value={(formData as any).maiden_name || ""} onChange={(e) => updateFormData({ maiden_name: e.target.value } as any)} />
-                  </div>
-                  <div className="space-y-1.5">
                     <Label htmlFor="religion">Religion</Label>
                     <Input id="religion" className="text-sm" value={(formData as any).religion || ""} onChange={(e) => updateFormData({ religion: e.target.value } as any)} />
                   </div>
@@ -2210,8 +2230,8 @@ export function PatientDetailsEditor({
 
             <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
               <SectionHeader icon={MapPin} label="Addresses" />
-              <CollapsibleContent className="p-3">
-                <div className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
+              <CollapsibleContent className="p-2">
+                <div className="grid gap-x-6 gap-y-2 sm:grid-cols-2">
                   <div className="space-y-1.5">
                     <Label htmlFor="physical_address" className="text-xs font-bold">Physical Address</Label>
                     <AddressAutocomplete
@@ -2260,7 +2280,7 @@ export function PatientDetailsEditor({
             {/* Beneficiaries */}
             <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
               <SectionHeader icon={Briefcase} label="Employer" />
-              <CollapsibleContent className="p-3">
+              <CollapsibleContent className="p-2">
                 <div className={FIELD_GRID_2_CLASS}>
                   <div className="space-y-1.5">
                     <Label htmlFor="employer">
@@ -2317,7 +2337,7 @@ export function PatientDetailsEditor({
 
             <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
               <SectionHeader icon={Users} label="Beneficiaries" />
-              <CollapsibleContent className="p-3">
+              <CollapsibleContent className="p-2">
                 <div className="flex justify-end mb-3">
                   {!showAddNOK && (
                     <Button
@@ -2505,7 +2525,7 @@ export function PatientDetailsEditor({
 
             <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
               <SectionHeader icon={StickyNote} label="General Notes" />
-              <CollapsibleContent className="p-3">
+              <CollapsibleContent className="p-2">
                 <Textarea
                   value={formData.notes}
                   onChange={(e) => updateFormData({ notes: e.target.value })}
@@ -2524,6 +2544,11 @@ export function PatientDetailsEditor({
             <FinancialInformation patientId={patient.id} />
           </TabsContent>
 
+          {/* === MY HEALTH RECORDS TAB (EDIT) === */}
+          <TabsContent value="healthrecords" className="mt-4 space-y-3">
+            <div><h2 className="text-lg font-semibold text-primary-dark">My Health Records</h2><p className="text-xs text-muted-foreground">Medical records and reports shared with your Wealth Manager for underwriting.</p></div>
+            <DocumentUploadList patientId={patient.id} documentKind="Health Record" addLabel="Upload health record" />
+          </TabsContent>
 
 
           {/* === Tasks tab (edit mode) === */}

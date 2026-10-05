@@ -16,7 +16,7 @@ Return ONLY a JSON object with these keys (omit anything not stated; never inven
 {
  "cash_flow": {"gross_income","net_salary","fixed_expenses","discretionary_expenses","tax_bracket" (one of "18%","26%","31%","36%","39%","41%","45%")},
  "assets_liabilities": {"items":[{"kind" (one of "Property","Vehicle","Cash / savings","Other asset","Home loan (bond)","Vehicle finance","Credit card","Personal loan","Other debt"),"description","value"}]},
- "risk_portfolio": {"policies":[{"kind" (one of "Life cover","Disability","Income protection","Severe illness","Short-term (assets)","Funeral"),"insurer","cover","premium"}]},
+ "risk_portfolio": {"policies":[{"kind" (one of "Life cover","Disability","Income protection","Severe illness","Short Term Insurance","Funeral"),"insurer","cover","premium"}]},
  "investments": {"holdings":[{"kind" (one of "Retirement annuity","Pension fund","Provident fund","Preservation fund","Tax-free savings","Unit trusts","Endowment","Other"),"provider","value","contribution"}]},
  "goals_risk": {"retirement_age","retirement_income","risk_profile" (one of "Conservative","Moderately conservative","Moderate","Moderately aggressive","Aggressive"),"goals"},
  "estate": {"will_status" (one of "No will","Will in place","Will outdated"),"will_date","executor","trusts"},
