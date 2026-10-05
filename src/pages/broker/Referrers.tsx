@@ -27,7 +27,7 @@ export default function Referrers() {
     queryFn: async () => (await db.from("wealth_referrer_rates").select("*").eq("broker_user_id", user!.id)).data ?? [],
   });
 
-  const referrerIds = useMemo(() => Array.from(new Set((referrals.data ?? []).map((r: any) => r.referrer_user_id))), [referrals.data]);
+  const referrerIds = useMemo(() => Array.from(new Set<string>((referrals.data ?? []).map((r: any) => r.referrer_user_id))), [referrals.data]);
   const names = useQuery({
     queryKey: ["referrer-names", referrerIds],
     enabled: referrerIds.length > 0,
