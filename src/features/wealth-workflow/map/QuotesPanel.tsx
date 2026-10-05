@@ -21,10 +21,11 @@ export const QUOTE_STEPS = new Set([
   "Quotes received, AI ranks top 3", "Select options and commentary", "Affordability check", "Generate ROA (versioned)",
 ]);
 
-const INSURERS = ["Discovery", "Old Mutual", "Sanlam", "Liberty", "Momentum", "Hollard"];
-const FACTORS = [1.0, 0.94, 1.08, 1.02, 0.97, 1.12];
+const COVER_TYPES = ["Car", "Home", "Life", "Disability", "Severe Illness", "Other"];
+const EMPTY_FORM = { insurer: "", product: "", premium: "", cover: "", excess: "", coverType: "" };
 // Short-term products go through the insurer's own credit check instead of an affordability check.
 const SHORT_TERM_PRODUCTS = ["Short-term (assets)", "Car", "Car Insurance", "Home", "Home Insurance", "Short-term insurance"];
+const isShortTerm = (q: any) => q.cover_type === "Car" || q.cover_type === "Home" || SHORT_TERM_PRODUCTS.includes(q.product);
 
 export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }: {
   label: string; viewer: Viewer; workflowId: string; records: any; clientFirst: string;
@@ -33,7 +34,8 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
   const quotes: any[] = records?.quotes ?? [];
   const holdings: any[] = records?.holdings ?? [];
   const [busy, setBusy] = useState(false);
-  const [form, setForm] = useState({ insurer: "", product: "Life cover", premium: "", cover: "" });
+  const [activeFolder, setActiveFolder] = useState("");
+  const [form, setForm] = useState(EMPTY_FORM);
   const { data: recs = [] } = useRecommendationHistory(workflowId);
   const { data: fin } = useQuery({
     queryKey: ["fin-cashflow", records?.patientId], enabled: !!records?.patientId,
@@ -53,22 +55,40 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
   const selected = quotes.filter((q) => q.selected);
   const selPremium = selected.reduce((a, q) => a + Number(q.monthly_premium || 0), 0);
 
+  const folderOf = (q: any) => q.cover_type || "Unfiled";
+  const folders = [...COVER_TYPES, "Unfiled"].filter((f) => quotes.some((q) => folderOf(q) === f));
+  const folder = folders.includes(activeFolder) ? activeFolder : folders[0] ?? "Life";
+  const inFolder = quotes.filter((q) => folderOf(q) === folder).sort((a, b) => (a.ai_rank ?? 99) - (b.ai_rank ?? 99) || Number(a.monthly_premium) - Number(b.monthly_premium));
+
+  const FolderTabs = () => folders.length > 1 || folders[0] === "Unfiled" ? (
+    <div className="flex flex-wrap gap-1.5">
+      {folders.map((f) => (
+        <button key={f} onClick={() => setActiveFolder(f)}
+          className={cn("flex items-center gap-1 rounded-full border px-2.5 py-1 text-2xs font-medium", f === folder ? "border-primary bg-primary text-primary-foreground" : "border-border/60 text-muted-foreground hover:bg-muted")}>
+          <Folder className="h-3 w-3" />{f} · {quotes.filter((q) => folderOf(q) === f).length}
+        </button>
+      ))}
+    </div>
+  ) : <p className="flex items-center gap-1 text-2xs font-medium text-muted-foreground"><Folder className="h-3 w-3" />{folder}</p>;
+
+  const toggle = (q: any) => run(() => db.from("wealth_quotes").update({ selected: !q.selected, broker_overridden: true }).eq("id", q.id), q.selected ? "Removed from recommendation" : "Added to recommendation");
+
   const QuoteTable = ({ selectable }: { selectable?: boolean }) => (
     <div className="overflow-hidden rounded-lg border border-border/60">
       <table className="w-full text-xs">
         <thead className="bg-muted/50 text-2xs uppercase tracking-wide text-muted-foreground">
-          <tr><th className="px-2 py-1.5 text-left">#</th><th className="px-2 py-1.5 text-left">Insurer</th><th className="px-2 py-1.5 text-right">Cover</th><th className="px-2 py-1.5 text-right">Premium / month</th>{(selectable || isWM) && <th className="w-8" />}</tr>
+          <tr><th className="px-2 py-1.5 text-left">AI</th><th className="px-2 py-1.5 text-left">Insurer</th><th className="px-2 py-1.5 text-right">Cover</th><th className="px-2 py-1.5 text-right">Excess</th><th className="px-2 py-1.5 text-right">Premium / month</th>{(selectable || isWM) && <th className="w-8" />}</tr>
         </thead>
         <tbody>
-          {quotes.map((q) => (
-            <tr key={q.id} className={cn("border-t border-border/60", (q.rank ?? 99) <= 3 && "bg-[hsl(var(--owner-advisor-bg))]")}>
-              <td className="px-2 py-1.5 font-semibold">{q.rank ?? "—"}</td>
+          {inFolder.map((q) => (
+            <tr key={q.id} className={cn("border-t border-border/60", q.ai_rank && "bg-[hsl(var(--owner-advisor-bg))]")}>
+              <td className="px-2 py-1.5 font-semibold">{q.ai_rank ?? "—"}</td>
               <td className="px-2 py-1.5">{q.insurer}<span className="block text-2xs text-muted-foreground">{q.product}{q.method === "assisted" ? " · indicative" : ""}</span></td>
               <td className="px-2 py-1.5 text-right">{R(q.cover_amount)}</td>
+              <td className="px-2 py-1.5 text-right">{R(q.excess)}</td>
               <td className="px-2 py-1.5 text-right font-medium">{R(q.monthly_premium)}</td>
               {selectable && isWM ? (
-                <td className="px-2"><input type="checkbox" aria-label={`Select ${q.insurer}`} checked={q.selected} disabled={busy}
-                  onChange={() => run(() => db.from("wealth_quotes").update({ selected: !q.selected }).eq("id", q.id), q.selected ? "Removed from recommendation" : "Added to recommendation")} /></td>
+                <td className="px-2"><input type="checkbox" aria-label={`Select ${q.insurer}`} checked={!!q.selected} disabled={busy} onChange={() => toggle(q)} /></td>
               ) : isWM && !selectable ? (
                 <td className="px-2"><button aria-label="Remove" className="text-muted-foreground hover:text-destructive" onClick={() => run(() => db.from("wealth_quotes").delete().eq("id", q.id), "Quote removed")}><Trash2 className="h-3.5 w-3.5" /></button></td>
               ) : selectable ? <td className="px-2">{q.selected && <CheckCircle2 className="h-4 w-4 text-[hsl(var(--owner-advisor))]" />}</td> : null}
@@ -78,11 +98,6 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
       </table>
     </div>
   );
-
-  const rerank = async (rows: any[]) => {
-    const sorted = [...rows].sort((a, b) => Number(a.monthly_premium) - Number(b.monthly_premium));
-    for (let i = 0; i < sorted.length; i++) await db.from("wealth_quotes").update({ rank: i + 1 }).eq("id", sorted[i].id);
-  };
 
   switch (label) {
     case "Insurer schedules and claims history":
@@ -118,73 +133,73 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
       return <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">The CRM (Iress XPLAN) isn't connected yet. The client profile is kept here until the connection is set up.</p>;
 
     case "Quotes received, AI ranks top 3":
-      if (!quotes.length) {
-        return isWM ? (
-          <div className="space-y-3">
-            <p className="text-xs text-muted-foreground">Choose how you'll quote for {clientFirst}:</p>
-            <div className="grid gap-2 sm:grid-cols-2">
-              <div className="rounded-lg border border-border/60 p-3 text-xs">
-                <p className="mb-1 flex items-center gap-1.5 font-semibold"><PenLine className="h-3.5 w-3.5" />Option A · Enter my quotes</p>
-                <p className="mb-2 text-muted-foreground">Capture quotes you got from insurer portals. Ranked by premium.</p>
-                <div className="space-y-1.5">
-                  <Input placeholder="Insurer" value={form.insurer} onChange={(e) => setForm({ ...form, insurer: e.target.value })} />
-                  <Input placeholder="Product" value={form.product} onChange={(e) => setForm({ ...form, product: e.target.value })} />
-                  <div className="grid grid-cols-2 gap-1.5">
-                    <Input placeholder="Cover (R)" inputMode="numeric" value={form.cover} onChange={(e) => setForm({ ...form, cover: e.target.value })} />
-                    <Input placeholder="Premium (R)" inputMode="numeric" value={form.premium} onChange={(e) => setForm({ ...form, premium: e.target.value })} />
-                  </div>
-                  <Button size="sm" className="w-full rounded-full" disabled={busy || !form.insurer || !form.premium}
-                    onClick={() => run(async () => { const r = await db.from("wealth_quotes").insert({ workflow_id: workflowId, method: "manual", insurer: form.insurer, product: form.product || "Life cover", monthly_premium: Number(form.premium), cover_amount: form.cover ? Number(form.cover) : null, rank: 1 }); setForm({ insurer: "", product: "Life cover", premium: "", cover: "" }); return r; }, "Quote added")}>
-                    <Plus className="mr-1 h-3.5 w-3.5" />Add quote
-                  </Button>
-                </div>
+      return (
+        <div className="space-y-3">
+          {isWM && (
+            <div className="rounded-lg border border-border/60 p-3 text-xs">
+              <p className="mb-2 font-semibold">Add a returned quote</p>
+              <div className="grid gap-1.5 sm:grid-cols-3">
+                <Input placeholder="Insurer" value={form.insurer} onChange={(e) => setForm({ ...form, insurer: e.target.value })} />
+                <Input placeholder="Product" value={form.product} onChange={(e) => setForm({ ...form, product: e.target.value })} />
+                <select aria-label="Cover type" className="h-10 rounded-md border border-input bg-background px-2 text-xs" value={form.coverType} onChange={(e) => setForm({ ...form, coverType: e.target.value })}>
+                  <option value="">Let AI choose folder</option>
+                  {COVER_TYPES.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+                <Input placeholder="Cover (R)" inputMode="numeric" value={form.cover} onChange={(e) => setForm({ ...form, cover: e.target.value })} />
+                <Input placeholder="Premium / month (R)" inputMode="numeric" value={form.premium} onChange={(e) => setForm({ ...form, premium: e.target.value })} />
+                <Input placeholder="Excess (R)" inputMode="numeric" value={form.excess} onChange={(e) => setForm({ ...form, excess: e.target.value })} />
               </div>
-              <div className="rounded-lg border border-border/60 p-3 text-xs">
-                <p className="mb-1 flex items-center gap-1.5 font-semibold"><Sparkles className="h-3.5 w-3.5" />Option B · Indicative comparison</p>
-                <p className="mb-2 text-muted-foreground">Elysian AI prepares indicative premiums from 6 insurers, based on {clientFirst}'s income. Confirm final figures with each insurer.</p>
-                <Button size="sm" variant="outline" className="w-full rounded-full" disabled={busy}
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Button size="sm" className="rounded-full" disabled={busy || !form.insurer || !form.premium}
                   onClick={() => run(async () => {
-                    const income = Number(cf.gross_income ?? 50000);
-                    const cover = Math.round((income * 12 * 10) / 100000) * 100000;
-                    const rows = INSURERS.map((ins, i) => ({ workflow_id: workflowId, method: "assisted", insurer: ins, product: "Life cover", cover_amount: cover, monthly_premium: Math.round((cover / 1000) * 0.11 * FACTORS[i]) }));
-                    rows.sort((a, b) => a.monthly_premium - b.monthly_premium).forEach((r: any, i) => (r.rank = i + 1));
-                    return db.from("wealth_quotes").insert(rows);
-                  }, "Indicative comparison ready")}>
-                  {busy ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-1 h-3.5 w-3.5" />}Prepare comparison
+                    const r = await db.from("wealth_quotes").insert({ workflow_id: workflowId, method: "manual", insurer: form.insurer, product: form.product || "Life cover", cover_type: form.coverType || null, monthly_premium: Number(form.premium), cover_amount: form.cover ? Number(form.cover) : null, excess: form.excess ? Number(form.excess) : null });
+                    setForm({ ...EMPTY_FORM, coverType: form.coverType }); return r;
+                  }, "Quote added")}><Plus className="mr-1 h-3.5 w-3.5" />Add quote</Button>
+                <Button size="sm" variant="outline" className="rounded-full" disabled={busy || !quotes.length}
+                  onClick={() => run(async () => {
+                    const { data, error } = await supabase.functions.invoke("rank-quotes", { body: { workflow_id: workflowId } });
+                    if (error) { let m = error.message; try { m = (await (error as any).context.json())?.error ?? m; } catch { /* keep */ } throw new Error(m); }
+                    if (data?.error) throw new Error(data.error);
+                  }, "Elysian AI has filed and ranked the quotes")}>
+                  {busy ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-1 h-3.5 w-3.5" />}Rank with Elysian AI
                 </Button>
               </div>
             </div>
-            {records?.patientId && (
-              <DocumentRequestComposer kind="quotes" workflowId={workflowId} patientId={records.patientId} clientName={clientFirst} />
-            )}
-          </div>
-        ) : <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">Quotes are being gathered from insurers.</p>;
-      }
-      return (
-        <div className="space-y-2">
-          <QuoteTable />
-          <p className="text-2xs text-muted-foreground">Top 3 by premium are highlighted.{quotes.some((q) => q.method === "assisted") ? " Indicative figures — confirm with each insurer." : ""}</p>
-          {isWM && quotes.some((q) => q.method === "manual") && (
-            <div className="grid grid-cols-[1fr_1fr_auto] gap-1.5">
-              <Input placeholder="Insurer" value={form.insurer} onChange={(e) => setForm({ ...form, insurer: e.target.value })} />
-              <Input placeholder="Premium (R)" inputMode="numeric" value={form.premium} onChange={(e) => setForm({ ...form, premium: e.target.value })} />
-              <Button size="sm" disabled={busy || !form.insurer || !form.premium} onClick={() => run(async () => {
-                const r = await db.from("wealth_quotes").insert({ workflow_id: workflowId, method: "manual", insurer: form.insurer, product: form.product || "Life cover", monthly_premium: Number(form.premium) }).select("*");
-                if (r.error) return r;
-                await rerank([...quotes, ...(r.data ?? [])]); setForm({ ...form, insurer: "", premium: "" }); return r;
-              }, "Quote added")}><Plus className="h-3.5 w-3.5" /></Button>
-            </div>
+          )}
+          {quotes.length ? <><FolderTabs /><QuoteTable /></> : (
+            <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">{isWM ? "No quotes yet. Add each quote as insurers return them." : "Quotes are being gathered from insurers."}</p>
+          )}
+          {isWM && !quotes.length && records?.patientId && (
+            <DocumentRequestComposer kind="quotes" workflowId={workflowId} patientId={records.patientId} clientName={clientFirst} />
           )}
         </div>
       );
 
-    case "Select options and commentary":
-      return quotes.length ? (
+    case "Select options and commentary": {
+      if (!quotes.length) return <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">No quotes yet. Add them in the step above.</p>;
+      const picks = inFolder.filter((q) => q.ai_rank).sort((a, b) => a.ai_rank - b.ai_rank);
+      const followsAI = inFolder.every((q) => !!q.selected === !!q.ai_rank);
+      return (
         <div className="space-y-2">
+          <FolderTabs />
+          {picks.length ? (
+            <div className="space-y-1.5 rounded-lg border border-border/60 p-3 text-xs">
+              <p className="flex items-center gap-1.5 font-semibold"><Sparkles className="h-3.5 w-3.5" />Elysian AI's top {picks.length} in {folder}</p>
+              {picks.map((q) => (
+                <p key={q.id}><b>{q.ai_rank}. {q.insurer}</b> · {R(q.monthly_premium)}/month{q.excess != null ? ` · excess ${R(q.excess)}` : ""}<span className="block text-muted-foreground">{q.ai_reason}</span></p>
+              ))}
+              {isWM && (
+                followsAI ? <p className="flex items-center gap-1.5 text-[hsl(var(--owner-advisor))]"><CheckCircle2 className="h-3.5 w-3.5" />You're following the AI's choice. Tick different quotes below to change it.</p>
+                : <Button size="sm" variant="outline" className="rounded-full" disabled={busy} onClick={() => run(async () => {
+                    for (const q of inFolder) { const r = await db.from("wealth_quotes").update({ selected: !!q.ai_rank, broker_overridden: false }).eq("id", q.id); if (r.error) return r; }
+                  }, "AI choice accepted")}>Accept AI choice</Button>
+              )}
+            </div>
+          ) : isWM && <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">Rank the quotes with Elysian AI in the step above to see its top three.</p>}
           <QuoteTable selectable />
           {selected.map((q) => (
             <div key={q.id} className="space-y-1">
-              <p className="text-2xs font-semibold">Why {q.insurer}?</p>
+              <p className="text-2xs font-semibold">Why {q.insurer}?{q.broker_overridden ? " (your own pick)" : ""}</p>
               {isWM ? (
                 <Textarea rows={2} defaultValue={q.commentary ?? ""} placeholder="Your reasoning for this option"
                   onBlur={(e) => e.target.value !== (q.commentary ?? "") && run(() => db.from("wealth_quotes").update({ commentary: e.target.value }).eq("id", q.id), "Commentary saved")} className="text-xs" />
@@ -192,7 +207,8 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
             </div>
           ))}
         </div>
-      ) : <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">No quotes yet. Add them in the step above.</p>;
+      );
+    }
 
     case "Affordability check": {
       if (!selected.length) return <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">Select at least one option to check affordability.</p>;
