@@ -38,7 +38,6 @@ import {
   History,
   BarChart3,
   FileText,
-  Wallet,
   FolderOpen as ClientFolder,
 } from "lucide-react";
 
@@ -126,8 +125,7 @@ const CLIENT_BLOCKED_PATHS = ["/practice", "/patients"];
 const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.myPersonalDashboard", to: "/my-dashboard" },
   { icon: Activity, label: "Live Workspace", labelKey: "nav.liveWorkspace", to: "/my-workspace" },
-  { icon: User, label: "Personal Information", labelKey: "nav.clientPersonal", to: "/patient/details?section=personal" },
-  { icon: Wallet, label: "Financial Information", labelKey: "nav.clientFinancial", to: "/patient/details?section=financial" },
+  { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/patient/details?section=health" },
   { icon: ClientFolder, label: "Documents", labelKey: "nav.clientDocuments", to: "/patient/documents" },
   { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
   { icon: Activity, label: "My Biolog", labelKey: "nav.myBiolog", to: "/biolog" },

@@ -1,7 +1,6 @@
 import { dobFromSaId } from "@/lib/saId";
 import { PatientProgrammesTab } from "@/features/programmes/components/PatientProgrammesTab";
 import { ClientAISummary } from "@/features/wealth-workflow/client/ClientAISummary";
-import { MyAdvisorsHistory } from "@/features/wealth-workflow/client/MyAdvisorsHistory";
 import { LifeEventsPanel } from "@/features/wealth-workflow/client/LifeEventsPanel";
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
@@ -2029,7 +2028,6 @@ export function PatientDetailsEditor({
           {/* === MY HOLARCHY TAB (EDIT, overview) === */}
           <TabsContent value="overview" className="space-y-4 mt-4">
             <ClientAISummary patientId={patient.id} />
-            <MyAdvisorsHistory patientId={patient.id} />
             </TabsContent>
 
             {/* === PERSONAL / MEDICAL (top-level tabs) === */}
