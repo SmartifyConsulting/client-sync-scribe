@@ -92,11 +92,8 @@ Deno.serve(async (req) => {
 
     if (!ALLOWED_ORIGIN.test(p.origin)) return json({ error: "Invalid app address." }, 400);
     const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", user.id);
-    const isWm = roles?.some((r) => r.role === "doctor" || r.role === "admin");
-    const isClientOnly = roles?.some((r) => r.role === "patient") && !isWm;
-    const { data: linked } = await admin.from("patients").select("id").eq("patient_user_id", user.id).limit(1);
-    if (isClientOnly || (!isWm && linked?.length))
-      return json({ error: "Only Wealth Managers can invite new clients." }, 403);
+    if (!roles?.some((r) => r.role === "doctor" || r.role === "admin"))
+      return json({ error: "Only Wealth Managers can invite new clients. Ask an administrator to mark your account as a Wealth Manager." }, 403);
 
     if (p.action === "renew") {
       const { data: inv } = await admin.from("wealth_client_invites").select("id, owner_user_id, status").eq("id", p.inviteId).maybeSingle();
