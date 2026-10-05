@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, CheckCircle2, Loader2, Plus, Sparkles, Trash2, PenLine } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Folder, Loader2, Plus, Sparkles, Trash2, PenLine } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +33,7 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
   const quotes: any[] = records?.quotes ?? [];
   const holdings: any[] = records?.holdings ?? [];
   const [busy, setBusy] = useState(false);
+  const [folder, setFolder] = useState("");
   const [form, setForm] = useState({ insurer: "", product: "Life cover", premium: "", cover: "" });
   const { data: recs = [] } = useRecommendationHistory(workflowId);
   const { data: fin } = useQuery({
@@ -53,18 +54,44 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
   const selected = quotes.filter((q) => q.selected);
   const selPremium = selected.reduce((a, q) => a + Number(q.monthly_premium || 0), 0);
 
-  const QuoteTable = ({ selectable }: { selectable?: boolean }) => (
+  const folders = Array.from(new Set(quotes.map((q) => q.cover_type ?? "General")));
+  const activeFolder = folders.includes(folder) ? folder : folders[0];
+  const QuoteTable = ({ selectable }: { selectable?: boolean }) => {
+    const rows = quotes.filter((q) => (q.cover_type ?? "General") === activeFolder)
+      .sort((a, b) => (a.rank ?? 99) - (b.rank ?? 99));
+    const hasExcess = rows.some((q) => q.excess != null && Number(q.excess) > 0);
+    return (
+    <div className="space-y-2">
+      {folders.length > 1 && (
+        <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Cover type folders">
+          {folders.map((f) => {
+            const n = quotes.filter((q) => (q.cover_type ?? "General") === f).length;
+            const sel = quotes.some((q) => (q.cover_type ?? "General") === f && q.selected);
+            return (
+              <button key={f} type="button" role="tab" aria-selected={f === activeFolder} onClick={() => setFolder(f)}
+                className={cn("flex items-center gap-1 rounded-full border px-2.5 py-1 text-2xs font-medium",
+                  f === activeFolder ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:bg-muted")}>
+                <Folder className="h-3 w-3" /> {f} <span className="opacity-70">({n})</span>
+                {sel && <CheckCircle2 className="h-3 w-3" />}
+              </button>
+            );
+          })}
+        </div>
+      )}
     <div className="overflow-hidden rounded-lg border border-border/60">
       <table className="w-full text-xs">
         <thead className="bg-muted/50 text-2xs uppercase tracking-wide text-muted-foreground">
-          <tr><th className="px-2 py-1.5 text-left">#</th><th className="px-2 py-1.5 text-left">Insurer</th><th className="px-2 py-1.5 text-right">Cover</th><th className="px-2 py-1.5 text-right">Premium / month</th>{(selectable || isWM) && <th className="w-8" />}</tr>
+          <tr><th className="px-2 py-1.5 text-left">#</th><th className="px-2 py-1.5 text-left">Insurer</th><th className="px-2 py-1.5 text-right">Cover</th>{hasExcess && <th className="px-2 py-1.5 text-right">Excess</th>}<th className="px-2 py-1.5 text-right">Premium / month</th>{(selectable || isWM) && <th className="w-8" />}</tr>
         </thead>
         <tbody>
-          {quotes.map((q) => (
-            <tr key={q.id} className={cn("border-t border-border/60", (q.rank ?? 99) <= 3 && "bg-[hsl(var(--owner-advisor-bg))]")}>
+          {rows.map((q) => (
+            <tr key={q.id} className={cn("border-t border-border/60 align-top", (q.rank ?? 99) <= 3 && "bg-[hsl(var(--owner-advisor-bg))]")}>
               <td className="px-2 py-1.5 font-semibold">{q.rank ?? "—"}</td>
-              <td className="px-2 py-1.5">{q.insurer}<span className="block text-2xs text-muted-foreground">{q.product}{q.method === "assisted" ? " · indicative" : ""}</span></td>
+              <td className="px-2 py-1.5">{q.insurer}<span className="block text-2xs text-muted-foreground">{q.product}{q.method === "assisted" ? " · indicative" : ""}</span>
+                {q.ai_reason && <span className="mt-1 flex gap-1 text-2xs text-foreground/80"><Sparkles className="mt-0.5 h-3 w-3 flex-none text-primary" />{q.ai_reason}</span>}
+              </td>
               <td className="px-2 py-1.5 text-right">{R(q.cover_amount)}</td>
+              {hasExcess && <td className="px-2 py-1.5 text-right">{Number(q.excess) > 0 ? R(q.excess) : "—"}</td>}
               <td className="px-2 py-1.5 text-right font-medium">{R(q.monthly_premium)}</td>
               {selectable && isWM ? (
                 <td className="px-2"><input type="checkbox" aria-label={`Select ${q.insurer}`} checked={q.selected} disabled={busy}
@@ -77,7 +104,9 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
         </tbody>
       </table>
     </div>
-  );
+    </div>
+    );
+  };
 
   const rerank = async (rows: any[]) => {
     const sorted = [...rows].sort((a, b) => Number(a.monthly_premium) - Number(b.monthly_premium));
