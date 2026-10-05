@@ -1341,7 +1341,7 @@ export function PatientDetailsEditor({
   const handleCancel = () => {
     const fn = patient.first_name || splitName(patient.name).first;
     const ln = patient.last_name || splitName(patient.name).last;
-    setFormData({
+    setFormData({ ...(formData as any),
       first_name: fn,
       last_name: ln,
       email: patient.email || "",
