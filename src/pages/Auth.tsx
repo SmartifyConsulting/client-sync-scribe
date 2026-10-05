@@ -986,8 +986,8 @@ export default function Auth() {
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="w-full max-w-md">
             <div className="text-center mb-6">
-              <button type="button" onClick={() => navigate("/")} className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity">
-                <Logo size="lg" onDark />
+              <button type="button" onClick={() => navigate("/")} className="relative left-1/2 -translate-x-1/2 flex w-max justify-center mb-4 hover:opacity-80 transition-opacity">
+                <Logo size="lg" onDark className="[&_img]:!h-[16.5rem] [&_img]:!max-w-[92vw]" />
               </button>
             </div>
             <SignInCard onSignUp={() => { setIsLogin(false); setCurrentStep(0); setAccountCreated(false); }} />
@@ -1005,8 +1005,8 @@ export default function Auth() {
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-6">
-            <button type="button" onClick={() => navigate("/")} className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity">
-              <Logo size="lg" onDark />
+            <button type="button" onClick={() => navigate("/")} className="relative left-1/2 -translate-x-1/2 flex w-max justify-center mb-4 hover:opacity-80 transition-opacity">
+              <Logo size="lg" onDark className="[&_img]:!h-[16.5rem] [&_img]:!max-w-[92vw]" />
             </button>
           </div>
           {/* Sign In / Sign Up tabs */}
