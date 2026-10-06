@@ -11306,6 +11306,9 @@ export type Database = {
         Row: {
           annual_review_appointment_id: string | null
           blockers: Json
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
           consultation_session_id: string | null
           created_at: string
           current_stage: string
@@ -11322,6 +11325,9 @@ export type Database = {
         Insert: {
           annual_review_appointment_id?: string | null
           blockers?: Json
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           consultation_session_id?: string | null
           created_at?: string
           current_stage?: string
@@ -11338,6 +11344,9 @@ export type Database = {
         Update: {
           annual_review_appointment_id?: string | null
           blockers?: Json
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           consultation_session_id?: string | null
           created_at?: string
           current_stage?: string
@@ -12484,6 +12493,10 @@ export type Database = {
       wealth_blockers: {
         Args: { _target_stage: string; _workflow_id: string }
         Returns: Json
+      }
+      wealth_cancel_workflow: {
+        Args: { _reason: string; _workflow_id: string }
+        Returns: undefined
       }
       wealth_derive_stage: { Args: { _workflow_id: string }; Returns: Json }
       wealth_financials_verify: {

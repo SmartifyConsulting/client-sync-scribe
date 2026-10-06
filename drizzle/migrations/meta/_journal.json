@@ -71,6 +71,13 @@
       "when": 1791231465043,
       "tag": "0009_holarc_health_links",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791324002908,
+      "tag": "0010_wealth_cancel_workflow",
+      "breakpoints": true
     }
   ]
 }
