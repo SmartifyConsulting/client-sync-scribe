@@ -37,13 +37,13 @@ export const SECTION_TRIGGER_ALWAYS_GREEN_CLASS = cn(
 );
 
 /**
- * Teal variant (matches the Holarc Wealth logo mark colour, #2DB0A6) that stays
+ * Former teal variant, now the brand accent colour, that stays
  * filled with white text in BOTH open and collapsed states. Used on My Practice's
  * FSP info sections, scoped there only — everywhere else keeps the primary colour.
  */
 export const SECTION_TRIGGER_TEAL_CLASS = cn(
   "group px-4 py-2 hover:no-underline border-0 rounded-none",
-  "![background-color:#2DB0A6] hover:![background-color:#249186] !text-white",
+  "!bg-primary hover:!bg-primary/90 !text-white",
   "[&_*:not(.section-count-pill)]:!text-white",
   "[&>svg]:!text-white",
   "[&_.section-count-pill]:!bg-white [&_.section-count-pill]:!text-black",

@@ -962,7 +962,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                               (() => {
                                 const letterIdx = availableLetters.indexOf(letter);
                                 const avatarColors = [
-                                  "bg-accent text-accent-foreground dark:bg-teal-900/40 dark:text-teal-300",
+                                  "bg-accent text-accent-foreground dark:bg-primary/20 dark:text-primary",
                                   "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
                                   "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300",
                                 ];
