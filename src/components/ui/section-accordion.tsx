@@ -43,7 +43,7 @@ export const SECTION_TRIGGER_ALWAYS_GREEN_CLASS = cn(
  */
 export const SECTION_TRIGGER_TEAL_CLASS = cn(
   "group px-4 py-2 hover:no-underline border-0 rounded-none",
-  "!bg-primary hover:!bg-primary/90 !text-white",
+  "!bg-navy hover:!bg-navy/90 !text-white",
   "[&_*:not(.section-count-pill)]:!text-white",
   "[&>svg]:!text-white",
   "[&_.section-count-pill]:!bg-white [&_.section-count-pill]:!text-black",
