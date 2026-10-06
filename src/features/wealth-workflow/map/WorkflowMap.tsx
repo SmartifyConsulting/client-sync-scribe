@@ -16,6 +16,7 @@ import { InsurerBadge } from "./insurerColors";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { MapAvatars } from "./StepAvatar";
+import { CancelWorkflowButton, CancelledNotice } from "../workspace/CancelWorkflow";
 
 interface Props {
   patientId: string;
@@ -128,9 +129,12 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
 
       <div className="grid min-w-0 grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
         <div className="min-w-0 rounded-xl border border-border bg-card p-4">
-          <p className="mb-3 flex items-center gap-2 text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-primary" /> Steps
-          </p>
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <p className="flex items-center gap-2 text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-primary" /> Steps
+            </p>
+            {(wf.status === "active" || wf.status === "blocked") && <CancelWorkflowButton workflowId={wf.id} />}
+          </div>
           <LiveTray groups={m.groups} viewer={viewer} clientFirst={clientFirst}
             managerName={managerFirst} avatars={avatars} nextTitle={nextAction?.title}
             history={(gk, step) => <WorkingWindow embedded managerName={managerFirst} group={m.groups.find((g) => g.group.key === gk) ?? null} stepLabel={step} isLive={false} viewer={viewer}
