@@ -557,7 +557,7 @@ export function TodaysBriefing() {
 
   return (
     <div data-tour="doctor-briefing" className="rounded-xl border border-primary bg-card shadow-sm">
-      <div className="rounded-t-xl bg-primary p-3 md:p-5 flex items-center justify-between gap-1 md:gap-2">
+      <div className="rounded-t-xl bg-primary p-2.5 md:p-3 flex items-center justify-between gap-1 md:gap-2">
         <div className="flex items-center gap-1 md:gap-3">
           <Button
             variant="ghost"
@@ -569,7 +569,7 @@ export function TodaysBriefing() {
             <ChevronLeft className="h-3.5 w-3.5 md:h-5 md:w-5" />
           </Button>
           <div className="text-center">
-            <h3 className="text-xs md:text-lg font-semibold text-primary-foreground">{briefingTitle}</h3>
+            <h3 className="text-xs md:text-sm font-semibold text-primary-foreground">{briefingTitle}</h3>
             <p className="text-xs md:text-sm text-white">
               <span>{formattedSelectedDate}</span>
               <span className="inline md:hidden"> • {doneCount}/{appointments.length}</span>
@@ -671,14 +671,14 @@ export function TodaysBriefing() {
       )}
 
       {appointments.length === 0 ? (
-        <div className="p-8 text-center text-muted-foreground">
+        <div className="p-4 text-center text-sm text-muted-foreground">
           {translatedLabels['No appointments scheduled for today.'] || t("briefing.noAppointments")}
         </div>
       ) : (
         <div className="divide-y divide-border">
           {(translatedAppointments || appointments).map((apt, index) => (
             <Collapsible key={apt.id} defaultOpen={index === 0}>
-              <div className="p-3" style={{ animationDelay: `${index * 100}ms` }}>
+              <div className="p-2" style={{ animationDelay: `${index * 100}ms` }}>
                 <CollapsibleTrigger className="w-full">
                   <div className="flex items-center gap-3 hover:bg-muted/50 rounded-lg p-1 -m-1 transition-colors">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent shrink-0">

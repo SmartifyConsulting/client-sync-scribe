@@ -439,14 +439,14 @@ export function CompactTodoList() {
   return (
       <div className="rounded-xl border border-primary bg-card shadow-sm font-size-preserve">
         {/* Header */}
-        <div className="w-full rounded-t-xl bg-primary px-4 py-3 flex items-center justify-between">
+        <div className="w-full rounded-t-xl bg-primary px-3 py-2 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-primary-foreground">{t("doctorDashboard.todoList")}</h3>
           <div className="flex items-center gap-2">
             <button
               onClick={() => { isRecording ? stopRecording() : startRecording(); }}
               disabled={isProcessing || isAiProcessing}
               className={cn(
-                "h-7 w-7 rounded-full flex items-center justify-center transition-colors",
+                "h-6 w-6 rounded-full flex items-center justify-center transition-colors",
                 isRecording
                   ? "bg-destructive hover:bg-destructive/90"
                   : "bg-terracotta hover:bg-terracotta-dark"
@@ -463,7 +463,7 @@ export function CompactTodoList() {
           </div>
         </div>
 
-        <div className="p-3 space-y-2">
+        <div className="p-2 space-y-1.5">
         {/* Inline add */}
         <div className="flex gap-1.5">
           <Input
@@ -471,13 +471,13 @@ export function CompactTodoList() {
             onChange={(e) => setNewTaskText(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addTask()}
             placeholder={t("doctorDashboard.addTask")}
-            className="h-8 text-xs border-border rounded-lg px-2.5"
+            className="h-7 text-xs border-border rounded-lg px-2.5"
             disabled={isProcessing || isAiProcessing}
           />
           <button
             onClick={addTask}
             disabled={!newTaskText.trim() || isProcessing || isAiProcessing}
-            className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center shrink-0 hover:bg-primary/90 disabled:opacity-50 transition-colors"
+            className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center shrink-0 hover:bg-primary/90 disabled:opacity-50 transition-colors"
           >
             <Plus className="h-3.5 w-3.5 text-primary-foreground" />
           </button>
@@ -485,11 +485,11 @@ export function CompactTodoList() {
 
         {/* Tabs */}
         <Tabs value={filter} onValueChange={(v) => setFilter(v as "active" | "completed")}>
-          <TabsList className="h-9 w-full bg-neutral-600 p-1">
-            <TabsTrigger value="active" className="h-7 flex-1 tab-brand whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5">
+          <TabsList className="h-8 w-full bg-neutral-600 p-1">
+            <TabsTrigger value="active" className="h-6 flex-1 tab-brand whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1">
               {t("doctorDashboard.active")} ({activeCount})
             </TabsTrigger>
-            <TabsTrigger value="completed" className="h-7 flex-1 tab-brand whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5">
+            <TabsTrigger value="completed" className="h-6 flex-1 tab-brand whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1">
               {t("doctorDashboard.done")} ({completedCount})
             </TabsTrigger>
           </TabsList>
@@ -598,7 +598,7 @@ export function CompactTodoList() {
 
                   {buckets.map((b) => (
                     <AccordionItem key={b.key} value={b.key} className={SECTION_ITEM_ROUNDED_CLASS}>
-                      <AccordionTrigger className={cn(SECTION_TRIGGER_GREY_CLASS, SECTION_TRIGGER_ROUNDED_CLASS, "px-3 py-2")}>
+                      <AccordionTrigger className={cn(SECTION_TRIGGER_GREY_CLASS, SECTION_TRIGGER_ROUNDED_CLASS, "px-2.5 py-1.5")}>
 
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <CalendarDays className="h-3.5 w-3.5 text-primary shrink-0" />
@@ -617,7 +617,7 @@ export function CompactTodoList() {
                               value={`${b.key}-${patientName}`}
                               className="border-0 !border-b-0 rounded-lg bg-muted/30 overflow-hidden"
                             >
-                              <AccordionTrigger className="px-4 py-1.5 border-0 rounded-none bg-transparent hover:no-underline hover:bg-muted/50">
+                              <AccordionTrigger className="px-3 py-1 border-0 rounded-none bg-transparent hover:no-underline hover:bg-muted/50">
                                 <div className="flex items-center gap-1.5 flex-1 min-w-0">
                                   <UserIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                                   {isSamplePatient({ name: patientName }) && <SampleBadge />}
