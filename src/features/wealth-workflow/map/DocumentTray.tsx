@@ -46,7 +46,7 @@ const textHtml = (title: string, text: string) =>
   `<div id="holarc-document" style="width:794px;padding:48px 56px;background:#fff;font-family:Georgia,serif;color:#111"><h2 style="font-size:18px;margin:0 0 12px">${esc(title)}</h2><div style="white-space:pre-wrap;font-size:12px;line-height:1.6">${esc(text)}</div></div>`;
 
 // Speaker-coloured transcript: teal for the Wealth Manager, black for the client.
-const BROKER_COLOR = "#2DB0A6";
+const BROKER_COLOR = "hsl(var(--primary))";
 const CLIENT_COLOR = "#111111";
 const transcriptHtml = (title: string, segments: { speaker: string; text: string }[]) => {
   const body = segments.map((s) => {

@@ -108,9 +108,9 @@
     --sos-foreground: 0 0% 100%;
 
     /* Ask Holarc — warm orange facilitation accent */
-    --maeve: 176 58% 34%;
+    --maeve: 30 61% 46%;
     --maeve-foreground: 0 0% 100%;
-    --maeve-dark: 176 62% 26%;
+    --maeve-dark: 30 61% 36%;
     --gradient-sos: linear-gradient(135deg, hsl(222 50% 22%), hsl(214 70% 40%));
 
     /* Borders */
@@ -506,8 +506,8 @@
   --admin-text-primary: 215 25% 15%;
   --admin-text-secondary: 215 14% 38%;
   --admin-text-tertiary: 215 12% 55%;
-  --admin-accent: 180 45% 28%;
-  --admin-accent-soft: 180 45% 28% / 0.08;
+  --admin-accent: 30 61% 46%;
+  --admin-accent-soft: 30 61% 46% / 0.08;
   --admin-status-active: 152 60% 38%;
   --admin-status-pending: 38 92% 45%;
   --admin-status-suspended: 356 67% 48%;
@@ -521,8 +521,8 @@
   --admin-text-primary: 0 0% 95%;
   --admin-text-secondary: 0 0% 70%;
   --admin-text-tertiary: 0 0% 55%;
-  --admin-accent: 180 50% 55%;
-  --admin-accent-soft: 180 50% 55% / 0.12;
+  --admin-accent: 30 61% 56%;
+  --admin-accent-soft: 30 61% 56% / 0.12;
 }
 
 .admin-shell {

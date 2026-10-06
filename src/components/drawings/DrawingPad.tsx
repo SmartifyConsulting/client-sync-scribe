@@ -51,7 +51,7 @@ type Tool = "pen" | "eraser" | "text" | "select" | "line" | "circle" | "rectangl
 
 const COLORS = [
   "#000000", "#EF4444", "#F97316", "#EAB308", "#22C55E", 
-  "#14B8A6", "#3B82F6", "#8B5CF6", "#EC4899", "#6B7280"
+  "#D1873C", "#3B82F6", "#8B5CF6", "#EC4899", "#6B7280"
 ];
 
 export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal = false }: DrawingPadProps) {

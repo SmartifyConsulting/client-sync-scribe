@@ -1465,7 +1465,7 @@ export function PatientDetailsEditor({
           {!rewardsLoading && lollipopCount !== undefined && (
             <div className="hidden lg:flex shrink-0 items-center gap-3 ml-auto">
               <img src={vulaVouchersLogo} alt="Vulas" className="h-[60px] w-auto object-contain" />
-              <span className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
+              <span className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-primary bg-clip-text text-transparent">
                 <AnimatedCounter target={lollipopCount} />
               </span>
             </div>
@@ -1515,7 +1515,7 @@ export function PatientDetailsEditor({
           <div className="mt-3 border-t border-border pt-3 lg:hidden">
             <div className="flex items-center justify-center gap-2">
               <img src={vulaVouchersLogo} alt="Vulas" className="h-[60px] w-auto object-contain" />
-              <span className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
+              <span className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-primary bg-clip-text text-transparent">
                 <AnimatedCounter target={lollipopCount} />
               </span>
             </div>
@@ -1715,7 +1715,7 @@ export function PatientDetailsEditor({
           {/* Vula counter + logo */}
           <div className="flex-1 min-w-0 flex items-center gap-2">
             <img src={vulaVouchersLogo} alt="Vulas" className="h-6 w-auto object-contain" />
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-primary bg-clip-text text-transparent">
               <AnimatedCounter target={lollipopCount} />
             </span>
           </div>
