@@ -16,6 +16,7 @@ import { InsurerBadge } from "./insurerColors";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { MapAvatars } from "./StepAvatar";
+import { CancelWorkflowButton, CancelledNotice } from "../workspace/CancelWorkflow";
 
 interface Props {
   patientId: string;
@@ -73,14 +74,22 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
 
   if (m.loading) return <div className="flex h-32 items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>;
 
-  if (!m.workflow) {
+  const cancelled = (m.workflow as any)?.status === "cancelled";
+  if (!m.workflow || cancelled) {
     return (
-      <div className="rounded-xl border bg-card p-6 text-center text-sm">
-        <p className="text-muted-foreground">No wealth workflow for this client yet.</p>
-        <Button className="mt-3" size="sm" disabled={start.isPending}
-          onClick={() => start.mutate({ patientId }, { onError: (e: any) => toast({ title: "Could not start", description: e.message, variant: "destructive" }) })}>
-          Start workflow
-        </Button>
+      <div className="space-y-3">
+        {cancelled && <CancelledNotice wf={m.workflow} />}
+        <div className="rounded-xl border bg-card p-6 text-center text-sm">
+          <p className="text-muted-foreground">{viewer === "client"
+            ? `Your Live Workspace will open once ${avatars.advisor.name && avatars.advisor.name !== "Wealth Manager" ? avatars.advisor.name.split(" ")[0] : "your Wealth Manager"} starts your plan.`
+            : cancelled ? "Start a new Live Workspace when the client is ready." : "No wealth workflow for this client yet."}</p>
+          {viewer !== "client" && (
+            <Button className="mt-3" size="sm" disabled={start.isPending}
+              onClick={() => start.mutate({ patientId }, { onError: (e: any) => toast({ title: "Could not start", description: e.message, variant: "destructive" }) })}>
+              Start workflow
+            </Button>
+          )}
+        </div>
       </div>
     );
   }
@@ -120,9 +129,12 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
 
       <div className="grid min-w-0 grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
         <div className="min-w-0 rounded-xl border border-border bg-card p-4">
-          <p className="mb-3 flex items-center gap-2 text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-primary" /> Steps
-          </p>
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <p className="flex items-center gap-2 text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-primary" /> Steps
+            </p>
+            {(wf.status === "active" || wf.status === "blocked") && <CancelWorkflowButton workflowId={wf.id} />}
+          </div>
           <LiveTray groups={m.groups} viewer={viewer} clientFirst={clientFirst}
             managerName={managerFirst} avatars={avatars} nextTitle={nextAction?.title}
             history={(gk, step) => <WorkingWindow embedded managerName={managerFirst} group={m.groups.find((g) => g.group.key === gk) ?? null} stepLabel={step} isLive={false} viewer={viewer}

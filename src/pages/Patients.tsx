@@ -992,6 +992,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                                 const firstNames = parts.slice(0, -1).join(" ");
                                 return `${lastName}, ${firstNames}`;
                               })()}
+                              {user?.id && (patient as any).patient_user_id === user.id && <span className="text-muted-foreground">(me)</span>}
                               {isSamplePatient(patient) && <SampleBadge />}
                             </span>
                           </Link>
