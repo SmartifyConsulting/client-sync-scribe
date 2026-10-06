@@ -73,14 +73,22 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
 
   if (m.loading) return <div className="flex h-32 items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>;
 
-  if (!m.workflow) {
+  const cancelled = (m.workflow as any)?.status === "cancelled";
+  if (!m.workflow || cancelled) {
     return (
-      <div className="rounded-xl border bg-card p-6 text-center text-sm">
-        <p className="text-muted-foreground">No wealth workflow for this client yet.</p>
-        <Button className="mt-3" size="sm" disabled={start.isPending}
-          onClick={() => start.mutate({ patientId }, { onError: (e: any) => toast({ title: "Could not start", description: e.message, variant: "destructive" }) })}>
-          Start workflow
-        </Button>
+      <div className="space-y-3">
+        {cancelled && <CancelledNotice wf={m.workflow} />}
+        <div className="rounded-xl border bg-card p-6 text-center text-sm">
+          <p className="text-muted-foreground">{viewer === "client"
+            ? `Your Live Workspace will open once ${avatars.advisor.name && avatars.advisor.name !== "Wealth Manager" ? avatars.advisor.name.split(" ")[0] : "your Wealth Manager"} starts your plan.`
+            : cancelled ? "Start a new Live Workspace when the client is ready." : "No wealth workflow for this client yet."}</p>
+          {viewer !== "client" && (
+            <Button className="mt-3" size="sm" disabled={start.isPending}
+              onClick={() => start.mutate({ patientId }, { onError: (e: any) => toast({ title: "Could not start", description: e.message, variant: "destructive" }) })}>
+              Start workflow
+            </Button>
+          )}
+        </div>
       </div>
     );
   }
