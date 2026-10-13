@@ -152,7 +152,7 @@ const handler = async (req: Request): Promise<Response> => {
     const isResend = !!existingInvitation;
 
     // If recipient exists on platform, create notification
-    if (finalRecipientId) {
+    if (finalRecipientId && !isResend) {
       await supabaseAdmin.from("notifications").insert({
         user_id: finalRecipientId,
         type: isReferral ? "app_referral" : "invitation_received",
@@ -215,11 +215,16 @@ const handler = async (req: Request): Promise<Response> => {
             : `${senderName} has invited you to join Holarc`,
         html: emailHtml,
       });
-      if (!emailResponse.ok) console.error("Email send error:", emailResponse.error);
-      else console.log("Email sent successfully");
+      if (!emailResponse.ok) {
+        console.error("Email send error:", emailResponse.error);
+        return new Response(JSON.stringify({ error: "The invitation was saved but the email could not be sent. Please try again shortly." }), {
+          status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      console.log("Email sent successfully");
     }
 
-    return new Response(JSON.stringify({ success: true, invitation, sentToExistingUser: !!finalRecipientId }), {
+    return new Response(JSON.stringify({ success: true, invitation, resent: isResend, sentToExistingUser: !!finalRecipientId }), {
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: any) {
