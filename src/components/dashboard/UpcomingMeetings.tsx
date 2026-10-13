@@ -63,7 +63,7 @@ export function UpcomingMeetings() {
   }, []);
 
   return (
-    <Panel title="Upcoming Meetings" icon={CalendarDays}>
+    <Panel title="Upcoming Consultations" icon={CalendarDays}>
       {loading ? (
         <div className="animate-pulse space-y-2">
           <div className="h-4 bg-muted rounded w-1/2" />
