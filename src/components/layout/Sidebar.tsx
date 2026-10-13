@@ -510,7 +510,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                 {applyItemPreferences(DOCTOR_TOP_ITEMS, preferences.item_order, preferences.hidden_items).map((item) =>
                   renderNavLink(item),
                 )}
-                {isDoctor && profileToggle}
+                
               </div>
 
               {doctorSections.map((section) => {
@@ -531,7 +531,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             </>
           ) : isNurseMenu ? (
             <>
-              <div className="space-y-1.5">{profileToggle}</div>
+              
               {NURSE_SECTIONS.map((section) => (
                 <div key={section.title} className="space-y-1.5">
                   {section.items.map((item) => renderNavLink(item))}
@@ -543,7 +543,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             </>
           ) : (
             <div className="space-y-1.5">
-              {(isDoctor || isNurse) && profileToggle}
+
               {(doctorInPatientMode || nurseInPatientMode) && (
                 <p className="mx-1 px-3 py-1.5 rounded-md bg-neutral-900 text-2xs font-bold uppercase tracking-[0.14em] text-white">
                   My Profile
