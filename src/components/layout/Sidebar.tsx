@@ -90,7 +90,7 @@ const DOCTOR_SECTIONS: NavSection[] = [
       { icon: Users, label: "My Clients", labelKey: "nav.myPatients", to: "/patients", tour: "import-patients" },
       { icon: UserPlus, label: "Referrers", labelKey: "nav.referrers", to: "/referrers" },
       { icon: BedDouble, label: "Admissions", labelKey: "nav.admissions", to: "/admissions" },
-      { icon: Stethoscope, label: "Meetings", labelKey: "nav.mySessions", to: "/sessions" },
+      { icon: Stethoscope, label: "Consultations", labelKey: "nav.mySessions", to: "/sessions" },
       { icon: FolderOpen, label: "Documents", labelKey: "nav.allDocuments", to: "/documents" },
       { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
       { icon: Users2, label: "Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
