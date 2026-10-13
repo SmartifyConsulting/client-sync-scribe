@@ -127,30 +127,29 @@ const handler = async (req: Request): Promise<Response> => {
       .eq("status", "pending")
       .single();
 
-    if (existingInvitation) {
-      return new Response(JSON.stringify({ error: "You already have a pending invitation to this user" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    // A pending invite already exists (e.g. an earlier email failed): reuse it and resend.
+    let invitation: any = existingInvitation;
+    if (!invitation) {
+      const { data: created, error: inviteError } = await supabaseAdmin
+        .from("user_invitations")
+        .insert({
+          sender_id: user.id,
+          recipient_id: finalRecipientId,
+          recipient_email: finalRecipientEmail || recipientEmail,
+          message: message,
+          status: "pending",
+        })
+        .select().single();
 
-    // Create invitation record
-    const { data: invitation, error: inviteError } = await supabaseAdmin
-      .from("user_invitations")
-      .insert({
-        sender_id: user.id,
-        recipient_id: finalRecipientId,
-        recipient_email: finalRecipientEmail || recipientEmail,
-        message: message,
-        status: "pending",
-      })
-      .select().single();
-
-    if (inviteError) {
-      console.error("Failed to create invitation:", inviteError);
-      return new Response(JSON.stringify({ error: "Failed to create invitation" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      if (inviteError) {
+        console.error("Failed to create invitation:", inviteError);
+        return new Response(JSON.stringify({ error: "Failed to create invitation" }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      invitation = created;
     }
+    const isResend = !!existingInvitation;
 
     // If recipient exists on platform, create notification
     if (finalRecipientId) {
