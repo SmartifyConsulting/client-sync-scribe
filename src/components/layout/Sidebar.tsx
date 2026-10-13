@@ -531,7 +531,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             </>
           ) : isNurseMenu ? (
             <>
-              <div className="space-y-1.5">{profileToggle}</div>
+              
               {NURSE_SECTIONS.map((section) => (
                 <div key={section.title} className="space-y-1.5">
                   {section.items.map((item) => renderNavLink(item))}
