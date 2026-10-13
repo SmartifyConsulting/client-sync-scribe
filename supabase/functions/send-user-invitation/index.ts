@@ -127,33 +127,32 @@ const handler = async (req: Request): Promise<Response> => {
       .eq("status", "pending")
       .single();
 
-    if (existingInvitation) {
-      return new Response(JSON.stringify({ error: "You already have a pending invitation to this user" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    // A pending invite already exists (e.g. an earlier email failed): reuse it and resend.
+    let invitation: any = existingInvitation;
+    if (!invitation) {
+      const { data: created, error: inviteError } = await supabaseAdmin
+        .from("user_invitations")
+        .insert({
+          sender_id: user.id,
+          recipient_id: finalRecipientId,
+          recipient_email: finalRecipientEmail || recipientEmail,
+          message: message,
+          status: "pending",
+        })
+        .select().single();
 
-    // Create invitation record
-    const { data: invitation, error: inviteError } = await supabaseAdmin
-      .from("user_invitations")
-      .insert({
-        sender_id: user.id,
-        recipient_id: finalRecipientId,
-        recipient_email: finalRecipientEmail || recipientEmail,
-        message: message,
-        status: "pending",
-      })
-      .select().single();
-
-    if (inviteError) {
-      console.error("Failed to create invitation:", inviteError);
-      return new Response(JSON.stringify({ error: "Failed to create invitation" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      if (inviteError) {
+        console.error("Failed to create invitation:", inviteError);
+        return new Response(JSON.stringify({ error: "Failed to create invitation" }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      invitation = created;
     }
+    const isResend = !!existingInvitation;
 
     // If recipient exists on platform, create notification
-    if (finalRecipientId) {
+    if (finalRecipientId && !isResend) {
       await supabaseAdmin.from("notifications").insert({
         user_id: finalRecipientId,
         type: isReferral ? "app_referral" : "invitation_received",
@@ -216,11 +215,16 @@ const handler = async (req: Request): Promise<Response> => {
             : `${senderName} has invited you to join Holarc`,
         html: emailHtml,
       });
-      if (!emailResponse.ok) console.error("Email send error:", emailResponse.error);
-      else console.log("Email sent successfully");
+      if (!emailResponse.ok) {
+        console.error("Email send error:", emailResponse.error);
+        return new Response(JSON.stringify({ error: "The invitation was saved but the email could not be sent. Please try again shortly." }), {
+          status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      console.log("Email sent successfully");
     }
 
-    return new Response(JSON.stringify({ success: true, invitation, sentToExistingUser: !!finalRecipientId }), {
+    return new Response(JSON.stringify({ success: true, invitation, resent: isResend, sentToExistingUser: !!finalRecipientId }), {
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: any) {
