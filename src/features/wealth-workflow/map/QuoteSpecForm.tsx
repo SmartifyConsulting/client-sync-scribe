@@ -31,8 +31,8 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
     queryKey: ["fin-needs", patientId], enabled: !!patientId,
     queryFn: async () => (await db.from("client_financial_profiles").select("cash_flow,assets_liabilities,risk_portfolio").eq("patient_id", patientId).maybeSingle()).data,
   });
-  const { data: insurers = [] } = useQuery({
-    queryKey: ["quote-insurers", user?.id], enabled: !!user && isWM,
+  const { data: insurerRows = [] } = useQuery({
+    queryKey: ["quote-insurer-names", user?.id], enabled: !!user && isWM,
     queryFn: async () => {
       const [cat, creds] = await Promise.all([
         db.from("app_integrations_catalog").select("id,name").eq("category", "insurance").eq("is_active", true).order("display_order"),
@@ -42,6 +42,9 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
       return (cat.data ?? []).filter((c: any) => ready.has(c.id)).map((c: any) => c.name as string);
     },
   });
+
+  // Older cached entries were {name, ready}; always render plain names.
+  const insurers: string[] = (insurerRows as any[]).map((r) => (typeof r === "string" ? r : r?.name)).filter(Boolean);
 
   const [plan, setPlan] = useState<Plan>({});
   const [chosen, setChosen] = useState<string[]>([]);
