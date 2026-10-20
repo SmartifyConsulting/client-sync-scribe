@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus, X } from "lucide-react";
 import { insurerColor } from "./insurerColors";
+import { insurerFields, insurerKey } from "./insurerDictionary";
 import { LoginRing, LOGIN_TEXT, OtpDialog, type Challenge, type LoginState } from "./InsurerLogin";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -144,10 +145,12 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
         <div className="flex flex-wrap gap-1.5">
           {insurers.map((ins: string) => {
             const on = chosen.includes(ins);
+            const c = insurerColor(ins);
             return (
               <button key={ins} type="button" aria-pressed={on}
                 onClick={() => setChosen((c) => (on ? c.filter((x) => x !== ins) : [...c, ins]))}
-                className={cn("rounded-full border px-2.5 py-0.5 text-[11px]", on ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card")}>
+                className="rounded-full border px-2.5 py-0.5 text-[11px] font-medium"
+                style={on ? { background: `hsl(${c})`, borderColor: `hsl(${c})`, color: "hsl(0 0% 100%)" } : { borderColor: `hsl(${c})`, color: `hsl(${c})` }}>
                 {ins}
               </button>
             );
@@ -158,15 +161,15 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
       {chosen.length > 0 && (
         <div className="space-y-2">
           <p className={label}>2 · Products from the needs analysis · 3 options each</p>
-          <div role="tablist" className="flex flex-wrap items-end gap-0.5 border-b border-border">
+          <div role="tablist" className="flex flex-wrap items-end gap-0.5 border-b-2" style={{ borderColor: activeTab ? `hsl(${insurerColor(activeTab)})` : undefined }}>
             {chosen.map((t) => {
               const c = insurerColor(t);
               const on = activeTab === t;
               return (
                 <button key={t} role="tab" aria-selected={on} onClick={() => openTab(t)}
-                  className={cn("-mb-px flex items-center gap-1.5 rounded-t-md border border-b-0 px-3 py-1 text-[11px] font-medium transition-colors",
-                    on ? "text-primary-foreground" : "border-transparent hover:opacity-90")}
-                  style={on ? { background: `hsl(${c})`, borderColor: `hsl(${c})` } : { color: `hsl(${c})`, background: `hsl(${c} / 0.08)` }}>
+                  className={cn("flex items-center gap-1.5 rounded-t-md px-3 font-semibold transition-all",
+                    on ? "py-1.5 text-[11px] shadow-sm" : "py-1 text-[11px] opacity-75 hover:opacity-100")}
+                  style={{ background: `hsl(${c})`, color: "hsl(0 0% 100%)" }}>
                   {t}
                   <LoginRing state={login[t]} />
                 </button>
@@ -189,7 +192,8 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
           </div>
 
           {products.map((p) => {
-            const fields = PRODUCT_TYPES[p] ?? [];
+            const extra = activeTab ? insurerFields(activeTab, p).map((f) => ({ ...f, key: insurerKey(activeTab, f.key) })) : [];
+            const fields = [...(PRODUCT_TYPES[p] ?? []), ...extra];
             return (
               <div key={p} className="overflow-x-auto rounded-lg border border-border/60">
                 <div className="flex items-center justify-between bg-foreground px-2 py-1 text-background">
@@ -198,29 +202,30 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
                     onClick={() => setPlan((pl) => { const { [p]: _, ...rest } = pl; return rest; })}><X className="h-3 w-3" /></button>
                 </div>
                 {formulaFor(p) && <p className="border-t border-border/60 px-2 py-1 text-[10px] tabular-nums text-muted-foreground">{formulaFor(p)}</p>}
-                <table className="w-full">
+                <table className="w-full min-w-[560px] table-fixed">
+                  <colgroup><col className="w-44" />{plan[p].map((_, i) => <col key={i} />)}</colgroup>
                   <thead className="text-[10px] uppercase tracking-wide text-muted-foreground">
                     <tr><th className="px-2 py-1 text-left font-medium">Variable</th>{plan[p].map((_, i) => <th key={i} className="px-2 py-1 text-left font-medium">Option {String.fromCharCode(65 + i)}</th>)}</tr>
                   </thead>
                   <tbody>
                     {fields.map((f) => (
-                      <tr key={f.key} className="border-t border-border/60">
-                        <td className="whitespace-nowrap px-2 py-0.5 text-muted-foreground">{f.label}</td>
+                      <tr key={f.key} className={cn("border-t border-border/60", f.key.includes(":") && "bg-muted/30")}>
+                        <td className="truncate px-2 py-0.5 text-muted-foreground" title={f.label}>{f.label}</td>
                         {plan[p].map((v, i) => (
-                          <td key={i} className="min-w-[120px] px-2 py-0.5">
+                          <td key={i} className="px-2 py-0.5">
                             {f.kind === "select" ? (
-                              <select className="h-6 w-full rounded border border-input bg-background px-1 text-[11px]" value={v[f.key]} onChange={(e) => setVal(p, i, f.key, e.target.value)}>
+                              <select className="h-6 w-full rounded border border-input bg-background px-1 text-[11px]" value={v[f.key] ?? f.options[0]} onChange={(e) => setVal(p, i, f.key, e.target.value)}>
                                 {f.options.map((o) => <option key={o}>{o}</option>)}
                               </select>
                             ) : f.kind === "toggle" ? (
-                              <input type="checkbox" aria-label={f.label} checked={!!v[f.key]} onChange={(e) => setVal(p, i, f.key, e.target.checked)} />
+                              <div className="flex h-6 items-center"><input type="checkbox" aria-label={f.label} checked={!!v[f.key]} onChange={(e) => setVal(p, i, f.key, e.target.checked)} /></div>
                             ) : (
-                              <div className="flex items-center gap-1">
-                                {f.kind === "amount" && <span className="text-muted-foreground">R</span>}
-                                <Input className="h-6 px-1.5 text-[11px] tabular-nums" inputMode="decimal" value={f.kind === "amount" ? groupDigits(v[f.key]) : v[f.key]}
+                              <div className="flex h-6 items-center gap-1">
+                                <span className="w-3 shrink-0 text-muted-foreground">{f.kind === "amount" ? "R" : ""}</span>
+                                <Input className="h-6 w-full px-1.5 text-[11px] tabular-nums" inputMode="decimal" value={f.kind === "amount" ? groupDigits(v[f.key]) : v[f.key]}
                                   disabled={f.key === "growth" && String(v.increase_option).includes("No increase")}
                                   onChange={(e) => setVal(p, i, f.key, e.target.value.replace(/[^\d.]/g, ""))} />
-                                {f.kind === "percent" && <span className="text-muted-foreground">%</span>}
+                                <span className="w-3 shrink-0 text-muted-foreground">{f.kind === "percent" ? "%" : ""}</span>
                               </div>
                             )}
                           </td>

@@ -205,12 +205,20 @@ Deno.serve(async (req) => {
         .eq("broker_user_id", user.id);
       if (error) return json({ error: "Could not load integrations." }, 500);
 
-      const credentials = (rows ?? []).map((r) => ({
-        integration_id: r.integration_id,
-        is_enabled: r.is_enabled,
-        status: r.status,
-        updated_at: r.updated_at,
-        has_credentials: !!r.encrypted_credentials,
+      // Only the non-secret quote email is surfaced in the list; passwords never leave without re-auth.
+      const credentials = await Promise.all((rows ?? []).map(async (r) => {
+        let quote_email: string | null = null;
+        if (r.encrypted_credentials && encryptionKey) {
+          try { quote_email = (await decryptJson(encryptionKey, r.encrypted_credentials)).quote_email || null; } catch { /* ignore */ }
+        }
+        return {
+          integration_id: r.integration_id,
+          is_enabled: r.is_enabled,
+          status: r.status,
+          updated_at: r.updated_at,
+          has_credentials: !!r.encrypted_credentials,
+          quote_email,
+        };
       }));
       return json({ credentials });
     }
