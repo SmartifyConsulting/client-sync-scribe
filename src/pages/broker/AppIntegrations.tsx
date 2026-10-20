@@ -100,6 +100,24 @@ export default function AppIntegrations() {
     }
   };
 
+  const handleUsernameBlur = async (entry: CatalogEntry, value: string) => {
+    const trimmed = value.trim();
+    const current = statusFor(entry.id)?.username ?? "";
+    if (trimmed === current) return;
+    qc.setQueryData(["broker-integration-credentials", user?.id], (prev: CredentialStatus[] | undefined) => {
+      const list = prev ?? [];
+      const existing = list.find((c) => c.integration_id === entry.id);
+      if (existing) return list.map((c) => (c.integration_id === entry.id ? { ...c, username: trimmed || null } : c));
+      return [...list, { integration_id: entry.id, is_enabled: false, username: trimmed || null, status: "pending", updated_at: null, has_credentials: false }];
+    });
+    try {
+      await invoke({ action: "set_username", integrationId: entry.id, username: trimmed || null });
+    } catch (e: any) {
+      toast.error(e.message ?? "Could not save username.");
+      credentials.refetch();
+    }
+  };
+
   const handleUnlock = async () => {
     if (!unlockPassword) return;
     setUnlocking(true);
@@ -208,6 +226,18 @@ export default function AppIntegrations() {
                           </div>
                           <Switch checked={status?.is_enabled ?? false} onCheckedChange={(v) => handleToggle(entry, v)} />
                         </div>
+                        {entry.required_fields.includes("username") && (
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Username</Label>
+                            <Input
+                              defaultValue={status?.username ?? ""}
+                              key={status?.username ?? ""}
+                              placeholder="Not set"
+                              className="mt-1"
+                              onBlur={(e) => handleUsernameBlur(entry, e.target.value)}
+                            />
+                          </div>
+                        )}
                         <div className="flex gap-2">
                           <Button variant="outline" size="sm" className="flex-1" asChild>
                             <a href={entry.portal_url} target="_blank" rel="noopener noreferrer">
