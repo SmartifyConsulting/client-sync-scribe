@@ -38,6 +38,7 @@ import {
   History,
   BarChart3,
   FolderOpen as ClientFolder,
+  Plug,
 } from "lucide-react";
 
 import { useUserRole } from "@/hooks/useUserRole";
@@ -94,6 +95,7 @@ const DOCTOR_SECTIONS: NavSection[] = [
       { icon: FolderOpen, label: "Documents", labelKey: "nav.allDocuments", to: "/documents" },
       { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
       { icon: Users2, label: "Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
+      { icon: Plug, label: "App Integrations", labelKey: "nav.appIntegrations", to: "/app-integrations" },
     ],
   },
 ];
@@ -172,6 +174,7 @@ const adminNavItems: NavItem[] = [
   { icon: BarChart3, label: "Performance", labelKey: "nav.performance", to: "/admin/performance" },
   { icon: DollarSign, label: "Pricing", labelKey: "nav.pricing", to: "/admin/pricing" },
   { icon: Gift, label: "Rewards", labelKey: "nav.rewards", to: "/admin/gamification" },
+  { icon: Plug, label: "Integrations", labelKey: "nav.integrationsAdmin", to: "/admin/integrations" },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true },
   { icon: Siren, label: "Hospital Portal", labelKey: "nav.hospitalPortal", to: "/provider/hospital", danger: true },
   { icon: Siren, label: "ER Portal", labelKey: "nav.erPortal", to: "/provider/ambulance", danger: true },

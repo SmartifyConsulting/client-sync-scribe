@@ -41,6 +41,7 @@ import ReferrerSignup from "./pages/ReferrerSignup";
 import ReferrerDashboard from "./pages/referrer/ReferrerDashboard";
 import ReferrerCommissions from "./pages/referrer/ReferrerCommissions";
 import BrokerReferrers from "./pages/broker/Referrers";
+import AppIntegrations from "./pages/broker/AppIntegrations";
 import QuotesScreen from "./pages/broker/QuotesScreen";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -78,6 +79,7 @@ import NurseProfile from "./pages/NurseProfile";
 import PracticePatients from "./pages/practice/PracticePatients";
 import PricingAdmin from "./pages/admin/PricingAdmin";
 import GamificationAdmin from "./pages/admin/GamificationAdmin";
+import IntegrationsAdmin from "./pages/admin/IntegrationsAdmin";
 import CountryPerformance from "./pages/admin/CountryPerformance";
 import BulkPasswordReset from "./pages/admin/BulkPasswordReset";
 
@@ -328,6 +330,7 @@ const App = () => (
             <Route path="/referrer-dashboard" element={<ReferrerDashboard />} />
             <Route path="/referrer-commissions" element={<ReferrerCommissions />} />
             <Route path="/referrers" element={<BrokerReferrers />} />
+            <Route path="/app-integrations" element={<AppIntegrations />} />
             <Route path="/quotes-screen" element={<QuotesScreen />} />
             <Route path="/earnings" element={<Navigate to="/practice?tab=earnings" replace />} />
             
@@ -339,6 +342,7 @@ const App = () => (
             <Route path="/admin/bulk-password-reset" element={<BulkPasswordReset />} />
             <Route path="/admin/users" element={<HolarcHelpProviders />} />
             <Route path="/admin/wealth-users" element={<WealthUsers />} />
+            <Route path="/admin/integrations" element={<IntegrationsAdmin />} />
             <Route path="/admin/holarchelp-providers" element={<Navigate to="/admin/users" replace />} />
             <Route path="/admin/holarchelp-accountability" element={<HolarcHelpAccountability />} />
             <Route path="/admin/holarchelp-providers/:type/:id/incidents" element={<HolarcHelpProviderIncidents />} />

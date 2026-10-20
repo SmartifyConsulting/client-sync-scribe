@@ -20,8 +20,15 @@ export const WEALTH_DEMO_PROFILES: TestProfile[] = [
   { email: "underwriting@demo.momentum.co.za", name: "Momentum Underwriting", role: "as Insurer", icon: Building2 },
 ];
 
+/** Real accounts — Marlin (Wealth Manager) and his client Georgia. */
+export const REAL_ACCOUNT_PROFILES: TestProfile[] = [
+  { email: "marlin@marlinmoodley.co.za", name: "Marlin Moodley", role: "as Wealth Manager", icon: Stethoscope },
+  { email: "georgiaadams@holarchealth.com", name: "Georgia Adams", role: "as Client", icon: HeartPulse },
+];
+
 export const TEST_PROFILES: TestProfile[] = [
   ...WEALTH_DEMO_PROFILES,
+  ...REAL_ACCOUNT_PROFILES,
   { email: "info@georgiaadams.co.za", name: "Georgia Adams", role: "Admin", icon: ShieldCheck },
 ];
 
