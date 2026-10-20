@@ -107,4 +107,7 @@
 - [x] Saved insurer logins used directly (no App Integrations visit)
 - [x] Insurer tabs with products quoted in each
 - [x] Compact frames, fields and fonts
+- [x] Insurers chosen first; they set the tabs
+- [x] Products pre-filled from needs analysis, 3 options each
+- [x] In-app OTP box per insurer tab (handed to broker helper)
 - [ ] Live insurer portal automation (Momentum first) — needs the real portal address; portals need broker 2FA
