@@ -10,6 +10,7 @@ const INSURERS: { match: RegExp; name: string; hsl: string }[] = [
   { match: /stanlib/i, name: "STANLIB", hsl: "215 70% 40%" },
   { match: /hollard/i, name: "Hollard", hsl: "280 45% 40%" },
   { match: /brightrock/i, name: "BrightRock", hsl: "20 80% 45%" },
+  { match: /bidvest|fmi/i, name: "Bidvest Life / FMI", hsl: "215 80% 32%" },
 ];
 const FALLBACK = "35 85% 38%";
 
