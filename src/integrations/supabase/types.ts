@@ -12677,7 +12677,11 @@ export type Database = {
         | "active"
         | "past_due"
         | "cancelled"
-      integration_category: "insurance" | "crm_planning" | "industry_portal"
+      integration_category:
+        | "insurance"
+        | "crm_planning"
+        | "industry_portal"
+        | "financial_service_provider"
       integration_status: "configured" | "pending" | "inactive"
       invitation_status: "pending" | "accepted" | "declined" | "expired"
       user_role:
@@ -12839,7 +12843,12 @@ export const Constants = {
         "past_due",
         "cancelled",
       ],
-      integration_category: ["insurance", "crm_planning", "industry_portal"],
+      integration_category: [
+        "insurance",
+        "crm_planning",
+        "industry_portal",
+        "financial_service_provider",
+      ],
       integration_status: ["configured", "pending", "inactive"],
       invitation_status: ["pending", "accepted", "declined", "expired"],
       user_role: [
