@@ -101,7 +101,11 @@ export default function IntegrationsAdmin() {
     setDialogOpen(true);
   };
 
+  // Every provider must always collect at least a username and password.
+  const MANDATORY_FIELDS = ["username", "password"] as const;
+
   const toggleField = (field: string) => {
+    if ((MANDATORY_FIELDS as readonly string[]).includes(field)) return;
     setDraft((d) => ({
       ...d,
       required_fields: d.required_fields.includes(field)
@@ -115,6 +119,7 @@ export default function IntegrationsAdmin() {
       toast({ title: "Missing fields", description: "ID, name, and portal URL are required.", variant: "destructive" });
       return;
     }
+    const requiredFields = Array.from(new Set([...MANDATORY_FIELDS, ...draft.required_fields]));
     setSaving(true);
     if (editingId) {
       const { error } = await db
@@ -123,7 +128,7 @@ export default function IntegrationsAdmin() {
           name: draft.name,
           category: draft.category,
           portal_url: draft.portal_url,
-          required_fields: draft.required_fields,
+          required_fields: requiredFields,
           is_active: draft.is_active,
         })
         .eq("id", editingId);
@@ -139,7 +144,7 @@ export default function IntegrationsAdmin() {
         name: draft.name,
         category: draft.category,
         portal_url: draft.portal_url,
-        required_fields: draft.required_fields,
+        required_fields: requiredFields,
         is_active: draft.is_active,
         display_order: maxOrder + 1,
       });
@@ -276,13 +281,21 @@ export default function IntegrationsAdmin() {
             </div>
             <div>
               <Label>Required Fields</Label>
+              <p className="text-xs text-[hsl(var(--admin-text-tertiary))] mb-1">Username and password are always required.</p>
               <div className="flex flex-wrap gap-3 mt-1">
-                {ALL_FIELDS.map((field) => (
-                  <label key={field} className="flex items-center gap-1.5 text-sm">
-                    <Checkbox checked={draft.required_fields.includes(field)} onCheckedChange={() => toggleField(field)} />
+                {ALL_FIELDS.map((field) => {
+                  const mandatory = (MANDATORY_FIELDS as readonly string[]).includes(field);
+                  return (
+                  <label key={field} className={`flex items-center gap-1.5 text-sm ${mandatory ? "opacity-70" : ""}`}>
+                    <Checkbox
+                      checked={mandatory || draft.required_fields.includes(field)}
+                      disabled={mandatory}
+                      onCheckedChange={() => toggleField(field)}
+                    />
                     {field}
                   </label>
-                ))}
+                  );
+                })}
               </div>
             </div>
             <div className="flex items-center gap-2">

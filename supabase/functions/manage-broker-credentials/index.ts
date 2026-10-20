@@ -6,7 +6,10 @@ import { z } from "npm:zod@3";
 // place plaintext passwords/pins are ever handled server-side; nothing else
 // should read/write broker_integration_credentials directly.
 const Body = z.discriminatedUnion("action", [
-  z.object({ action: z.literal("reauth"), password: z.string().min(1) }),
+  z.object({ action: z.literal("protector_status") }),
+  z.object({ action: z.literal("set_protector"), passcode: z.string().min(4).max(100), currentPasscode: z.string().max(100).optional() }),
+  z.object({ action: z.literal("reset_protector"), accountPassword: z.string().min(1), newPasscode: z.string().min(4).max(100) }),
+  z.object({ action: z.literal("reauth"), passcode: z.string().min(1) }),
   z.object({ action: z.literal("list") }),
   z.object({ action: z.literal("reveal"), integrationId: z.string().min(1), token: z.string().min(1) }),
   z.object({
@@ -64,6 +67,11 @@ async function verifyToken(secret: string, token: string, brokerUserId: string):
   return diff === 0;
 }
 
+async function sha256Hex(s: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 // ---- AES-256-GCM for credential payloads ----
 async function aesKey(secretB64: string) {
   const raw = Uint8Array.from(atob(secretB64), (c) => c.charCodeAt(0));
@@ -110,15 +118,65 @@ Deno.serve(async (req) => {
 
     const admin = createClient(supabaseUrl, serviceRoleKey);
 
-    if (p.action === "reauth") {
-      // Verify password by attempting a password grant sign-in for this user's email.
+    if (p.action === "protector_status") {
+      const { data: row } = await admin
+        .from("broker_security_settings")
+        .select("password_protector_hash")
+        .eq("broker_user_id", user.id)
+        .maybeSingle();
+      return json({ isSet: !!row?.password_protector_hash });
+    }
+
+    if (p.action === "set_protector") {
+      const { data: row } = await admin
+        .from("broker_security_settings")
+        .select("password_protector_hash")
+        .eq("broker_user_id", user.id)
+        .maybeSingle();
+
+      if (row?.password_protector_hash) {
+        if (!p.currentPasscode) return json({ error: "Current Password Protector required." }, 401);
+        if ((await sha256Hex(p.currentPasscode)) !== row.password_protector_hash) {
+          return json({ error: "Current Password Protector is incorrect." }, 401);
+        }
+      }
+
+      const newHash = await sha256Hex(p.passcode);
+      const { error } = await admin
+        .from("broker_security_settings")
+        .upsert({ broker_user_id: user.id, password_protector_hash: newHash }, { onConflict: "broker_user_id" });
+      if (error) return json({ error: "Could not save Password Protector." }, 500);
+      return json({ ok: true });
+    }
+
+    if (p.action === "reset_protector") {
+      // Forgot the Password Protector: fall back to confirming the account login password.
       const { data: userRow } = await admin.auth.admin.getUserById(user.id);
       const email = userRow?.user?.email;
       if (!email) return json({ error: "Could not verify account." }, 400);
 
       const verifyClient = createClient(supabaseUrl, anonKey);
-      const { error: signInError } = await verifyClient.auth.signInWithPassword({ email, password: p.password });
-      if (signInError) return json({ error: "Incorrect password." }, 401);
+      const { error: signInError } = await verifyClient.auth.signInWithPassword({ email, password: p.accountPassword });
+      if (signInError) return json({ error: "Incorrect account password." }, 401);
+
+      const newHash = await sha256Hex(p.newPasscode);
+      const { error } = await admin
+        .from("broker_security_settings")
+        .upsert({ broker_user_id: user.id, password_protector_hash: newHash }, { onConflict: "broker_user_id" });
+      if (error) return json({ error: "Could not reset Password Protector." }, 500);
+      return json({ ok: true });
+    }
+
+    if (p.action === "reauth") {
+      const { data: row } = await admin
+        .from("broker_security_settings")
+        .select("password_protector_hash")
+        .eq("broker_user_id", user.id)
+        .maybeSingle();
+      if (!row?.password_protector_hash) return json({ error: "Password Protector not set up yet." }, 400);
+      if ((await sha256Hex(p.passcode)) !== row.password_protector_hash) {
+        return json({ error: "Incorrect Password Protector." }, 401);
+      }
 
       if (!reauthSecret) return json({ error: "Server misconfigured." }, 500);
       const token = await signToken(reauthSecret, user.id);

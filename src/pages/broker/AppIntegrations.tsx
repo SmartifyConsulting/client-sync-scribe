@@ -51,9 +51,27 @@ export default function AppIntegrations() {
   const qc = useQueryClient();
 
   const [unlockOpen, setUnlockOpen] = useState(false);
-  const [unlockPassword, setUnlockPassword] = useState("");
+  const [passcode, setPasscode] = useState("");
   const [unlocking, setUnlocking] = useState(false);
   const [reauthToken, setReauthToken] = useState<string | null>(null);
+
+  // Set-up / change Password Protector
+  const [setProtectorOpen, setSetProtectorOpen] = useState(false);
+  const [currentPasscode, setCurrentPasscode] = useState("");
+  const [newPasscode, setNewPasscode] = useState("");
+  const [confirmPasscode, setConfirmPasscode] = useState("");
+  const [savingProtector, setSavingProtector] = useState(false);
+
+  // Forgot Password Protector — reset via account password
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [accountPassword, setAccountPassword] = useState("");
+  const [resettingProtector, setResettingProtector] = useState(false);
+
+  const protectorStatus = useQuery({
+    queryKey: ["password-protector-status", user?.id],
+    enabled: !!user,
+    queryFn: async (): Promise<boolean> => (await invoke({ action: "protector_status" })).isSet ?? false,
+  });
 
   const [manageEntry, setManageEntry] = useState<CatalogEntry | null>(null);
   const [manageUsername, setManageUsername] = useState("");
@@ -100,24 +118,87 @@ export default function AppIntegrations() {
   };
 
   const handleUnlock = async () => {
-    if (!unlockPassword) return;
+    if (!passcode) return;
     setUnlocking(true);
     try {
-      const data = await invoke({ action: "reauth", password: unlockPassword });
+      const data = await invoke({ action: "reauth", passcode });
       setReauthToken(data.token);
       setUnlockOpen(false);
-      setUnlockPassword("");
+      setPasscode("");
       toast.success("Unlocked for 10 minutes.");
     } catch (e: any) {
-      toast.error(e.message ?? "Incorrect password.");
+      toast.error(e.message ?? "Incorrect Password Protector.");
     } finally {
       setUnlocking(false);
     }
   };
 
+  const openProtectorGate = () => {
+    if (protectorStatus.data) {
+      setUnlockOpen(true);
+    } else {
+      setCurrentPasscode("");
+      setNewPasscode("");
+      setConfirmPasscode("");
+      setSetProtectorOpen(true);
+    }
+  };
+
+  const handleSetProtector = async () => {
+    if (newPasscode.length < 4) {
+      toast.error("Password Protector must be at least 4 characters.");
+      return;
+    }
+    if (newPasscode !== confirmPasscode) {
+      toast.error("Passcodes don't match.");
+      return;
+    }
+    setSavingProtector(true);
+    try {
+      await invoke({
+        action: "set_protector",
+        passcode: newPasscode,
+        ...(protectorStatus.data ? { currentPasscode } : {}),
+      });
+      toast.success(protectorStatus.data ? "Password Protector changed." : "Password Protector set up.");
+      setSetProtectorOpen(false);
+      protectorStatus.refetch();
+    } catch (e: any) {
+      toast.error(e.message ?? "Could not save Password Protector.");
+    } finally {
+      setSavingProtector(false);
+    }
+  };
+
+  const handleForgotReset = async () => {
+    if (newPasscode.length < 4) {
+      toast.error("Password Protector must be at least 4 characters.");
+      return;
+    }
+    if (newPasscode !== confirmPasscode) {
+      toast.error("Passcodes don't match.");
+      return;
+    }
+    setResettingProtector(true);
+    try {
+      await invoke({ action: "reset_protector", accountPassword, newPasscode });
+      toast.success("Password Protector reset.");
+      setForgotOpen(false);
+      setUnlockOpen(false);
+      setAccountPassword("");
+      setNewPasscode("");
+      setConfirmPasscode("");
+      protectorStatus.refetch();
+    } catch (e: any) {
+      toast.error(e.message ?? "Incorrect account password.");
+    } finally {
+      setResettingProtector(false);
+    }
+  };
+
   const openManage = async (entry: CatalogEntry) => {
     if (!reauthToken) {
-      setUnlockOpen(true);
+      openProtectorGate();
       return;
     }
     setManageEntry(entry);
@@ -173,8 +254,8 @@ export default function AppIntegrations() {
               <Unlock className="h-3.5 w-3.5" /> Unlocked
             </Badge>
           ) : (
-            <Button size="sm" onClick={() => setUnlockOpen(true)}>
-              <Lock className="h-4 w-4 mr-1.5" /> Unlock Credentials
+            <Button size="sm" onClick={openProtectorGate}>
+              <Lock className="h-4 w-4 mr-1.5" /> Password Protector
             </Button>
           )
         }
@@ -227,26 +308,105 @@ export default function AppIntegrations() {
         </div>
       )}
 
-      {/* Unlock dialog */}
+      {/* Password Protector — unlock */}
       <Dialog open={unlockOpen} onOpenChange={setUnlockOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Unlock Credentials</DialogTitle>
-            <DialogDescription>Confirm your password to manage saved portal credentials for the next 10 minutes.</DialogDescription>
+            <DialogTitle>Password Protector</DialogTitle>
+            <DialogDescription>Enter your Password Protector to manage saved portal credentials for the next 10 minutes.</DialogDescription>
           </DialogHeader>
           <div>
-            <Label>Password</Label>
+            <Label>Password Protector</Label>
             <Input
               type="password"
-              value={unlockPassword}
-              onChange={(e) => setUnlockPassword(e.target.value)}
+              value={passcode}
+              onChange={(e) => setPasscode(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleUnlock()}
             />
           </div>
+          <button
+            type="button"
+            className="text-xs text-muted-foreground hover:text-primary underline w-fit"
+            onClick={() => {
+              setUnlockOpen(false);
+              setAccountPassword("");
+              setNewPasscode("");
+              setConfirmPasscode("");
+              setForgotOpen(true);
+            }}
+          >
+            Forgot your Password Protector?
+          </button>
           <DialogFooter>
             <Button variant="outline" onClick={() => setUnlockOpen(false)}>Cancel</Button>
-            <Button onClick={handleUnlock} disabled={unlocking || !unlockPassword}>
+            <Button onClick={handleUnlock} disabled={unlocking || !passcode}>
               {unlocking ? <Loader2 className="h-4 w-4 animate-spin" /> : "Unlock"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Password Protector — set up / change */}
+      <Dialog open={setProtectorOpen} onOpenChange={setSetProtectorOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{protectorStatus.data ? "Change Password Protector" : "Set Up Password Protector"}</DialogTitle>
+            <DialogDescription>
+              {protectorStatus.data
+                ? "This is separate from your account login password."
+                : "Create a Password Protector to guard your saved portal credentials. This is separate from your account login password."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            {protectorStatus.data && (
+              <div>
+                <Label>Current Password Protector</Label>
+                <Input type="password" value={currentPasscode} onChange={(e) => setCurrentPasscode(e.target.value)} />
+              </div>
+            )}
+            <div>
+              <Label>New Password Protector</Label>
+              <Input type="password" value={newPasscode} onChange={(e) => setNewPasscode(e.target.value)} />
+            </div>
+            <div>
+              <Label>Confirm Password Protector</Label>
+              <Input type="password" value={confirmPasscode} onChange={(e) => setConfirmPasscode(e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSetProtectorOpen(false)}>Cancel</Button>
+            <Button onClick={handleSetProtector} disabled={savingProtector}>
+              {savingProtector ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Password Protector — forgot, reset via account password */}
+      <Dialog open={forgotOpen} onOpenChange={setForgotOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reset Password Protector</DialogTitle>
+            <DialogDescription>Confirm your account login password to set a new Password Protector.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>Account Password</Label>
+              <Input type="password" value={accountPassword} onChange={(e) => setAccountPassword(e.target.value)} />
+            </div>
+            <div>
+              <Label>New Password Protector</Label>
+              <Input type="password" value={newPasscode} onChange={(e) => setNewPasscode(e.target.value)} />
+            </div>
+            <div>
+              <Label>Confirm Password Protector</Label>
+              <Input type="password" value={confirmPasscode} onChange={(e) => setConfirmPasscode(e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setForgotOpen(false)}>Cancel</Button>
+            <Button onClick={handleForgotReset} disabled={resettingProtector}>
+              {resettingProtector ? <Loader2 className="h-4 w-4 animate-spin" /> : "Reset"}
             </Button>
           </DialogFooter>
         </DialogContent>
