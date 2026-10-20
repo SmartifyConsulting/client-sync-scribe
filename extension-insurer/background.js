@@ -1,5 +1,11 @@
 // Drives one insurer login per tab. Credentials live only in memory for the job.
 const jobs = new Map(); // portalTabId -> job
+const trustedApp = (url) => {
+  try {
+    const u = new URL(url);
+    return ["https://holarc.co.za", "https://www.holarc.co.za", "https://holarc-wealth.lovable.app", "https://id-preview--320b9905-9d0e-4ca1-af45-821272397de6.lovable.app", "http://localhost:8080"].includes(u.origin);
+  } catch { return false; }
+};
 
 function tell(job, msg) {
   chrome.tabs.sendMessage(job.appTabId, { insurer: job.insurer, workflowId: job.workflowId, ...msg }).catch(() => {});
@@ -7,45 +13,107 @@ function tell(job, msg) {
 
 chrome.runtime.onMessage.addListener((d, sender) => {
   const appTabId = sender.tab?.id;
+  if (!appTabId || !trustedApp(sender.tab?.url)) return;
   if (d.type === "insurer-login") {
     if (!d.loginUrl || !d.username || !d.password) {
       chrome.tabs.sendMessage(appTabId, { type: "insurer-login-result", insurer: d.insurer, workflowId: d.workflowId, ok: false, message: "No saved login address or password." });
       return;
     }
+    let origin;
+    try { const u = new URL(d.loginUrl); if (u.protocol !== "https:" || u.username || u.password) throw new Error(); origin = u.origin; }
+    catch { tell({ appTabId, ...d }, { type: "insurer-login-result", ok: false, message: "Set a valid HTTPS portal URL for this insurer." }); return; }
+    const existing = [...jobs.entries()].find(([, j]) => j.appTabId === appTabId && j.insurer === d.insurer && j.workflowId === d.workflowId);
+    if (existing) { chrome.tabs.remove(existing[0]).catch(() => {}); jobs.delete(existing[0]); }
     chrome.tabs.create({ url: d.loginUrl, active: true }, (tab) => {
-      jobs.set(tab.id, { ...d, appTabId, step: 0, done: false });
+      if (!tab?.id) return;
+      const job = { ...d, appTabId, origin, step: 0, done: false, submitted: false, expires: Date.now() + 15 * 60 * 1000 };
+      jobs.set(tab.id, job);
+      // Persist only routing metadata, never passwords/PINs.
+      chrome.storage.session.set({ [`portal-${tab.id}`]: { appTabId, insurer: d.insurer, workflowId: d.workflowId, origin, expires: job.expires } });
     });
     return;
   }
-  const entry = [...jobs.entries()].find(([, j]) => j.insurer === d.insurer && j.appTabId === appTabId);
+  const entry = [...jobs.entries()].find(([, j]) => j.insurer === d.insurer && j.workflowId === d.workflowId && j.appTabId === appTabId);
   if (!entry) return;
   const [tabId, job] = entry;
   if (d.type === "insurer-otp") {
-    chrome.scripting.executeScript({ target: { tabId }, func: fillOtp, args: [d.otp] });
+    if (!/^\d{4,8}$/.test(d.otp)) return;
+    chrome.scripting.executeScript({ target: { tabId }, func: fillOtp, args: [d.otp] }).then(() => {
+      job.done = false;
+      job.challenge = null;
+      setTimeout(() => checkPortal(tabId), 1500);
+    }).catch(() => tell(job, { type: "insurer-login-result", ok: false, message: "Finish verification in the insurer tab." }));
     chrome.tabs.update(tabId, { active: true });
   }
-  if (d.type === "insurer-email-check") chrome.tabs.reload(tabId);
+  if (d.type === "insurer-email-check") { job.done = false; job.challenge = null; chrome.tabs.reload(tabId); }
 });
 
-chrome.tabs.onRemoved.addListener((id) => jobs.delete(id));
+chrome.tabs.onRemoved.addListener((id) => { const job = jobs.get(id); if (job) tell(job, { type: "insurer-login-result", ok: false, message: "Insurer portal tab closed." }); jobs.delete(id); chrome.storage.session.remove(`portal-${id}`); });
 
 chrome.tabs.onUpdated.addListener(async (tabId, info) => {
-  const job = jobs.get(tabId);
-  if (!job || job.done || info.status !== "complete") return;
-  job.step += 1;
-  if (job.step > 6) { job.done = true; tell(job, { type: "insurer-login-result", ok: false, message: "The portal didn't finish logging in. Please finish in the insurer tab." }); return; }
-  // Give single-page portals a moment to draw the form.
-  await new Promise((r) => setTimeout(r, 1200));
-  const [res] = await chrome.scripting.executeScript({ target: { tabId }, func: drive, args: [job.username, job.password] }).catch(() => [{}]);
-  const r = res?.result || {};
-  if (r.state === "otp") tell(job, { type: "insurer-challenge", method: "otp", hint: r.hint });
-  else if (r.state === "email") tell(job, { type: "insurer-challenge", method: "email", hint: r.hint });
-  else if (r.state === "submitted") tell(job, { type: "insurer-login-progress", state: "connecting" });
-  else if (r.state === "in") { job.done = true; tell(job, { type: "insurer-login-result", ok: true }); }
+  if (info.status === "complete") checkPortal(tabId);
 });
 
+async function checkPortal(tabId) {
+  const job = jobs.get(tabId);
+  if (!job || job.done || job.checking) return;
+  if (Date.now() >= job.expires) { job.username = ""; job.password = ""; job.done = true; tell(job, { type: "insurer-login-result", ok: false, message: "The 15-minute quote session expired. Unlock again." }); return; }
+  const tab = await chrome.tabs.get(tabId).catch(() => null);
+  if (!tab?.url || new URL(tab.url).origin !== job.origin) {
+    job.done = true; job.username = ""; job.password = "";
+    tell(job, { type: "insurer-login-result", ok: false, message: "The portal redirected to another login site. Finish there, or update the portal URL in Holarc Wealth." }); return;
+  }
+  job.checking = true;
+  job.step += 1;
+  if (job.step > 90) { job.done = true; job.checking = false; job.username = ""; job.password = ""; tell(job, { type: "insurer-login-result", ok: false, message: "The portal didn't finish logging in. Please finish in the insurer tab." }); return; }
+  // Give single-page portals a moment to draw the form.
+  await new Promise((r) => setTimeout(r, 1200));
+  const [res] = await chrome.scripting.executeScript({ target: { tabId }, func: drive, args: [job.username, job.password, job.submitted] }).catch(() => [{}]);
+  const r = res?.result || {};
+  job.checking = false;
+  if (r.state === "otp" || r.state === "email") {
+    if (job.challenge !== r.state) tell(job, { type: "insurer-challenge", method: r.state, hint: r.hint });
+    job.challenge = r.state;
+  } else if (r.state === "submitted") { job.submitted = true; tell(job, { type: "insurer-login-progress", state: "connecting" }); }
+  else if (r.state === "in") { job.done = true; job.username = ""; job.password = ""; tell(job, { type: "insurer-login-result", ok: true }); }
+  else if (r.state === "failed") { job.done = true; job.username = ""; job.password = ""; tell(job, { type: "insurer-login-result", ok: false, message: "The insurer rejected the login. Check it in the portal." }); }
+  if (!job.done) setTimeout(() => checkPortal(tabId), 2500);
+}
+
+// Capture only PDF downloads from a uniquely associated, broker-opened portal.
+// No reading unrelated browsing/downloads, no forwarding session cookies.
+chrome.downloads.onCreated.addListener(async (item) => {
+  if (!/\.pdf(?:[?#]|$)/i.test(item.filename || item.url) && item.mime !== "application/pdf") return;
+  const stored = await chrome.storage.session.get(null);
+  const entries = Object.entries(stored).filter(([key, j]) => key.startsWith("portal-") && Date.now() < j.expires);
+  const matches = entries.filter(([, j]) => {
+    try { return new URL(item.referrer || item.url).origin === j.origin && new URL(item.url).origin === j.origin; } catch { return false; }
+  });
+  if (matches.length !== 1) return;
+  const [key, job] = matches[0];
+  const tabId = Number(key.slice(7));
+  const app = await chrome.tabs.get(job.appTabId).catch(() => null);
+  if (!trustedApp(app?.url)) return;
+  try {
+    const [result] = await chrome.scripting.executeScript({ target: { tabId }, func: readPdf, args: [item.url] });
+    if (!result?.result?.base64) throw new Error();
+    tell(job, { type: "insurer-pdf", captureId: `${tabId}-${item.id}`, filename: (item.filename || "quote.pdf").split(/[\\/]/).pop(), base64: result.result.base64 });
+  } catch { tell(job, { type: "insurer-pdf-error" }); }
+});
+
+async function readPdf(url) {
+  if (new URL(url).origin !== location.origin) throw new Error("Unsupported PDF source");
+  const response = await fetch(url, { credentials: "include", redirect: "error" });
+  if (!response.ok || Number(response.headers.get("content-length")) > 5242880) throw new Error("PDF unavailable");
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  if (bytes.length > 5242880 || new TextDecoder().decode(bytes.slice(0, 5)) !== "%PDF-") throw new Error("Invalid PDF");
+  let text = "";
+  for (let i = 0; i < bytes.length; i += 8192) text += String.fromCharCode(...bytes.subarray(i, i + 8192));
+  return { base64: btoa(text) };
+}
+
 // ---- injected into the insurer page ----
-function drive(username, password) {
+function drive(username, password, submitted) {
   const vis = (el) => el && el.offsetParent !== null && !el.disabled;
   const setVal = (el, v) => {
     const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set;
@@ -62,6 +130,7 @@ function drive(username, password) {
   };
   const inputs = [...document.querySelectorAll("input")].filter(vis);
   const text = document.body.innerText || "";
+  if (/incorrect password|invalid (credentials|password|username)|login failed/i.test(text)) return { state: "failed" };
   const otp = inputs.find((i) => i.autocomplete === "one-time-code" || /otp|pin|token|code|verification/i.test(`${i.name} ${i.id} ${i.placeholder} ${i.getAttribute("aria-label") || ""}`));
   if (otp && !inputs.some((i) => i.type === "password")) {
     const m = text.match(/sent to ([^\n.]{3,40})/i);
@@ -74,19 +143,21 @@ function drive(username, password) {
   const pw = inputs.find((i) => i.type === "password");
   const user = inputs.find((i) => ["text", "email", "tel"].includes(i.type) && /user|email|login|id|name/i.test(`${i.name} ${i.id} ${i.placeholder} ${i.autocomplete}`)) ||
     inputs.find((i) => ["text", "email"].includes(i.type));
-  if (pw) {
+  if (pw && !submitted) {
     if (user && !user.value) setVal(user, username);
     setVal(pw, password);
     submit(pw);
     return { state: "submitted" };
   }
   if (user && !user.value && /log ?in|sign ?in|username/i.test(text)) { setVal(user, username); submit(user); return { state: "submitted" }; }
-  return { state: "in" };
+  if (!pw && /log ?out|sign ?out/i.test(text) && /quote|quotation|new business|adviser dashboard/i.test(text)) return { state: "in" };
+  return { state: "waiting" };
 }
 
 function fillOtp(code) {
   const vis = (el) => el && el.offsetParent !== null && !el.disabled;
   const inputs = [...document.querySelectorAll("input")].filter(vis).filter((i) => i.type !== "hidden" && i.type !== "checkbox");
+  if (!inputs.length) return;
   const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set;
   const put = (el, v) => { el.focus(); setter.call(el, v); el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); };
   const boxes = inputs.filter((i) => i.maxLength === 1);

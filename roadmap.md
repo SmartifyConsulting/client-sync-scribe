@@ -117,7 +117,7 @@
 - [x] Insurer tabs as real tabs in legend colours, no counts, login progress ring
 - [x] PIN / email verification pops up as a window (no inline box)
 - [x] Black product headers, white text; removed "requests quotes from six insurers" line
-- [ ] Browser add-on: log in, answer PIN/email prompt, capture quote PDF into Working Window + Documents — add-on not built; needs real Momentum portal address
+- [x] Browser add-on login/challenge and same-origin PDF capture implemented; live insurer validation tracked below
 
 ## Step 4 quotes — Oct 2026
 - [x] Existing cover prominent with insurer per policy; Since/Last seen under email
@@ -125,10 +125,19 @@
 - [x] Quote-request email on each insurer's App Integrations card
 - [x] Insurer option dictionary (from public product guides) shown per insurer tab
 - [ ] Confirm dictionary against live insurer quote screens — blocked: needs broker login + PIN
-- [ ] Browser add-on for insurer login / PDF capture — not built; needs Momentum's correct login address
+- [x] Browser add-on for insurer login / PDF capture implemented; live portal validation tracked below
 - [ ] Send quote requests by email to the saved address
 
 ## Insurer login add-on (Oct 2026)
 - [x] Browser add-on: opens portal, fills saved login, relays PIN/email prompt to Holarc
 - [ ] Test against each live portal — Momentum/Bidvest addresses invalid; selectors unverified
-- [ ] Capture quote PDF into Working Window + Documents
+- [x] Capture quote PDF into Working Window + Documents; verified with Georgia Demo upload
+
+## Holarc Wealth Companion — agreed Oct 20 updates
+- [x] Editable per-broker insurer portal URLs
+- [x] Restore insurer legend colours, retain orange ordinary badges
+- [x] 15-minute Password Protector unlock and expiry tests
+- [x] One-time Companion setup and open-portal / PDF-upload fallback
+- [x] Automatic quote PDF attachment via Companion for same-origin portal downloads; other sources use upload
+- [x] Verify UI and attachment pipeline with Georgia Demo, including duplicate readback and Working Window PDF preview
+- [ ] Real insurer login / quote-form / download validation — requires broker-installed Companion, correct portal URL and broker verification; no external insurer requests made

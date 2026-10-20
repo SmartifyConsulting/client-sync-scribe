@@ -145,7 +145,7 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
               <SolidBadge className="bg-emerald-600">{clientFirst}</SolidBadge>
               <SolidBadge className="bg-blue-600">{avatars.advisor.name && avatars.advisor.name !== "Wealth Manager" ? avatars.advisor.name.split(" ")[0] : "Wealth Manager"}</SolidBadge>
               <SolidBadge className="bg-slate-600">System</SolidBadge>
-              {Array.from(new Set((m.records?.holdings ?? []).map((h: any) => h.provider as string))).map((p) => <InsurerBadge key={p} provider={p} />)}
+              {Array.from(new Set((m.records?.holdings ?? []).map((h: any) => h.provider as string))).map((p) => <InsurerBadge key={p} provider={p} legend />)}
             </>} />
         </div>
         <div className="min-w-0 rounded-xl border border-border bg-card p-4 lg:sticky lg:top-4">

@@ -48,6 +48,7 @@ interface CredentialStatus {
   updated_at: string | null;
   has_credentials: boolean;
   quote_email?: string | null;
+  portal_url?: string | null;
 }
 
 const CATEGORY_LABELS: Record<Category, string> = {
@@ -229,6 +230,12 @@ export default function AppIntegrations() {
       toast.error("Enter all required fields before saving.");
       return;
     }
+    if (manageFields.portal_url) {
+      try {
+        const url = new URL(manageFields.portal_url);
+        if (url.protocol !== "https:" || url.username || url.password) throw new Error();
+      } catch { toast.error("Enter a valid HTTPS portal URL without login details."); return; }
+    }
     setSaving(true);
     try {
       await invoke({
@@ -390,7 +397,7 @@ export default function AppIntegrations() {
                       <div key={entry.id} className="rounded-md border bg-card px-3 py-2.5 space-y-2">
                         <div className="flex items-center justify-between gap-2">
                           <a
-                            href={entry.portal_url}
+            href={status?.portal_url || entry.portal_url}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-sm font-medium truncate min-w-0 hover:underline hover:text-primary inline-flex items-center gap-1"
@@ -408,6 +415,7 @@ export default function AppIntegrations() {
                             Quote requests: {status?.quote_email ? <span className="text-foreground">{status.quote_email}</span> : <span className="italic">no email set</span>}
                           </p>
                         )}
+                        <p className="truncate text-xs text-muted-foreground" title={status?.portal_url || entry.portal_url}>{status?.portal_url || entry.portal_url}</p>
                         <div className="flex gap-1.5">
                           <Button variant="ghost" size="sm" className="flex-1 h-7 text-xs px-2" onClick={() => openManage(entry)}>
                             <Settings2 className="h-3 w-3 mr-1" /> Credentials
@@ -466,6 +474,11 @@ export default function AppIntegrations() {
             </div>
           ) : (
             <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="insurer-portal-url">Portal URL</Label>
+                <Input id="insurer-portal-url" type="url" placeholder="https://" value={manageFields.portal_url ?? manageEntry?.portal_url ?? ""}
+                  onChange={(e) => setManageFields((f) => ({ ...f, portal_url: e.target.value }))} />
+              </div>
               {manageEntry?.required_fields.includes("username") && (
                 <div>
                   <Label>Username</Label>
@@ -480,7 +493,7 @@ export default function AppIntegrations() {
                   <p className="mt-1 text-xs text-muted-foreground">Where quote requests go when you choose to request by email.</p>
                 </div>
               )}
-              {manageEntry?.required_fields.filter((f) => f !== "username" && f !== "quote_email").map((field) => (
+              {manageEntry?.required_fields.filter((f) => f !== "username" && f !== "quote_email" && f !== "portal_url").map((field) => (
                 <div key={field}>
                   <Label className="capitalize">{field.replace(/_/g, " ")}</Label>
                   <div className="relative">
