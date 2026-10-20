@@ -101,3 +101,10 @@
 - [x] Calendar + notifications back in top bar; Documents nav count removed
 - [x] Clients can read their WM's name (no more "Your Wealth Manager")
 - [x] Option A/B quoting selector, per-step output cards (Steps 3–4), legend tick colours
+
+## Step 4 quotes (Oct 2026)
+- [x] Amounts shown as R 1 000 000.00
+- [x] Saved insurer logins used directly (no App Integrations visit)
+- [x] Insurer tabs with products quoted in each
+- [x] Compact frames, fields and fonts
+- [ ] Live insurer portal automation (Momentum first) — needs the real portal address; portals need broker 2FA
