@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { KeyRound, Loader2, Plus, X } from "lucide-react";
+import { Loader2, Plus, X } from "lucide-react";
+import { insurerColor } from "./insurerColors";
+import { LoginRing, LOGIN_TEXT, OtpDialog, type Challenge, type LoginState } from "./InsurerLogin";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -127,14 +129,6 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
     qc.invalidateQueries({ queryKey: ["wealth-quote-spec", workflowId] });
   };
 
-  /** Hands the code to the broker-side helper running the insurer's login for this session. */
-  const sendOtp = (ins: string) => {
-    const code = (otp[ins] ?? "").trim();
-    if (!/^\d{4,8}$/.test(code)) return toast({ title: "Enter the 4–8 digit code from the insurer", variant: "destructive" });
-    window.postMessage({ source: "holarc", type: "insurer-otp", insurer: ins, workflowId, otp: code }, window.location.origin);
-    setOtp((o) => ({ ...o, [ins]: "" }));
-    setOtpState((s) => ({ ...s, [ins]: "Waiting for the browser add-on…" }));
-  };
 
   if (isLoading) return <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />;
   if (!isWM) return null;
