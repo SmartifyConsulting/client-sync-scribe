@@ -141,6 +141,16 @@ Deno.serve(async (req) => {
         }
       }
 
+      const { data: userRow } = await admin.auth.admin.getUserById(user.id);
+      const email = userRow?.user?.email;
+      if (email) {
+        const verifyClient = createClient(supabaseUrl, anonKey);
+        const { error: matchesAccountPw } = await verifyClient.auth.signInWithPassword({ email, password: p.passcode });
+        if (!matchesAccountPw) {
+          return json({ error: "Your Password Protector can't be the same as your account login password." }, 400);
+        }
+      }
+
       const newHash = await sha256Hex(p.passcode);
       const { error } = await admin
         .from("broker_security_settings")
@@ -158,6 +168,10 @@ Deno.serve(async (req) => {
       const verifyClient = createClient(supabaseUrl, anonKey);
       const { error: signInError } = await verifyClient.auth.signInWithPassword({ email, password: p.accountPassword });
       if (signInError) return json({ error: "Incorrect account password." }, 401);
+
+      if (p.newPasscode === p.accountPassword) {
+        return json({ error: "Your Password Protector can't be the same as your account login password." }, 400);
+      }
 
       const newHash = await sha256Hex(p.newPasscode);
       const { error } = await admin
@@ -242,6 +256,7 @@ Deno.serve(async (req) => {
             username: p.username ?? null,
             encrypted_credentials: encrypted,
             status: "configured",
+            is_enabled: true,
           },
           { onConflict: "broker_user_id,integration_id" },
         );

@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ComponentProps } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Lock, Unlock, ExternalLink, Settings2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Lock, ExternalLink, Settings2, Eye, EyeOff, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,10 +9,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 
 const db = supabase as any;
+
+function PasswordInput(props: ComponentProps<typeof Input>) {
+  const [visible, setVisible] = useState(false);
+  return (
+    <div className="relative">
+      <Input {...props} type={visible ? "text" : "password"} className={`pr-9 ${props.className ?? ""}`} />
+      <button
+        type="button"
+        tabIndex={-1}
+        className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+        onClick={() => setVisible((v) => !v)}
+      >
+        {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+      </button>
+    </div>
+  );
+}
 
 type Category = "insurance" | "crm_planning" | "industry_portal";
 
@@ -50,13 +66,17 @@ export default function AppIntegrations() {
   const { user } = useAuth();
   const qc = useQueryClient();
 
-  const [unlockOpen, setUnlockOpen] = useState(false);
+  // The screen is locked every time it's opened — this is in-memory only,
+  // never persisted, so navigating away and back always re-locks it.
   const [passcode, setPasscode] = useState("");
   const [unlocking, setUnlocking] = useState(false);
   const [reauthToken, setReauthToken] = useState<string | null>(null);
 
+  // Re-lock automatically the moment this page unmounts.
+  useEffect(() => () => setReauthToken(null), []);
+
   // Set-up / change Password Protector
-  const [setProtectorOpen, setSetProtectorOpen] = useState(false);
+  const [changeProtectorOpen, setChangeProtectorOpen] = useState(false);
   const [currentPasscode, setCurrentPasscode] = useState("");
   const [newPasscode, setNewPasscode] = useState("");
   const [confirmPasscode, setConfirmPasscode] = useState("");
@@ -88,7 +108,7 @@ export default function AppIntegrations() {
 
   const credentials = useQuery({
     queryKey: ["broker-integration-credentials", user?.id],
-    enabled: !!user,
+    enabled: !!user && !!reauthToken,
     queryFn: async (): Promise<CredentialStatus[]> => (await invoke({ action: "list" })).credentials ?? [],
   });
 
@@ -102,45 +122,17 @@ export default function AppIntegrations() {
     }));
   }, [catalog.data]);
 
-  const handleToggle = async (entry: CatalogEntry, enabled: boolean) => {
-    qc.setQueryData(["broker-integration-credentials", user?.id], (prev: CredentialStatus[] | undefined) => {
-      const list = prev ?? [];
-      const existing = list.find((c) => c.integration_id === entry.id);
-      if (existing) return list.map((c) => (c.integration_id === entry.id ? { ...c, is_enabled: enabled } : c));
-      return [...list, { integration_id: entry.id, is_enabled: enabled, status: "pending", updated_at: null, has_credentials: false }];
-    });
-    try {
-      await invoke({ action: "toggle", integrationId: entry.id, isEnabled: enabled });
-    } catch (e: any) {
-      toast.error(e.message ?? "Could not update integration.");
-      credentials.refetch();
-    }
-  };
-
   const handleUnlock = async () => {
     if (!passcode) return;
     setUnlocking(true);
     try {
       const data = await invoke({ action: "reauth", passcode });
       setReauthToken(data.token);
-      setUnlockOpen(false);
       setPasscode("");
-      toast.success("Unlocked for 10 minutes.");
     } catch (e: any) {
       toast.error(e.message ?? "Incorrect Password Protector.");
     } finally {
       setUnlocking(false);
-    }
-  };
-
-  const openProtectorGate = () => {
-    if (protectorStatus.data) {
-      setUnlockOpen(true);
-    } else {
-      setCurrentPasscode("");
-      setNewPasscode("");
-      setConfirmPasscode("");
-      setSetProtectorOpen(true);
     }
   };
 
@@ -160,8 +152,18 @@ export default function AppIntegrations() {
         passcode: newPasscode,
         ...(protectorStatus.data ? { currentPasscode } : {}),
       });
-      toast.success(protectorStatus.data ? "Password Protector changed." : "Password Protector set up.");
-      setSetProtectorOpen(false);
+      if (protectorStatus.data) {
+        toast.success("Password Protector changed.");
+        setChangeProtectorOpen(false);
+      } else {
+        // First-time setup also unlocks the screen immediately.
+        const data = await invoke({ action: "reauth", passcode: newPasscode });
+        setReauthToken(data.token);
+        toast.success("Password Protector set up.");
+      }
+      setCurrentPasscode("");
+      setNewPasscode("");
+      setConfirmPasscode("");
       protectorStatus.refetch();
     } catch (e: any) {
       toast.error(e.message ?? "Could not save Password Protector.");
@@ -182,9 +184,10 @@ export default function AppIntegrations() {
     setResettingProtector(true);
     try {
       await invoke({ action: "reset_protector", accountPassword, newPasscode });
+      const data = await invoke({ action: "reauth", passcode: newPasscode });
+      setReauthToken(data.token);
       toast.success("Password Protector reset.");
       setForgotOpen(false);
-      setUnlockOpen(false);
       setAccountPassword("");
       setNewPasscode("");
       setConfirmPasscode("");
@@ -197,10 +200,7 @@ export default function AppIntegrations() {
   };
 
   const openManage = async (entry: CatalogEntry) => {
-    if (!reauthToken) {
-      openProtectorGate();
-      return;
-    }
+    if (!reauthToken) return;
     setManageEntry(entry);
     setManageUsername("");
     setManageFields({});
@@ -214,7 +214,6 @@ export default function AppIntegrations() {
       toast.error(e.message ?? "Session expired — please unlock again.");
       setReauthToken(null);
       setManageEntry(null);
-      setUnlockOpen(true);
     } finally {
       setLoadingReveal(false);
     }
@@ -222,6 +221,12 @@ export default function AppIntegrations() {
 
   const handleSaveCredentials = async () => {
     if (!manageEntry || !reauthToken) return;
+    const missingUsername = manageEntry.required_fields.includes("username") && !manageUsername.trim();
+    const missingField = manageEntry.required_fields.some((f) => f !== "username" && !manageFields[f]?.trim());
+    if (missingUsername || missingField) {
+      toast.error("Enter all required fields before saving.");
+      return;
+    }
     setSaving(true);
     try {
       await invoke({
@@ -241,6 +246,107 @@ export default function AppIntegrations() {
     }
   };
 
+  // ---- Locked states: nothing about the integrations is shown until unlocked ----
+
+  if (protectorStatus.isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!reauthToken) {
+    const firstTime = !protectorStatus.data;
+    return (
+      <div className="max-w-sm mx-auto mt-16 space-y-4 text-center">
+        <Lock className="h-10 w-10 mx-auto text-[hsl(var(--navy))]" />
+        <h1 className="text-xl font-semibold text-[hsl(var(--navy))]">
+          {firstTime ? "Set Up Password Protector" : "App Integrations Locked"}
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          {firstTime
+            ? "Create a Password Protector to guard your saved portal credentials. This is separate from your account login password."
+            : "Enter your Password Protector to view and manage your connected portals."}
+        </p>
+        {firstTime ? (
+          <div className="space-y-3 text-left">
+            <div>
+              <Label>New Password Protector</Label>
+              <PasswordInput value={newPasscode} onChange={(e) => setNewPasscode(e.target.value)} />
+            </div>
+            <div>
+              <Label>Confirm Password Protector</Label>
+              <PasswordInput value={confirmPasscode} onChange={(e) => setConfirmPasscode(e.target.value)} />
+            </div>
+            <Button className="w-full" onClick={handleSetProtector} disabled={savingProtector}>
+              {savingProtector ? <Loader2 className="h-4 w-4 animate-spin" /> : "Set Up & Continue"}
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-3 text-left">
+            <div>
+              <Label>Password Protector</Label>
+              <PasswordInput
+                value={passcode}
+                onChange={(e) => setPasscode(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleUnlock()}
+                autoFocus
+              />
+            </div>
+            <Button className="w-full" onClick={handleUnlock} disabled={unlocking || !passcode}>
+              {unlocking ? <Loader2 className="h-4 w-4 animate-spin" /> : "Unlock"}
+            </Button>
+            <button
+              type="button"
+              className="text-xs text-muted-foreground hover:text-primary underline w-full text-center"
+              onClick={() => {
+                setAccountPassword("");
+                setNewPasscode("");
+                setConfirmPasscode("");
+                setForgotOpen(true);
+              }}
+            >
+              Forgot your Password Protector?
+            </button>
+          </div>
+        )}
+
+        {/* Forgot Password Protector — reset via account password */}
+        <Dialog open={forgotOpen} onOpenChange={setForgotOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Reset Password Protector</DialogTitle>
+              <DialogDescription>Confirm your account login password to set a new Password Protector.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 text-left">
+              <div>
+                <Label>Account Password</Label>
+                <PasswordInput value={accountPassword} onChange={(e) => setAccountPassword(e.target.value)} />
+              </div>
+              <div>
+                <Label>New Password Protector</Label>
+                <PasswordInput value={newPasscode} onChange={(e) => setNewPasscode(e.target.value)} />
+              </div>
+              <div>
+                <Label>Confirm Password Protector</Label>
+                <PasswordInput value={confirmPasscode} onChange={(e) => setConfirmPasscode(e.target.value)} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setForgotOpen(false)}>Cancel</Button>
+              <Button onClick={handleForgotReset} disabled={resettingProtector}>
+                {resettingProtector ? <Loader2 className="h-4 w-4 animate-spin" /> : "Reset"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }
+
+  // ---- Unlocked: show the cards ----
+
   const loading = catalog.isLoading || credentials.isLoading;
 
   return (
@@ -249,15 +355,18 @@ export default function AppIntegrations() {
         title={<span className="text-[hsl(var(--navy))]">App Integrations</span>}
         subtitle="Connect your insurance, CRM, and industry portal logins."
         actions={
-          reauthToken ? (
-            <Badge variant="outline" className="gap-1.5">
-              <Unlock className="h-3.5 w-3.5" /> Unlocked
-            </Badge>
-          ) : (
-            <Button size="sm" onClick={openProtectorGate}>
-              <Lock className="h-4 w-4 mr-1.5" /> Password Protector
-            </Button>
-          )
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setCurrentPasscode("");
+              setNewPasscode("");
+              setConfirmPasscode("");
+              setChangeProtectorOpen(true);
+            }}
+          >
+            <KeyRound className="h-3.5 w-3.5 mr-1.5" /> Change Password Protector
+          </Button>
         }
       />
 
@@ -278,15 +387,12 @@ export default function AppIntegrations() {
                     return (
                       <div key={entry.id} className="rounded-md border bg-card px-3 py-2.5 space-y-2">
                         <div className="flex items-center justify-between gap-2">
-                          <div className="min-w-0">
-                            <p className="text-sm font-medium truncate">{entry.name}</p>
-                            <Badge variant={configured ? "default" : "secondary"} className="mt-0.5 text-2xs px-1.5 py-0 font-normal">
-                              {configured
-                                ? `Configured${status?.updated_at ? ` · ${new Date(status.updated_at).toLocaleDateString()}` : ""}`
-                                : "Not Set Up"}
-                            </Badge>
-                          </div>
-                          <Switch checked={status?.is_enabled ?? false} onCheckedChange={(v) => handleToggle(entry, v)} className="shrink-0" />
+                          <p className="text-sm font-medium truncate min-w-0">{entry.name}</p>
+                          <Badge variant={configured ? "default" : "secondary"} className="shrink-0 text-2xs px-1.5 py-0 font-normal">
+                            {configured
+                              ? `Configured${status?.updated_at ? ` · ${new Date(status.updated_at).toLocaleDateString()}` : ""}`
+                              : "Not Set Up"}
+                          </Badge>
                         </div>
                         <div className="flex gap-1.5">
                           <Button variant="ghost" size="sm" className="flex-1 h-7 text-xs px-2" asChild>
@@ -308,105 +414,31 @@ export default function AppIntegrations() {
         </div>
       )}
 
-      {/* Password Protector — unlock */}
-      <Dialog open={unlockOpen} onOpenChange={setUnlockOpen}>
+      {/* Change Password Protector */}
+      <Dialog open={changeProtectorOpen} onOpenChange={setChangeProtectorOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Password Protector</DialogTitle>
-            <DialogDescription>Enter your Password Protector to manage saved portal credentials for the next 10 minutes.</DialogDescription>
-          </DialogHeader>
-          <div>
-            <Label>Password Protector</Label>
-            <Input
-              type="password"
-              value={passcode}
-              onChange={(e) => setPasscode(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleUnlock()}
-            />
-          </div>
-          <button
-            type="button"
-            className="text-xs text-muted-foreground hover:text-primary underline w-fit"
-            onClick={() => {
-              setUnlockOpen(false);
-              setAccountPassword("");
-              setNewPasscode("");
-              setConfirmPasscode("");
-              setForgotOpen(true);
-            }}
-          >
-            Forgot your Password Protector?
-          </button>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setUnlockOpen(false)}>Cancel</Button>
-            <Button onClick={handleUnlock} disabled={unlocking || !passcode}>
-              {unlocking ? <Loader2 className="h-4 w-4 animate-spin" /> : "Unlock"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Password Protector — set up / change */}
-      <Dialog open={setProtectorOpen} onOpenChange={setSetProtectorOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{protectorStatus.data ? "Change Password Protector" : "Set Up Password Protector"}</DialogTitle>
-            <DialogDescription>
-              {protectorStatus.data
-                ? "This is separate from your account login password."
-                : "Create a Password Protector to guard your saved portal credentials. This is separate from your account login password."}
-            </DialogDescription>
+            <DialogTitle>Change Password Protector</DialogTitle>
+            <DialogDescription>This is separate from your account login password.</DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
-            {protectorStatus.data && (
-              <div>
-                <Label>Current Password Protector</Label>
-                <Input type="password" value={currentPasscode} onChange={(e) => setCurrentPasscode(e.target.value)} />
-              </div>
-            )}
+            <div>
+              <Label>Current Password Protector</Label>
+              <PasswordInput value={currentPasscode} onChange={(e) => setCurrentPasscode(e.target.value)} />
+            </div>
             <div>
               <Label>New Password Protector</Label>
-              <Input type="password" value={newPasscode} onChange={(e) => setNewPasscode(e.target.value)} />
+              <PasswordInput value={newPasscode} onChange={(e) => setNewPasscode(e.target.value)} />
             </div>
             <div>
               <Label>Confirm Password Protector</Label>
-              <Input type="password" value={confirmPasscode} onChange={(e) => setConfirmPasscode(e.target.value)} />
+              <PasswordInput value={confirmPasscode} onChange={(e) => setConfirmPasscode(e.target.value)} />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setSetProtectorOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setChangeProtectorOpen(false)}>Cancel</Button>
             <Button onClick={handleSetProtector} disabled={savingProtector}>
               {savingProtector ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Password Protector — forgot, reset via account password */}
-      <Dialog open={forgotOpen} onOpenChange={setForgotOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Reset Password Protector</DialogTitle>
-            <DialogDescription>Confirm your account login password to set a new Password Protector.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3">
-            <div>
-              <Label>Account Password</Label>
-              <Input type="password" value={accountPassword} onChange={(e) => setAccountPassword(e.target.value)} />
-            </div>
-            <div>
-              <Label>New Password Protector</Label>
-              <Input type="password" value={newPasscode} onChange={(e) => setNewPasscode(e.target.value)} />
-            </div>
-            <div>
-              <Label>Confirm Password Protector</Label>
-              <Input type="password" value={confirmPasscode} onChange={(e) => setConfirmPasscode(e.target.value)} />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setForgotOpen(false)}>Cancel</Button>
-            <Button onClick={handleForgotReset} disabled={resettingProtector}>
-              {resettingProtector ? <Loader2 className="h-4 w-4 animate-spin" /> : "Reset"}
             </Button>
           </DialogFooter>
         </DialogContent>
