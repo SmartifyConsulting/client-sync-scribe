@@ -10,7 +10,12 @@ export function useImpersonate() {
     setSwitching(email);
     try {
       const { data, error } = await supabase.functions.invoke("admin-impersonate", { body: { email } });
-      if (error || !data?.token_hash) throw new Error(error?.message || data?.error || "Failed");
+      if (error) {
+        let msg = error.message;
+        try { const b = await (error as any).context?.json?.(); if (b?.error) msg = b.error; } catch { /* ignore */ }
+        throw new Error(msg);
+      }
+      if (!data?.token_hash) throw new Error(data?.error || "Failed");
       await supabase.auth.signOut();
       const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: "email" });
       if (vErr) throw vErr;
