@@ -206,9 +206,12 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
             })}
           </div>
           {login[activeTab] && login[activeTab] !== "connected" && (
-            <p className={label}>{LOGIN_TEXT[login[activeTab]]}</p>
+            <p className={label}>{LOGIN_TEXT[login[activeTab]]}
+              {login[activeTab] === "no-addon" && <> <button className="underline" onClick={downloadAddon}>Download the add-on</button> · unzip, open chrome://extensions, turn on Developer mode, click Load unpacked and pick the folder, then refresh this page.</>}
+            </p>
           )}
           <OtpDialog challenge={challenge} onClose={() => setChallenge(null)} onSubmit={submitChallenge} />
+          <ProtectorDialog open={!!askFor} busy={unlocking} onClose={() => setAskFor(null)} onSubmit={unlock} />
 
 
           <div className="flex flex-wrap items-center gap-1.5 rounded border border-border/60 px-2 py-1">
