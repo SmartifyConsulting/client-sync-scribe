@@ -11033,6 +11033,39 @@ export type Database = {
         }
         Relationships: []
       }
+      wealth_quote_specs: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          insurers: string[]
+          product_type: string
+          updated_at: string
+          variations: Json
+          workflow_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          insurers?: string[]
+          product_type: string
+          updated_at?: string
+          variations?: Json
+          workflow_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          insurers?: string[]
+          product_type?: string
+          updated_at?: string
+          variations?: Json
+          workflow_id?: string
+        }
+        Relationships: []
+      }
       wealth_quotes: {
         Row: {
           ai_rank: number | null
