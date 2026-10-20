@@ -9,7 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { PRODUCT_TYPES, variationComplete } from "./quoteSpec";
 import { groupDigits } from "./money";
-import { defaultVariations, productsFromNeeds } from "./needsProducts";
+import { DEFAULT_PARAMS, type NeedsParams, defaultVariations, productsFromNeeds, withAmount } from "./needsProducts";
 
 const db = supabase as any;
 type Plan = Record<string, Record<string, any>[]>; // product -> variations
@@ -51,7 +51,11 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
   const [tab, setTab] = useState("");
   const [busy, setBusy] = useState(false);
   const [otp, setOtp] = useState<Record<string, string>>({});
+  const [otpState, setOtpState] = useState<Record<string, string>>({});
   const [adding, setAdding] = useState("");
+  const [params, setParams] = useState<NeedsParams>(DEFAULT_PARAMS);
+  const needs = productsFromNeeds(fin, params);
+  const formulaFor = (p: string) => needs.find((n) => n.product === p)?.formula;
 
   useEffect(() => {
     if (isLoading) return;
@@ -59,6 +63,28 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
     if (patientId && !finReady) return;
     setPlan(Object.fromEntries(productsFromNeeds(fin).map(({ product, amount }) => [product, defaultVariations(product, amount)])));
   }, [spec, isLoading, fin, finReady, patientId]);
+
+  // Confirmation back from the broker-side helper once the PIN reached the insurer login.
+  useEffect(() => {
+    const onMsg = (e: MessageEvent) => {
+      const d = e.data;
+      if (e.origin !== window.location.origin || d?.source !== "holarc-extension" || d?.type !== "insurer-otp-result" || d.workflowId !== workflowId) return;
+      setOtpState((s) => ({ ...s, [d.insurer]: d.ok ? "Logged in" : d.message || "PIN rejected" }));
+    };
+    window.addEventListener("message", onMsg);
+    return () => window.removeEventListener("message", onMsg);
+  }, [workflowId]);
+
+  /** Changing a formula input recalculates the suggested amount on all three options. */
+  const applyParams = (next: NeedsParams) => {
+    setParams(next);
+    const fresh = productsFromNeeds(fin, next);
+    setPlan((pl) => {
+      const out = { ...pl };
+      for (const n of fresh) if (out[n.product]) out[n.product] = withAmount(n.product, out[n.product], n.amount);
+      return out;
+    });
+  };
 
   const products = Object.keys(plan);
   const activeTab = chosen.includes(tab) ? tab : chosen[0] ?? "";
