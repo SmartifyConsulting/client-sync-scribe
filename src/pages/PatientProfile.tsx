@@ -1,4 +1,5 @@
 import { TransactionLogs } from "@/features/wealth-workflow/TransactionLogs";
+import { ExistingCoverCard } from "@/features/wealth-workflow/client/ExistingCoverCard";
 import { SignedImage } from "@/features/documents/components/SignedImage";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { BiologPanel } from "@/features/biolog/BiologPanel";
@@ -378,6 +379,7 @@ export default function PatientProfile() {
               {format(new Date(patient.created_at), "MMM yy")}
             </p>
           </div>
+          <ExistingCoverCard patientId={patient.id} />
         </div>
       )}
 
