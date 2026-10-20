@@ -62,37 +62,37 @@ export function QuoteSpecForm({ workflowId, isWM }: { workflowId: string; isWM: 
   if (!isWM) return null;
 
   return (
-    <div className="space-y-3 rounded-lg border border-border/60 p-3 text-xs">
-      <p className="font-semibold">Quote plan</p>
+    <div className="space-y-2.5 rounded-lg border border-border/60 p-2.5 text-[11px] leading-tight">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Quote plan</p>
 
       <div className="grid gap-2 sm:grid-cols-2">
-        <label className="space-y-1"><span className="text-2xs text-muted-foreground">1 · Type of insurance</span>
-          <select className="h-8 w-full rounded-md border border-input bg-background px-2" value={product} onChange={(e) => changeProduct(e.target.value)}>
+        <label className="space-y-1"><span className="text-[10px] font-normal text-muted-foreground">1 · Type of insurance</span>
+          <select className="h-6 w-full rounded border border-input bg-background px-1 text-[11px].5 text-[11px]" value={product} onChange={(e) => changeProduct(e.target.value)}>
             {Object.keys(PRODUCT_TYPES).map((p) => <option key={p}>{p}</option>)}
           </select>
         </label>
-        <label className="space-y-1"><span className="text-2xs text-muted-foreground">2 · Number of quote variations</span>
-          <select className="h-8 w-full rounded-md border border-input bg-background px-2" value={variations.length} onChange={(e) => setCount(Number(e.target.value))}>
+        <label className="space-y-1"><span className="text-[10px] font-normal text-muted-foreground">2 · Number of quote variations</span>
+          <select className="h-6 w-full rounded border border-input bg-background px-1 text-[11px].5 text-[11px]" value={variations.length} onChange={(e) => setCount(Number(e.target.value))}>
             {[1, 2, 3, 4].map((n) => <option key={n}>{n}</option>)}
           </select>
         </label>
       </div>
 
       <div>
-        <p className="mb-1 text-2xs text-muted-foreground">3 · What makes each variation different</p>
+        <p className="mb-1 text-[10px] font-normal text-muted-foreground">3 · What makes each variation different</p>
         <div className="overflow-x-auto rounded-lg border border-border/60">
           <table className="w-full">
-            <thead className="bg-muted/50 text-2xs uppercase tracking-wide text-muted-foreground">
-              <tr><th className="px-2 py-1.5 text-left">Variable</th>{variations.map((_, i) => <th key={i} className="px-2 py-1.5 text-left">Option {String.fromCharCode(65 + i)}</th>)}</tr>
+            <thead className="bg-muted/40 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              <tr><th className="px-2 py-1 text-left font-medium">Variable</th>{variations.map((_, i) => <th key={i} className="px-2 py-1 text-left font-medium">Option {String.fromCharCode(65 + i)}</th>)}</tr>
             </thead>
             <tbody>
               {fields.map((f) => (
                 <tr key={f.key} className="border-t border-border/60">
-                  <td className="whitespace-nowrap px-2 py-1">{f.label}</td>
+                  <td className="whitespace-nowrap px-2 py-0.5 text-muted-foreground">{f.label}</td>
                   {variations.map((v, i) => (
-                    <td key={i} className="min-w-[130px] px-2 py-1">
+                    <td key={i} className="min-w-[120px] px-2 py-0.5">
                       {f.kind === "select" ? (
-                        <select className="h-7 w-full rounded-md border border-input bg-background px-1" value={v[f.key]} onChange={(e) => setVal(i, f.key, e.target.value)}>
+                        <select className="h-6 w-full rounded border border-input bg-background px-1 text-[11px]" value={v[f.key]} onChange={(e) => setVal(i, f.key, e.target.value)}>
                           {f.options.map((o) => <option key={o}>{o}</option>)}
                         </select>
                       ) : f.kind === "toggle" ? (
@@ -100,7 +100,7 @@ export function QuoteSpecForm({ workflowId, isWM }: { workflowId: string; isWM: 
                       ) : (
                         <div className="flex items-center gap-1">
                           {f.kind === "amount" && <span className="text-muted-foreground">R</span>}
-                          <Input className="h-7 text-xs" inputMode="decimal" value={v[f.key]} disabled={f.key === "growth" && String(v.increase_option).includes("No increase")}
+                          <Input className="h-6 px-1.5 text-[11px]" inputMode="decimal" value={v[f.key]} disabled={f.key === "growth" && String(v.increase_option).includes("No increase")}
                             onChange={(e) => setVal(i, f.key, e.target.value.replace(/[^\d.]/g, ""))} />
                           {f.kind === "percent" && <span className="text-muted-foreground">%</span>}
                         </div>
@@ -115,7 +115,7 @@ export function QuoteSpecForm({ workflowId, isWM }: { workflowId: string; isWM: 
       </div>
 
       <div>
-        <p className="mb-1 text-2xs text-muted-foreground">4 · Insurers to quote (logins saved in App Integrations)</p>
+        <p className="mb-1 text-[10px] font-normal text-muted-foreground">4 · Insurers to quote (logins saved in App Integrations)</p>
         <div className="flex flex-wrap gap-1.5">
           {insurers.map((ins: any) => {
             const on = chosen.includes(ins.name);
@@ -123,7 +123,7 @@ export function QuoteSpecForm({ workflowId, isWM }: { workflowId: string; isWM: 
               <button key={ins.name} type="button" disabled={!ins.ready}
                 title={ins.ready ? "" : "Add this insurer's login in App Integrations first"}
                 onClick={() => setChosen((c) => (on ? c.filter((x) => x !== ins.name) : [...c, ins.name]))}
-                className={cn("flex items-center gap-1 rounded-full border px-3 py-1",
+                className={cn("flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px]",
                   on ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card",
                   !ins.ready && "opacity-50")}>
                 {!ins.ready && <Lock className="h-3 w-3" />}{ins.name}
@@ -134,12 +134,12 @@ export function QuoteSpecForm({ workflowId, isWM }: { workflowId: string; isWM: 
       </div>
 
       <div className="flex items-center justify-between gap-2">
-        <p className="text-2xs text-muted-foreground">{variations.length} × {chosen.length} = <b>{variations.length * chosen.length}</b> quotes to collect</p>
-        <Button size="sm" className="rounded-full" disabled={busy || !allComplete || !chosen.length} onClick={save}>
+        <p className="text-[10px] font-normal text-muted-foreground">{variations.length} × {chosen.length} = <b>{variations.length * chosen.length}</b> quotes to collect</p>
+        <Button size="sm" className="h-7 rounded-full px-3 text-[11px]" disabled={busy || !allComplete || !chosen.length} onClick={save}>
           {busy && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}{spec ? "Update quote plan" : "Save quote plan"}
         </Button>
       </div>
-      {!allComplete && <p className="text-2xs text-muted-foreground">Fill in every amount for each option to save.</p>}
+      {!allComplete && <p className="text-[10px] font-normal text-muted-foreground">Fill in every amount for each option to save.</p>}
     </div>
   );
 }
