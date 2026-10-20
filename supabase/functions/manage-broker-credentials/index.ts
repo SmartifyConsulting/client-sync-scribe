@@ -17,7 +17,6 @@ const Body = z.discriminatedUnion("action", [
     token: z.string().min(1),
   }),
   z.object({ action: z.literal("toggle"), integrationId: z.string().min(1), isEnabled: z.boolean() }),
-  z.object({ action: z.literal("set_username"), integrationId: z.string().min(1), username: z.string().trim().max(200).optional().nullable() }),
 ]);
 
 const json = (b: unknown, status = 200) =>
@@ -136,7 +135,6 @@ Deno.serve(async (req) => {
       const credentials = (rows ?? []).map((r) => ({
         integration_id: r.integration_id,
         is_enabled: r.is_enabled,
-        username: r.username,
         status: r.status,
         updated_at: r.updated_at,
         has_credentials: !!r.encrypted_credentials,
@@ -152,17 +150,6 @@ Deno.serve(async (req) => {
           { onConflict: "broker_user_id,integration_id" },
         );
       if (error) return json({ error: "Could not update integration." }, 500);
-      return json({ ok: true });
-    }
-
-    if (p.action === "set_username") {
-      const { error } = await admin
-        .from("broker_integration_credentials")
-        .upsert(
-          { broker_user_id: user.id, integration_id: p.integrationId, username: p.username ?? null },
-          { onConflict: "broker_user_id,integration_id" },
-        );
-      if (error) return json({ error: "Could not save username." }, 500);
       return json({ ok: true });
     }
 

@@ -28,7 +28,6 @@ interface CatalogEntry {
 interface CredentialStatus {
   integration_id: string;
   is_enabled: boolean;
-  username: string | null;
   status: "configured" | "pending" | "inactive";
   updated_at: string | null;
   has_credentials: boolean;
@@ -90,30 +89,12 @@ export default function AppIntegrations() {
       const list = prev ?? [];
       const existing = list.find((c) => c.integration_id === entry.id);
       if (existing) return list.map((c) => (c.integration_id === entry.id ? { ...c, is_enabled: enabled } : c));
-      return [...list, { integration_id: entry.id, is_enabled: enabled, username: null, status: "pending", updated_at: null, has_credentials: false }];
+      return [...list, { integration_id: entry.id, is_enabled: enabled, status: "pending", updated_at: null, has_credentials: false }];
     });
     try {
       await invoke({ action: "toggle", integrationId: entry.id, isEnabled: enabled });
     } catch (e: any) {
       toast.error(e.message ?? "Could not update integration.");
-      credentials.refetch();
-    }
-  };
-
-  const handleUsernameBlur = async (entry: CatalogEntry, value: string) => {
-    const trimmed = value.trim();
-    const current = statusFor(entry.id)?.username ?? "";
-    if (trimmed === current) return;
-    qc.setQueryData(["broker-integration-credentials", user?.id], (prev: CredentialStatus[] | undefined) => {
-      const list = prev ?? [];
-      const existing = list.find((c) => c.integration_id === entry.id);
-      if (existing) return list.map((c) => (c.integration_id === entry.id ? { ...c, username: trimmed || null } : c));
-      return [...list, { integration_id: entry.id, is_enabled: false, username: trimmed || null, status: "pending", updated_at: null, has_credentials: false }];
-    });
-    try {
-      await invoke({ action: "set_username", integrationId: entry.id, username: trimmed || null });
-    } catch (e: any) {
-      toast.error(e.message ?? "Could not save username.");
       credentials.refetch();
     }
   };
@@ -184,7 +165,7 @@ export default function AppIntegrations() {
   return (
     <div className="space-y-4">
       <PageHeader
-        title="App Integrations"
+        title={<span className="text-[hsl(var(--navy))]">App Integrations</span>}
         subtitle="Connect your insurance, CRM, and industry portal logins."
         actions={
           reauthToken ? (
@@ -192,8 +173,8 @@ export default function AppIntegrations() {
               <Unlock className="h-3.5 w-3.5" /> Unlocked
             </Badge>
           ) : (
-            <Button variant="outline" size="sm" onClick={() => setUnlockOpen(true)}>
-              <Lock className="h-4 w-4 mr-1.5" /> Unlock credentials
+            <Button size="sm" onClick={() => setUnlockOpen(true)}>
+              <Lock className="h-4 w-4 mr-1.5" /> Unlock Credentials
             </Button>
           )
         }
@@ -204,48 +185,36 @@ export default function AppIntegrations() {
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-5">
           {grouped.map(({ category, items }) =>
             items.length === 0 ? null : (
               <div key={category}>
-                <h2 className="text-sm font-semibold text-muted-foreground mb-2">{CATEGORY_LABELS[category]}</h2>
-                <div className="grid gap-3 sm:grid-cols-2">
+                <h2 className="text-xs font-semibold uppercase tracking-wide text-[hsl(var(--navy))] mb-1.5">{CATEGORY_LABELS[category]}</h2>
+                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                   {items.map((entry) => {
                     const status = statusFor(entry.id);
                     const configured = status?.status === "configured";
                     return (
-                      <div key={entry.id} className="rounded-lg border bg-card p-4 space-y-3">
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <p className="font-semibold">{entry.name}</p>
-                            <Badge variant={configured ? "default" : "secondary"} className="mt-1">
+                      <div key={entry.id} className="rounded-md border bg-card px-3 py-2.5 space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium truncate">{entry.name}</p>
+                            <Badge variant={configured ? "default" : "secondary"} className="mt-0.5 text-2xs px-1.5 py-0 font-normal">
                               {configured
                                 ? `Configured${status?.updated_at ? ` · ${new Date(status.updated_at).toLocaleDateString()}` : ""}`
                                 : "Not Set Up"}
                             </Badge>
                           </div>
-                          <Switch checked={status?.is_enabled ?? false} onCheckedChange={(v) => handleToggle(entry, v)} />
+                          <Switch checked={status?.is_enabled ?? false} onCheckedChange={(v) => handleToggle(entry, v)} className="shrink-0" />
                         </div>
-                        {entry.required_fields.includes("username") && (
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Username</Label>
-                            <Input
-                              defaultValue={status?.username ?? ""}
-                              key={status?.username ?? ""}
-                              placeholder="Not set"
-                              className="mt-1"
-                              onBlur={(e) => handleUsernameBlur(entry, e.target.value)}
-                            />
-                          </div>
-                        )}
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="flex-1" asChild>
+                        <div className="flex gap-1.5">
+                          <Button variant="ghost" size="sm" className="flex-1 h-7 text-xs px-2" asChild>
                             <a href={entry.portal_url} target="_blank" rel="noopener noreferrer">
-                              Launch Portal <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+                              Launch <ExternalLink className="h-3 w-3 ml-1" />
                             </a>
                           </Button>
-                          <Button variant="outline" size="sm" className="flex-1" onClick={() => openManage(entry)}>
-                            <Settings2 className="h-3.5 w-3.5 mr-1.5" /> Manage
+                          <Button variant="ghost" size="sm" className="flex-1 h-7 text-xs px-2" onClick={() => openManage(entry)}>
+                            <Settings2 className="h-3 w-3 mr-1" /> Credentials
                           </Button>
                         </div>
                       </div>
@@ -262,7 +231,7 @@ export default function AppIntegrations() {
       <Dialog open={unlockOpen} onOpenChange={setUnlockOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Unlock credentials</DialogTitle>
+            <DialogTitle>Unlock Credentials</DialogTitle>
             <DialogDescription>Confirm your password to manage saved portal credentials for the next 10 minutes.</DialogDescription>
           </DialogHeader>
           <div>
