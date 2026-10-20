@@ -660,6 +660,42 @@ export type Database = {
           },
         ]
       }
+      app_integrations_catalog: {
+        Row: {
+          category: Database["public"]["Enums"]["integration_category"]
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          name: string
+          portal_url: string
+          required_fields: Json
+          updated_at: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["integration_category"]
+          created_at?: string
+          display_order?: number
+          id: string
+          is_active?: boolean
+          name: string
+          portal_url: string
+          required_fields?: Json
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["integration_category"]
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          portal_url?: string
+          required_fields?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       app_modules: {
         Row: {
           description: string | null
@@ -1940,6 +1976,71 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      broker_integration_credentials: {
+        Row: {
+          broker_user_id: string
+          created_at: string
+          encrypted_credentials: string | null
+          id: string
+          integration_id: string
+          is_enabled: boolean
+          status: Database["public"]["Enums"]["integration_status"]
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          broker_user_id: string
+          created_at?: string
+          encrypted_credentials?: string | null
+          id?: string
+          integration_id: string
+          is_enabled?: boolean
+          status?: Database["public"]["Enums"]["integration_status"]
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          broker_user_id?: string
+          created_at?: string
+          encrypted_credentials?: string | null
+          id?: string
+          integration_id?: string
+          is_enabled?: boolean
+          status?: Database["public"]["Enums"]["integration_status"]
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broker_integration_credentials_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "app_integrations_catalog"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      broker_security_settings: {
+        Row: {
+          broker_user_id: string
+          created_at: string
+          password_protector_hash: string | null
+          updated_at: string
+        }
+        Insert: {
+          broker_user_id: string
+          created_at?: string
+          password_protector_hash?: string | null
+          updated_at?: string
+        }
+        Update: {
+          broker_user_id?: string
+          created_at?: string
+          password_protector_hash?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       budget_actuals: {
         Row: {
@@ -12576,6 +12677,8 @@ export type Database = {
         | "active"
         | "past_due"
         | "cancelled"
+      integration_category: "insurance" | "crm_planning" | "industry_portal"
+      integration_status: "configured" | "pending" | "inactive"
       invitation_status: "pending" | "accepted" | "declined" | "expired"
       user_role:
         | "doctor"
@@ -12736,6 +12839,8 @@ export const Constants = {
         "past_due",
         "cancelled",
       ],
+      integration_category: ["insurance", "crm_planning", "industry_portal"],
+      integration_status: ["configured", "pending", "inactive"],
       invitation_status: ["pending", "accepted", "declined", "expired"],
       user_role: [
         "doctor",
