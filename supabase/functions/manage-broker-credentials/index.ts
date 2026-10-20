@@ -212,13 +212,6 @@ Deno.serve(async (req) => {
         updated_at: r.updated_at,
         has_credentials: !!r.encrypted_credentials,
       }));
-      // TEMPORARY: Astute FSE falls back to the project's saved secret keys.
-      const env = astuteEnv();
-      if (env) {
-        const a = credentials.find((c) => c.integration_id === "astute");
-        if (!a) credentials.push({ integration_id: "astute", is_enabled: true, status: "configured", updated_at: null, has_credentials: true });
-        else if (!a.has_credentials) Object.assign(a, { has_credentials: true, status: "configured" });
-      }
       return json({ credentials });
     }
 
