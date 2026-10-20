@@ -127,7 +127,7 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
       )}
 
 
-      <div className="grid min-w-0 grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+      <div className={`grid min-w-0 grid-cols-1 items-start gap-4 ${shownStep === "Quote 6 insurers, rank top 3" ? "lg:grid-cols-[minmax(260px,1fr)_minmax(0,3fr)]" : "lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]"}`}>
         <div className="min-w-0 rounded-xl border border-border bg-card p-4">
           <div className="mb-3 flex items-center justify-between gap-2">
             <p className="flex items-center gap-2 text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
