@@ -387,7 +387,14 @@ export default function AppIntegrations() {
                     return (
                       <div key={entry.id} className="rounded-md border bg-card px-3 py-2.5 space-y-2">
                         <div className="flex items-center justify-between gap-2">
-                          <p className="text-sm font-medium truncate min-w-0">{entry.name}</p>
+                          <a
+                            href={entry.portal_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm font-medium truncate min-w-0 hover:underline hover:text-primary inline-flex items-center gap-1"
+                          >
+                            {entry.name} <ExternalLink className="h-3 w-3 shrink-0" />
+                          </a>
                           <Badge variant={configured ? "default" : "secondary"} className="shrink-0 text-2xs px-1.5 py-0 font-normal">
                             {configured
                               ? `Configured${status?.updated_at ? ` · ${new Date(status.updated_at).toLocaleDateString()}` : ""}`
@@ -395,11 +402,6 @@ export default function AppIntegrations() {
                           </Badge>
                         </div>
                         <div className="flex gap-1.5">
-                          <Button variant="ghost" size="sm" className="flex-1 h-7 text-xs px-2" asChild>
-                            <a href={entry.portal_url} target="_blank" rel="noopener noreferrer">
-                              Launch <ExternalLink className="h-3 w-3 ml-1" />
-                            </a>
-                          </Button>
                           <Button variant="ghost" size="sm" className="flex-1 h-7 text-xs px-2" onClick={() => openManage(entry)}>
                             <Settings2 className="h-3 w-3 mr-1" /> Credentials
                           </Button>
