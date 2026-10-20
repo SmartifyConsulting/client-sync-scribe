@@ -111,3 +111,10 @@
 - [x] Products pre-filled from needs analysis, 3 options each
 - [x] In-app OTP box per insurer tab (handed to broker helper)
 - [ ] Live insurer portal automation (Momentum first) — needs the real portal address; portals need broker 2FA
+
+## Step 4 polish (Oct 2026)
+- [x] Existing cover summary on the client page
+- [x] Insurer tabs as real tabs in legend colours, no counts, login progress ring
+- [x] PIN / email verification pops up as a window (no inline box)
+- [x] Black product headers, white text; removed "requests quotes from six insurers" line
+- [ ] Browser add-on: log in, answer PIN/email prompt, capture quote PDF into Working Window + Documents — add-on not built; needs real Momentum portal address

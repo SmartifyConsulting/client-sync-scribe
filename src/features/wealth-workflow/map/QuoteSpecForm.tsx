@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { KeyRound, Loader2, Plus, X } from "lucide-react";
+import { Loader2, Plus, X } from "lucide-react";
+import { insurerColor } from "./insurerColors";
+import { LoginRing, LOGIN_TEXT, OtpDialog, type Challenge, type LoginState } from "./InsurerLogin";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -50,8 +52,8 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
   const [chosen, setChosen] = useState<string[]>([]);
   const [tab, setTab] = useState("");
   const [busy, setBusy] = useState(false);
-  const [otp, setOtp] = useState<Record<string, string>>({});
-  const [otpState, setOtpState] = useState<Record<string, string>>({});
+  const [login, setLogin] = useState<Record<string, LoginState>>({});
+  const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [adding, setAdding] = useState("");
   const [params, setParams] = useState<NeedsParams>(DEFAULT_PARAMS);
   const needs = productsFromNeeds(fin, params);
@@ -64,16 +66,40 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
     setPlan(Object.fromEntries(productsFromNeeds(fin).map(({ product, amount }) => [product, defaultVariations(product, amount)])));
   }, [spec, isLoading, fin, finReady, patientId]);
 
-  // Confirmation back from the broker-side helper once the PIN reached the insurer login.
+  // Messages from the broker-side add-on driving the insurer login.
   useEffect(() => {
     const onMsg = (e: MessageEvent) => {
       const d = e.data;
-      if (e.origin !== window.location.origin || d?.source !== "holarc-extension" || d?.type !== "insurer-otp-result" || d.workflowId !== workflowId) return;
-      setOtpState((s) => ({ ...s, [d.insurer]: d.ok ? "Logged in" : d.message || "PIN rejected" }));
+      if (e.origin !== window.location.origin || d?.source !== "holarc-extension" || d.workflowId !== workflowId) return;
+      if (d.type === "insurer-login-progress") setLogin((s) => ({ ...s, [d.insurer]: d.state }));
+      if (d.type === "insurer-challenge") {
+        setLogin((s) => ({ ...s, [d.insurer]: "challenge" }));
+        setChallenge({ insurer: d.insurer, method: d.method === "email" ? "email" : "otp", hint: d.hint });
+      }
+      if (d.type === "insurer-otp-result" || d.type === "insurer-login-result") {
+        setLogin((s) => ({ ...s, [d.insurer]: d.ok ? "connected" : "failed" }));
+        if (d.ok) setChallenge((c) => (c?.insurer === d.insurer ? null : c));
+        else toast({ title: `${d.insurer} login failed`, description: d.message, variant: "destructive" });
+      }
     };
     window.addEventListener("message", onMsg);
     return () => window.removeEventListener("message", onMsg);
   }, [workflowId]);
+
+  /** Opening a tab asks the add-on to log in with the saved credentials. No reply = add-on missing. */
+  const openTab = (ins: string) => {
+    setTab(ins);
+    if (login[ins] === "connected" || login[ins] === "connecting") return;
+    setLogin((s) => ({ ...s, [ins]: "connecting" }));
+    window.postMessage({ source: "holarc", type: "insurer-login", insurer: ins, workflowId }, window.location.origin);
+    setTimeout(() => setLogin((s) => (s[ins] === "connecting" ? { ...s, [ins]: "no-addon" } : s)), 8000);
+  };
+
+  const submitChallenge = (value: string) => {
+    if (!challenge) return;
+    window.postMessage({ source: "holarc", type: challenge.method === "otp" ? "insurer-otp" : "insurer-email-check", insurer: challenge.insurer, workflowId, otp: value }, window.location.origin);
+    setLogin((s) => ({ ...s, [challenge.insurer]: "connecting" }));
+  };
 
   /** Changing a formula input recalculates the suggested amount on all three options. */
   const applyParams = (next: NeedsParams) => {
@@ -103,14 +129,6 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
     qc.invalidateQueries({ queryKey: ["wealth-quote-spec", workflowId] });
   };
 
-  /** Hands the code to the broker-side helper running the insurer's login for this session. */
-  const sendOtp = (ins: string) => {
-    const code = (otp[ins] ?? "").trim();
-    if (!/^\d{4,8}$/.test(code)) return toast({ title: "Enter the 4–8 digit code from the insurer", variant: "destructive" });
-    window.postMessage({ source: "holarc", type: "insurer-otp", insurer: ins, workflowId, otp: code }, window.location.origin);
-    setOtp((o) => ({ ...o, [ins]: "" }));
-    setOtpState((s) => ({ ...s, [ins]: "Waiting for the browser add-on…" }));
-  };
 
   if (isLoading) return <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />;
   if (!isWM) return null;
@@ -140,25 +158,26 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
       {chosen.length > 0 && (
         <div className="space-y-2">
           <p className={label}>2 · Products from the needs analysis · 3 options each</p>
-          <div role="tablist" className="flex flex-wrap gap-1 border-b border-border/60 pb-1">
-            {chosen.map((t) => (
-              <button key={t} role="tab" aria-selected={activeTab === t} onClick={() => setTab(t)}
-                className={cn("rounded-full border px-2 py-0.5 text-[10px] font-medium",
-                  activeTab === t ? "border-primary bg-primary text-primary-foreground" : "border-border/60 bg-card text-muted-foreground hover:text-foreground")}>
-                {t}<span className="ml-1 opacity-70">{total}</span>
-              </button>
-            ))}
+          <div role="tablist" className="flex flex-wrap items-end gap-0.5 border-b border-border">
+            {chosen.map((t) => {
+              const c = insurerColor(t);
+              const on = activeTab === t;
+              return (
+                <button key={t} role="tab" aria-selected={on} onClick={() => openTab(t)}
+                  className={cn("-mb-px flex items-center gap-1.5 rounded-t-md border border-b-0 px-3 py-1 text-[11px] font-medium transition-colors",
+                    on ? "text-primary-foreground" : "border-transparent hover:opacity-90")}
+                  style={on ? { background: `hsl(${c})`, borderColor: `hsl(${c})` } : { color: `hsl(${c})`, background: `hsl(${c} / 0.08)` }}>
+                  {t}
+                  <LoginRing state={login[t]} />
+                </button>
+              );
+            })}
           </div>
+          {login[activeTab] && login[activeTab] !== "connected" && (
+            <p className={label}>{LOGIN_TEXT[login[activeTab]]}</p>
+          )}
+          <OtpDialog challenge={challenge} onClose={() => setChallenge(null)} onSubmit={submitChallenge} />
 
-          <div className="flex flex-wrap items-center gap-1.5 rounded border border-border/60 px-2 py-1">
-            <KeyRound className="h-3 w-3 text-muted-foreground" />
-            <span className={label}>{activeTab} sent a one-time PIN?</span>
-            <Input className="h-6 w-24 px-1.5 text-[11px] tabular-nums" inputMode="numeric" autoComplete="one-time-code" placeholder="OTP"
-              value={otp[activeTab] ?? ""} onChange={(e) => setOtp((o) => ({ ...o, [activeTab]: e.target.value.replace(/\D/g, "").slice(0, 8) }))}
-              onKeyDown={(e) => e.key === "Enter" && sendOtp(activeTab)} />
-            <Button size="sm" variant="outline" className="h-6 rounded-full px-2 text-[10px]" onClick={() => sendOtp(activeTab)}>Submit</Button>
-            {otpState[activeTab] && <span className={label}>{otpState[activeTab]}</span>}
-          </div>
 
           <div className="flex flex-wrap items-center gap-1.5 rounded border border-border/60 px-2 py-1">
             <span className={label}>Shortfall formula · income years</span>
@@ -173,9 +192,9 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
             const fields = PRODUCT_TYPES[p] ?? [];
             return (
               <div key={p} className="overflow-x-auto rounded-lg border border-border/60">
-                <div className="flex items-center justify-between bg-muted/40 px-2 py-1">
+                <div className="flex items-center justify-between bg-foreground px-2 py-1 text-background">
                   <span className="text-[10px] font-semibold uppercase tracking-wide">{p}</span>
-                  <button aria-label={`Remove ${p}`} className="text-muted-foreground hover:text-destructive"
+                  <button aria-label={`Remove ${p}`} className="text-background/70 hover:text-background"
                     onClick={() => setPlan((pl) => { const { [p]: _, ...rest } = pl; return rest; })}><X className="h-3 w-3" /></button>
                 </div>
                 {formulaFor(p) && <p className="border-t border-border/60 px-2 py-1 text-[10px] tabular-nums text-muted-foreground">{formulaFor(p)}</p>}

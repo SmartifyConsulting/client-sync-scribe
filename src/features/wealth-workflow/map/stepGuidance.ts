@@ -115,7 +115,7 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
   },
   "Quote 6 insurers, rank top 3": {
     client: { what: "We request quotes from six insurers and rank the best three for you.", required: ["Nothing from you"] },
-    manager: { what: "Holarc Wealth requests quotes from six insurers and ranks the top three.", required: ["Completed needs analysis"] },
+    manager: { what: "", required: ["Completed needs analysis"] },
     unlocks: "Option selection",
   },
   "Select options and commentary": {

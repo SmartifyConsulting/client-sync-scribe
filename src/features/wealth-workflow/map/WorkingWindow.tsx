@@ -144,7 +144,7 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
               </ol>
             </div>
           ) : (
-            t && <p className="text-sm leading-relaxed text-muted-foreground">{wm(fillName(t.what, first))}</p>
+            t?.what && <p className="text-sm leading-relaxed text-muted-foreground">{wm(fillName(t.what, first))}</p>
           )}
 
           {blockers.length > 0 && step.state === "next" && (
