@@ -33,8 +33,9 @@ export function useClientDocuments(patientId?: string) {
         ...((sessions.data ?? []) as any[]).map((s) => ({ id: s.id, kind: "transcript" as const, title: `${s.title || "Meeting"} transcript`, date: s.created_at, text: s.transcript })),
         ...((files.data ?? []) as any[]).map((f) => {
           const c: string | undefined = f.content || undefined;
-          const isHtml = !!c && /<[a-z][\s\S]*>/i.test(c);
-          return { id: f.id, kind: "file" as const, title: f.name || "Document", date: f.created_at, html: isHtml ? c : undefined, text: isHtml ? undefined : c, url: f.media_url || undefined };
+          const isPdf = f.media_url?.startsWith("data:application/pdf;");
+          const isHtml = !isPdf && !!c && /<[a-z][\s\S]*>/i.test(c);
+          return { id: f.id, kind: "file" as const, title: f.name || "Document", date: f.created_at, html: isHtml ? c : undefined, text: isHtml || isPdf ? undefined : c, url: f.media_url || undefined };
         }),
       ].sort((a, b) => +new Date(b.date) - +new Date(a.date));
     },

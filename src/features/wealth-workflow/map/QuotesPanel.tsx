@@ -137,6 +137,7 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
       const mine = quotes.filter((q) => q.insurer === active);
       return (
         <div className="space-y-2">
+          {isWM && <QuoteSpecForm workflowId={workflowId} isWM={isWM} patientId={records?.patientId} />}
           <div role="tablist" className="flex flex-wrap gap-1">
             {[...insurerTabs, FINAL].map((t) => (
               <button key={t} role="tab" aria-selected={active === t} onClick={() => setTab(t)}

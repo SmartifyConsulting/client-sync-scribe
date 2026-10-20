@@ -4,6 +4,8 @@ import { Loader2, Plus, X } from "lucide-react";
 import { insurerColor } from "./insurerColors";
 import { insurerFields, insurerKey } from "./insurerDictionary";
 import { LoginRing, LOGIN_TEXT, OtpDialog, ProtectorDialog, addonInstalled, downloadAddon, type Challenge, type LoginState } from "./InsurerLogin";
+import { CompanionSetup } from "./CompanionSetup";
+import { QuotePdfCapture } from "./QuotePdfCapture";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -37,12 +39,14 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
   const { data: insurerRows = [] } = useQuery({
     queryKey: ["quote-insurer-rows", user?.id], enabled: !!user && isWM,
     queryFn: async () => {
+      if (!user) return [];
       const [cat, creds] = await Promise.all([
         db.from("app_integrations_catalog").select("id,name,portal_url").eq("category", "insurance").eq("is_active", true).order("display_order"),
-        db.from("broker_integration_credentials").select("integration_id,status").eq("broker_user_id", user!.id),
+        supabase.functions.invoke("manage-broker-credentials", { body: { action: "list" } }),
       ]);
-      const ready = new Set((creds.data ?? []).filter((c: any) => c.status === "configured").map((c: any) => c.integration_id));
-      return (cat.data ?? []).filter((c: any) => ready.has(c.id)) as { id: string; name: string; portal_url: string | null }[];
+      const statuses = creds.data?.credentials ?? [];
+      const ready = new Set(statuses.filter((c: any) => c.status === "configured" && c.is_enabled).map((c: any) => c.integration_id));
+      return (cat.data ?? []).filter((c: any) => ready.has(c.id)).map((c: any) => ({ ...c, portal_url: statuses.find((s: any) => s.integration_id === c.id)?.portal_url || c.portal_url })) as { id: string; name: string; portal_url: string | null }[];
     },
   });
 
@@ -91,8 +95,11 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
   const TOKEN_KEY = "holarc-cred-token";
   const [askFor, setAskFor] = useState<string | null>(null);
   const [unlocking, setUnlocking] = useState(false);
+  const [setupOpen, setSetupOpen] = useState(false);
+  const [portalEdit, setPortalEdit] = useState<string | null>(null);
+  const [portalUrl, setPortalUrl] = useState("");
   const getToken = () => {
-    try { const t = JSON.parse(sessionStorage.getItem(TOKEN_KEY) || "null"); return t && t.exp > Date.now() + 30000 ? t.token as string : null; } catch { return null; }
+    try { const t = JSON.parse(sessionStorage.getItem(TOKEN_KEY) || "null"); return t && t.uid === user?.id && t.exp > Date.now() ? t.token as string : null; } catch { return null; }
   };
   const startLogin = async (ins: string, token: string) => {
     const row = (insurerRows as any[]).find((r) => r?.name === ins);
@@ -105,13 +112,13 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
       return toast({ title: `Couldn't unlock the ${ins} login`, description: data?.error ?? "Please try again.", variant: "destructive" });
     }
     const f = data.fields ?? {};
-    window.postMessage({ source: "holarc", type: "insurer-login", insurer: ins, workflowId, loginUrl: row.portal_url,
+    window.postMessage({ source: "holarc", type: "insurer-login", insurer: ins, workflowId, loginUrl: f.portal_url || row.portal_url,
       username: f.username ?? data.username, password: f.password }, window.location.origin);
   };
   const openTab = (ins: string) => {
     setTab(ins);
     if (login[ins] === "connected" || login[ins] === "connecting" || login[ins] === "challenge") return;
-    if (!addonInstalled()) return setLogin((s) => ({ ...s, [ins]: "no-addon" }));
+    if (!addonInstalled()) { setSetupOpen(true); return setLogin((s) => ({ ...s, [ins]: "no-addon" })); }
     const token = getToken();
     if (token) startLogin(ins, token); else setAskFor(ins);
   };
@@ -120,9 +127,28 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
     const { data, error } = await supabase.functions.invoke("manage-broker-credentials", { body: { action: "reauth", passcode } });
     setUnlocking(false);
     if (error || data?.error) return toast({ title: data?.error ?? "Incorrect Password Protector", variant: "destructive" });
-    sessionStorage.setItem(TOKEN_KEY, JSON.stringify({ token: data.token, exp: Date.now() + (data.expiresInMs ?? 300000) }));
+    sessionStorage.setItem(TOKEN_KEY, JSON.stringify({ token: data.token, uid: user?.id, exp: Date.now() + Math.min(data.expiresInMs ?? 900000, 900000) }));
     const ins = askFor; setAskFor(null);
     if (ins) startLogin(ins, data.token);
+  };
+  const savePortal = async () => {
+    const token = getToken();
+    if (!token) { toast({ title: "Unlock saved insurer logins before editing the portal URL." }); setAskFor(portalEdit); return; }
+    const row = insurerRows.find((r) => r.name === portalEdit);
+    if (!row) return;
+    try {
+      const url = new URL(portalUrl);
+      if (url.protocol !== "https:" || url.username || url.password) throw new Error("Enter a valid HTTPS portal URL without login details.");
+      const revealed = await supabase.functions.invoke("manage-broker-credentials", { body: { action: "reveal", integrationId: row.id, token } });
+      if (revealed.error || revealed.data?.error) throw new Error("Please unlock again.");
+      const saved = await supabase.functions.invoke("manage-broker-credentials", { body: { action: "save", integrationId: row.id, token, username: revealed.data.username, fields: { ...revealed.data.fields, portal_url: portalUrl } } });
+      if (saved.error || saved.data?.error) throw new Error(saved.data?.error ?? "Could not save portal URL.");
+      qc.invalidateQueries({ queryKey: ["quote-insurer-rows"] });
+      qc.invalidateQueries({ queryKey: ["broker-integration-credentials"] });
+      setLogin((s) => ({ ...s, [row.name]: "failed" }));
+      setPortalEdit(null);
+      toast({ title: "Portal URL saved" });
+    } catch (e) { toast({ title: e instanceof Error ? e.message : "Could not save portal URL.", variant: "destructive" }); }
   };
 
   const submitChallenge = (value: string) => {
@@ -174,12 +200,12 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
         <div className="flex flex-wrap gap-1.5">
           {insurers.map((ins: string) => {
             const on = chosen.includes(ins);
-            const c = "35 85% 38%"; // badges stay orange; only tabs use legend colours
+            const c = "var(--insurer-badge)"; // badges stay orange; only tabs use legend colours
             return (
               <button key={ins} type="button" aria-pressed={on}
                 onClick={() => setChosen((c) => (on ? c.filter((x) => x !== ins) : [...c, ins]))}
                 className="rounded-full border px-2.5 py-0.5 text-[11px] font-medium"
-                style={on ? { background: `hsl(${c})`, borderColor: `hsl(${c})`, color: "hsl(0 0% 100%)" } : { borderColor: `hsl(${c})`, color: `hsl(${c})` }}>
+                style={on ? { background: `hsl(${c})`, borderColor: `hsl(${c})`, color: "hsl(var(--insurer-foreground))" } : { borderColor: `hsl(${c})`, color: `hsl(${c})` }}>
                 {ins}
               </button>
             );
@@ -198,7 +224,7 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
                 <button key={t} role="tab" aria-selected={on} onClick={() => openTab(t)}
                   className={cn("flex items-center gap-1.5 rounded-t-md px-3 font-semibold transition-all",
                     on ? "py-1.5 text-[11px] shadow-sm" : "py-1 text-[11px] opacity-75 hover:opacity-100")}
-                  style={{ background: `hsl(${c})`, color: "hsl(0 0% 100%)" }}>
+                  style={{ background: `hsl(${c})`, color: "hsl(var(--insurer-foreground))" }}>
                   {t}
                   <LoginRing state={login[t]} />
                 </button>
@@ -207,11 +233,26 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
           </div>
           {login[activeTab] && login[activeTab] !== "connected" && (
             <p className={label}>{LOGIN_TEXT[login[activeTab]]}
-              {login[activeTab] === "no-addon" && <> <button className="underline" onClick={downloadAddon}>Download the add-on</button> · unzip, open chrome://extensions, turn on Developer mode, click Load unpacked and pick the folder, then refresh this page.</>}
+              {login[activeTab] === "no-addon" && <Button variant="link" size="sm" className="h-auto px-1 text-xs" onClick={() => setSetupOpen(true)}>One-time setup</Button>}
             </p>
           )}
           <OtpDialog challenge={challenge} onClose={() => setChallenge(null)} onSubmit={submitChallenge} />
           <ProtectorDialog open={!!askFor} busy={unlocking} onClose={() => setAskFor(null)} onSubmit={unlock} />
+          <CompanionSetup open={setupOpen} onClose={() => setSetupOpen(false)} />
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => {
+              const value = insurerRows.find((r) => r.name === activeTab)?.portal_url;
+              try { const url = new URL(value ?? ""); if (url.protocol !== "https:" || url.username || url.password) throw new Error(); window.open(url.href, "_blank", "noopener,noreferrer"); }
+              catch { toast({ title: "Set this insurer's portal URL first.", variant: "destructive" }); }
+            }}>Open portal</Button>
+            <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => { setPortalEdit(activeTab); setPortalUrl(insurerRows.find((r) => r.name === activeTab)?.portal_url ?? ""); }}>Edit portal URL</Button>
+            <span className={label}>Password Protector · 15-minute quote session</span>
+          </div>
+          {portalEdit === activeTab && <div className="flex gap-1.5">
+            <Input type="url" aria-label={`${activeTab} portal URL`} className="h-7 text-xs" value={portalUrl} onChange={(e) => setPortalUrl(e.target.value)} />
+            <Button size="sm" className="h-7 text-xs" onClick={savePortal}>Save URL</Button>
+          </div>}
+          {patientId && <QuotePdfCapture workflowId={workflowId} patientId={patientId} insurer={activeTab} />}
 
 
           <div className="flex flex-wrap items-center gap-1.5 rounded border border-border/60 px-2 py-1">

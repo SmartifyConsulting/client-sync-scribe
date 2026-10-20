@@ -132,3 +132,11 @@
 - [x] Browser add-on: opens portal, fills saved login, relays PIN/email prompt to Holarc
 - [ ] Test against each live portal — Momentum/Bidvest addresses invalid; selectors unverified
 - [ ] Capture quote PDF into Working Window + Documents
+
+## Holarc Wealth Companion — agreed Oct 20 updates
+- [ ] Editable per-broker insurer portal URLs
+- [ ] Restore insurer legend colours, retain orange ordinary badges
+- [ ] 15-minute Password Protector unlock and expiry tests
+- [ ] One-time Companion setup and open-portal / PDF-upload fallback
+- [ ] Automatic quote PDF attachment via Companion
+- [ ] Verify UI and attachment pipeline; live insurer check requires broker installation and verification

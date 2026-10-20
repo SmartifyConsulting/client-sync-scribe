@@ -1,10 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "Holarc Wealth Insurer Login",
-  "version": "1.0.0",
+  "name": "Holarc Wealth Companion",
+  "version": "1.1.0",
   "description": "Logs into insurer adviser portals with the broker's saved Holarc Wealth logins and relays PIN / email verification back to Holarc.",
   "icons": { "48": "icon.png", "128": "icon.png" },
-  "permissions": ["tabs", "scripting", "storage"],
+  "permissions": ["tabs", "scripting", "storage", "downloads"],
   "host_permissions": ["https://*/*"],
   "background": { "service_worker": "background.js" },
   "content_scripts": [
@@ -12,8 +12,8 @@
       "matches": [
         "https://holarc.co.za/*",
         "https://www.holarc.co.za/*",
-        "https://*.lovable.app/*",
-        "https://*.lovableproject.com/*",
+        "https://holarc-wealth.lovable.app/*",
+        "https://id-preview--320b9905-9d0e-4ca1-af45-821272397de6.lovable.app/*",
         "http://localhost/*"
       ],
       "js": ["bridge.js"],

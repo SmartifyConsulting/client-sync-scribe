@@ -12,7 +12,7 @@ export const LOGIN_TEXT: Record<LoginState, string> = {
   challenge: "Waiting for verification…",
   connected: "Connected",
   failed: "Login failed — click the tab to try again.",
-  "no-addon": "The Holarc insurer add-on isn't installed in this browser.",
+  "no-addon": "Holarc Wealth Companion is not set up in this browser.",
 };
 
 /** Small circular progress ring shown on an insurer tab while the add-on logs in. */
@@ -71,7 +71,7 @@ export function ProtectorDialog({ open, onClose, onSubmit, busy }: { open: boole
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-sm"><KeyRound className="h-4 w-4" />Unlock saved insurer logins</DialogTitle>
-          <DialogDescription className="text-xs">Type your Password Protector. You won't be asked again for a while.</DialogDescription>
+          <DialogDescription className="text-xs">Unlock all insurer quotes for 15 minutes. After that, Holarc Wealth asks for your Password Protector again.</DialogDescription>
         </DialogHeader>
         <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (code) onSubmit(code); }}>
           <div className="relative flex-1">
