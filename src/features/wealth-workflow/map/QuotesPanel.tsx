@@ -125,60 +125,42 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
         return isWM ? (
           <div className="space-y-3">
             <QuoteSpecForm workflowId={workflowId} isWM={isWM} patientId={records?.patientId} />
-            <p className="text-xs text-muted-foreground">Then capture the quotes for {clientFirst}:</p>
-            <div className="grid gap-2 sm:grid-cols-2">
-              <div className="rounded-lg border border-border/60 p-3 text-xs">
-                <p className="mb-1 flex items-center gap-1.5 font-semibold"><PenLine className="h-3.5 w-3.5" />Option A · Enter my quotes</p>
-                <p className="mb-2 text-muted-foreground">Capture quotes you got from insurer portals. Ranked by premium.</p>
-                <div className="space-y-1.5">
-                  <Input placeholder="Insurer" value={form.insurer} onChange={(e) => setForm({ ...form, insurer: e.target.value })} />
-                  <Input placeholder="Product" value={form.product} onChange={(e) => setForm({ ...form, product: e.target.value })} />
-                  <div className="grid grid-cols-2 gap-1.5">
-                    <Input placeholder="Cover (R)" inputMode="numeric" value={form.cover} onChange={(e) => setForm({ ...form, cover: e.target.value })} />
-                    <Input placeholder="Premium (R)" inputMode="numeric" value={form.premium} onChange={(e) => setForm({ ...form, premium: e.target.value })} />
-                  </div>
-                  <Button size="sm" className="w-full rounded-full" disabled={busy || !form.insurer || !form.premium}
-                    onClick={() => run(async () => { const r = await db.from("wealth_quotes").insert({ workflow_id: workflowId, method: "manual", insurer: form.insurer, product: form.product || "Life cover", monthly_premium: Number(form.premium), cover_amount: form.cover ? Number(form.cover) : null, rank: 1 }); setForm({ insurer: "", product: "Life cover", premium: "", cover: "" }); return r; }, "Quote added")}>
-                    <Plus className="mr-1 h-3.5 w-3.5" />Add quote
-                  </Button>
-                </div>
-              </div>
-              <div className="rounded-lg border border-border/60 p-3 text-xs">
-                <p className="mb-1 flex items-center gap-1.5 font-semibold"><Sparkles className="h-3.5 w-3.5" />Option B · Indicative comparison</p>
-                <p className="mb-2 text-muted-foreground">Elysian AI prepares indicative premiums from 6 insurers, based on {clientFirst}'s income. Confirm final figures with each insurer.</p>
-                <Button size="sm" variant="outline" className="w-full rounded-full" disabled={busy}
-                  onClick={() => run(async () => {
-                    const income = Number(cf.gross_income ?? 50000);
-                    const cover = Math.round((income * 12 * 10) / 100000) * 100000;
-                    const rows = INSURERS.map((ins, i) => ({ workflow_id: workflowId, method: "assisted", insurer: ins, product: "Life cover", cover_amount: cover, monthly_premium: Math.round((cover / 1000) * 0.11 * FACTORS[i]) }));
-                    rows.sort((a, b) => a.monthly_premium - b.monthly_premium).forEach((r: any, i) => (r.rank = i + 1));
-                    return db.from("wealth_quotes").insert(rows);
-                  }, "Indicative comparison ready")}>
-                  {busy ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-1 h-3.5 w-3.5" />}Prepare comparison
-                </Button>
-              </div>
-            </div>
             {records?.patientId && (
               <DocumentRequestComposer kind="quotes" workflowId={workflowId} patientId={records.patientId} clientName={clientFirst} />
             )}
           </div>
         ) : <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">Quotes are being gathered from insurers.</p>;
       }
+      const FINAL = "Comparison & selection";
       const insurerTabs = Array.from(new Set(quotes.map((q) => q.insurer)));
-      const active = insurerTabs.includes(tab) ? tab : "Comparison";
+      const active = insurerTabs.includes(tab) ? tab : FINAL;
       const mine = quotes.filter((q) => q.insurer === active);
       return (
         <div className="space-y-2">
           <div role="tablist" className="flex flex-wrap gap-1">
-            {["Comparison", ...insurerTabs].map((t) => (
+            {[...insurerTabs, FINAL].map((t) => (
               <button key={t} role="tab" aria-selected={active === t} onClick={() => setTab(t)}
                 className={cn("rounded-full border px-2 py-0.5 text-[10px] font-medium",
                   active === t ? "border-primary bg-primary text-primary-foreground" : "border-border/60 bg-card text-muted-foreground hover:text-foreground")}>
-                {t}{t !== "Comparison" && <span className="ml-1 opacity-70">{quotes.filter((q) => q.insurer === t).length}</span>}
+                {t}{t !== FINAL && <span className="ml-1 opacity-70">{quotes.filter((q) => q.insurer === t).length}</span>}
               </button>
             ))}
           </div>
-          {active === "Comparison" ? <QuoteTable /> : (
+          {active === FINAL ? (
+            <div className="space-y-2">
+              <QuoteTable selectable />
+              {selected.map((q) => (
+                <div key={q.id} className="space-y-1">
+                  <p className="text-[10px] font-semibold">Why {q.insurer} · {q.product}?</p>
+                  {isWM ? (
+                    <Textarea rows={2} defaultValue={q.commentary ?? ""} placeholder="Your reasoning for this option"
+                      onBlur={(e) => e.target.value !== (q.commentary ?? "") && run(() => db.from("wealth_quotes").update({ commentary: e.target.value }).eq("id", q.id), "Commentary saved")} className="text-[11px]" />
+                  ) : <p className="text-[11px] text-muted-foreground">{q.commentary || "—"}</p>}
+                </div>
+              ))}
+              <p className="text-[10px] text-muted-foreground">Tick the options to present to {clientFirst}. Top 3 by premium are highlighted.</p>
+            </div>
+          ) : (
             <div className="overflow-hidden rounded-lg border border-border/60">
               <table className="w-full text-[11px]">
                 <thead className="bg-muted/40 text-[10px] uppercase tracking-wide text-muted-foreground">
@@ -195,18 +177,6 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
                   ))}
                 </tbody>
               </table>
-            </div>
-          )}
-          <p className="text-[10px] text-muted-foreground">Top 3 by premium are highlighted.{quotes.some((q) => q.method === "assisted") ? " Indicative figures — confirm with each insurer." : ""}</p>
-          {isWM && quotes.some((q) => q.method === "manual") && (
-            <div className="grid grid-cols-[1fr_1fr_auto] gap-1.5">
-              <Input placeholder="Insurer" value={form.insurer} onChange={(e) => setForm({ ...form, insurer: e.target.value })} />
-              <Input placeholder="Premium (R)" inputMode="numeric" value={form.premium} onChange={(e) => setForm({ ...form, premium: e.target.value })} />
-              <Button size="sm" disabled={busy || !form.insurer || !form.premium} onClick={() => run(async () => {
-                const r = await db.from("wealth_quotes").insert({ workflow_id: workflowId, method: "manual", insurer: form.insurer, product: form.product || "Life cover", monthly_premium: Number(form.premium) }).select("*");
-                if (r.error) return r;
-                await rerank([...quotes, ...(r.data ?? [])]); setForm({ ...form, insurer: "", premium: "" }); return r;
-              }, "Quote added")}><Plus className="h-3.5 w-3.5" /></Button>
             </div>
           )}
         </div>
