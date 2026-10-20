@@ -85,6 +85,7 @@ export function DocumentRequestComposer({ kind, workflowId, patientId, clientNam
     <div className="space-y-3 rounded-lg border border-border/60 p-3">
       <p className="flex items-center gap-1.5 text-xs font-semibold"><Mail className="h-3.5 w-3.5" /> Request by email</p>
 
+      {kind !== "quotes" && (
       <div>
         <p className="mb-1 text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Insurers</p>
         {insurers.isLoading ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : (
@@ -98,8 +99,8 @@ export function DocumentRequestComposer({ kind, workflowId, patientId, clientNam
             ))}
           </div>
         )}
-        <p className="mt-1 text-2xs text-muted-foreground">Manage addresses in the Quotes screen.</p>
       </div>
+      )}
 
       {kind === "quotes" && !!docs.data?.length && (
         <div>
