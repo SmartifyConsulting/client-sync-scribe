@@ -118,3 +118,12 @@
 - [x] PIN / email verification pops up as a window (no inline box)
 - [x] Black product headers, white text; removed "requests quotes from six insurers" line
 - [ ] Browser add-on: log in, answer PIN/email prompt, capture quote PDF into Working Window + Documents — add-on not built; needs real Momentum portal address
+
+## Step 4 quotes — Oct 2026
+- [x] Existing cover prominent with insurer per policy; Since/Last seen under email
+- [x] Insurer tabs in solid legend colours; aligned product table columns
+- [x] Quote-request email on each insurer's App Integrations card
+- [x] Insurer option dictionary (from public product guides) shown per insurer tab
+- [ ] Confirm dictionary against live insurer quote screens — blocked: needs broker login + PIN
+- [ ] Browser add-on for insurer login / PDF capture — not built; needs Momentum's correct login address
+- [ ] Send quote requests by email to the saved address
