@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { useRecommendationHistory } from "../hooks";
 import { DocumentRequestComposer } from "./DocumentRequestComposer";
+import { QuoteSpecForm } from "./QuoteSpecForm";
 
 type Viewer = "manager" | "client";
 const db = supabase as any;
@@ -121,7 +122,8 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
       if (!quotes.length) {
         return isWM ? (
           <div className="space-y-3">
-            <p className="text-xs text-muted-foreground">Choose how you'll quote for {clientFirst}:</p>
+            <QuoteSpecForm workflowId={workflowId} isWM={isWM} />
+            <p className="text-xs text-muted-foreground">Then capture the quotes for {clientFirst}:</p>
             <div className="grid gap-2 sm:grid-cols-2">
               <div className="rounded-lg border border-border/60 p-3 text-xs">
                 <p className="mb-1 flex items-center gap-1.5 font-semibold"><PenLine className="h-3.5 w-3.5" />Option A · Enter my quotes</p>

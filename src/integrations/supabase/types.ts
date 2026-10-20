@@ -11033,6 +11033,39 @@ export type Database = {
         }
         Relationships: []
       }
+      wealth_quote_specs: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          insurers: string[]
+          product_type: string
+          updated_at: string
+          variations: Json
+          workflow_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          insurers?: string[]
+          product_type: string
+          updated_at?: string
+          variations?: Json
+          workflow_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          insurers?: string[]
+          product_type?: string
+          updated_at?: string
+          variations?: Json
+          workflow_id?: string
+        }
+        Relationships: []
+      }
       wealth_quotes: {
         Row: {
           ai_rank: number | null
@@ -12677,7 +12710,11 @@ export type Database = {
         | "active"
         | "past_due"
         | "cancelled"
-      integration_category: "insurance" | "crm_planning" | "industry_portal"
+      integration_category:
+        | "insurance"
+        | "crm_planning"
+        | "industry_portal"
+        | "financial_service_provider"
       integration_status: "configured" | "pending" | "inactive"
       invitation_status: "pending" | "accepted" | "declined" | "expired"
       user_role:
@@ -12839,7 +12876,12 @@ export const Constants = {
         "past_due",
         "cancelled",
       ],
-      integration_category: ["insurance", "crm_planning", "industry_portal"],
+      integration_category: [
+        "insurance",
+        "crm_planning",
+        "industry_portal",
+        "financial_service_provider",
+      ],
       integration_status: ["configured", "pending", "inactive"],
       invitation_status: ["pending", "accepted", "declined", "expired"],
       user_role: [
