@@ -401,14 +401,6 @@ export function SignInCard({ onSignUp }: { onSignUp?: () => void }) {
           >
             {useOtp ? "Sign in with password instead" : "Prefer a one-time code? Email it to me"}
           </button>
-
-          <button
-            type="button"
-            onClick={() => navigate("/provider-signup")}
-            className="block w-full text-center text-xs font-medium text-primary hover:underline pt-2"
-          >
-            Registering a hospital, emergency service or insurance company? Onboard your organisation →
-          </button>
         </div>
       </div>
 
