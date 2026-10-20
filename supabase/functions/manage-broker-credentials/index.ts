@@ -73,8 +73,9 @@ async function sha256Hex(s: string): Promise<string> {
 }
 
 // ---- AES-256-GCM for credential payloads ----
-async function aesKey(secretB64: string) {
-  const raw = Uint8Array.from(atob(secretB64), (c) => c.charCodeAt(0));
+async function aesKey(secret: string) {
+  // Derive a 256-bit key from the secret string so any length/format works.
+  const raw = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(secret));
   return crypto.subtle.importKey("raw", raw, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
 }
 
