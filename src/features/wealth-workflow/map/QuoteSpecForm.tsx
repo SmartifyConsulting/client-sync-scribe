@@ -109,7 +109,7 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
     if (!/^\d{4,8}$/.test(code)) return toast({ title: "Enter the 4–8 digit code from the insurer", variant: "destructive" });
     window.postMessage({ source: "holarc", type: "insurer-otp", insurer: ins, workflowId, otp: code }, window.location.origin);
     setOtp((o) => ({ ...o, [ins]: "" }));
-    toast({ title: `Code passed to the ${ins} session` });
+    setOtpState((s) => ({ ...s, [ins]: "Waiting for the browser add-on…" }));
   };
 
   if (isLoading) return <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />;
@@ -157,6 +157,16 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
               value={otp[activeTab] ?? ""} onChange={(e) => setOtp((o) => ({ ...o, [activeTab]: e.target.value.replace(/\D/g, "").slice(0, 8) }))}
               onKeyDown={(e) => e.key === "Enter" && sendOtp(activeTab)} />
             <Button size="sm" variant="outline" className="h-6 rounded-full px-2 text-[10px]" onClick={() => sendOtp(activeTab)}>Submit</Button>
+            {otpState[activeTab] && <span className={label}>{otpState[activeTab]}</span>}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5 rounded border border-border/60 px-2 py-1">
+            <span className={label}>Shortfall formula · income years</span>
+            <Input className="h-6 w-12 px-1.5 text-[11px] tabular-nums" inputMode="numeric" value={params.incomeYears}
+              onChange={(e) => applyParams({ ...params, incomeYears: Number(e.target.value.replace(/\D/g, "")) || 0 })} />
+            <span className={label}>· income protection %</span>
+            <Input className="h-6 w-12 px-1.5 text-[11px] tabular-nums" inputMode="numeric" value={params.ipPercent}
+              onChange={(e) => applyParams({ ...params, ipPercent: Math.min(Number(e.target.value.replace(/\D/g, "")) || 0, 100) })} />
           </div>
 
           {products.map((p) => {
@@ -168,6 +178,7 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
                   <button aria-label={`Remove ${p}`} className="text-muted-foreground hover:text-destructive"
                     onClick={() => setPlan((pl) => { const { [p]: _, ...rest } = pl; return rest; })}><X className="h-3 w-3" /></button>
                 </div>
+                {formulaFor(p) && <p className="border-t border-border/60 px-2 py-1 text-[10px] tabular-nums text-muted-foreground">{formulaFor(p)}</p>}
                 <table className="w-full">
                   <thead className="text-[10px] uppercase tracking-wide text-muted-foreground">
                     <tr><th className="px-2 py-1 text-left font-medium">Variable</th>{plan[p].map((_, i) => <th key={i} className="px-2 py-1 text-left font-medium">Option {String.fromCharCode(65 + i)}</th>)}</tr>
