@@ -14,3 +14,6 @@
 - Workflow owner badges use fixed labels and colours (`--owner-*` tokens; insurer colours in map/insurerColors.tsx), never viewer-relative "You". Why: colour alone tells who acts.
 
 - Insurer portal login runs in the broker-side add-on (extension-insurer/, zipped to public/holarc-insurer-addon.zip); the app unlocks credentials via the Password Protector reauth token and passes them by same-origin postMessage. Why: insurer portals need the broker browser session and 2FA.
+- Portal URL overrides are encrypted per broker with the existing credentials; catalog URLs remain defaults. Why: brokers can correct their own destinations without changing everyone else's.
+- Quote PDF capture is workflow-owner authenticated and stored as PDF data URLs in existing RLS-protected documents, keyed by workflow and SHA-256; never use public media storage for quote PDFs. Why: preserves client privacy, existing Documents visibility, and duplicate detection without changing schemas.
+- Companion PDF capture only reads same-origin downloads from one uniquely associated portal; unsupported sources use manual PDF upload. Why: avoids capturing unrelated downloads or forwarding session cookies.

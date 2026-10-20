@@ -246,6 +246,17 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
               catch { toast({ title: "Set this insurer's portal URL first.", variant: "destructive" }); }
             }}>Open portal</Button>
             <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => { setPortalEdit(activeTab); setPortalUrl(insurerRows.find((r) => r.name === activeTab)?.portal_url ?? ""); }}>Edit portal URL</Button>
+            {["username", "password"].map((field) => <Button key={field} variant="ghost" size="sm" className="h-7 text-xs" onClick={async () => {
+              const token = getToken();
+              if (!token) { setAskFor(activeTab); return; }
+              const row = insurerRows.find((r) => r.name === activeTab);
+              if (!row) return;
+              const { data, error } = await supabase.functions.invoke("manage-broker-credentials", { body: { action: "reveal", integrationId: row.id, token } });
+              const value = field === "username" ? data?.username : data?.fields?.password;
+              if (error || data?.error || !value) { toast({ title: "Could not unlock the saved login.", variant: "destructive" }); return; }
+              try { await navigator.clipboard.writeText(value); toast({ title: `${field === "username" ? "Username" : "Password"} copied. Clear your clipboard after use.` }); }
+              catch { toast({ title: "Your browser blocked copying.", variant: "destructive" }); }
+            }}>Copy {field}</Button>)}
             <span className={label}>Password Protector · 15-minute quote session</span>
           </div>
           {portalEdit === activeTab && <div className="flex gap-1.5">
