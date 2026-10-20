@@ -67,12 +67,12 @@ export function QuoteSpecForm({ workflowId, isWM }: { workflowId: string; isWM: 
 
       <div className="grid gap-2 sm:grid-cols-2">
         <label className="space-y-1"><span className="text-[10px] font-normal text-muted-foreground">1 · Type of insurance</span>
-          <select className="h-6 w-full rounded border border-input bg-background px-1 text-[11px].5 text-[11px]" value={product} onChange={(e) => changeProduct(e.target.value)}>
+          <select className="h-6 w-full rounded border border-input bg-background px-1.5 text-[11px]" value={product} onChange={(e) => changeProduct(e.target.value)}>
             {Object.keys(PRODUCT_TYPES).map((p) => <option key={p}>{p}</option>)}
           </select>
         </label>
         <label className="space-y-1"><span className="text-[10px] font-normal text-muted-foreground">2 · Number of quote variations</span>
-          <select className="h-6 w-full rounded border border-input bg-background px-1 text-[11px].5 text-[11px]" value={variations.length} onChange={(e) => setCount(Number(e.target.value))}>
+          <select className="h-6 w-full rounded border border-input bg-background px-1.5 text-[11px]" value={variations.length} onChange={(e) => setCount(Number(e.target.value))}>
             {[1, 2, 3, 4].map((n) => <option key={n}>{n}</option>)}
           </select>
         </label>
