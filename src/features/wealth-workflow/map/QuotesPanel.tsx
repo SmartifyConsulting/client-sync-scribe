@@ -11,10 +11,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useRecommendationHistory } from "../hooks";
 import { DocumentRequestComposer } from "./DocumentRequestComposer";
 import { QuoteSpecForm } from "./QuoteSpecForm";
+import { fmtR } from "./money";
 
 type Viewer = "manager" | "client";
 const db = supabase as any;
-const R = (n?: number | null) => (n == null ? "—" : `R ${Math.round(Number(n)).toLocaleString("en-ZA")}`);
+const R = fmtR;
 
 /** Step 3 and Step 4 outputs shown in the Working Window (instead of a repeated document list). */
 export const QUOTE_STEPS = new Set([
@@ -34,6 +35,7 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
   const quotes: any[] = records?.quotes ?? [];
   const holdings: any[] = records?.holdings ?? [];
   const [busy, setBusy] = useState(false);
+  const [tab, setTab] = useState("Comparison");
   const [form, setForm] = useState({ insurer: "", product: "Life cover", premium: "", cover: "" });
   const { data: recs = [] } = useRecommendationHistory(workflowId);
   const { data: fin } = useQuery({
@@ -162,10 +164,40 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
           </div>
         ) : <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">Quotes are being gathered from insurers.</p>;
       }
+      const insurerTabs = Array.from(new Set(quotes.map((q) => q.insurer)));
+      const active = insurerTabs.includes(tab) ? tab : "Comparison";
+      const mine = quotes.filter((q) => q.insurer === active);
       return (
         <div className="space-y-2">
-          <QuoteTable />
-          <p className="text-2xs text-muted-foreground">Top 3 by premium are highlighted.{quotes.some((q) => q.method === "assisted") ? " Indicative figures — confirm with each insurer." : ""}</p>
+          <div role="tablist" className="flex flex-wrap gap-1">
+            {["Comparison", ...insurerTabs].map((t) => (
+              <button key={t} role="tab" aria-selected={active === t} onClick={() => setTab(t)}
+                className={cn("rounded-full border px-2 py-0.5 text-[10px] font-medium",
+                  active === t ? "border-primary bg-primary text-primary-foreground" : "border-border/60 bg-card text-muted-foreground hover:text-foreground")}>
+                {t}{t !== "Comparison" && <span className="ml-1 opacity-70">{quotes.filter((q) => q.insurer === t).length}</span>}
+              </button>
+            ))}
+          </div>
+          {active === "Comparison" ? <QuoteTable /> : (
+            <div className="overflow-hidden rounded-lg border border-border/60">
+              <table className="w-full text-[11px]">
+                <thead className="bg-muted/40 text-[10px] uppercase tracking-wide text-muted-foreground">
+                  <tr><th className="px-2 py-1 text-left font-medium">Product</th><th className="px-2 py-1 text-right font-medium">Cover</th><th className="px-2 py-1 text-right font-medium">Premium / month</th><th className="px-2 py-1 text-right font-medium">Rank</th></tr>
+                </thead>
+                <tbody>
+                  {mine.map((q) => (
+                    <tr key={q.id} className="border-t border-border/60">
+                      <td className="px-2 py-1">{q.product}{q.method === "assisted" && <span className="ml-1 text-[10px] text-muted-foreground">· indicative</span>}</td>
+                      <td className="px-2 py-1 text-right tabular-nums">{R(q.cover_amount)}</td>
+                      <td className="px-2 py-1 text-right font-medium tabular-nums">{R(q.monthly_premium)}</td>
+                      <td className="px-2 py-1 text-right">{q.rank ?? "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          <p className="text-[10px] text-muted-foreground">Top 3 by premium are highlighted.{quotes.some((q) => q.method === "assisted") ? " Indicative figures — confirm with each insurer." : ""}</p>
           {isWM && quotes.some((q) => q.method === "manual") && (
             <div className="grid grid-cols-[1fr_1fr_auto] gap-1.5">
               <Input placeholder="Insurer" value={form.insurer} onChange={(e) => setForm({ ...form, insurer: e.target.value })} />

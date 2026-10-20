@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { PRODUCT_TYPES, defaultVariation, variationComplete, type FieldDef } from "./quoteSpec";
+import { groupDigits } from "./money";
 
 const db = supabase as any;
 
@@ -27,8 +28,9 @@ export function QuoteSpecForm({ workflowId, isWM }: { workflowId: string; isWM: 
         db.from("app_integrations_catalog").select("id,name").eq("category", "insurance").eq("is_active", true).order("display_order"),
         db.from("broker_integration_credentials").select("integration_id,is_enabled,status").eq("broker_user_id", user!.id),
       ]);
-      const ready = new Set((creds.data ?? []).filter((c: any) => c.is_enabled && c.status === "configured").map((c: any) => c.integration_id));
-      return (cat.data ?? []).map((c: any) => ({ name: c.name, ready: ready.has(c.id) }));
+      // Any saved (encrypted) login counts; no trip to App Integrations needed.
+      const ready = new Set((creds.data ?? []).filter((c: any) => c.status === "configured").map((c: any) => c.integration_id));
+      return (cat.data ?? []).filter((c: any) => ready.has(c.id)).map((c: any) => ({ name: c.name, ready: true }));
     },
   });
 
@@ -100,7 +102,7 @@ export function QuoteSpecForm({ workflowId, isWM }: { workflowId: string; isWM: 
                       ) : (
                         <div className="flex items-center gap-1">
                           {f.kind === "amount" && <span className="text-muted-foreground">R</span>}
-                          <Input className="h-6 px-1.5 text-[11px]" inputMode="decimal" value={v[f.key]} disabled={f.key === "growth" && String(v.increase_option).includes("No increase")}
+                          <Input className="h-6 px-1.5 text-[11px] tabular-nums" inputMode="decimal" value={f.kind === "amount" ? groupDigits(v[f.key]) : v[f.key]} disabled={f.key === "growth" && String(v.increase_option).includes("No increase")}
                             onChange={(e) => setVal(i, f.key, e.target.value.replace(/[^\d.]/g, ""))} />
                           {f.kind === "percent" && <span className="text-muted-foreground">%</span>}
                         </div>
@@ -115,7 +117,8 @@ export function QuoteSpecForm({ workflowId, isWM }: { workflowId: string; isWM: 
       </div>
 
       <div>
-        <p className="mb-1 text-[10px] font-normal text-muted-foreground">4 · Insurers to quote (logins saved in App Integrations)</p>
+        <p className="mb-1 text-[10px] font-normal text-muted-foreground">4 · Insurers to quote</p>
+        {!insurers.length && <p className="text-[10px] text-muted-foreground">No saved insurer logins found.</p>}
         <div className="flex flex-wrap gap-1.5">
           {insurers.map((ins: any) => {
             const on = chosen.includes(ins.name);
