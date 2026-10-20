@@ -30,6 +30,9 @@ Deno.serve(async (req) => {
     // target outside this list still requires admin.
     const REVERSE_ADMIN_EMAIL = "info@georgiaadams.co.za";
     const SEEDED_EMAILS = new Set([
+      "marlin@marlinmoodley.co.za",
+      "georgiaadams@holarchealth.com",
+      "georgia.client@demo.holarcwealth.co.za",
       "info@georgiaadams.co.za",
       "georgia.adams@smartify.co.za",
       "sme@smartify.co.za",
