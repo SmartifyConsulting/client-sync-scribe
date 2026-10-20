@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Holarc Wealth Insurer Login",
+  "version": "1.0.0",
+  "description": "Logs into insurer adviser portals with the broker's saved Holarc Wealth logins and relays PIN / email verification back to Holarc.",
+  "icons": { "48": "icon.png", "128": "icon.png" },
+  "permissions": ["tabs", "scripting", "storage"],
+  "host_permissions": ["https://*/*"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://holarc.co.za/*",
+        "https://www.holarc.co.za/*",
+        "https://*.lovable.app/*",
+        "https://*.lovableproject.com/*",
+        "http://localhost/*"
+      ],
+      "js": ["bridge.js"],
+      "run_at": "document_start"
+    }
+  ]
+}

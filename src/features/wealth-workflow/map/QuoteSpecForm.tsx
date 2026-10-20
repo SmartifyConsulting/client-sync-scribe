@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus, X } from "lucide-react";
 import { insurerColor } from "./insurerColors";
 import { insurerFields, insurerKey } from "./insurerDictionary";
-import { LoginRing, LOGIN_TEXT, OtpDialog, type Challenge, type LoginState } from "./InsurerLogin";
+import { LoginRing, LOGIN_TEXT, OtpDialog, ProtectorDialog, addonInstalled, downloadAddon, type Challenge, type LoginState } from "./InsurerLogin";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -35,14 +35,14 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
     queryFn: async () => (await db.from("client_financial_profiles").select("cash_flow,assets_liabilities,risk_portfolio").eq("patient_id", patientId).maybeSingle()).data,
   });
   const { data: insurerRows = [] } = useQuery({
-    queryKey: ["quote-insurer-names", user?.id], enabled: !!user && isWM,
+    queryKey: ["quote-insurer-rows", user?.id], enabled: !!user && isWM,
     queryFn: async () => {
       const [cat, creds] = await Promise.all([
-        db.from("app_integrations_catalog").select("id,name").eq("category", "insurance").eq("is_active", true).order("display_order"),
+        db.from("app_integrations_catalog").select("id,name,portal_url").eq("category", "insurance").eq("is_active", true).order("display_order"),
         db.from("broker_integration_credentials").select("integration_id,status").eq("broker_user_id", user!.id),
       ]);
       const ready = new Set((creds.data ?? []).filter((c: any) => c.status === "configured").map((c: any) => c.integration_id));
-      return (cat.data ?? []).filter((c: any) => ready.has(c.id)).map((c: any) => c.name as string);
+      return (cat.data ?? []).filter((c: any) => ready.has(c.id)) as { id: string; name: string; portal_url: string | null }[];
     },
   });
 
@@ -87,13 +87,42 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
     return () => window.removeEventListener("message", onMsg);
   }, [workflowId]);
 
-  /** Opening a tab asks the add-on to log in with the saved credentials. No reply = add-on missing. */
+  /** Opening a tab unlocks the saved login and asks the add-on to open and log into the insurer portal. */
+  const TOKEN_KEY = "holarc-cred-token";
+  const [askFor, setAskFor] = useState<string | null>(null);
+  const [unlocking, setUnlocking] = useState(false);
+  const getToken = () => {
+    try { const t = JSON.parse(sessionStorage.getItem(TOKEN_KEY) || "null"); return t && t.exp > Date.now() + 30000 ? t.token as string : null; } catch { return null; }
+  };
+  const startLogin = async (ins: string, token: string) => {
+    const row = (insurerRows as any[]).find((r) => r?.name === ins);
+    if (!row?.id) return;
+    setLogin((s) => ({ ...s, [ins]: "connecting" }));
+    const { data, error } = await supabase.functions.invoke("manage-broker-credentials", { body: { action: "reveal", integrationId: row.id, token } });
+    if (error || data?.error) {
+      sessionStorage.removeItem(TOKEN_KEY);
+      setLogin((s) => ({ ...s, [ins]: "failed" }));
+      return toast({ title: `Couldn't unlock the ${ins} login`, description: data?.error ?? "Please try again.", variant: "destructive" });
+    }
+    const f = data.fields ?? {};
+    window.postMessage({ source: "holarc", type: "insurer-login", insurer: ins, workflowId, loginUrl: row.portal_url,
+      username: f.username ?? data.username, password: f.password }, window.location.origin);
+  };
   const openTab = (ins: string) => {
     setTab(ins);
-    if (login[ins] === "connected" || login[ins] === "connecting") return;
-    setLogin((s) => ({ ...s, [ins]: "connecting" }));
-    window.postMessage({ source: "holarc", type: "insurer-login", insurer: ins, workflowId }, window.location.origin);
-    setTimeout(() => setLogin((s) => (s[ins] === "connecting" ? { ...s, [ins]: "no-addon" } : s)), 8000);
+    if (login[ins] === "connected" || login[ins] === "connecting" || login[ins] === "challenge") return;
+    if (!addonInstalled()) return setLogin((s) => ({ ...s, [ins]: "no-addon" }));
+    const token = getToken();
+    if (token) startLogin(ins, token); else setAskFor(ins);
+  };
+  const unlock = async (passcode: string) => {
+    setUnlocking(true);
+    const { data, error } = await supabase.functions.invoke("manage-broker-credentials", { body: { action: "reauth", passcode } });
+    setUnlocking(false);
+    if (error || data?.error) return toast({ title: data?.error ?? "Incorrect Password Protector", variant: "destructive" });
+    sessionStorage.setItem(TOKEN_KEY, JSON.stringify({ token: data.token, exp: Date.now() + (data.expiresInMs ?? 300000) }));
+    const ins = askFor; setAskFor(null);
+    if (ins) startLogin(ins, data.token);
   };
 
   const submitChallenge = (value: string) => {
@@ -177,9 +206,12 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
             })}
           </div>
           {login[activeTab] && login[activeTab] !== "connected" && (
-            <p className={label}>{LOGIN_TEXT[login[activeTab]]}</p>
+            <p className={label}>{LOGIN_TEXT[login[activeTab]]}
+              {login[activeTab] === "no-addon" && <> <button className="underline" onClick={downloadAddon}>Download the add-on</button> · unzip, open chrome://extensions, turn on Developer mode, click Load unpacked and pick the folder, then refresh this page.</>}
+            </p>
           )}
           <OtpDialog challenge={challenge} onClose={() => setChallenge(null)} onSubmit={submitChallenge} />
+          <ProtectorDialog open={!!askFor} busy={unlocking} onClose={() => setAskFor(null)} onSubmit={unlock} />
 
 
           <div className="flex flex-wrap items-center gap-1.5 rounded border border-border/60 px-2 py-1">
