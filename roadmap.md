@@ -127,3 +127,8 @@
 - [ ] Confirm dictionary against live insurer quote screens — blocked: needs broker login + PIN
 - [ ] Browser add-on for insurer login / PDF capture — not built; needs Momentum's correct login address
 - [ ] Send quote requests by email to the saved address
+
+## Insurer login add-on (Oct 2026)
+- [x] Browser add-on: opens portal, fills saved login, relays PIN/email prompt to Holarc
+- [ ] Test against each live portal — Momentum/Bidvest addresses invalid; selectors unverified
+- [ ] Capture quote PDF into Working Window + Documents

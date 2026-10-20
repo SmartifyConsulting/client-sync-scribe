@@ -12,3 +12,5 @@
 - Practice logos live in the private `practice-logos` bucket (`<user_id>/...`) and are embedded as data URLs in documents. Why: signed copies keep logos permanently.
 - Step 1 requires personal info (ID, DOB, address, marital status) checked inside `wealth_onboarding_refresh`; Step 2 financials are AI-captured by the `extract-financials` edge function (WM only) and advance only via `wealth_financials_verify` (client only); any later edit clears `verified_at` by trigger. Why: client-confirmed fact-find is the audit basis for advice.
 - Workflow owner badges use fixed labels and colours (`--owner-*` tokens; insurer colours in map/insurerColors.tsx), never viewer-relative "You". Why: colour alone tells who acts.
+
+- Insurer portal login runs in the broker-side add-on (extension-insurer/, zipped to public/holarc-insurer-addon.zip); the app unlocks credentials via the Password Protector reauth token and passes them by same-origin postMessage. Why: insurer portals need the broker browser session and 2FA.
