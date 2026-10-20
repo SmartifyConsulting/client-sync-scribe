@@ -124,7 +124,7 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
       if (!quotes.length) {
         return isWM ? (
           <div className="space-y-3">
-            <QuoteSpecForm workflowId={workflowId} isWM={isWM} />
+            <QuoteSpecForm workflowId={workflowId} isWM={isWM} patientId={records?.patientId} />
             <p className="text-xs text-muted-foreground">Then capture the quotes for {clientFirst}:</p>
             <div className="grid gap-2 sm:grid-cols-2">
               <div className="rounded-lg border border-border/60 p-3 text-xs">
