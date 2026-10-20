@@ -23,7 +23,7 @@ import { AdminPanel } from "@/pages/admin/_shared/AdminPanel";
 
 const db = supabase as any;
 
-type Category = "insurance" | "crm_planning" | "industry_portal";
+type Category = "insurance" | "crm_planning" | "industry_portal" | "financial_service_provider";
 
 interface CatalogEntry {
   id: string;
@@ -39,9 +39,10 @@ const CATEGORY_LABELS: Record<Category, string> = {
   insurance: "Insurance",
   crm_planning: "CRM & Planning",
   industry_portal: "Industry Portals",
+  financial_service_provider: "Financial Service Providers",
 };
 
-const ALL_FIELDS = ["username", "password", "pin", "agency_code"] as const;
+const ALL_FIELDS = ["username", "password", "pin", "agency_code", "id_number"] as const;
 
 const emptyDraft = (): Omit<CatalogEntry, "display_order"> => ({
   id: "",
@@ -101,8 +102,8 @@ export default function IntegrationsAdmin() {
     setDialogOpen(true);
   };
 
-  // Every provider must always collect at least a username and password.
-  const MANDATORY_FIELDS = ["username", "password"] as const;
+  // Every provider must always collect at least a password; username is optional.
+  const MANDATORY_FIELDS = ["password"] as const;
 
   const toggleField = (field: string) => {
     if ((MANDATORY_FIELDS as readonly string[]).includes(field)) return;
@@ -115,8 +116,8 @@ export default function IntegrationsAdmin() {
   };
 
   const handleSave = async () => {
-    if (!draft.id.trim() || !draft.name.trim() || !draft.portal_url.trim()) {
-      toast({ title: "Missing fields", description: "ID, name, and portal URL are required.", variant: "destructive" });
+    if (!draft.name.trim() || !draft.portal_url.trim()) {
+      toast({ title: "Missing fields", description: "Name and portal URL are required.", variant: "destructive" });
       return;
     }
     const requiredFields = Array.from(new Set([...MANDATORY_FIELDS, ...draft.required_fields]));
@@ -140,7 +141,7 @@ export default function IntegrationsAdmin() {
     } else {
       const maxOrder = Math.max(0, ...entries.filter((e) => e.category === draft.category).map((e) => e.display_order));
       const { error } = await db.from("app_integrations_catalog").insert({
-        id: draft.id.trim().toLowerCase().replace(/\s+/g, "_"),
+        id: draft.name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, ""),
         name: draft.name,
         category: draft.category,
         portal_url: draft.portal_url,
@@ -198,7 +199,7 @@ export default function IntegrationsAdmin() {
     );
   }
 
-  const grouped = (["insurance", "crm_planning", "industry_portal"] as Category[]).map((cat) => ({
+  const grouped = (["insurance", "crm_planning", "industry_portal", "financial_service_provider"] as Category[]).map((cat) => ({
     category: cat,
     items: entries.filter((e) => e.category === cat).sort((a, b) => a.display_order - b.display_order),
   }));
@@ -254,12 +255,6 @@ export default function IntegrationsAdmin() {
             <DialogTitle>{editingId ? "Edit Provider" : "Add Provider"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
-            {!editingId && (
-              <div>
-                <Label>ID (slug)</Label>
-                <Input value={draft.id} onChange={(e) => setDraft((d) => ({ ...d, id: e.target.value }))} placeholder="e.g. brightrock" />
-              </div>
-            )}
             <div>
               <Label>Name</Label>
               <Input value={draft.name} onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))} placeholder="e.g. BrightRock" />
@@ -281,7 +276,7 @@ export default function IntegrationsAdmin() {
             </div>
             <div>
               <Label>Required Fields</Label>
-              <p className="text-xs text-[hsl(var(--admin-text-tertiary))] mb-1">Username and password are always required.</p>
+              <p className="text-xs text-[hsl(var(--admin-text-tertiary))] mb-1">Password is always required.</p>
               <div className="flex flex-wrap gap-3 mt-1">
                 {ALL_FIELDS.map((field) => {
                   const mandatory = (MANDATORY_FIELDS as readonly string[]).includes(field);
@@ -292,7 +287,7 @@ export default function IntegrationsAdmin() {
                       disabled={mandatory}
                       onCheckedChange={() => toggleField(field)}
                     />
-                    {field}
+                    {field.replace(/_/g, " ")}
                   </label>
                   );
                 })}

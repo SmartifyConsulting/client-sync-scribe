@@ -30,7 +30,7 @@ function PasswordInput(props: ComponentProps<typeof Input>) {
   );
 }
 
-type Category = "insurance" | "crm_planning" | "industry_portal";
+type Category = "insurance" | "crm_planning" | "industry_portal" | "financial_service_provider";
 
 interface CatalogEntry {
   id: string;
@@ -53,6 +53,7 @@ const CATEGORY_LABELS: Record<Category, string> = {
   insurance: "Insurance Providers",
   crm_planning: "CRM & Financial Planning",
   industry_portal: "Industry Portals",
+  financial_service_provider: "Financial Service Providers",
 };
 
 const invoke = async (body: Record<string, unknown>) => {
@@ -115,7 +116,7 @@ export default function AppIntegrations() {
   const statusFor = (integrationId: string) => (credentials.data ?? []).find((c) => c.integration_id === integrationId);
 
   const grouped = useMemo(() => {
-    const cats: Category[] = ["insurance", "crm_planning", "industry_portal"];
+    const cats: Category[] = ["insurance", "crm_planning", "industry_portal", "financial_service_provider"];
     return cats.map((category) => ({
       category,
       items: (catalog.data ?? []).filter((e) => e.category === category),
