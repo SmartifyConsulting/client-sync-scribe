@@ -145,7 +145,7 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
         <div className="flex flex-wrap gap-1.5">
           {insurers.map((ins: string) => {
             const on = chosen.includes(ins);
-            const c = insurerColor(ins);
+            const c = "35 85% 38%"; // badges stay orange; only tabs use legend colours
             return (
               <button key={ins} type="button" aria-pressed={on}
                 onClick={() => setChosen((c) => (on ? c.filter((x) => x !== ins) : [...c, ins]))}

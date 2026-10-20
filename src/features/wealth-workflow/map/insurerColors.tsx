@@ -19,10 +19,10 @@ export function insurerColor(provider?: string | null) {
 }
 
 export function InsurerBadge({ provider }: { provider: string }) {
-  const c = insurerColor(provider);
+  // Badges stay in the single insurer orange; only the Step 4 tabs use per-insurer legend colours.
   return (
     <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-2xs font-semibold text-white"
-      style={{ background: `hsl(${c})` }}>{provider}
+      style={{ background: `hsl(${FALLBACK})` }}>{provider}
     </span>
   );
 }
