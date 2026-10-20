@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Check, Mail, KeyRound } from "lucide-react";
+import { Check, Mail, KeyRound, Eye, EyeOff } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ export const LOGIN_TEXT: Record<LoginState, string> = {
   challenge: "Waiting for verification…",
   connected: "Connected",
   failed: "Login failed — click the tab to try again.",
-  "no-addon": "The browser add-on isn't installed or running, so the insurer login can't start.",
+  "no-addon": "The Holarc insurer add-on isn't installed in this browser.",
 };
 
 /** Small circular progress ring shown on an insurer tab while the add-on logs in. */
@@ -59,4 +59,38 @@ export function OtpDialog({ challenge, onClose, onSubmit }: { challenge: Challen
       </DialogContent>
     </Dialog>
   );
+}
+
+/** Asks once per session for the Password Protector that unlocks the saved insurer logins. */
+export function ProtectorDialog({ open, onClose, onSubmit, busy }: { open: boolean; onClose: () => void; onSubmit: (v: string) => void; busy?: boolean }) {
+  const [code, setCode] = useState("");
+  const [show, setShow] = useState(false);
+  useEffect(() => { if (!open) setCode(""); }, [open]);
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-sm"><KeyRound className="h-4 w-4" />Unlock saved insurer logins</DialogTitle>
+          <DialogDescription className="text-xs">Type your Password Protector. You won't be asked again for a while.</DialogDescription>
+        </DialogHeader>
+        <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (code) onSubmit(code); }}>
+          <div className="relative flex-1">
+            <Input autoFocus type={show ? "text" : "password"} className="h-8 pr-8 text-xs" value={code} onChange={(e) => setCode(e.target.value)} />
+            <button type="button" tabIndex={-1} aria-label={show ? "Hide" : "Show"} onClick={() => setShow((s) => !s)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground">{show ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}</button>
+          </div>
+          <Button size="sm" className="h-8" disabled={!code || busy}>Unlock</Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export const addonInstalled = () => document.documentElement.dataset.holarcAddon === "1";
+
+export function downloadAddon() {
+  fetch("/holarc-insurer-addon.zip")
+    .then((r) => { if (!r.ok) throw new Error(`Download failed: ${r.status}`); return r.blob(); })
+    .then((b) => { const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "holarc-insurer-addon.zip"; a.click(); URL.revokeObjectURL(a.href); })
+    .catch((e) => alert(e.message));
 }
