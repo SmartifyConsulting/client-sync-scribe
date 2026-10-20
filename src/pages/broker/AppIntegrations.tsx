@@ -47,6 +47,7 @@ interface CredentialStatus {
   status: "configured" | "pending" | "inactive";
   updated_at: string | null;
   has_credentials: boolean;
+  quote_email?: string | null;
 }
 
 const CATEGORY_LABELS: Record<Category, string> = {
@@ -402,6 +403,11 @@ export default function AppIntegrations() {
                               : "Not Set Up"}
                           </Badge>
                         </div>
+                        {entry.category === "insurance" && (
+                          <p className="truncate text-xs text-muted-foreground">
+                            Quote requests: {status?.quote_email ? <span className="text-foreground">{status.quote_email}</span> : <span className="italic">no email set</span>}
+                          </p>
+                        )}
                         <div className="flex gap-1.5">
                           <Button variant="ghost" size="sm" className="flex-1 h-7 text-xs px-2" onClick={() => openManage(entry)}>
                             <Settings2 className="h-3 w-3 mr-1" /> Credentials
@@ -466,7 +472,15 @@ export default function AppIntegrations() {
                   <Input value={manageUsername} onChange={(e) => setManageUsername(e.target.value)} />
                 </div>
               )}
-              {manageEntry?.required_fields.filter((f) => f !== "username").map((field) => (
+              {manageEntry?.category === "insurance" && (
+                <div>
+                  <Label>Quote requests email</Label>
+                  <Input type="email" placeholder="quotes@insurer.co.za" value={manageFields.quote_email ?? ""}
+                    onChange={(e) => setManageFields((f) => ({ ...f, quote_email: e.target.value }))} />
+                  <p className="mt-1 text-xs text-muted-foreground">Where quote requests go when you choose to request by email.</p>
+                </div>
+              )}
+              {manageEntry?.required_fields.filter((f) => f !== "username" && f !== "quote_email").map((field) => (
                 <div key={field}>
                   <Label className="capitalize">{field.replace(/_/g, " ")}</Label>
                   <div className="relative">
