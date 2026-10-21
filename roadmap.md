@@ -1,4 +1,9 @@
 # Roadmap — Step 5 Indigro copy
+## Numbered scenario submission — Oct 22
+- [x] Quote 1-3 (Options A-C) tracked per insurer with own status, 90s stall warning and per-quote Retry; saved quotes never resent
+- [x] Companion v1.5.0 enters each option into the connected portal by field label and clicks Quote/Calculate; insurers run in parallel tabs
+- [ ] Validate label matching on live Discovery/Momentum quote screens — requires broker-installed Companion and broker login
+
 ## Live quote activity — Oct 21
 - [x] Add insurer-coloured activity ring, actual stage commentary and 30-second waiting warning with Retry
 - [x] Show actual workflow quote-PDF count; await document count refresh after successful save; no promised nine-document total

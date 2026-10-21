@@ -9,6 +9,8 @@ import { QuotePdfCapture } from "./QuotePdfCapture";
 import { DiscoveryScreenScan } from "./DiscoveryScreenScan";
 import { InsurerActivity } from "./InsurerActivity";
 import { isActivityPhase, updateActivity, type QuoteActivity, type ActivityPhase } from "./quoteActivity";
+import { startJobs, setStatus, markCaptured, type QuoteJobs } from "./quoteJobs";
+import { QuoteJobsPanel } from "./QuoteJobsPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -63,6 +65,9 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
   const [login, setLogin] = useState<Record<string, LoginState>>({});
   const [activity, setActivity] = useState<Record<string, QuoteActivity>>({});
   const recordActivity = (insurer: string, phase: ActivityPhase, detail?: string) => setActivity((s) => ({ ...s, [insurer]: updateActivity(s[insurer], phase, Date.now(), detail) }));
+  const JOBS_KEY = `holarc-quote-jobs-${workflowId}`;
+  const [jobs, setJobs] = useState<QuoteJobs>(() => { try { return JSON.parse(localStorage.getItem(JOBS_KEY) || "{}"); } catch { return {}; } });
+  useEffect(() => { localStorage.setItem(JOBS_KEY, JSON.stringify(jobs)); }, [jobs, JOBS_KEY]);
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [adding, setAdding] = useState("");
   const [params, setParams] = useState<NeedsParams>(DEFAULT_PARAMS);
@@ -85,6 +90,8 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
       if (d.type === "insurer-scan-result" && d.ok && ["fields", "no-fields"].includes(d.scan?.state)) recordActivity(d.insurer, d.scan.state);
       if (d.type === "insurer-pdf") recordActivity(d.insurer, "saving");
       if (d.type === "insurer-pdf-error") recordActivity(d.insurer, "pdf-error");
+      if (d.type === "insurer-quote-status" && Number.isInteger(d.n) && ["submitting", "generating", "no-fields", "failed"].includes(d.status))
+        setJobs((j) => setStatus(j, d.insurer, d.n, d.status, Date.now(), typeof d.detail === "string" ? d.detail.slice(0, 160) : undefined));
       if (d.type === "insurer-login-progress") setLogin((s) => ({ ...s, [d.insurer]: d.state }));
       if (d.type === "insurer-challenge") {
         recordActivity(d.insurer, d.method === "email" ? "email" : "otp");
@@ -162,6 +169,19 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
       setPortalEdit(null);
       toast({ title: "Portal URL saved" });
     } catch (e) { toast({ title: e instanceof Error ? e.message : "Could not save portal URL.", variant: "destructive" }); }
+  };
+
+  /** Send each option (Quote 1 = Option A …) to the connected portal; values only, labelled by field name. */
+  const submitScenarios = (ins: string, only?: number[]) => {
+    if (login[ins] !== "connected") { toast({ title: `Connect ${ins} first.` }); return; }
+    const prods = Object.keys(plan);
+    const count = Math.max(...prods.map((p) => plan[p].length), 0);
+    const scenarios = Array.from({ length: count }, (_, i) => ({
+      n: i + 1,
+      fields: prods.flatMap((p) => (PRODUCT_TYPES[p] ?? []).map((f) => ({ product: p, label: f.label, kind: f.kind, value: String(plan[p][i]?.[f.key] ?? "") }))).filter((f) => f.value !== ""),
+    })).filter((s) => (!only || only.includes(s.n)) && jobs[ins]?.find((j) => j.n === s.n)?.status !== "captured");
+    setJobs((j) => startJobs(j, ins, count, Date.now(), only));
+    window.postMessage({ source: "holarc", type: "insurer-quote-submit", insurer: ins, workflowId, scenarios }, window.location.origin);
   };
 
   const submitChallenge = (value: string) => {
@@ -278,7 +298,14 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
             <Input type="url" aria-label={`${activeTab} portal URL`} className="h-7 text-xs" value={portalUrl} onChange={(e) => setPortalUrl(e.target.value)} />
             <Button size="sm" className="h-7 text-xs" onClick={savePortal}>Save URL</Button>
           </div>}
-          {patientId && <QuotePdfCapture workflowId={workflowId} patientId={patientId} insurer={activeTab} onActivity={recordActivity} />}
+          <div className="flex flex-wrap items-center gap-2">
+            <Button size="sm" className="h-7 rounded-full px-3 text-[11px]" disabled={login[activeTab] !== "connected" || !allComplete} onClick={() => submitScenarios(activeTab)}>
+              Submit {Math.max(...products.map((p) => plan[p].length), 0)} quotes to {activeTab}
+            </Button>
+            {login[activeTab] !== "connected" && <span className={label}>Connect {activeTab} first — insurers can run at the same time.</span>}
+          </div>
+          <QuoteJobsPanel jobs={jobs} onRetry={(ins, n) => submitScenarios(ins, [n])} />
+          {patientId && <QuotePdfCapture workflowId={workflowId} patientId={patientId} insurer={activeTab} onActivity={(ins, phase, detail) => { recordActivity(ins, phase, detail); if (phase === "saved" && !detail) setJobs((j) => markCaptured(j, ins, Date.now())); }} />}
           {/^discovery$/i.test(activeTab) && <DiscoveryScreenScan workflowId={workflowId} connected={login[activeTab] === "connected"} />}
 
 

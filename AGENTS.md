@@ -21,3 +21,5 @@
 - App Integrations shows the shared CompanionStatus and CompanionSetup before and after credential unlock; installation detection observes the bridge marker. Why: first-time setup is discoverable without exposing saved credentials.
 - Discovery screen verification reads only allowlisted quote labels, control types and static options, never values, credentials, page text or screenshots; results stay in Step 4 memory and are not proof of correct quote submission. Why: safely discover real fields without exposing client data or claiming unverified automation.
 - Step 4 activity uses allowlisted Companion phases and phase-change timestamps; PDF completion follows successful authenticated saves, not login or scenario counts. Why: progress exposes actual waiting points without claiming unimplemented quoting or inventing document totals.
+
+- Step 4 quote scenarios are numbered per insurer (Quote n = Option n) and advance only on Companion status messages or a successful authenticated PDF save; the Companion fills portal fields by label only on the trusted portal origin. Why: partial returns and retries stay truthful per scenario.
