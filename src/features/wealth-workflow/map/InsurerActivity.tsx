@@ -4,10 +4,17 @@ import { Button } from "@/components/ui/button";
 import { insurerColor } from "./insurerColors";
 import { ACTIVITY_TEXT, activityWaiting, type QuoteActivity } from "./quoteActivity";
 
-export function InsurerActivity({ insurer, activity, onRetry }: { insurer: string; activity?: QuoteActivity; onRetry: () => void }) {
+export function InsurerActivity({ insurer, activity, onRetry, idleText = "Not connected yet", idleAction = "Connect" }: { insurer: string; activity?: QuoteActivity; onRetry: () => void; idleText?: string; idleAction?: string }) {
   const [now, setNow] = useState(Date.now());
   useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(timer); }, []);
-  if (!activity) return null;
+  if (!insurer) return null;
+  if (!activity) return <section aria-label={`${insurer} background activity`} className="flex items-center gap-2 border-b border-border py-2 text-xs">
+    <svg viewBox="0 0 32 32" className="h-8 w-8 shrink-0" style={{ color: `hsl(${insurerColor(insurer)})` }} aria-hidden="true">
+      <circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" strokeWidth="3" opacity="0.25" />
+    </svg>
+    <p role="status" className="flex-1 font-medium text-foreground">{insurer} · {idleText}</p>
+    <Button variant="outline" size="sm" className="h-7 text-xs" onClick={onRetry}>{idleAction}</Button>
+  </section>;
   const stalled = activityWaiting(activity, now);
   const error = ["failed", "pdf-error", "no-fields"].includes(activity.phase);
   const complete = ["fields", "saved"].includes(activity.phase);
