@@ -6,6 +6,7 @@ import { insurerFields, insurerKey } from "./insurerDictionary";
 import { LoginRing, LOGIN_TEXT, OtpDialog, ProtectorDialog, addonInstalled, downloadAddon, type Challenge, type LoginState } from "./InsurerLogin";
 import { CompanionSetup } from "./CompanionSetup";
 import { QuotePdfCapture } from "./QuotePdfCapture";
+import { DiscoveryScreenScan } from "./DiscoveryScreenScan";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -264,6 +265,7 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
             <Button size="sm" className="h-7 text-xs" onClick={savePortal}>Save URL</Button>
           </div>}
           {patientId && <QuotePdfCapture workflowId={workflowId} patientId={patientId} insurer={activeTab} />}
+          {/^discovery$/i.test(activeTab) && <DiscoveryScreenScan workflowId={workflowId} connected={login[activeTab] === "connected"} />}
 
 
           <div className="flex flex-wrap items-center gap-1.5 rounded border border-border/60 px-2 py-1">
