@@ -74,6 +74,20 @@ describe("Companion background portal rules", () => {
     h.listeners.message({ type: "insurer-pdf-ack", workflowId: "georgia-demo", captureId: "2-10", ok: true }, h.sender);
     await flush(); expect(h.removed).toEqual([2]);
   });
+  it("reports a numbered scenario as no-fields when the portal screen has no matching fields", async () => {
+    const h = harness(); h.login();
+    h.listeners.message({ type: "insurer-quote-submit", insurer: "discovery", workflowId: "georgia-demo", scenarios: [{ n: 1, fields: [{ label: "Benefit amount", value: "1000000" }] }] }, h.sender);
+    await flush();
+    expect(h.injected.at(-1).func.name).toBe("fillScenario");
+    expect(h.sent.filter((m) => m.type === "insurer-quote-status").map((m) => [m.n, m.status])).toEqual([[1, "submitting"], [1, "no-fields"]]);
+  });
+  it("never submits a scenario into an untrusted page", async () => {
+    const h = harness(); h.login(); h.tabs.set(2, { id: 2, url: "https://unrelated.example/quote" });
+    h.listeners.message({ type: "insurer-quote-submit", insurer: "discovery", workflowId: "georgia-demo", scenarios: [{ n: 2, fields: [] }] }, h.sender);
+    await flush();
+    expect(h.injected.some((i) => i.func.name === "fillScenario")).toBe(false);
+    expect(h.sent.at(-1)).toMatchObject({ n: 2, status: "failed" });
+  });
   it("ignores unrelated PDF origins", async () => {
     const h = harness(); h.login(); await h.listeners.download({ id: 9, filename: "quote.pdf", url: "https://unrelated.example/quote.pdf" });
     expect(h.injected).toHaveLength(0); expect(h.sent.some((m) => m.type === "insurer-pdf")).toBe(false);
