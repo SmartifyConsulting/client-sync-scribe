@@ -171,6 +171,19 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
     } catch (e) { toast({ title: e instanceof Error ? e.message : "Could not save portal URL.", variant: "destructive" }); }
   };
 
+  /** Send each option (Quote 1 = Option A …) to the connected portal; values only, labelled by field name. */
+  const submitScenarios = (ins: string, only?: number[]) => {
+    if (login[ins] !== "connected") { toast({ title: `Connect ${ins} first.` }); return; }
+    const prods = Object.keys(plan);
+    const count = Math.max(...prods.map((p) => plan[p].length), 0);
+    const scenarios = Array.from({ length: count }, (_, i) => ({
+      n: i + 1,
+      fields: prods.flatMap((p) => (PRODUCT_TYPES[p] ?? []).map((f) => ({ product: p, label: f.label, kind: f.kind, value: String(plan[p][i]?.[f.key] ?? "") }))).filter((f) => f.value !== ""),
+    })).filter((s) => !only || only.includes(s.n));
+    setJobs((j) => startJobs(j, ins, count, Date.now(), only));
+    window.postMessage({ source: "holarc", type: "insurer-quote-submit", insurer: ins, workflowId, scenarios }, window.location.origin);
+  };
+
   const submitChallenge = (value: string) => {
     if (!challenge) return;
     window.postMessage({ source: "holarc", type: challenge.method === "otp" ? "insurer-otp" : "insurer-email-check", insurer: challenge.insurer, workflowId, otp: value }, window.location.origin);
@@ -285,7 +298,14 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
             <Input type="url" aria-label={`${activeTab} portal URL`} className="h-7 text-xs" value={portalUrl} onChange={(e) => setPortalUrl(e.target.value)} />
             <Button size="sm" className="h-7 text-xs" onClick={savePortal}>Save URL</Button>
           </div>}
-          {patientId && <QuotePdfCapture workflowId={workflowId} patientId={patientId} insurer={activeTab} onActivity={recordActivity} />}
+          <div className="flex flex-wrap items-center gap-2">
+            <Button size="sm" className="h-7 rounded-full px-3 text-[11px]" disabled={login[activeTab] !== "connected" || !allComplete} onClick={() => submitScenarios(activeTab)}>
+              Submit {Math.max(...products.map((p) => plan[p].length), 0)} quotes to {activeTab}
+            </Button>
+            {login[activeTab] !== "connected" && <span className={label}>Connect {activeTab} first — insurers can run at the same time.</span>}
+          </div>
+          <QuoteJobsPanel jobs={jobs} onRetry={(ins, n) => submitScenarios(ins, [n])} />
+          {patientId && <QuotePdfCapture workflowId={workflowId} patientId={patientId} insurer={activeTab} onActivity={(ins, phase, detail) => { recordActivity(ins, phase, detail); if (phase === "saved" && !detail) setJobs((j) => markCaptured(j, ins, Date.now())); }} />}
           {/^discovery$/i.test(activeTab) && <DiscoveryScreenScan workflowId={workflowId} connected={login[activeTab] === "connected"} />}
 
 
