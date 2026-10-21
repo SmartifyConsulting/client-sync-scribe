@@ -23,6 +23,7 @@ function harness() {
     } },
     scripting: { executeScript: async (options) => { injected.push(options); return [{ result: options.func.name === "readPdf" ? { base64: "JVBERi0=" } : { state: "otp" } }]; } },
     downloads: { onCreated: { addListener: (fn) => { listeners.download = fn; } } },
+    windows: { create: (options, cb) => { created.push(options); tabs.set(2, { id: 2, url: options.url }); cb({ id: 9, tabs: [{ id: 2 }] }); } },
   };
   const context = vm.createContext({ chrome, URL, Date, Map, Object, Number, Promise, setTimeout: (fn, ms) => { if (ms === 1200) fn(); }, TextDecoder, Uint8Array });
   vm.runInContext(source, context);
@@ -34,8 +35,9 @@ function harness() {
 const flush = async () => { for (let i = 0; i < 25; i++) await Promise.resolve(); };
 
 describe("Companion background portal rules", () => {
-  it("opens insurer login in an inactive tab", () => {
-    const h = harness(); h.login(); expect(h.created[0].active).toBe(false);
+  it("opens every insurer login in a hidden minimised window", () => {
+    const h = harness(); h.login(); expect(h.created[0].state).toBe("minimized"); expect(h.created[0].focused).toBe(false);
+    const m = harness(); m.login({ insurer: "Momentum", loginUrl: "https://adviser.momentum.co.za/login" }); expect(m.created[0].state).toBe("minimized");
     expect(h.sent[0].phase).toBe("opening");
   });
   it("keeps OTP injection in the background", async () => {
