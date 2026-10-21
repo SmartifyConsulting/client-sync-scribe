@@ -179,7 +179,7 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
     const scenarios = Array.from({ length: count }, (_, i) => ({
       n: i + 1,
       fields: prods.flatMap((p) => (PRODUCT_TYPES[p] ?? []).map((f) => ({ product: p, label: f.label, kind: f.kind, value: String(plan[p][i]?.[f.key] ?? "") }))).filter((f) => f.value !== ""),
-    })).filter((s) => !only || only.includes(s.n));
+    })).filter((s) => (!only || only.includes(s.n)) && jobs[ins]?.find((j) => j.n === s.n)?.status !== "captured");
     setJobs((j) => startJobs(j, ins, count, Date.now(), only));
     window.postMessage({ source: "holarc", type: "insurer-quote-submit", insurer: ins, workflowId, scenarios }, window.location.origin);
   };
