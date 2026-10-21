@@ -141,3 +141,8 @@
 - [x] Automatic quote PDF attachment via Companion for same-origin portal downloads; other sources use upload
 - [x] Verify UI and attachment pipeline with Georgia Demo, including duplicate readback and Working Window PDF preview
 - [ ] Real insurer login / quote-form / download validation — requires broker-installed Companion, correct portal URL and broker verification; no external insurer requests made
+
+## Discovery and Momentum walkthrough — Oct 21
+- [ ] Install Companion in the broker's browser — requires the broker's local installation approval
+- [ ] Save verified Discovery and Momentum URLs per broker — requires Password Protector unlock
+- [ ] Validate login, quote form and PDF capture with Georgia only — requires broker verification; no quote submissions without confirmation
