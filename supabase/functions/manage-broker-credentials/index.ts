@@ -17,7 +17,7 @@ const Body = z.discriminatedUnion("action", [
     action: z.literal("save"),
     integrationId: z.string().min(1),
     username: z.string().trim().max(200).optional().nullable(),
-    fields: z.record(z.string(), z.string().max(500)), // e.g. { password: "...", pin: "..." }
+    fields: z.record(z.string(), z.string().max(4000)), // e.g. { password: "...", pin: "..." }
     token: z.string().min(1),
   }),
   z.object({ action: z.literal("toggle"), integrationId: z.string().min(1), isEnabled: z.boolean() }),
@@ -266,6 +266,12 @@ Deno.serve(async (req) => {
           const url = new URL(p.fields.portal_url);
           if (url.protocol !== "https:" || url.username || url.password) return json({ error: "Enter an HTTPS portal URL without login details." }, 400);
         } catch { return json({ error: "Enter a valid HTTPS portal URL." }, 400); }
+      }
+      if (p.fields.quote_email) {
+        const list = p.fields.quote_email.split(/[;,\s]+/).map((x) => x.trim().toLowerCase()).filter(Boolean);
+        const bad = list.find((x) => !z.string().email().safeParse(x).success);
+        if (bad) return json({ error: `Invalid quote email: ${bad}` }, 400);
+        p.fields.quote_email = Array.from(new Set(list)).join(", ");
       }
       const encrypted = await encryptJson(encryptionKey, p.fields);
       const { error } = await admin
