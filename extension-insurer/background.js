@@ -1,5 +1,13 @@
 // Drives one insurer login per tab. Credentials live only in memory for the job.
 const jobs = new Map(); // portalTabId -> job
+const discoveryHost = (host) => host === "discovery.co.za" || host.endsWith(".discovery.co.za");
+function portalAllowed(url, job) {
+  try {
+    const u = new URL(url);
+    if (u.protocol !== "https:" || u.username || u.password) return false;
+    return u.origin === job.origin || (job.discoveryRedirects && u.port === "" && discoveryHost(u.hostname));
+  } catch { return false; }
+}
 const trustedApp = (url) => {
   try {
     const u = new URL(url);
@@ -14,6 +22,23 @@ function tell(job, msg) {
 chrome.runtime.onMessage.addListener((d, sender) => {
   const appTabId = sender.tab?.id;
   if (!appTabId || !trustedApp(sender.tab?.url)) return;
+  if (d.type === "insurer-pdf-ack") {
+    if (d.ok !== true || typeof d.captureId !== "string") return;
+    // The app acknowledges only after the authenticated document save succeeds.
+    chrome.storage.session.get(null).then(async (stored) => {
+      const entry = Object.entries(stored).find(([key, j]) => key.startsWith("portal-") && j.appTabId === appTabId && j.workflowId === d.workflowId && j.pendingCaptures?.includes(d.captureId));
+      if (!entry) return;
+      const [key, job] = entry;
+      job.pendingCaptures = job.pendingCaptures.filter((id) => id !== d.captureId);
+      if (job.pendingCaptures.length) { await chrome.storage.session.set({ [key]: job }); return; }
+      const tabId = Number(key.slice(7));
+      // Remove routing first so intentional closure isn't reported as login failure.
+      jobs.delete(tabId);
+      await chrome.storage.session.remove(key);
+      await chrome.tabs.remove(tabId).catch(() => {});
+    }).catch(() => {});
+    return;
+  }
   if (d.type === "insurer-login") {
     if (!d.loginUrl || !d.username || !d.password) {
       chrome.tabs.sendMessage(appTabId, { type: "insurer-login-result", insurer: d.insurer, workflowId: d.workflowId, ok: false, message: "No saved login address or password." });
@@ -24,12 +49,13 @@ chrome.runtime.onMessage.addListener((d, sender) => {
     catch { tell({ appTabId, ...d }, { type: "insurer-login-result", ok: false, message: "Set a valid HTTPS portal URL for this insurer." }); return; }
     const existing = [...jobs.entries()].find(([, j]) => j.appTabId === appTabId && j.insurer === d.insurer && j.workflowId === d.workflowId);
     if (existing) { chrome.tabs.remove(existing[0]).catch(() => {}); jobs.delete(existing[0]); }
-    chrome.tabs.create({ url: d.loginUrl, active: true }, (tab) => {
+    chrome.tabs.create({ url: d.loginUrl, active: false }, (tab) => {
       if (!tab?.id) return;
-      const job = { ...d, appTabId, origin, step: 0, done: false, submitted: false, expires: Date.now() + 15 * 60 * 1000 };
+      const discoveryRedirects = /^discovery$/i.test(d.insurer) && discoveryHost(new URL(origin).hostname) && new URL(origin).port === "";
+      const job = { ...d, appTabId, origin, discoveryRedirects, step: 0, done: false, submitted: false, expires: Date.now() + 15 * 60 * 1000 };
       jobs.set(tab.id, job);
       // Persist only routing metadata, never passwords/PINs.
-      chrome.storage.session.set({ [`portal-${tab.id}`]: { appTabId, insurer: d.insurer, workflowId: d.workflowId, origin, expires: job.expires } });
+      chrome.storage.session.set({ [`portal-${tab.id}`]: { appTabId, insurer: d.insurer, workflowId: d.workflowId, origin, expires: job.expires, pendingCaptures: [] } });
     });
     return;
   }
@@ -38,12 +64,11 @@ chrome.runtime.onMessage.addListener((d, sender) => {
   const [tabId, job] = entry;
   if (d.type === "insurer-otp") {
     if (!/^\d{4,8}$/.test(d.otp)) return;
-    chrome.scripting.executeScript({ target: { tabId }, func: fillOtp, args: [d.otp] }).then(() => {
+    chrome.scripting.executeScript({ target: { tabId }, func: fillOtp, args: [d.otp, job.origin, job.discoveryRedirects] }).then(() => {
       job.done = false;
       job.challenge = null;
       setTimeout(() => checkPortal(tabId), 1500);
     }).catch(() => tell(job, { type: "insurer-login-result", ok: false, message: "Finish verification in the insurer tab." }));
-    chrome.tabs.update(tabId, { active: true });
   }
   if (d.type === "insurer-email-check") { job.done = false; job.challenge = null; chrome.tabs.reload(tabId); }
 });
@@ -59,16 +84,20 @@ async function checkPortal(tabId) {
   if (!job || job.done || job.checking) return;
   if (Date.now() >= job.expires) { job.username = ""; job.password = ""; job.done = true; tell(job, { type: "insurer-login-result", ok: false, message: "The 15-minute quote session expired. Unlock again." }); return; }
   const tab = await chrome.tabs.get(tabId).catch(() => null);
-  if (!tab?.url || new URL(tab.url).origin !== job.origin) {
+  if (!portalAllowed(tab?.url, job)) {
     job.done = true; job.username = ""; job.password = "";
     tell(job, { type: "insurer-login-result", ok: false, message: "The portal redirected to another login site. Finish there, or update the portal URL in Holarc Wealth." }); return;
   }
+  // Downloads must match the actual current portal origin, even after a safe redirect.
+  const key = `portal-${tabId}`;
+  const stored = await chrome.storage.session.get(key);
+  if (stored[key]) await chrome.storage.session.set({ [key]: { ...stored[key], origin: new URL(tab.url).origin } });
   job.checking = true;
   job.step += 1;
   if (job.step > 90) { job.done = true; job.checking = false; job.username = ""; job.password = ""; tell(job, { type: "insurer-login-result", ok: false, message: "The portal didn't finish logging in. Please finish in the insurer tab." }); return; }
   // Give single-page portals a moment to draw the form.
   await new Promise((r) => setTimeout(r, 1200));
-  const [res] = await chrome.scripting.executeScript({ target: { tabId }, func: drive, args: [job.username, job.password, job.submitted] }).catch(() => [{}]);
+  const [res] = await chrome.scripting.executeScript({ target: { tabId }, func: drive, args: [job.username, job.password, job.submitted, job.origin, job.discoveryRedirects] }).catch(() => [{}]);
   const r = res?.result || {};
   job.checking = false;
   if (r.state === "otp" || r.state === "email") {
@@ -97,7 +126,11 @@ chrome.downloads.onCreated.addListener(async (item) => {
   try {
     const [result] = await chrome.scripting.executeScript({ target: { tabId }, func: readPdf, args: [item.url] });
     if (!result?.result?.base64) throw new Error();
-    tell(job, { type: "insurer-pdf", captureId: `${tabId}-${item.id}`, filename: (item.filename || "quote.pdf").split(/[\\/]/).pop(), base64: result.result.base64 });
+    const captureId = `${tabId}-${item.id}`;
+    const latest = (await chrome.storage.session.get(key))[key];
+    if (!latest || Date.now() >= latest.expires) return;
+    await chrome.storage.session.set({ [key]: { ...latest, pendingCaptures: [...(latest.pendingCaptures || []), captureId] } });
+    tell(job, { type: "insurer-pdf", captureId, filename: (item.filename || "quote.pdf").split(/[\\/]/).pop(), base64: result.result.base64 });
   } catch { tell(job, { type: "insurer-pdf-error" }); }
 });
 
@@ -113,7 +146,10 @@ async function readPdf(url) {
 }
 
 // ---- injected into the insurer page ----
-function drive(username, password, submitted) {
+function drive(username, password, submitted, origin, discoveryRedirects) {
+  // Recheck inside the page: navigation may occur between tab inspection and injection.
+  const u = new URL(location.href);
+  if (u.protocol !== "https:" || u.username || u.password || !(u.origin === origin || (discoveryRedirects && !u.port && (u.hostname === "discovery.co.za" || u.hostname.endsWith(".discovery.co.za"))))) return { state: "waiting" };
   const vis = (el) => el && el.offsetParent !== null && !el.disabled;
   const setVal = (el, v) => {
     const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set;
@@ -154,7 +190,9 @@ function drive(username, password, submitted) {
   return { state: "waiting" };
 }
 
-function fillOtp(code) {
+function fillOtp(code, origin, discoveryRedirects) {
+  const u = new URL(location.href);
+  if (u.protocol !== "https:" || u.username || u.password || !(u.origin === origin || (discoveryRedirects && !u.port && (u.hostname === "discovery.co.za" || u.hostname.endsWith(".discovery.co.za"))))) return;
   const vis = (el) => el && el.offsetParent !== null && !el.disabled;
   const inputs = [...document.querySelectorAll("input")].filter(vis).filter((i) => i.type !== "hidden" && i.type !== "checkbox");
   if (!inputs.length) return;

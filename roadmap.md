@@ -150,3 +150,10 @@
 ## Companion discovery — Oct 21
 - [x] Obvious setup button and live installation status at the top of App Integrations, including the locked screen
 - [x] Reuse the one-time setup dialog and Companion download
+
+## Companion background portals — Oct 21
+- [x] Keep login and OTP portal tabs inactive
+- [x] Allow HTTPS Discovery Partner redirects within discovery.co.za only
+- [x] Close managed portal tabs only after successful PDF-save acknowledgement
+- [x] Test routing, background behaviour and capture acknowledgement; rebuild download (11 isolated tests; no real insurer requests)
+- [ ] Live Discovery quote walkthrough — blocked: broker-installed updated Companion and broker verification required
