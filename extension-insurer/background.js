@@ -65,6 +65,7 @@ chrome.runtime.onMessage.addListener((d, sender) => {
   if (!entry) return;
   const [tabId, job] = entry;
   if (d.type === "insurer-scan") { scanPortal(tabId, job); return; }
+  if (d.type === "insurer-quote-submit") { runScenarios(tabId, job, d.scenarios); return; }
   if (d.type === "insurer-otp") {
     if (!/^\d{4,8}$/.test(d.otp)) return;
     chrome.scripting.executeScript({ target: { tabId }, func: fillOtp, args: [d.otp, job.origin, job.discoveryRedirects] }).then(() => {
@@ -172,6 +173,7 @@ chrome.downloads.onCreated.addListener(async (item) => {
     const latest = (await chrome.storage.session.get(key))[key];
     if (!latest || Date.now() >= latest.expires) return;
     await chrome.storage.session.set({ [key]: { ...latest, pendingCaptures: [...(latest.pendingCaptures || []), captureId] } });
+    const live = jobs.get(tabId); if (live) live.pdfSeen = true;
     tell(job, { type: "insurer-login-progress", state: "connected", phase: "capturing" });
     tell(job, { type: "insurer-pdf", captureId, filename: (item.filename || "quote.pdf").split(/[\\/]/).pop(), base64: result.result.base64 });
   } catch { tell(job, { type: "insurer-pdf-error" }); }
@@ -246,4 +248,56 @@ function fillOtp(code, origin, discoveryRedirects) {
   else put(inputs.find((i) => i.autocomplete === "one-time-code" || /otp|pin|token|code/i.test(`${i.name} ${i.id} ${i.placeholder}`)) || inputs[0], code);
   const btn = [...document.querySelectorAll("button, input[type=submit]")].find((b) => vis(b) && /verify|continue|submit|next|confirm|log ?in/i.test(b.value || b.textContent || ""));
   if (btn) btn.click();
+}
+
+// ---- scenario submission: one option at a time per insurer; insurers run in parallel tabs ----
+async function runScenarios(tabId, job, scenarios) {
+  if (!Array.isArray(scenarios) || job.running) return;
+  job.running = true;
+  try {
+    for (const sc of scenarios.slice(0, 6)) {
+      const n = Number(sc?.n);
+      const fields = (Array.isArray(sc?.fields) ? sc.fields : []).slice(0, 60).filter((f) => typeof f?.label === "string" && typeof f?.value === "string" && f.value.length <= 60);
+      if (!Number.isInteger(n)) continue;
+      if (Date.now() >= job.expires) { tell(job, { type: "insurer-quote-status", n, status: "failed", detail: "Quote session expired. Reconnect and retry." }); continue; }
+      const tab = await chrome.tabs.get(tabId).catch(() => null);
+      if (!tab || !portalAllowed(tab.url, job)) { tell(job, { type: "insurer-quote-status", n, status: "failed", detail: "Insurer tab is no longer on the portal." }); continue; }
+      tell(job, { type: "insurer-quote-status", n, status: "submitting" });
+      const [res] = await chrome.scripting.executeScript({ target: { tabId }, func: fillScenario, args: [fields, job.origin, job.discoveryRedirects] }).catch(() => [{}]);
+      const r = res?.result || {};
+      if (!r.filled) { tell(job, { type: "insurer-quote-status", n, status: "no-fields", detail: "No matching quote fields on the current portal screen." }); continue; }
+      if (!r.clicked) { tell(job, { type: "insurer-quote-status", n, status: "no-fields", detail: `Filled ${r.filled} field(s) but found no Quote/Calculate button.` }); continue; }
+      tell(job, { type: "insurer-quote-status", n, status: "generating" });
+      job.pdfSeen = false;
+      for (let t = 0; t < 60 && !job.pdfSeen; t++) await new Promise((ok) => setTimeout(ok, 2000));
+      // No PDF within 2 minutes: the app shows it as stalled with Retry; move on to the next option.
+    }
+  } finally { job.running = false; }
+}
+
+function fillScenario(fields, origin, discoveryRedirects) {
+  const u = new URL(location.href);
+  if (u.protocol !== "https:" || u.username || u.password || !(u.origin === origin || (discoveryRedirects && !u.port && (u.hostname === "discovery.co.za" || u.hostname.endsWith(".discovery.co.za"))))) return { filled: 0 };
+  const norm = (t) => (t || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const vis = (el) => el.getClientRects().length > 0 && !el.disabled;
+  const controls = [...document.querySelectorAll("input, select")].filter((el) => vis(el) && !["hidden", "password", "submit", "button", "file"].includes(el.type));
+  const labelOf = (el) => norm(el.labels?.[0]?.textContent || el.getAttribute("aria-label") || el.placeholder || el.name);
+  const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set;
+  let filled = 0;
+  for (const f of fields) {
+    const want = norm(f.label);
+    const el = controls.find((c) => labelOf(c) === want) || controls.find((c) => labelOf(c).includes(want));
+    if (!el) continue;
+    if (el.tagName === "SELECT") {
+      const opt = [...el.options].find((o) => norm(o.textContent) === norm(f.value)) || [...el.options].find((o) => norm(o.textContent).includes(norm(f.value)));
+      if (!opt) continue;
+      el.value = opt.value;
+    } else if (el.type === "checkbox") { if (el.checked !== (f.value === "true")) el.click(); }
+    else { el.focus(); setter.call(el, f.value.replace(/[^\d.]/g, "") || f.value); el.dispatchEvent(new Event("input", { bubbles: true })); }
+    el.dispatchEvent(new Event("change", { bubbles: true })); el.blur();
+    filled++;
+  }
+  const btn = filled && [...document.querySelectorAll("button, input[type=submit], input[type=button], a[role=button]")].find((b) => vis(b) && /calculate|get quote|generate|quote|illustrat/i.test(b.value || b.textContent || ""));
+  if (btn) btn.click();
+  return { filled, clicked: !!btn };
 }
