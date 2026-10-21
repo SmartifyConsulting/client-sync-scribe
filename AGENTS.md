@@ -17,3 +17,4 @@
 - Portal URL overrides are encrypted per broker with the existing credentials; catalog URLs remain defaults. Why: brokers can correct their own destinations without changing everyone else's.
 - Quote PDF capture is workflow-owner authenticated and stored as PDF data URLs in existing RLS-protected documents, keyed by workflow and SHA-256; never use public media storage for quote PDFs. Why: preserves client privacy, existing Documents visibility, and duplicate detection without changing schemas.
 - Companion PDF capture only reads same-origin downloads from one uniquely associated portal; unsupported sources use manual PDF upload. Why: avoids capturing unrelated downloads or forwarding session cookies.
+- App Integrations shows the shared CompanionStatus and CompanionSetup before and after credential unlock; installation detection observes the bridge marker. Why: first-time setup is discoverable without exposing saved credentials.

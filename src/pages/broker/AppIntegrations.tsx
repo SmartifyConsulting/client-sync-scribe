@@ -1,4 +1,5 @@
 import { QUOTE_EMAIL_PRESETS, parseEmails } from "@/features/wealth-workflow/map/quoteEmails";
+import { CompanionStatus } from "@/features/wealth-workflow/map/CompanionStatus";
 import { useEffect, useMemo, useState, type ComponentProps } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Lock, ExternalLink, Settings2, Eye, EyeOff, KeyRound } from "lucide-react";
@@ -273,6 +274,9 @@ export default function AppIntegrations() {
   if (!reauthToken) {
     const firstTime = !protectorStatus.data;
     return (
+      <div className="space-y-4">
+        <PageHeader title="App Integrations" />
+        <CompanionStatus />
       <div className="max-w-sm mx-auto mt-16 space-y-4 text-center">
         <Lock className="h-10 w-10 mx-auto text-[hsl(var(--navy))]" />
         <h1 className="text-xl font-semibold text-[hsl(var(--navy))]">
@@ -356,6 +360,7 @@ export default function AppIntegrations() {
           </DialogContent>
         </Dialog>
       </div>
+      </div>
     );
   }
 
@@ -383,6 +388,8 @@ export default function AppIntegrations() {
           </Button>
         }
       />
+
+      <CompanionStatus />
 
       {loading ? (
         <div className="flex h-48 items-center justify-center">
