@@ -1,3 +1,4 @@
+import { QUOTE_EMAIL_PRESETS, parseEmails } from "@/features/wealth-workflow/map/quoteEmails";
 import { useEffect, useMemo, useState, type ComponentProps } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Lock, ExternalLink, Settings2, Eye, EyeOff, KeyRound } from "lucide-react";
@@ -60,7 +61,11 @@ const CATEGORY_LABELS: Record<Category, string> = {
 
 const invoke = async (body: Record<string, unknown>) => {
   const { data, error } = await supabase.functions.invoke("manage-broker-credentials", { body });
-  if (error) throw new Error((data as any)?.error ?? error.message);
+  if (error) {
+    let msg = (data as any)?.error as string | undefined;
+    try { msg = msg ?? (await (error as any).context?.json())?.error; } catch { /* ignore */ }
+    throw new Error(msg ?? "Could not save. Please try again.");
+  }
   if ((data as any)?.error) throw new Error((data as any).error);
   return data;
 };
@@ -485,14 +490,36 @@ export default function AppIntegrations() {
                   <Input value={manageUsername} onChange={(e) => setManageUsername(e.target.value)} />
                 </div>
               )}
-              {manageEntry?.category === "insurance" && (
-                <div>
-                  <Label>Quote requests email</Label>
-                  <Input type="email" placeholder="quotes@insurer.co.za" value={manageFields.quote_email ?? ""}
-                    onChange={(e) => setManageFields((f) => ({ ...f, quote_email: e.target.value }))} />
-                  <p className="mt-1 text-xs text-muted-foreground">Where quote requests go when you choose to request by email.</p>
-                </div>
-              )}
+              {manageEntry?.category === "insurance" && (() => {
+                const current = parseEmails(manageFields.quote_email);
+                const options = Array.from(new Set([...(QUOTE_EMAIL_PRESETS[manageEntry.id] ?? []), ...current]));
+                const setList = (l: string[]) => setManageFields((f) => ({ ...f, quote_email: l.join(", ") }));
+                return (
+                  <div>
+                    <Label>Quote requests emails</Label>
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {options.map((e) => {
+                        const on = current.includes(e);
+                        return (
+                          <button key={e} type="button" aria-pressed={on}
+                            onClick={() => setList(on ? current.filter((x) => x !== e) : [...current, e])}
+                            className={`rounded-full border px-2 py-0.5 text-[11px] ${on ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground"}`}>
+                            {e}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <Input className="mt-1.5" type="email" placeholder="Add another address and press Enter"
+                      onKeyDown={(e) => {
+                        if (e.key !== "Enter") return;
+                        e.preventDefault();
+                        const v = (e.target as HTMLInputElement).value.trim().toLowerCase();
+                        if (v) { setList(parseEmails([...current, v].join(","))); (e.target as HTMLInputElement).value = ""; }
+                      }} />
+                    <p className="mt-1 text-xs text-muted-foreground">Tick every inbox that can receive quote requests. You pick which ones to use in Step 4.</p>
+                  </div>
+                );
+              })()}
               {manageEntry?.required_fields.filter((f) => f !== "username" && f !== "quote_email" && f !== "portal_url").map((field) => (
                 <div key={field}>
                   <Label className="capitalize">{field.replace(/_/g, " ")}</Label>
