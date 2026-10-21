@@ -278,7 +278,7 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
             <Input type="url" aria-label={`${activeTab} portal URL`} className="h-7 text-xs" value={portalUrl} onChange={(e) => setPortalUrl(e.target.value)} />
             <Button size="sm" className="h-7 text-xs" onClick={savePortal}>Save URL</Button>
           </div>}
-          {patientId && <QuotePdfCapture workflowId={workflowId} patientId={patientId} insurer={activeTab} />}
+          {patientId && <QuotePdfCapture workflowId={workflowId} patientId={patientId} insurer={activeTab} onActivity={recordActivity} />}
           {/^discovery$/i.test(activeTab) && <DiscoveryScreenScan workflowId={workflowId} connected={login[activeTab] === "connected"} />}
 
 

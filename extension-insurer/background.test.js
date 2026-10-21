@@ -36,6 +36,7 @@ const flush = async () => { for (let i = 0; i < 25; i++) await Promise.resolve()
 describe("Companion background portal rules", () => {
   it("opens insurer login in an inactive tab", () => {
     const h = harness(); h.login(); expect(h.created[0].active).toBe(false);
+    expect(h.sent[0].phase).toBe("opening");
   });
   it("keeps OTP injection in the background", async () => {
     const h = harness(); h.login(); h.listeners.message({ type: "insurer-otp", insurer: "discovery", workflowId: "georgia-demo", otp: "123456" }, h.sender);
