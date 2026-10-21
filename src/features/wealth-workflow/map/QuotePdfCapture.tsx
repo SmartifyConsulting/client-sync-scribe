@@ -56,6 +56,7 @@ export function QuotePdfCapture({ workflowId, patientId, insurer, onActivity }: 
   return <div className="space-y-1.5 text-xs" onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); const file = e.dataTransfer.files[0]; if (file) void upload(file); }}>
     <input ref={input} type="file" accept="application/pdf,.pdf" aria-label="Upload quote PDF" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) void upload(file); e.target.value = ""; }} />
     <Button size="sm" variant="outline" disabled={busy || !insurer} onClick={() => input.current?.click()}>{busy ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Upload className="mr-1.5 h-3.5 w-3.5" />}Upload quote PDF</Button>
+    <p role="status" className="text-[10px] text-muted-foreground">{docs.length} quote PDFs saved · all insurers · this workflow</p>
     {docs.map((d) => <Button key={d.id} variant="ghost" size="sm" className="flex h-auto w-full justify-start text-xs" onClick={() => setPreview({ id: d.id, title: d.name, date: d.created_at, kind: "file", url: d.media_url })}><FileText className="mr-1.5 h-3.5 w-3.5 shrink-0" /><span className="truncate">{d.name}</span></Button>)}
     <DocPreviewDialog doc={preview} onClose={() => setPreview(null)} />
   </div>;

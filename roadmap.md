@@ -1,8 +1,9 @@
 # Roadmap — Step 5 Indigro copy
 ## Live quote activity — Oct 21
-- [ ] Add insurer-coloured activity ring, actual stage commentary and stalled-state visibility
-- [ ] Verify saved-PDF counts refresh and distinguish planned quotes from documents
-- [ ] Test Companion progress and Georgia Demo UI without live insurer submissions
+- [x] Add insurer-coloured activity ring, actual stage commentary and 30-second waiting warning with Retry
+- [x] Show actual workflow quote-PDF count; await document count refresh after successful save; no promised nine-document total
+- [x] Test Companion progress and authenticated Georgia Demo UI with simulated activity, OTP, waiting and failure; 22 isolated tests pass; Companion v1.4.0 packaged
+- [ ] Live quote generation remains blocked: insurer-specific scenario submission is not implemented or verified; broker-installed Companion and legitimate insurer verification required
 
 - [x] Glossary + hide healthcare modules (nav, mobile nav, route guard)
 - [x] Nav labels, en.json + uiTranslations (en) rewrite
