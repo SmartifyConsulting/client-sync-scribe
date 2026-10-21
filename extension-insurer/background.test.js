@@ -77,4 +77,43 @@ describe("Companion background portal rules", () => {
     const h = harness(); h.login(); await h.listeners.download({ id: 9, filename: "quote.pdf", url: "https://unrelated.example/quote.pdf" });
     expect(h.injected).toHaveLength(0); expect(h.sent).toHaveLength(0);
   });
+  it("routes a Discovery screen scan only from its initiating app and workflow", async () => {
+    const h = harness(); h.login();
+    h.listeners.message({ type: "insurer-scan", insurer: "discovery", workflowId: "other" }, h.sender);
+    h.listeners.message({ type: "insurer-scan", insurer: "discovery", workflowId: "georgia-demo" }, { tab: { id: 3, url: h.sender.tab.url } });
+    await flush(); expect(h.injected).toHaveLength(0);
+    h.listeners.message({ type: "insurer-scan", insurer: "discovery", workflowId: "georgia-demo" }, h.sender);
+    await flush(); expect(h.injected[0].func.name).toBe("scanQuoteScreen");
+  });
+  it("does not scan unsafe redirects or expired sessions", async () => {
+    const h = harness(); h.login(); h.tabs.set(2, { url: "https://evil.example/quote" });
+    await vm.runInContext("scanPortal(2, jobs.get(2))", h.context); expect(h.injected).toHaveLength(0);
+    vm.runInContext("jobs.get(2).expires = 0", h.context);
+    await vm.runInContext("scanPortal(2, jobs.get(2))", h.context); expect(h.injected).toHaveLength(0);
+  });
+});
+
+describe("Discovery scan privacy", () => {
+  const element = (label, overrides = {}) => ({ tagName: "INPUT", type: "text", labels: [{ textContent: label }], getClientRects: () => [1], getAttribute: () => null, required: false, disabled: false, ...overrides });
+  const scan = (inputs) => {
+    const h = harness();
+    Object.assign(h.context, { location: { href: "https://partner.discovery.co.za/quote" }, getComputedStyle: () => ({ visibility: "visible" }), document: { querySelectorAll: (s) => s === "iframe" ? [] : inputs } });
+    return vm.runInContext('scanQuoteScreen("https://partner.discovery.co.za", true)', h.context);
+  };
+  it("never exports entered amounts, client identity or credentials", () => {
+    const result = scan([element("Benefit amount", { value: "SECRET-AMOUNT" }), element("Client name", { value: "SECRET-NAME" }), element("Email", { value: "SECRET-EMAIL" }), element("Cover", { name: "id_number", value: "SECRET-ID" })]);
+    expect(result.fields).toHaveLength(1); expect(result.fields[0].label).toBe("Benefit amount");
+    expect(JSON.stringify(result)).not.toContain("SECRET"); expect(result.blocked).toBe(3);
+  });
+  it.each([element("Password", { type: "password" }), element("Code", { autocomplete: "one-time-code" })])("returns no fields on authentication screens", (auth) => {
+    const result = scan([auth, element("Benefit amount")]);
+    expect(result.state).toBe("verification"); expect(result.fields).toHaveLength(0);
+  });
+  it("exports static quote options but excludes personalized dropdown choices", () => {
+    const result = scan([element("Premium pattern", { tagName: "SELECT", options: [{ textContent: "Level" }, { textContent: "Georgia Adams" }, { textContent: "test@example.com" }, { textContent: "Age-rated" }] })]);
+    expect([...result.fields[0].options]).toEqual(["Level", "Age-rated"]);
+  });
+  it("does not treat an empty dashboard as a confirmed quote form", () => {
+    expect(scan([]).state).toBe("no-fields");
+  });
 });

@@ -62,6 +62,7 @@ chrome.runtime.onMessage.addListener((d, sender) => {
   const entry = [...jobs.entries()].find(([, j]) => j.insurer === d.insurer && j.workflowId === d.workflowId && j.appTabId === appTabId);
   if (!entry) return;
   const [tabId, job] = entry;
+  if (d.type === "insurer-scan") { scanPortal(tabId, job); return; }
   if (d.type === "insurer-otp") {
     if (!/^\d{4,8}$/.test(d.otp)) return;
     chrome.scripting.executeScript({ target: { tabId }, func: fillOtp, args: [d.otp, job.origin, job.discoveryRedirects] }).then(() => {
@@ -104,9 +105,46 @@ async function checkPortal(tabId) {
     if (job.challenge !== r.state) tell(job, { type: "insurer-challenge", method: r.state, hint: r.hint });
     job.challenge = r.state;
   } else if (r.state === "submitted") { job.submitted = true; tell(job, { type: "insurer-login-progress", state: "connecting" }); }
-  else if (r.state === "in") { job.done = true; job.username = ""; job.password = ""; tell(job, { type: "insurer-login-result", ok: true }); }
+  else if (r.state === "in") { job.done = true; job.username = ""; job.password = ""; tell(job, { type: "insurer-login-result", ok: true }); if (/^discovery$/i.test(job.insurer)) await scanPortal(tabId, job); }
   else if (r.state === "failed") { job.done = true; job.username = ""; job.password = ""; tell(job, { type: "insurer-login-result", ok: false, message: "The insurer rejected the login. Check it in the portal." }); }
   if (!job.done) setTimeout(() => checkPortal(tabId), 2500);
+}
+
+async function scanPortal(tabId, job) {
+  if (!/^discovery$/i.test(job.insurer) || Date.now() >= job.expires) return tell(job, { type: "insurer-scan-result", ok: false, message: "Connect Discovery again to scan its current screen." });
+  try {
+    const tab = await chrome.tabs.get(tabId);
+    if (!portalAllowed(tab?.url, job)) throw new Error();
+    const [result] = await chrome.scripting.executeScript({ target: { tabId }, func: scanQuoteScreen, args: [job.origin, job.discoveryRedirects] });
+    if (!result?.result) throw new Error();
+    tell(job, { type: "insurer-scan-result", ok: true, scan: result.result });
+  } catch { tell(job, { type: "insurer-scan-result", ok: false, message: "Could not read the current Discovery screen. Reconnect and try again." }); }
+}
+
+// Read structural quote metadata only: never values, page text, URLs, IDs or screenshots.
+function scanQuoteScreen(origin, discoveryRedirects) {
+  const u = new URL(location.href);
+  if (u.protocol !== "https:" || u.username || u.password || !(u.origin === origin || (discoveryRedirects && !u.port && (u.hostname === "discovery.co.za" || u.hostname.endsWith(".discovery.co.za"))))) throw new Error("Untrusted portal");
+  const visible = (el) => el.getClientRects().length > 0 && getComputedStyle(el).visibility !== "hidden";
+  const inputs = [...document.querySelectorAll("input, select, textarea")].filter(visible);
+  const sensitive = /password|passcode|otp|pin|token|verification|one.?time|username|user.?name|login|email|phone|identity|id.?number|passport|account/i;
+  if (inputs.some((el) => el.type === "password" || el.autocomplete === "one-time-code")) return { state: "verification", fields: [], blocked: 0, frames: 0, truncated: false };
+  const safe = (s) => {
+    const t = String(s || "").replace(/\s+/g, " ").trim();
+    return t.length <= 90 && !/@|\d{4,}|https?:|[<>]/i.test(t) ? t : "";
+  };
+  const allowedOption = /^(?:level|compulsory|age[- ]rated|standard|classic|essential|comprehensive|core|included|excluded|yes|no|male|female|own occupation|suited occupation|any occupation|cpi(?: \+ \d+%)?|\d+%?(?: fixed)?|(?:to age )?\d+|\d+ (?:days|months?|years?)|no increase|cover increase: (?:fixed percentage|cpi rate)|guarantee term extender)$/i;
+  let blocked = 0;
+  const fields = inputs.flatMap((el) => {
+    if (["hidden", "submit", "button", "file"].includes(el.type)) return [];
+    const label = safe(el.labels?.[0]?.textContent || el.getAttribute("aria-label"));
+    if (sensitive.test(`${el.type} ${el.name} ${el.id} ${el.autocomplete} ${label}`)) { blocked++; return []; }
+    const quoteField = /cover|benefit|premium|growth|escalation|increase|waiting|term|occupation|smok|gender|sex|birth|age|income|disabil|illness|vitality|plan|accelerat|payout/i.test(label);
+    if (!label || !quoteField) { blocked++; return []; }
+    return [{ label, kind: el.tagName === "SELECT" ? "select" : ["checkbox", "radio"].includes(el.type) ? el.type : "input", required: el.required || el.getAttribute("aria-required") === "true", disabled: el.disabled,
+      options: el.tagName === "SELECT" ? [...el.options].map((o) => safe(o.textContent)).filter((t) => t && allowedOption.test(t)).slice(0, 40) : [] }];
+  });
+  return { state: fields.length ? "fields" : "no-fields", fields: fields.slice(0, 100), blocked, frames: document.querySelectorAll("iframe").length, truncated: fields.length > 100 };
 }
 
 // Capture only PDF downloads from a uniquely associated, broker-opened portal.
