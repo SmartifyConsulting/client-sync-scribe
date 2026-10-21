@@ -1,4 +1,9 @@
 # Roadmap — Step 5 Indigro copy
+## Live quote activity — Oct 21
+- [ ] Add insurer-coloured activity ring, actual stage commentary and stalled-state visibility
+- [ ] Verify saved-PDF counts refresh and distinguish planned quotes from documents
+- [ ] Test Companion progress and Georgia Demo UI without live insurer submissions
+
 - [x] Glossary + hide healthcare modules (nav, mobile nav, route guard)
 - [x] Nav labels, en.json + uiTranslations (en) rewrite
 - [x] Hardcoded copy on shared screens (86 files)
