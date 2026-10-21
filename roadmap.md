@@ -157,3 +157,8 @@
 - [x] Close managed portal tabs only after successful PDF-save acknowledgement
 - [x] Test routing, background behaviour and capture acknowledgement; rebuild download (11 isolated tests; no real insurer requests)
 - [ ] Live Discovery quote walkthrough — blocked: broker-installed updated Companion and broker verification required
+
+## Discovery field verification — Oct 21
+- [ ] Add read-only quote-screen scan and compact results in Step 4; never collect field values or credentials
+- [ ] Test scan privacy, routing and empty/login-screen handling; rebuild Companion
+- [ ] Validate Discovery's actual quote fields — requires broker-installed updated Companion and legitimate portal verification; no live quote submission
