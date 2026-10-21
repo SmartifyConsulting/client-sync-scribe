@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
+import { parseEmails } from "./quoteEmails";
 
 const db = supabase as any;
 
@@ -62,9 +63,10 @@ export function DocumentRequestComposer({ kind, workflowId, patientId, clientNam
 
   // Default-select every insurer that has an address on file.
   useEffect(() => {
+    if (kind === "quotes") return; // quotes: broker ticks inboxes explicitly
     const withAddress = (insurers.data ?? []).filter((i: any) => i.request_address);
     setCheckedInsurers(new Set(withAddress.map((i: any) => i.insurer_name)));
-  }, [insurers.data]);
+  }, [insurers.data, kind]);
 
   useEffect(() => {
     if (kind !== "quotes") return;
@@ -82,7 +84,7 @@ export function DocumentRequestComposer({ kind, workflowId, patientId, clientNam
     const { data, error } = await supabase.functions.invoke("wealth-send-document-request", {
       body: {
         workflowId, patientId, kind, subject, body,
-        insurers: selectedInsurers.map((i: any) => ({ name: i.insurer_name, address: i.request_address })),
+        insurers: selectedInsurers.map((i: any) => ({ name: i.label ?? i.insurer_name, address: i.request_address })),
         attachedDocumentIds: kind === "quotes" ? Array.from(checkedDocs) : [],
       },
     });
