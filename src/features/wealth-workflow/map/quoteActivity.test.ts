@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 import { activityWaiting, isActivityPhase, updateActivity } from "./quoteActivity";
 describe("Truthful quote activity", () => {
   it("flags an unchanged step after 30 seconds despite polling", () => {

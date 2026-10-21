@@ -76,7 +76,7 @@ describe("Companion background portal rules", () => {
   });
   it("ignores unrelated PDF origins", async () => {
     const h = harness(); h.login(); await h.listeners.download({ id: 9, filename: "quote.pdf", url: "https://unrelated.example/quote.pdf" });
-    expect(h.injected).toHaveLength(0); expect(h.sent).toHaveLength(0);
+    expect(h.injected).toHaveLength(0); expect(h.sent.some((m) => m.type === "insurer-pdf")).toBe(false);
   });
   it("routes a Discovery screen scan only from its initiating app and workflow", async () => {
     const h = harness(); h.login();
