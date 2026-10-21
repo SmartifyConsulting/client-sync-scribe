@@ -146,3 +146,7 @@
 - [ ] Install Companion in the broker's browser — requires the broker's local installation approval
 - [ ] Save verified Discovery and Momentum URLs per broker — requires Password Protector unlock
 - [ ] Validate login, quote form and PDF capture with Georgia only — requires broker verification; no quote submissions without confirmation
+
+## Companion discovery — Oct 21
+- [x] Obvious setup button and live installation status at the top of App Integrations, including the locked screen
+- [x] Reuse the one-time setup dialog and Companion download
