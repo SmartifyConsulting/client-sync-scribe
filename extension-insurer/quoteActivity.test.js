@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { activityWaiting, isActivityPhase, updateActivity } from "./quoteActivity";
+import { describe, expect, it } from "bun:test";
+import { activityWaiting, isActivityPhase, updateActivity } from "../src/features/wealth-workflow/map/quoteActivity";
 describe("Truthful quote activity", () => {
   it("flags an unchanged step after 30 seconds despite polling", () => {
     const first = updateActivity(undefined, "credentials", 1000);
@@ -13,7 +13,7 @@ describe("Truthful quote activity", () => {
     expect(activityWaiting(next, 31000)).toBe(false);
   });
   it("never calls required OTP or a saved PDF a stalled login", () => {
-    for (const phase of ["otp", "email", "saved", "fields"] as const) expect(activityWaiting(updateActivity(undefined, phase, 0), 60000)).toBe(false);
+    for (const phase of ["otp", "email", "saved", "fields"]) expect(activityWaiting(updateActivity(undefined, phase, 0), 60000)).toBe(false);
   });
   it("rejects unknown portal commentary", () => {
     expect(isActivityPhase("credentials")).toBe(true);
