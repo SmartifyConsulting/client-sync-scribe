@@ -50,7 +50,12 @@ chrome.runtime.onMessage.addListener((d, sender) => {
     catch { tell({ appTabId, ...d }, { type: "insurer-login-result", ok: false, message: "Set a valid HTTPS portal URL for this insurer." }); return; }
     const existing = [...jobs.entries()].find(([, j]) => j.appTabId === appTabId && j.insurer === d.insurer && j.workflowId === d.workflowId);
     if (existing) { chrome.tabs.remove(existing[0]).catch(() => {}); jobs.delete(existing[0]); }
-    chrome.tabs.create({ url: d.loginUrl, active: false }, (tab) => {
+    // Every insurer opens in its own minimised window so portals never appear in the broker's tab strip.
+    const openHidden = (cb) => chrome.windows.create({ url: d.loginUrl, focused: false, state: "minimized" }, (win) => {
+      if (chrome.runtime.lastError || !win?.tabs?.[0]) return chrome.tabs.create({ url: d.loginUrl, active: false }, cb);
+      cb(win.tabs[0]);
+    });
+    openHidden((tab) => {
       if (!tab?.id) return;
       const discoveryRedirects = /^discovery$/i.test(d.insurer) && discoveryHost(new URL(origin).hostname) && new URL(origin).port === "";
       const job = { ...d, appTabId, origin, discoveryRedirects, step: 0, done: false, submitted: false, expires: Date.now() + 15 * 60 * 1000 };

@@ -204,6 +204,13 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
 
   const products = Object.keys(plan);
   const activeTab = chosen.includes(tab) ? tab : chosen[0] ?? "";
+  // Auto-connect the visible insurer (any insurer) when the 15-minute unlock is already active.
+  useEffect(() => {
+    if (!activeTab || !insurerRows.length || login[activeTab] || !addonInstalled()) return;
+    const token = getToken();
+    if (token) void startLogin(activeTab, token);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, insurerRows.length]);
   const setVal = (p: string, i: number, k: string, val: any) =>
     setPlan((pl) => ({ ...pl, [p]: pl[p].map((x, j) => (j === i ? { ...x, [k]: val } : x)) }));
   const total = products.reduce((a, p) => a + plan[p].length, 0);
@@ -265,7 +272,10 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
               );
             })}
           </div>
-          <InsurerActivity insurer={activeTab} activity={activity[activeTab]} onRetry={() => { const token = getToken(); if (token) void startLogin(activeTab, token); else setAskFor(activeTab); }} />
+          <InsurerActivity insurer={activeTab} activity={activity[activeTab]}
+            idleText={!addonInstalled() ? "Companion not set up yet" : getToken() ? "Connecting automatically…" : "Unlock your saved logins to connect in the background"}
+            idleAction={!addonInstalled() ? "One-time setup" : getToken() ? "Connect" : "Unlock & connect"}
+            onRetry={() => { if (!addonInstalled()) { setSetupOpen(true); return; } const token = getToken(); if (token) void startLogin(activeTab, token); else setAskFor(activeTab); }} />
           {login[activeTab] === "no-addon" && (
             <p className={label}>{LOGIN_TEXT[login[activeTab]]}
               {login[activeTab] === "no-addon" && <Button variant="link" size="sm" className="h-auto px-1 text-xs" onClick={() => setSetupOpen(true)}>One-time setup</Button>}

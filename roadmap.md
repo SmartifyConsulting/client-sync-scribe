@@ -173,3 +173,9 @@
 - [x] Add read-only quote-screen scan and compact results in Step 4; never collect field values or credentials
 - [x] Test scan privacy, routing and empty/login-screen handling; rebuild Companion v1.3.0 (18 tests pass; authenticated Georgia Demo UI checked with simulated scan, not a live Discovery session)
 - [ ] Validate Discovery's actual quote fields — requires broker-installed updated Companion and legitimate portal verification; no live quote submission
+
+## Hidden portals + auto-connect, all insurers — Oct 21
+- [x] Every insurer opens in a minimised background window (Companion v1.5.1)
+- [x] Auto-connect the visible insurer tab when the 15-minute unlock is active
+- [x] Always-visible status ring per insurer (setup / unlock / connecting / connected)
+- [ ] Live check in broker browser — requires reinstalling Companion v1.5.1
