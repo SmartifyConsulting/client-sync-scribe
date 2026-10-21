@@ -36,6 +36,7 @@ const flush = async () => { for (let i = 0; i < 25; i++) await Promise.resolve()
 describe("Companion background portal rules", () => {
   it("opens insurer login in an inactive tab", () => {
     const h = harness(); h.login(); expect(h.created[0].active).toBe(false);
+    expect(h.sent[0].phase).toBe("opening");
   });
   it("keeps OTP injection in the background", async () => {
     const h = harness(); h.login(); h.listeners.message({ type: "insurer-otp", insurer: "discovery", workflowId: "georgia-demo", otp: "123456" }, h.sender);
@@ -75,7 +76,7 @@ describe("Companion background portal rules", () => {
   });
   it("ignores unrelated PDF origins", async () => {
     const h = harness(); h.login(); await h.listeners.download({ id: 9, filename: "quote.pdf", url: "https://unrelated.example/quote.pdf" });
-    expect(h.injected).toHaveLength(0); expect(h.sent).toHaveLength(0);
+    expect(h.injected).toHaveLength(0); expect(h.sent.some((m) => m.type === "insurer-pdf")).toBe(false);
   });
   it("routes a Discovery screen scan only from its initiating app and workflow", async () => {
     const h = harness(); h.login();

@@ -7,6 +7,8 @@ import { LoginRing, LOGIN_TEXT, OtpDialog, ProtectorDialog, addonInstalled, down
 import { CompanionSetup } from "./CompanionSetup";
 import { QuotePdfCapture } from "./QuotePdfCapture";
 import { DiscoveryScreenScan } from "./DiscoveryScreenScan";
+import { InsurerActivity } from "./InsurerActivity";
+import { isActivityPhase, updateActivity, type QuoteActivity, type ActivityPhase } from "./quoteActivity";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -59,6 +61,8 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
   const [tab, setTab] = useState("");
   const [busy, setBusy] = useState(false);
   const [login, setLogin] = useState<Record<string, LoginState>>({});
+  const [activity, setActivity] = useState<Record<string, QuoteActivity>>({});
+  const recordActivity = (insurer: string, phase: ActivityPhase, detail?: string) => setActivity((s) => ({ ...s, [insurer]: updateActivity(s[insurer], phase, Date.now(), detail) }));
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [adding, setAdding] = useState("");
   const [params, setParams] = useState<NeedsParams>(DEFAULT_PARAMS);
@@ -76,13 +80,19 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
   useEffect(() => {
     const onMsg = (e: MessageEvent) => {
       const d = e.data;
-      if (e.origin !== window.location.origin || d?.source !== "holarc-extension" || d.workflowId !== workflowId) return;
+      if (e.source !== window || e.origin !== window.location.origin || d?.source !== "holarc-extension" || d.workflowId !== workflowId || typeof d.insurer !== "string") return;
+      if (d.type === "insurer-login-progress" && isActivityPhase(d.phase)) recordActivity(d.insurer, d.phase);
+      if (d.type === "insurer-scan-result" && d.ok && ["fields", "no-fields"].includes(d.scan?.state)) recordActivity(d.insurer, d.scan.state);
+      if (d.type === "insurer-pdf") recordActivity(d.insurer, "saving");
+      if (d.type === "insurer-pdf-error") recordActivity(d.insurer, "pdf-error");
       if (d.type === "insurer-login-progress") setLogin((s) => ({ ...s, [d.insurer]: d.state }));
       if (d.type === "insurer-challenge") {
+        recordActivity(d.insurer, d.method === "email" ? "email" : "otp");
         setLogin((s) => ({ ...s, [d.insurer]: "challenge" }));
         setChallenge({ insurer: d.insurer, method: d.method === "email" ? "email" : "otp", hint: d.hint });
       }
       if (d.type === "insurer-otp-result" || d.type === "insurer-login-result") {
+        recordActivity(d.insurer, d.ok ? "connected" : "failed", d.ok ? undefined : d.message);
         setLogin((s) => ({ ...s, [d.insurer]: d.ok ? "connected" : "failed" }));
         if (d.ok) setChallenge((c) => (c?.insurer === d.insurer ? null : c));
         else toast({ title: `${d.insurer} login failed`, description: d.message, variant: "destructive" });
@@ -106,10 +116,12 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
     const row = (insurerRows as any[]).find((r) => r?.name === ins);
     if (!row?.id) return;
     setLogin((s) => ({ ...s, [ins]: "connecting" }));
+    recordActivity(ins, "unlocking");
     const { data, error } = await supabase.functions.invoke("manage-broker-credentials", { body: { action: "reveal", integrationId: row.id, token } });
     if (error || data?.error) {
       sessionStorage.removeItem(TOKEN_KEY);
       setLogin((s) => ({ ...s, [ins]: "failed" }));
+      recordActivity(ins, "failed", "Saved login could not be unlocked. Try your Password Protector again.");
       return toast({ title: `Couldn't unlock the ${ins} login`, description: data?.error ?? "Please try again.", variant: "destructive" });
     }
     const f = data.fields ?? {};
@@ -156,6 +168,7 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
     if (!challenge) return;
     window.postMessage({ source: "holarc", type: challenge.method === "otp" ? "insurer-otp" : "insurer-email-check", insurer: challenge.insurer, workflowId, otp: value }, window.location.origin);
     setLogin((s) => ({ ...s, [challenge.insurer]: "connecting" }));
+    recordActivity(challenge.insurer, "verifying");
   };
 
   /** Changing a formula input recalculates the suggested amount on all three options. */
@@ -232,7 +245,8 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
               );
             })}
           </div>
-          {login[activeTab] && login[activeTab] !== "connected" && (
+          <InsurerActivity insurer={activeTab} activity={activity[activeTab]} onRetry={() => { const token = getToken(); if (token) void startLogin(activeTab, token); else setAskFor(activeTab); }} />
+          {login[activeTab] === "no-addon" && (
             <p className={label}>{LOGIN_TEXT[login[activeTab]]}
               {login[activeTab] === "no-addon" && <Button variant="link" size="sm" className="h-auto px-1 text-xs" onClick={() => setSetupOpen(true)}>One-time setup</Button>}
             </p>
@@ -264,7 +278,7 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
             <Input type="url" aria-label={`${activeTab} portal URL`} className="h-7 text-xs" value={portalUrl} onChange={(e) => setPortalUrl(e.target.value)} />
             <Button size="sm" className="h-7 text-xs" onClick={savePortal}>Save URL</Button>
           </div>}
-          {patientId && <QuotePdfCapture workflowId={workflowId} patientId={patientId} insurer={activeTab} />}
+          {patientId && <QuotePdfCapture workflowId={workflowId} patientId={patientId} insurer={activeTab} onActivity={recordActivity} />}
           {/^discovery$/i.test(activeTab) && <DiscoveryScreenScan workflowId={workflowId} connected={login[activeTab] === "connected"} />}
 
 

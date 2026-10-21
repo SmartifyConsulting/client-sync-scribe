@@ -16,6 +16,7 @@ const trustedApp = (url) => {
 };
 
 function tell(job, msg) {
+  if (msg.state === "connecting" && !msg.phase) msg = { ...msg, phase: "waiting" };
   chrome.tabs.sendMessage(job.appTabId, { insurer: job.insurer, workflowId: job.workflowId, ...msg }).catch(() => {});
 }
 
@@ -54,6 +55,7 @@ chrome.runtime.onMessage.addListener((d, sender) => {
       const discoveryRedirects = /^discovery$/i.test(d.insurer) && discoveryHost(new URL(origin).hostname) && new URL(origin).port === "";
       const job = { ...d, appTabId, origin, discoveryRedirects, step: 0, done: false, submitted: false, expires: Date.now() + 15 * 60 * 1000 };
       jobs.set(tab.id, job);
+      tell(job, { type: "insurer-login-progress", state: "connecting", phase: "opening" });
       // Persist only routing metadata, never passwords/PINs.
       chrome.storage.session.set({ [`portal-${tab.id}`]: { appTabId, insurer: d.insurer, workflowId: d.workflowId, origin, expires: job.expires, pendingCaptures: [] } });
     });
@@ -78,6 +80,7 @@ chrome.tabs.onRemoved.addListener((id) => { const job = jobs.get(id); if (job) t
 
 chrome.tabs.onUpdated.addListener(async (tabId, info) => {
   if (info.status === "complete") checkPortal(tabId);
+  else if (info.status === "loading") { const job = jobs.get(tabId); if (job && !job.done) tell(job, { type: "insurer-login-progress", state: job.challenge ? "challenge" : "connecting", phase: job.challenge ? job.challenge : job.submitted ? "waiting" : "loading" }); }
 });
 
 async function checkPortal(tabId) {
@@ -104,7 +107,8 @@ async function checkPortal(tabId) {
   if (r.state === "otp" || r.state === "email") {
     if (job.challenge !== r.state) tell(job, { type: "insurer-challenge", method: r.state, hint: r.hint });
     job.challenge = r.state;
-  } else if (r.state === "submitted") { job.submitted = true; tell(job, { type: "insurer-login-progress", state: "connecting" }); }
+  } else if (r.state === "submitted") { job.submitted = true; tell(job, { type: "insurer-login-progress", state: "connecting", phase: "credentials" }); }
+  else if (r.state === "waiting") tell(job, { type: "insurer-login-progress", state: "connecting", phase: job.submitted ? "waiting" : "loading" });
   else if (r.state === "in") { job.done = true; job.username = ""; job.password = ""; tell(job, { type: "insurer-login-result", ok: true }); if (/^discovery$/i.test(job.insurer)) await scanPortal(tabId, job); }
   else if (r.state === "failed") { job.done = true; job.username = ""; job.password = ""; tell(job, { type: "insurer-login-result", ok: false, message: "The insurer rejected the login. Check it in the portal." }); }
   if (!job.done) setTimeout(() => checkPortal(tabId), 2500);
@@ -168,6 +172,7 @@ chrome.downloads.onCreated.addListener(async (item) => {
     const latest = (await chrome.storage.session.get(key))[key];
     if (!latest || Date.now() >= latest.expires) return;
     await chrome.storage.session.set({ [key]: { ...latest, pendingCaptures: [...(latest.pendingCaptures || []), captureId] } });
+    tell(job, { type: "insurer-login-progress", state: "connected", phase: "capturing" });
     tell(job, { type: "insurer-pdf", captureId, filename: (item.filename || "quote.pdf").split(/[\\/]/).pop(), base64: result.result.base64 });
   } catch { tell(job, { type: "insurer-pdf-error" }); }
 });
