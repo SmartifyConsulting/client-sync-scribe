@@ -9,6 +9,8 @@ import { QuotePdfCapture } from "./QuotePdfCapture";
 import { DiscoveryScreenScan } from "./DiscoveryScreenScan";
 import { InsurerActivity } from "./InsurerActivity";
 import { isActivityPhase, updateActivity, type QuoteActivity, type ActivityPhase } from "./quoteActivity";
+import { startJobs, setStatus, markCaptured, type QuoteJobs } from "./quoteJobs";
+import { QuoteJobsPanel } from "./QuoteJobsPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -63,6 +65,9 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
   const [login, setLogin] = useState<Record<string, LoginState>>({});
   const [activity, setActivity] = useState<Record<string, QuoteActivity>>({});
   const recordActivity = (insurer: string, phase: ActivityPhase, detail?: string) => setActivity((s) => ({ ...s, [insurer]: updateActivity(s[insurer], phase, Date.now(), detail) }));
+  const JOBS_KEY = `holarc-quote-jobs-${workflowId}`;
+  const [jobs, setJobs] = useState<QuoteJobs>(() => { try { return JSON.parse(localStorage.getItem(JOBS_KEY) || "{}"); } catch { return {}; } });
+  useEffect(() => { localStorage.setItem(JOBS_KEY, JSON.stringify(jobs)); }, [jobs, JOBS_KEY]);
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [adding, setAdding] = useState("");
   const [params, setParams] = useState<NeedsParams>(DEFAULT_PARAMS);
@@ -85,6 +90,8 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
       if (d.type === "insurer-scan-result" && d.ok && ["fields", "no-fields"].includes(d.scan?.state)) recordActivity(d.insurer, d.scan.state);
       if (d.type === "insurer-pdf") recordActivity(d.insurer, "saving");
       if (d.type === "insurer-pdf-error") recordActivity(d.insurer, "pdf-error");
+      if (d.type === "insurer-quote-status" && Number.isInteger(d.n) && ["submitting", "generating", "no-fields", "failed"].includes(d.status))
+        setJobs((j) => setStatus(j, d.insurer, d.n, d.status, Date.now(), typeof d.detail === "string" ? d.detail.slice(0, 160) : undefined));
       if (d.type === "insurer-login-progress") setLogin((s) => ({ ...s, [d.insurer]: d.state }));
       if (d.type === "insurer-challenge") {
         recordActivity(d.insurer, d.method === "email" ? "email" : "otp");
