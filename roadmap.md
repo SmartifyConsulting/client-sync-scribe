@@ -159,6 +159,6 @@
 - [ ] Live Discovery quote walkthrough — blocked: broker-installed updated Companion and broker verification required
 
 ## Discovery field verification — Oct 21
-- [ ] Add read-only quote-screen scan and compact results in Step 4; never collect field values or credentials
-- [ ] Test scan privacy, routing and empty/login-screen handling; rebuild Companion
+- [x] Add read-only quote-screen scan and compact results in Step 4; never collect field values or credentials
+- [x] Test scan privacy, routing and empty/login-screen handling; rebuild Companion v1.3.0 (18 tests pass; authenticated Georgia Demo UI checked with simulated scan, not a live Discovery session)
 - [ ] Validate Discovery's actual quote fields — requires broker-installed updated Companion and legitimate portal verification; no live quote submission
