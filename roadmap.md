@@ -1,4 +1,15 @@
 # Roadmap — Step 5 Indigro copy
+## Numbered scenario submission — Oct 22
+- [x] Quote 1-3 (Options A-C) tracked per insurer with own status, 90s stall warning and per-quote Retry; saved quotes never resent
+- [x] Companion v1.5.0 enters each option into the connected portal by field label and clicks Quote/Calculate; insurers run in parallel tabs
+- [ ] Validate label matching on live Discovery/Momentum quote screens — requires broker-installed Companion and broker login
+
+## Live quote activity — Oct 21
+- [x] Add insurer-coloured activity ring, actual stage commentary and 30-second waiting warning with Retry
+- [x] Show actual workflow quote-PDF count; await document count refresh after successful save; no promised nine-document total
+- [x] Test Companion progress and authenticated Georgia Demo UI with simulated activity, OTP, waiting and failure; 22 isolated tests pass; Companion v1.4.0 packaged
+- [ ] Live quote generation remains blocked: insurer-specific scenario submission is not implemented or verified; broker-installed Companion and legitimate insurer verification required
+
 - [x] Glossary + hide healthcare modules (nav, mobile nav, route guard)
 - [x] Nav labels, en.json + uiTranslations (en) rewrite
 - [x] Hardcoded copy on shared screens (86 files)
@@ -101,3 +112,70 @@
 - [x] Calendar + notifications back in top bar; Documents nav count removed
 - [x] Clients can read their WM's name (no more "Your Wealth Manager")
 - [x] Option A/B quoting selector, per-step output cards (Steps 3–4), legend tick colours
+
+## Step 4 quotes (Oct 2026)
+- [x] Amounts shown as R 1 000 000.00
+- [x] Saved insurer logins used directly (no App Integrations visit)
+- [x] Insurer tabs with products quoted in each
+- [x] Compact frames, fields and fonts
+- [x] Insurers chosen first; they set the tabs
+- [x] Products pre-filled from needs analysis, 3 options each
+- [x] In-app OTP box per insurer tab (handed to broker helper)
+- [ ] Live insurer portal automation (Momentum first) — needs the real portal address; portals need broker 2FA
+
+## Step 4 polish (Oct 2026)
+- [x] Existing cover summary on the client page
+- [x] Insurer tabs as real tabs in legend colours, no counts, login progress ring
+- [x] PIN / email verification pops up as a window (no inline box)
+- [x] Black product headers, white text; removed "requests quotes from six insurers" line
+- [x] Browser add-on login/challenge and same-origin PDF capture implemented; live insurer validation tracked below
+
+## Step 4 quotes — Oct 2026
+- [x] Existing cover prominent with insurer per policy; Since/Last seen under email
+- [x] Insurer tabs in solid legend colours; aligned product table columns
+- [x] Quote-request email on each insurer's App Integrations card
+- [x] Insurer option dictionary (from public product guides) shown per insurer tab
+- [ ] Confirm dictionary against live insurer quote screens — blocked: needs broker login + PIN
+- [x] Browser add-on for insurer login / PDF capture implemented; live portal validation tracked below
+- [ ] Send quote requests by email to the saved address
+
+## Insurer login add-on (Oct 2026)
+- [x] Browser add-on: opens portal, fills saved login, relays PIN/email prompt to Holarc
+- [ ] Test against each live portal — Momentum/Bidvest addresses invalid; selectors unverified
+- [x] Capture quote PDF into Working Window + Documents; verified with Georgia Demo upload
+
+## Holarc Wealth Companion — agreed Oct 20 updates
+- [x] Editable per-broker insurer portal URLs
+- [x] Restore insurer legend colours, retain orange ordinary badges
+- [x] 15-minute Password Protector unlock and expiry tests
+- [x] One-time Companion setup and open-portal / PDF-upload fallback
+- [x] Automatic quote PDF attachment via Companion for same-origin portal downloads; other sources use upload
+- [x] Verify UI and attachment pipeline with Georgia Demo, including duplicate readback and Working Window PDF preview
+- [ ] Real insurer login / quote-form / download validation — requires broker-installed Companion, correct portal URL and broker verification; no external insurer requests made
+
+## Discovery and Momentum walkthrough — Oct 21
+- [ ] Install Companion in the broker's browser — requires the broker's local installation approval
+- [ ] Save verified Discovery and Momentum URLs per broker — requires Password Protector unlock
+- [ ] Validate login, quote form and PDF capture with Georgia only — requires broker verification; no quote submissions without confirmation
+
+## Companion discovery — Oct 21
+- [x] Obvious setup button and live installation status at the top of App Integrations, including the locked screen
+- [x] Reuse the one-time setup dialog and Companion download
+
+## Companion background portals — Oct 21
+- [x] Keep login and OTP portal tabs inactive
+- [x] Allow HTTPS Discovery Partner redirects within discovery.co.za only
+- [x] Close managed portal tabs only after successful PDF-save acknowledgement
+- [x] Test routing, background behaviour and capture acknowledgement; rebuild download (11 isolated tests; no real insurer requests)
+- [ ] Live Discovery quote walkthrough — blocked: broker-installed updated Companion and broker verification required
+
+## Discovery field verification — Oct 21
+- [x] Add read-only quote-screen scan and compact results in Step 4; never collect field values or credentials
+- [x] Test scan privacy, routing and empty/login-screen handling; rebuild Companion v1.3.0 (18 tests pass; authenticated Georgia Demo UI checked with simulated scan, not a live Discovery session)
+- [ ] Validate Discovery's actual quote fields — requires broker-installed updated Companion and legitimate portal verification; no live quote submission
+
+## Hidden portals + auto-connect, all insurers — Oct 21
+- [x] Every insurer opens in a minimised background window (Companion v1.5.1)
+- [x] Auto-connect the visible insurer tab when the 15-minute unlock is active
+- [x] Always-visible status ring per insurer (setup / unlock / connecting / connected)
+- [ ] Live check in broker browser — requires reinstalling Companion v1.5.1

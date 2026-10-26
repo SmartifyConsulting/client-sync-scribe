@@ -1,3 +1,5 @@
+import { QUOTE_EMAIL_PRESETS, parseEmails } from "@/features/wealth-workflow/map/quoteEmails";
+import { CompanionStatus } from "@/features/wealth-workflow/map/CompanionStatus";
 import { useEffect, useMemo, useState, type ComponentProps } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Lock, ExternalLink, Settings2, Eye, EyeOff, KeyRound } from "lucide-react";
@@ -47,6 +49,8 @@ interface CredentialStatus {
   status: "configured" | "pending" | "inactive";
   updated_at: string | null;
   has_credentials: boolean;
+  quote_email?: string | null;
+  portal_url?: string | null;
 }
 
 const CATEGORY_LABELS: Record<Category, string> = {
@@ -58,7 +62,11 @@ const CATEGORY_LABELS: Record<Category, string> = {
 
 const invoke = async (body: Record<string, unknown>) => {
   const { data, error } = await supabase.functions.invoke("manage-broker-credentials", { body });
-  if (error) throw new Error((data as any)?.error ?? error.message);
+  if (error) {
+    let msg = (data as any)?.error as string | undefined;
+    try { msg = msg ?? (await (error as any).context?.json())?.error; } catch { /* ignore */ }
+    throw new Error(msg ?? "Could not save. Please try again.");
+  }
   if ((data as any)?.error) throw new Error((data as any).error);
   return data;
 };
@@ -228,6 +236,12 @@ export default function AppIntegrations() {
       toast.error("Enter all required fields before saving.");
       return;
     }
+    if (manageFields.portal_url) {
+      try {
+        const url = new URL(manageFields.portal_url);
+        if (url.protocol !== "https:" || url.username || url.password) throw new Error();
+      } catch { toast.error("Enter a valid HTTPS portal URL without login details."); return; }
+    }
     setSaving(true);
     try {
       await invoke({
@@ -260,6 +274,9 @@ export default function AppIntegrations() {
   if (!reauthToken) {
     const firstTime = !protectorStatus.data;
     return (
+      <div className="space-y-4">
+        <PageHeader title="App Integrations" />
+        <CompanionStatus />
       <div className="max-w-sm mx-auto mt-16 space-y-4 text-center">
         <Lock className="h-10 w-10 mx-auto text-[hsl(var(--navy))]" />
         <h1 className="text-xl font-semibold text-[hsl(var(--navy))]">
@@ -343,6 +360,7 @@ export default function AppIntegrations() {
           </DialogContent>
         </Dialog>
       </div>
+      </div>
     );
   }
 
@@ -371,6 +389,8 @@ export default function AppIntegrations() {
         }
       />
 
+      <CompanionStatus />
+
       {loading ? (
         <div className="flex h-48 items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -389,7 +409,7 @@ export default function AppIntegrations() {
                       <div key={entry.id} className="rounded-md border bg-card px-3 py-2.5 space-y-2">
                         <div className="flex items-center justify-between gap-2">
                           <a
-                            href={entry.portal_url}
+            href={status?.portal_url || entry.portal_url}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-sm font-medium truncate min-w-0 hover:underline hover:text-primary inline-flex items-center gap-1"
@@ -402,6 +422,12 @@ export default function AppIntegrations() {
                               : "Not Set Up"}
                           </Badge>
                         </div>
+                        {entry.category === "insurance" && (
+                          <p className="truncate text-xs text-muted-foreground">
+                            Quote requests: {status?.quote_email ? <span className="text-foreground">{status.quote_email}</span> : <span className="italic">no email set</span>}
+                          </p>
+                        )}
+                        <p className="truncate text-xs text-muted-foreground" title={status?.portal_url || entry.portal_url}>{status?.portal_url || entry.portal_url}</p>
                         <div className="flex gap-1.5">
                           <Button variant="ghost" size="sm" className="flex-1 h-7 text-xs px-2" onClick={() => openManage(entry)}>
                             <Settings2 className="h-3 w-3 mr-1" /> Credentials
@@ -460,13 +486,48 @@ export default function AppIntegrations() {
             </div>
           ) : (
             <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="insurer-portal-url">Portal URL</Label>
+                <Input id="insurer-portal-url" type="url" placeholder="https://" value={manageFields.portal_url ?? manageEntry?.portal_url ?? ""}
+                  onChange={(e) => setManageFields((f) => ({ ...f, portal_url: e.target.value }))} />
+              </div>
               {manageEntry?.required_fields.includes("username") && (
                 <div>
                   <Label>Username</Label>
                   <Input value={manageUsername} onChange={(e) => setManageUsername(e.target.value)} />
                 </div>
               )}
-              {manageEntry?.required_fields.filter((f) => f !== "username").map((field) => (
+              {manageEntry?.category === "insurance" && (() => {
+                const current = parseEmails(manageFields.quote_email);
+                const options = Array.from(new Set([...(QUOTE_EMAIL_PRESETS[manageEntry.id] ?? []), ...current]));
+                const setList = (l: string[]) => setManageFields((f) => ({ ...f, quote_email: l.join(", ") }));
+                return (
+                  <div>
+                    <Label>Quote requests emails</Label>
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {options.map((e) => {
+                        const on = current.includes(e);
+                        return (
+                          <button key={e} type="button" aria-pressed={on}
+                            onClick={() => setList(on ? current.filter((x) => x !== e) : [...current, e])}
+                            className={`rounded-full border px-2 py-0.5 text-[11px] ${on ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground"}`}>
+                            {e}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <Input className="mt-1.5" type="email" placeholder="Add another address and press Enter"
+                      onKeyDown={(e) => {
+                        if (e.key !== "Enter") return;
+                        e.preventDefault();
+                        const v = (e.target as HTMLInputElement).value.trim().toLowerCase();
+                        if (v) { setList(parseEmails([...current, v].join(","))); (e.target as HTMLInputElement).value = ""; }
+                      }} />
+                    <p className="mt-1 text-xs text-muted-foreground">Tick every inbox that can receive quote requests. You pick which ones to use in Step 4.</p>
+                  </div>
+                );
+              })()}
+              {manageEntry?.required_fields.filter((f) => f !== "username" && f !== "quote_email" && f !== "portal_url").map((field) => (
                 <div key={field}>
                   <Label className="capitalize">{field.replace(/_/g, " ")}</Label>
                   <div className="relative">

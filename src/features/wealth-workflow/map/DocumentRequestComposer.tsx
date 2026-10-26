@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
+import { parseEmails } from "./quoteEmails";
 
 const db = supabase as any;
 
@@ -31,9 +32,21 @@ export function DocumentRequestComposer({ kind, workflowId, patientId, clientNam
   const [busy, setBusy] = useState(false);
 
   const insurers = useQuery({
-    queryKey: ["wealth-insurer-contacts", user?.id],
+    queryKey: ["wealth-insurer-contacts", user?.id, kind],
     enabled: !!user,
-    queryFn: async () => (await db.from("wealth_insurer_contacts").select("*").eq("broker_user_id", user!.id).order("sort_order")).data ?? [],
+    queryFn: async () => {
+      if (kind !== "quotes") return (await db.from("wealth_insurer_contacts").select("*").eq("broker_user_id", user!.id).order("sort_order")).data ?? [];
+      // Quotes: one row per saved quote inbox on the insurer's App Integrations card.
+      const [cat, creds] = await Promise.all([
+        db.from("app_integrations_catalog").select("id,name").eq("category", "insurance").eq("is_active", true).order("display_order"),
+        supabase.functions.invoke("manage-broker-credentials", { body: { action: "list" } }),
+      ]);
+      const statuses = creds.data?.credentials ?? [];
+      return (cat.data ?? []).flatMap((c: any) => {
+        const s = statuses.find((x: any) => x.integration_id === c.id);
+        return parseEmails(s?.quote_email).map((e) => ({ id: `${c.id}:${e}`, insurer_name: `${c.name} · ${e}`, label: c.name, request_address: e }));
+      });
+    },
   });
 
   const docs = useQuery({
@@ -50,9 +63,10 @@ export function DocumentRequestComposer({ kind, workflowId, patientId, clientNam
 
   // Default-select every insurer that has an address on file.
   useEffect(() => {
+    if (kind === "quotes") return; // quotes: broker ticks inboxes explicitly
     const withAddress = (insurers.data ?? []).filter((i: any) => i.request_address);
     setCheckedInsurers(new Set(withAddress.map((i: any) => i.insurer_name)));
-  }, [insurers.data]);
+  }, [insurers.data, kind]);
 
   useEffect(() => {
     if (kind !== "quotes") return;
@@ -70,7 +84,7 @@ export function DocumentRequestComposer({ kind, workflowId, patientId, clientNam
     const { data, error } = await supabase.functions.invoke("wealth-send-document-request", {
       body: {
         workflowId, patientId, kind, subject, body,
-        insurers: selectedInsurers.map((i: any) => ({ name: i.insurer_name, address: i.request_address })),
+        insurers: selectedInsurers.map((i: any) => ({ name: i.label ?? i.insurer_name, address: i.request_address })),
         attachedDocumentIds: kind === "quotes" ? Array.from(checkedDocs) : [],
       },
     });
@@ -85,12 +99,14 @@ export function DocumentRequestComposer({ kind, workflowId, patientId, clientNam
     <div className="space-y-3 rounded-lg border border-border/60 p-3">
       <p className="flex items-center gap-1.5 text-xs font-semibold"><Mail className="h-3.5 w-3.5" /> Request by email</p>
 
+      {(
       <div>
-        <p className="mb-1 text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Insurers</p>
+        <p className="mb-1 text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">{kind === "quotes" ? "Quote inboxes" : "Insurers"}</p>
+        {kind === "quotes" && !insurers.isLoading && !insurers.data?.length && <p className="text-[11px] text-muted-foreground">Add quote emails on each insurer's App Integrations card.</p>}
         {insurers.isLoading ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : (
-          <div className="grid max-h-32 grid-cols-2 gap-1 overflow-y-auto">
+          <div className="grid max-h-40 grid-cols-1 gap-1 overflow-y-auto sm:grid-cols-2">
             {(insurers.data ?? []).map((i: any) => (
-              <label key={i.id} className={`flex items-center gap-1.5 text-xs ${!i.request_address ? "opacity-40" : ""}`}>
+              <label key={i.id} className={`flex items-center gap-1.5 text-[11px] ${!i.request_address ? "opacity-40" : ""}`}>
                 <input type="checkbox" disabled={!i.request_address} checked={checkedInsurers.has(i.insurer_name)}
                   onChange={(e) => setCheckedInsurers((s) => { const n = new Set(s); e.target.checked ? n.add(i.insurer_name) : n.delete(i.insurer_name); return n; })} />
                 {i.insurer_name}
@@ -98,8 +114,8 @@ export function DocumentRequestComposer({ kind, workflowId, patientId, clientNam
             ))}
           </div>
         )}
-        <p className="mt-1 text-2xs text-muted-foreground">Manage addresses in the Quotes screen.</p>
       </div>
+      )}
 
       {kind === "quotes" && !!docs.data?.length && (
         <div>

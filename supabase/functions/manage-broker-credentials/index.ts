@@ -1,6 +1,7 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from "npm:zod@3";
+import { REAUTH_TTL_MS, isExpired } from "./session.ts";
 
 // Encrypts/decrypts broker portal credentials (AES-256-GCM). This is the ONLY
 // place plaintext passwords/pins are ever handled server-side; nothing else
@@ -16,7 +17,7 @@ const Body = z.discriminatedUnion("action", [
     action: z.literal("save"),
     integrationId: z.string().min(1),
     username: z.string().trim().max(200).optional().nullable(),
-    fields: z.record(z.string(), z.string().max(500)), // e.g. { password: "...", pin: "..." }
+    fields: z.record(z.string(), z.string().max(4000)), // e.g. { password: "...", pin: "..." }
     token: z.string().min(1),
   }),
   z.object({ action: z.literal("toggle"), integrationId: z.string().min(1), isEnabled: z.boolean() }),
@@ -24,8 +25,6 @@ const Body = z.discriminatedUnion("action", [
 
 const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-
-const REAUTH_TTL_MS = 10 * 60 * 1000;
 
 // ---- re-auth token: HMAC-signed `${brokerUserId}.${exp}`, base64url ----
 async function hmacKey(secret: string) {
@@ -56,7 +55,7 @@ async function verifyToken(secret: string, token: string, brokerUserId: string):
   const [uid, expStr, sigB64] = parts;
   if (uid !== brokerUserId) return false;
   const exp = Number(expStr);
-  if (!Number.isFinite(exp) || Date.now() > exp) return false;
+  if (isExpired(exp)) return false;
   const key = await hmacKey(secret);
   const expected = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${uid}.${expStr}`));
   const expectedB64 = b64url(new Uint8Array(expected));
@@ -106,9 +105,10 @@ Deno.serve(async (req) => {
     if (!parsed.success) return json({ error: "Invalid request." }, 400);
     const p = parsed.data;
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    if (!supabaseUrl || !serviceRoleKey || !anonKey) return json({ error: "Server misconfigured." }, 500);
     const encryptionKey = Deno.env.get("CREDENTIALS_ENCRYPTION_KEY");
     const reauthSecret = Deno.env.get("CREDENTIALS_ENCRYPTION_KEY"); // reuse as HMAC secret too
 
@@ -205,12 +205,26 @@ Deno.serve(async (req) => {
         .eq("broker_user_id", user.id);
       if (error) return json({ error: "Could not load integrations." }, 500);
 
-      const credentials = (rows ?? []).map((r) => ({
-        integration_id: r.integration_id,
-        is_enabled: r.is_enabled,
-        status: r.status,
-        updated_at: r.updated_at,
-        has_credentials: !!r.encrypted_credentials,
+      // Only the non-secret quote email is surfaced in the list; passwords never leave without re-auth.
+      const credentials = await Promise.all((rows ?? []).map(async (r) => {
+        let quote_email: string | null = null;
+        let portal_url: string | null = null;
+        if (r.encrypted_credentials && encryptionKey) {
+          try {
+            const fields = await decryptJson(encryptionKey, r.encrypted_credentials);
+            quote_email = fields.quote_email || null;
+            portal_url = fields.portal_url || null;
+          } catch { /* ignore */ }
+        }
+        return {
+          integration_id: r.integration_id,
+          is_enabled: r.is_enabled,
+          status: r.status,
+          updated_at: r.updated_at,
+          has_credentials: !!r.encrypted_credentials,
+          quote_email,
+          portal_url,
+        };
       }));
       return json({ credentials });
     }
@@ -247,6 +261,18 @@ Deno.serve(async (req) => {
     }
 
     if (p.action === "save") {
+      if (p.fields.portal_url) {
+        try {
+          const url = new URL(p.fields.portal_url);
+          if (url.protocol !== "https:" || url.username || url.password) return json({ error: "Enter an HTTPS portal URL without login details." }, 400);
+        } catch { return json({ error: "Enter a valid HTTPS portal URL." }, 400); }
+      }
+      if (p.fields.quote_email) {
+        const list = p.fields.quote_email.split(/[;,\s]+/).map((x) => x.trim().toLowerCase()).filter(Boolean);
+        const bad = list.find((x) => !z.string().email().safeParse(x).success);
+        if (bad) return json({ error: `Invalid quote email: ${bad}` }, 400);
+        p.fields.quote_email = Array.from(new Set(list)).join(", ");
+      }
       const encrypted = await encryptJson(encryptionKey, p.fields);
       const { error } = await admin
         .from("broker_integration_credentials")

@@ -1,4 +1,5 @@
 import { TransactionLogs } from "@/features/wealth-workflow/TransactionLogs";
+import { ExistingCoverCard } from "@/features/wealth-workflow/client/ExistingCoverCard";
 import { SignedImage } from "@/features/documents/components/SignedImage";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { BiologPanel } from "@/features/biolog/BiologPanel";
@@ -316,6 +317,10 @@ export default function PatientProfile() {
                   </span>
                 )}
               </div>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Since {format(new Date(patient.created_at), "MMM yyyy")} · Last seen{" "}
+                {patient.last_visit ? format(new Date(patient.last_visit), "d MMM yyyy") : "—"}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -346,40 +351,8 @@ export default function PatientProfile() {
         </div>
       </div>
 
-      {/* Stats Cards - hide when doctor views their own patient record */}
-      {(patient as any).patient_user_id !== currentUserId && (
-        <div className="grid gap-2 grid-cols-2 md:grid-cols-3">
-          <div className="rounded-lg bg-card p-2 shadow-sm border border-border/50">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-muted-foreground">{t("patientProfile.totalSessions")}</p>
-              <FileText className="h-4 w-4 text-primary" />
-            </div>
-            <p className="mt-1 text-sm font-bold text-foreground">{completedSessions.length}</p>
-          </div>
-          <div className="rounded-lg bg-card p-2 shadow-sm border border-border/50">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-muted-foreground">{t("patientProfile.lastSeen")}</p>
-              <Clock className="h-4 w-4 text-primary" />
-            </div>
-            <p className="mt-1 text-sm font-bold text-foreground">
-              {patient.last_visit ? (
-                format(new Date(patient.last_visit), "MMM d")
-              ) : (
-                <span className="text-muted-foreground text-xs font-medium">—</span>
-              )}
-            </p>
-          </div>
-          <div className="rounded-lg bg-card p-2 shadow-sm border border-border/50">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-muted-foreground">{t("patientProfile.since")}</p>
-              <Calendar className="h-4 w-4 text-primary" />
-            </div>
-            <p className="mt-1 text-sm font-bold text-foreground">
-              {format(new Date(patient.created_at), "MMM yy")}
-            </p>
-          </div>
-        </div>
-      )}
+      {/* Existing cover - hide when the WM views their own record */}
+      {(patient as any).patient_user_id !== currentUserId && <ExistingCoverCard patientId={patient.id} />}
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">

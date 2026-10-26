@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Holarc Wealth Companion",
+  "version": "1.5.1",
+  "description": "Connects insurer portals in background tabs using saved Holarc Wealth logins, relays verification and captures quote PDFs.",
+  "icons": { "48": "icon.png", "128": "icon.png" },
+  "permissions": ["tabs", "scripting", "storage", "downloads"],
+  "host_permissions": ["https://*/*"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://holarc.co.za/*",
+        "https://www.holarc.co.za/*",
+        "https://holarc-wealth.lovable.app/*",
+        "https://id-preview--320b9905-9d0e-4ca1-af45-821272397de6.lovable.app/*",
+        "http://localhost/*"
+      ],
+      "js": ["bridge.js"],
+      "run_at": "document_start"
+    }
+  ]
+}
