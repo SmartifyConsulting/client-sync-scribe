@@ -188,7 +188,7 @@ function RoleBasedRedirect() {
   }
 
   if (hasDoctorRole) {
-    return <Navigate to="/doctor-dashboard" replace />;
+    return <Navigate to="/broker-dashboard" replace />;
   }
 
   if (isReferralAgent) {
@@ -206,7 +206,7 @@ function WealthRouteGuard() {
   if (!isLoading && !isAdmin && isWealthHidden(loc.pathname)) return <Navigate to="/dashboard" replace />;
   // Clients never reach firm-facing screens (My Business, My Clients).
   const clientOnly = !roleLoading && !isLoading && !isAdmin && hasPatientRole && !hasDoctorRole;
-  if (clientOnly && (loc.pathname === "/practice" || loc.pathname.startsWith("/practice/") || loc.pathname === "/patients")) {
+  if (clientOnly && (loc.pathname === "/business" || loc.pathname.startsWith("/business/") || loc.pathname === "/clients")) {
     return <Navigate to="/my-dashboard" replace />;
   }
   return null;
@@ -256,23 +256,23 @@ const App = () => (
               </ProtectedRoute>
             }
           >
-            <Route path="/patient/doctors" element={<MyDoctors />} />
-            <Route path="/patient/calendar" element={<PatientCalendar />} />
-            <Route path="/patient/documentation" element={<Documentation />} />
-            <Route path="/patient/invoices" element={<Invoices />} />
-            <Route path="/patient/invites" element={<PatientAccessManagement />} />
+            <Route path="/client/advisors" element={<MyDoctors />} />
+            <Route path="/client/calendar" element={<PatientCalendar />} />
+            <Route path="/client/documentation" element={<Documentation />} />
+            <Route path="/client/invoices" element={<Invoices />} />
+            <Route path="/client/invites" element={<PatientAccessManagement />} />
             <Route path="/patient/rewards" element={<MyRewards />} />
             <Route path="/patient/health-album" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/patient/tasks" element={<PatientTasks />} />
+            <Route path="/client/tasks" element={<PatientTasks />} />
             <Route path="/patient/admissions" element={<PatientAdmissions />} />
             <Route path="/patient/ward-admission/:incidentId" element={<PatientWardAdmission />} />
             <Route path="/patient/lab-results" element={<PatientLabResults />} />
             <Route path="/biolog" element={<V2Route><Biolog /></V2Route>} />
             <Route path="/ask-maeve" element={<V2Route><AskMaeveHome /></V2Route>} />
             <Route path="/ask-maeve/:sessionId" element={<V2Route><AskMaeveSession /></V2Route>} />
-            <Route path="/patient/documents" element={<PatientDocuments />} />
+            <Route path="/client/documents" element={<PatientDocuments />} />
             <Route path="/patient/round-table" element={<PatientRoundTable />} />
-            <Route path="/patient/details" element={<MyDetails />} />
+            <Route path="/client/details" element={<MyDetails />} />
             <Route path="/sessions/:id" element={<SessionDetail />} />
             <Route path="/patient/holarchelp/*" element={<HolarcHelpRoutes />} />
             <Route path="/doctor/holarchelp/*" element={<HolarcHelpRoutes />} />
@@ -291,16 +291,16 @@ const App = () => (
             }
           >
             {/* Doctor dashboard */}
-            <Route path="/doctor-dashboard" element={<Dashboard />} />
+            <Route path="/broker-dashboard" element={<Dashboard />} />
             
             {/* Doctor routes */}
-            <Route path="/patients" element={<Patients />} />
-            <Route path="/patients/:id" element={<PatientProfile />} />
+            <Route path="/clients" element={<Patients />} />
+            <Route path="/clients/:id" element={<PatientProfile />} />
             <Route path="/admissions" element={<DoctorAdmissions />} />
             <Route path="/biolog" element={<V2Route><Biolog /></V2Route>} />
             <Route path="/ask-maeve" element={<V2Route><AskMaeveHome /></V2Route>} />
             <Route path="/ask-maeve/:sessionId" element={<V2Route><AskMaeveSession /></V2Route>} />
-            <Route path="/doctor/sessions" element={<DoctorSessions />} />
+            <Route path="/broker/consultations" element={<DoctorSessions />} />
             <Route path="/calendar" element={<CalendarView />} />
             <Route path="/todos" element={<TodoList />} />
             <Route path="/sessions" element={<Sessions />} />
@@ -318,11 +318,11 @@ const App = () => (
             <Route path="/my-views" element={<MyViews />} />
             <Route path="/doctor/round-tables" element={<DoctorRoundTablesPage />} />
             <Route path="/invoices" element={<DoctorInvoices />} />
-            <Route path="/practice" element={<MyPractice />} />
+            <Route path="/business" element={<MyPractice />} />
             <Route path="/nurse-profile" element={<NurseProfile />} />
-            <Route path="/practice-patients" element={<PracticePatients />} />
+            <Route path="/firm-clients" element={<PracticePatients />} />
             <Route path="/doctor/rewards" element={<MyRewards />} />
-            <Route path="/referral-doctors" element={<ReferralDoctors />} />
+            <Route path="/referral-partners" element={<ReferralDoctors />} />
             <Route path="/cpd-certificates" element={<Navigate to="/profile" replace />} />
             <Route path="/expiring-recordings" element={<ExpiringRecordings />} />
             <Route path="/connections" element={<Connections />} />

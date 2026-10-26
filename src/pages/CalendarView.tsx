@@ -1231,7 +1231,7 @@ export default function CalendarView() {
                           <button
                             onClick={() => {
                               setIsEventDetailOpen(false);
-                              navigate(`/patients/${selectedEvent.patientId}`);
+                              navigate(`/clients/${selectedEvent.patientId}`);
                             }}
                             className="text-primary hover:underline font-medium block"
                           >

@@ -187,7 +187,7 @@ function IssuedPolicyDocs({ patientId }: { patientId?: string }) {
 
 function DocsLink({ viewer, onOpenDocuments, label = "Open documents" }: { viewer: Viewer; onOpenDocuments?: () => void; label?: string }) {
   return viewer === "client" ? (
-    <Button asChild variant="outline" className="w-full rounded-full"><Link to="/patient/documents"><Upload className="mr-2 h-4 w-4" />{label}</Link></Button>
+    <Button asChild variant="outline" className="w-full rounded-full"><Link to="/client/documents"><Upload className="mr-2 h-4 w-4" />{label}</Link></Button>
   ) : (
     <Button variant="outline" className="w-full rounded-full" onClick={onOpenDocuments}><FileText className="mr-2 h-4 w-4" />{label}</Button>
   );

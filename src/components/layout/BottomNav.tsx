@@ -23,9 +23,9 @@ import { useTranslation } from "react-i18next";
 import { isWealthHidden } from "@/lib/terminology";
 
 const doctorNavItems = [
-  { icon: LayoutDashboard, labelKey: "nav.home", to: "/doctor-dashboard" },
+  { icon: LayoutDashboard, labelKey: "nav.home", to: "/broker-dashboard" },
   { icon: User, labelKey: "nav.myProfile", to: "/patient/details?section=health" },
-  { icon: Briefcase, labelKey: "bottomNav.practice", to: "/practice" },
+  { icon: Briefcase, labelKey: "bottomNav.practice", to: "/business" },
   { icon: Sparkles, labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
   { icon: Siren, labelKey: "nav.sos", to: "/doctor/holarchelp", danger: true },
 ].filter((i) => !isWealthHidden(i.to));
@@ -44,7 +44,7 @@ const adminNavItems = [
   { icon: DollarSign, labelKey: "nav.pricing", to: "/admin/pricing" },
   { icon: Gift, labelKey: "nav.rewards", to: "/admin/gamification" },
   { icon: Siren, labelKey: "nav.sos", to: "/patient/holarchelp", danger: true },
-  { icon: Home, labelKey: "bottomNav.exit", to: "/doctor-dashboard" },
+  { icon: Home, labelKey: "bottomNav.exit", to: "/broker-dashboard" },
 ].filter((i) => !isWealthHidden(i.to));
 
 export function BottomNav() {
@@ -157,7 +157,7 @@ export function BottomNav() {
 
   // Patient nav - section-based
   const currentSection = searchParams.get("section") || "health";
-  const isOnDetails = location.pathname === "/patient/details";
+  const isOnDetails = location.pathname === "/client/details";
 
   const items = patientSections.filter((i) => v2Demo || i.to !== "/ask-maeve");
 

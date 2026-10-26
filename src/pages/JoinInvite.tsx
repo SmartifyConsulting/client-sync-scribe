@@ -102,7 +102,7 @@ export default function JoinInvite() {
                   <>
                     <p className="text-sm text-muted-foreground">This link is for {preview.firstName || "your client"} to create their own account. To test it, open the link in a private (incognito) window, or sign out below.</p>
                     <Button className="w-full" onClick={async () => { await supabase.auth.signOut(); setErr(null); setMode("signup"); }}>Sign out and register as {preview.firstName || "the client"}</Button>
-                    <Button variant="outline" className="w-full" onClick={() => navigate("/practice")}>Back to My Clients</Button>
+                    <Button variant="outline" className="w-full" onClick={() => navigate("/business")}>Back to My Clients</Button>
                   </>
                 ) : (
                   <>

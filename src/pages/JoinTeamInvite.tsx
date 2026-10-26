@@ -41,7 +41,7 @@ export default function JoinTeamInvite() {
       try { msg = msg ?? (await (error as any)?.context?.json?.())?.error; } catch { /* ignore */ }
       return setErr(msg ?? "We couldn't link your account. Please try again.");
     }
-    navigate("/doctor-dashboard", { replace: true });
+    navigate("/broker-dashboard", { replace: true });
   };
 
   const [autoTried, setAutoTried] = useState(false);

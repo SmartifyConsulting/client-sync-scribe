@@ -163,7 +163,7 @@ function DoctorPatientsTab() {
           }
           onImportComplete={() => fetchPatients()}
         />
-        <Button size="sm" className="gap-1" onClick={() => navigate("/patients")}>
+        <Button size="sm" className="gap-1" onClick={() => navigate("/clients")}>
           <Plus className="h-4 w-4" />
           Add
         </Button>
@@ -191,7 +191,7 @@ function DoctorPatientsTab() {
                   return (
                     <tr key={patient.id} className={cn("group transition-colors hover:bg-muted/50", isMe && "bg-muted/30")}>
                       <td className="px-4 py-2.5">
-                        <Link to={`/patients/${patient.id}`} className="flex items-center gap-2">
+                        <Link to={`/clients/${patient.id}`} className="flex items-center gap-2">
                           <div className={cn(
                             "flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs text-primary-foreground",
                             isMe ? "bg-terracotta" : "bg-primary"
@@ -220,7 +220,7 @@ function DoctorPatientsTab() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => navigate(`/patients/${patient.id}`)}>
+                            <DropdownMenuItem onClick={() => navigate(`/clients/${patient.id}`)}>
                               View Profile
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => navigate(`/sessions?patient=${patient.id}&autoStart=true`)}>

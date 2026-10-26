@@ -882,7 +882,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                   <>
                     <tr className="group transition-colors bg-gray-100 hover:bg-gray-200/60 dark:bg-gray-800/20 dark:hover:bg-gray-800/30">
                       <td className="px-2 lg:px-4 py-2.5">
-                        <Link to={`/patients/${mePatient.id}`} className="flex items-center gap-2.5">
+                        <Link to={`/clients/${mePatient.id}`} className="flex items-center gap-2.5">
                           <div className="flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs bg-brand-teal text-white">
                             ME
                           </div>
@@ -922,7 +922,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                         {new Date(mePatient.created_at).toLocaleDateString()}
                       </td>
                       <td className="px-3 lg:px-4 py-2.5 text-right">
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => navigate(`/patients/${mePatient.id}`)}>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => navigate(`/clients/${mePatient.id}`)}>
                           <Edit3 className="h-3.5 w-3.5" />
                         </Button>
                       </td>
@@ -954,7 +954,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       >
                         <td className="px-2 lg:px-4 py-2.5">
                           <Link
-                            to={`/patients/${patient.id}`}
+                            to={`/clients/${patient.id}`}
                             className="flex items-center gap-2.5"
                           >
                             <div className={cn(
@@ -1037,7 +1037,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                                 <Clock className="mr-2 h-4 w-4" />
                                 {t("patients.startSession")}
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => navigate(`/patients/${patient.id}`)}>
+                              <DropdownMenuItem onClick={() => navigate(`/clients/${patient.id}`)}>
                                 <Edit3 className="mr-2 h-4 w-4" />
                                 {t("patients.viewProfile")}
                               </DropdownMenuItem>

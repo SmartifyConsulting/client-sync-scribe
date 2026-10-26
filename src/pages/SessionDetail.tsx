@@ -344,7 +344,7 @@ export default function SessionDetail() {
       {/* Back Button */}
       {session.patient ? (
         <Link
-          to={`/patients/${session.patient_id}`}
+          to={`/clients/${session.patient_id}`}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -388,7 +388,7 @@ export default function SessionDetail() {
             </div>
             {session.patient && (
               <Link
-                to={`/patients/${session.patient_id}`}
+                to={`/clients/${session.patient_id}`}
                 className="mt-2 inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
               >
                 <User className="h-4 w-4" />

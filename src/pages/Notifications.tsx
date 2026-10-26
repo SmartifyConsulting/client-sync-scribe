@@ -399,7 +399,7 @@ export default function Notifications() {
             <div className="flex items-center gap-2">
               {activeTab === "messages" && (
                 <Button variant="outline" size="sm" asChild>
-                  <Link to={`/patients/${selectedMessage.patient_id}?tab=doctors&reply=${selectedMessage.sender_id}`}>
+                  <Link to={`/clients/${selectedMessage.patient_id}?tab=doctors&reply=${selectedMessage.sender_id}`}>
                     <Reply className="h-4 w-4 mr-2" />
                     Reply
                   </Link>
@@ -430,7 +430,7 @@ export default function Notifications() {
               </div>
               {selectedMessage.patient && (
                 <Link 
-                  to={`/patients/${selectedMessage.patient_id}`}
+                  to={`/clients/${selectedMessage.patient_id}`}
                   className="inline-flex items-center gap-1 mt-2 text-sm text-primary hover:underline"
                 >
                   <User className="h-4 w-4" />

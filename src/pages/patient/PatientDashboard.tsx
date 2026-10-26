@@ -306,7 +306,7 @@ export default function PatientDashboard() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Link to="/patient/calendar">
+          <Link to="/client/calendar">
             <Button variant="outline" size="sm" className="gap-1.5 text-xs">
               <Calendar className="h-3.5 w-3.5" /> {t("patientDashboard.calendar")}
             </Button>
@@ -434,9 +434,9 @@ export default function PatientDashboard() {
               <div className="space-y-2">
                 {[
                   { icon: Pill, text: t("patientDashboard.tip1"), link: "/patient/prescriptions" },
-                  { icon: ListChecks, text: t("patientDashboard.tip2"), link: "/patient/tasks" },
+                  { icon: ListChecks, text: t("patientDashboard.tip2"), link: "/client/tasks" },
                   { icon: Camera, text: t("patientDashboard.tip3"), link: "/patient/health-album" },
-                  { icon: Calendar, text: t("patientDashboard.tip4"), link: "/patient/calendar" },
+                  { icon: Calendar, text: t("patientDashboard.tip4"), link: "/client/calendar" },
                 ].map((tip, i) => (
                   <Link key={i} to={tip.link} className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-primary/5 transition-colors group">
                     <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary shrink-0">
@@ -462,7 +462,7 @@ export default function PatientDashboard() {
                   <Receipt className="h-4 w-4 text-primary" />
                   {t("patientDashboard.claimsTitle")}
                 </CardTitle>
-                <Link to="/patient/invoices">
+                <Link to="/client/invoices">
                   <Button variant="ghost" size="sm" className="text-xs h-6 text-primary gap-1">
                     {t("patientDashboard.claimsAllInvoices")} <ArrowRight className="h-4 w-4" />
                   </Button>
@@ -494,7 +494,7 @@ export default function PatientDashboard() {
             </CardContent>
           </Card>
 
-          <Link to="/patient/documentation">
+          <Link to="/client/documentation">
             <Card className="cursor-pointer border-primary/10 hover:border-primary/30 hover:shadow-md transition-all h-full">
               <CardHeader className="p-4">
                 <CardTitle className="flex items-center gap-2 text-sm">

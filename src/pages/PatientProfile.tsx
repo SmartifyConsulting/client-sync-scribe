@@ -249,7 +249,7 @@ export default function PatientProfile() {
     return (
       <div className="space-y-6 animate-fade-in">
         <Link
-          to="/patients"
+          to="/clients"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -281,7 +281,7 @@ export default function PatientProfile() {
     <div className="space-y-8 animate-fade-in">
       {/* Back Button */}
       <Link
-        to="/patients"
+        to="/clients"
         className="inline-flex items-center gap-2 text-base font-medium text-muted-foreground hover:text-foreground transition-colors group"
       >
         <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />

@@ -74,20 +74,20 @@ const VITALS = [
 
 const CARE_ITEMS = [
   { icon: Pill, label: "Medication", value: "1 due today", to: "/patient/rewards" },
-  { icon: CalendarDays, label: "Appointments", value: "Tomorrow 10:30", to: "/patient/calendar" },
+  { icon: CalendarDays, label: "Appointments", value: "Tomorrow 10:30", to: "/client/calendar" },
   { icon: FlaskConical, label: "Results", value: "1 new", to: "/patient/lab-results" },
 ];
 
 const CARE_CIRCLE = [
-  { name: "Dr Sarah", role: "GP", to: "/patient/doctors" },
-  { name: "Dr James", role: "Cardiologist", to: "/patient/doctors" },
-  { name: "Susan", role: "Physiotherapist", to: "/patient/doctors" },
+  { name: "Dr Sarah", role: "GP", to: "/client/advisors" },
+  { name: "Dr James", role: "Cardiologist", to: "/client/advisors" },
+  { name: "Susan", role: "Physiotherapist", to: "/client/advisors" },
 ];
 
 const HAPPENING = [
-  { icon: CalendarDays, title: "Tomorrow 10:30", detail: "GP appointment", to: "/patient/calendar" },
+  { icon: CalendarDays, title: "Tomorrow 10:30", detail: "GP appointment", to: "/client/calendar" },
   { icon: FlaskConical, title: "Blood results", detail: "Expected Friday", to: "/patient/lab-results" },
-  { icon: Activity, title: "Physio consultation", detail: "Monday 3:00 PM", to: "/patient/calendar" },
+  { icon: Activity, title: "Physio consultation", detail: "Monday 3:00 PM", to: "/client/calendar" },
 ];
 
 const INSIGHTS = [

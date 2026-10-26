@@ -19,17 +19,17 @@ export interface ScreenTip {
 export const SCREEN_TIPS: ScreenTip[] = [
   // Client
   { id: "patient.dashboard", match: "/dashboard", title: "Your dashboard", body: "Your wealth journey at a glance — actions to complete, what we're waiting for and recent milestones." },
-  { id: "patient.details", match: "/patient/details", title: "My Profile", body: "Your details, financial information and wealth journey. Wealth Managers only see what you choose to share." },
-  { id: "patient.doctors", match: "/patient/doctors", title: "My Wealth Managers", body: "Manage which Wealth Managers can work with you and send them a message." },
-  { id: "patient.documents", match: "/patient/documents", title: "My Documents", body: "Your Record of Advice (ROA), policy schedules and supporting documents. Tap the green arrow to share one." },
-  { id: "patient.calendar", match: "/patient/calendar", title: "My Calendar", body: "Your upcoming consultations and annual reviews." },
-  { id: "patient.tasks", match: "/patient/tasks", title: "My Actions", body: "What your Wealth Manager needs from you, with the reason and due date." },
+  { id: "patient.details", match: "/client/details", title: "My Profile", body: "Your details, financial information and wealth journey. Wealth Managers only see what you choose to share." },
+  { id: "patient.doctors", match: "/client/advisors", title: "My Wealth Managers", body: "Manage which Wealth Managers can work with you and send them a message." },
+  { id: "patient.documents", match: "/client/documents", title: "My Documents", body: "Your Record of Advice (ROA), policy schedules and supporting documents. Tap the green arrow to share one." },
+  { id: "patient.calendar", match: "/client/calendar", title: "My Calendar", body: "Your upcoming consultations and annual reviews." },
+  { id: "patient.tasks", match: "/client/tasks", title: "My Actions", body: "What your Wealth Manager needs from you, with the reason and due date." },
   { id: "patient.access", match: "/patient/access", title: "Access Management", body: "Control which Wealth Managers can view your information and what they can see." },
-  { id: "patient.invoices", match: "/patient/invoices", title: "My Fees", body: "Advice fees and statements from your Wealth Manager. Tap any item to view or download." },
+  { id: "patient.invoices", match: "/client/invoices", title: "My Fees", body: "Advice fees and statements from your Wealth Manager. Tap any item to view or download." },
 
   // Wealth Manager / shared
   { id: "doctor.dashboard", match: "/doctor/dashboard", title: "Today's Briefing", body: "Today's consultations, client decisions and outstanding actions." },
-  { id: "doctor.patients.v2", match: "/patients", title: "Your Clients", body: "Import clients from a spreadsheet, or add one manually. Open a client to see their Live workspace and Workflow Map." },
+  { id: "doctor.patients.v2", match: "/clients", title: "Your Clients", body: "Import clients from a spreadsheet, or add one manually. Open a client to see their Live workspace and Workflow Map." },
   { id: "doctor.sessions", match: "/sessions", title: "Consultations", body: "Recorded consultations with transcripts, summaries and the documents drafted from each one." },
   { id: "doctor.documents", match: "/documents", title: "Documents", body: "Records of Advice, letters and supporting documents. Create from templates or draft from a consultation." },
   { id: "doctor.calendar", match: "/calendar", title: "Calendar", body: "Consultations and annual reviews. Drag to reschedule and colour-code by type." },

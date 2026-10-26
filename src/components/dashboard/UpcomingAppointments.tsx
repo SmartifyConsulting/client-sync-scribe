@@ -120,7 +120,7 @@ export function UpcomingAppointments() {
               <div className="flex-1">
                 {appointment.patientId ? (
                   <Link
-                    to={`/patients/${appointment.patientId}`}
+                    to={`/clients/${appointment.patientId}`}
                     className="font-medium text-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
                   >
                     {appointment.patientName}

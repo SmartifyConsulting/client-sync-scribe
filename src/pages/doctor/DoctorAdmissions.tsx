@@ -230,7 +230,7 @@ export default function DoctorAdmissions() {
             <div className="flex items-center gap-3 rounded-xl border border-border px-3 py-2">
               <BedDouble className="h-4 w-4 shrink-0 text-primary" />
               <button
-                onClick={() => navigate(`/patients/${r.patient_id}`)}
+                onClick={() => navigate(`/clients/${r.patient_id}`)}
                 className="min-w-0 flex-1 text-left"
               >
                 <p className="truncate text-sm font-semibold text-foreground">{r.patient_name}</p>

@@ -37,7 +37,7 @@ export default function Dashboard() {
   const formattedDate = today.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
   if (shouldRedirectPatient) {
-    return <Navigate to="/patient/details" replace />;
+    return <Navigate to="/client/details" replace />;
   }
 
   const doctorIncomplete = isDoctor && profile && (

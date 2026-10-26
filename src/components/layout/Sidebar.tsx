@@ -85,10 +85,10 @@ const DOCTOR_SECTIONS: NavSection[] = [
   {
     title: "My Business",
     items: [
-      { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.dashboard", to: "/doctor-dashboard", tour: "doctor-home" },
-      { icon: Settings2, label: "My Business", labelKey: "nav.myPractice", to: "/practice", tour: "practice-settings" },
+      { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.dashboard", to: "/broker-dashboard", tour: "doctor-home" },
+      { icon: Settings2, label: "My Business", labelKey: "nav.myPractice", to: "/business", tour: "practice-settings" },
       { icon: Clock, label: "My Shifts", labelKey: "nav.myShift", to: "/my-shift" },
-      { icon: Users, label: "My Clients", labelKey: "nav.myPatients", to: "/patients", tour: "import-patients" },
+      { icon: Users, label: "My Clients", labelKey: "nav.myPatients", to: "/clients", tour: "import-patients" },
       { icon: UserPlus, label: "Referrers", labelKey: "nav.referrers", to: "/referrers" },
       { icon: BedDouble, label: "Admissions", labelKey: "nav.admissions", to: "/admissions" },
       { icon: Stethoscope, label: "Consultations", labelKey: "nav.mySessions", to: "/sessions" },
@@ -116,13 +116,13 @@ const doctorModeItems: (NavItem & { tour?: string })[] = [
 ];
 
 /** Firm-facing screens a client must never see. */
-const CLIENT_BLOCKED_PATHS = ["/practice", "/patients"];
+const CLIENT_BLOCKED_PATHS = ["/business", "/clients"];
 
 const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.myPersonalDashboard", to: "/my-dashboard" },
   { icon: Activity, label: "Live Workspace", labelKey: "nav.liveWorkspace", to: "/my-workspace" },
   { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/patient/details?section=health" },
-  { icon: ClientFolder, label: "Documents", labelKey: "nav.clientDocuments", to: "/patient/documents" },
+  { icon: ClientFolder, label: "Documents", labelKey: "nav.clientDocuments", to: "/client/documents" },
   { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
   { icon: Activity, label: "My Biolog", labelKey: "nav.myBiolog", to: "/biolog" },
   { icon: BedDouble, label: "My Admissions", labelKey: "nav.myAdmissions", to: "/patient/admissions" },
@@ -163,13 +163,13 @@ const referrerNavItems: (NavItem & { tour?: string })[] = [
 
 /** Extra tools for a Practice Management Assistant, appended to their own menu. */
 const assistantNavItems: (NavItem & { tour?: string })[] = [
-  { icon: Users, label: "Firm Clients", labelKey: "nav.practicePatients", to: "/practice-patients" },
+  { icon: Users, label: "Firm Clients", labelKey: "nav.practicePatients", to: "/firm-clients" },
   { icon: Calendar, label: "Firm Calendar", labelKey: "nav.practiceCalendar", to: "/calendar" },
   { icon: ListChecks, label: "Firm Actions", labelKey: "nav.practiceTasks", to: "/todos" },
 ];
 
 const adminNavItems: NavItem[] = [
-  { icon: LayoutDashboard, label: "Home", labelKey: "nav.home", to: "/doctor-dashboard" },
+  { icon: LayoutDashboard, label: "Home", labelKey: "nav.home", to: "/broker-dashboard" },
   { icon: Users, label: "Users", labelKey: "nav.users", to: "/admin/wealth-users" },
   { icon: BarChart3, label: "Performance", labelKey: "nav.performance", to: "/admin/performance" },
   { icon: DollarSign, label: "Pricing", labelKey: "nav.pricing", to: "/admin/pricing" },
@@ -339,7 +339,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     // RoleBasedRedirect in App.tsx) but isn't itself a nav item — treat it as
     // the doctor Dashboard link's route too, so Dashboard highlights on landing
     // instead of nothing being highlighted at all.
-    const isDashboardLandingAlias = itemPath === "/doctor-dashboard" && location.pathname === "/my-dashboard";
+    const isDashboardLandingAlias = itemPath === "/broker-dashboard" && location.pathname === "/my-dashboard";
 
     const isItemActive = isDashboardLandingAlias
       ? true
@@ -465,7 +465,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
    *  clinician can switch the sidebar between their professional tools and
    *  their own patient profile. */
   const professionalMode = isNurse ? "nurse" : "doctor";
-  const professionalHome = isNurse ? "/provider/hospital/nurse-dashboard" : "/doctor-dashboard";
+  const professionalHome = isNurse ? "/provider/hospital/nurse-dashboard" : "/broker-dashboard";
   const profileToggle = (
     <div className="mx-1 mt-1 flex items-center gap-1 rounded-full bg-muted/60 p-0.5">
       {([professionalMode, "patient"] as const).map((mode) => {

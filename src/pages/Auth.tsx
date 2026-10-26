@@ -576,7 +576,7 @@ export default function Auth() {
               : null);
     navigate(
       resolvedRole === "patient"
-        ? "/patient/details"
+        ? "/client/details"
         : resolvedRole === "emergency"
           ? "/provider"
           : "/dashboard"

@@ -38,9 +38,9 @@ const activityColors = {
 function activityHref(activity: Activity) {
   if (activity.type === "task") return "/todos";
   if (activity.type === "message") return "/notifications";
-  if (!activity.patientId) return "/doctor-dashboard";
-  if (activity.type === "document") return `/patients/${activity.patientId}?tab=documents`;
-  return `/patients/${activity.patientId}?tab=sessions`;
+  if (!activity.patientId) return "/broker-dashboard";
+  if (activity.type === "document") return `/clients/${activity.patientId}?tab=documents`;
+  return `/clients/${activity.patientId}?tab=sessions`;
 }
 
 export function RecentActivity() {

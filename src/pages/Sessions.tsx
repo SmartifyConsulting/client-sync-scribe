@@ -1403,7 +1403,7 @@ export default function Sessions() {
       <div className="flex items-center gap-4">
         {currentPatient && (
           <Link
-            to={`/patients/${patientId}`}
+            to={`/clients/${patientId}`}
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -2023,7 +2023,7 @@ export default function Sessions() {
             </Button>
             {currentPatient && (
               <Button variant="outline" asChild>
-                <Link to={`/patients/${patientId}`}>View Client Profile</Link>
+                <Link to={`/clients/${patientId}`}>View Client Profile</Link>
               </Button>
             )}
           </div>

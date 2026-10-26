@@ -32,7 +32,7 @@ export function AppLayout() {
   // in this layout's route group regardless of who's viewing it.
   const isSharedDashboard = location.pathname === "/my-dashboard" || location.pathname.startsWith("/my-future") || location.pathname.startsWith("/my-workspace") || location.pathname.startsWith("/claims") || location.pathname.startsWith("/messenger") || location.pathname.startsWith("/calendar");
   if (!roleLoading && isPatient && !(isAdmin && isAdminRoute) && !isSharedDashboard) {
-    return <Navigate to="/patient/details" replace />;
+    return <Navigate to="/client/details" replace />;
   }
 
   return (

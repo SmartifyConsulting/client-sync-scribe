@@ -27,7 +27,7 @@ export function ActiveWorkspaceClients() {
       <ul className="divide-y text-xs">
         {wfs.map((w) => (
           <li key={w.id} className="flex items-center justify-between py-1.5">
-            <Link to={`/patients/${w.patient_id}?tab=live`} className="font-medium hover:underline">{w.patients?.name ?? "Client"}</Link>
+            <Link to={`/clients/${w.patient_id}?tab=live`} className="font-medium hover:underline">{w.patients?.name ?? "Client"}</Link>
             <span className="flex items-center gap-2">
               <span className="text-muted-foreground">{STAGE_LABEL[w.current_stage] ?? w.current_stage}</span>
               {w.status === "blocked" && <Badge variant="destructive" className="text-2xs">Blocked</Badge>}

@@ -688,7 +688,7 @@ export function TodaysBriefing() {
                       <div className="flex items-center gap-2">
                         {apt.patientId ? (
                           <Link
-                            to={`/patients/${apt.patientId}`}
+                            to={`/clients/${apt.patientId}`}
                             className="font-medium text-primary hover:text-primary/80 hover:underline truncate text-sm"
                             onClick={(e) => e.stopPropagation()}
                           >

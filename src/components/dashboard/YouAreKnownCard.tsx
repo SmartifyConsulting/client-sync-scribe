@@ -41,7 +41,7 @@ export function YouAreKnownCard({ values, communication, className }: Props) {
       </dl>
 
       <Link
-        to="/patient/details"
+        to="/client/details"
         className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
       >
         View my profile <ChevronRight className="h-3.5 w-3.5" />

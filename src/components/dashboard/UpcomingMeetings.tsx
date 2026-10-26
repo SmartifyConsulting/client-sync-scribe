@@ -80,7 +80,7 @@ export function UpcomingMeetings() {
               </div>
               <div className="min-w-0 flex-1">
                 {m.patientId ? (
-                  <Link to={`/patients/${m.patientId}`} className="font-medium text-foreground hover:text-primary transition-colors truncate block">
+                  <Link to={`/clients/${m.patientId}`} className="font-medium text-foreground hover:text-primary transition-colors truncate block">
                     {m.patientName}
                   </Link>
                 ) : (

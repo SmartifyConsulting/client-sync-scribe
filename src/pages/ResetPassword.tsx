@@ -121,7 +121,7 @@ export default function ResetPassword() {
           ((roleRows ?? []).some((row) => row.role === "patient") ? "patient" : null);
 
         setTimeout(() => {
-          navigate(resolvedRole === "patient" ? "/patient/details" : "/dashboard");
+          navigate(resolvedRole === "patient" ? "/client/details" : "/dashboard");
         }, 2000);
       } else {
         setTimeout(() => navigate("/auth"), 2000);

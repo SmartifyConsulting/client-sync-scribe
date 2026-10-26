@@ -97,7 +97,7 @@ export function SignInCard({ onSignUp }: { onSignUp?: () => void }) {
             : rawRoles.includes("admin")
               ? "admin"
               : null);
-    navigate(resolvedRole === "patient" ? "/patient/details" : resolvedRole === "emergency" ? "/provider" : "/dashboard");
+    navigate(resolvedRole === "patient" ? "/client/details" : resolvedRole === "emergency" ? "/provider" : "/dashboard");
   };
 
   const handleLogin = async (e: React.FormEvent) => {
