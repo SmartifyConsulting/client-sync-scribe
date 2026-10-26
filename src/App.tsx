@@ -12,21 +12,17 @@ import MyFuture from "@/pages/MyFuture";
 import MyWorkspace from "@/pages/MyWorkspace";
 import Messenger from "@/pages/Messenger";
 import Claims from "@/pages/Claims";
-import { useProviderAccess } from "@/modules/holarchelp/components/ProviderGate";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import Landing from "./pages/IndigroWelcome";
 import Dashboard from "./pages/Dashboard";
 import Patients from "./pages/Patients";
 import PatientProfile from "./pages/PatientProfile";
-import DoctorAdmissions from "./pages/doctor/DoctorAdmissions";
 import CalendarView from "./pages/CalendarView";
 import Sessions from "./pages/Sessions";
 import SessionDetail from "./pages/SessionDetail";
 import MySessions from "./pages/MySessions";
 import MyPersonalDashboard from "./pages/MyPersonalDashboard";
 import MyViews from "./pages/MyViews";
-import MyShiftScreen from "./modules/holarchelp/pages/provider/hospital/MyShiftScreen";
-
 
 // Documents page is now wrapped inside DoctorDocumentsPage
 import Settings from "./pages/Settings";
@@ -50,35 +46,23 @@ import TermsAndConditions from "./pages/TermsAndConditions";
 import PatientConsent from "./pages/PatientConsent";
 import BusinessAssociateAgreement from "./pages/BusinessAssociateAgreement";
 import Legal from "./pages/Legal";
-import VulaWallet from "./pages/VulaWallet";
 
-// Patient pages
+// Client pages
 import PatientDashboard from "./pages/patient/PatientDashboard";
 import PatientCalendar from "./pages/patient/PatientCalendar";
 import Documentation from "./pages/patient/PrescriptionHistory";
 import Invoices from "./pages/patient/Invoices";
 import PatientAccessManagement from "./pages/patient/PatientAccessManagement";
 import MyRewards from "./pages/patient/MyRewards";
-import HealthAlbum from "./pages/patient/HealthAlbum";
 import MyDoctors from "./pages/patient/MyDoctors";
 import PatientTasks from "./pages/patient/PatientTasks";
-import PatientAdmissions from "./pages/patient/PatientAdmissions";
-import PatientLabResults from "./pages/patient/PatientLabResults";
-import PatientWardAdmission from "./pages/patient/PatientWardAdmission";
-import Biolog from "./pages/Biolog";
-import { V2Route } from "@/components/V2Route";
-import AskMaeveHome from "./features/ask-maeve/pages/AskMaeveHome";
-import AskMaeveSession from "./features/ask-maeve/pages/AskMaeveSession";
 import PatientDocuments from "./pages/patient/PatientDocuments";
-import PatientRoundTable from "./pages/patient/PatientRoundTable";
 import MyDetails from "./pages/patient/MyDetails";
 import DoctorInvoices from "./pages/doctor/Invoices";
 
 import MyPractice from "./pages/MyPractice";
-import NurseProfile from "./pages/NurseProfile";
 import PracticePatients from "./pages/practice/PracticePatients";
 import PricingAdmin from "./pages/admin/PricingAdmin";
-import GamificationAdmin from "./pages/admin/GamificationAdmin";
 import IntegrationsAdmin from "./pages/admin/IntegrationsAdmin";
 import CountryPerformance from "./pages/admin/CountryPerformance";
 import BulkPasswordReset from "./pages/admin/BulkPasswordReset";
@@ -87,21 +71,11 @@ import ReferralDoctors from "./pages/ReferralDoctors";
 import ExpiringRecordings from "./pages/ExpiringRecordings";
 import Admin from "./pages/Admin";
 import DoctorDocumentsPage from "./pages/doctor/DoctorDocumentsPage";
-import DoctorRoundTablesPage from "./pages/doctor/DoctorRoundTablesPage";
 import DoctorSessions from "./pages/doctor/Sessions";
 import ProviderSignup from "./pages/ProviderSignup";
 import ProviderApprovalAction from "./pages/admin/ProviderApprovalAction";
-
-// HolarcHelp module
-import HolarcHelpRoutes from "./modules/holarchelp/routes";
-import ProviderRoutes from "./modules/holarchelp/routes-provider";
-import PublicTrack from "./modules/holarchelp/pages/PublicTrack";
-import HolarcHelpProviders from "./pages/admin/HolarcHelpProviders";
 import WealthUsers from "./pages/admin/WealthUsers";
 import ActivityLog from "./pages/ActivityLog";
-import HolarcHelpAccountability from "./pages/admin/HolarcHelpAccountability";
-import HolarcHelpProviderIncidents from "./pages/admin/HolarcHelpProviderIncidents";
-import SosAlertListener from "@/components/SosAlertListener";
 
 const queryClient = new QueryClient();
 
@@ -157,34 +131,15 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function RoleBasedRedirect() {
-  const { isPatient, isEmergency, isNurse, isReferralAgent, hasDoctorRole, hasPatientRole, loading } = useUserRole();
-  const { providerType, loading: providerLoading } = useProviderAccess();
-  const { isAdmin, isLoading: adminLoading } = useIsAdmin();
+  const { isReferralAgent, hasDoctorRole, loading } = useUserRole();
+  const { isLoading: adminLoading } = useIsAdmin();
 
-  if (loading || providerLoading || adminLoading) {
+  if (loading || adminLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
       </div>
     );
-  }
-
-  // Provider routing wins when the user is solely a provider (hospital/ambulance staff).
-  // Admins who are also providers fall through to /my-dashboard via the catch-all,
-  // and can still reach the provider portal via the profile switcher.
-  if (providerType && !hasDoctorRole && !hasPatientRole) {
-    return <Navigate to="/provider" replace />;
-  }
-
-  if (isEmergency && !hasDoctorRole && !hasPatientRole) {
-    return <Navigate to="/provider" replace />;
-  }
-
-  // Nurses land on their ward dashboard, doctors on their clinical dashboard.
-  // /my-dashboard is the personal (patient) landing screen — only default there
-  // for accounts that are not practitioners.
-  if (isNurse) {
-    return <Navigate to="/provider/hospital/nurse-dashboard" replace />;
   }
 
   if (hasDoctorRole) {
@@ -243,8 +198,6 @@ const App = () => (
           <Route path="/patient-consent" element={<PatientConsent />} />
           <Route path="/business-associate-agreement" element={<BusinessAssociateAgreement />} />
           <Route path="/legal" element={<Legal />} />
-          <Route path="/vula/wallet" element={<VulaWallet />} />
-          <Route path="/track/:token" element={<PublicTrack />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           
@@ -262,23 +215,10 @@ const App = () => (
             <Route path="/client/invoices" element={<Invoices />} />
             <Route path="/client/invites" element={<PatientAccessManagement />} />
             <Route path="/patient/rewards" element={<MyRewards />} />
-            <Route path="/patient/health-album" element={<Navigate to="/dashboard" replace />} />
             <Route path="/client/tasks" element={<PatientTasks />} />
-            <Route path="/patient/admissions" element={<PatientAdmissions />} />
-            <Route path="/patient/ward-admission/:incidentId" element={<PatientWardAdmission />} />
-            <Route path="/patient/lab-results" element={<PatientLabResults />} />
-            <Route path="/biolog" element={<V2Route><Biolog /></V2Route>} />
-            <Route path="/ask-maeve" element={<V2Route><AskMaeveHome /></V2Route>} />
-            <Route path="/ask-maeve/:sessionId" element={<V2Route><AskMaeveSession /></V2Route>} />
             <Route path="/client/documents" element={<PatientDocuments />} />
-            <Route path="/patient/round-table" element={<PatientRoundTable />} />
             <Route path="/client/details" element={<MyDetails />} />
             <Route path="/sessions/:id" element={<SessionDetail />} />
-            <Route path="/patient/holarchelp/*" element={<HolarcHelpRoutes />} />
-            <Route path="/doctor/holarchelp/*" element={<HolarcHelpRoutes />} />
-            <Route path="/patient/incidents" element={<Navigate to="/patient/holarchelp/incidents" replace />} />
-            <Route path="/doctor/incidents" element={<Navigate to="/doctor/holarchelp/incidents" replace />} />
-            <Route path="/incidents" element={<Navigate to="/patient/holarchelp/incidents" replace />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
 
@@ -296,10 +236,6 @@ const App = () => (
             {/* Doctor routes */}
             <Route path="/clients" element={<Patients />} />
             <Route path="/clients/:id" element={<PatientProfile />} />
-            <Route path="/admissions" element={<DoctorAdmissions />} />
-            <Route path="/biolog" element={<V2Route><Biolog /></V2Route>} />
-            <Route path="/ask-maeve" element={<V2Route><AskMaeveHome /></V2Route>} />
-            <Route path="/ask-maeve/:sessionId" element={<V2Route><AskMaeveSession /></V2Route>} />
             <Route path="/broker/consultations" element={<DoctorSessions />} />
             <Route path="/calendar" element={<CalendarView />} />
             <Route path="/todos" element={<TodoList />} />
@@ -310,16 +246,12 @@ const App = () => (
             <Route path="/my-workspace" element={<MyWorkspace />} />
             <Route path="/messenger" element={<Messenger />} />
             <Route path="/claims" element={<Claims />} />
-            <Route path="/my-shift" element={<MyShiftScreen />} />
             <Route path="/sessions/:id" element={<SessionDetail />} />
-
 
             <Route path="/documents" element={<DoctorDocumentsPage />} />
             <Route path="/my-views" element={<MyViews />} />
-            <Route path="/doctor/round-tables" element={<DoctorRoundTablesPage />} />
             <Route path="/invoices" element={<DoctorInvoices />} />
             <Route path="/business" element={<MyPractice />} />
-            <Route path="/nurse-profile" element={<NurseProfile />} />
             <Route path="/firm-clients" element={<PracticePatients />} />
             <Route path="/doctor/rewards" element={<MyRewards />} />
             <Route path="/referral-partners" element={<ReferralDoctors />} />
@@ -332,28 +264,20 @@ const App = () => (
             <Route path="/referrers" element={<BrokerReferrers />} />
             <Route path="/app-integrations" element={<AppIntegrations />} />
             <Route path="/quotes-screen" element={<QuotesScreen />} />
-            <Route path="/earnings" element={<Navigate to="/practice?tab=earnings" replace />} />
-            
+            <Route path="/earnings" element={<Navigate to="/business?tab=earnings" replace />} />
+
             {/* Admin routes */}
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/pricing" element={<PricingAdmin />} />
-            <Route path="/admin/gamification" element={<GamificationAdmin />} />
             <Route path="/admin/performance" element={<CountryPerformance />} />
             <Route path="/admin/bulk-password-reset" element={<BulkPasswordReset />} />
-            <Route path="/admin/users" element={<HolarcHelpProviders />} />
             <Route path="/admin/wealth-users" element={<WealthUsers />} />
             <Route path="/admin/integrations" element={<IntegrationsAdmin />} />
-            <Route path="/admin/holarchelp-providers" element={<Navigate to="/admin/users" replace />} />
-            <Route path="/admin/holarchelp-accountability" element={<HolarcHelpAccountability />} />
-            <Route path="/admin/holarchelp-providers/:type/:id/incidents" element={<HolarcHelpProviderIncidents />} />
-            
+
             {/* Common routes */}
             <Route path="/settings" element={<Settings />} />
             <Route path="/profile" element={<Profile />} />
           </Route>
-          
-          {/* HolarcHelp provider portal (its own layout, gated by hospital_staff/ambulance_staff role) */}
-          <Route path="/provider/*" element={<ProtectedRoute><ProviderRoutes /></ProtectedRoute>} />
 
           {/* Role-based redirect for /dashboard */}
           <Route path="/dashboard" element={<ProtectedRoute><RoleBasedRedirect /></ProtectedRoute>} />

@@ -51,7 +51,6 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { usePracticeAssistant } from "@/hooks/usePracticeAssistant";
 import { useHospitalAffiliation } from "@/hooks/useHospitalAffiliation";
-import { useNurseWard } from "@/modules/holarchelp/hooks/useNurseWard";
 import { useV2Demo } from "@/hooks/useV2Demo";
 import { useSignatureBackfill } from "@/hooks/useSignatureBackfill";
 
@@ -132,29 +131,6 @@ const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true, tour: "patient-sos" },
 ];
 
-/** Nurses work inside one hospital and one ward, so their menu is limited to
- *  that ward's board, admissions, their shifts and their own profile. */
-const NURSE_SECTIONS: NavSection[] = [
-  {
-    title: "My Work",
-    items: [
-      { icon: LayoutDashboard, label: "Dashboard", labelKey: "nav.nurseDashboard", to: "/provider/hospital/nurse-dashboard" },
-      { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/nurse-profile" },
-      { icon: Clock, label: "My Shifts", labelKey: "nav.myShift", to: "/my-shift" },
-      { icon: History, label: "Activity Log", labelKey: "nav.activityLog", to: "/provider/hospital/activity-log" },
-    ],
-  },
-];
-
-const NURSE_BOTTOM_ITEMS: (NavItem & { tour?: string })[] = [
-  { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true },
-];
-
-const nurseNavItems: (NavItem & { tour?: string })[] = [
-  ...NURSE_SECTIONS.flatMap((s) => s.items),
-  ...NURSE_BOTTOM_ITEMS,
-];
-
 /** Referral Agents only need their own referral pipeline and earnings. */
 const referrerNavItems: (NavItem & { tour?: string })[] = [
   { icon: UserPlus, label: "My Referrals", labelKey: "nav.myReferrals", to: "/referrer-dashboard" },
@@ -210,7 +186,6 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const { isAssistant } = usePracticeAssistant();
   const { hasHospitalAffiliation, loading: affiliationLoading } = useHospitalAffiliation();
   const { v2Demo } = useV2Demo();
-  const { assignment: nurseAssignment } = useNurseWard();
   // Ensures a doctor's typed signature exists as a PNG for outbound email.
   useSignatureBackfill();
 
@@ -234,32 +209,26 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   // "My Profile" (/patient/details) — the route alone must not flip the nav.
   // While the role is still resolving we must NOT fall back to the route-based
   // guess, otherwise a doctor sees the patient nav for one frame.
-  // A user with a hospital nursing roster record is treated as a nurse even if
-  // their account also carries another clinician role.
-  const isNurse = role === "nurse" || !!nurseAssignment;
-  const isDoctor = role === "doctor" && !isNurse;
+  const isDoctor = role === "doctor";
   const routeSaysPatient = isOnPatientRoute && !roleLoading && role !== null;
 
-  /** Doctors and nurses can flip the sidebar between their professional menu
-   *  and their own patient menu with the badge next to the dashboard. Derived
-   *  from the current route (rather than local state) so the active pill
-   *  stays correct even if the sidebar remounts on navigation — local state
-   *  was resetting to "doctor" on every route change, leaving the pill stuck
-   *  showing the wrong side as active. */
+  /** Doctors can flip the sidebar between their professional menu and their
+   *  own patient menu with the badge next to the dashboard. Derived from the
+   *  current route (rather than local state) so the active pill stays correct
+   *  even if the sidebar remounts on navigation — local state was resetting
+   *  to "doctor" on every route change, leaving the pill stuck showing the
+   *  wrong side as active. */
   const isOnMyDashboardRoute = location.pathname.startsWith("/my-dashboard");
   const profileMode: "doctor" | "patient" = (isOnPatientRoute || isOnMyDashboardRoute) ? "patient" : "doctor";
 
   const doctorInPatientMode = isDoctor && profileMode === "patient";
-  const nurseInPatientMode = isNurse && profileMode === "patient";
-  const isNurseMenu = isNurse && !nurseInPatientMode;
 
   const isPatientMenu =
     doctorInPatientMode ||
-    nurseInPatientMode ||
-    (!isDoctor && !isNurse && (isPatient || routeSaysPatient));
+    (!isDoctor && (isPatient || routeSaysPatient));
 
   const isReferrerMenu = role === "referral_agent";
-  const isDoctorMenu = !isOnAdminRoute && !isPatientMenu && !isNurseMenu && !isReferrerMenu && !(isAdmin && isOnAdminRoute);
+  const isDoctorMenu = !isOnAdminRoute && !isPatientMenu && !isReferrerMenu && !(isAdmin && isOnAdminRoute);
 
   /** Doctors only see "My Shifts" once they're attached to a hospital. */
   const hideMyShift = isDoctorMenu && (affiliationLoading || !hasHospitalAffiliation);
@@ -279,9 +248,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 
   const baseNav = isOnAdminRoute && isAdmin
     ? adminNavItems.filter((i) => !isWealthHidden(i.to))
-    : isNurseMenu
-      ? withShiftRule(nurseNavItems)
-      : isReferrerMenu
+    : isReferrerMenu
       ? referrerNavItems
       : isPatientMenu
       ? withShiftRule(patientNavItems).filter((i) => !CLIENT_BLOCKED_PATHS.includes(i.to))
@@ -461,11 +428,11 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     return () => window.removeEventListener("wealth-doc-signed", handler);
   }, [isPatientMenu, refetchPatientDocCount]);
 
-  /** Doctor|Patient (or Nurse|Patient) pill shown next to Dashboard so a
-   *  clinician can switch the sidebar between their professional tools and
-   *  their own patient profile. */
-  const professionalMode = isNurse ? "nurse" : "doctor";
-  const professionalHome = isNurse ? "/provider/hospital/nurse-dashboard" : "/broker-dashboard";
+  /** Doctor|Patient pill shown next to Dashboard so a Wealth Manager can
+   *  switch the sidebar between their professional tools and their own
+   *  client profile. */
+  const professionalMode = "doctor";
+  const professionalHome = "/broker-dashboard";
   const profileToggle = (
     <div className="mx-1 mt-1 flex items-center gap-1 rounded-full bg-muted/60 p-0.5">
       {([professionalMode, "patient"] as const).map((mode) => {
@@ -532,22 +499,10 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 
               </div>
             </>
-          ) : isNurseMenu ? (
-            <>
-              
-              {NURSE_SECTIONS.map((section) => (
-                <div key={section.title} className="space-y-1.5">
-                  {section.items.map((item) => renderNavLink(item))}
-                </div>
-              ))}
-              <div className="space-y-1.5">
-                {withShiftRule(NURSE_BOTTOM_ITEMS).map((item) => renderNavLink(item))}
-              </div>
-            </>
           ) : (
             <div className="space-y-1.5">
 
-              {(doctorInPatientMode || nurseInPatientMode) && (
+              {doctorInPatientMode && (
                 <p className="mx-1 px-3 py-1.5 rounded-md bg-neutral-900 text-2xs font-bold uppercase tracking-[0.14em] text-white">
                   My Profile
                 </p>
@@ -561,7 +516,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         </nav>
 
         {/* Customise menu — doctors only */}
-        {!loading && !isPatientMenu && !isNurseMenu && !isOnAdminRoute && (
+        {!loading && !isPatientMenu && !isOnAdminRoute && (
           <div className="px-4 pb-1">
             <Popover>
               <PopoverTrigger asChild>

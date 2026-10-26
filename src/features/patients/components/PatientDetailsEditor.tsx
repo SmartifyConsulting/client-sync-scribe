@@ -114,8 +114,6 @@ const SessionHistoryTableLazy = lazy(() =>
 );
 const PatientDashboardLazy = lazy(() => import("@/pages/patient/PatientDashboard"));
 const PatientTasksLazy = lazy(() => import("@/pages/patient/PatientTasks"));
-const AdmissionsViewLazy = lazy(() => import("@/features/sessions/admissions/AdmissionsView").then(m => ({ default: m.AdmissionsView })));
-const PatientIncidentHistoryLazy = lazy(() => import("@/components/holarchelp/PatientIncidentHistory"));
 
 interface PatientDetailsEditorProps {
   patient: Patient;

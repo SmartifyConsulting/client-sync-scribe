@@ -29,10 +29,12 @@ export const CLIENT_TERMS = {
  */
 export const WEALTH_HIDDEN_MODULES = [
   "/doctor/holarchelp", "/patient/holarchelp", "/holarchelp", "/provider/hospital", "/provider/ambulance",
-  "/admissions", "/patient/admissions", "/patient/ward", "/my-shift", "/nurse-profile",
+  "/admissions", "/patient/admissions", "/patient/ward-admission", "/my-shift", "/nurse-profile",
   "/prescriptions", "/patient/prescriptions", "/patient/lab-results", "/lab-results",
   "/biolog", "/patient/rewards", "/doctor/rewards", "/vula", "/admin/gamification", "/ask-maeve",
   "/doctor/round-tables", "/patient/round-table", "/patient/health-album",
+  "/provider", "/admin/users", "/admin/holarchelp-providers", "/admin/holarchelp-accountability",
+  "/provider-signup", "/admin/provider-approval",
 ];
 
 export const isWealthHidden = (path: string) =>

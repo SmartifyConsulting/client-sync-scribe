@@ -63,7 +63,6 @@ import { DocumentsBrowser } from "@/features/documents/components/DocumentsBrows
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
 import { RequestConnectionButton } from "@/components/patients/RequestConnectionButton";
 import { RoundTable } from "@/components/patients/RoundTable";
-import { AdmissionsView } from "@/components/admissions/AdmissionsView";
 import { LollipopDisplay } from "@/components/gamification/LollipopDisplay"; // Vula display
 import { useTemplates } from "@/hooks/useTemplates";
 import { useDocuments, Document as DocumentRecord } from "@/hooks/useDocuments";
@@ -480,15 +479,6 @@ export default function PatientProfile() {
               )}
             </>
           )}
-        </TabsContent>
-
-        <TabsContent value="admissions" className="space-y-4">
-          <AdmissionsView
-            patientId={patient.id}
-            patientHeight={(patient as any).height_cm}
-            patientWeight={(patient as any).weight_kg}
-            canEdit={true}
-          />
         </TabsContent>
 
         {/* Doctors Tab */}
