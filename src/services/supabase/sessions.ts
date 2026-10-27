@@ -9,7 +9,7 @@ export type SessionRow = Database["public"]["Tables"]["sessions"]["Row"];
 export type SessionInsert = Database["public"]["Tables"]["sessions"]["Insert"];
 export type SessionUpdate = Database["public"]["Tables"]["sessions"]["Update"];
 
-const WITH_PATIENT = `*, patient:patients(id, name)` as const;
+const WITH_PATIENT = `*, patient:clients(id, name)` as const;
 
 export async function listSessions(patientId?: string) {
   let query = supabase

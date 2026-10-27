@@ -34,7 +34,7 @@ export function WealthRoleOverview() {
         return { mode: "insurer" as const, apps: (apps ?? []) as unknown as App[] };
       }
       const { data: wfs } = await supabase.from("wealth_workflows" as any)
-        .select("id,current_stage,status,patient_id,patients(name)").in("status", ["active", "blocked"]);
+        .select("id,current_stage,status,patient_id,patients:clients(name)").in("status", ["active", "blocked"]);
       return { mode: firm ? ("fsp" as const) : ("wm" as const), firm: firm?.name, wfs: (wfs ?? []) as unknown as Wf[] };
     },
   });

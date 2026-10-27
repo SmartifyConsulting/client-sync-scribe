@@ -211,7 +211,7 @@ export default function TodoList() {
       // Practice Management Assistant or a practice colleague).
       const { data, error } = await supabase
         .from('todos')
-        .select('*, patients(name)')
+        .select('*, patients:clients(name)')
         .or(`assignee.eq.doctor,assigned_to_user_id.eq.${user?.id ?? '00000000-0000-0000-0000-000000000000'}`)
         .order('created_at', { ascending: false });
 
@@ -408,7 +408,7 @@ export default function TodoList() {
         priority: todo.priority,
         patient_id: todo.patient_id ?? null,
         status: 'pending',
-      }).select('*, patients(name)').single();
+      }).select('*, patients:clients(name)').single();
       if (error) throw error;
       setTodos([{ ...(data as any), completed: false, patient_name: (data as any).patients?.name || null, is_auto_executed: false, task_type: (data as any).task_type || 'standard' }, ...todos]);
       toast({ title: "Action duplicated" });

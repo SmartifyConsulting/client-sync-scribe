@@ -28,7 +28,7 @@ export function useGenerateWmActionItems() {
 
     (async () => {
       const { data: wfs } = await supabase.from("wealth_workflows" as any)
-        .select("id,current_stage,status,patient_id,patients(name)")
+        .select("id,current_stage,status,patient_id,patients:clients(name)")
         .in("status", ["active", "blocked"]);
       if (cancelled || !wfs?.length) return;
 

@@ -133,7 +133,7 @@ export default function MySessions() {
 
       let q = supabase
         .from("sessions")
-        .select("id, title, status, started_at, duration_minutes, user_id, patient:patients(id, name)")
+        .select("id, title, status, started_at, duration_minutes, user_id, patient:clients(id, name)")
         .neq("status", "paused")
         .order("started_at", { ascending: false })
         .limit(500);

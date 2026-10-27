@@ -39,7 +39,7 @@ export default function ExpiringRecordings() {
 
       const { data, error } = await supabase
         .from("sessions")
-        .select("id, started_at, audio_url, transcript, patient_id, title, patients(name)")
+        .select("id, started_at, audio_url, transcript, patient_id, title, patients:clients(name)")
         .eq("user_id", user.id)
         .not("audio_url", "is", null)
         .gte("started_at", sevenDaysAgo.toISOString())

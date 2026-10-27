@@ -102,7 +102,7 @@ export function useSessions(patientId?: string) {
         .from('sessions')
         .select(`
           *,
-          patient:patients(id, name, allergies, current_medications, conditions_diagnoses)
+          patient:clients(id, name, allergies, current_medications, conditions_diagnoses)
         `)
         // Paused drafts are resumable work-in-progress, never session history.
         .neq('status', 'paused')
@@ -144,7 +144,7 @@ export function useSessions(patientId?: string) {
         })
         .select(`
           *,
-          patient:patients(id, name)
+          patient:clients(id, name)
         `)
         .single();
 
@@ -173,7 +173,7 @@ export function useSessions(patientId?: string) {
         .eq('id', id)
         .select(`
           *,
-          patient:patients(id, name)
+          patient:clients(id, name)
         `)
         .single();
 
@@ -277,7 +277,7 @@ const completeSession = async (
           .from('sessions')
           .update(sessionRecord)
           .eq('id', sessionId)
-          .select(`*, patient:patients(id, name)`)
+          .select(`*, patient:clients(id, name)`)
           .single();
         if (error) throw error;
         resultData = data;
@@ -286,7 +286,7 @@ const completeSession = async (
         const { data, error } = await supabase
           .from('sessions')
           .insert(sessionRecord)
-          .select(`*, patient:patients(id, name)`)
+          .select(`*, patient:clients(id, name)`)
           .single();
         if (error) throw error;
         resultData = data;
@@ -1254,7 +1254,7 @@ export function useSession(id: string) {
           .from('sessions')
           .select(`
             *,
-            patient:patients(id, name, allergies, current_medications, conditions_diagnoses)
+            patient:clients(id, name, allergies, current_medications, conditions_diagnoses)
           `)
           .eq('id', id)
           .maybeSingle();
