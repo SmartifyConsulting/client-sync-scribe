@@ -225,7 +225,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
     for (const doc of filteredDocuments) {
       const key =
         groupBy === "patient"
-          ? doc.patient_name || "No patient"
+          ? doc.patient_name || "No client"
           : doc.template_name || "Custom";
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(doc);
@@ -240,7 +240,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
   const patientGroups = (items: Document[]): [string, Document[]][] => {
     const map = new Map<string, Document[]>();
     for (const doc of items) {
-      const key = doc.patient_name || "No patient";
+      const key = doc.patient_name || "No client";
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(doc);
     }
@@ -255,7 +255,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-foreground truncate">{doc.name}</p>
         <p className="text-sm text-muted-foreground">
-          {doc.patient_name || "No patient"} · {formatDate(doc.created_at)} ·{" "}
+          {doc.patient_name || "No client"} · {formatDate(doc.created_at)} ·{" "}
           <span className="text-primary/70">{doc.template_name || "Custom"}</span>
         </p>
       </div>
@@ -1169,7 +1169,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
               />
             </div>
             {shareDocument?.patient_name && (
-              <p className="text-sm text-muted-foreground">Patient: {shareDocument.patient_name}</p>
+              <p className="text-sm text-muted-foreground">Client: {shareDocument.patient_name}</p>
             )}
           </div>
           <DialogFooter>
@@ -1314,7 +1314,7 @@ function DocumentPreviewWithLetterhead({
   return (
     <DocumentPreview
       title={document.name}
-      subtitle={document.patient_name ? `Patient: ${document.patient_name}` : undefined}
+      subtitle={document.patient_name ? `Client: ${document.patient_name}` : undefined}
       content={resolving ? document.content : resolvedContent}
       logoUrl={profile?.logo_url || undefined}
       fontFamily={headerFooter?.font_family || undefined}

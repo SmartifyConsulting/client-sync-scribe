@@ -92,7 +92,7 @@ const handler = async (req: Request): Promise<Response> => {
       // Link patient record if not already linked
       if (patientId) {
         await supabaseAdmin
-          .from('patients')
+          .from('clients')
           .update({ patient_user_id: existingUser.id })
           .eq('id', patientId)
           .is('patient_user_id', null);
@@ -120,7 +120,7 @@ const handler = async (req: Request): Promise<Response> => {
         user_id: existingUser.id,
         type: 'connection',
         title: `${doctorName} has connected with you`,
-        description: `${doctorName} from ${practiceName} has added you as a patient. You can now view your sessions and documents.`,
+        description: `${doctorName} from ${practiceName} has added you as a client. You can now view your sessions and documents.`,
       });
 
       // Send a "connected" email (not "Create Account")
@@ -144,10 +144,10 @@ const handler = async (req: Request): Promise<Response> => {
                   <ul style="padding-left: 20px;">
                     <li>View your appointment calendar</li>
                     <li>Access your consultation summaries</li>
-                    <li>Review prescriptions and documents</li>
+                    <li>Review your policy documents and claims</li>
                   </ul>
                   <div style="text-align: center; margin: 30px 0;">
-                    <a href="${appUrl}/patient/dashboard" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block; font-size: 16px;">
+                    <a href="${appUrl}/my-dashboard" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block; font-size: 16px;">
                       View Dashboard
                     </a>
                   </div>
@@ -210,7 +210,7 @@ const handler = async (req: Request): Promise<Response> => {
               <p>With Holarc Wealth, you can:</p>
               <ul style="padding-left: 20px;">
                 <li>View your appointment calendar</li>
-                <li>Access your prescription history</li>
+                <li>Access your policy documents and claims</li>
                 <li>Review consultation summaries</li>
                 <li>Manage your financial information securely</li>
               </ul>

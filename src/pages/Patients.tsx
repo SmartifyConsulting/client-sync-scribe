@@ -176,8 +176,8 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
           patientEmail: newPatient.email,
           patientName: newPatient.name,
           patientId: null,
-          doctorName: profile?.full_name || "Your Doctor",
-          practiceName: profile?.practice_address || "Medical Practice",
+          doctorName: profile?.full_name || "Your Wealth Manager",
+          practiceName: profile?.practice_address || "Your Firm",
         },
       });
       if (error) throw error;
@@ -709,7 +709,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
 
                 <Button onClick={handleCreatePatient} className="w-full" disabled={creating}>
                   {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Add New Patient
+                  Add New Client
                 </Button>
               </div>
             </ScrollArea>
