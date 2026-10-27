@@ -14,7 +14,6 @@ import {
   Wallet as Pill,
   Receipt,
   FileText,
-  FileBadge,
   FileEdit,
   PenTool,
   Landmark as Hospital,
@@ -31,7 +30,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmissionEditor";
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
-import { MedicalCertificateEditor } from "@/components/sessions/MedicalCertificateEditor";
 import { ReferralLetterEditor } from "@/components/sessions/ReferralLetterEditor";
 import { GeneralLetterEditor } from "@/components/sessions/GeneralLetterEditor";
 import { DrawingPad } from "@/components/drawings/DrawingPad";
@@ -100,7 +98,6 @@ export default function SessionDetail() {
   const { isAdmin } = useIsAdmin();
   const [showPrescriptionEditor, setShowPrescriptionEditor] = useState(false);
   const [showInvoiceEditor, setShowInvoiceEditor] = useState(false);
-  const [showMedicalCertificateEditor, setShowMedicalCertificateEditor] = useState(false);
   const [showReferralLetterEditor, setShowReferralLetterEditor] = useState(false);
   const [showGeneralLetterEditor, setShowGeneralLetterEditor] = useState(false);
   const [showDrawingPad, setShowDrawingPad] = useState(false);
@@ -446,7 +443,6 @@ export default function SessionDetail() {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuItem onSelect={() => setShowPrescriptionEditor(true)}><Pill className="mr-2 h-4 w-4" />Prescription</DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setShowInvoiceEditor(true)}><Receipt className="mr-2 h-4 w-4" />Fee statement</DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setShowMedicalCertificateEditor(true)}><FileBadge className="mr-2 h-4 w-4" />Advice Letter</DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setShowReferralLetterEditor(true)}><FileText className="mr-2 h-4 w-4" />Referral Letter</DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setShowGeneralLetterEditor(true)}><FileEdit className="mr-2 h-4 w-4" />General Letter</DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setShowDrawingPad(true)}><PenTool className="mr-2 h-4 w-4" />Drawing Pad</DropdownMenuItem>
@@ -660,22 +656,6 @@ export default function SessionDetail() {
             toast({
               title: "Fee statement created",
               description: `Invoice #${invoice.invoice_number} has been created.`,
-            });
-          }}
-        />
-      )}
-
-      {/* Medical Certificate Editor Modal */}
-      {showMedicalCertificateEditor && session.patient && (
-        <MedicalCertificateEditor
-          patientId={session.patient_id}
-          patientName={session.patient.name}
-          sessionId={id}
-          onClose={() => setShowMedicalCertificateEditor(false)}
-          onSave={() => {
-            toast({
-              title: "Advice Letter created",
-              description: "The advice letter has been saved.",
             });
           }}
         />

@@ -51,10 +51,10 @@ export function DoctorProfileDialog({
             <Avatar className="h-8 w-8">
               <AvatarImage src={doctor?.avatar_url || undefined} />
               <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                {doctor?.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "DR"}
+                {doctor?.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "WM"}
               </AvatarFallback>
             </Avatar>
-            <span>{doctor?.full_name || "Doctor"}</span>
+            <span>{doctor?.full_name || "Wealth Manager"}</span>
           </DialogTitle>
         </DialogHeader>
         {isLoading ? (
