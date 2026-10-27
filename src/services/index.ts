@@ -12,7 +12,6 @@ export * as invoicesService from "./supabase/invoices";
 export * as prescriptionsService from "./supabase/prescriptions";
 export * as profilesService from "./supabase/profiles";
 export * as appointmentsService from "./supabase/appointments";
-export * as rewardsService from "./supabase/rewards";
 export * as admissionsService from "./supabase/admissions";
 export * as notificationsService from "./supabase/notifications";
 export * as practiceService from "./supabase/practice";

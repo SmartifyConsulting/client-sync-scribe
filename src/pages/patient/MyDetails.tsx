@@ -6,7 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
 import { Patient } from "@/hooks/usePatients";
 import { useToast } from "@/hooks/use-toast";
-import { useMyRewards } from "@/hooks/usePatientRewards";
 import { EmergencyContact } from "@/features/patients/components/EmergencyContactsSection";
 
 
@@ -26,7 +25,6 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
   const [userId, setUserId] = useState<string>("");
   const [emergencyContacts, setEmergencyContacts] = useState<EmergencyContact[]>([]);
   const { toast } = useToast();
-  const { lollipopCount, loading: rewardsLoading } = useMyRewards();
   const lastSavedToastRef = useRef<number>(0);
 
   useEffect(() => {
@@ -225,8 +223,6 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
           userId={userId}
           emergencyContacts={emergencyContacts}
           onEmergencyContactsChange={setEmergencyContacts}
-          lollipopCount={lollipopCount}
-          rewardsLoading={rewardsLoading}
           section={section}
         />
       ) : (

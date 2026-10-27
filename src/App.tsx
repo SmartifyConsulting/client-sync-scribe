@@ -52,7 +52,6 @@ import PatientDashboard from "./pages/patient/PatientDashboard";
 import PatientCalendar from "./pages/patient/PatientCalendar";
 import Invoices from "./pages/patient/Invoices";
 import PatientAccessManagement from "./pages/patient/PatientAccessManagement";
-import MyRewards from "./pages/patient/MyRewards";
 import MyDoctors from "./pages/patient/MyDoctors";
 import PatientTasks from "./pages/patient/PatientTasks";
 import PatientDocuments from "./pages/patient/PatientDocuments";
@@ -212,7 +211,6 @@ const App = () => (
             <Route path="/client/calendar" element={<PatientCalendar />} />
             <Route path="/client/invoices" element={<Invoices />} />
             <Route path="/client/invites" element={<PatientAccessManagement />} />
-            <Route path="/patient/rewards" element={<MyRewards />} />
             <Route path="/client/tasks" element={<PatientTasks />} />
             <Route path="/client/documents" element={<PatientDocuments />} />
             <Route path="/client/details" element={<MyDetails />} />
@@ -251,7 +249,6 @@ const App = () => (
             <Route path="/invoices" element={<DoctorInvoices />} />
             <Route path="/business" element={<MyPractice />} />
             <Route path="/firm-clients" element={<PracticePatients />} />
-            <Route path="/doctor/rewards" element={<MyRewards />} />
             <Route path="/referral-partners" element={<ReferralDoctors />} />
             <Route path="/cpd-certificates" element={<Navigate to="/profile" replace />} />
             <Route path="/expiring-recordings" element={<ExpiringRecordings />} />

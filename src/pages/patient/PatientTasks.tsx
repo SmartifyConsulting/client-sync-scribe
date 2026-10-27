@@ -498,19 +498,8 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
           .eq("id", todo.id);
         if (updateError) throw updateError;
 
-        if (todo.vulas_reward > 0) {
-          await supabase.from("patient_rewards").insert({
-            patient_id: todo.patient_id,
-            awarded_by: user.id,
-            lollipops_count: todo.vulas_reward,
-            visit_category: "Task Completion",
-            reward_type: "task_proof",
-          });
-        }
-
-        toast({ title: "✅ Action verified!", description: `AI confirmed your proof. +${todo.vulas_reward} Vulas earned!` });
+        toast({ title: "✅ Action verified!", description: "AI confirmed your proof." });
         handleCloseRecording();
-        queryClient.invalidateQueries({ queryKey: ["my-rewards"] });
         onComplete();
       } else {
         setRecordedBlob(null);

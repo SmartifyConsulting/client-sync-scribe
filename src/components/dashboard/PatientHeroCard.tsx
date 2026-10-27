@@ -3,12 +3,10 @@ import { format } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import { Camera, Loader2 } from "lucide-react";
 
-import vulaVouchersLogo from "@/assets/vula-vouchers-logo.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { useMyRewards } from "@/hooks/usePatientRewards";
 import { useToast } from "@/hooks/use-toast";
 
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
@@ -69,7 +67,6 @@ export function PatientHeroCard({
   const { user } = useAuth();
   const { profile, loading: profileLoading } = useProfile();
   const { toast } = useToast();
-  const { lollipopCount, loading: rewardsLoading } = useMyRewards();
 
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -204,26 +201,7 @@ export function PatientHeroCard({
           {action && <div className="mt-3">{action}</div>}
         </div>
 
-        {false && !rewardsLoading && (
-          <div className="hidden lg:flex shrink-0 items-center gap-3 ml-auto rounded-xl bg-background/70 border border-border px-4 py-2">
-            <img src={vulaVouchersLogo} alt="Vulas" className="h-[52px] w-auto object-contain" />
-            <span className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-primary bg-clip-text text-transparent">
-              <AnimatedCounter target={lollipopCount || 0} />
-            </span>
-          </div>
-        )}
       </div>
-
-      {false && !rewardsLoading && (
-        <div className="mt-3 border-t border-border pt-3 lg:hidden">
-          <div className="flex items-center justify-center gap-2">
-            <img src={vulaVouchersLogo} alt="Vulas" className="h-[52px] w-auto object-contain" />
-            <span className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-primary bg-clip-text text-transparent">
-              <AnimatedCounter target={lollipopCount || 0} />
-            </span>
-          </div>
-        </div>
-      )}
     </section>
   );
 }

@@ -48,7 +48,6 @@ import { Copy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { logProfileView } from "@/lib/logProfileView";
 import { useSessions } from "@/hooks/useSessions";
-import { usePatientRewards } from "@/hooks/usePatientRewards";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCard } from "@/components/patients/SessionCard";
@@ -61,7 +60,6 @@ import { DocumentsBrowser } from "@/features/documents/components/DocumentsBrows
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
 import { RequestConnectionButton } from "@/components/patients/RequestConnectionButton";
 import { RoundTable } from "@/components/patients/RoundTable";
-import { LollipopDisplay } from "@/components/gamification/LollipopDisplay"; // Vula display
 import { useTemplates } from "@/hooks/useTemplates";
 import { useDocuments, Document as DocumentRecord } from "@/hooks/useDocuments";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
@@ -83,7 +81,6 @@ export default function PatientProfile() {
   const { toast } = useToast();
   const { patient, loading: patientLoading, updatePatient } = usePatient(id || "");
   const { sessions, loading: sessionsLoading } = useSessions(id);
-  const { lollipopCount } = usePatientRewards(id);
   const { templates, loading: templatesLoading } = useTemplates();
   const { documents, loading: documentsLoading, fetchDocuments, updateDocument } = useDocuments(id);
   const { user } = useAuth();

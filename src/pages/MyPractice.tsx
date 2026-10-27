@@ -32,7 +32,6 @@ import {
 } from "lucide-react";
 
 import ReferralDoctors from "@/pages/ReferralDoctors";
-import MyRewards from "@/pages/patient/MyRewards";
 import { ComplianceForms } from "@/features/wealth-workflow/forms/ComplianceForms";
 import { TargetsCommission } from "@/features/wealth-workflow/TargetsCommission";
 
@@ -1754,11 +1753,6 @@ export default function MyPractice() {
         {/* === EARNINGS TAB === */}
         <TabsContent value="earnings" className="mt-4 my-practice-tab-body">
           <TargetsCommission />
-        </TabsContent>
-
-        {/* === REWARDS TAB === */}
-        <TabsContent value="rewards" className="mt-4 my-practice-tab-body">
-          <MyRewards embedded />
         </TabsContent>
 
       </Tabs>

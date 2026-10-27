@@ -1,6 +1,6 @@
 import { WorkflowStatusCard } from "@/features/wealth-workflow/WorkflowStatusCard";
 import { useState, useEffect } from "react";
-import { Loader2, Sparkles, Wallet as Pill, LineChart as HeartPulse, RefreshCw, TrendingUp as Activity, AlertTriangle, Check, X, ChevronDown, ChevronRight, Flame, PartyPopper, Droplets, ShieldAlert, Phone, Mail } from "lucide-react";
+import { Loader2, Sparkles, Wallet as Pill, LineChart as HeartPulse, RefreshCw, TrendingUp as Activity, AlertTriangle, Check, X, ChevronDown, ChevronRight, Droplets, ShieldAlert, Phone, Mail } from "lucide-react";
 import { DiscPersonalityCard } from "@/features/patients/components/DiscPersonalityCard";
 import { useV2Demo } from "@/hooks/useV2Demo";
 import { RelationshipInsightCard } from "@/features/patients/components/RelationshipInsightCard";
@@ -10,7 +10,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { Session } from "@/hooks/useSessions";
-import { medicationSyncBus } from "@/lib/utils";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -94,159 +93,6 @@ interface SummaryData {
   conditions: ConditionItem[];
   allergies: AllergyItem[];
   conflicts: MedicationConflict[];
-}
-
-function ChronicAdherenceSection({ patientId, patientName }: { patientId: string; patientName: string }) {
-  const { toast } = useToast();
-  const [adherenceData, setAdherenceData] = useState<{ prescription: string; streak: number }[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [congratulating, setCongratulating] = useState(false);
-
-  const fetchAdherence = async () => {
-    setLoading(true);
-    try {
-      const { data: prescriptions } = await supabase
-        .from("prescriptions")
-        .select("id, medication")
-        .eq("patient_id", patientId)
-        .eq("status", "active");
-      if (!prescriptions || prescriptions.length === 0) { setAdherenceData([]); setLoading(false); return; }
-
-      const { data: adherence } = await supabase
-        .from("medication_adherence")
-        .select("prescription_id, scheduled_date, status")
-        .eq("patient_id", patientId)
-        .eq("status", "completed")
-        .order("scheduled_date", { ascending: false });
-
-      const streaks = prescriptions.map((rx) => {
-        const records = (adherence || [])
-          .filter((a) => a.prescription_id === rx.id)
-          .sort((a, b) => b.scheduled_date.localeCompare(a.scheduled_date));
-        let streak = 0;
-        const today = new Date();
-        let checkDate = today;
-        for (let i = 0; i < 365; i++) {
-          const dateStr = checkDate.toISOString().split("T")[0];
-          if (records.some((r) => r.scheduled_date === dateStr)) {
-            streak++;
-            checkDate = new Date(checkDate.getTime() - 86400000);
-          } else break;
-        }
-        return { prescription: rx.medication, streak };
-      });
-      setAdherenceData(streaks);
-    } catch (err) {
-      console.error(err);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchAdherence();
-  }, [patientId]);
-
-  // Refresh when medications are updated anywhere in the app
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const detail = (e as CustomEvent).detail as { patientId?: string } | undefined;
-      if (!detail?.patientId || detail.patientId === patientId) fetchAdherence();
-    };
-    medicationSyncBus.addEventListener("medications-updated", handler);
-    return () => medicationSyncBus.removeEventListener("medications-updated", handler);
-  }, [patientId]);
-
-  const maxStreak = Math.max(0, ...adherenceData.map((d) => d.streak));
-
-  const handleCongratulate = async () => {
-    setCongratulating(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      // Insert congratulation record
-      await supabase.from("doctor_congratulations").insert({
-        doctor_id: user.id,
-        patient_id: patientId,
-        streak_type: "medication_adherence",
-        streak_count: maxStreak,
-      });
-
-      // Award 250 Vulas to patient
-      await supabase.from("patient_rewards").insert({
-        patient_id: patientId,
-        awarded_by: user.id,
-        lollipops_count: 250,
-        visit_category: "Acknowledgement of Achievement",
-        reward_type: "congratulation",
-      });
-
-      // Notify patient
-      const { data: patientData } = await supabase
-        .from("clients")
-        .select("patient_user_id")
-        .eq("id", patientId)
-        .maybeSingle();
-      if (patientData?.patient_user_id) {
-        await supabase.from("notifications").insert({
-          user_id: patientData.patient_user_id,
-          title: "🎉 Your Wealth Manager Congratulated You!",
-          description: `Your doctor congratulated you on your ${maxStreak}-day medication streak! You earned 250 Vulas!`,
-          type: "congratulation",
-          reference_id: patientId,
-        });
-      }
-
-      toast({
-        title: "🎉 Congratulations Sent!",
-        description: `${patientName} received 250 Vulas for their ${maxStreak}-day streak. You also earned 250 Vulas!`,
-      });
-    } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    }
-    setCongratulating(false);
-  };
-
-  return (
-    <div className="rounded-xl border border-terracotta/30 bg-terracotta/5 px-2 py-1.5 space-y-1">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 min-w-0">
-          <Pill className="h-3.5 w-3.5 text-terracotta shrink-0" />
-          <span className="text-xs font-bold text-foreground truncate">Chronic Medication Patient</span>
-          <Badge className="bg-terracotta/10 text-terracotta border-terracotta/30 text-2xs px-1.5 py-0">
-            Chronic
-          </Badge>
-        </div>
-        {maxStreak >= 7 && (
-          <Button
-            onClick={handleCongratulate}
-            disabled={congratulating}
-            size="sm"
-            className="h-6 gap-1 px-2 text-2xs bg-primary hover:bg-primary-dark"
-          >
-            {congratulating ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
-            ) : (
-              <PartyPopper className="h-3 w-3" />
-            )}
-            Congratulate (+250 Ⓜ)
-          </Button>
-        )}
-      </div>
-      {!loading && adherenceData.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {adherenceData.map((d, i) => (
-            <div key={i} className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-card border border-border">
-              <Flame className={`h-3 w-3 ${d.streak >= 7 ? "text-orange-500" : "text-muted-foreground"}`} />
-              <span className="text-2xs font-medium">{d.prescription}</span>
-              <span className="text-2xs font-bold text-foreground">{d.streak}d</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-
 }
 
 function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientOverviewProps) {
@@ -799,11 +645,6 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
           </span>
         </div>
       </div>
-
-      {/* Chronic Medication Badge + Adherence Streak */}
-      {patient.is_chronic && (
-        <ChronicAdherenceSection patientId={patient.id} patientName={patient.name} />
-      )}
 
       {/* Conflicting Medication Alert */}
       {summaryData.conflicts && summaryData.conflicts.length > 0 && (

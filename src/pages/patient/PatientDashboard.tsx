@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Calendar, FileText, Clock, User, Loader2, Wallet as Pill, ListChecks, ArrowRight, Info, Sparkles, Building2, Receipt, Star, Camera, Trophy, Heart, Mic } from "lucide-react";
+import { Calendar, FileText, Clock, User, Loader2, ListChecks, ArrowRight, Info, Sparkles, Building2, Receipt, Star, Trophy, Heart, Mic } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { useMyRewards } from "@/hooks/usePatientRewards";
 import { supabase } from "@/integrations/supabase/client";
 import { format, parseISO, isFuture } from "date-fns";
 import { Link } from "react-router-dom";
@@ -64,7 +63,6 @@ export default function PatientDashboard() {
   const { user } = useAuth();
   const { profile } = useProfile();
   const queryClient = useQueryClient();
-  const { lollipopCount, loading: rewardsLoading } = useMyRewards();
 
   // Fetch patient record
   const { data: patientRecord } = useQuery({
@@ -400,55 +398,6 @@ export default function PatientDashboard() {
             )}
           </CardContent>
         </Card>
-      </div>
-
-      {/* Row 2: Vulas Balance */}
-      <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2'}`}>
-        {false && (<Link to="/patient/rewards">
-          <Card className="h-full border-primary hover:shadow-lg transition-all cursor-pointer">
-            <CardContent className="flex items-center gap-4 p-5">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary shrink-0">
-                <Trophy className="h-7 w-7 text-primary-foreground" />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t("patientDashboard.vulaLabel")}</p>
-                <p className="text-2xl font-bold text-foreground">{lollipopCount}</p>
-              </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground" />
-            </CardContent>
-          </Card>
-        </Link>)}
-
-
-        {!isMobile && (
-          <Card className="border-primary/10 bg-gradient-to-br from-primary/3 to-card">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <Trophy className="h-4 w-4 text-primary" />
-                {t("patientDashboard.earnVulasTitle")}
-              </CardTitle>
-              <CardDescription className="text-xs">{t("patientDashboard.earnVulasDescription")}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {[
-                  { icon: Pill, text: t("patientDashboard.tip1"), link: "/patient/prescriptions" },
-                  { icon: ListChecks, text: t("patientDashboard.tip2"), link: "/client/tasks" },
-                  { icon: Camera, text: t("patientDashboard.tip3"), link: "/patient/health-album" },
-                  { icon: Calendar, text: t("patientDashboard.tip4"), link: "/client/calendar" },
-                ].map((tip, i) => (
-                  <Link key={i} to={tip.link} className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-primary/5 transition-colors group">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary shrink-0">
-                      <tip.icon className="h-3.5 w-3.5 text-primary" />
-                    </div>
-                    <p className="text-sm text-foreground group-hover:text-primary transition-colors">{tip.text}</p>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </Link>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
 
       {/* Row 3: Recent Claims + Documentation (hidden on mobile) */}

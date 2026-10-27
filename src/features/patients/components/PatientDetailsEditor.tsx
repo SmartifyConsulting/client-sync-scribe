@@ -6,7 +6,6 @@ import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react"
 import { useTranslation } from "react-i18next";
 import { LANGUAGES } from "@/lib/languages";
 import { PatientSessionRecorder } from "@/features/patients/components/PatientSessionRecorder";
-import { DailyMedsInline } from "@/features/patients/components/DailyMedsInline";
 import { RelationshipProfileExercise } from "@/features/patients/components/RelationshipProfileExercise";
 import { useV2Demo } from "@/hooks/useV2Demo";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -95,7 +94,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { TransactionLogs } from "@/features/wealth-workflow/TransactionLogs";
 import { isValidOptionalEmail } from "@/lib/validation";
 
-import vulaVouchersLogo from "@/assets/vula-vouchers-logo.png";
 
 const PatientDocuments = lazy(() => import("@/pages/patient/PatientDocuments"));
 const ClaimsPage = lazy(() => import("@/pages/Claims"));
@@ -123,8 +121,6 @@ interface PatientDetailsEditorProps {
   userId?: string;
   emergencyContacts?: import("./EmergencyContactsSection").EmergencyContact[];
   onEmergencyContactsChange?: (next: import("./EmergencyContactsSection").EmergencyContact[]) => void;
-  lollipopCount?: number;
-  rewardsLoading?: boolean;
   section?: string;
 }
 
@@ -350,43 +346,6 @@ const formatSurgeryDate = (date: string, precision?: string) => {
   }
 };
 
-function AnimatedCounter({ target }: { target: number }) {
-  const [count, setCount] = useState(target);
-  const rafRef = useRef<number>();
-  const startRef = useRef<number>();
-  const fromRef = useRef<number>(target);
-  const lastTargetRef = useRef<number>(target);
-  useEffect(() => {
-    // Skip if target hasn't actually changed — prevents the double-animation
-    // that happens when lollipopCount arrives in two passes (0 → real value).
-    if (target === lastTargetRef.current && count === target) return;
-    lastTargetRef.current = target;
-    if (target <= 0) {
-      setCount(0);
-      fromRef.current = 0;
-      return;
-    }
-    const from = count;
-    fromRef.current = from;
-    startRef.current = undefined;
-    const duration = 1200;
-    const delta = target - from;
-    const step = (ts: number) => {
-      if (!startRef.current) startRef.current = ts;
-      const progress = Math.min((ts - startRef.current) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.round(from + delta * eased));
-      if (progress < 1) rafRef.current = requestAnimationFrame(step);
-    };
-    rafRef.current = requestAnimationFrame(step);
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [target]);
-  return <span>{count}</span>;
-}
-
 const SECTION_TABS: Record<string, string[]> = {
   health: ["personal", "medical", "healthrecords", "history", "documents", "logs"],
   admin: ["calendar", "tasks", "programmes"],
@@ -403,8 +362,6 @@ export function PatientDetailsEditor({
   userId,
   emergencyContacts,
   onEmergencyContactsChange,
-  lollipopCount = 0,
-  rewardsLoading = false,
   section,
 }: PatientDetailsEditorProps) {
   const { v2Demo } = useV2Demo();
@@ -1460,15 +1417,6 @@ export function PatientDetailsEditor({
               Here's what's happening today, {format(new Date(), "EEEE, MMMM d, yyyy")}
             </p>
           </div>
-          {/* Vulas inline on desktop only (tablet shows below "What's happening") */}
-          {!rewardsLoading && lollipopCount !== undefined && (
-            <div className="hidden lg:flex shrink-0 items-center gap-3 ml-auto">
-              <img src={vulaVouchersLogo} alt="Vulas" className="h-[60px] w-auto object-contain" />
-              <span className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-primary bg-clip-text text-transparent">
-                <AnimatedCounter target={lollipopCount} />
-              </span>
-            </div>
-          )}
         </div>
 
         {/* Row 2: Upcoming Appointments */}
@@ -1508,18 +1456,6 @@ export function PatientDetailsEditor({
             <p className="text-xs text-muted-foreground">No upcoming appointments.</p>
           )}
         </div>
-
-        {/* Row 3: Vulas - mobile + tablet (desktop shows inline above) */}
-        {!rewardsLoading && lollipopCount !== undefined && (
-          <div className="mt-3 border-t border-border pt-3 lg:hidden">
-            <div className="flex items-center justify-center gap-2">
-              <img src={vulaVouchersLogo} alt="Vulas" className="h-[60px] w-auto object-contain" />
-              <span className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-primary bg-clip-text text-transparent">
-                <AnimatedCounter target={lollipopCount} />
-              </span>
-            </div>
-          </div>
-        )}
 
         {/* Row 4: Action Buttons */}
         <div className="mt-3 grid grid-cols-2 gap-3">
@@ -1715,13 +1651,6 @@ export function PatientDetailsEditor({
             {avatarUrl ? <AvatarImage src={avatarUrl} alt={patient.name} /> : null}
             <AvatarFallback className="bg-primary text-primary text-base font-semibold">{initials}</AvatarFallback>
           </Avatar>
-          {/* Vula counter + logo */}
-          <div className="flex-1 min-w-0 flex items-center gap-2">
-            <img src={vulaVouchersLogo} alt="Vulas" className="h-6 w-auto object-contain" />
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-primary bg-clip-text text-transparent">
-              <AnimatedCounter target={lollipopCount} />
-            </span>
-          </div>
         </div>
         {/* Bottom row: calendar/mic + appointments */}
         <div className="flex items-center gap-3 mt-2 pt-2 border-t border-border">

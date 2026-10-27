@@ -314,7 +314,7 @@ Signature: ___________________
             await supabase.from('notifications').insert({
               user_id: patientCheck.patient_user_id,
               title: 'New Chronic Medication Assigned',
-              description: `Your doctor has prescribed chronic medication. Track your daily adherence in My Rewards → Chronic Meds to earn Vulas!`,
+              description: `Your doctor has prescribed chronic medication. Track your daily adherence from your dashboard.`,
               type: 'medication_assigned',
               reference_id: patientId,
             });

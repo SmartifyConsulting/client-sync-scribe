@@ -42,21 +42,10 @@ export function useWeighIns(patientId?: string) {
       });
       if (error) throw error;
 
-      if (vulas > 0) {
-        await db.from("patient_rewards").insert({
-          patient_id: patientId,
-          reward_type: "weight_loss",
-          visit_category: "weigh_in",
-          awarded_by: user?.id,
-          lollipops_count: vulas,
-        });
-      }
-
       return { kgLost, vulas };
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: key });
-      qc.invalidateQueries({ queryKey: ["patient-rewards"] });
     },
   });
 

@@ -1103,59 +1103,6 @@ ${tasksHtml}`;
         }
       }
 
-      // Vula awarding MUST be sequenced last — after every auto-created document above has settled.
-      logger.debug('All auto-documents processed; proceeding to Vula awarding step.');
-      if (visitCategory && patientId) {
-        const { data: configData } = await supabase
-          .from('gamification_config')
-          .select('lollipops_awarded')
-          .eq('visit_category', visitCategory)
-          .eq('is_active', true)
-          .maybeSingle();
-        
-        const lollipopsToAward = configData?.lollipops_awarded || 1;
-
-        const { data: patientData } = await supabase
-          .from('clients')
-          .select('patient_user_id')
-          .eq('id', patientId)
-          .maybeSingle();
-
-        const { data: rewardData, error: rewardError } = await supabase
-          .from('patient_rewards')
-          .insert({
-            patient_id: patientId,
-            session_id: sessionId,
-            reward_type: 'lollipop',
-            visit_category: visitCategory,
-            lollipops_count: lollipopsToAward,
-            awarded_by: user.id,
-          })
-          .select()
-          .single();
-
-        if (rewardError) {
-          console.error('Error awarding vula:', rewardError);
-        } else {
-          logger.debug('Vula awarded for:', visitCategory, 'count:', lollipopsToAward);
-          
-          if (patientData?.patient_user_id) {
-            await supabase.from('notifications').insert({
-              user_id: patientData.patient_user_id,
-              title: `Ⓜ️ You earned ${lollipopsToAward} Vula${lollipopsToAward > 1 ? 's' : ''}!`,
-              description: `Great job! You received ${lollipopsToAward} Vula${lollipopsToAward > 1 ? 's' : ''} for your ${visitCategory}.`,
-              type: 'reward',
-              reference_id: rewardData.id,
-            });
-          }
-
-          toast({ 
-            title: `Ⓜ️ ${lollipopsToAward} Vula${lollipopsToAward > 1 ? 's' : ''} Awarded!`, 
-            description: `Patient earned ${lollipopsToAward} Vula${lollipopsToAward > 1 ? 's' : ''} for their ${visitCategory}` 
-          });
-        }
-      }
-
       // Fire-and-forget: refresh DISC personality profile from the new session content.
       if (patientId) {
         supabase.functions

@@ -8,7 +8,6 @@ import {
   Users,
   Briefcase,
   UserCog,
-  Gift,
   Siren,
   DollarSign,
   Home,
@@ -34,7 +33,6 @@ const patientSections = [
   { icon: FolderOpen, labelKey: "bottomNav.myDesk", section: "admin", to: "/patient/details?section=admin" },
   { icon: Activity, labelKey: "nav.liveWorkspace", section: "workspace", to: "/my-workspace" },
   { icon: FileText, labelKey: "nav.myClaims", section: "claims", to: "/claims" },
-  { icon: Gift, labelKey: "nav.myRewards", section: "rewards", to: "/patient/rewards" },
   { icon: Sparkles, labelKey: "nav.askMaeve", section: "maeve", to: "/ask-maeve", accent: true },
   { icon: Siren, labelKey: "nav.sos", section: "sos", to: "/patient/holarchelp", danger: true },
 ].filter((i) => !isWealthHidden(i.to));
@@ -42,7 +40,6 @@ const patientSections = [
 const adminNavItems = [
   { icon: Users, labelKey: "nav.users", to: "/admin/users" },
   { icon: DollarSign, labelKey: "nav.pricing", to: "/admin/pricing" },
-  { icon: Gift, labelKey: "nav.rewards", to: "/admin/gamification" },
   { icon: Siren, labelKey: "nav.sos", to: "/patient/holarchelp", danger: true },
   { icon: Home, labelKey: "bottomNav.exit", to: "/broker-dashboard" },
 ].filter((i) => !isWealthHidden(i.to));
@@ -166,9 +163,7 @@ export function BottomNav() {
       <div className="flex items-center justify-around px-2 py-2">
         {items.map((item) => {
           const isActive =
-            item.section === "rewards"
-              ? location.pathname === "/patient/rewards"
-              : item.section === "maeve"
+            item.section === "maeve"
               ? location.pathname.startsWith("/ask-maeve")
               : item.section === "workspace"
               ? location.pathname.startsWith("/my-workspace")
