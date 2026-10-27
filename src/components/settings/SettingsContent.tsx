@@ -88,7 +88,7 @@ export function SettingsContent() {
 
   const EMERGENCY_ROLES = ["ambulance_staff", "hospital_staff", "blood_bank"];
   const planType: "doctor" | "patient" | "emergency" =
-    role === "patient" ? "patient" : EMERGENCY_ROLES.includes(role || "") ? "emergency" : "doctor";
+    role === "client" ? "patient" : EMERGENCY_ROLES.includes(role || "") ? "emergency" : "doctor";
 
   const fetchPricing = async () => {
     setLoadingPricing(true);

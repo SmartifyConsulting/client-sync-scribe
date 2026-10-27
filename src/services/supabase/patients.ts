@@ -7,9 +7,9 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
-export type PatientRow = Database["public"]["Tables"]["patients"]["Row"];
-export type PatientInsert = Database["public"]["Tables"]["patients"]["Insert"];
-export type PatientUpdate = Database["public"]["Tables"]["patients"]["Update"];
+export type PatientRow = Database["public"]["Tables"]["clients"]["Row"];
+export type PatientInsert = Database["public"]["Tables"]["clients"]["Insert"];
+export type PatientUpdate = Database["public"]["Tables"]["clients"]["Update"];
 
 export async function listPatients(): Promise<PatientRow[]> {
   const { data, error } = await supabase

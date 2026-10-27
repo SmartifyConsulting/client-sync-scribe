@@ -14,7 +14,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 
 type TeamRole = "broker" | "admin" | "client" | "referral_agent" | "fsp";
 const ROLE_LABEL: Record<TeamRole, string> = {
-  doctor: "Wealth Manager", admin: "Admin", patient: "Client", referral_agent: "Referral Agent", fsp: "FSP",
+  broker: "Wealth Manager", admin: "Admin", client: "Client", referral_agent: "Referral Agent", fsp: "FSP",
 };
 const INVITABLE_ROLES: { value: "referral_agent" | "fsp"; label: string }[] = [
   { value: "referral_agent", label: "Referral Agent" },

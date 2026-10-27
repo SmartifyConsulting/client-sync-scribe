@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import type { Database } from '@/integrations/supabase/types';
 
 export interface Profile {
   id: string;
@@ -11,7 +12,7 @@ export interface Profile {
   logo_url: string | null;
   avatar_url: string | null;
   signature_url: string | null;
-  role: 'doctor' | 'patient' | null;
+  role: Database['public']['Tables']['profiles']['Row']['role'];
   specialty: string | null;
   mobile_number: string | null;
   inactive_threshold_months: number | null;

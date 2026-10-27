@@ -30,9 +30,9 @@ export type Update<T extends keyof Tables> = Tables[T]["Update"];
 /* Core domain rows                                                   */
 /* ------------------------------------------------------------------ */
 
-export type Patient = Row<"patients">;
-export type PatientInsert = Insert<"patients">;
-export type PatientUpdate = Update<"patients">;
+export type Patient = Row<"clients">;
+export type PatientInsert = Insert<"clients">;
+export type PatientUpdate = Update<"clients">;
 
 export type Session = Row<"sessions">;
 export type SessionInsert = Insert<"sessions">;
