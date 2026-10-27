@@ -12,7 +12,7 @@ import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-interface PatientOverviewProps {
+interface ClientOverviewProps {
   patient: {
     id: string;
     name: string;
@@ -92,7 +92,7 @@ interface SummaryData {
   conflicts: MedicationConflict[];
 }
 
-function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientOverviewProps) {
+function PhysicalOverview({ patient, sessions, isSelfService = false }: ClientOverviewProps) {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
@@ -914,7 +914,7 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
 }
 
 
-export function PatientOverview(props: PatientOverviewProps) {
+export function ClientOverview(props: ClientOverviewProps) {
   return (
     <div className="space-y-4">
       <h2 className="text-base font-semibold text-foreground">Financial Health Summary</h2>

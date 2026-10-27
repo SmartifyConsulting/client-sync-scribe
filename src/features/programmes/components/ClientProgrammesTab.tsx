@@ -11,7 +11,7 @@ interface Props {
 }
 
 /** Programme documents (exercise programmes and eating plans) plus weigh-ins. */
-export function PatientProgrammesTab({ patientId, patientName, canManage }: Props) {
+export function ClientProgrammesTab({ patientId, patientName, canManage }: Props) {
   return (
     <div className="grid gap-4 lg:grid-cols-[1fr_280px]">
       <div className="min-w-0">

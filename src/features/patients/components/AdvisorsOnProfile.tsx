@@ -33,7 +33,7 @@ interface DoctorAccess {
   } | null;
 }
 
-interface DoctorsOnProfileProps {
+interface AdvisorsOnProfileProps {
   patientId: string;
   patientName: string;
 }
@@ -45,7 +45,7 @@ const permissionLabels: Record<string, { label: string; icon: React.ComponentTyp
   prescription_history: { label: "Prescriptions", icon: Pill },
 };
 
-export function DoctorsOnProfile({ patientId, patientName }: DoctorsOnProfileProps) {
+export function AdvisorsOnProfile({ patientId, patientName }: AdvisorsOnProfileProps) {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const [doctors, setDoctors] = useState<DoctorAccess[]>([]);

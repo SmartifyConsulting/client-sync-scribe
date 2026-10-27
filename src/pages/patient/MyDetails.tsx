@@ -3,7 +3,7 @@ import { useSearchParams, Navigate, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
+import { ClientDetailsEditor } from "@/components/patients/ClientDetailsEditor";
 import { Patient } from "@/hooks/useClients";
 import { useToast } from "@/hooks/use-toast";
 import { EmergencyContact } from "@/features/patients/components/EmergencyContactsSection";
@@ -215,7 +215,7 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
       </div>}
 
       {patient ? (
-        <PatientDetailsEditor
+        <ClientDetailsEditor
           patient={patient}
           onSave={handleSave}
           isSelfService

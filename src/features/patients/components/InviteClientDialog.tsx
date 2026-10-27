@@ -18,12 +18,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
 import { PermissionTransparencyModal } from "@/components/permissions/PermissionTransparencyModal";
 
-interface InvitePatientDialogProps {
+interface InviteClientDialogProps {
   patientId: string;
   patientName: string;
 }
 
-export function InvitePatientDialog({ patientId, patientName }: InvitePatientDialogProps) {
+export function InviteClientDialog({ patientId, patientName }: InviteClientDialogProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [showTransparency, setShowTransparency] = useState(false);

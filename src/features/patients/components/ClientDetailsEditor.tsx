@@ -1,11 +1,11 @@
 import { HolarcHealthRecords } from "./HolarcHealthRecords";
 import { dobFromSaId } from "@/lib/saId";
-import { PatientProgrammesTab } from "@/features/programmes/components/PatientProgrammesTab";
+import { ClientProgrammesTab } from "@/features/programmes/components/ClientProgrammesTab";
 import { LifeEventsPanel } from "@/features/wealth-workflow/client/LifeEventsPanel";
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { LANGUAGES } from "@/lib/languages";
-import { PatientSessionRecorder } from "@/features/patients/components/PatientSessionRecorder";
+import { ClientSessionRecorder } from "@/features/patients/components/ClientSessionRecorder";
 import { useV2Demo } from "@/hooks/useV2Demo";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn, emitMedicationsUpdated } from "@/lib/utils";
@@ -112,7 +112,7 @@ const SessionHistoryTableLazy = lazy(() =>
 const ClientDashboardLazy = lazy(() => import("@/pages/patient/ClientDashboard"));
 const ClientTasksLazy = lazy(() => import("@/pages/patient/ClientTasks"));
 
-interface PatientDetailsEditorProps {
+interface ClientDetailsEditorProps {
   patient: Patient;
   onSave: (updates: Partial<Patient>) => Promise<any>;
   isSelfService?: boolean;
@@ -353,7 +353,7 @@ const SECTION_TABS: Record<string, string[]> = {
   financial: ["medical"],
 };
 
-export function PatientDetailsEditor({
+export function ClientDetailsEditor({
   patient,
   onSave,
   isSelfService = false,
@@ -362,7 +362,7 @@ export function PatientDetailsEditor({
   emergencyContacts,
   onEmergencyContactsChange,
   section,
-}: PatientDetailsEditorProps) {
+}: ClientDetailsEditorProps) {
   const { v2Demo } = useV2Demo();
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -1861,7 +1861,7 @@ export function PatientDetailsEditor({
                   <h2 className="text-lg font-semibold text-primary-dark">My Consultations</h2>
                   <p className="text-xs text-muted-foreground">Your consultations with your advisers. You can also record meetings with advisers not on Holarc Wealth.</p>
                 </div>
-                <PatientSessionRecorder patientId={patient.id} patientName={patient.name} />
+                <ClientSessionRecorder patientId={patient.id} patientName={patient.name} />
               </TabsContent>
             )}
 
@@ -1887,7 +1887,7 @@ export function PatientDetailsEditor({
 
             {isSelfService && (
               <TabsContent value="programmes" className="mt-4">
-                <PatientProgrammesTab patientId={patient.id} canManage={false} isSelf />
+                <ClientProgrammesTab patientId={patient.id} canManage={false} isSelf />
               </TabsContent>
             )}
 

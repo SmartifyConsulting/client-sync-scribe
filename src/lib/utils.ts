@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 
 /**
  * Lightweight cross-component event bus for medication updates.
- * Components save medications via PatientDetailsEditor, then any view
+ * Components save medications via ClientDetailsEditor, then any view
  * showing prescriptions / adherence / chronic meds can subscribe to
  * `medications-updated` and invalidate its query caches.
  */

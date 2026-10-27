@@ -252,11 +252,11 @@ function parseExcelDate(value: any): string | undefined {
   return undefined;
 }
 
-interface PatientImportProps {
+interface ClientImportProps {
   onImportComplete?: () => void;
 }
 
-export function PatientImport({ onImportComplete }: PatientImportProps) {
+export function ClientImport({ onImportComplete }: ClientImportProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const [isDragging, setIsDragging] = useState(false);
@@ -751,12 +751,12 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
 }
 
 // Dialog wrapper for use in other components
-interface PatientImportDialogProps {
+interface ClientImportDialogProps {
   trigger: React.ReactNode;
   onImportComplete?: () => void;
 }
 
-export function PatientImportDialog({ trigger, onImportComplete }: PatientImportDialogProps) {
+export function ClientImportDialog({ trigger, onImportComplete }: ClientImportDialogProps) {
   const [open, setOpen] = useState(false);
 
   const handleComplete = () => {
@@ -779,7 +779,7 @@ export function PatientImportDialog({ trigger, onImportComplete }: PatientImport
             Import clients from spreadsheets or text notes using AI-powered field detection
           </DialogDescription>
         </DialogHeader>
-        <PatientImport onImportComplete={handleComplete} />
+        <ClientImport onImportComplete={handleComplete} />
       </DialogContent>
     </Dialog>
   );

@@ -2,7 +2,7 @@ import { TransactionLogs } from "@/features/wealth-workflow/TransactionLogs";
 import { ExistingCoverCard } from "@/features/wealth-workflow/client/ExistingCoverCard";
 import { SignedImage } from "@/features/documents/components/SignedImage";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
-import { PatientProgrammesTab } from "@/features/programmes/components/PatientProgrammesTab";
+import { ClientProgrammesTab } from "@/features/programmes/components/ClientProgrammesTab";
 import { WorkflowMap } from "@/features/wealth-workflow/map/WorkflowMap";
 import { LiveWorkspace } from "@/features/wealth-workflow/workspace/LiveWorkspace";
 
@@ -52,12 +52,12 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCard } from "@/components/patients/SessionCard";
 import { SessionHistoryTable } from "@/components/patients/SessionHistoryTable";
-import { PatientOverview } from "@/components/patients/PatientOverview";
-import { InvitePatientDialog } from "@/components/patients/InvitePatientDialog";
+import { ClientOverview } from "@/components/patients/ClientOverview";
+import { InviteClientDialog } from "@/components/patients/InviteClientDialog";
 import { EmoticonSender } from "@/components/patients/EmoticonSender";
-import { DoctorsOnProfile } from "@/components/patients/DoctorsOnProfile";
+import { AdvisorsOnProfile } from "@/components/patients/AdvisorsOnProfile";
 import { DocumentsBrowser } from "@/features/documents/components/DocumentsBrowser";
-import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
+import { ClientDetailsEditor } from "@/components/patients/ClientDetailsEditor";
 import { RequestConnectionButton } from "@/components/patients/RequestConnectionButton";
 import { RoundTable } from "@/components/patients/RoundTable";
 import { useTemplates } from "@/hooks/useTemplates";
@@ -396,7 +396,7 @@ export default function ClientProfile() {
 
         {/* Overview Tab - AI Summary */}
         <TabsContent value="overview">
-          <PatientOverview patient={patient} sessions={sessions} />
+          <ClientOverview patient={patient} sessions={sessions} />
         </TabsContent>
 
         <TabsContent value="workflow">
@@ -478,14 +478,14 @@ export default function ClientProfile() {
         {/* Doctors Tab */}
         <TabsContent value="doctors">
           <div className="rounded-2xl bg-card p-6 shadow-card">
-            <DoctorsOnProfile patientId={patient.id} patientName={patient.name} />
+            <AdvisorsOnProfile patientId={patient.id} patientName={patient.name} />
           </div>
         </TabsContent>
 
         {/* Programmes Tab — eating plan, exercise programme and weigh-ins */}
         <TabsContent value="programmes">
           <div className="rounded-2xl bg-card p-4 shadow-card">
-            <PatientProgrammesTab
+            <ClientProgrammesTab
               patientId={patient.id}
               patientName={patient.name}
               canManage
@@ -756,7 +756,7 @@ export default function ClientProfile() {
         </TabsContent>
 
         <TabsContent value="details">
-          <PatientDetailsEditor patient={patient} onSave={updatePatient} />
+          <ClientDetailsEditor patient={patient} onSave={updatePatient} />
         </TabsContent>
 
         {/* Notes tab removed - notes now in General Notes frame under Details */}

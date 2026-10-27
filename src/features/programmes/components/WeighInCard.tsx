@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Scale } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useWeighIns } from "../usePatientProgrammes";
+import { useWeighIns } from "../useClientProgrammes";
 import { VULA_MATRIX, kgToStones } from "../types";
 
 /** Doctors log a weigh-in at check-in and award Vulas for weight lost. */

@@ -32,7 +32,7 @@ interface SessionRow {
   external_doctor_specialty: string | null;
 }
 
-export function PatientSessionRecorder({ patientId, patientName }: Props) {
+export function ClientSessionRecorder({ patientId, patientName }: Props) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [sessions, setSessions] = useState<SessionRow[]>([]);
