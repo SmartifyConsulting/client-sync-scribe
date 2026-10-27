@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { Loader2, Search, Plus, MoreVertical, Trash2, Upload, Send } from "lucide-react";
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
 import { ClientWorkspace } from "@/features/wealth-workflow/workspace/ClientWorkspace";
-import { Patient, usePatients } from "@/hooks/usePatients";
+import { Patient, useClients } from "@/hooks/useClients";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -108,7 +108,7 @@ function DoctorPatientsTab() {
   const { profile } = useProfile();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { patients, loading, createPatient, deletePatient, fetchPatients } = usePatients();
+  const { patients, loading, createPatient, deletePatient, fetchPatients } = useClients();
   const [searchQuery, setSearchQuery] = useState("");
 
   const getSurname = (name: string) => {

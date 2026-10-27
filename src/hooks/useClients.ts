@@ -214,7 +214,7 @@ const shouldBeInactive = (lastVisit: string | null, thresholdMonths: number): bo
   return lastVisitDate < thresholdDate;
 };
 
-export function usePatients() {
+export function useClients() {
   const { toast } = useToast();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
@@ -417,7 +417,7 @@ export function usePatients() {
   };
 }
 
-export function usePatient(id: string) {
+export function useClient(id: string) {
   const { toast } = useToast();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(true);

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, startOfDay, endOfDay } from "date-fns";
 import { SampleBadge } from "@/components/patients/SampleBadge";
-import { isSamplePatient } from "@/lib/samplePatients";
+import { isSampleClient } from "@/lib/sampleClients";
 import { cn } from "@/lib/utils";
 
 interface Appointment {
@@ -124,12 +124,12 @@ export function UpcomingAppointments() {
                     className="font-medium text-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
                   >
                     {appointment.patientName}
-                    {isSamplePatient({ name: appointment.patientName, created_at: appointment.patientCreatedAt }) && <SampleBadge />}
+                    {isSampleClient({ name: appointment.patientName, created_at: appointment.patientCreatedAt }) && <SampleBadge />}
                   </Link>
                 ) : (
                   <span className="font-medium text-foreground inline-flex items-center gap-1">
                     {appointment.patientName}
-                    {isSamplePatient({ name: appointment.patientName, created_at: appointment.patientCreatedAt }) && <SampleBadge />}
+                    {isSampleClient({ name: appointment.patientName, created_at: appointment.patientCreatedAt }) && <SampleBadge />}
                   </span>
                 )}
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">

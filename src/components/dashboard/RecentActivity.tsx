@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { SampleBadge } from "@/components/patients/SampleBadge";
-import { isSamplePatient } from "@/lib/samplePatients";
+import { isSampleClient } from "@/lib/sampleClients";
 import { useTranslation } from "react-i18next";
 import { relativeTimeLabel } from "@/lib/relativeTimeLabel";
 
@@ -152,7 +152,7 @@ export function RecentActivity() {
                     {activity.patientId && activity.patientName ? (
                       <p className="text-xs text-muted-foreground truncate inline-flex items-center gap-1">
                         {activity.patientName}
-                        {isSamplePatient({ name: activity.patientName, created_at: activity.patientCreatedAt }) && <SampleBadge />}
+                        {isSampleClient({ name: activity.patientName, created_at: activity.patientCreatedAt }) && <SampleBadge />}
                       </p>
                     ) : (
                       <p className="text-xs text-muted-foreground truncate">

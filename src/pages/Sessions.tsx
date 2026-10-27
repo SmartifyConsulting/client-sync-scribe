@@ -62,7 +62,7 @@ import { PostSessionStepDialog, type PostSessionStepType } from "@/features/sess
 import { cleanClinicianNotes, fuzzyKey } from "@/features/sessions/utils/clinicianNotesSections";
 import { SessionGeneratedDocuments } from "@/features/sessions/components/SessionGeneratedDocuments";
 import { SessionResultPanels } from "@/features/sessions/components/SessionResultPanels";
-import { renderClinicalHighlights } from "@/features/sessions/lib/clinicalHighlights";
+import { renderAdvisoryHighlights } from "@/features/sessions/lib/advisoryHighlights";
 import { Toggle } from "@/components/ui/toggle";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -73,7 +73,7 @@ import { useAudioRecording } from "@/hooks/useAudioRecording";
 import { useLiveDiagnosticHint } from "@/hooks/useLiveDiagnosticHint";
 import { AudioWaveform } from "@/components/sessions/AudioWaveform";
 import { useSessions } from "@/hooks/useSessions";
-import { usePatients } from "@/hooks/usePatients";
+import { useClients } from "@/hooks/useClients";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -236,7 +236,7 @@ export default function Sessions() {
   }, []);
 
   const navigate = useNavigate();
-  const { patients, loading: patientsLoading } = usePatients();
+  const { patients, loading: patientsLoading } = useClients();
   const { sessions, loading: sessionsLoading, createSession, completeSession } = useSessions();
   const [selectedRecordings, setSelectedRecordings] = useState<Set<string>>(new Set());
   const [isDownloading, setIsDownloading] = useState(false);
@@ -1495,7 +1495,7 @@ export default function Sessions() {
                         {s.date}
                       </button>
                       <p className="text-sm text-foreground leading-relaxed">
-                        {renderClinicalHighlights(String(s.summary || "No summary"))}
+                        {renderAdvisoryHighlights(String(s.summary || "No summary"))}
                       </p>
                     </div>
                   ))

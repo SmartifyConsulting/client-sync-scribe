@@ -18,7 +18,7 @@ import {
 } from "@/features/patients/lib/careTeamPermissions";
 
 import type { EmergencyContact } from "./EmergencyContactsSection";
-import type { NextOfKinMember } from "@/hooks/usePatients";
+import type { NextOfKinMember } from "@/hooks/useClients";
 
 interface Props {
   patientId: string;

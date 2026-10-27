@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { PatientImportDialog } from "@/components/patients/PatientImport";
-import { usePatients } from "@/hooks/usePatients";
+import { useClients } from "@/hooks/useClients";
 import {
   Dialog,
   DialogContent,
@@ -59,7 +59,7 @@ import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
 import { SampleBadge } from "@/components/patients/SampleBadge";
-import { isSamplePatient } from "@/lib/samplePatients";
+import { isSampleClient } from "@/lib/sampleClients";
 
 
 export default function Patients({ hideHeader = false }: { hideHeader?: boolean }) {
@@ -68,7 +68,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
   const { profile } = useProfile();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { patients, loading, createPatient, deletePatient, fetchPatients } = usePatients();
+  const { patients, loading, createPatient, deletePatient, fetchPatients } = useClients();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
@@ -993,7 +993,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                                 return `${lastName}, ${firstNames}`;
                               })()}
                               {user?.id && (patient as any).patient_user_id === user.id && <span className="text-muted-foreground">(me)</span>}
-                              {isSamplePatient(patient) && <SampleBadge />}
+                              {isSampleClient(patient) && <SampleBadge />}
                             </span>
                           </Link>
                         </td>

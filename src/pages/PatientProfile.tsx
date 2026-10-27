@@ -37,11 +37,11 @@ import { ImageComparisonDialog } from "@/components/documents/ImageComparisonDia
 import { cn } from "@/lib/utils";
 import vulaSymbol from "@/assets/vula-symbol.png";
 import { SampleBadge } from "@/components/patients/SampleBadge";
-import { isSamplePatient } from "@/lib/samplePatients";
+import { isSampleClient } from "@/lib/sampleClients";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { usePatient } from "@/hooks/usePatients";
+import { useClient } from "@/hooks/useClients";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Copy } from "lucide-react";
@@ -79,7 +79,7 @@ export default function PatientProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { patient, loading: patientLoading, updatePatient } = usePatient(id || "");
+  const { patient, loading: patientLoading, updatePatient } = useClient(id || "");
   const { sessions, loading: sessionsLoading } = useSessions(id);
   const { templates, loading: templatesLoading } = useTemplates();
   const { documents, loading: documentsLoading, fetchDocuments, updateDocument } = useDocuments(id);
@@ -293,7 +293,7 @@ export default function PatientProfile() {
               <h1 className="page-title flex items-center gap-2">
                 {patient.name}
                 <div className={cn("h-2.5 w-2.5 rounded-full flex-shrink-0", patient.status === "active" ? "bg-sky-500" : "bg-red-400")} />
-                {isSamplePatient(patient) && <SampleBadge size="md" />}
+                {isSampleClient(patient) && <SampleBadge size="md" />}
               </h1>
 
               <div className="flex flex-wrap items-center gap-3 text-base text-muted-foreground mt-1">

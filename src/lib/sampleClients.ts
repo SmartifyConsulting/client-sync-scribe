@@ -21,14 +21,14 @@ const SAMPLE_NAME_HINTS = [
   "john smith",
 ];
 
-export interface SamplePatientLike {
+export interface SampleClientLike {
   name?: string | null;
   is_sample?: boolean | null;
   email?: string | null;
   created_at?: string | null;
 }
 
-export function isSamplePatient(patient: SamplePatientLike | null | undefined): boolean {
+export function isSampleClient(patient: SampleClientLike | null | undefined): boolean {
   if (!patient) return false;
   if (patient.created_at && patient.created_at < DEMO_DATA_CUTOFF) return true;
   if (patient.is_sample === true) return true;

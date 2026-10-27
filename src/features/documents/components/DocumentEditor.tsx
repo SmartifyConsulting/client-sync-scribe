@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { usePatients } from "@/hooks/usePatients";
+import { useClients } from "@/hooks/useClients";
 import { useProfile } from "@/hooks/useProfile";
 import { useDocuments } from "@/hooks/useDocuments";
 import { fillDocumentPlaceholders } from "@/features/documents/lib/fillDocumentPlaceholders";
@@ -146,7 +146,7 @@ function ProcedureSearchInput({
 
 export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave }: DocumentEditorProps) {
   const { toast } = useToast();
-  const { patients } = usePatients();
+  const { patients } = useClients();
   const { profile } = useProfile();
   const { createDocument } = useDocuments();
   const [documentName, setDocumentName] = useState(`${template.name} - ${new Date().toLocaleDateString()}`);

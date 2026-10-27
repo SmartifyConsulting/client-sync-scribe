@@ -20,7 +20,7 @@ import {
 import { Loader2, Upload, UploadCloud, File as FileIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { usePatients } from "@/hooks/usePatients";
+import { useClients } from "@/hooks/useClients";
 import { useUpload } from "@/features/uploads/useUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { UploadProgressBar, type UploadProgressState } from "./components/UploadProgressBar";
@@ -45,7 +45,7 @@ function inferMediaType(file: File): string {
 export function UploadDocumentDialog({ open, onOpenChange, onUploaded }: UploadDocumentDialogProps) {
   const { toast } = useToast();
   const { user } = useAuth();
-  const { patients } = usePatients();
+  const { patients } = useClients();
   const { upload, isUploading } = useUpload("patient-media", { maxBytes: 20 * 1024 * 1024 });
   const fileInputRef = useRef<HTMLInputElement>(null);
 

@@ -37,7 +37,7 @@ import { AiUploadZone } from "@/features/documents/components/AiUploadZone";
 
 import { format } from "date-fns";
 import { SampleBadge } from "@/components/patients/SampleBadge";
-import { isSamplePatient } from "@/lib/samplePatients";
+import { isSampleClient } from "@/lib/sampleClients";
 import { documentTypeBadgeClass } from "@/lib/documentTypeColors";
 import { cn } from "@/lib/utils";
 
@@ -50,7 +50,7 @@ function getSurname(name: string) {
 }
 
 function DocumentCard({ doc, onPreview }: { doc: DocRow; onPreview: (doc: DocRow) => void }) {
-  const sample = !!doc.patient_name && isSamplePatient({ name: doc.patient_name });
+  const sample = !!doc.patient_name && isSampleClient({ name: doc.patient_name });
 
   return (
     <button type="button" className="w-full text-left" onClick={() => onPreview(doc)}>

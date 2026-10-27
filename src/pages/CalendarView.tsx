@@ -39,7 +39,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { usePatients } from "@/hooks/usePatients";
+import { useClients } from "@/hooks/useClients";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { usePractice } from "@/hooks/usePractice";
@@ -114,7 +114,7 @@ export default function CalendarView() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { patients } = usePatients();
+  const { patients } = useClients();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);

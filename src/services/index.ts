@@ -5,7 +5,6 @@
  * on the new path. Until then, both this and direct module paths work.
  */
 
-export * as patientsService from "./supabase/patients";
 export * as sessionsService from "./supabase/sessions";
 export * as documentsService from "./supabase/documents";
 export * as invoicesService from "./supabase/invoices";

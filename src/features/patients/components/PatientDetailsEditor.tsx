@@ -85,7 +85,7 @@ import {
   CurrentMedication,
   ConditionDiagnosis,
   Allergy,
-} from "@/hooks/usePatients";
+} from "@/hooks/useClients";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
