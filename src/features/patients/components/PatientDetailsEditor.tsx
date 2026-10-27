@@ -72,7 +72,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FinancialInformation } from "./financial/FinancialInformation";
 import { DocumentUploadList } from "./financial/DocumentUploadList";
-import { PreferredHospitals, type PreferredHospital } from "./PreferredHospitals";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";

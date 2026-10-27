@@ -15,7 +15,6 @@ import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RenewalsDueCard } from "@/features/patients/components/RenewalsDueCard";
 
 interface AssignedTask {
   id: string;
@@ -508,11 +507,6 @@ export default function PatientDashboard() {
             </Card>
           </Link>
         </div>
-      )}
-
-      {/* Renewals due */}
-      {patientRecord?.id && user?.id && (
-        <RenewalsDueCard patientId={patientRecord.id} patientUserId={user.id} />
       )}
 
       {/* Assigned Tasks */}
