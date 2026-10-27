@@ -671,7 +671,7 @@ export default function Sessions() {
 
 
   // Callback to handle session completion after transcription
-  const handleSessionComplete = useCallback(async (transcriptText: string, visitCategories?: string[] | null) => {
+  const handleSessionComplete = useCallback(async (transcriptText: string) => {
     if (completionRanRef.current) {
       console.log("handleSessionComplete skipped — already ran for this session");
       return;
@@ -715,7 +715,6 @@ export default function Sessions() {
         null,
         fullTranscript,
         currentNotes,
-        visitCategories?.[0] || undefined,
         {
           patient_id: patientId!,
           title: `Session - ${new Date().toLocaleDateString()}`,
@@ -782,17 +781,6 @@ export default function Sessions() {
     setSessionState("completed");
     pendingCompletionRef.current = false;
   }, [completeSession, patientId, generateAllDocuments]);
-
-  // Visit-category dialog runs as the final step of the post-session queue (Vula award).
-  // PostSessionStepDialog calls onFinish() itself right after this resolves.
-  const handleVisitCategoryConfirm = async (categories: string[] | null) => {
-    if (categories && categories.length > 0 && currentSessionId) {
-      // Persist visit categories to the already-created session
-      try {
-        await (supabase.from('sessions').update({ visit_category: categories[0] } as any) as any).eq('id', currentSessionId);
-      } catch (e) { console.error(e); }
-    }
-  };
 
   const { 
     isRecording, 
@@ -1281,7 +1269,6 @@ export default function Sessions() {
           extractedFollowUp={extractedFollowUp}
           patientName={currentPatient?.name}
           transcript={pendingTranscript}
-          onVulaConfirm={handleVisitCategoryConfirm}
           clinicianNotes={cleanClinicianNotes(notes)}
           summary={summary}
           actionPoints={actionPoints}

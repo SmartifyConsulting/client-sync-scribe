@@ -2,8 +2,6 @@ import { WorkflowStatusCard } from "@/features/wealth-workflow/WorkflowStatusCar
 import { useState, useEffect } from "react";
 import { Loader2, Sparkles, Wallet as Pill, LineChart as HeartPulse, RefreshCw, TrendingUp as Activity, AlertTriangle, Check, X, ChevronDown, ChevronRight, Droplets, ShieldAlert, Phone, Mail } from "lucide-react";
 import { DiscPersonalityCard } from "@/features/patients/components/DiscPersonalityCard";
-import { useV2Demo } from "@/hooks/useV2Demo";
-import { RelationshipInsightCard } from "@/features/patients/components/RelationshipInsightCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,7 +11,6 @@ import type { Session } from "@/hooks/useSessions";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EmotionalJournal } from "@/features/patients/components/overview/EmotionalJournal";
 
 interface PatientOverviewProps {
   patient: {
@@ -96,7 +93,6 @@ interface SummaryData {
 }
 
 function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientOverviewProps) {
-  const { v2Demo } = useV2Demo();
   const { toast } = useToast();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
@@ -876,10 +872,9 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
         </Collapsible>
       </div>
 
-      {/* DISC + relationship insight (doctor-only) */}
+      {/* DISC profile (doctor-only) */}
       <div className="grid gap-4 md:grid-cols-2 items-start">
         <DiscPersonalityCard patientId={patient.id} hasSessions={(sessions || []).some((s) => s.status === "completed")} />
-        {v2Demo && <RelationshipInsightCard patientId={patient.id} />}
       </div>
 
       {/* Chronic Medications — from the patient's own current_medications list (distinct shape from the AI-summarised Medications card above). */}
@@ -924,7 +919,6 @@ export function PatientOverview(props: PatientOverviewProps) {
     <div className="space-y-4">
       <h2 className="text-base font-semibold text-foreground">Financial Health Summary</h2>
       <WorkflowStatusCard patientId={props.patient.id} />
-      <EmotionalJournal patientId={props.patient.id} />
     </div>
   );
 }

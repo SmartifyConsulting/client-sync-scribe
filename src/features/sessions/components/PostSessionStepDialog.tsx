@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/dialog";
 import type { GeneratedDoc } from "./GeneratedDocumentsDialog";
 import { FollowUpAppointmentDialog } from "./FollowUpAppointmentDialog";
-import { VisitCategoryDialog } from "./VisitCategoryDialog";
 import { ClinicianNotesColumns } from "./ClinicianNotesAccordion";
 import { DocumentPreview } from "./DocumentPreview";
 import { useProfile } from "@/hooks/useProfile";
@@ -26,7 +25,7 @@ const DOC_ICONS: Record<string, typeof FileText> = {
 };
 
 export type DocStepType = "prescription" | "medcert" | "referral" | "invoice";
-export type PostSessionStepType = DocStepType | "summary" | "schedule" | "vula";
+export type PostSessionStepType = DocStepType | "summary" | "schedule";
 
 interface PostSessionStepDialogProps {
   open: boolean;
@@ -366,7 +365,6 @@ interface PostSessionQueueDialogProps {
   extractedFollowUp?: { follow_up_date?: string; follow_up_time?: string; notes?: string } | null;
   patientName?: string;
   transcript?: string;
-  onVulaConfirm: (categories: string[] | null) => Promise<void> | void;
   /** AI Clinician notes surfaced on the prescription step. */
   clinicianNotes?: string | null;
   /** AI summary + action points shown as the first step of the queue. */
@@ -376,7 +374,7 @@ interface PostSessionQueueDialogProps {
 
 /**
  * Drives the sequential post-session queue: document steps render the step
- * dialog above, while schedule and vula steps delegate to their own dialogs.
+ * dialog above, while the schedule step delegates to its own dialog.
  */
 export function PostSessionStepDialog({
   queue,
@@ -392,7 +390,6 @@ export function PostSessionStepDialog({
   extractedFollowUp,
   patientName,
   transcript,
-  onVulaConfirm,
   clinicianNotes,
   summary,
   actionPoints,
@@ -430,23 +427,6 @@ export function PostSessionStepDialog({
         suggestedDate={extractedFollowUp?.follow_up_date}
         suggestedTime={extractedFollowUp?.follow_up_time}
         onDone={onAdvance}
-      />
-    );
-  }
-
-  if (step === "vula") {
-    return (
-      <VisitCategoryDialog
-        open
-        onOpenChange={(o) => {
-          if (!o) onFinish();
-        }}
-        patientName={patientName}
-        transcript={transcript}
-        onConfirm={async (categories) => {
-          await onVulaConfirm(categories);
-          onFinish();
-        }}
       />
     );
   }

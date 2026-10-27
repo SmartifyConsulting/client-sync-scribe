@@ -6,7 +6,6 @@ import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react"
 import { useTranslation } from "react-i18next";
 import { LANGUAGES } from "@/lib/languages";
 import { PatientSessionRecorder } from "@/features/patients/components/PatientSessionRecorder";
-import { RelationshipProfileExercise } from "@/features/patients/components/RelationshipProfileExercise";
 import { useV2Demo } from "@/hooks/useV2Demo";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn, emitMedicationsUpdated } from "@/lib/utils";
