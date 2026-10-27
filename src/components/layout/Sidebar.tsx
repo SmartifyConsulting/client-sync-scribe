@@ -123,7 +123,6 @@ const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/patient/details?section=health" },
   { icon: ClientFolder, label: "Documents", labelKey: "nav.clientDocuments", to: "/client/documents" },
   { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
-  { icon: Activity, label: "My Biolog", labelKey: "nav.myBiolog", to: "/biolog" },
   { icon: BedDouble, label: "My Admissions", labelKey: "nav.myAdmissions", to: "/patient/admissions" },
   { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/patient/rewards" },
   { icon: Sparkles, label: "Ask Holarc Wealth", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
@@ -233,9 +232,9 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   /** Doctors only see "My Shifts" once they're attached to a hospital. */
   const hideMyShift = isDoctorMenu && (affiliationLoading || !hasHospitalAffiliation);
 
-  /** Version 2.0 features (Biolog, Ask Holarc) show for everyone as a greyed-out
+  /** Version 2.0 features (Ask Holarc) show for everyone as a greyed-out
    *  preview; only the system admin accounts (useV2Demo) can actually open them. */
-  const V2_PATHS = ["/biolog", "/ask-maeve"];
+  const V2_PATHS = ["/ask-maeve"];
   const withShiftRule = (items: (NavItem & { tour?: string })[]) => {
     let next = (hideMyShift ? items.filter((i) => i.to !== "/my-shift") : items).filter((i) => !isWealthHidden(i.to));
     if (!v2Demo) next = next.map((i) => (V2_PATHS.includes(i.to) ? { ...i, v2Locked: true } : i));

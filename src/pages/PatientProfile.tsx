@@ -2,8 +2,6 @@ import { TransactionLogs } from "@/features/wealth-workflow/TransactionLogs";
 import { ExistingCoverCard } from "@/features/wealth-workflow/client/ExistingCoverCard";
 import { SignedImage } from "@/features/documents/components/SignedImage";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
-import { BiologPanel } from "@/features/biolog/BiologPanel";
-import { useV2Demo } from "@/hooks/useV2Demo";
 import { PatientProgrammesTab } from "@/features/programmes/components/PatientProgrammesTab";
 import { WorkflowMap } from "@/features/wealth-workflow/map/WorkflowMap";
 import { LiveWorkspace } from "@/features/wealth-workflow/workspace/LiveWorkspace";
@@ -79,7 +77,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { INTAKE_EMAIL_DOMAIN } from "@/lib/mailboxDomain";
 
 export default function PatientProfile() {
-  const { v2Demo } = useV2Demo();
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -486,17 +483,6 @@ export default function PatientProfile() {
           <div className="rounded-2xl bg-card p-6 shadow-card">
             <DoctorsOnProfile patientId={patient.id} patientName={patient.name} />
           </div>
-        </TabsContent>
-
-        {/* Biolog Tab — the care team reviews the patient's own Biolog */}
-        <TabsContent value="biolog">
-          {!v2Demo ? null : (patient as any).patient_user_id ? (
-            <BiologPanel ownerUserId={(patient as any).patient_user_id} readOnly />
-          ) : (
-            <div className="rounded-2xl bg-card p-6 text-sm text-muted-foreground shadow-card">
-              This patient has not activated their app account yet, so there is no Biolog to show.
-            </div>
-          )}
         </TabsContent>
 
         {/* Programmes Tab — eating plan, exercise programme and weigh-ins */}

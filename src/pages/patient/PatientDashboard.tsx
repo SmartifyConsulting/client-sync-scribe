@@ -494,16 +494,16 @@ export default function PatientDashboard() {
             </CardContent>
           </Card>
 
-          <Link to="/client/documentation">
+          <Link to="/client/documents">
             <Card className="cursor-pointer border-primary/10 hover:border-primary/30 hover:shadow-md transition-all h-full">
               <CardHeader className="p-4">
                 <CardTitle className="flex items-center gap-2 text-sm">
                   <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary">
                     <FileText className="h-4 w-4 text-primary" />
                   </div>
-                  {t("patientDashboard.documentationTitle")}
+                  Documents
                 </CardTitle>
-                <CardDescription className="text-xs">{t("patientDashboard.documentationDescription")}</CardDescription>
+                <CardDescription className="text-xs">View and manage your documents</CardDescription>
               </CardHeader>
             </Card>
           </Link>

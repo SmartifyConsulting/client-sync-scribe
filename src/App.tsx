@@ -50,7 +50,6 @@ import Legal from "./pages/Legal";
 // Client pages
 import PatientDashboard from "./pages/patient/PatientDashboard";
 import PatientCalendar from "./pages/patient/PatientCalendar";
-import Documentation from "./pages/patient/PrescriptionHistory";
 import Invoices from "./pages/patient/Invoices";
 import PatientAccessManagement from "./pages/patient/PatientAccessManagement";
 import MyRewards from "./pages/patient/MyRewards";
@@ -211,7 +210,6 @@ const App = () => (
           >
             <Route path="/client/advisors" element={<MyDoctors />} />
             <Route path="/client/calendar" element={<PatientCalendar />} />
-            <Route path="/client/documentation" element={<Documentation />} />
             <Route path="/client/invoices" element={<Invoices />} />
             <Route path="/client/invites" element={<PatientAccessManagement />} />
             <Route path="/patient/rewards" element={<MyRewards />} />

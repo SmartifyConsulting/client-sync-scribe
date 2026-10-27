@@ -27,7 +27,6 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -101,9 +100,7 @@ export default function MyPersonalDashboard() {
   const { user } = useAuth();
   const { profile } = useProfile();
   const navigate = useNavigate();
-  const { isAdmin } = useIsAdmin();
   const unlocked = true;
-  const biologUnlocked = isAdmin;
 
   const { data: patientIds = [] } = useQuery({
     queryKey: ["dashboard-patient-ids", user?.id],
@@ -148,7 +145,6 @@ export default function MyPersonalDashboard() {
     enabled: !!user?.id,
     queryFn: async () => {
       const nowIso = new Date().toISOString();
-      const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
 
       const [todosRes, apptRes] = await Promise.all([
         supabase
@@ -164,23 +160,13 @@ export default function MyPersonalDashboard() {
           .gte("requested_start", nowIso),
       ]);
 
-      let recentBiologEntries = 0;
-      if (patientIds.length) {
-        const biologRes: any = await (supabase as any)
-          .from("biolog_entries")
-          .select("id")
-          .in("patient_id", patientIds)
-          .gte("created_at", weekAgo);
-        recentBiologEntries = (biologRes?.data || []).length;
-      }
-
       const todos = todosRes.data || [];
       return {
         openTasks: todos.length,
         overdueTasks: todos.filter((t: any) => t.due_date && t.due_date < nowIso).length,
         upcomingAppointments: (apptRes.data || []).length,
         medicationDue: 0,
-        recentBiologEntries,
+        recentBiologEntries: 0,
         newResults: 0,
       };
     },

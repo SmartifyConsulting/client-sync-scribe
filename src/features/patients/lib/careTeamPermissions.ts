@@ -23,7 +23,6 @@ export const CARE_TEAM_PERMISSIONS: CareTeamPermission[] = [
   { id: "documents", label: "My Documents" },
   { id: "calendar", label: "My Calendar" },
   { id: "tasks", label: "My Tasks" },
-  { id: "biolog", label: "My Biolog" },
   { id: "round_table", label: "My Round Table" },
 ];
 
