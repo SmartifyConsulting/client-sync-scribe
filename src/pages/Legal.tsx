@@ -1,22 +1,19 @@
 import { Link } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import { LegalDocLayout } from "@/components/legal/LegalDocLayout";
 import { FileText, ChevronRight } from "lucide-react";
 
 export default function Legal() {
-  const { t } = useTranslation();
-
   const docs = [
-    { to: "/terms-and-conditions", title: t('legal.documents.termsTitle'), description: t('legal.documents.termsDescription') },
-    { to: "/business-associate-agreement", title: t('legal.documents.providerTitle'), description: t('legal.documents.providerDescription') },
-    { to: "/patient-consent", title: t('legal.documents.consentTitle'), description: t('legal.documents.consentDescription') },
+    { to: "/terms-and-conditions", title: "Terms and Conditions", description: "The terms governing your use of Holarc Wealth" },
+    { to: "/wealth-manager-agreement", title: "Wealth Manager Operator Agreement", description: "Data processing terms for Wealth Managers using the Platform" },
+    { to: "/client-consent", title: "Client Consent and Privacy Notice", description: "What you are agreeing to as a client of the Platform" },
   ];
 
   return (
-    <LegalDocLayout title={t('legal.title')} subtitle={t('legal.subtitle')}>
+    <LegalDocLayout title="Legal Documents" subtitle="Review the agreements that govern your use of Holarc Wealth">
       <>
         <p>
-          {t('legal.introduction')}
+          Review the legal documents that govern your use of the Holarc Wealth platform.
         </p>
         <ul className="list-none p-0 m-0 flex flex-col gap-5 [&>li]:before:hidden">
           {docs.map((d) => (

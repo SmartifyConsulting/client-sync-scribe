@@ -8,8 +8,8 @@ export function Footer() {
 
   const links = [
     { to: "/terms-and-conditions", label: t("footer.terms") },
-    { to: "/patient-consent", label: t("footer.privacy") },
-    { to: "/business-associate-agreement", label: t("footer.compliance") },
+    { to: "/client-consent", label: t("footer.privacy") },
+    { to: "/wealth-manager-agreement", label: t("footer.compliance") },
     { to: "/legal", label: t("footer.legal") },
   ];
 

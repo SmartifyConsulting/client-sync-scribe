@@ -29,7 +29,7 @@ export function LegalDocLayout({
   effectiveDate = "1 January 2026",
   lastUpdated,
   version = "1.0",
-  owner = "Holarc Health (Pty) Ltd",
+  owner = "Holarc Wealth (Pty) Ltd",
   children,
 }: LegalDocLayoutProps) {
   const navigate = useNavigate();

@@ -15,8 +15,8 @@ export function TrialSignupSection({
   onAcceptedTermsChange,
 }: TrialSignupSectionProps) {
   const primaryConsentDocument = userRole === "client"
-    ? { name: "Patient Consent and Authorization", path: "/patient-consent" }
-    : { name: "Business Associate Agreement", path: "/business-associate-agreement" };
+    ? { name: "Client Consent and Privacy Notice", path: "/client-consent" }
+    : { name: "Wealth Manager Operator Agreement", path: "/wealth-manager-agreement" };
 
   return (
     <div className="pt-4 border-t border-border space-y-4">

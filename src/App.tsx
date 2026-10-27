@@ -43,8 +43,8 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import TermsAndConditions from "./pages/TermsAndConditions";
-import PatientConsent from "./pages/PatientConsent";
-import BusinessAssociateAgreement from "./pages/BusinessAssociateAgreement";
+import ClientConsent from "./pages/ClientConsent";
+import WealthManagerAgreement from "./pages/WealthManagerAgreement";
 import Legal from "./pages/Legal";
 
 // Client pages
@@ -194,8 +194,8 @@ const App = () => (
           <Route path="/admin/provider-approval" element={<ProviderApprovalAction />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
           <Route path="/intellectual-property" element={<Navigate to="/terms-and-conditions#intellectual-property" replace />} />
-          <Route path="/patient-consent" element={<PatientConsent />} />
-          <Route path="/business-associate-agreement" element={<BusinessAssociateAgreement />} />
+          <Route path="/client-consent" element={<ClientConsent />} />
+          <Route path="/wealth-manager-agreement" element={<WealthManagerAgreement />} />
           <Route path="/legal" element={<Legal />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
