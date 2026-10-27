@@ -1,6 +1,6 @@
 # Roadmap — Step 5 Indigro copy
 ## Preview repair — Oct 27
-- [ ] Align remaining shared types, roles and client joins with the current generated schema; restore missing admissions hook; verify preview.
+- [x] Align remaining shared types, roles and client joins with the current generated schema; restore missing admissions hook; verify preview (build OK, signed-in dashboard without runtime errors, gold AI Summary heading).
 ## Numbered scenario submission — Oct 22
 - [x] Quote 1-3 (Options A-C) tracked per insurer with own status, 90s stall warning and per-quote Retry; saved quotes never resent
 - [x] Companion v1.5.0 enters each option into the connected portal by field label and clicks Quote/Calculate; insurers run in parallel tabs
