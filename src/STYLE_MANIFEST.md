@@ -35,7 +35,7 @@ The sidebar width is defined as `--sidebar-width: 210px` in `index.css`. All sid
 
 ## 6. Layout Shell Parity
 
-Both `AppLayout` (Doctor) and `PatientAppLayout` (Patient) must share:
+Both `AppLayout` (Advisor) and `ClientAppLayout` (Client) must share:
 - Root: `overflow-hidden`
 - Main content: `pb-24 md:pb-0 md:ml-[var(--sidebar-width)]`
 - Content container: `px-4 py-6 md:px-8 md:pt-2 md:pb-8 max-w-7xl mx-auto`
