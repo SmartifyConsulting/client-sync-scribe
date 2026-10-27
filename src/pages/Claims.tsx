@@ -33,7 +33,7 @@ type Draft = { id?: string; patient_id: string; application_id: string; claim_ty
 export default function Claims() {
   const { user } = useAuth();
   const { role } = useUserRole();
-  const isClient = role === "patient";
+  const isClient = role === "client";
   const qc = useQueryClient();
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");

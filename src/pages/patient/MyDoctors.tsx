@@ -168,7 +168,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
       const { data: match } = await supabase
         .from("profiles")
         .select("id, full_name, specialty, avatar_url, practice_number")
-        .eq("role", "doctor")
+        .eq("role", "broker")
         .ilike("full_name", gpName)
         .maybeSingle();
       return { name: gpName, onHolarc: !!match, matchedProfile: match || null };

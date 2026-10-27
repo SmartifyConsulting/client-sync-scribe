@@ -4,7 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "react-router-dom";
 
 interface TrialSignupSectionProps {
-  userRole: "doctor" | "patient";
+  userRole: "broker" | "client";
   acceptedTerms: boolean;
   onAcceptedTermsChange: (accepted: boolean) => void;
 }
@@ -14,7 +14,7 @@ export function TrialSignupSection({
   acceptedTerms,
   onAcceptedTermsChange,
 }: TrialSignupSectionProps) {
-  const primaryConsentDocument = userRole === "patient"
+  const primaryConsentDocument = userRole === "client"
     ? { name: "Patient Consent and Authorization", path: "/patient-consent" }
     : { name: "Business Associate Agreement", path: "/business-associate-agreement" };
 

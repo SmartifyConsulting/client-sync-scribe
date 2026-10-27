@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
-export type UserRole = 'doctor' | 'patient' | 'admin' | 'emergency' | 'nurse' | 'referral_agent' | 'fsp' | null;
+export type UserRole = 'broker' | 'client' | 'admin' | 'emergency' | 'nurse' | 'referral_agent' | 'fsp' | null;
 type ResolvedRole = Exclude<UserRole, null>;
-type RawRole = 'doctor' | 'patient' | 'admin' | 'hospital_staff' | 'ambulance_staff' | 'blood_bank' | 'nurse' | 'referral_agent' | 'fsp';
+type RawRole = 'broker' | 'client' | 'admin' | 'hospital_staff' | 'ambulance_staff' | 'blood_bank' | 'nurse' | 'referral_agent' | 'fsp';
 const EMERGENCY_RAW: RawRole[] = ['hospital_staff', 'ambulance_staff', 'blood_bank'];
 
 // Module-level cache so navigating across layout groups (which remounts the
@@ -79,23 +79,23 @@ export function useUserRole() {
         const profileRole = profileData?.role as ResolvedRole | undefined;
         if (profileRole) normalized.push(profileRole);
         for (const r of rawRoles) {
-          if (r === 'doctor' || r === 'patient' || r === 'admin' || r === 'nurse' || r === 'referral_agent' || r === 'fsp') {
+          if (r === 'broker' || r === 'client' || r === 'admin' || r === 'nurse' || r === 'referral_agent' || r === 'fsp') {
             if (!normalized.includes(r)) normalized.push(r);
           }
         }
         if ((hasEmergencyRaw || ownsProvider) && !normalized.includes('emergency')) normalized.push('emergency');
 
-        // Prefer the explicit profile role so a doctor who also owns a hospital
-        // (or other provider) still lands on the doctor dashboard. The profile
+        // Prefer the explicit profile role so a broker who also owns a hospital
+        // (or other provider) still lands on the broker dashboard. The profile
         // switcher still surfaces the provider portal via hasEmergencyRole.
         const effectiveRole: UserRole =
           profileRole ??
           (normalized.includes('nurse')
             ? 'nurse'
-            : normalized.includes('doctor')
-            ? 'doctor'
-            : normalized.includes('patient')
-              ? 'patient'
+            : normalized.includes('broker')
+            ? 'broker'
+            : normalized.includes('client')
+              ? 'client'
               : (ownsProvider || normalized.includes('emergency'))
                 ? 'emergency'
                 : normalized.includes('admin')
@@ -126,16 +126,16 @@ export function useUserRole() {
   return {
     role,
     loading,
-    isDoctor: role === 'doctor',
-    isPatient: role === 'patient',
+    isDoctor: role === 'broker',
+    isPatient: role === 'client',
     isEmergency: role === 'emergency',
     isNurse: role === 'nurse',
     isReferralAgent: role === 'referral_agent',
     isFsp: role === 'fsp',
     hasNurseRole: availableRoles.includes('nurse'),
     isAdmin: availableRoles.includes('admin'),
-    hasDoctorRole: availableRoles.includes('doctor'),
-    hasPatientRole: availableRoles.includes('patient'),
+    hasDoctorRole: availableRoles.includes('broker'),
+    hasPatientRole: availableRoles.includes('client'),
     hasEmergencyRole: availableRoles.includes('emergency'),
     hasAdminRole: availableRoles.includes('admin'),
   };

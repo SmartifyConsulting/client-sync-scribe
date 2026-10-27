@@ -209,19 +209,19 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   // "My Profile" (/patient/details) — the route alone must not flip the nav.
   // While the role is still resolving we must NOT fall back to the route-based
   // guess, otherwise a doctor sees the patient nav for one frame.
-  const isDoctor = role === "doctor";
+  const isDoctor = role === "broker";
   const routeSaysPatient = isOnPatientRoute && !roleLoading && role !== null;
 
   /** Doctors can flip the sidebar between their professional menu and their
    *  own patient menu with the badge next to the dashboard. Derived from the
    *  current route (rather than local state) so the active pill stays correct
    *  even if the sidebar remounts on navigation — local state was resetting
-   *  to "doctor" on every route change, leaving the pill stuck showing the
+   *  to "broker" on every route change, leaving the pill stuck showing the
    *  wrong side as active. */
   const isOnMyDashboardRoute = location.pathname.startsWith("/my-dashboard");
-  const profileMode: "doctor" | "patient" = (isOnPatientRoute || isOnMyDashboardRoute) ? "patient" : "doctor";
+  const profileMode: "broker" | "client" = (isOnPatientRoute || isOnMyDashboardRoute) ? "client" : "broker";
 
-  const doctorInPatientMode = isDoctor && profileMode === "patient";
+  const doctorInPatientMode = isDoctor && profileMode === "client";
 
   const isPatientMenu =
     doctorInPatientMode ||
@@ -431,13 +431,13 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   /** Doctor|Patient pill shown next to Dashboard so a Wealth Manager can
    *  switch the sidebar between their professional tools and their own
    *  client profile. */
-  const professionalMode = "doctor";
+  const professionalMode = "broker";
   const professionalHome = "/broker-dashboard";
   const profileToggle = (
     <div className="mx-1 mt-1 flex items-center gap-1 rounded-full bg-muted/60 p-0.5">
-      {([professionalMode, "patient"] as const).map((mode) => {
-        const isProfessional = mode !== "patient";
-        const active = isProfessional ? profileMode === "doctor" : profileMode === "patient";
+      {([professionalMode, "client"] as const).map((mode) => {
+        const isProfessional = mode !== "client";
+        const active = isProfessional ? profileMode === "broker" : profileMode === "client";
         return (
           <button
             key={mode}

@@ -68,7 +68,7 @@ interface PartnerInput {
   mobile_number: string;
 }
 
-type UserRole = "doctor" | "patient";
+type UserRole = "broker" | "client";
 
 const DOCTOR_STEPS = ["Account", "Terms & Payment"];
 const PATIENT_STEPS = ["Account", "Terms & Payment"];
@@ -151,7 +151,7 @@ export default function Auth() {
     return () => clearTimeout(t);
   }, [otpCooldown]);
 
-  const [userRole, setUserRole] = useState<UserRole>(roleParam || "patient");
+  const [userRole, setUserRole] = useState<UserRole>(roleParam || "client");
   const [countryCode, setCountryCode] = useState("+27");
 
   // Doctor fields
@@ -197,7 +197,7 @@ export default function Auth() {
   useEffect(() => {
     if (inviteToken) {
       setIsLogin(false);
-      setUserRole("patient");
+      setUserRole("client");
     }
   }, [inviteToken]);
 
@@ -205,7 +205,7 @@ export default function Auth() {
   useEffect(() => {
     const draft = loadDraft();
     if (draft && !isLogin) {
-      setUserRole(draft.userRole || "doctor");
+      setUserRole(draft.userRole || "broker");
       setFirstName(draft.firstName || draft.fullName || "");
       setLastName(draft.lastName || "");
       setCountryCode(draft.countryCode || "+27");
@@ -250,7 +250,7 @@ export default function Auth() {
     }
   }, [currentStep, firstName, lastName, phone, mobileNumber, dob, physicalAddress]);
 
-  const steps = userRole === "doctor" ? DOCTOR_STEPS : PATIENT_STEPS;
+  const steps = userRole === "broker" ? DOCTOR_STEPS : PATIENT_STEPS;
   const totalSteps = steps.length;
   const progress = ((currentStep + 1) / totalSteps) * 100;
   const selectedCountry = COUNTRIES.find(c => c.code === countryCode) || COUNTRIES[0];
@@ -315,12 +315,12 @@ export default function Auth() {
       toast({ title: "Email required", variant: "destructive" });
       return false;
     }
-    const phoneInput = userRole === "doctor" ? mobileNumber : phone;
+    const phoneInput = userRole === "broker" ? mobileNumber : phone;
     if (signupMethod === "phone" && !phoneInput.trim()) {
       toast({ title: "Phone number required", variant: "destructive" });
       return false;
     }
-    if (userRole === "doctor") {
+    if (userRole === "broker") {
       if (!practiceNumber.trim() || !doctorNumber.trim()) {
         toast({
           title: "Registration details required",
@@ -417,7 +417,7 @@ export default function Auth() {
       if (!userId) throw new Error("No user account found");
 
       const preferredLanguage = selectedCountry.lang;
-      const phoneDigits = userRole === "doctor" ? mobileNumber : phone;
+      const phoneDigits = userRole === "broker" ? mobileNumber : phone;
       const fullPhone = phoneDigits ? `${countryCode} ${phoneDigits}` : null;
 
       const nameParts = fullName.trim().toLowerCase().split(/\s+/);
@@ -440,13 +440,13 @@ export default function Auth() {
         preferred_language: preferredLanguage,
       };
       if (avatarUrl) profileUpdate.avatar_url = avatarUrl;
-      if (userRole === "doctor") {
+      if (userRole === "broker") {
         profileUpdate.practice_number = practiceNumber.trim();
         profileUpdate.doctor_number = doctorNumber.trim();
       }
       await supabase.from("profiles").update(profileUpdate).eq("id", userId);
 
-      if (userRole === "doctor") {
+      if (userRole === "broker") {
         supabase.functions.invoke("generate-about-me", { body: { notes: "" } })
           .then(async ({ data, error }) => {
             if (error) throw error;
@@ -458,7 +458,7 @@ export default function Auth() {
       }
 
 
-      if (userRole === "patient") {
+      if (userRole === "client") {
         if (inviteToken) {
           const { data: invitation } = await supabase
             .from("client_invitations")
@@ -565,17 +565,17 @@ export default function Auth() {
     const isEmergency = rawRoles.some((r) => r === "hospital_staff" || r === "ambulance_staff" || r === "blood_bank");
     const resolvedRole =
       profileData?.role ??
-      (rawRoles.includes("patient")
-        ? "patient"
-        : rawRoles.includes("doctor")
-          ? "doctor"
+      (rawRoles.includes("client")
+        ? "client"
+        : rawRoles.includes("broker")
+          ? "broker"
           : isEmergency
             ? "emergency"
             : rawRoles.includes("admin")
               ? "admin"
               : null);
     navigate(
-      resolvedRole === "patient"
+      resolvedRole === "client"
         ? "/client/details"
         : resolvedRole === "emergency"
           ? "/provider"
@@ -722,10 +722,10 @@ export default function Auth() {
               <Select
                 value={userRole}
                 onValueChange={(v) => {
-                  if (v === "patient" || v === "doctor") {
+                  if (v === "client" || v === "broker") {
                     setUserRole(v as UserRole);
                   } else if (v === "fsp") {
-                    setUserRole("doctor" as UserRole);
+                    setUserRole("broker" as UserRole);
                   } else {
                     navigate(`/provider-signup?kind=${v}`);
                   }
@@ -735,8 +735,8 @@ export default function Auth() {
                   <SelectValue placeholder="Select user type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="patient">Client</SelectItem>
-                  <SelectItem value="doctor">Wealth Manager</SelectItem>
+                  <SelectItem value="client">Client</SelectItem>
+                  <SelectItem value="broker">Wealth Manager</SelectItem>
                   <SelectItem value="fsp">FSP / Key Individual</SelectItem>
                   <SelectItem value="insurance">Insurer</SelectItem>
                 </SelectContent>
@@ -875,10 +875,10 @@ export default function Auth() {
                 value={userRole}
                 disabled={!!inviteToken}
                 onValueChange={(v) => {
-                  if (v === "patient" || v === "doctor") {
+                  if (v === "client" || v === "broker") {
                     setUserRole(v as UserRole);
                   } else if (v === "fsp") {
-                    setUserRole("doctor" as UserRole);
+                    setUserRole("broker" as UserRole);
                   } else {
                     navigate(`/provider-signup?kind=${v}`);
                   }
@@ -888,8 +888,8 @@ export default function Auth() {
                   <SelectValue placeholder="Select user type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="patient">Client</SelectItem>
-                  <SelectItem value="doctor">Wealth Manager</SelectItem>
+                  <SelectItem value="client">Client</SelectItem>
+                  <SelectItem value="broker">Wealth Manager</SelectItem>
                   <SelectItem value="fsp">FSP / Key Individual</SelectItem>
                   <SelectItem value="insurance">Insurer</SelectItem>
                 </SelectContent>
@@ -1040,7 +1040,7 @@ export default function Auth() {
             <p className="text-xs mt-1 text-white/70">Step {currentStep + 1} of {totalSteps}: {steps[currentStep]}</p>
           </div>
           <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
-            {userRole === "doctor" ? renderDoctorStep() : renderPatientStep()}
+            {userRole === "broker" ? renderDoctorStep() : renderPatientStep()}
             <div className="flex gap-2 mt-6">
               {currentStep > 0 && (
                 <Button type="button" variant="outline" onClick={handlePrev} disabled={loading} className="flex-1">

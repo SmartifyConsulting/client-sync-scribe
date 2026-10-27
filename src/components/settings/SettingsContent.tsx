@@ -47,8 +47,8 @@ export function SettingsContent() {
   const [searchParams] = useSearchParams();
   const { isConnected: googleRealConnected, isConnecting: googleRealConnecting, connect: googleConnect, disconnect: googleDisconnect } = useGoogleCalendar();
 
-  const isDoctor = role === "doctor";
-  const isPatientRole = role === "patient";
+  const isDoctor = role === "broker";
+  const isPatientRole = role === "client";
 
   const [outlookConnected, setOutlookConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState<string | null>(null);

@@ -262,8 +262,8 @@ export default function Profile() {
   const [patientLoading, setPatientLoading] = useState(false);
   const lastSavedToastRef = useRef<number>(0);
 
-  const isDoctor = role === "doctor";
-  const isPatient = role === "patient";
+  const isDoctor = role === "broker";
+  const isPatient = role === "client";
 
   // Fetch patient record for Holarchive
   useEffect(() => {

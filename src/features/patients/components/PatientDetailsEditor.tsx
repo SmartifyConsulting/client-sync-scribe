@@ -1323,7 +1323,7 @@ export function PatientDetailsEditor({
     // `user_roles` table depending on when the account was created, so
     // check both and match on either to avoid missing real doctors.
     const [{ data: roleRows }, { data: matchingProfiles }] = await Promise.all([
-      supabase.from("user_roles").select("user_id").eq("role", "doctor"),
+      supabase.from("user_roles").select("user_id").eq("role", "broker"),
       supabase
         .from("profiles")
         .select("id, full_name, practice_number, doctor_number, specialty, role")
@@ -1331,7 +1331,7 @@ export function PatientDetailsEditor({
         .limit(20),
     ]);
     const doctorIds = new Set((roleRows || []).map((r: any) => r.user_id));
-    const data = (matchingProfiles || []).filter((p: any) => p.role === "doctor" || doctorIds.has(p.id)).slice(0, 5);
+    const data = (matchingProfiles || []).filter((p: any) => p.role === "broker" || p.role === "doctor" || doctorIds.has(p.id)).slice(0, 5);
     setGpSearchResults(data || []);
     if ((data || []).length > 0) setGpSearchOpen(true);
   };

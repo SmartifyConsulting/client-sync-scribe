@@ -88,16 +88,16 @@ export function SignInCard({ onSignUp }: { onSignUp?: () => void }) {
     const isEmergency = rawRoles.some((r) => r === "hospital_staff" || r === "ambulance_staff" || r === "blood_bank");
     const resolvedRole =
       profileData?.role ??
-      (rawRoles.includes("patient")
-        ? "patient"
-        : rawRoles.includes("doctor")
-          ? "doctor"
+      (rawRoles.includes("client")
+        ? "client"
+        : rawRoles.includes("broker")
+          ? "broker"
           : isEmergency
             ? "emergency"
             : rawRoles.includes("admin")
               ? "admin"
               : null);
-    navigate(resolvedRole === "patient" ? "/client/details" : resolvedRole === "emergency" ? "/provider" : "/dashboard");
+    navigate(resolvedRole === "client" ? "/client/details" : resolvedRole === "emergency" ? "/provider" : "/dashboard");
   };
 
   const handleLogin = async (e: React.FormEvent) => {

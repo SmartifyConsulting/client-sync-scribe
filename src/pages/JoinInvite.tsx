@@ -64,7 +64,7 @@ export default function JoinInvite() {
     if (mode === "signup") {
       const { data, error } = await supabase.auth.signUp({
         email: f.email.trim(), password: f.password,
-        options: { emailRedirectTo: `${window.location.origin}/join/${token}`, data: { full_name: `${f.first} ${f.last}`.trim(), role: "patient" } },
+        options: { emailRedirectTo: `${window.location.origin}/join/${token}`, data: { full_name: `${f.first} ${f.last}`.trim(), role: "client" } },
       });
       setBusy(false);
       if (error) return setErr(error.message);

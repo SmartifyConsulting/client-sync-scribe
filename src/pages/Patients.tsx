@@ -120,7 +120,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
         const { data: patientRoles } = await supabase
           .from("user_roles")
           .select("user_id")
-          .eq("role", "patient");
+          .eq("role", "client");
         const patientIds = (patientRoles || []).map(r => r.user_id);
         if (patientIds.length === 0) {
           setPatientSuggestions([]);

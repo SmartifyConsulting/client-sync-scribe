@@ -118,10 +118,10 @@ export default function ResetPassword() {
 
         const resolvedRole =
           profileData?.role ??
-          ((roleRows ?? []).some((row) => row.role === "patient") ? "patient" : null);
+          ((roleRows ?? []).some((row) => row.role === "client") ? "client" : null);
 
         setTimeout(() => {
-          navigate(resolvedRole === "patient" ? "/client/details" : "/dashboard");
+          navigate(resolvedRole === "client" ? "/client/details" : "/dashboard");
         }, 2000);
       } else {
         setTimeout(() => navigate("/auth"), 2000);

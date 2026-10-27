@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
-type TeamRole = "doctor" | "admin" | "patient" | "referral_agent" | "fsp";
+type TeamRole = "broker" | "admin" | "client" | "referral_agent" | "fsp";
 const ROLE_LABEL: Record<TeamRole, string> = {
   doctor: "Wealth Manager", admin: "Admin", patient: "Client", referral_agent: "Referral Agent", fsp: "FSP",
 };
@@ -34,7 +34,7 @@ export default function WealthUsers() {
     queryFn: async () => {
       const sbx = supabase as any;
       const { data: roles } = await sbx.from("user_roles").select("user_id, role")
-        .in("role", ["doctor", "admin", "referral_agent", "fsp"]);
+        .in("role", ["broker", "admin", "referral_agent", "fsp"]);
       const ids = Array.from(new Set((roles ?? []).map((r: any) => r.user_id)));
       if (!ids.length) return [];
       const { data: profiles } = await sbx.from("profiles").select("id, full_name, avatar_url").in("id", ids);
@@ -114,7 +114,7 @@ export default function WealthUsers() {
           <p className="py-12 text-center text-sm text-muted-foreground">No team members yet.</p>
         ) : (
           members.data.map((m) => {
-            const nonAdminRole = (m.roles.find((r) => r !== "admin") ?? "doctor") as TeamRole;
+            const nonAdminRole = (m.roles.find((r) => r !== "admin") ?? "broker") as TeamRole;
             return (
               <div key={String(m.id)} className="flex items-center justify-between gap-3 px-4 py-3">
                 <div className="min-w-0">
@@ -129,7 +129,7 @@ export default function WealthUsers() {
                       <Select value={nonAdminRole} onValueChange={(v) => changeRole(m.id as string, m.roles, v as TeamRole)}>
                         <SelectTrigger className="h-8 w-40 text-xs"><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          {(["doctor", "referral_agent", "fsp"] as TeamRole[]).map((r) => (
+                          {(["broker", "referral_agent", "fsp"] as TeamRole[]).map((r) => (
                             <SelectItem key={r} value={r}>{ROLE_LABEL[r]}</SelectItem>
                           ))}
                         </SelectContent>
