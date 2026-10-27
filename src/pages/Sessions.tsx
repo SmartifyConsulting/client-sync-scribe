@@ -39,12 +39,8 @@ import {
   Save,
   CalendarCheck,
 } from "lucide-react";
-import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
-import { MedicalCertificateEditor } from "@/components/sessions/MedicalCertificateEditor";
-import { ReferralLetterEditor } from "@/components/sessions/ReferralLetterEditor";
 import { GeneralLetterEditor } from "@/components/sessions/GeneralLetterEditor";
-import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmissionEditor";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { WealthClientOverview } from "@/features/sessions/components/WealthClientOverview";
 import { SessionDiscStrip } from "@/features/sessions/components/SessionDiscStrip";
@@ -57,7 +53,6 @@ import {
   type PausedSessionSnapshot,
 } from "@/features/sessions/utils/pausedSession";
 
-import { SessionDiagnosticsModal } from "@/components/sessions/SessionDiagnosticsModal";
 
 import { ClinicianNotesColumns } from "@/features/sessions/components/ClinicianNotesAccordion";
 import { DrawingPad } from "@/components/drawings/DrawingPad";
@@ -185,20 +180,10 @@ export default function Sessions() {
   const [actionPoints, setActionPoints] = useState<string[]>([]);
   const [sessionDuration, setSessionDuration] = useState(0);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-  const [showPrescriptionEditor, setShowPrescriptionEditor] = useState(false);
   const [showInvoiceEditor, setShowInvoiceEditor] = useState(false);
-  const [prescription, setPrescription] = useState<string | null>(null);
   const [invoice, setInvoice] = useState<{ id: string; invoice_number: string; amount: number } | null>(null);
   const [currentMedications, setCurrentMedications] = useState<{ medication: string; dosage: string; frequency: string }[]>([]);
   const [patientSelectorOpen, setPatientSelectorOpen] = useState(false);
-  const [aiDiagnosis, setAiDiagnosis] = useState<string | null>(null);
-  const [isGeneratingDiagnosis, setIsGeneratingDiagnosis] = useState(false);
-  const [translatedDiagnosis, setTranslatedDiagnosis] = useState<string | null>(null);
-  const [isTranslatingDiagnosis, setIsTranslatingDiagnosis] = useState(false);
-  const [showTranslated, setShowTranslated] = useState(false);
-  const [isNarrating, setIsNarrating] = useState(false);
-  const narrationAudioRef = useRef<HTMLAudioElement | null>(null);
-  const [doctorLanguage, setDoctorLanguage] = useState<string>("English");
   const [pastPatientSessions, setPastPatientSessions] = useState<any[]>([]);
   const savedAudioUrlRef = useRef<string | null>(null);
   const [pendingTranscript, setPendingTranscript] = useState<string>("");
@@ -215,12 +200,7 @@ export default function Sessions() {
   const [showAboutRecordingDialog, setShowAboutRecordingDialog] = useState(false);
   const [showAiConsultPrompt, setShowAiConsultPrompt] = useState(false);
   const micPreWarmedRef = useRef(false);
-  const [showMedicalCertificateEditor, setShowMedicalCertificateEditor] = useState(false);
-  const [showDiagnosticsModal, setShowDiagnosticsModal] = useState(false);
-  const [findingsNote, setFindingsNote] = useState("");
-  const [showReferralLetterEditor, setShowReferralLetterEditor] = useState(false);
   const [showGeneralLetterEditor, setShowGeneralLetterEditor] = useState(false);
-  const [showHospitalAdmissionEditor, setShowHospitalAdmissionEditor] = useState(false);
   const [selectedDocType, setSelectedDocType] = useState<string>("");
   const notesRef = useRef<string>("");
   const personalNotesRef = useRef<string>("");
@@ -361,60 +341,6 @@ export default function Sessions() {
     fetchPastSessions();
   }, [patientId]);
 
-  // Generate AI Clinician Diagnosis
-  const generateAIDiagnosis = async (override?: { summary?: string; transcript?: string }) => {
-    const summaryText = override?.summary ?? summary;
-    const transcriptText = override?.transcript ?? transcript;
-    if (!currentPatient || !summaryText) return;
-
-    setIsGeneratingDiagnosis(true);
-    setAiDiagnosis(null);
-    
-    try {
-      const { data, error } = await supabase.functions.invoke('ai-clinician-diagnosis', {
-        body: {
-          sessionSummary: summaryText,
-          sessionTranscript: transcriptText,
-
-          patientName: currentPatient.name,
-          patientAge: currentPatient.dob ? calculateAge(currentPatient.dob) : null,
-          allergies: currentPatient.allergies,
-          currentMedications: currentMedications,
-          pastSessions: pastPatientSessions,
-          conditions: currentPatient.notes,
-          language: doctorLanguage
-        }
-      });
-      
-      if (error) throw error;
-      
-      if (data?.recommendation) {
-        setAiDiagnosis(data.recommendation);
-        setTranslatedDiagnosis(null);
-        setShowTranslated(false);
-      } else if (data?.error) {
-        throw new Error(data.error);
-      }
-    } catch (error) {
-      console.error('Error generating AI diagnosis:', error);
-      setAiDiagnosis('Failed to generate diagnostic recommendation. Please try again.');
-    } finally {
-      setIsGeneratingDiagnosis(false);
-    }
-  };
-
-  // Helper to calculate age from DOB
-  const calculateAge = (dob: string): number => {
-    const birthDate = new Date(dob);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    return age;
-  };
-
   // Keep refs in sync with state
   useEffect(() => {
     currentSessionIdRef.current = currentSessionId;
@@ -457,23 +383,6 @@ export default function Sessions() {
       return next;
     });
   }, [postSessionQueue.length]);
-
-  // Persist the AI assessment + doctor findings note against the session row
-  const persistAssessment = useCallback(async (note?: string) => {
-    const sid = currentSessionIdRef.current;
-    if (!sid) return;
-    try {
-      await supabase
-        .from("sessions")
-        .update({
-          ai_diagnosis: aiDiagnosis ?? null,
-          ...(note !== undefined ? { ai_findings_note: note || null } : {}),
-        } as any)
-        .eq("id", sid);
-    } catch (e) {
-      console.error("Failed to persist AI assessment:", e);
-    }
-  }, [aiDiagnosis]);
 
   // --- Silent document creation (no per-document review dialog) ---
   /**
@@ -1239,12 +1148,6 @@ export default function Sessions() {
     startRecording();
   };
 
-  const handleSavePrescription = (prescriptionData: { content: string; rawTranscript: string }) => {
-    setPrescription(prescriptionData.content);
-    // Append prescription to notes
-    setNotes(prev => prev ? `${prev}\n\n--- PRESCRIPTION ---\n${prescriptionData.content}` : `--- PRESCRIPTION ---\n${prescriptionData.content}`);
-  };
-
   const toggleRecording = () => {
     console.log("=== toggleRecording called ===");
     console.log("isRecording:", isRecording);
@@ -1274,19 +1177,6 @@ export default function Sessions() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Session Diagnostics Modal */}
-      <SessionDiagnosticsModal
-        open={showDiagnosticsModal}
-        fullDiagnosis={aiDiagnosis}
-        diagnosisLoading={isGeneratingDiagnosis}
-        patientName={currentPatient?.name}
-        sessionDate={new Date().toLocaleDateString()}
-        onClose={() => {
-          setShowDiagnosticsModal(false);
-          persistAssessment();
-        }}
-      />
-
       {/* Session start prompts — a SINGLE Dialog root that swaps its content between the
           two steps (Session Recordings notice, then AI Consult opt-in). Using one Dialog
           instead of two separate ones avoids Radix briefly double-mounting a dialog while
@@ -1877,93 +1767,6 @@ export default function Sessions() {
             sessionId={currentSessionId}
             doctorName={doctorName}
             patientName={currentPatient?.name}
-            clinicianNotes={showTranslated && translatedDiagnosis ? translatedDiagnosis : aiDiagnosis}
-            clinicianActions={
-              <div className="flex items-center gap-2">
-                {isGeneratingDiagnosis && (
-                  <span className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Analyzing...
-                  </span>
-                )}
-                {aiDiagnosis && doctorLanguage !== 'English' && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="gap-1 text-xs"
-                    disabled={isTranslatingDiagnosis}
-                    onClick={async () => {
-                      if (translatedDiagnosis) {
-                        setShowTranslated(!showTranslated);
-                        return;
-                      }
-                      setIsTranslatingDiagnosis(true);
-                      try {
-                        const { data, error } = await supabase.functions.invoke('summarize-session', {
-                          body: { content: aiDiagnosis, action: 'translate', targetLanguage: doctorLanguage }
-                        });
-                        if (!error && data?.summary) {
-                          setTranslatedDiagnosis(data.summary);
-                          setShowTranslated(true);
-                        }
-                      } catch (e) { console.error('Translation error:', e); }
-                      setIsTranslatingDiagnosis(false);
-                    }}
-                  >
-                    {isTranslatingDiagnosis ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                    {showTranslated ? 'Show Original' : `Translate to ${doctorLanguage}`}
-                  </Button>
-                )}
-                {aiDiagnosis && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="gap-1 text-xs"
-                    onClick={async () => {
-                      if (isNarrating) {
-                        narrationAudioRef.current?.pause();
-                        narrationAudioRef.current = null;
-                        setIsNarrating(false);
-                        return;
-                      }
-                      setIsNarrating(true);
-                      try {
-                        const textToNarrate = showTranslated && translatedDiagnosis ? translatedDiagnosis : aiDiagnosis;
-                        const { data: { session: authSession } } = await supabase.auth.getSession();
-                        const accessToken = authSession?.access_token;
-                        if (!accessToken) throw new Error('Not authenticated');
-                        const response = await fetch(
-                          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`,
-                          {
-                            method: 'POST',
-                            headers: {
-                              'Content-Type': 'application/json',
-                              'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-                              'Authorization': `Bearer ${accessToken}`,
-                            },
-                            body: JSON.stringify({ text: textToNarrate }),
-                          }
-                        );
-                        if (!response.ok) throw new Error('Narration failed');
-                        const blob = await response.blob();
-                        const url = URL.createObjectURL(blob);
-                        const audio = new Audio(url);
-                        audio.onended = () => { setIsNarrating(false); narrationAudioRef.current = null; };
-                        audio.play();
-                        narrationAudioRef.current = audio;
-                      } catch (e) {
-                        console.error('Narration error:', e);
-                        setIsNarrating(false);
-                        toast({ title: "Narration failed", variant: "destructive" });
-                      }
-                    }}
-                  >
-                    {isNarrating ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                    {isNarrating ? 'Stop' : 'Narrate'}
-                  </Button>
-                )}
-              </div>
-            }
           />
 
           {/* Post-Session Actions: Create Documents */}
@@ -1975,23 +1778,15 @@ export default function Sessions() {
                   <SelectValue placeholder="Select document type..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="prescription">Prescription</SelectItem>
                   <SelectItem value="invoice">Fee statement</SelectItem>
-                  <SelectItem value="medical_certificate">Advice Letter</SelectItem>
-                  <SelectItem value="referral_letter">Referral Letter</SelectItem>
                   <SelectItem value="general_letter">General Letter</SelectItem>
-                  <SelectItem value="hospital_admission">Hospital Admission</SelectItem>
                 </SelectContent>
               </Select>
               <Button
                 disabled={!selectedDocType || !patientId}
                 onClick={() => {
-                  if (selectedDocType === 'prescription') setShowPrescriptionEditor(true);
-                  else if (selectedDocType === 'invoice') setShowInvoiceEditor(true);
-                  else if (selectedDocType === 'medical_certificate') setShowMedicalCertificateEditor(true);
-                  else if (selectedDocType === 'referral_letter') setShowReferralLetterEditor(true);
+                  if (selectedDocType === 'invoice') setShowInvoiceEditor(true);
                   else if (selectedDocType === 'general_letter') setShowGeneralLetterEditor(true);
-                  else if (selectedDocType === 'hospital_admission') setShowHospitalAdmissionEditor(true);
                 }}
               >
                 <FileText className="h-4 w-4 mr-1" />
@@ -2030,18 +1825,6 @@ export default function Sessions() {
         </div>
       )}
 
-      {showPrescriptionEditor && currentPatient && patientId && (
-        <PrescriptionEditor
-          patientName={currentPatient.name}
-          patientId={patientId}
-          doctorName="Dr. Georgia Adams"
-          allergies={currentPatient.allergies}
-          currentMedications={currentMedications}
-          onClose={() => setShowPrescriptionEditor(false)}
-          onSave={handleSavePrescription}
-        />
-      )}
-
       {/* Invoice Editor Modal */}
       {showInvoiceEditor && currentPatient && patientId && (
         <InvoiceEditor
@@ -2053,28 +1836,6 @@ export default function Sessions() {
         />
       )}
 
-      {/* Medical Certificate Editor Modal */}
-      {showMedicalCertificateEditor && currentPatient && patientId && (
-        <MedicalCertificateEditor
-          patientName={currentPatient.name}
-          patientId={patientId}
-          sessionId={currentSessionId || undefined}
-          onClose={() => setShowMedicalCertificateEditor(false)}
-          onSave={() => setShowMedicalCertificateEditor(false)}
-        />
-      )}
-
-      {/* Referral Letter Editor Modal */}
-      {showReferralLetterEditor && currentPatient && patientId && (
-        <ReferralLetterEditor
-          patientName={currentPatient.name}
-          patientId={patientId}
-          sessionId={currentSessionId || undefined}
-          onClose={() => setShowReferralLetterEditor(false)}
-          onSave={() => setShowReferralLetterEditor(false)}
-        />
-      )}
-
       {/* General Letter Editor Modal */}
       {showGeneralLetterEditor && currentPatient && patientId && (
         <GeneralLetterEditor
@@ -2083,17 +1844,6 @@ export default function Sessions() {
           sessionId={currentSessionId || undefined}
           onClose={() => setShowGeneralLetterEditor(false)}
           onSave={() => setShowGeneralLetterEditor(false)}
-        />
-      )}
-
-      {/* Hospital Admission Editor Modal */}
-      {showHospitalAdmissionEditor && currentPatient && patientId && (
-        <HospitalAdmissionEditor
-          patientName={currentPatient.name}
-          patientId={patientId}
-          sessionId={currentSessionId || undefined}
-          onClose={() => setShowHospitalAdmissionEditor(false)}
-          onSave={() => setShowHospitalAdmissionEditor(false)}
         />
       )}
     </div>

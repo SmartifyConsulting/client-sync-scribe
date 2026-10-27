@@ -8,7 +8,6 @@
 export type InsightKind =
   | "summarize-session"
   | "analyze-medical-image"
-  | "ai-clinician-diagnosis"
   | "check-medication-conflicts"
   | "lookup-medical-codes"
   | "summarize-patient-history";

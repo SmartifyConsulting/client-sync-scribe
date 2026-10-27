@@ -29,9 +29,6 @@ export const analyzeMedicalImage = (payload: { imageUrl: string; documentId?: st
 export const compareMedicalImages = (payload: { imageUrls: string[]; comparisonType?: string }) =>
   safeInvoke("compare-medical-images", payload);
 
-export const aiClinicianDiagnosis = (payload: Record<string, unknown>) =>
-  safeInvoke("ai-clinician-diagnosis", payload);
-
 export const checkMedicationConflicts = (payload: { medications: string[] }) =>
   safeInvoke("check-medication-conflicts", payload);
 
