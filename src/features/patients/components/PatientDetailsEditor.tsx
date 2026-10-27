@@ -15,6 +15,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AddressAutocomplete } from "@/components/patients/AddressAutocomplete";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { useSessions } from "@/hooks/useSessions";
 import {
   Pencil,
@@ -413,6 +414,7 @@ export function PatientDetailsEditor({
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { isDoctor } = useUserRole();
+  const { isAdmin } = useIsAdmin();
   const queryClient = useQueryClient();
   const { sessions: patientSessions, loading: patientSessionsLoading } = useSessions(
     isSelfService ? patient.id : undefined,
@@ -1588,7 +1590,11 @@ export function PatientDetailsEditor({
   // Tab list renderer
   const renderTabsList = () => {
     const activeTabs = isSelfService && section ? SECTION_TABS[section] || null : null;
-    const show = (tab: string) => !activeTabs || activeTabs.includes(tab);
+    // Healthcare-only tabs with no wealth equivalent yet: hidden from clients
+    // regardless of section mapping (admins bypass, matching WEALTH_HIDDEN_MODULES).
+    const WEALTH_HIDDEN_TABS = ["labresults", "roundtable"];
+    const show = (tab: string) =>
+      (!activeTabs || activeTabs.includes(tab)) && (isAdmin || !WEALTH_HIDDEN_TABS.includes(tab));
     const triggerClass =
       "tab-brand whitespace-nowrap text-xs px-3 py-1.5";
 
@@ -1973,7 +1979,7 @@ export function PatientDetailsEditor({
               </TabsContent>
             )}
 
-            {isSelfService && (
+            {isSelfService && isAdmin && (
               <TabsContent value="labresults" className="mt-4">
                 <div className="mb-4">
                   <h2 className="text-lg font-semibold text-primary-dark">Lab Results</h2>
@@ -1991,7 +1997,7 @@ export function PatientDetailsEditor({
               </TabsContent>
             )}
 
-            {isSelfService && (
+            {isSelfService && isAdmin && (
               <TabsContent value="roundtable" className="mt-4">
                 <div className="mb-4">
                   <h2 className="text-lg font-semibold text-primary-dark">My Round Table</h2>
@@ -2655,7 +2661,7 @@ export function PatientDetailsEditor({
             </TabsContent>
           )}
 
-          {isSelfService && (
+          {isSelfService && isAdmin && (
             <TabsContent value="labresults" className="mt-4">
               <div className="mb-4">
                 <h2 className="text-lg font-semibold text-primary-dark">Lab Results</h2>
@@ -2673,7 +2679,7 @@ export function PatientDetailsEditor({
             </TabsContent>
           )}
 
-          {isSelfService && (
+          {isSelfService && isAdmin && (
             <TabsContent value="roundtable" className="mt-4">
               <div className="mb-4">
                 <h2 className="text-lg font-semibold text-primary-dark">My Round Table</h2>
