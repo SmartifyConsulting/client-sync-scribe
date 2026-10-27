@@ -79,10 +79,10 @@ export function RelationshipInsightCard({ patientId }: { patientId: string }) {
       ) : !assessment ? (
         <p className="text-sm text-muted-foreground italic">
           {row?.status === "insufficient_information"
-            ? "The patient felt none of the descriptions fitted. Consider exploring communication preferences directly."
+            ? "The client felt none of the descriptions fitted. Consider exploring communication preferences directly."
             : row?.status === "incomplete"
-            ? "The patient has started the short About Me exercise but not yet finished it."
-            : "Available once the patient completes the short About Me exercise on their profile."}
+            ? "The client has started the short About Me exercise but not yet finished it."
+            : "Available once the client completes the short About Me exercise on their profile."}
         </p>
       ) : (
         <RelationshipAssessmentDetails assessment={assessment} />

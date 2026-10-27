@@ -129,8 +129,8 @@ export function DiscPersonalityCard({ patientId, hasSessions }: Props) {
       ) : !profile ? (
         <p className="text-sm text-muted-foreground italic">
           {hasSessions
-            ? "No DISC profile yet — click Generate to build one from this patient's sessions."
-            : "DISC profile will generate after the patient's first completed consultation."}
+            ? "No DISC profile yet — click Generate to build one from this client's sessions."
+            : "DISC profile will generate after the client's first completed consultation."}
         </p>
       ) : (
         <>

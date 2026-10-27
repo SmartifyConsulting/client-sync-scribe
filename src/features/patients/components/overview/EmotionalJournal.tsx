@@ -41,10 +41,10 @@ interface InsightRow {
 }
 
 const PRIVACY_NOTE =
-  "This journal is private. Only you can read what you write here. Your care team never sees these entries — only a short, generalised note may appear in your health summary.";
+  "This journal is private. Only you can read what you write here. Your Wealth Manager never sees these entries — only a short, generalised note may appear in your summary.";
 
 const SOMATIC_NOTE =
-  "Emotions have a somatological effect: sustained stress, grief, anger or fear commonly express themselves physically — muscle tension, headaches, pain, disturbed sleep and digestive changes. This is general information, not a diagnosis.";
+  "Financial stress and major life changes can affect your wellbeing and decision-making. Noting how you're feeling here helps your Wealth Manager understand the context behind your financial goals. This is general information, not professional advice.";
 
 function bucketOf(dateStr: string): "Today" | "This week" | "This month" | "Earlier" {
   try {
@@ -304,8 +304,8 @@ export function EmotionalJournal({ patientId }: { patientId: string }) {
         <div className="flex items-start gap-2 rounded-xl border border-primary/30 bg-primary/5 p-3">
           <Lock className="h-4 w-4 text-primary mt-0.5 shrink-0" />
           <p className="text-xs text-foreground leading-relaxed">
-            The patient's journal entries are private. Only the short, generalised summations below are shared with the
-            care team.
+            The client's journal entries are private. Only the short, generalised summations below are shared with the
+            Wealth Manager.
           </p>
         </div>
       )}

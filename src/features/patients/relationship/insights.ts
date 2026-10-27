@@ -329,7 +329,7 @@ export const LOW_CONFIDENCE_NOTE =
   "Early insight — consider exploring communication preferences directly.";
 
 export const ETHICAL_TOOLTIP =
-  "Relationship insight — this information is intended to support rapport and communication. It is not a medical, psychological or diagnostic assessment and should not be used to make clinical decisions.";
+  "Relationship insight — this information is intended to support rapport and communication. It is not a professional assessment and should not be used to make financial advice decisions.";
 
 /** Close neighbouring patterns for each primary — internal, testing-facing only. */
 const SECONDARY_MAP: Record<number, number[]> = {

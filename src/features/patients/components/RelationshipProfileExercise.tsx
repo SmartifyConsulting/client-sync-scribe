@@ -29,7 +29,7 @@ const INTRO =
   "There are no right or wrong answers. These questions simply help us understand how you tend to approach things and how we can communicate with you in a way that feels natural.";
 const INTRO_2 = "Don't overthink your answers. Choose the description that feels most like you.";
 const PRIVACY =
-  "Your responses are used to help your care team understand how best to communicate with you. They are not a medical or psychological diagnosis.";
+  "Your responses are used to help your Wealth Manager understand how best to communicate with you. They are not a professional assessment of any kind.";
 
 /**
  * "Help us understand you" — a short, warm two-part exercise inside About Me.
@@ -172,11 +172,11 @@ export function RelationshipProfileExercise({ patientId }: { patientId: string }
         <p className="text-xs text-muted-foreground">
           {completed
             ? row?.status === "insufficient_information"
-              ? "Completed — the patient felt none of the descriptions fitted."
+              ? "Completed — the client felt none of the descriptions fitted."
               : `Completed${row?.completed_at ? ` on ${new Date(row.completed_at).toLocaleDateString()}` : ""}.`
             : row?.status === "incomplete"
             ? "Started but not yet finished."
-            : "Not started yet — the patient can complete this from their own profile."}
+            : "Not started yet — the client can complete this from their own profile."}
         </p>
         {assessment && <RelationshipAssessmentDetails assessment={assessment} compact />}
       </div>
@@ -194,7 +194,7 @@ export function RelationshipProfileExercise({ patientId }: { patientId: string }
         </div>
         {justFinished && (
           <p className="text-sm text-foreground">
-            That's all we need. This helps your care team understand how best to work with you.
+            That's all we need. This helps your Wealth Manager understand how best to work with you.
           </p>
         )}
         <p className="text-xs text-muted-foreground">You've completed this short exercise.</p>
