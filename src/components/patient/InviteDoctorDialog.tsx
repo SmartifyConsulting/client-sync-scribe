@@ -109,7 +109,7 @@ export function InviteDoctorDialog({
       // Check for existing request (use doctor_id when available, fall back to numbers)
       let existingRequest: any = null;
       const baseQuery = supabase
-        .from("doctor_access_requests")
+        .from("advisor_access_requests")
         .select("*")
         .eq("patient_user_id", user.id);
 
@@ -129,13 +129,13 @@ export function InviteDoctorDialog({
           return;
         }
         const { error: updateError } = await supabase
-          .from("doctor_access_requests")
+          .from("advisor_access_requests")
           .update({ status: "pending", updated_at: new Date().toISOString() })
           .eq("id", existingRequest.id);
         if (updateError) throw updateError;
       } else {
         const { error: insertError } = await supabase
-          .from("doctor_access_requests")
+          .from("advisor_access_requests")
           .insert({
             patient_user_id: user.id,
             doctor_practice_number: practiceNum,

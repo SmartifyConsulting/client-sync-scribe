@@ -608,7 +608,7 @@ export function PatientDetailsEditor({
       return;
     }
     supabase
-      .from("doctor_patient_access")
+      .from("broker_client_access")
       .select("doctor_id")
       .eq("patient_user_id", patient.patient_user_id)
       .then(async ({ data: access }) => {
@@ -744,7 +744,7 @@ export function PatientDetailsEditor({
           doctorId = user.id;
         } else {
           const { data: access } = await supabase
-            .from("doctor_patient_access")
+            .from("broker_client_access")
             .select("doctor_id, granted_at")
             .eq("patient_user_id", user.id)
             .eq("is_active", true)

@@ -117,11 +117,11 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
 
       const [{ data: accessData, error: accessError }, { data: hiddenRows }] = await Promise.all([
         supabase
-          .from("doctor_patient_access")
+          .from("broker_client_access")
           .select("*")
           .eq("patient_user_id", user.id),
         supabase
-          .from("patient_hidden_doctors")
+          .from("client_hidden_advisors")
           .select("doctor_id")
           .eq("patient_user_id", user.id),
       ]);
@@ -182,7 +182,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
   const handleHide = async (access: DoctorAccess) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    const { error } = await supabase.from("patient_hidden_doctors").insert({
+    const { error } = await supabase.from("client_hidden_advisors").insert({
       patient_user_id: user.id,
       doctor_id: access.doctor_id,
     } as any);
@@ -199,14 +199,14 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
     if (!user) return;
     // Unhide
     await supabase
-      .from("patient_hidden_doctors")
+      .from("client_hidden_advisors")
       .delete()
       .eq("patient_user_id", user.id)
       .eq("doctor_id", access.doctor_id);
     // If deactivated, re-activate
     if (!access.is_active) {
       await supabase
-        .from("doctor_patient_access")
+        .from("broker_client_access")
         .update({ is_active: true, revoked_at: null } as any)
         .eq("id", access.id);
     }
@@ -271,7 +271,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
     setUninviteLoading(true);
     try {
       await supabase
-        .from("doctor_patient_access")
+        .from("broker_client_access")
         .update({ is_active: false, revoked_at: new Date().toISOString() } as any)
         .eq("id", uninviteTarget.id);
 

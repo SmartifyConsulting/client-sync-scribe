@@ -158,7 +158,7 @@ export default function PatientDashboard() {
       if (!currentUser) return [];
       
       const { data: accessData } = await supabase
-        .from("doctor_patient_access")
+        .from("broker_client_access")
         .select("id, doctor_id, granted_at")
         .eq("patient_user_id", currentUser.id)
         .eq("is_active", true);

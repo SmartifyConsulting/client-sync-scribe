@@ -246,7 +246,7 @@ export function TodaysBriefing() {
             // Get linked doctors for this patient
             if (patientUserId) {
               const { data: accessRecords } = await supabase
-                .from('doctor_patient_access')
+                .from('broker_client_access')
                 .select('doctor_id')
                 .eq('patient_user_id', patientUserId)
                 .eq('is_active', true);

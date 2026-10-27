@@ -90,7 +90,7 @@ export default function PatientAccessManagement() {
     try {
       // Fetch outgoing invites that were accepted
       const { data: acceptedRequests, error: reqError } = await supabase
-        .from("doctor_access_requests")
+        .from("advisor_access_requests")
         .select("*")
         .eq("patient_user_id", user.id)
         .eq("status", "accepted")
@@ -108,11 +108,11 @@ export default function PatientAccessManagement() {
           .eq("doctor_number", req.doctor_registration_number)
           .maybeSingle();
 
-        // Fetch granted permissions from doctor_patient_access
+        // Fetch granted permissions from broker_client_access
         let permissions: AccessPermission[] | undefined;
         if (profile?.id) {
           const { data: access } = await supabase
-            .from("doctor_patient_access")
+            .from("broker_client_access")
             .select("permissions")
             .eq("doctor_id", profile.id)
             .eq("patient_user_id", user.id)
@@ -218,7 +218,7 @@ export default function PatientAccessManagement() {
       if (action === "accepted") {
         const invitation = incomingInvitations.find(i => i.id === invitationId);
         if (invitation) {
-          await supabase.from("doctor_patient_access").insert({
+          await supabase.from("broker_client_access").insert({
             doctor_id: invitation.sender_id,
             patient_user_id: user!.id,
             permissions: permissionsPerInvitation[invitationId] || [],

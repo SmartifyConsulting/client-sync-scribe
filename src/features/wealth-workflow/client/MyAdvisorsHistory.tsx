@@ -13,7 +13,7 @@ export function MyAdvisorsHistory({ patientId }: { patientId: string }) {
       const rows: { id: string; from: string; to: string | null; active: boolean }[] = [];
       if (p?.patient_user_id) {
         const { data: acc } = await supabase
-          .from("doctor_patient_access")
+          .from("broker_client_access")
           .select("doctor_id, granted_at, revoked_at, is_active")
           .eq("patient_user_id", p.patient_user_id);
         for (const a of acc ?? []) rows.push({ id: a.doctor_id, from: a.granted_at, to: a.revoked_at, active: a.is_active && !a.revoked_at });

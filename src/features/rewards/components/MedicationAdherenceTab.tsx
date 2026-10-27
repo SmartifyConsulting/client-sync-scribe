@@ -158,7 +158,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
       if (chronicCount === 0) return { hasUnsyncedChronic: false };
       // Check if patient has any active doctor connection
       const { data: access } = await supabase
-        .from("doctor_patient_access")
+        .from("broker_client_access")
         .select("doctor_id")
         .eq("patient_user_id", patient?.patient_user_id || user.id)
         .eq("is_active", true)

@@ -194,7 +194,7 @@ export default function PatientProfile() {
 
       // Check if this doctor has session_summaries permission from the patient
       const { data: accessRecords } = await supabase
-        .from("doctor_patient_access")
+        .from("broker_client_access")
         .select("permissions")
         .eq("patient_user_id", patientUserId)
         .eq("is_active", true);

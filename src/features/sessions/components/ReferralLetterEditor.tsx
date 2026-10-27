@@ -100,7 +100,7 @@ export function ReferralLetterEditor({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       const { data } = await supabase
-        .from("referral_doctors")
+        .from("referral_partners")
         .select("id, first_name, last_name, specialty, address, email")
         .eq("user_id", user.id)
         .order("last_name", { ascending: true });

@@ -34,7 +34,7 @@ export function ProfileSharesSection({ ownerUserId }: { ownerUserId: string }) {
   const load = async () => {
     setLoading(true);
     const { data, error } = await supabase
-      .from("patient_profile_shares")
+      .from("client_profile_shares")
       .select("*")
       .eq("owner_user_id", ownerUserId)
       .order("created_at", { ascending: false });
@@ -70,7 +70,7 @@ export function ProfileSharesSection({ ownerUserId }: { ownerUserId: string }) {
       if (data) resolvedUserId = (data as any).id;
     }
 
-    const { error } = await supabase.from("patient_profile_shares").insert({
+    const { error } = await supabase.from("client_profile_shares").insert({
       owner_user_id: ownerUserId,
       shared_with_user_id: resolvedUserId,
       shared_with_username: username,
@@ -98,7 +98,7 @@ export function ProfileSharesSection({ ownerUserId }: { ownerUserId: string }) {
 
   const updateShare = async (id: string, patch: Partial<Share>) => {
     const { error } = await supabase
-      .from("patient_profile_shares")
+      .from("client_profile_shares")
       .update(patch as any)
       .eq("id", id);
     if (error) {
@@ -109,7 +109,7 @@ export function ProfileSharesSection({ ownerUserId }: { ownerUserId: string }) {
   };
 
   const removeShare = async (id: string) => {
-    const { error } = await supabase.from("patient_profile_shares").delete().eq("id", id);
+    const { error } = await supabase.from("client_profile_shares").delete().eq("id", id);
     if (error) {
       toast({ title: "Delete failed", description: error.message, variant: "destructive" });
       return;

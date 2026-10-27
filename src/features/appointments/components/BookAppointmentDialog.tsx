@@ -109,7 +109,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
     setLoading(true);
     try {
       const { data: access } = await supabase
-        .from("doctor_patient_access")
+        .from("broker_client_access")
         .select("doctor_id")
         .eq("patient_user_id", user.id)
         .eq("is_active", true);

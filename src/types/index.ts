@@ -76,9 +76,9 @@ export type HeaderFooterTemplate = Row<"header_footer_templates">;
 export type Practice = Row<"practices">;
 export type PracticeMember = Row<"practice_members">;
 
-export type DoctorPatientAccess = Row<"doctor_patient_access">;
-export type DoctorAccessRequest = Row<"doctor_access_requests">;
-export type PatientInvitation = Row<"patient_invitations">;
+export type BrokerClientAccess = Row<"broker_client_access">;
+export type AdvisorAccessRequest = Row<"advisor_access_requests">;
+export type ClientInvitation = Row<"client_invitations">;
 
 /* ------------------------------------------------------------------ */
 /* Enums                                                               */

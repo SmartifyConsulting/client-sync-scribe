@@ -461,14 +461,14 @@ export default function Auth() {
       if (userRole === "patient") {
         if (inviteToken) {
           const { data: invitation } = await supabase
-            .from("patient_invitations")
+            .from("client_invitations")
             .select("*")
             .eq("token", inviteToken)
             .eq("status", "pending")
             .single();
 
           if (invitation) {
-            await supabase.from("patient_invitations").update({ status: "accepted" }).eq("id", invitation.id);
+            await supabase.from("client_invitations").update({ status: "accepted" }).eq("id", invitation.id);
             if (invitation.patient_id) {
               await supabase.from("patients").update({
                 patient_user_id: userId,
@@ -476,7 +476,7 @@ export default function Auth() {
                 phone: fullPhone,
               }).eq("id", invitation.patient_id);
             }
-            await supabase.from("doctor_patient_access").insert({
+            await supabase.from("broker_client_access").insert({
               doctor_id: invitation.doctor_id,
               patient_user_id: userId,
               permissions: ["patient_info", "calendar", "session_summaries", "prescription_history"],

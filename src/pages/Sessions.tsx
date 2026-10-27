@@ -662,13 +662,13 @@ export default function Sessions() {
         doc = inserted ?? null;
       }
       if (data.doctor_name) {
-        const { data: refDoc } = await supabase.from('referral_doctors')
+        const { data: refDoc } = await supabase.from('referral_partners')
           .select('id, referral_count')
           .eq('user_id', user.id)
           .ilike('last_name', `%${data.doctor_name.split(' ').pop()}%`)
           .maybeSingle();
         if (refDoc) {
-          await supabase.from('referral_doctors')
+          await supabase.from('referral_partners')
             .update({ referral_count: (refDoc.referral_count || 0) + 1 })
             .eq('id', refDoc.id);
         }

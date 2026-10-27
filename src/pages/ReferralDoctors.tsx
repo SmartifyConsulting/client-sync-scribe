@@ -258,7 +258,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
   const fetchDoctors = async () => {
     setLoading(true);
     const { data, error } = await supabase
-      .from("referral_doctors")
+      .from("referral_partners")
       .select("*")
       .order("last_name", { ascending: true });
     if (!error && data) setDoctors(data as any);
@@ -278,11 +278,11 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
       email: form.email || null, phone: form.phone || null, specialty,
     };
     if (editingId) {
-      const { error } = await supabase.from("referral_doctors").update(record).eq("id", editingId);
+      const { error } = await supabase.from("referral_partners").update(record).eq("id", editingId);
       if (error) toast({ title: "Error", description: "Failed to update", variant: "destructive" });
       else toast({ title: "Updated", description: "Referral wealth manager updated" });
     } else {
-      const { error } = await supabase.from("referral_doctors").insert({ ...record, user_id: user.id });
+      const { error } = await supabase.from("referral_partners").insert({ ...record, user_id: user.id });
       if (error) toast({ title: "Error", description: "Failed to add", variant: "destructive" });
       else toast({ title: "Added", description: "Referral wealth manager added" });
     }
@@ -317,7 +317,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
   };
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("referral_doctors").delete().eq("id", id);
+    const { error } = await supabase.from("referral_partners").delete().eq("id", id);
     if (!error) {
       setDoctors(doctors.filter(d => d.id !== id));
       toast({ title: "Removed", description: "Referral wealth manager removed" });

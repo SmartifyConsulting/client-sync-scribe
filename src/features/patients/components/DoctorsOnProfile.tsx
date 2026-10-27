@@ -102,7 +102,7 @@ export function DoctorsOnProfile({ patientId, patientName }: DoctorsOnProfilePro
 
       // Get all doctors with access to this patient
       const { data: accessData, error } = await supabase
-        .from('doctor_patient_access')
+        .from('broker_client_access')
         .select(`
           id,
           doctor_id,

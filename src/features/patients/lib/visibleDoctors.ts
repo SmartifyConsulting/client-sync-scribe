@@ -3,8 +3,8 @@
  * to and have NOT hidden from their lists. Used by the renewal selector,
  * round-table participant lists, share targets, etc.
  *
- * Hidden doctors are filtered out via `patient_hidden_doctors`. Deactivated
- * relationships (`doctor_patient_access.is_active = false`) are filtered too,
+ * Hidden doctors are filtered out via `client_hidden_advisors`. Deactivated
+ * relationships (`broker_client_access.is_active = false`) are filtered too,
  * but historic data referencing those doctors remains visible elsewhere.
  */
 
@@ -21,12 +21,12 @@ export interface VisibleDoctor {
 export async function fetchVisibleDoctors(patientUserId: string): Promise<VisibleDoctor[]> {
   const [{ data: access }, { data: hidden }] = await Promise.all([
     supabase
-      .from("doctor_patient_access")
+      .from("broker_client_access")
       .select("doctor_id")
       .eq("patient_user_id", patientUserId)
       .eq("is_active", true),
     supabase
-      .from("patient_hidden_doctors")
+      .from("client_hidden_advisors")
       .select("doctor_id")
       .eq("patient_user_id", patientUserId),
   ]);
