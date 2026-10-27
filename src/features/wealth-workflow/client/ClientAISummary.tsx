@@ -71,6 +71,7 @@ export function ClientAISummary({ patientId }: { patientId: string }) {
   return (
     <Panel
       title="AI Summary"
+      className="[&_h2]:text-warning"
       icon={Sparkles}
       action={
         <div className="flex items-center gap-2">

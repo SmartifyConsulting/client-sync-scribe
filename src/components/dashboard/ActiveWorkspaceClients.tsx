@@ -17,7 +17,7 @@ export function ActiveWorkspaceClients() {
     enabled: !!user,
     queryFn: async () => {
       const { data } = await supabase.from("wealth_workflows" as any)
-        .select("id,current_stage,status,patient_id,patients(name)").in("status", ["active", "blocked"]);
+        .select("id,current_stage,status,patient_id,patients:clients(name)").in("status", ["active", "blocked"]);
       return (data ?? []) as unknown as Wf[];
     },
   });

@@ -257,7 +257,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
         .from('invoices')
         .select(`
           id, invoice_number, description, amount, status, due_date, paid_at, created_at, session_id,
-          patient:patients(id, name)
+          patient:clients(id, name)
         `)
         .order('created_at', { ascending: false });
 
@@ -1007,7 +1007,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
           due_date: newInvoiceForm.dueDate,
           status: 'pending',
         })
-        .select(`*, patient:patients(id, name)`)
+        .select(`*, patient:clients(id, name)`)
         .single();
 
       if (error) throw error;

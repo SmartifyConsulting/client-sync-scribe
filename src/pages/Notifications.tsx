@@ -237,7 +237,7 @@ export default function Notifications() {
         .from('messages')
         .select(`
           *,
-          patient:patients(name)
+          patient:clients(name)
         `)
         .order('created_at', { ascending: false });
 
