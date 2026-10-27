@@ -6,14 +6,14 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { DocPreviewDialog } from "./DocumentTray";
 
-export function QuotePdfCapture({ workflowId, patientId, insurer, onActivity }: { workflowId: string; patientId: string; insurer: string; onActivity?: (insurer: string, phase: "saving" | "saved" | "pdf-error", detail?: string) => void }) {
+export function QuotePdfCapture({ workflowId, clientId, insurer, onActivity }: { workflowId: string; clientId: string; insurer: string; onActivity?: (insurer: string, phase: "saving" | "saved" | "pdf-error", detail?: string) => void }) {
   const qc = useQueryClient();
   const input = useRef<HTMLInputElement>(null);
   const processing = useRef(new Set<string>());
   const [busy, setBusy] = useState(false);
   const [preview, setPreview] = useState<any>(null);
   const { data: docs = [] } = useQuery({ queryKey: ["quote-pdfs", workflowId], queryFn: async () => {
-    const { data, error } = await supabase.from("documents").select("id,name,media_url,created_at").eq("patient_id", patientId).like("document_kind", `quote_pdf:${workflowId}:%`).order("created_at", { ascending: false });
+    const { data, error } = await supabase.from("documents").select("id,name,media_url,created_at").eq("patient_id", clientId).like("document_kind", `quote_pdf:${workflowId}:%`).order("created_at", { ascending: false });
     if (error) throw error;
     return data ?? [];
   } });

@@ -19,11 +19,11 @@ import { useProfile } from "@/hooks/useProfile";
 import { PermissionTransparencyModal } from "@/components/permissions/PermissionTransparencyModal";
 
 interface InviteClientDialogProps {
-  patientId: string;
-  patientName: string;
+  clientId: string;
+  clientName: string;
 }
 
-export function InviteClientDialog({ patientId, patientName }: InviteClientDialogProps) {
+export function InviteClientDialog({ clientId, clientName }: InviteClientDialogProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [showTransparency, setShowTransparency] = useState(false);
@@ -48,9 +48,9 @@ export function InviteClientDialog({ patientId, patientName }: InviteClientDialo
       const { data, error } = await supabase.functions.invoke("send-patient-invitation", {
         body: {
           patientEmail: email,
-          patientName: patientName,
-          patientId: patientId,
-          doctorName: profile?.full_name || t("common.name"),
+          clientName: clientName,
+          clientId: clientId,
+          advisorName: profile?.full_name || t("common.name"),
           practiceName: profile?.practice_address || t("common.name"),
         },
       });

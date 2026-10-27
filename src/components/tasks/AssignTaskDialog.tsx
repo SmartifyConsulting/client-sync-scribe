@@ -27,7 +27,7 @@ interface AssignTaskDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** Pre-selected patient (optional). */
-  patientId?: string | null;
+  clientId?: string | null;
   /** Existing task being re-assigned (optional). */
   task?: { id: string; title?: string | null; patient_id?: string | null } | null;
   onCreated?: () => void;
@@ -35,7 +35,7 @@ interface AssignTaskDialogProps {
 
 type Target =
   | { kind: "colleague"; userId: string; label: string }
-  | { kind: "patient"; patientId: string; label: string };
+  | { kind: "patient"; clientId: string; label: string };
 
 /**
  * Creates a task and assigns it to a practice colleague (doctor or Practice
@@ -44,7 +44,7 @@ type Target =
 export function AssignTaskDialog({
   open,
   onOpenChange,
-  patientId,
+  clientId,
   task,
   onCreated,
 }: AssignTaskDialogProps) {
@@ -73,10 +73,10 @@ export function AssignTaskDialog({
 
   useEffect(() => {
     if (!open) return;
-    const pid = task?.patient_id ?? patientId;
+    const pid = task?.patient_id ?? clientId;
     if (pid) setTargetKey(`patient:${pid}`);
     if (task?.title) setTitle(task.title);
-  }, [open, patientId, task?.id]);
+  }, [open, clientId, task?.id]);
 
   const targets = useMemo<Target[]>(() => {
     const list: Target[] = colleagues.map((c) => ({
@@ -85,7 +85,7 @@ export function AssignTaskDialog({
       label: `${c.full_name || "Colleague"}${c.role === "assistant" ? " (Assistant)" : ""}`,
     }));
     for (const p of patients) {
-      list.push({ kind: "patient", patientId: p.id, label: `${p.name} (Patient)` });
+      list.push({ kind: "patient", clientId: p.id, label: `${p.name} (Client)` });
     }
     return list;
   }, [colleagues, patients]);
@@ -103,8 +103,8 @@ export function AssignTaskDialog({
     setSaving(true);
     try {
       const [kind, id] = targetKey.split(":");
-      const isPatient = kind === "patient";
-      const patient = isPatient ? patients.find((p) => p.id === id) : undefined;
+      const isClient = kind === "patient";
+      const patient = isClient ? patients.find((p) => p.id === id) : undefined;
 
       const payload: Record<string, unknown> = {
         user_id: user.id,
@@ -114,9 +114,9 @@ export function AssignTaskDialog({
         priority,
         status: "pending",
         due_date: dueDate || null,
-        assignee: isPatient ? "patient" : "doctor",
-        assigned_to_user_id: isPatient ? patient?.patient_user_id ?? null : id,
-        patient_id: isPatient ? id : patientId ?? null,
+        assignee: isClient ? "patient" : "doctor",
+        assigned_to_user_id: isClient ? patient?.patient_user_id ?? null : id,
+        patient_id: isClient ? id : clientId ?? null,
       };
 
       let data: any;
@@ -146,7 +146,7 @@ export function AssignTaskDialog({
         data = created;
       }
 
-      const notifyUser = isPatient ? patient?.patient_user_id : id;
+      const notifyUser = isClient ? patient?.patient_user_id : id;
       if (notifyUser) {
         await supabase.from("notifications").insert({
           user_id: notifyUser,
@@ -192,8 +192,8 @@ export function AssignTaskDialog({
               <SelectContent className="max-h-72">
                 {targets.map((t) => (
                   <SelectItem
-                    key={t.kind === "patient" ? `patient:${t.patientId}` : `colleague:${t.userId}`}
-                    value={t.kind === "patient" ? `patient:${t.patientId}` : `colleague:${t.userId}`}
+                    key={t.kind === "patient" ? `patient:${t.clientId}` : `colleague:${t.userId}`}
+                    value={t.kind === "patient" ? `patient:${t.clientId}` : `colleague:${t.userId}`}
                   >
                     {t.label}
                   </SelectItem>

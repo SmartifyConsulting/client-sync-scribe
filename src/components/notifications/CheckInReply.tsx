@@ -7,21 +7,21 @@ import { useToast } from "@/hooks/use-toast";
 
 interface CheckInReplyProps {
   /** patients.id carried on the check-in notification. */
-  patientId: string | null;
+  clientId: string | null;
 }
 
 /**
  * Lets a patient reply to a doctor's check-in straight from the notification.
  * The reply is stored against the original check-in and notifies the doctor.
  */
-export function CheckInReply({ patientId }: CheckInReplyProps) {
+export function CheckInReply({ clientId }: CheckInReplyProps) {
   const [openReply, setOpenReply] = useState(false);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const { toast } = useToast();
 
   const send = async () => {
-    if (!text.trim() || !patientId) return;
+    if (!text.trim() || !clientId) return;
     setSending(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -31,7 +31,7 @@ export function CheckInReply({ patientId }: CheckInReplyProps) {
         .from("emoticon_messages" as any)
         .select("id, sender_id, patient_id")
         .eq("recipient_id", user.id)
-        .eq("patient_id", patientId)
+        .eq("patient_id", clientId)
         .is("reply_to_id", null)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -42,7 +42,7 @@ export function CheckInReply({ patientId }: CheckInReplyProps) {
       const { error } = await supabase.from("emoticon_messages" as any).insert({
         sender_id: user.id,
         recipient_id: (parent as any).sender_id,
-        patient_id: patientId,
+        patient_id: clientId,
         emoticon: "💬",
         message: text,
         reply_to_id: (parent as any).id,
@@ -55,7 +55,7 @@ export function CheckInReply({ patientId }: CheckInReplyProps) {
         type: "checkin_reply",
         title: "Reply to your check-in",
         description: text,
-        reference_id: patientId,
+        reference_id: clientId,
         is_read: false,
       });
 
@@ -73,7 +73,7 @@ export function CheckInReply({ patientId }: CheckInReplyProps) {
     }
   };
 
-  if (!patientId) return null;
+  if (!clientId) return null;
 
   return (
     <div className="mt-3" onClick={(e) => e.stopPropagation()}>

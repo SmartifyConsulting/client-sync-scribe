@@ -12,7 +12,7 @@ const QUOTES = [
     quote:
       "I love that I finally have one place where every doctor's notes, my prescriptions and my appointments live together.",
     name: "Thandi K.",
-    role: "Patient · Cape Town",
+    role: "Client · Cape Town",
   },
   {
     quote:

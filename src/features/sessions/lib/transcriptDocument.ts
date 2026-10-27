@@ -27,8 +27,8 @@ function toHtml(title: string, transcript: string): string {
 export interface SaveTranscriptDocumentArgs {
   userId: string;
   sessionId: string;
-  patientId?: string | null;
-  patientName?: string | null;
+  clientId?: string | null;
+  clientName?: string | null;
   transcript: string;
   sessionTitle?: string | null;
   sessionDate?: string | null;
@@ -41,8 +41,8 @@ export interface SaveTranscriptDocumentArgs {
 export async function saveSessionTranscriptDocument({
   userId,
   sessionId,
-  patientId,
-  patientName,
+  clientId,
+  clientName,
   transcript,
   sessionTitle,
   sessionDate,
@@ -63,8 +63,8 @@ export async function saveSessionTranscriptDocument({
 
     const payload = {
       user_id: userId,
-      patient_id: patientId || null,
-      patient_name: patientName || null,
+      patient_id: clientId || null,
+      patient_name: clientName || null,
       session_id: sessionId,
       name,
       template_name: TRANSCRIPT_TEMPLATE_NAME,

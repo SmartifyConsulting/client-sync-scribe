@@ -4,8 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 
 interface Props {
-  patientId?: string;
-  /** Inline mode renders a single chip row with no card frame (used at the top of Patient Overview). */
+  clientId?: string;
+  /** Inline mode renders a single chip row with no card frame (used at the top of Client Overview). */
   inline?: boolean;
 }
 
@@ -58,19 +58,19 @@ const DIMS: {
  * Compact DISC personality reminder for the live session screen.
  * Shows scores plus adjectives only — no rationale paragraphs.
  */
-export function SessionDiscStrip({ patientId, inline = false }: Props) {
-  const { isDoctor } = useUserRole();
+export function SessionDiscStrip({ clientId, inline = false }: Props) {
+  const { isAdvisor } = useUserRole();
   const [profile, setProfile] = useState<Record<string, any> | null>(null);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    if (!isDoctor || !patientId) return;
+    if (!isAdvisor || !clientId) return;
     let cancelled = false;
     (async () => {
       const { data } = await supabase
         .from("patient_disc_profiles")
         .select("*")
-        .eq("patient_id", patientId)
+        .eq("patient_id", clientId)
         .maybeSingle();
       if (!cancelled) {
         setProfile(data ?? null);
@@ -80,9 +80,9 @@ export function SessionDiscStrip({ patientId, inline = false }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [patientId, isDoctor]);
+  }, [clientId, isAdvisor]);
 
-  if (!isDoctor || !patientId) return null;
+  if (!isAdvisor || !clientId) return null;
 
   if (inline) {
     if (!profile) return null;

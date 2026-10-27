@@ -16,8 +16,8 @@ interface Activity {
   description: string;
   /** ISO timestamp; rendered via i18n relative-time helper */
   timeIso: string;
-  patientId?: string;
-  patientName?: string;
+  clientId?: string;
+  clientName?: string;
   patientCreatedAt?: string | null;
 }
 
@@ -38,9 +38,9 @@ const activityColors = {
 function activityHref(activity: Activity) {
   if (activity.type === "task") return "/todos";
   if (activity.type === "message") return "/notifications";
-  if (!activity.patientId) return "/broker-dashboard";
-  if (activity.type === "document") return `/clients/${activity.patientId}?tab=documents`;
-  return `/clients/${activity.patientId}?tab=sessions`;
+  if (!activity.clientId) return "/broker-dashboard";
+  if (activity.type === "document") return `/clients/${activity.clientId}?tab=documents`;
+  return `/clients/${activity.clientId}?tab=sessions`;
 }
 
 export function RecentActivity() {
@@ -71,8 +71,8 @@ export function RecentActivity() {
             title: titles[index % titles.length],
             description: descriptions[index % descriptions.length],
             timeIso: new Date(now - offsetsMs[index % offsetsMs.length]).toISOString(),
-            patientId: patient.id,
-            patientName: patient.name,
+            clientId: patient.id,
+            clientName: patient.name,
             patientCreatedAt: patient.created_at,
           }));
 
@@ -149,10 +149,10 @@ export function RecentActivity() {
                     <Link to={activityHref(activity)} className="text-xs text-primary hover:underline truncate block">
                       {activity.title}
                     </Link>
-                    {activity.patientId && activity.patientName ? (
+                    {activity.clientId && activity.clientName ? (
                       <p className="text-xs text-muted-foreground truncate inline-flex items-center gap-1">
-                        {activity.patientName}
-                        {isSampleClient({ name: activity.patientName, created_at: activity.patientCreatedAt }) && <SampleBadge />}
+                        {activity.clientName}
+                        {isSampleClient({ name: activity.clientName, created_at: activity.patientCreatedAt }) && <SampleBadge />}
                       </p>
                     ) : (
                       <p className="text-xs text-muted-foreground truncate">

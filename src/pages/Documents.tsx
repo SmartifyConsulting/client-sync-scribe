@@ -236,7 +236,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
   })();
   const defaultOpenDocGroup = documentGroups.length ? [documentGroups[0].key] : [];
 
-  /** Sub-groups a date bucket's documents by patient, so the Date view reads the same as Patient view within each bucket. */
+  /** Sub-groups a date bucket's documents by client, so the Date view reads the same as Client view within each bucket. */
   const patientGroups = (items: Document[]): [string, Document[]][] => {
     const map = new Map<string, Document[]>();
     for (const doc of items) {
@@ -863,15 +863,15 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                       <p className="text-xs text-muted-foreground px-4 py-3">No documents in this group.</p>
                     ) : groupBy === "date" ? (
                       <Accordion type="multiple" className="space-y-2 py-1">
-                        {patientGroups(group.items).map(([patientName, items]) => (
+                        {patientGroups(group.items).map(([clientName, items]) => (
                           <AccordionItem
-                            key={patientName}
-                            value={patientName}
+                            key={clientName}
+                            value={clientName}
                             className="border-0 !border-b-0 rounded-lg bg-muted/30 overflow-hidden"
                           >
                             <AccordionTrigger className="px-4 py-1.5 border-0 rounded-none bg-transparent hover:no-underline hover:bg-muted/50">
                               <div className="flex items-center justify-between w-full pr-2">
-                                <span className="text-xs font-medium text-foreground">{patientName}</span>
+                                <span className="text-xs font-medium text-foreground">{clientName}</span>
                                 <SectionCountPill count={items.length} />
                               </div>
                             </AccordionTrigger>

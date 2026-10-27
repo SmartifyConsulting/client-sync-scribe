@@ -172,7 +172,7 @@ export default function Auth() {
   const [partners, setPartners] = useState<PartnerInput[]>([]);
   const [newPartner, setNewPartner] = useState<PartnerInput>({ full_name: "", registration_number: "", mobile_number: "" });
 
-  // Patient fields
+  // Client fields
   const [phone, setPhone] = useState("");
   const [dob, setDob] = useState("");
   const [physicalAddress, setPhysicalAddress] = useState("");

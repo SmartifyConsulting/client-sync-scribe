@@ -77,8 +77,8 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
   // Step 4: Notes
   const [notes, setNotes] = useState("");
 
-  // Patient record
-  const [patientId, setPatientId] = useState<string | null>(null);
+  // Client record
+  const [clientId, setPatientId] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -135,23 +135,23 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
     }
   };
 
-  const fetchServices = async (doctorId: string) => {
+  const fetchServices = async (advisorId: string) => {
     setLoading(true);
     try {
       const { data } = await supabase
         .from("service_prices")
         .select("*")
-        .eq("user_id", doctorId);
+        .eq("user_id", advisorId);
       const serviceList = (data || []) as ServicePrice[];
       setServices(serviceList);
 
       // Check if this is the patient's first appointment with this doctor
-      if (user && patientId) {
+      if (user && clientId) {
         const { count } = await supabase
           .from("appointment_requests")
           .select("id", { count: "exact", head: true })
           .eq("patient_user_id", user.id)
-          .eq("doctor_id", doctorId);
+          .eq("doctor_id", advisorId);
 
         const firstVisit = (count || 0) === 0;
         setIsFirstVisit(firstVisit);
@@ -169,7 +169,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
     }
   };
 
-  const fetchBusySlots = async (doctorId: string, date: Date) => {
+  const fetchBusySlots = async (advisorId: string, date: Date) => {
     const dayStart = new Date(date);
     dayStart.setHours(0, 0, 0, 0);
     const dayEnd = new Date(date);
@@ -178,7 +178,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
     const { data } = await supabase
       .from("doctor_busy_slots" as any)
       .select("start_time, end_time")
-      .eq("doctor_id", doctorId)
+      .eq("doctor_id", advisorId)
       .gte("start_time", dayStart.toISOString())
       .lte("start_time", dayEnd.toISOString());
 
@@ -228,7 +228,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
   };
 
   const handleSubmit = async () => {
-    if (!user || !selectedDoctor || !selectedDate || !selectedSlot || !patientId) return;
+    if (!user || !selectedDoctor || !selectedDate || !selectedSlot || !clientId) return;
     setSubmitting(true);
     try {
       const startTime = setMinutes(setHours(new Date(selectedDate), selectedSlot.hour), selectedSlot.minute);
@@ -238,7 +238,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
       const { error } = await supabase.from("appointment_requests").insert({
         patient_user_id: user.id,
         doctor_id: selectedDoctor.doctor_id,
-        patient_id: patientId,
+        patient_id: clientId,
         service_id: selectedService?.id || null,
         requested_start: startTime.toISOString(),
         requested_end: endTime.toISOString(),

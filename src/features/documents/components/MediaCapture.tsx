@@ -9,12 +9,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 interface MediaCaptureProps {
-  patientId: string;
-  patientName: string;
+  clientId: string;
+  clientName: string;
   onSaved?: () => void;
 }
 
-export function MediaCapture({ patientId, patientName, onSaved }: MediaCaptureProps) {
+export function MediaCapture({ clientId, clientName, onSaved }: MediaCaptureProps) {
   const { toast } = useToast();
   const [mediaType, setMediaType] = useState<"audio" | "video">("audio");
   const [isRecording, setIsRecording] = useState(false);
@@ -122,7 +122,7 @@ export function MediaCapture({ patientId, patientName, onSaved }: MediaCapturePr
     setIsSaving(true);
     try {
       const ext = mediaType === "video" ? "webm" : "webm";
-      const fileName = `${patientId}/${Date.now()}.${ext}`;
+      const fileName = `${clientId}/${Date.now()}.${ext}`;
       
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("patient-media")
@@ -143,8 +143,8 @@ export function MediaCapture({ patientId, patientName, onSaved }: MediaCapturePr
           name: title,
           content: `[${mediaType.toUpperCase()} Recording] ${title}`,
           user_id: user.id,
-          patient_id: patientId,
-          patient_name: patientName,
+          patient_id: clientId,
+          patient_name: clientName,
           media_url: publicUrl,
           media_type: mediaType,
         });

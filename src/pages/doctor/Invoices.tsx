@@ -79,7 +79,7 @@ import { buildDocumentPdfBase64, pdfFileName } from "@/features/documents/utils/
 import { DocumentPreview } from "@/components/sessions/DocumentPreview";
 import { Eye } from "lucide-react";
 
-interface Patient {
+interface Client {
   id: string;
   name: string;
 }
@@ -101,7 +101,7 @@ interface Invoice {
   paid_at: string | null;
   created_at: string;
   session_id?: string | null;
-  patient: {
+  client: {
     id: string;
     name: string;
   } | null;
@@ -195,9 +195,9 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
   
   // Create invoice state
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
-  const [patientSelectorOpen, setPatientSelectorOpen] = useState(false);
+  const [clients, setPatients] = useState<Client[]>([]);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [clientSelectorOpen, setClientSelectorOpen] = useState(false);
   const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
   const [servicePrices, setServicePrices] = useState<ServicePrice[]>([]);
   const [selectedService, setSelectedService] = useState<ServicePrice | null>(null);
@@ -211,7 +211,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
 
   useEffect(() => {
     fetchInvoices();
-    fetchPatients();
+    fetchClients();
     fetchServicePrices();
   }, []);
 
@@ -237,7 +237,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
     return CURRENCIES.find(c => c.code === code)?.symbol || code;
   };
 
-  const fetchPatients = async () => {
+  const fetchClients = async () => {
     try {
       const { data, error } = await supabase
         .from('clients')
@@ -247,7 +247,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
       if (error) throw error;
       setPatients(data || []);
     } catch (error) {
-      console.error("Error fetching patients:", error);
+      console.error("Error fetching clients:", error);
     }
   };
 
@@ -257,7 +257,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
         .from('invoices')
         .select(`
           id, invoice_number, description, amount, status, due_date, paid_at, created_at, session_id,
-          patient:clients(id, name)
+          client:clients(id, name)
         `)
         .order('created_at', { ascending: false });
 
@@ -278,17 +278,17 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
   // Send a PAID-stamped invoice copy to the medical aid claims email.
   // Used both by the auto-submit path (in markAsPaid) and the manual button.
   const sendPaidInvoiceToMedicalAid = async (invoice: Invoice, opts: { silent?: boolean } = {}) => {
-    if (!invoice.patient?.id) return false;
+    if (!invoice.client?.id) return false;
 
     try {
-      // Pull patient details + linked patient profile (for auto-email toggle).
-      const { data: patientData } = await supabase
+      // Pull client details + linked client profile (for auto-email toggle).
+      const { data: clientData } = await supabase
         .from("clients")
         .select("id, name, email, physical_address, postal_address, address, medical_aid, medical_aid_number, primary_member, claims_email, patient_user_id")
-        .eq("id", invoice.patient.id)
+        .eq("id", invoice.client.id)
         .maybeSingle();
 
-      if (!patientData?.claims_email) {
+      if (!clientData?.claims_email) {
         if (!opts.silent) {
           toast({
             title: "No Claims Email",
@@ -310,9 +310,9 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
           due_date: invoice.due_date,
           paid_at: invoice.paid_at,
           session_id: invoice.session_id ?? null,
-          patient: invoice.patient,
+          client: invoice.client,
         },
-        patientData,
+        clientData,
         profile,
         paidAt,
         invoiceCurrency,
@@ -335,12 +335,12 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
           if (user) {
             await supabase.from("documents").insert({
               user_id: user.id,
-              patient_id: invoice.patient.id,
+              patient_id: invoice.client.id,
               session_id: invoice.session_id ?? null,
               name: `Invoice ${invoice.invoice_number} — PAID`,
               template_name: "Invoice (Paid)",
               content: html,
-              patient_name: invoice.patient.name,
+              patient_name: invoice.client.name,
               is_draft: false,
             } as any);
           }
@@ -353,9 +353,9 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
 
       const { error: emailErr } = await supabase.functions.invoke("send-document-email", {
         body: {
-          to: patientData.claims_email,
-          cc: patientData.email || undefined,
-          subject: `Invoice ${invoice.invoice_number} (PAID) - ${patientData.name}`,
+          to: clientData.claims_email,
+          cc: clientData.email || undefined,
+          subject: `Invoice ${invoice.invoice_number} (PAID) - ${clientData.name}`,
           documentName: `Invoice ${invoice.invoice_number} — PAID`,
           documentId: invoice.id,
           documentHtml: html,
@@ -371,9 +371,9 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
 
       toast({
         title: "Sent to Provider",
-        description: patientData.email
-          ? `Paid invoice emailed to ${patientData.claims_email}, cc ${patientData.email}`
-          : `Paid invoice emailed to ${patientData.claims_email}`,
+        description: clientData.email
+          ? `Paid invoice emailed to ${clientData.claims_email}, cc ${clientData.email}`
+          : `Paid invoice emailed to ${clientData.claims_email}`,
       });
       return true;
     } catch (err: any) {
@@ -389,20 +389,20 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
     }
   };
 
-  // Email the invoice straight to the patient. Never CCs / sends to the
+  // Email the invoice straight to the client. Never CCs / sends to the
   // medical aid — that only happens once the invoice is stamped paid
   // (see sendPaidInvoiceToMedicalAid above).
-  const sendInvoiceToPatient = async (invoice: Invoice) => {
-    if (!invoice.patient?.id) return;
+  const sendInvoiceToClient = async (invoice: Invoice) => {
+    if (!invoice.client?.id) return;
     setUpdatingId(invoice.id);
     try {
-      const { data: patientData } = await supabase
+      const { data: clientData } = await supabase
         .from("clients")
         .select("id, name, email, physical_address, postal_address, address, medical_aid, medical_aid_number, primary_member")
-        .eq("id", invoice.patient.id)
+        .eq("id", invoice.client.id)
         .maybeSingle();
 
-      if (!patientData?.email) {
+      if (!clientData?.email) {
         toast({
           title: "No Client Email",
           description: "Add an email address on the client profile to send fee statements.",
@@ -422,9 +422,9 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
           created_at: invoice.created_at,
           paid_at: invoice.paid_at,
           session_id: invoice.session_id ?? null,
-          patient: invoice.patient,
+          client: invoice.client,
         },
-        patient: patientData as any,
+        client: clientData as any,
         profile: profile as any,
         currency: invoiceCurrency,
         paid: isPaid,
@@ -434,8 +434,8 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
 
       const { error: emailErr } = await supabase.functions.invoke("send-document-email", {
         body: {
-          to: patientData.email,
-          subject: `Invoice ${invoice.invoice_number}${isPaid ? " (PAID)" : ""} - ${patientData.name}`,
+          to: clientData.email,
+          subject: `Invoice ${invoice.invoice_number}${isPaid ? " (PAID)" : ""} - ${clientData.name}`,
           documentName: `Invoice ${invoice.invoice_number}`,
           documentId: invoice.id,
           documentHtml: html,
@@ -448,12 +448,12 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
       });
       if (emailErr) throw emailErr;
 
-      toast({ title: "Fee statement Sent", description: `Emailed to ${patientData.email}` });
+      toast({ title: "Fee statement Sent", description: `Emailed to ${clientData.email}` });
     } catch (err: any) {
-      console.error("Error sending invoice to patient:", err);
+      console.error("Error sending invoice to client:", err);
       toast({
         title: "Send Failed",
-        description: err.message || "Failed to send invoice to patient",
+        description: err.message || "Failed to send invoice to client",
         variant: "destructive",
       });
     } finally {
@@ -489,25 +489,25 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
       });
 
       // Auto-forward the PAID-stamped invoice to the claims email
-      // (only if patient has enabled the auto-email toggle).
-      if (updatedInvoice?.patient?.id) {
+      // (only if client has enabled the auto-email toggle).
+      if (updatedInvoice?.client?.id) {
         try {
-          const { data: patientData } = await supabase
+          const { data: clientData } = await supabase
             .from('clients')
             .select('claims_email, patient_user_id')
-            .eq('id', updatedInvoice.patient.id)
+            .eq('id', updatedInvoice.client.id)
             .maybeSingle();
 
-          if (!patientData?.claims_email) {
+          if (!clientData?.claims_email) {
             toast({
               title: "No Claims Email",
               description: "Add a Provider Claims Email on the client profile to enable auto-submit.",
             });
-          } else if (patientData?.patient_user_id) {
+          } else if (clientData?.patient_user_id) {
             const { data: patientProfile } = await supabase
               .from('profiles')
               .select('auto_email_invoice_to_insurance')
-              .eq('id', patientData.patient_user_id)
+              .eq('id', clientData.patient_user_id)
               .maybeSingle();
 
             if (patientProfile?.auto_email_invoice_to_insurance) {
@@ -569,11 +569,11 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
   const previewInvoice = async (invoice: Invoice) => {
     setLoadingPreviewId(invoice.id);
     try {
-      const { data: patientData } = invoice.patient?.id
+      const { data: clientData } = invoice.client?.id
         ? await supabase
             .from("clients")
             .select("id, name, physical_address, postal_address, address, medical_aid, medical_aid_number, primary_member, claims_email")
-            .eq("id", invoice.patient.id)
+            .eq("id", invoice.client.id)
             .maybeSingle()
         : { data: null } as any;
 
@@ -587,9 +587,9 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
           created_at: invoice.created_at,
           paid_at: invoice.paid_at,
           session_id: invoice.session_id ?? null,
-          patient: invoice.patient,
+          client: invoice.client,
         },
-        patient: patientData,
+        client: clientData,
         profile,
         currency: invoiceCurrency,
         paid: getInvoiceStatus(invoice) === "paid",
@@ -694,7 +694,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
         const search = searchQuery.toLowerCase();
         return (
           invoice.invoice_number.toLowerCase().includes(search) ||
-          invoice.patient?.name.toLowerCase().includes(search) ||
+          invoice.client?.name.toLowerCase().includes(search) ||
           invoice.description.toLowerCase().includes(search)
         );
       }
@@ -923,7 +923,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
       const { error } = await supabase.functions.invoke("send-invoice-report", {
         body: {
           email: emailAddress,
-          doctorName: profile?.full_name || "Doctor",
+          advisorName: profile?.full_name || "Doctor",
           practiceNumber: profile?.practice_number || "",
           dateFrom: reportDateFrom ? format(reportDateFrom, "yyyy-MM-dd") : "",
           dateTo: reportDateTo ? format(reportDateTo, "yyyy-MM-dd") : "",
@@ -971,7 +971,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
   };
 
   const handleCreateInvoice = async () => {
-    if (!selectedPatient) {
+    if (!selectedClient) {
       toast({
         title: "No Client Selected",
         description: "Please select a client first",
@@ -999,15 +999,15 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
       const { data, error } = await supabase
         .from('invoices')
         .insert({
-          patient_id: selectedPatient.id,
+          patient_id: selectedClient.id,
           doctor_id: user.id,
           invoice_number: invoiceNumber,
-          description: newInvoiceForm.description || `Consultation - ${selectedPatient.name}`,
+          description: newInvoiceForm.description || `Consultation - ${selectedClient.name}`,
           amount: parseFloat(newInvoiceForm.amount),
           due_date: newInvoiceForm.dueDate,
           status: 'pending',
         })
-        .select(`*, patient:clients(id, name)`)
+        .select(`*, client:clients(id, name)`)
         .single();
 
       if (error) throw error;
@@ -1021,7 +1021,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
 
       // Reset form
       setShowCreateDialog(false);
-      setSelectedPatient(null);
+      setSelectedClient(null);
       setSelectedService(null);
       setNewInvoiceForm({
         description: "",
@@ -1056,7 +1056,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
           <div>
             <h1 className="page-title">Fee statements</h1>
             <p className="mt-1 text-muted-foreground text-xs">
-              Manage and track all patient invoices
+              Manage and track all client invoices
             </p>
           </div>
         )}
@@ -1078,21 +1078,21 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
               </DialogHeader>
               
               <div className="space-y-4 py-4">
-                {/* Patient Selector with Search */}
+                {/* Client Selector with Search */}
                 <div className="space-y-2">
                   <Label>Client</Label>
-                  <Popover open={patientSelectorOpen} onOpenChange={setPatientSelectorOpen}>
+                  <Popover open={clientSelectorOpen} onOpenChange={setClientSelectorOpen}>
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
                         role="combobox"
-                        aria-expanded={patientSelectorOpen}
+                        aria-expanded={clientSelectorOpen}
                         className="w-full justify-between"
                       >
-                        {selectedPatient ? (
+                        {selectedClient ? (
                           <span className="flex items-center gap-2">
                             <User className="h-4 w-4 text-muted-foreground" />
-                            {selectedPatient.name}
+                            {selectedClient.name}
                           </span>
                         ) : (
                           <span className="text-muted-foreground">Select a client...</span>
@@ -1106,17 +1106,17 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                         <CommandList>
                           <CommandEmpty>No client found.</CommandEmpty>
                           <CommandGroup>
-                            {patients.map((patient) => (
+                            {clients.map((client) => (
                               <CommandItem
-                                key={patient.id}
-                                value={patient.name}
+                                key={client.id}
+                                value={client.name}
                                 onSelect={() => {
-                                  setSelectedPatient(patient);
-                                  setPatientSelectorOpen(false);
+                                  setSelectedClient(client);
+                                  setClientSelectorOpen(false);
                                   if (!newInvoiceForm.description) {
                                     setNewInvoiceForm(prev => ({
                                       ...prev,
-                                      description: `Consultation - ${patient.name}`
+                                      description: `Consultation - ${client.name}`
                                     }));
                                   }
                                 }}
@@ -1124,11 +1124,11 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                                 <Check
                                   className={cn(
                                     "mr-2 h-4 w-4",
-                                    selectedPatient?.id === patient.id ? "opacity-100" : "opacity-0"
+                                    selectedClient?.id === client.id ? "opacity-100" : "opacity-0"
                                   )}
                                 />
                                 <User className="mr-2 h-4 w-4 text-muted-foreground" />
-                                {patient.name}
+                                {client.name}
                               </CommandItem>
                             ))}
                           </CommandGroup>
@@ -1257,7 +1257,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                   className="flex-1" 
                   onClick={() => {
                     setShowCreateDialog(false);
-                    setSelectedPatient(null);
+                    setSelectedClient(null);
                     setSelectedService(null);
                     setNewInvoiceForm({
                       description: "",
@@ -1271,7 +1271,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                 <Button 
                   className="flex-1 gap-2" 
                   onClick={handleCreateInvoice}
-                  disabled={isCreatingInvoice || !selectedPatient}
+                  disabled={isCreatingInvoice || !selectedClient}
                 >
                   {isCreatingInvoice ? (
                     <>
@@ -1590,7 +1590,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
                           <User className="h-4 w-4 text-primary" />
                         </div>
-                        <span>{invoice.patient?.name || "Unknown"}</span>
+                        <span>{invoice.client?.name || "Unknown"}</span>
                       </div>
                     </TableCell>
                     <TableCell className="max-w-[200px] truncate">{invoice.description}</TableCell>
@@ -1652,13 +1652,13 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                           <Pencil className="h-4 w-4" />
                         </Button>
 
-                        {/* Send to patient — never CCs / goes to the medical aid; that only happens once paid */}
+                        {/* Send to client — never CCs / goes to the medical aid; that only happens once paid */}
                         {status !== "archived" && (
                           <Button
                             size="icon"
                             variant="ghost"
                             className="h-8 w-8"
-                            onClick={() => sendInvoiceToPatient(invoice)}
+                            onClick={() => sendInvoiceToClient(invoice)}
                             disabled={updatingId === invoice.id}
                             title="Email fee statement to client"
                           >
@@ -1916,7 +1916,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Bill To</p>
-                  <p className="font-semibold text-foreground">{viewingInvoice.patient?.name || "Unknown"}</p>
+                  <p className="font-semibold text-foreground">{viewingInvoice.client?.name || "Unknown"}</p>
                 </div>
               </div>
             </div>

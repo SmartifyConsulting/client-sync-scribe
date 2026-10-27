@@ -2,7 +2,7 @@
 //
 // Templates are authored before a patient is chosen, so previews should still
 // show the signed-in doctor's real details ([DoctorName], [PracticeNumber],
-// [DoctorSignature], …) instead of raw brackets. Patient-scoped tokens have no
+// [DoctorSignature], …) instead of raw brackets. Client-scoped tokens have no
 // context yet and fall back to the shared quiet "___" placeholder.
 
 import { fillDocumentPlaceholders, type FillProfile } from "@/features/documents/lib/fillDocumentPlaceholders";

@@ -7,19 +7,19 @@ import { VULA_MATRIX } from "./types";
 const db = supabase as any;
 
 /** Doctor-recorded weigh-ins and the Vulas awarded for weight lost. */
-export function useWeighIns(patientId?: string) {
+export function useWeighIns(clientId?: string) {
   const { user } = useAuth();
   const qc = useQueryClient();
-  const key = ["patient-weigh-ins", patientId];
+  const key = ["patient-weigh-ins", clientId];
 
   const query = useQuery({
     queryKey: key,
-    enabled: !!patientId,
+    enabled: !!clientId,
     queryFn: async () => {
       const { data, error } = await db
         .from("patient_weigh_ins")
         .select("*")
-        .eq("patient_id", patientId)
+        .eq("patient_id", clientId)
         .order("recorded_at", { ascending: false });
       if (error) throw error;
       return (data || []) as WeighIn[];
@@ -33,7 +33,7 @@ export function useWeighIns(patientId?: string) {
       const vulas = input.awardVulas ? Math.round(kgLost * VULA_MATRIX.perKilogramLost) : 0;
 
       const { error } = await db.from("patient_weigh_ins").insert({
-        patient_id: patientId,
+        patient_id: clientId,
         recorded_by: user?.id,
         weight_kg: input.weight_kg,
         previous_weight_kg: previous,

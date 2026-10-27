@@ -19,7 +19,7 @@ const findTarget = (id: string): HTMLElement | null =>
 
 export function TourProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const { role, isPatient, loading: roleLoading } = useUserRole();
+  const { role, isClient, loading: roleLoading } = useUserRole();
   const [steps, setSteps] = useState<TourStep[]>([]);
   const [stepIndex, setStepIndex] = useState(0);
   const [active, setActive] = useState(false);
@@ -38,12 +38,12 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
   );
 
   const start = useCallback(() => {
-    const next = isPatient ? patientTourSteps : doctorTourSteps;
+    const next = isClient ? patientTourSteps : doctorTourSteps;
     if (!next.length) return;
     setSteps(next);
     setStepIndex(0);
     setActive(true);
-  }, [isPatient]);
+  }, [isClient]);
 
   // Auto-start once per user if they've never finished or skipped
   useEffect(() => {

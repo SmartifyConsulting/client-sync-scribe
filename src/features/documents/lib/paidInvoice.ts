@@ -14,16 +14,16 @@ interface InvoiceRow {
   due_date: string;
   paid_at?: string | null;
   session_id?: string | null;
-  patient: { id: string; name: string } | null;
+  client: { id: string; name: string } | null;
   created_at?: string | null;
 }
 
-type PatientLite = NonNullable<BuildInvoiceArgs["patient"]>;
+type ClientLite = NonNullable<BuildInvoiceArgs["client"]>;
 type ProfileLite = NonNullable<BuildInvoiceArgs["profile"]>;
 
 export async function buildPaidInvoiceHtml(
   invoice: InvoiceRow,
-  patient: PatientLite | null,
+  client: ClientLite | null,
   profile: ProfileLite | null,
   paidAt: Date,
   currency = "ZAR",
@@ -33,7 +33,7 @@ export async function buildPaidInvoiceHtml(
       ...invoice,
       paid_at: invoice.paid_at || paidAt.toISOString(),
     },
-    patient,
+    client,
     profile,
     currency,
     paid: true,

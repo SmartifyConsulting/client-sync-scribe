@@ -9,7 +9,7 @@ import { ClinicianNotesColumns } from "./ClinicianNotesAccordion";
 interface SessionResultPanelsProps {
   /** Finalised transcript — rendered in a collapsed accordion when present. */
   transcript?: string | null;
-  doctorName?: string;
+  advisorName?: string;
   summary?: string | null;
   /** Playable (signed) audio URL for the recording. */
   audioUrl?: string | null;
@@ -17,7 +17,7 @@ interface SessionResultPanelsProps {
   /** Session id — used to look up whether each action point's linked to-do is done. */
   sessionId?: string | null;
   /** Shown as the assignee for action points whose linked to-do is assigned to the patient. */
-  patientName?: string | null;
+  clientName?: string | null;
   /** AI Clinician decision-support write-up. */
   clinicianNotes?: string | null;
   /** Buttons rendered inside the AI Clinician header (translate / narrate). */
@@ -85,13 +85,13 @@ export function AISummaryCard({
  */
 export function SessionResultPanels({
   transcript,
-  doctorName,
+  advisorName,
   summary,
   audioUrl,
   audioActions,
   actionPoints = [],
   sessionId,
-  patientName,
+  clientName,
   clinicianNotes,
   clinicianActions,
   summaryActions,
@@ -133,14 +133,14 @@ export function SessionResultPanels({
   const assigneeLabel = (point: string) => {
     const todo = matchedTodo(point);
     if (!todo) return null;
-    if (todo.assignee === "patient") return patientName || "Patient";
-    return doctorName || "Doctor";
+    if (todo.assignee === "patient") return clientName || "Client";
+    return advisorName || "Doctor";
   };
 
   return (
     <div className="space-y-6">
       {transcript ? (
-        <SessionTranscriptAccordion transcript={transcript} doctorName={doctorName} />
+        <SessionTranscriptAccordion transcript={transcript} advisorName={advisorName} />
       ) : null}
 
       <div className="grid gap-3 lg:grid-cols-2">

@@ -17,14 +17,14 @@ const KIND_LABEL: Record<MessageKind, string> = {
   chat: "", change_request: "Change requested", counter: "Counter-proposal", accept: "Agreed", redraft: "ROA redrafted",
 };
 
-export function useMessages(patientId?: string | null, recommendationId?: string | null) {
+export function useMessages(clientId?: string | null, recommendationId?: string | null) {
   const qc = useQueryClient();
-  const key = ["wealth-messages", patientId, recommendationId ?? "all"];
+  const key = ["wealth-messages", clientId, recommendationId ?? "all"];
   const q = useQuery({
     queryKey: key,
-    enabled: !!patientId,
+    enabled: !!clientId,
     queryFn: async () => {
-      let r = (supabase as any).from("wealth_messages").select("*").eq("patient_id", patientId).order("created_at");
+      let r = (supabase as any).from("wealth_messages").select("*").eq("patient_id", clientId).order("created_at");
       if (recommendationId) r = r.eq("recommendation_id", recommendationId);
       const { data, error } = await r;
       if (error) throw error;
@@ -32,20 +32,20 @@ export function useMessages(patientId?: string | null, recommendationId?: string
     },
   });
   useEffect(() => {
-    if (!patientId) return;
-    const ch = supabase.channel(`wm-${patientId}-${recommendationId ?? "all"}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "wealth_messages", filter: `patient_id=eq.${patientId}` },
-        () => qc.invalidateQueries({ queryKey: ["wealth-messages", patientId] }))
+    if (!clientId) return;
+    const ch = supabase.channel(`wm-${clientId}-${recommendationId ?? "all"}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "wealth_messages", filter: `patient_id=eq.${clientId}` },
+        () => qc.invalidateQueries({ queryKey: ["wealth-messages", clientId] }))
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [patientId, recommendationId, qc]);
+  }, [clientId, recommendationId, qc]);
   return q;
 }
 
-export async function sendMessage(patientId: string, body: string, kind: MessageKind = "chat", recommendationId?: string | null) {
+export async function sendMessage(clientId: string, body: string, kind: MessageKind = "chat", recommendationId?: string | null) {
   const { data: { user } } = await supabase.auth.getUser();
   const { error } = await (supabase as any).from("wealth_messages").insert({
-    patient_id: patientId, sender_id: user?.id, body, kind, recommendation_id: recommendationId ?? null,
+    patient_id: clientId, sender_id: user?.id, body, kind, recommendation_id: recommendationId ?? null,
   });
   if (error) throw error;
 }
@@ -53,11 +53,11 @@ export async function sendMessage(patientId: string, body: string, kind: Message
 const time = (d: string) => new Date(d).toLocaleString("en-ZA", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
 /** WhatsApp-style thread. Wealth Manager bubbles use the blue owner colour, client bubbles the green owner colour. */
-export function MessageThread({ patientId, advisorUserId, names, recommendationId, compact, footer, hideComposer }: {
-  patientId: string; advisorUserId?: string | null; names: { advisor: string; client: string };
+export function MessageThread({ clientId, advisorUserId, names, recommendationId, compact, footer, hideComposer }: {
+  clientId: string; advisorUserId?: string | null; names: { advisor: string; client: string };
   recommendationId?: string | null; compact?: boolean; footer?: React.ReactNode; hideComposer?: boolean;
 }) {
-  const { data: msgs = [], isLoading } = useMessages(patientId, recommendationId);
+  const { data: msgs = [], isLoading } = useMessages(clientId, recommendationId);
   const [me, setMe] = useState<string | null>(null);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
@@ -67,15 +67,15 @@ export function MessageThread({ patientId, advisorUserId, names, recommendationI
   useEffect(() => { end.current?.scrollIntoView({ block: "end" }); }, [msgs.length]);
   useEffect(() => {
     if (msgs.some((m) => !m.read_at && m.sender_id !== me) && me) {
-      (supabase as any).rpc("wealth_messages_mark_read", { _patient: patientId }).then(() => {});
+      (supabase as any).rpc("wealth_messages_mark_read", { _patient: clientId }).then(() => {});
     }
-  }, [msgs, me, patientId]);
+  }, [msgs, me, clientId]);
 
   const submit = async () => {
     const body = text.trim();
     if (!body) return;
     setBusy(true);
-    try { await sendMessage(patientId, body, recommendationId ? (me === advisorUserId ? "counter" : "change_request") : "chat", recommendationId); setText(""); }
+    try { await sendMessage(clientId, body, recommendationId ? (me === advisorUserId ? "counter" : "change_request") : "chat", recommendationId); setText(""); }
     catch (e: any) { toast({ title: "Message not sent", description: e?.message ?? "Please check your connection and try again.", variant: "destructive" }); }
     finally { setBusy(false); }
   };

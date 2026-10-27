@@ -5,7 +5,7 @@
  * `Database` definition (`@/integrations/supabase/types`) so any schema
  * change flows through automatically.
  *
- * Phase 4 of the refactor: extract the most-used inline shapes (Patient,
+ * Phase 4 of the refactor: extract the most-used inline shapes (Client,
  * Session, Document, Invoice, Prescription, Profile, Appointment, Reward
  * and a handful of supporting tables) into a single import surface.
  *
@@ -56,8 +56,6 @@ export type AppointmentUpdate = Update<"appointments">;
 
 export type AppointmentRequest = Row<"appointment_requests">;
 
-export type PatientReward = Row<"patient_rewards">;
-export type DoctorReward = Row<"doctor_rewards">;
 export type MedicationAdherence = Row<"medication_adherence">;
 
 export type HospitalAdmission = Row<"hospital_admissions">;

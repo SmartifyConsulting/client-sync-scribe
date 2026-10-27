@@ -32,7 +32,7 @@ interface ImageSlot {
 interface ImageComparisonDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  patientId?: string;
+  clientId?: string;
   existingImageUrls?: { url: string; label: string }[];
 }
 
@@ -46,7 +46,7 @@ const COMPARISON_TYPES = [
 export function ImageComparisonDialog({
   open,
   onOpenChange,
-  patientId,
+  clientId,
   existingImageUrls = [],
 }: ImageComparisonDialogProps) {
   const { toast } = useToast();
@@ -119,7 +119,7 @@ export function ImageComparisonDialog({
           imageLabels.push(img.label || `Image ${imageUrls.length}`);
         } else if (img.file) {
           const ext = img.file.name.split(".").pop() || "jpg";
-          const fileName = `comparisons/${patientId || "general"}/${Date.now()}_${imageUrls.length}.${ext}`;
+          const fileName = `comparisons/${clientId || "general"}/${Date.now()}_${imageUrls.length}.${ext}`;
           const { error: uploadError } = await supabase.storage
             .from("patient-media")
             .upload(fileName, img.file, { contentType: img.file.type });
@@ -133,7 +133,7 @@ export function ImageComparisonDialog({
       }
 
       const { data, error } = await supabase.functions.invoke("compare-medical-images", {
-        body: { imageUrls, imageLabels, comparisonType, patientId },
+        body: { imageUrls, imageLabels, comparisonType, clientId },
       });
 
       if (error) throw error;

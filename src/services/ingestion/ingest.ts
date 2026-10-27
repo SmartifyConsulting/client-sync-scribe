@@ -15,7 +15,7 @@ export interface IngestResult {
 export async function ingestRawRecord(_input: {
   source: IngestSource;
   payload: unknown;
-  patientId: string;
+  clientId: string;
 }): Promise<IngestResult> {
   return { ok: false, recordId: null, error: "not-implemented" };
 }

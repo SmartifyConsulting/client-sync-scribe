@@ -2,8 +2,8 @@ import { useWorkflowMap } from "./useWorkflowMap";
 import { WorkflowStepper } from "./WorkflowStepper";
 
 /** Simplified client-facing view. No internal system steps. */
-export function ClientJourney({ patientId }: { patientId: string }) {
-  const m = useWorkflowMap(patientId);
+export function ClientJourney({ clientId }: { clientId: string }) {
+  const m = useWorkflowMap(clientId);
   if (!m.workflow) return null;
   const wf = m.workflow;
   const myActions = m.openTasks.filter((t) => t.owner_role === "client").length;

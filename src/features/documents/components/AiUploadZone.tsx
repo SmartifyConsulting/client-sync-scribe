@@ -9,8 +9,8 @@ import { ApplyHistoryDialog, type ExtractedHistory } from "./ApplyHistoryDialog"
 import { UploadDocumentsDialog, type UploadDetails } from "./UploadDocumentsDialog";
 
 interface AiUploadZoneProps {
-  patientId?: string;
-  patientName?: string;
+  clientId?: string;
+  clientName?: string;
   /** Categories offered in the dialog, taken from documents already stored. */
   knownCategories?: string[];
   /** Called after every batch so the caller can refresh its list. */
@@ -25,8 +25,8 @@ interface AiUploadZoneProps {
  * images and transcription of handwritten PDFs.
  */
 export function AiUploadZone({
-  patientId,
-  patientName,
+  clientId,
+  clientName,
   knownCategories = [],
   onUploaded,
   className,
@@ -67,7 +67,7 @@ export function AiUploadZone({
 
           // Storage RLS requires the first folder to be the uploader's user id.
           const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, "-");
-          const path = `${user.id}/${patientId || "self"}/${Date.now()}-${safeName}`;
+          const path = `${user.id}/${clientId || "self"}/${Date.now()}-${safeName}`;
           const { error: uploadError } = await supabase.storage
             .from("patient-media")
             .upload(path, file, { upsert: true });
@@ -101,7 +101,7 @@ export function AiUploadZone({
                 setProgress({ stage: "extracting", percent: 75, ...meta });
                 const rd = (data?.history as any)?.record_date;
                 if (typeof rd === "string" && /^\d{4}-\d{2}-\d{2}$/.test(rd)) detectedRecordDate = rd;
-                if (patientId && data?.history) setPendingHistory(data.history as ExtractedHistory);
+                if (clientId && data?.history) setPendingHistory(data.history as ExtractedHistory);
               }
             } catch {
               /* fall back to the plain upload record */
@@ -114,8 +114,8 @@ export function AiUploadZone({
             .from("documents")
             .insert({
               user_id: user.id,
-              patient_id: patientId || null,
-              patient_name: patientName || null,
+              patient_id: clientId || null,
+              patient_name: clientName || null,
               name: file.name,
               content,
               template_name: details.category || "Upload",
@@ -170,7 +170,7 @@ export function AiUploadZone({
         );
       }
     },
-    [patientId, patientName, toast, onUploaded],
+    [clientId, clientName, toast, onUploaded],
   );
 
   const handleFiles = useCallback((files: FileList | null) => {
@@ -243,11 +243,11 @@ export function AiUploadZone({
 
       <UploadProgressBar state={progress} />
 
-      {patientId && pendingHistory && (
+      {clientId && pendingHistory && (
         <ApplyHistoryDialog
           open
           onOpenChange={(o) => !o && setPendingHistory(null)}
-          patientId={patientId}
+          clientId={clientId}
           history={pendingHistory}
           recordDate={recordDate || undefined}
           onApplied={() => {

@@ -26,7 +26,7 @@ export interface DocumentInput {
   patient_name?: string;
 }
 
-export function useDocuments(patientId?: string, options?: { allOwners?: boolean }) {
+export function useDocuments(clientId?: string, options?: { allOwners?: boolean }) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -39,7 +39,7 @@ export function useDocuments(patientId?: string, options?: { allOwners?: boolean
       setDocuments([]);
       setLoading(false);
     }
-  }, [user, patientId, options?.allOwners]);
+  }, [user, clientId, options?.allOwners]);
 
   const fetchDocuments = async () => {
     if (!user) return;
@@ -50,8 +50,8 @@ export function useDocuments(patientId?: string, options?: { allOwners?: boolean
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (patientId) {
-      query = query.eq('patient_id', patientId);
+    if (clientId) {
+      query = query.eq('patient_id', clientId);
     } else if (!options?.allOwners) {
       query = query.eq('user_id', user.id);
     }

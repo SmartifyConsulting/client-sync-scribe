@@ -101,7 +101,7 @@ interface UnifiedDocument {
   aiAnalysis?: string | null;
   aiAnalyzedAt?: string | null;
   emailSentAt?: string | null;
-  patientId?: string | null;
+  clientId?: string | null;
   userId?: string | null;
   templateName?: string | null;
   attachments?: DocumentAttachment[];
@@ -233,7 +233,7 @@ export default function ClientDocuments({ hideHeader = false }: { hideHeader?: b
   const [storageMB, setStorageMB] = useState(0);
   const [filter, setFilter] = useState<DocType | "all">("all");
   const [patientIds, setPatientIds] = useState<string[]>([]);
-  const [patientName, setPatientName] = useState("");
+  const [clientName, setPatientName] = useState("");
 
   // Media recording state
   const [recordingMode, setRecordingMode] = useState<"audio" | "video" | null>(null);
@@ -328,7 +328,7 @@ export default function ClientDocuments({ hideHeader = false }: { hideHeader?: b
         aiAnalysis: (doc as any).ai_analysis,
         aiAnalyzedAt: (doc as any).ai_analyzed_at,
         emailSentAt: (doc as any).email_sent_at,
-        patientId: (doc as any).patient_id,
+        clientId: (doc as any).patient_id,
         userId: (doc as any).user_id,
         templateName: doc.template_name,
         attachments: Array.isArray((doc as any).attachments)
@@ -488,7 +488,7 @@ export default function ClientDocuments({ hideHeader = false }: { hideHeader?: b
       const file = e.dataTransfer.files?.[0];
       if (file) processFile(file);
     },
-    [mediaTitle, patientIds, patientName, user],
+    [mediaTitle, patientIds, clientName, user],
   );
 
   const handleImageUpload = async (file: globalThis.File) => {
@@ -512,7 +512,7 @@ export default function ClientDocuments({ hideHeader = false }: { hideHeader?: b
         content: `[IMAGE] ${docName}`,
         user_id: user!.id,
         patient_id: patientIds[0],
-        patient_name: patientName,
+        patient_name: clientName,
         media_url: publicUrl,
         media_type: "image",
       });
@@ -559,7 +559,7 @@ export default function ClientDocuments({ hideHeader = false }: { hideHeader?: b
         content: `[${(recordingMode || "audio").toUpperCase()} Recording] ${mediaTitle}`,
         user_id: user!.id,
         patient_id: patientIds[0],
-        patient_name: patientName,
+        patient_name: clientName,
         media_url: publicUrl,
         media_type: recordingMode || "audio",
       });
@@ -964,7 +964,7 @@ export default function ClientDocuments({ hideHeader = false }: { hideHeader?: b
         <div
           key={docGroupBy}
           className={cn(
-            "patient-section-frame rounded-xl border overflow-hidden divide-y divide-white transition-colors",
+            "client-section-frame rounded-xl border overflow-hidden divide-y divide-white transition-colors",
             isDragging ? "border-2 border-dashed border-primary bg-primary/5" : "border-border bg-card",
           )}
           onDragOver={(e) => {
@@ -1185,7 +1185,7 @@ export default function ClientDocuments({ hideHeader = false }: { hideHeader?: b
       <ImageComparisonDialog
         open={showCompareDialog}
         onOpenChange={setShowCompareDialog}
-        patientId={patientIds[0]}
+        clientId={patientIds[0]}
       />
 
       {/* Delete confirmation */}
@@ -1293,7 +1293,7 @@ function DocumentPreviewDialog({
           id: doc.id,
           content: doc.content || "",
           user_id: doc.userId,
-          patient_id: doc.patientId,
+          patient_id: doc.clientId,
           template_name: doc.templateName,
           session_id: null,
           name: doc.name,

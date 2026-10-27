@@ -36,13 +36,13 @@ function StatusRow({ label, done, hint }: { label: string; done: boolean; hint?:
 
 /** Shows the front/back ID images Didit captured, once per client, so a
  *  manager can confirm them without re-requesting the ID at FICA stage. */
-function IdOnFile({ patientId }: { patientId?: string }) {
+function IdOnFile({ clientId }: { clientId?: string }) {
   const { data } = useQuery({
-    queryKey: ["patient-id-images", patientId],
-    enabled: !!patientId,
+    queryKey: ["patient-id-images", clientId],
+    enabled: !!clientId,
     queryFn: async () => {
       const sbx = supabase as any;
-      const { data: pat } = await sbx.from("clients").select("id_document_front_path, id_document_back_path").eq("id", patientId).maybeSingle();
+      const { data: pat } = await sbx.from("clients").select("id_document_front_path, id_document_back_path").eq("id", clientId).maybeSingle();
       if (!pat?.id_document_front_path && !pat?.id_document_back_path) return null;
       const sign = async (path?: string | null) => path ? (await sbx.storage.from("identity-documents").createSignedUrl(path, 3600)).data?.signedUrl ?? null : null;
       return { front: await sign(pat.id_document_front_path), back: await sign(pat.id_document_back_path) };
@@ -64,8 +64,8 @@ const FREQUENCIES = ["Monthly", "Quarterly", "Bi-annually", "Annually"];
 
 /** Compulsory, client-chosen next meeting date (at most 12 months out) —
  *  sets it on every open application and books the appointment automatically. */
-function NextMeetingPicker({ viewer, apps, patientId, brokerUserId, clientFirst }: {
-  viewer: Viewer; apps: any[]; patientId?: string; brokerUserId?: string; clientFirst: string;
+function NextMeetingPicker({ viewer, apps, clientId, brokerUserId, clientFirst }: {
+  viewer: Viewer; apps: any[]; clientId?: string; brokerUserId?: string; clientFirst: string;
 }) {
   const qc = useQueryClient();
   const maxDate = new Date(); maxDate.setFullYear(maxDate.getFullYear() + 1);
@@ -80,7 +80,7 @@ function NextMeetingPicker({ viewer, apps, patientId, brokerUserId, clientFirst 
   }
 
   const confirm = async () => {
-    if (!date || !patientId || !brokerUserId) return;
+    if (!date || !clientId || !brokerUserId) return;
     setBusy(true);
     const sbx = supabase as any;
     const start = new Date(`${date}T09:00:00`);
@@ -88,7 +88,7 @@ function NextMeetingPicker({ viewer, apps, patientId, brokerUserId, clientFirst 
     const [{ error: appErr }] = await Promise.all([
       sbx.from("wealth_applications").update({ review_date: date }).in("id", apps.map((a) => a.id)),
       sbx.from("appointments").insert({
-        user_id: brokerUserId, patient_id: patientId, title: `Review meeting (${frequency.toLowerCase()})`,
+        user_id: brokerUserId, patient_id: clientId, title: `Review meeting (${frequency.toLowerCase()})`,
         type: "session", start_time: start.toISOString(), end_time: end.toISOString(),
       }),
     ]);
@@ -162,11 +162,11 @@ function HealthDisclosureChoice({ viewer, workflowId, status, clientFirst }: { v
 
 /** Policy documents an insurer sent back (filed automatically via the
  *  Step 4 email reply pipeline, tagged "Issued Policy"). */
-function IssuedPolicyDocs({ patientId }: { patientId?: string }) {
+function IssuedPolicyDocs({ clientId }: { clientId?: string }) {
   const { data } = useQuery({
-    queryKey: ["issued-policy-docs", patientId],
-    enabled: !!patientId,
-    queryFn: async () => (await (supabase as any).from("documents").select("id,name,created_at").eq("patient_id", patientId).eq("document_kind", "Issued Policy").order("created_at", { ascending: false })).data ?? [],
+    queryKey: ["issued-policy-docs", clientId],
+    enabled: !!clientId,
+    queryFn: async () => (await (supabase as any).from("documents").select("id,name,created_at").eq("patient_id", clientId).eq("document_kind", "Issued Policy").order("created_at", { ascending: false })).data ?? [],
   });
   if (!data?.length) return null;
   return (
@@ -259,7 +259,7 @@ export function LaterStepPanel({ label, viewer, workflowId, records, clientFirst
           {current?.status === "accepted" ? (
             <p className="text-xs text-muted-foreground">Accepted {fmt(current.decided_at)}.</p>
           ) : current && (current.status === "presented" || current.status === "changes_requested" || current.status === "draft") ? (
-            <RoaNegotiation viewer={viewer} patientId={records?.patientId} workflowId={workflowId} recs={recs} current={current}
+            <RoaNegotiation viewer={viewer} clientId={records?.clientId} workflowId={workflowId} recs={recs} current={current}
               clientFirst={clientFirst} onAccept={() => run(decide.mutateAsync({ recommendationId: current.id, decision: "accepted" }), "Thank you. Your acceptance is recorded.")}
               accepting={decide.isPending} />
           ) : (
@@ -279,7 +279,7 @@ export function LaterStepPanel({ label, viewer, workflowId, records, clientFirst
           <p className="text-xs text-muted-foreground">
             {viewer === "client" ? "Your ID is already on file from your identity check — just upload a Bank Account Verification Letter and a Proof of Residential Address no older than 3 months." : `${clientFirst} uploads a Bank Account Verification Letter and Proof of Address (ID already on file from their identity check).`}
           </p>
-          {viewer === "manager" && <IdOnFile patientId={records?.patientId} />}
+          {viewer === "manager" && <IdOnFile clientId={records?.clientId} />}
           <DocsLink viewer={viewer} onOpenDocuments={onOpenDocuments} label={viewer === "client" ? "Upload my documents" : "Open documents"} />
         </div>
       );
@@ -311,7 +311,7 @@ export function LaterStepPanel({ label, viewer, workflowId, records, clientFirst
           ) : (
             <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">No application submitted yet.</p>
           )}
-          {label === "Policy schedule to portal and CRM" && <IssuedPolicyDocs patientId={records?.patientId} />}
+          {label === "Policy schedule to portal and CRM" && <IssuedPolicyDocs clientId={records?.clientId} />}
           {label === "Policy schedule to portal and CRM" && <DocsLink viewer={viewer} onOpenDocuments={onOpenDocuments} label="Open policy schedules" />}
         </div>
       );
@@ -322,7 +322,7 @@ export function LaterStepPanel({ label, viewer, workflowId, records, clientFirst
           <CalendarClock className="h-4 w-4" />Next meeting: {fmt(due)}
         </p>
       ) : (
-        <NextMeetingPicker viewer={viewer} apps={apps} patientId={records?.patientId} brokerUserId={records?.personal?.user_id} clientFirst={clientFirst} />
+        <NextMeetingPicker viewer={viewer} apps={apps} clientId={records?.clientId} brokerUserId={records?.personal?.user_id} clientFirst={clientFirst} />
       );
     }
     case "Acknowledge renewal":

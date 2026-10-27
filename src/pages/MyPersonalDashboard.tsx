@@ -191,7 +191,7 @@ export default function MyPersonalDashboard() {
       {/* Hero: photo, greeting, Vulas, appointments */}
       <ClientHeroCard emotionalLine={GREETING_LINE[state]} />
 
-      {w?.patientId && <ClientAISummary patientId={w.patientId} />}
+      {w?.clientId && <ClientAISummary clientId={w.clientId} />}
 
       {/* Your Financial Protection + What's Happening */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">

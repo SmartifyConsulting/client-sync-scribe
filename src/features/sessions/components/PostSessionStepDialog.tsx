@@ -288,13 +288,13 @@ function DocStepDialog({
 function SummaryStepDialog({
   summary,
   actionPoints,
-  patientName,
+  clientName,
   clinicianNotes,
   onAdvance,
 }: {
   summary?: string | null;
   actionPoints?: string[];
-  patientName?: string;
+  clientName?: string;
   clinicianNotes?: string | null;
   onAdvance: () => void;
 }) {
@@ -307,7 +307,7 @@ function SummaryStepDialog({
             AI Summary
           </DialogTitle>
           <DialogDescription>
-            {patientName ? `Consultation summary for ${patientName}.` : "Consultation summary."}
+            {clientName ? `Consultation summary for ${clientName}.` : "Consultation summary."}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 max-h-[65vh] overflow-y-auto text-sm leading-relaxed text-foreground">
@@ -360,10 +360,10 @@ interface PostSessionQueueDialogProps {
   onAdvance: () => void;
   onFinish: () => void;
   currentPatient: { id: string; name: string; patient_user_id: string | null } | null;
-  doctorId: string;
-  doctorName?: string;
+  advisorId: string;
+  advisorName?: string;
   extractedFollowUp?: { follow_up_date?: string; follow_up_time?: string; notes?: string } | null;
-  patientName?: string;
+  clientName?: string;
   transcript?: string;
   /** AI Clinician notes surfaced on the prescription step. */
   clinicianNotes?: string | null;
@@ -385,10 +385,10 @@ export function PostSessionStepDialog({
   onAdvance,
   onFinish,
   currentPatient,
-  doctorId,
-  doctorName,
+  advisorId,
+  advisorName,
   extractedFollowUp,
-  patientName,
+  clientName,
   transcript,
   clinicianNotes,
   summary,
@@ -402,7 +402,7 @@ export function PostSessionStepDialog({
       <SummaryStepDialog
         summary={summary}
         actionPoints={actionPoints}
-        patientName={patientName || currentPatient?.name}
+        clientName={clientName || currentPatient?.name}
         clinicianNotes={clinicianNotes}
         onAdvance={onAdvance}
       />
@@ -410,7 +410,7 @@ export function PostSessionStepDialog({
   }
 
   if (step === "schedule") {
-    if (!currentPatient || !doctorId) {
+    if (!currentPatient || !advisorId) {
       return null;
     }
     return (
@@ -419,11 +419,11 @@ export function PostSessionStepDialog({
         onOpenChange={(o) => {
           if (!o) onAdvance();
         }}
-        doctorId={doctorId}
-        doctorName={doctorName}
-        patientId={currentPatient.id}
+        advisorId={advisorId}
+        advisorName={advisorName}
+        clientId={currentPatient.id}
         patientUserId={currentPatient.patient_user_id}
-        patientName={patientName || currentPatient.name}
+        clientName={clientName || currentPatient.name}
         suggestedDate={extractedFollowUp?.follow_up_date}
         suggestedTime={extractedFollowUp?.follow_up_time}
         onDone={onAdvance}

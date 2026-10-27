@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Pencil, Check } from "lucide-react";
 
 interface SessionNotepadProps {
-  patientId: string;
+  clientId: string;
   sessionId?: string | null;
-  patientName?: string;
+  clientName?: string;
   notes: string;
   onNotesChange: (notes: string) => void;
   isRecording?: boolean;

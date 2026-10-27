@@ -45,12 +45,12 @@ function inferMediaType(file: File): string {
 export function UploadDocumentDialog({ open, onOpenChange, onUploaded }: UploadDocumentDialogProps) {
   const { toast } = useToast();
   const { user } = useAuth();
-  const { patients } = useClients();
+  const { clients } = useClients();
   const { upload, isUploading } = useUpload("patient-media", { maxBytes: 20 * 1024 * 1024 });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [name, setName] = useState("");
-  const [patientId, setPatientId] = useState<string>(NO_PATIENT_VALUE);
+  const [clientId, setPatientId] = useState<string>(NO_PATIENT_VALUE);
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -95,7 +95,7 @@ export function UploadDocumentDialog({ open, onOpenChange, onUploaded }: UploadD
     setIsSaving(true);
     try {
       const selectedPatient =
-        patientId !== NO_PATIENT_VALUE ? patients.find((p) => p.id === patientId) : null;
+        clientId !== NO_PATIENT_VALUE ? clients.find((p) => p.id === clientId) : null;
 
       // Storage RLS requires the first folder to be the uploader's own user id.
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, "-");
@@ -187,7 +187,7 @@ export function UploadDocumentDialog({ open, onOpenChange, onUploaded }: UploadD
             setHistoryPatientId(null);
           }
         }}
-        patientId={historyPatientId}
+        clientId={historyPatientId}
         history={pendingHistory}
         onApplied={() => {
           setPendingHistory(null);
@@ -217,13 +217,13 @@ export function UploadDocumentDialog({ open, onOpenChange, onUploaded }: UploadD
 
           <div>
             <Label className="text-sm">Client (optional)</Label>
-            <Select value={patientId} onValueChange={setPatientId}>
+            <Select value={clientId} onValueChange={setPatientId}>
               <SelectTrigger>
                 <SelectValue placeholder="No client (firm document)" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={NO_PATIENT_VALUE}>No client (firm document)</SelectItem>
-                {patients.map((p) => (
+                {clients.map((p) => (
                   <SelectItem key={p.id} value={p.id}>
                     {p.name}
                   </SelectItem>

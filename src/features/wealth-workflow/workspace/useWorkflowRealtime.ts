@@ -5,15 +5,15 @@ import { supabase } from "@/integrations/supabase/client";
 const KEYS = ["wealth-client-question", "wealth-workflow", "wealth-recs", "wealth-audit", "wealth-blockers", "wealth-map-records"];
 
 /** Refreshes wealth queries when any underlying record changes. RLS scopes the events. */
-export function useWorkflowRealtime(patientId?: string, workflowId?: string) {
+export function useWorkflowRealtime(clientId?: string, workflowId?: string) {
   const qc = useQueryClient();
   useEffect(() => {
-    if (!patientId) return;
+    if (!clientId) return;
     const refresh = () => KEYS.forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
-    const ch = supabase.channel(`wealth-${patientId}`);
-    ch.on("postgres_changes", { event: "*", schema: "public", table: "wealth_workflows", filter: `patient_id=eq.${patientId}` }, refresh);
-    ch.on("postgres_changes", { event: "*", schema: "public", table: "todos", filter: `patient_id=eq.${patientId}` }, refresh);
-    ch.on("postgres_changes", { event: "*", schema: "public", table: "messages", filter: `patient_id=eq.${patientId}` }, refresh);
+    const ch = supabase.channel(`wealth-${clientId}`);
+    ch.on("postgres_changes", { event: "*", schema: "public", table: "wealth_workflows", filter: `patient_id=eq.${clientId}` }, refresh);
+    ch.on("postgres_changes", { event: "*", schema: "public", table: "todos", filter: `patient_id=eq.${clientId}` }, refresh);
+    ch.on("postgres_changes", { event: "*", schema: "public", table: "messages", filter: `patient_id=eq.${clientId}` }, refresh);
     if (workflowId) {
       ["wealth_workflow_transitions", "wealth_recommendations", "wealth_applications", "wealth_compliance_checks", "wealth_kyc_checks", "wealth_signed_documents"].forEach((t) =>
         ch.on("postgres_changes", { event: "*", schema: "public", table: t, filter: `workflow_id=eq.${workflowId}` }, refresh),
@@ -21,5 +21,5 @@ export function useWorkflowRealtime(patientId?: string, workflowId?: string) {
     }
     ch.subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [patientId, workflowId, qc]);
+  }, [clientId, workflowId, qc]);
 }

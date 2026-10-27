@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { MessageThread } from "@/features/messenger/MessageThread";
 import { useUserRole } from "@/hooks/useUserRole";
 
-interface Thread { patientId: string; advisorId: string | null; advisorName: string; clientName: string; unread: number; last?: string }
+interface Thread { clientId: string; advisorId: string | null; advisorName: string; clientName: string; unread: number; last?: string }
 
 /** In-app, audited chat between a client and their Wealth Manager. */
 export default function Messenger() {
@@ -33,7 +33,7 @@ export default function Messenger() {
       return rows.map((r) => {
         const own = (msgs ?? []).filter((m: any) => m.patient_id === r.id);
         return {
-          patientId: r.id, advisorId: r.user_id,
+          clientId: r.id, advisorId: r.user_id,
           advisorName: (profs ?? []).find((p: any) => p.id === r.user_id)?.full_name || "Wealth Manager",
           clientName: r.name || "Client",
           unread: own.filter((m: any) => !m.read_at && m.sender_id !== me).length,
@@ -43,11 +43,11 @@ export default function Messenger() {
     },
   });
 
-  const { isPatient } = useUserRole() as any;
-  const isClient = threads.length > 0 ? threads.every((t) => t.advisorId !== me) : !!isPatient;
+  const { isClient: isClientRole } = useUserRole() as any;
+  const isClient = threads.length > 0 ? threads.every((t) => t.advisorId !== me) : !!isClientRole;
   const filtered = useMemo(() => threads.filter((t) => (isClient ? t.advisorName : t.clientName).toLowerCase().includes(q.toLowerCase())), [threads, q, isClient]);
-  useEffect(() => { if (!active && threads[0]) setActive(threads[0].patientId); }, [threads, active]);
-  const current = threads.find((t) => t.patientId === active);
+  useEffect(() => { if (!active && threads[0]) setActive(threads[0].clientId); }, [threads, active]);
+  const current = threads.find((t) => t.clientId === active);
 
   return (
     <div className="mx-auto flex h-[calc(100vh-7rem)] w-full max-w-6xl flex-col gap-3 p-3 md:p-4">
@@ -67,9 +67,9 @@ export default function Messenger() {
             {isLoading && <li className="p-3 text-xs text-muted-foreground">Loading…</li>}
             {!isLoading && filtered.length === 0 && <li className="p-3 text-xs text-muted-foreground">{isClient ? "You're not linked to a Wealth Manager yet. Ask them to send you an invite." : "No conversations yet. Clients appear here once they've joined."}</li>}
             {filtered.map((t) => (
-              <li key={t.patientId}>
-                <button onClick={() => setActive(t.patientId)}
-                  className={cn("flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-muted/60", active === t.patientId && "bg-muted")}>
+              <li key={t.clientId}>
+                <button onClick={() => setActive(t.clientId)}
+                  className={cn("flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-muted/60", active === t.clientId && "bg-muted")}>
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                     {(isClient ? t.advisorName : t.clientName).split(" ").map((n) => n[0]).join("").slice(0, 2)}
                   </span>
@@ -90,7 +90,7 @@ export default function Messenger() {
                 <MessageCircle className="h-4 w-4 text-primary" />
                 <span className="text-sm font-semibold">{isClient ? current.advisorName : current.clientName}</span>
               </div>
-              <MessageThread key={current.patientId} patientId={current.patientId} advisorUserId={current.advisorId}
+              <MessageThread key={current.clientId} clientId={current.clientId} advisorUserId={current.advisorId}
                 names={{ advisor: current.advisorName.split(" ")[0], client: current.clientName.split(" ")[0] }} />
             </>
           ) : (

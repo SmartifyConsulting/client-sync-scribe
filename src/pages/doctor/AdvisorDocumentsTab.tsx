@@ -215,7 +215,7 @@ export default function AdvisorDocumentsTab() {
               Type
             </ToggleGroupItem>
             <ToggleGroupItem value="patient" className="text-xs px-3">
-              Patient
+              Client
             </ToggleGroupItem>
           </ToggleGroup>
           <DropdownMenu>
@@ -286,17 +286,17 @@ export default function AdvisorDocumentsTab() {
                       }, new Map<string, DocRow[]>()),
                     )
                       .sort(([a], [b]) => getSurname(a).localeCompare(getSurname(b)))
-                      .map(([patientName, rows]) => (
+                      .map(([clientName, rows]) => (
                         <AccordionItem
-                          key={patientName}
-                          value={patientName}
+                          key={clientName}
+                          value={clientName}
                           className="border-0 !border-b-0 rounded-lg bg-muted/30 overflow-hidden"
                         >
                           <AccordionTrigger className="px-4 py-1.5 border-0 rounded-none bg-transparent hover:no-underline hover:bg-muted/50">
                             <div className="flex items-center justify-between w-full pr-2">
                               <span className="text-xs font-medium text-foreground flex items-center gap-1.5">
                                 <User className="h-3.5 w-3.5 text-muted-foreground" />
-                                {patientName}
+                                {clientName}
                               </span>
                               <SectionCountPill count={rows.length} />
                             </div>

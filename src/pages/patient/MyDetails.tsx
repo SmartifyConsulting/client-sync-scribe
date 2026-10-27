@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ClientDetailsEditor } from "@/components/patients/ClientDetailsEditor";
-import { Patient } from "@/hooks/useClients";
+import { Client } from "@/hooks/useClients";
 import { useToast } from "@/hooks/use-toast";
 import { EmergencyContact } from "@/features/patients/components/EmergencyContactsSection";
 
@@ -19,7 +19,7 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
   const returnTo = rawReturn && rawReturn.startsWith("/") && !rawReturn.startsWith("//") ? rawReturn : null;
   const rawSection = searchParams.get("section");
   const section = embedded ? "workspace" : rawSection === "home" ? "health" : rawSection || "health";
-  const [patient, setPatient] = useState<Patient | null>(null);
+  const [patient, setPatient] = useState<Client | null>(null);
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string>("");
   const [userId, setUserId] = useState<string>("");
@@ -28,10 +28,10 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
   const lastSavedToastRef = useRef<number>(0);
 
   useEffect(() => {
-    fetchPatientRecord();
+    fetchClientRecord();
   }, []);
 
-  const fetchPatientRecord = async () => {
+  const fetchClientRecord = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -83,7 +83,7 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
 
         const fallbackName =
           profile?.full_name ||
-          (user.email ? user.email.split("@")[0] : "New Patient");
+          (user.email ? user.email.split("@")[0] : "New Client");
 
         const { data: created, error: insertErr } = await supabase
           .from("clients")
@@ -126,12 +126,12 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
       if (data) {
         setPatient({
           ...data,
-          surgeries: Array.isArray(data.surgeries) ? data.surgeries as unknown as Patient["surgeries"] : [],
-          pharmacies: Array.isArray(data.pharmacies) ? data.pharmacies as unknown as Patient["pharmacies"] : [],
-          family_history: Array.isArray(data.family_history) ? data.family_history as unknown as Patient["family_history"] : [],
-          next_of_kin_members: Array.isArray(data.next_of_kin_members) ? data.next_of_kin_members as unknown as Patient["next_of_kin_members"] : [],
-          current_medications: Array.isArray(data.current_medications) ? data.current_medications as unknown as Patient["current_medications"] : [],
-        } as unknown as Patient);
+          surgeries: Array.isArray(data.surgeries) ? data.surgeries as unknown as Client["surgeries"] : [],
+          pharmacies: Array.isArray(data.pharmacies) ? data.pharmacies as unknown as Client["pharmacies"] : [],
+          family_history: Array.isArray(data.family_history) ? data.family_history as unknown as Client["family_history"] : [],
+          next_of_kin_members: Array.isArray(data.next_of_kin_members) ? data.next_of_kin_members as unknown as Client["next_of_kin_members"] : [],
+          current_medications: Array.isArray(data.current_medications) ? data.current_medications as unknown as Client["current_medications"] : [],
+        } as unknown as Client);
         const ec = (data as any).emergency_contacts;
         setEmergencyContacts(Array.isArray(ec) ? ec : []);
       }
@@ -142,7 +142,7 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
     }
   };
 
-  const handleSave = async (updates: Partial<Patient>) => {
+  const handleSave = async (updates: Partial<Client>) => {
     if (!patient) return;
     const { error } = await supabase
       .from("clients")
@@ -216,7 +216,7 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
 
       {patient ? (
         <ClientDetailsEditor
-          patient={patient}
+          client={patient}
           onSave={handleSave}
           isSelfService
           userEmail={userEmail}

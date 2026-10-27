@@ -747,7 +747,7 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
         </DialogContent>
       </Dialog>
 
-      <AdvisorProfileDialog doctorId={viewDoctorId} onOpenChange={(o) => !o && setViewDoctorId(null)} />
+      <AdvisorProfileDialog advisorId={viewDoctorId} onOpenChange={(o) => !o && setViewDoctorId(null)} />
     </div>
   );
 }

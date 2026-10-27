@@ -78,7 +78,7 @@ export const receiveEmailDocument = (payload: Record<string, unknown>) =>
 
 export const sendPatientInvitation = (payload: {
   patientEmail: string;
-  patientName?: string;
+  clientName?: string;
   message?: string;
 }) => safeInvoke("send-patient-invitation", payload);
 

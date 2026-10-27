@@ -17,7 +17,7 @@ interface LineItem {
   amount: string;
 }
 
-interface PatientDetails {
+interface ClientDetails {
   name: string;
   medical_aid: string | null;
   medical_aid_number: string | null;
@@ -31,24 +31,24 @@ interface ServicePrice {
 }
 
 interface InvoiceEditorProps {
-  patientId: string;
-  patientName: string;
+  clientId: string;
+  clientName: string;
   sessionId?: string;
   onClose: () => void;
   onSave: (invoice: { id: string; invoice_number: string; amount: number }) => void;
 }
 
-export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSave }: InvoiceEditorProps) {
+export function InvoiceEditor({ clientId, clientName, sessionId, onClose, onSave }: InvoiceEditorProps) {
   const { toast } = useToast();
   const { profile } = useProfile();
   const { formattedContent: savedTemplate, headerFooter } = useTemplateWithHeaderFooter("Invoice");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [patientDetails, setPatientDetails] = useState<PatientDetails | null>(null);
+  const [clientDetails, setClientDetails] = useState<ClientDetails | null>(null);
   const [servicePrices, setServicePrices] = useState<ServicePrice[]>([]);
   const [selectedService, setSelectedService] = useState<string>("");
   const [currency, setCurrency] = useState<string>("ZAR");
   const [lineItems, setLineItems] = useState<LineItem[]>([
-    { id: crypto.randomUUID(), description: `Consultation session - ${patientName}`, amount: "" }
+    { id: crypto.randomUUID(), description: `Consultation session - ${clientName}`, amount: "" }
   ]);
   const [dueDate, setDueDate] = useState(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
   const [showPreview, setShowPreview] = useState(false);
@@ -78,11 +78,11 @@ export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSa
       const { data: patientData, error: patientError } = await supabase
         .from('clients')
         .select('name, medical_aid, medical_aid_number')
-        .eq('id', patientId)
+        .eq('id', clientId)
         .single();
 
       if (!patientError && patientData) {
-        setPatientDetails(patientData);
+        setClientDetails(patientData);
         const medicalAidInfo = patientData.medical_aid && patientData.medical_aid_number 
           ? ` (${patientData.medical_aid} - ${patientData.medical_aid_number})`
           : '';
@@ -106,19 +106,19 @@ export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSa
     };
 
     fetchData();
-  }, [patientId]);
+  }, [clientId]);
 
   // Handle service selection - adds a new line item
   const handleServiceSelect = (serviceId: string) => {
     setSelectedService(serviceId);
     const service = servicePrices.find(s => s.id === serviceId);
     if (service) {
-      const medicalAidInfo = patientDetails?.medical_aid && patientDetails?.medical_aid_number 
-        ? ` (${patientDetails.medical_aid} - ${patientDetails.medical_aid_number})`
+      const medicalAidInfo = clientDetails?.medical_aid && clientDetails?.medical_aid_number 
+        ? ` (${clientDetails.medical_aid} - ${clientDetails.medical_aid_number})`
         : '';
       const newItem: LineItem = {
         id: crypto.randomUUID(),
-        description: `${service.service_name} - ${patientDetails?.name || patientName}${medicalAidInfo}`,
+        description: `${service.service_name} - ${clientDetails?.name || clientName}${medicalAidInfo}`,
         amount: service.default_price.toString(),
       };
       setLineItems(prev => [...prev, newItem]);
@@ -166,7 +166,7 @@ export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSa
 Invoice Number: ${generateInvoiceNumber()}
 Date: ${new Date().toLocaleDateString()}
 Due Date: ${new Date(dueDate).toLocaleDateString()}
-Patient: ${patientName}
+Client: ${clientName}
 
 ─────────────────────────────────────
 
@@ -181,8 +181,10 @@ Total: ${getCurrencySymbol(currency)} ${totalAmount.toFixed(2)}`;
       return savedTemplate
         .replace(/\[DATE\]/g, new Date().toLocaleDateString())
         .replace(/\[InvoiceDate\]/g, new Date().toLocaleDateString())
-        .replace(/\[PATIENT_NAME\]/g, patientName)
-        .replace(/\[PatientName\]/g, patientName)
+        .replace(/\[PATIENT_NAME\]/g, clientName)
+        .replace(/\[PatientName\]/g, clientName)
+        .replace(/\[CLIENT_NAME\]/g, clientName)
+        .replace(/\[ClientName\]/g, clientName)
         .replace(/\[INVOICE_CONTENT\]/g, invoiceBody)
         .replace(/\[InvoiceNumber\]/g, generateInvoiceNumber())
         .replace(/\[DueDate\]/g, new Date(dueDate).toLocaleDateString())
@@ -222,7 +224,7 @@ Total: ${getCurrencySymbol(currency)} ${totalAmount.toFixed(2)}`;
       const { data, error } = await supabase
         .from('invoices')
         .insert({
-          patient_id: patientId,
+          patient_id: clientId,
           doctor_id: user.id,
           session_id: sessionId || null,
           invoice_number: invoiceNumber,
@@ -263,7 +265,7 @@ Total: ${getCurrencySymbol(currency)} ${totalAmount.toFixed(2)}`;
     return (
       <DocumentPreview
         title="Fee statement"
-        subtitle={`Patient: ${patientName}`}
+        subtitle={`Client: ${clientName}`}
         content={generateContent()}
         logoUrl={profile?.logo_url || headerFooter?.header?.center?.imageUrl || undefined}
         fontFamily={headerFooter?.font_family || undefined}
@@ -285,7 +287,7 @@ Total: ${getCurrencySymbol(currency)} ${totalAmount.toFixed(2)}`;
             </div>
             <div>
               <h2 className="text-lg font-semibold text-foreground">Create Fee statement</h2>
-              <p className="text-sm text-muted-foreground">Patient: {patientName}</p>
+              <p className="text-sm text-muted-foreground">Client: {clientName}</p>
             </div>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}>
@@ -390,8 +392,8 @@ Total: ${getCurrencySymbol(currency)} ${totalAmount.toFixed(2)}`;
               Preview
             </Button>
             <SendDocumentButton
-              patientId={patientId}
-              patientName={patientName}
+              clientId={clientId}
+              clientName={clientName}
               documentLabel="Invoice"
               getContent={generateContent}
               preferredField="claims_email"

@@ -773,9 +773,9 @@ function NotificationList({
               </div>
             )}
 
-            {/* Patient reply to a doctor's check-in */}
+            {/* Client reply to an advisor's check-in */}
             {notification.type === 'emoticon_received' && (
-              <CheckInReply patientId={notification.reference_id} />
+              <CheckInReply clientId={notification.reference_id} />
             )}
           </div>
 

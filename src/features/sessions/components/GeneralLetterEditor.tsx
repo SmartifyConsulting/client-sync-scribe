@@ -12,8 +12,8 @@ import { SendDocumentButton } from "./SendDocumentButton";
 import { DocumentPreview } from "./DocumentPreview";
 
 interface GeneralLetterEditorProps {
-  patientId: string;
-  patientName: string;
+  clientId: string;
+  clientName: string;
   sessionId?: string;
   onClose: () => void;
   onSave: (letter: { content: string }) => void;
@@ -27,19 +27,19 @@ Date: [DATE]
 
 To Whom It May Concern,
 
-RE: [PATIENT_NAME]
+RE: [CLIENT_NAME]
 
 [LETTER_CONTENT]
 
 Yours faithfully,
 
 Signature: ___________________
-           [DOCTOR_NAME]
+           [ADVISOR_NAME]
 `;
 
 export function GeneralLetterEditor({ 
-  patientId,
-  patientName,
+  clientId,
+  clientName,
   sessionId,
   onClose, 
   onSave 
@@ -48,7 +48,7 @@ export function GeneralLetterEditor({
   const { profile } = useProfile();
   const { formattedContent: savedTemplate, headerFooter, isLoading: templateLoading } = useTemplateWithHeaderFooter("General");
   
-  const doctorName = profile?.full_name || "Doctor";
+  const advisorName = profile?.full_name || "Doctor";
   const practiceNumber = profile?.practice_number || "";
   const practiceAddress = profile?.practice_address || "";
   const doctorNumber = profile?.doctor_number || "";
@@ -63,10 +63,14 @@ export function GeneralLetterEditor({
   const generateContent = () => {
     return baseTemplate
       .replace(/\[DATE\]/g, new Date().toLocaleDateString())
-      .replace(/\[PATIENT_NAME\]/g, patientName)
-      .replace(/\[PatientName\]/g, patientName)
-      .replace(/\[DOCTOR_NAME\]/g, doctorName)
-      .replace(/\[DoctorName\]/g, doctorName)
+      .replace(/\[PATIENT_NAME\]/g, clientName)
+      .replace(/\[PatientName\]/g, clientName)
+      .replace(/\[CLIENT_NAME\]/g, clientName)
+      .replace(/\[ClientName\]/g, clientName)
+      .replace(/\[DOCTOR_NAME\]/g, advisorName)
+      .replace(/\[DoctorName\]/g, advisorName)
+      .replace(/\[ADVISOR_NAME\]/g, advisorName)
+      .replace(/\[AdvisorName\]/g, advisorName)
       .replace(/\[PRACTICE_NUMBER\]/g, practiceNumber)
       .replace(/\[PracticeNumber\]/g, practiceNumber)
       .replace(/\[PRACTICE_ADDRESS\]/g, practiceAddress)
@@ -93,16 +97,16 @@ export function GeneralLetterEditor({
 
       const content = generateContent();
       const documentName = subject 
-        ? `General Letter - ${subject} - ${patientName} - ${new Date().toLocaleDateString()}`
-        : `General Letter - ${patientName} - ${new Date().toLocaleDateString()}`;
+        ? `General Letter - ${subject} - ${clientName} - ${new Date().toLocaleDateString()}`
+        : `General Letter - ${clientName} - ${new Date().toLocaleDateString()}`;
 
       const { error } = await supabase
         .from('documents')
         .insert({
           name: documentName,
           content: content,
-          patient_id: patientId,
-          patient_name: patientName,
+          patient_id: clientId,
+          patient_name: clientName,
           template_name: 'General Letter',
           user_id: user.id,
         });
@@ -131,7 +135,7 @@ export function GeneralLetterEditor({
     return (
       <DocumentPreview
         title="General Letter"
-        subtitle={`Patient: ${patientName}`}
+        subtitle={`Client: ${clientName}`}
         content={generateContent()}
         logoUrl={profile?.logo_url || undefined}
         fontFamily={headerFooter?.font_family || undefined}
@@ -153,7 +157,7 @@ export function GeneralLetterEditor({
             </div>
             <div>
               <h2 className="text-lg font-semibold text-foreground">General Letter</h2>
-              <p className="text-sm text-muted-foreground">Patient: {patientName}</p>
+              <p className="text-sm text-muted-foreground">Client: {clientName}</p>
             </div>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}>
@@ -196,8 +200,8 @@ export function GeneralLetterEditor({
               Preview
             </Button>
             <SendDocumentButton
-              patientId={patientId}
-              patientName={patientName}
+              clientId={clientId}
+              clientName={clientName}
               documentLabel="Letter"
               getContent={generateContent}
               headerFooter={headerFooter}

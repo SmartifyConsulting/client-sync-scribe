@@ -207,19 +207,19 @@ export async function resolveDocumentPreviewContent(
   // Documents created outside a session (or older rows) may not carry a
   // patient_id — recover it from the linked session so certificates/invoices
   // still resolve real patient details.
-  let patientId = doc.patient_id || null;
-  if (!patientId && doc.session_id) {
+  let clientId = doc.patient_id || null;
+  if (!clientId && doc.session_id) {
     const { data: sessionRow } = await supabase
       .from("sessions")
       .select("patient_id")
       .eq("id", doc.session_id)
       .maybeSingle();
-    patientId = (sessionRow as any)?.patient_id || null;
+    clientId = (sessionRow as any)?.patient_id || null;
   }
 
   const [patientRes, profileRes] = await Promise.all([
-    patientId
-      ? supabase.from("clients").select("*").eq("id", patientId).maybeSingle()
+    clientId
+      ? supabase.from("clients").select("*").eq("id", clientId).maybeSingle()
       : Promise.resolve({ data: null } as any),
     doc.user_id
       ? supabase.from("profiles").select("*").eq("id", doc.user_id).maybeSingle()
@@ -245,11 +245,11 @@ export async function resolveDocumentPreviewContent(
         .maybeSingle();
       invRow = data || null;
     }
-    if (!invRow && patientId) {
+    if (!invRow && clientId) {
       const { data } = await supabase
         .from("invoices")
         .select("*")
-        .eq("patient_id", patientId)
+        .eq("patient_id", clientId)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -282,11 +282,11 @@ export async function resolveDocumentPreviewContent(
         .order("created_at", { ascending: true });
       rxRows = data || null;
     }
-    if ((!rxRows || rxRows.length === 0) && patientId) {
+    if ((!rxRows || rxRows.length === 0) && clientId) {
       const { data } = await supabase
         .from("prescriptions")
         .select("*")
-        .eq("patient_id", patientId)
+        .eq("patient_id", clientId)
         .order("created_at", { ascending: false })
         .limit(5);
       rxRows = data || null;

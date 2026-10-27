@@ -11,8 +11,8 @@ import { AdvisorProfileDialog } from "@/components/doctors/AdvisorProfileDialog"
 
 
 interface RoundTableNote {
-  patientName: string;
-  doctorName: string;
+  clientName: string;
+  advisorName: string;
   content: string;
 }
 
@@ -24,8 +24,8 @@ interface LinkedDoctor {
 
 interface AppointmentWithHistory {
   id: string;
-  patientId: string;
-  patientName: string;
+  clientId: string;
+  clientName: string;
   startTime: string;
   formattedTime: string;
   lastSessionSummary: string | null;
@@ -194,7 +194,7 @@ export function TodaysBriefing() {
       // Fetch patient details and last session for each appointment
       const enrichedAppointments = await Promise.all(
         appointmentsData.map(async (apt) => {
-          let patientName = apt.title || "Unknown Patient";
+          let clientName = apt.title || "Unknown Client";
           let lastSessionSummary: string | null = null;
           let allergies: string | null = null;
           let lastPrescription: string | null = null;
@@ -211,7 +211,7 @@ export function TodaysBriefing() {
               .maybeSingle();
 
             if (patient) {
-              patientName = patient.name;
+              clientName = patient.name;
               allergies = patient.allergies;
               patientUserId = patient.patient_user_id;
             }
@@ -288,8 +288,8 @@ export function TodaysBriefing() {
               unreadRoundTableNotes = allNotes
                 .filter(note => !readNoteIds.has(note.id))
                 .map(note => ({
-                  patientName,
-                  doctorName: note.doctor_name,
+                  clientName,
+                  advisorName: note.doctor_name,
                   content: note.content
                 }));
             }
@@ -298,8 +298,8 @@ export function TodaysBriefing() {
 
           return {
             id: apt.id,
-            patientId: apt.patient_id || '',
-            patientName,
+            clientId: apt.patient_id || '',
+            clientName,
             startTime: apt.start_time,
             formattedTime: format(parseISO(apt.start_time), 'h:mm a'),
             lastSessionSummary,
@@ -334,7 +334,7 @@ export function TodaysBriefing() {
     });
 
     appointments.forEach((apt, index) => {
-      let text = `At ${apt.formattedTime}, you have ${apt.patientName}. `;
+      let text = `At ${apt.formattedTime}, you have ${apt.clientName}. `;
       
       if (apt.allergies) {
         text += `Please note: this patient has allergies to ${apt.allergies}. `;
@@ -360,7 +360,7 @@ export function TodaysBriefing() {
       if (apt.unreadRoundTableNotes.length > 0) {
         text += `There ${apt.unreadRoundTableNotes.length === 1 ? 'is' : 'are'} ${apt.unreadRoundTableNotes.length} unread Round Table note${apt.unreadRoundTableNotes.length > 1 ? 's' : ''} for this patient. `;
         apt.unreadRoundTableNotes.forEach((note) => {
-          text += `${note.doctorName} wrote: ${note.content} `;
+          text += `${note.advisorName} wrote: ${note.content} `;
         });
       }
       
@@ -368,7 +368,7 @@ export function TodaysBriefing() {
         text += "That concludes your briefing for today.";
       }
 
-      segs.push({ label: apt.patientName, text });
+      segs.push({ label: apt.clientName, text });
     });
 
     return segs;
@@ -686,17 +686,17 @@ export function TodaysBriefing() {
                     </div>
                     <div className="flex-1 min-w-0 text-left">
                       <div className="flex items-center gap-2">
-                        {apt.patientId ? (
+                        {apt.clientId ? (
                           <Link
-                            to={`/clients/${apt.patientId}`}
+                            to={`/clients/${apt.clientId}`}
                             className="font-medium text-primary hover:text-primary/80 hover:underline truncate text-sm"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            {apt.patientName}
+                            {apt.clientName}
                           </Link>
                         ) : (
                           <span className="font-medium text-primary truncate text-sm">
-                            {apt.patientName}
+                            {apt.clientName}
                           </span>
                         )}
                         <span className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
@@ -784,7 +784,7 @@ export function TodaysBriefing() {
                       {apt.unreadRoundTableNotes.slice(0, 1).map((note, noteIndex) => (
                         <div key={noteIndex} className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded p-2">
                           <p className="text-xs font-medium text-amber-700 dark:text-amber-400">
-                            {note.doctorName}
+                            {note.advisorName}
                           </p>
                           <p className="text-xs text-foreground mt-0.5">
                             {note.content.length > 100 ? note.content.substring(0, 100) + '...' : note.content}
@@ -800,7 +800,7 @@ export function TodaysBriefing() {
         </div>
       )}
 
-      <AdvisorProfileDialog doctorId={viewDoctorId} onOpenChange={(o) => !o && setViewDoctorId(null)} />
+      <AdvisorProfileDialog advisorId={viewDoctorId} onOpenChange={(o) => !o && setViewDoctorId(null)} />
     </div>
   );
 }

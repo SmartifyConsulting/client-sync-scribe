@@ -31,7 +31,7 @@ export interface SessionDrawing {
   updated_at: string;
 }
 
-export function useSessionDrawings(patientId: string, sessionId?: string | null) {
+export function useSessionDrawings(clientId: string, sessionId?: string | null) {
   const { toast } = useToast();
   const [drawings, setDrawings] = useState<SessionDrawing[]>([]);
   const [currentDrawing, setCurrentDrawing] = useState<SessionDrawing | null>(null);
@@ -47,7 +47,7 @@ export function useSessionDrawings(patientId: string, sessionId?: string | null)
       let query = supabase
         .from("session_drawings")
         .select("*")
-        .eq("patient_id", patientId)
+        .eq("patient_id", clientId)
         .order("version", { ascending: false });
 
       const { data, error } = await query;
@@ -74,7 +74,7 @@ export function useSessionDrawings(patientId: string, sessionId?: string | null)
     } finally {
       setLoading(false);
     }
-  }, [patientId, sessionId]);
+  }, [clientId, sessionId]);
 
   const saveDrawing = useCallback(async (canvasData: CanvasData, createNewVersion = false) => {
     try {
@@ -109,7 +109,7 @@ export function useSessionDrawings(patientId: string, sessionId?: string | null)
           await supabase
             .from("session_drawings")
             .update({ is_current: false })
-            .eq("patient_id", patientId);
+            .eq("patient_id", clientId);
         }
 
         // Get next version number
@@ -121,7 +121,7 @@ export function useSessionDrawings(patientId: string, sessionId?: string | null)
         const { data, error } = await supabase
           .from("session_drawings")
           .insert([{
-            patient_id: patientId,
+            patient_id: clientId,
             session_id: sessionId || null,
             doctor_id: user.id,
             canvas_data: JSON.parse(JSON.stringify(canvasData)),
@@ -156,7 +156,7 @@ export function useSessionDrawings(patientId: string, sessionId?: string | null)
     } finally {
       setSaving(false);
     }
-  }, [currentDrawing, drawings, patientId, sessionId, toast]);
+  }, [currentDrawing, drawings, clientId, sessionId, toast]);
 
   const loadVersion = useCallback((version: number) => {
     const drawing = drawings.find(d => d.version === version);
@@ -195,10 +195,10 @@ export function useSessionDrawings(patientId: string, sessionId?: string | null)
   }, [currentDrawing, drawings, toast]);
 
   useEffect(() => {
-    if (patientId) {
+    if (clientId) {
       fetchDrawings();
     }
-  }, [patientId, sessionId, fetchDrawings]);
+  }, [clientId, sessionId, fetchDrawings]);
 
   return {
     drawings,

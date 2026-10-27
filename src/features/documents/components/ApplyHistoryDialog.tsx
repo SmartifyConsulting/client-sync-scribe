@@ -110,7 +110,7 @@ const entryName = (entry: unknown): string => {
 interface ApplyHistoryDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  patientId: string;
+  clientId: string;
   history: ExtractedHistory;
   /** Record date the history came from, shown alongside appended entries. */
   recordDate?: string;
@@ -126,7 +126,7 @@ interface ApplyHistoryDialogProps {
 export function ApplyHistoryDialog({
   open,
   onOpenChange,
-  patientId,
+  clientId,
   history,
   recordDate,
   onApplied,
@@ -169,7 +169,7 @@ export function ApplyHistoryDialog({
         .select(
           "conditions_diagnoses, current_medications, allergies, surgeries, family_history, notes",
         )
-        .eq("id", patientId)
+        .eq("id", clientId)
         .maybeSingle();
       if (readError) throw readError;
 
@@ -227,7 +227,7 @@ export function ApplyHistoryDialog({
         return;
       }
 
-      const { error } = await supabase.from("clients").update(updates as any).eq("id", patientId);
+      const { error } = await supabase.from("clients").update(updates as any).eq("id", clientId);
       if (error) throw error;
 
       toast({

@@ -7,26 +7,26 @@ import { Loader2, Upload, FileText, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface DocumentUploadListProps {
-  patientId: string;
+  clientId: string;
   documentKind: string;
   accept?: string;
   addLabel?: string;
 }
 
 /** Upload + list documents of a specific kind (e.g. "Will", "Health Record") for a client. */
-export function DocumentUploadList({ patientId, documentKind, accept = ".pdf,.doc,.docx,.jpg,.jpeg,.png", addLabel }: DocumentUploadListProps) {
+export function DocumentUploadList({ clientId, documentKind, accept = ".pdf,.doc,.docx,.jpg,.jpeg,.png", addLabel }: DocumentUploadListProps) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
   const { data: docs = [], isLoading } = useQuery({
-    queryKey: ["client-documents", patientId, documentKind],
+    queryKey: ["client-documents", clientId, documentKind],
     queryFn: async () => {
       const { data } = await supabase
         .from("documents")
         .select("id,name,media_url,created_at")
-        .eq("patient_id", patientId)
+        .eq("patient_id", clientId)
         .eq("document_kind", documentKind)
         .order("created_at", { ascending: false });
       return data ?? [];
@@ -38,7 +38,7 @@ export function DocumentUploadList({ patientId, documentKind, accept = ".pdf,.do
     setUploading(true);
     try {
       const ext = file.name.split(".").pop() || "pdf";
-      const path = `${patientId}/${Date.now()}.${ext}`;
+      const path = `${clientId}/${Date.now()}.${ext}`;
       const { error: uploadError } = await supabase.storage.from("patient-media").upload(path, file, { contentType: file.type });
       if (uploadError) throw uploadError;
       const { data: { publicUrl } } = supabase.storage.from("patient-media").getPublicUrl(path);
@@ -48,7 +48,7 @@ export function DocumentUploadList({ patientId, documentKind, accept = ".pdf,.do
         name: docName,
         content: `[FILE] ${docName}`,
         user_id: user.id,
-        patient_id: patientId,
+        patient_id: clientId,
         media_url: publicUrl,
         media_type: file.type.startsWith("image/") ? "image" : "application/octet-stream",
         document_kind: documentKind,
@@ -56,7 +56,7 @@ export function DocumentUploadList({ patientId, documentKind, accept = ".pdf,.do
       if (docError) throw docError;
 
       toast.success(`${documentKind} uploaded`);
-      qc.invalidateQueries({ queryKey: ["client-documents", patientId, documentKind] });
+      qc.invalidateQueries({ queryKey: ["client-documents", clientId, documentKind] });
     } catch (err: any) {
       toast.error(err.message || "Upload failed");
     } finally {
@@ -68,7 +68,7 @@ export function DocumentUploadList({ patientId, documentKind, accept = ".pdf,.do
   const removeDoc = async (id: string) => {
     const { error } = await supabase.from("documents").delete().eq("id", id);
     if (error) return toast.error("Couldn't remove the document.");
-    qc.invalidateQueries({ queryKey: ["client-documents", patientId, documentKind] });
+    qc.invalidateQueries({ queryKey: ["client-documents", clientId, documentKind] });
   };
 
   return (

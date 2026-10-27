@@ -40,9 +40,9 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
 interface DrawingPadProps {
-  patientId: string;
+  clientId: string;
   sessionId?: string | null;
-  patientName?: string;
+  clientName?: string;
   onClose?: () => void;
   isModal?: boolean;
 }
@@ -54,7 +54,7 @@ const COLORS = [
   "#D1873C", "#3B82F6", "#8B5CF6", "#EC4899", "#6B7280"
 ];
 
-export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal = false }: DrawingPadProps) {
+export function DrawingPad({ clientId, sessionId, clientName, onClose, isModal = false }: DrawingPadProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [tool, setTool] = useState<Tool>("pen");
@@ -85,7 +85,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     saving, 
     saveDrawing, 
     loadVersion 
-  } = useSessionDrawings(patientId, sessionId);
+  } = useSessionDrawings(clientId, sessionId);
 
   // Initialize canvas with current drawing
   useEffect(() => {
@@ -702,7 +702,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     if (!canvas) return;
     
     const link = document.createElement("a");
-    link.download = `drawing-${patientName || "patient"}-${format(new Date(), "yyyy-MM-dd")}.png`;
+    link.download = `drawing-${clientName || "patient"}-${format(new Date(), "yyyy-MM-dd")}.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
   };

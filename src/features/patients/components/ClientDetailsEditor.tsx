@@ -77,7 +77,7 @@ import { format, parseISO, isFuture, isAfter } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, Mic, Clock } from "lucide-react";
 import {
-  Patient,
+  Client,
   Surgery,
   Pharmacy,
   FamilyHistoryEntry,
@@ -113,8 +113,8 @@ const ClientDashboardLazy = lazy(() => import("@/pages/patient/ClientDashboard")
 const ClientTasksLazy = lazy(() => import("@/pages/patient/ClientTasks"));
 
 interface ClientDetailsEditorProps {
-  patient: Patient;
-  onSave: (updates: Partial<Patient>) => Promise<any>;
+  client: Client;
+  onSave: (updates: Partial<Client>) => Promise<any>;
   isSelfService?: boolean;
   userEmail?: string;
   userId?: string;
@@ -354,7 +354,7 @@ const SECTION_TABS: Record<string, string[]> = {
 };
 
 export function ClientDetailsEditor({
-  patient,
+  client,
   onSave,
   isSelfService = false,
   userEmail,
@@ -368,11 +368,11 @@ export function ClientDetailsEditor({
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const navigate = useNavigate();
-  const { isDoctor } = useUserRole();
+  const { isAdvisor } = useUserRole();
   const { isAdmin } = useIsAdmin();
   const queryClient = useQueryClient();
   const { sessions: patientSessions, loading: patientSessionsLoading } = useSessions(
-    isSelfService ? patient.id : undefined,
+    isSelfService ? client.id : undefined,
   );
   const [isEditing, setIsEditing] = useState(true);
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
@@ -386,7 +386,7 @@ export function ClientDetailsEditor({
 
   // Fetch upcoming appointments for banner
   const { data: bannerAppointments = [] } = useQuery({
-    queryKey: ["banner-appointments", patient.id],
+    queryKey: ["banner-appointments", client.id],
     queryFn: async () => {
       const {
         data: { user },
@@ -444,8 +444,8 @@ export function ClientDetailsEditor({
     return { first: parts.slice(0, -1).join(" "), last: parts[parts.length - 1] };
   };
 
-  const initFirst = patient.first_name || splitName(patient.name).first;
-  const initLast = patient.last_name || splitName(patient.name).last;
+  const initFirst = client.first_name || splitName(client.name).first;
+  const initLast = client.last_name || splitName(client.name).last;
 
   const [formData, setFormData] = useState({
     first_name: initFirst,
@@ -560,14 +560,14 @@ export function ClientDetailsEditor({
   // specialty is "General Practitioner" (falls back to the first connected
   // doctor) so patients don't have to search from scratch.
   useEffect(() => {
-    if (!isSelfService || !patient.patient_user_id || formData.general_practitioner) {
+    if (!isSelfService || !client.patient_user_id || formData.general_practitioner) {
       setGpAutoDetected(null);
       return;
     }
     supabase
       .from("broker_client_access")
       .select("doctor_id")
-      .eq("patient_user_id", patient.patient_user_id)
+      .eq("patient_user_id", client.patient_user_id)
       .then(async ({ data: access }) => {
         const doctorIds = (access || []).map((a: any) => a.doctor_id);
         if (doctorIds.length === 0) return;
@@ -579,34 +579,34 @@ export function ClientDetailsEditor({
         const gp = profiles.find((p: any) => (p.specialty || "").toLowerCase().includes("general practitioner")) || profiles[0];
         setGpAutoDetected({ id: gp.id, full_name: gp.full_name });
       });
-  }, [isSelfService, patient.patient_user_id, formData.general_practitioner]);
+  }, [isSelfService, client.patient_user_id, formData.general_practitioner]);
 
   // Fetch avatar for self-service patients
   useEffect(() => {
-    if (isSelfService && patient.patient_user_id) {
+    if (isSelfService && client.patient_user_id) {
       supabase
         .from("profiles")
         .select("avatar_url")
-        .eq("id", patient.patient_user_id)
+        .eq("id", client.patient_user_id)
         .single()
         .then(({ data }) => {
           if (data?.avatar_url) setAvatarUrl(data.avatar_url);
         });
     }
-  }, [isSelfService, patient.patient_user_id]);
+  }, [isSelfService, client.patient_user_id]);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !patient.patient_user_id) return;
+    if (!file || !client.patient_user_id) return;
     setUploadingAvatar(true);
     try {
       const fileExt = file.name.split(".").pop();
-      const fileName = `${patient.patient_user_id}/avatar.${fileExt}`;
+      const fileName = `${client.patient_user_id}/avatar.${fileExt}`;
       const { error: uploadError } = await supabase.storage.from("avatars").upload(fileName, file, { upsert: true });
       if (uploadError) throw uploadError;
       const { data } = supabase.storage.from("avatars").getPublicUrl(fileName);
       const newUrl = `${data.publicUrl}?t=${Date.now()}`;
-      await supabase.from("profiles").update({ avatar_url: newUrl }).eq("id", patient.patient_user_id);
+      await supabase.from("profiles").update({ avatar_url: newUrl }).eq("id", client.patient_user_id);
       setAvatarUrl(newUrl);
       toast({ title: "Photo updated", description: "Your profile picture has been updated." });
     } catch (err: any) {
@@ -617,69 +617,69 @@ export function ClientDetailsEditor({
   };
 
   useEffect(() => {
-    if (patient) {
-      const fn = patient.first_name || splitName(patient.name).first;
-      const ln = patient.last_name || splitName(patient.name).last;
+    if (client) {
+      const fn = client.first_name || splitName(client.name).first;
+      const ln = client.last_name || splitName(client.name).last;
       setFormData({
         first_name: fn,
         last_name: ln,
-        email: patient.email || "",
-        phone: patient.phone || "",
-        dob: patient.dob || "",
-        occupation: patient.occupation || "",
-        employer: patient.employer || "",
-        reporting_to_email: patient.reporting_to_email || "",
-        referred_by: patient.referred_by || "",
-        marital_status: patient.marital_status || "",
-        id_passport_number: patient.id_passport_number || "",
-        gender: patient.gender || "",
-        physical_address: patient.physical_address || "",
-        postal_address: patient.postal_address || "",
-        same_as_physical: patient.same_as_physical || false,
-        medical_aid: patient.medical_aid || "",
-        medical_insurance_product: patient.medical_insurance_product || "",
-        medical_aid_number: patient.medical_aid_number || "",
-        primary_member: patient.primary_member || "",
-        claims_email: patient.claims_email || "",
-        general_practitioner: patient.general_practitioner || "",
-        allergies: patient.allergies || "",
-        next_of_kin_name: patient.next_of_kin_name || "",
-        next_of_kin_phone: patient.next_of_kin_phone || "",
-        next_of_kin_email: patient.next_of_kin_email || "",
-        next_of_kin_relationship: patient.next_of_kin_relationship || "",
-        height_cm: patient.height_cm?.toString() || "",
-        weight_kg: patient.weight_kg?.toString() || "",
-        pharmacy_name: patient.pharmacy_name || "",
-        pharmacy_email: patient.pharmacy_email || "",
-        notes: patient.notes || "",
-        blood_type: patient.blood_type || "",
-        organ_donor: patient.organ_donor || false,
-        preferred_language: (patient as any).preferred_language || "",
-        title: (patient as any).title || "",
-        maiden_name: (patient as any).maiden_name || "",
-        religion: (patient as any).religion || "",
-        smoker: (patient as any).smoker || "",
-        smoker_quantity: (patient as any).smoker_quantity || "",
-        highest_education: (patient as any).highest_education || "",
-        self_employed: (patient as any).self_employed || "",
-        business_name: (patient as any).business_name || "",
-        employer_years: (patient as any).employer_years || "",
-        tax_reference_number: (patient as any).tax_reference_number || "",
+        email: client.email || "",
+        phone: client.phone || "",
+        dob: client.dob || "",
+        occupation: client.occupation || "",
+        employer: client.employer || "",
+        reporting_to_email: client.reporting_to_email || "",
+        referred_by: client.referred_by || "",
+        marital_status: client.marital_status || "",
+        id_passport_number: client.id_passport_number || "",
+        gender: client.gender || "",
+        physical_address: client.physical_address || "",
+        postal_address: client.postal_address || "",
+        same_as_physical: client.same_as_physical || false,
+        medical_aid: client.medical_aid || "",
+        medical_insurance_product: client.medical_insurance_product || "",
+        medical_aid_number: client.medical_aid_number || "",
+        primary_member: client.primary_member || "",
+        claims_email: client.claims_email || "",
+        general_practitioner: client.general_practitioner || "",
+        allergies: client.allergies || "",
+        next_of_kin_name: client.next_of_kin_name || "",
+        next_of_kin_phone: client.next_of_kin_phone || "",
+        next_of_kin_email: client.next_of_kin_email || "",
+        next_of_kin_relationship: client.next_of_kin_relationship || "",
+        height_cm: client.height_cm?.toString() || "",
+        weight_kg: client.weight_kg?.toString() || "",
+        pharmacy_name: client.pharmacy_name || "",
+        pharmacy_email: client.pharmacy_email || "",
+        notes: client.notes || "",
+        blood_type: client.blood_type || "",
+        organ_donor: client.organ_donor || false,
+        preferred_language: (client as any).preferred_language || "",
+        title: (client as any).title || "",
+        maiden_name: (client as any).maiden_name || "",
+        religion: (client as any).religion || "",
+        smoker: (client as any).smoker || "",
+        smoker_quantity: (client as any).smoker_quantity || "",
+        highest_education: (client as any).highest_education || "",
+        self_employed: (client as any).self_employed || "",
+        business_name: (client as any).business_name || "",
+        employer_years: (client as any).employer_years || "",
+        tax_reference_number: (client as any).tax_reference_number || "",
       } as any);
-      setOrganDonorOrgans(patient.organ_donor_organs || []);
-      setSurgeries(patient.surgeries || []);
-      setFamilyHistory(patient.family_history || []);
-      setNokMembers(patient.next_of_kin_members || []);
-      setCurrentMedications(patient.current_medications || []);
-      setConditionsDiagnoses(patient.conditions_diagnoses || []);
-      setAllergiesStructured(patient.allergies_structured || []);
-      const existingPharmacies = patient.pharmacies || [];
-      if (existingPharmacies.length === 0 && (patient.pharmacy_name || patient.pharmacy_email)) {
+      setOrganDonorOrgans(client.organ_donor_organs || []);
+      setSurgeries(client.surgeries || []);
+      setFamilyHistory(client.family_history || []);
+      setNokMembers(client.next_of_kin_members || []);
+      setCurrentMedications(client.current_medications || []);
+      setConditionsDiagnoses(client.conditions_diagnoses || []);
+      setAllergiesStructured(client.allergies_structured || []);
+      const existingPharmacies = client.pharmacies || [];
+      if (existingPharmacies.length === 0 && (client.pharmacy_name || client.pharmacy_email)) {
         setPharmacies([
           {
             id: crypto.randomUUID(),
-            name: patient.pharmacy_name || "",
-            email: patient.pharmacy_email || "",
+            name: client.pharmacy_name || "",
+            email: client.pharmacy_email || "",
             is_primary: true,
           },
         ]);
@@ -688,17 +688,17 @@ export function ClientDetailsEditor({
       }
       setHasChanges(false);
     }
-  }, [patient]);
+  }, [client]);
 
   const syncChronicMedsToPrescriptions = useCallback(
     async (meds: CurrentMedication[]) => {
-      if (!patient?.id) return;
+      if (!client?.id) return;
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
-        let doctorId: string | null = null;
-        if (isDoctor) {
-          doctorId = user.id;
+        let advisorId: string | null = null;
+        if (isAdvisor) {
+          advisorId = user.id;
         } else {
           const { data: access } = await supabase
             .from("broker_client_access")
@@ -707,10 +707,10 @@ export function ClientDetailsEditor({
             .eq("is_active", true)
             .order("granted_at", { ascending: false })
             .limit(1);
-          doctorId = access?.[0]?.doctor_id ?? null;
+          advisorId = access?.[0]?.doctor_id ?? null;
         }
         const chronicMeds = (meds || []).filter((m) => m.is_chronic && (m.name || "").trim());
-        if (chronicMeds.length > 0 && !doctorId) {
+        if (chronicMeds.length > 0 && !advisorId) {
           toast({
             title: "Connect a wealth manager to track chronic meds",
             description: "Add your wealth manager under My Wealth management so chronic meds appear under Rewards.",
@@ -720,7 +720,7 @@ export function ClientDetailsEditor({
         const { data: existingRx } = await supabase
           .from("prescriptions")
           .select("id, medication, status")
-          .eq("patient_id", patient.id);
+          .eq("patient_id", client.id);
         const norm = (s: string) => (s || "").trim().toLowerCase();
         const existingByName = new Map<string, { id: string; status: string }>();
         (existingRx || []).forEach((r: any) => existingByName.set(norm(r.medication), { id: r.id, status: r.status }));
@@ -754,8 +754,8 @@ export function ClientDetailsEditor({
           } else {
             await supabase.from("prescriptions").insert({
               ...payload,
-              patient_id: patient.id,
-              doctor_id: doctorId!,
+              patient_id: client.id,
+              doctor_id: advisorId!,
             });
           }
         }
@@ -764,14 +764,14 @@ export function ClientDetailsEditor({
             await supabase.from("prescriptions").update({ status: "cancelled" }).eq("id", rx.id);
           }
         }
-        emitMedicationsUpdated(patient.id);
-        queryClient.invalidateQueries({ queryKey: ["chronic-prescriptions", patient.id] });
-        queryClient.invalidateQueries({ queryKey: ["todays-medications", patient.id] });
+        emitMedicationsUpdated(client.id);
+        queryClient.invalidateQueries({ queryKey: ["chronic-prescriptions", client.id] });
+        queryClient.invalidateQueries({ queryKey: ["todays-medications", client.id] });
       } catch (err) {
         console.error("chronic to prescriptions sync failed", err);
       }
     },
-    [patient?.id, isDoctor, toast, queryClient],
+    [client?.id, isAdvisor, toast, queryClient],
   );
 
   // Medical insurance makes employer details compulsory.
@@ -783,7 +783,7 @@ export function ClientDetailsEditor({
 
     async (data: typeof formData, surgeriesData: Surgery[]) => {
       if (!data.first_name.trim() && !data.last_name.trim()) return;
-      if (!patient?.id) {
+      if (!client?.id) {
         toast({ title: "Cannot save without a client record", variant: "destructive" });
         return;
       }
@@ -860,18 +860,18 @@ export function ClientDetailsEditor({
       await syncChronicMedsToPrescriptions(currentMedications);
       if (userId) {
         await supabase.from("wealth_audit_log").insert({
-          patient_id: patient.id,
+          patient_id: client.id,
           actor_user_id: userId,
           action: "Personal information updated",
           record_type: "clients",
-          record_id: patient.id,
+          record_id: client.id,
         } as any);
       }
       setSaving(false);
       setHasChanges(false);
       setLastSavedAt(Date.now());
     },
-    [onSave, pharmacies, familyHistory, organDonorOrgans, nokMembers, currentMedications, conditionsDiagnoses, allergiesStructured, syncChronicMedsToPrescriptions, patient?.id, toast, userId],
+    [onSave, pharmacies, familyHistory, organDonorOrgans, nokMembers, currentMedications, conditionsDiagnoses, allergiesStructured, syncChronicMedsToPrescriptions, client?.id, toast, userId],
   );
 
   useEffect(() => {
@@ -1294,58 +1294,58 @@ export function ClientDetailsEditor({
   };
 
   const handleCancel = () => {
-    const fn = patient.first_name || splitName(patient.name).first;
-    const ln = patient.last_name || splitName(patient.name).last;
+    const fn = client.first_name || splitName(client.name).first;
+    const ln = client.last_name || splitName(client.name).last;
     setFormData({ ...(formData as any),
       first_name: fn,
       last_name: ln,
-      email: patient.email || "",
-      phone: patient.phone || "",
-      dob: patient.dob || "",
-      occupation: patient.occupation || "",
-      employer: patient.employer || "",
-      reporting_to_email: patient.reporting_to_email || "",
-      referred_by: patient.referred_by || "",
-      marital_status: patient.marital_status || "",
-      id_passport_number: patient.id_passport_number || "",
-      gender: patient.gender || "",
-      physical_address: patient.physical_address || "",
-      postal_address: patient.postal_address || "",
-      same_as_physical: patient.same_as_physical || false,
-      medical_aid: patient.medical_aid || "",
-      medical_insurance_product: patient.medical_insurance_product || "",
-      medical_aid_number: patient.medical_aid_number || "",
-      primary_member: patient.primary_member || "",
-      claims_email: patient.claims_email || "",
-      general_practitioner: patient.general_practitioner || "",
-      allergies: patient.allergies || "",
-      next_of_kin_name: patient.next_of_kin_name || "",
-      next_of_kin_phone: patient.next_of_kin_phone || "",
-      next_of_kin_email: patient.next_of_kin_email || "",
-      next_of_kin_relationship: patient.next_of_kin_relationship || "",
-      height_cm: patient.height_cm?.toString() || "",
-      weight_kg: patient.weight_kg?.toString() || "",
-      pharmacy_name: patient.pharmacy_name || "",
-      pharmacy_email: patient.pharmacy_email || "",
-      notes: patient.notes || "",
-      blood_type: patient.blood_type || "",
-      organ_donor: patient.organ_donor || false,
-      preferred_language: (patient as any).preferred_language || "",
+      email: client.email || "",
+      phone: client.phone || "",
+      dob: client.dob || "",
+      occupation: client.occupation || "",
+      employer: client.employer || "",
+      reporting_to_email: client.reporting_to_email || "",
+      referred_by: client.referred_by || "",
+      marital_status: client.marital_status || "",
+      id_passport_number: client.id_passport_number || "",
+      gender: client.gender || "",
+      physical_address: client.physical_address || "",
+      postal_address: client.postal_address || "",
+      same_as_physical: client.same_as_physical || false,
+      medical_aid: client.medical_aid || "",
+      medical_insurance_product: client.medical_insurance_product || "",
+      medical_aid_number: client.medical_aid_number || "",
+      primary_member: client.primary_member || "",
+      claims_email: client.claims_email || "",
+      general_practitioner: client.general_practitioner || "",
+      allergies: client.allergies || "",
+      next_of_kin_name: client.next_of_kin_name || "",
+      next_of_kin_phone: client.next_of_kin_phone || "",
+      next_of_kin_email: client.next_of_kin_email || "",
+      next_of_kin_relationship: client.next_of_kin_relationship || "",
+      height_cm: client.height_cm?.toString() || "",
+      weight_kg: client.weight_kg?.toString() || "",
+      pharmacy_name: client.pharmacy_name || "",
+      pharmacy_email: client.pharmacy_email || "",
+      notes: client.notes || "",
+      blood_type: client.blood_type || "",
+      organ_donor: client.organ_donor || false,
+      preferred_language: (client as any).preferred_language || "",
     });
-    setOrganDonorOrgans(patient.organ_donor_organs || []);
-    setSurgeries(patient.surgeries || []);
-    setFamilyHistory(patient.family_history || []);
+    setOrganDonorOrgans(client.organ_donor_organs || []);
+    setSurgeries(client.surgeries || []);
+    setFamilyHistory(client.family_history || []);
 
-    setNokMembers(patient.next_of_kin_members || []);
-    setCurrentMedications(patient.current_medications || []);
-    setConditionsDiagnoses(patient.conditions_diagnoses || []);
-    setAllergiesStructured(patient.allergies_structured || []);
+    setNokMembers(client.next_of_kin_members || []);
+    setCurrentMedications(client.current_medications || []);
+    setConditionsDiagnoses(client.conditions_diagnoses || []);
+    setAllergiesStructured(client.allergies_structured || []);
     setIsEditing(false);
   };
 
   const calculateBMI = () => {
-    const height = patient.height_cm;
-    const weight = patient.weight_kg;
+    const height = client.height_cm;
+    const weight = client.weight_kg;
     if (height && weight && height > 0) {
       const heightInMeters = height / 100;
       return (weight / (heightInMeters * heightInMeters)).toFixed(1);
@@ -1367,7 +1367,7 @@ export function ClientDetailsEditor({
   const ProfileBanner = () => {
     if (!isSelfService) return null;
     const initials =
-      patient.name
+      client.name
         ?.split(" ")
         .map((n) => n[0])
         .join("")
@@ -1386,7 +1386,7 @@ export function ClientDetailsEditor({
           >
             <div className="relative">
               <Avatar className="h-20 w-20 border-2 border-primary">
-                {avatarUrl ? <AvatarImage src={avatarUrl} alt={patient.name} /> : null}
+                {avatarUrl ? <AvatarImage src={avatarUrl} alt={client.name} /> : null}
                 <AvatarFallback className="bg-primary text-primary-foreground text-xl font-semibold">{initials}</AvatarFallback>
               </Avatar>
               {/* Always-visible camera badge so users notice the upload affordance */}
@@ -1409,7 +1409,7 @@ export function ClientDetailsEditor({
               {(() => {
                 const hour = new Date().getHours();
                 const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-                return `${greeting}, ${patient.name.split(" ")[0]}`;
+                return `${greeting}, ${client.name.split(" ")[0]}`;
               })()}
             </h3>
             <p className="text-muted-foreground text-xs">
@@ -1464,7 +1464,7 @@ export function ClientDetailsEditor({
             className="w-full h-9 text-xs gap-1.5"
             onClick={() => {
               setActiveTab("calendar");
-              if (isMobile && isSelfService) navigate("/patient/details?section=admin");
+              if (isMobile && isSelfService) navigate("/client/details?section=admin");
             }}
           >
             <Calendar className="h-3.5 w-3.5" />
@@ -1475,7 +1475,7 @@ export function ClientDetailsEditor({
             className="w-full h-9 text-xs gap-1.5"
             onClick={() => {
               setActiveTab("tasks");
-              if (isMobile && isSelfService) navigate("/patient/details?section=admin");
+              if (isMobile && isSelfService) navigate("/client/details?section=admin");
             }}
           >
             <CheckSquare className="h-3.5 w-3.5" />
@@ -1488,8 +1488,8 @@ export function ClientDetailsEditor({
 
   // Per-record share handler for NOK contacts
   const handleShareRecord = (type: "nok", record: { id: string; name: string; phone: string; email: string }) => {
-    const shareUrl = `${window.location.origin}/patient/${patient.id}`;
-    const text = `${record.name} - Emergency Contact for ${patient.name}\n${shareUrl}`;
+    const shareUrl = `${window.location.origin}/client/${client.id}`;
+    const text = `${record.name} - Emergency Contact for ${client.name}\n${shareUrl}`;
 
     setNokMembers((prev) => prev.map((n) => (n.id === record.id ? { ...n, shared: true } : n)));
     setHasChanges(true);
@@ -1605,7 +1605,7 @@ export function ClientDetailsEditor({
       );
     }
 
-    // Desktop/Tablet for doctor-viewed patient: Personal & Medical tabs on the green bar
+    // Desktop/Tablet for doctor-viewed client: Personal & Medical tabs on the green bar
     return (
       <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
         <TabsTrigger
@@ -1635,7 +1635,7 @@ export function ClientDetailsEditor({
   const CompactBanner = () => {
     if (!isSelfService || !isMobile || section === "home") return null;
     const initials =
-      patient.name
+      client.name
         ?.split(" ")
         .map((n) => n[0])
         .join("")
@@ -1647,7 +1647,7 @@ export function ClientDetailsEditor({
         <div className="flex items-center gap-3">
           {/* Avatar */}
           <Avatar className="h-14 w-14 border-2 border-primary shrink-0">
-            {avatarUrl ? <AvatarImage src={avatarUrl} alt={patient.name} /> : null}
+            {avatarUrl ? <AvatarImage src={avatarUrl} alt={client.name} /> : null}
             <AvatarFallback className="bg-primary text-primary text-base font-semibold">{initials}</AvatarFallback>
           </Avatar>
         </div>
@@ -1660,7 +1660,7 @@ export function ClientDetailsEditor({
               className="h-7 w-7"
               onClick={() => {
                 setActiveTab("calendar");
-                navigate("/patient/details?section=admin");
+                navigate("/client/details?section=admin");
               }}
             >
               <Calendar className="h-3.5 w-3.5" />
@@ -1670,7 +1670,7 @@ export function ClientDetailsEditor({
               className="h-7 w-7"
               onClick={() => {
                 setActiveTab("tasks");
-                navigate("/patient/details?section=admin");
+                navigate("/client/details?section=admin");
               }}
             >
               <Mic className="h-3.5 w-3.5" />
@@ -1711,25 +1711,25 @@ export function ClientDetailsEditor({
                 </Button>
               </div>
 
-              <div className="patient-section-frame rounded-xl border border-border bg-card overflow-hidden divide-y divide-white">
+              <div className="client-section-frame rounded-xl border border-border bg-card overflow-hidden divide-y divide-white">
               <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
 
                 <SectionHeader icon={User} label="Personal Information" />
                 <CollapsibleContent className="p-2">
                   <div className={FIELD_GRID_2_CLASS}>
-                    <ViewField label="First Name(s)" value={patient.first_name || splitName(patient.name).first} />
-                    <ViewField label="Last Name" value={patient.last_name || splitName(patient.name).last} />
-                    <ViewField label="ID/Passport Number" value={patient.id_passport_number} />
-                    <ViewField label="Gender" value={patient.gender} />
+                    <ViewField label="First Name(s)" value={client.first_name || splitName(client.name).first} />
+                    <ViewField label="Last Name" value={client.last_name || splitName(client.name).last} />
+                    <ViewField label="ID/Passport Number" value={client.id_passport_number} />
+                    <ViewField label="Gender" value={client.gender} />
                     <ViewField
                       label="Date of Birth"
-                      value={patient.dob ? format(new Date(patient.dob), "MMMM d, yyyy") : null}
+                      value={client.dob ? format(new Date(client.dob), "MMMM d, yyyy") : null}
                     />
-                    <ViewField label="Email" value={patient.email} />
-                    <ViewField label="Phone" value={stripDialCode(patient.phone)} />
-                    <ViewField label="Marital Status" value={patient.marital_status} />
-                    <ViewField label="Language" value={LANGUAGES.find(l => l.code === (patient as any).preferred_language)?.name || (patient as any).preferred_language || "—"} />
-                    <ViewField label="Referred By" value={patient.referred_by} />
+                    <ViewField label="Email" value={client.email} />
+                    <ViewField label="Phone" value={stripDialCode(client.phone)} />
+                    <ViewField label="Marital Status" value={client.marital_status} />
+                    <ViewField label="Language" value={LANGUAGES.find(l => l.code === (client as any).preferred_language)?.name || (client as any).preferred_language || "—"} />
+                    <ViewField label="Referred By" value={client.referred_by} />
                   </div>
                 </CollapsibleContent>
               </Collapsible>
@@ -1738,10 +1738,10 @@ export function ClientDetailsEditor({
                 <SectionHeader icon={MapPin} label="Addresses" />
                 <CollapsibleContent className="p-2">
                   <div className={FIELD_GRID_2_CLASS}>
-                    <ViewField label="Physical Address" value={patient.physical_address || patient.address} />
+                    <ViewField label="Physical Address" value={client.physical_address || client.address} />
                     <ViewField
                       label="Postal Address"
-                      value={patient.same_as_physical ? "Same as physical address" : patient.postal_address}
+                      value={client.same_as_physical ? "Same as physical address" : client.postal_address}
                     />
                   </div>
                 </CollapsibleContent>
@@ -1751,8 +1751,8 @@ export function ClientDetailsEditor({
                 <SectionHeader icon={Briefcase} label="Employer" />
                 <CollapsibleContent className="p-2">
                   <div className={FIELD_GRID_2_CLASS}>
-                    <ViewField label="Employer" value={patient.employer} />
-                    <ViewField label="Occupation" value={patient.occupation} />
+                    <ViewField label="Employer" value={client.employer} />
+                    <ViewField label="Occupation" value={client.occupation} />
                   </div>
                 </CollapsibleContent>
               </Collapsible>
@@ -1804,10 +1804,10 @@ export function ClientDetailsEditor({
                   ) : (
                     <div className={FIELD_GRID_2_CLASS}>
 
-                      <ViewField label="Name" value={patient.next_of_kin_name} />
-                      <ViewField label="Relationship" value={patient.next_of_kin_relationship} />
-                      <ViewField label="Phone" value={stripDialCode(patient.next_of_kin_phone)} />
-                      <ViewField label="Email" value={patient.next_of_kin_email} />
+                      <ViewField label="Name" value={client.next_of_kin_name} />
+                      <ViewField label="Relationship" value={client.next_of_kin_relationship} />
+                      <ViewField label="Phone" value={stripDialCode(client.next_of_kin_phone)} />
+                      <ViewField label="Email" value={client.next_of_kin_email} />
                     </div>
                   )}
                 </CollapsibleContent>
@@ -1816,7 +1816,7 @@ export function ClientDetailsEditor({
               <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
                 <SectionHeader icon={StickyNote} label="General Notes" />
                 <CollapsibleContent className="p-2">
-                  <p className="text-xs text-foreground whitespace-pre-wrap">{patient.notes || "No notes recorded"}</p>
+                  <p className="text-xs text-foreground whitespace-pre-wrap">{client.notes || "No notes recorded"}</p>
                 </CollapsibleContent>
               </Collapsible>
               </div>
@@ -1825,14 +1825,14 @@ export function ClientDetailsEditor({
             {/* === MEDICAL INFORMATION TAB — TWO COLUMNS === */}
             <TabsContent value="medical" className="mt-4 space-y-3">
               <div><h2 className="text-lg font-semibold text-primary-dark">Financial Information</h2><p className="text-xs text-muted-foreground">The facts behind the Financial Needs Analysis.</p></div>
-              <FinancialInformation patientId={patient.id} />
+              <FinancialInformation clientId={client.id} />
             </TabsContent>
 
             {/* === MY HEALTH RECORDS TAB === */}
             <TabsContent value="healthrecords" className="mt-4 space-y-3">
               <div><h2 className="text-lg font-semibold text-primary-dark">My Health Records</h2><p className="text-xs text-muted-foreground">Chronic conditions, chronic medication and hospital admissions from Holarc Health, plus reports shared for underwriting.</p></div>
-              <HolarcHealthRecords patientId={patient.id} />
-<DocumentUploadList patientId={patient.id} documentKind="Health Record" addLabel="Upload health record" />
+              <HolarcHealthRecords clientId={client.id} />
+<DocumentUploadList clientId={client.id} documentKind="Health Record" addLabel="Upload health record" />
             </TabsContent>
 
 
@@ -1861,13 +1861,13 @@ export function ClientDetailsEditor({
                   <h2 className="text-lg font-semibold text-primary-dark">My Consultations</h2>
                   <p className="text-xs text-muted-foreground">Your consultations with your advisers. You can also record meetings with advisers not on Holarc Wealth.</p>
                 </div>
-                <ClientSessionRecorder patientId={patient.id} patientName={patient.name} />
+                <ClientSessionRecorder clientId={client.id} clientName={client.name} />
               </TabsContent>
             )}
 
             {isSelfService && (
               <TabsContent value="lifeEvents" className="mt-4">
-                <LifeEventsPanel patientId={patient.id} />
+                <LifeEventsPanel clientId={client.id} />
               </TabsContent>
             )}
 
@@ -1887,7 +1887,7 @@ export function ClientDetailsEditor({
 
             {isSelfService && (
               <TabsContent value="programmes" className="mt-4">
-                <ClientProgrammesTab patientId={patient.id} canManage={false} isSelf />
+                <ClientProgrammesTab clientId={client.id} canManage={false} isSelf />
               </TabsContent>
             )}
 
@@ -1919,7 +1919,7 @@ export function ClientDetailsEditor({
                     </div>
                   }
                 >
-                  <TestResultsPanel patientId={patient.id} />
+                  <TestResultsPanel clientId={client.id} />
                 </Suspense>
               </TabsContent>
             )}
@@ -1983,7 +1983,7 @@ export function ClientDetailsEditor({
               <AutosaveStatus saving={saving} hasChanges={hasChanges} lastSavedAt={lastSavedAt} />
             </div>
 
-            <div className="patient-section-frame rounded-xl border border-border bg-card overflow-hidden divide-y divide-white">
+            <div className="client-section-frame rounded-xl border border-border bg-card overflow-hidden divide-y divide-white">
             <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
               <SectionHeader icon={User} label="Personal Information" />
               <CollapsibleContent className="p-2">
@@ -2464,14 +2464,14 @@ export function ClientDetailsEditor({
           {/* === MEDICAL TAB (EDIT) === */}
           <TabsContent value="medical" className="mt-4 space-y-3">
             <div><h2 className="text-lg font-semibold text-primary-dark">Financial Information</h2><p className="text-xs text-muted-foreground">The facts behind the Financial Needs Analysis.</p></div>
-            <FinancialInformation patientId={patient.id} />
+            <FinancialInformation clientId={client.id} />
           </TabsContent>
 
           {/* === MY HEALTH RECORDS TAB (EDIT) === */}
           <TabsContent value="healthrecords" className="mt-4 space-y-3">
             <div><h2 className="text-lg font-semibold text-primary-dark">My Health Records</h2><p className="text-xs text-muted-foreground">Chronic conditions, chronic medication and hospital admissions from Holarc Health, plus reports shared for underwriting.</p></div>
-            <HolarcHealthRecords patientId={patient.id} />
-<DocumentUploadList patientId={patient.id} documentKind="Health Record" addLabel="Upload health record" />
+            <HolarcHealthRecords clientId={client.id} />
+<DocumentUploadList clientId={client.id} documentKind="Health Record" addLabel="Upload health record" />
           </TabsContent>
 
 
@@ -2515,9 +2515,9 @@ export function ClientDetailsEditor({
                 ) : patientSessions.length > 0 ? (
                   <SessionHistoryTableLazy
                     sessions={patientSessions}
-                    patientId={patient.id}
-                    patientName={patient.name}
-                    allergies={patient.allergies}
+                    clientId={client.id}
+                    clientName={client.name}
+                    allergies={client.allergies}
                   />
                 ) : (
                   <div className="py-12 text-center text-sm text-muted-foreground">
@@ -2530,7 +2530,7 @@ export function ClientDetailsEditor({
 
           {isSelfService && (
             <TabsContent value="logs" className="mt-4">
-              <TransactionLogs patientId={patient.id} />
+              <TransactionLogs clientId={client.id} />
             </TabsContent>
           )}
 
@@ -2584,7 +2584,7 @@ export function ClientDetailsEditor({
 
           {isSelfService && (
             <TabsContent value="lifeEvents" className="mt-4">
-              <LifeEventsPanel patientId={patient.id} />
+              <LifeEventsPanel clientId={client.id} />
             </TabsContent>
           )}
 
@@ -2601,7 +2601,7 @@ export function ClientDetailsEditor({
                   </div>
                 }
               >
-                <TestResultsPanel patientId={patient.id} />
+                <TestResultsPanel clientId={client.id} />
               </Suspense>
             </TabsContent>
           )}

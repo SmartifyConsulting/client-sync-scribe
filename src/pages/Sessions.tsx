@@ -146,12 +146,12 @@ export default function Sessions() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
-  const urlPatientId = searchParams.get("patient");
-  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(urlPatientId);
-  const [doctorName, setDoctorName] = useState<string>("Doctor");
+  const urlClientId = searchParams.get("client");
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(urlClientId);
+  const [advisorName, setDoctorName] = useState<string>("Doctor");
   
   // Use URL param if provided, otherwise use selected patient
-  const patientId = urlPatientId || selectedPatientId;
+  const clientId = urlClientId || selectedClientId;
 
   // Fetch logged-in doctor's name and language preference
   useEffect(() => {
@@ -184,6 +184,7 @@ export default function Sessions() {
   const [invoice, setInvoice] = useState<{ id: string; invoice_number: string; amount: number } | null>(null);
   const [currentMedications, setCurrentMedications] = useState<{ medication: string; dosage: string; frequency: string }[]>([]);
   const [patientSelectorOpen, setPatientSelectorOpen] = useState(false);
+  const [doctorLanguage, setDoctorLanguage] = useState<string>("English");
   const [pastPatientSessions, setPastPatientSessions] = useState<any[]>([]);
   const savedAudioUrlRef = useRef<string | null>(null);
   const [pendingTranscript, setPendingTranscript] = useState<string>("");
@@ -236,7 +237,7 @@ export default function Sessions() {
   }, []);
 
   const navigate = useNavigate();
-  const { patients, loading: patientsLoading } = useClients();
+  const { clients, loading: clientsLoading } = useClients();
   const { sessions, loading: sessionsLoading, createSession, completeSession } = useSessions();
   const [selectedRecordings, setSelectedRecordings] = useState<Set<string>>(new Set());
   const [isDownloading, setIsDownloading] = useState(false);
@@ -246,7 +247,7 @@ export default function Sessions() {
   const [sessionDateTo, setSessionDateTo] = useState("");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
-  const currentPatient = patients.find(p => p.id === patientId);
+  const currentPatient = clients.find(p => p.id === clientId);
   // Arriving from a patient profile's "Start Session" link — suppress the
   // patient-selector idle screen entirely while the session auto-starts.
   const [autoStartTimedOut, setAutoStartTimedOut] = useState(false);
@@ -264,22 +265,22 @@ export default function Sessions() {
 
   // Handle patient selection
   const handlePatientSelect = (value: string) => {
-    setSelectedPatientId(value);
+    setSelectedClientId(value);
     setSearchParams({ patient: value });
   };
 
   // Fetch active prescriptions when patient changes — refreshable on med updates
   const fetchActivePrescriptions = useCallback(async () => {
-    if (!patientId) return;
+    if (!clientId) return;
     const { data, error } = await supabase
       .from('prescriptions')
       .select('medication, dosage, frequency')
-      .eq('patient_id', patientId)
+      .eq('patient_id', clientId)
       .eq('status', 'active');
     if (!error && data) {
       setCurrentMedications(data);
     }
-  }, [patientId]);
+  }, [clientId]);
 
   useEffect(() => {
     fetchActivePrescriptions();
@@ -298,14 +299,14 @@ export default function Sessions() {
 
   // Listen for cross-component medication updates
   useEffect(() => {
-    if (!patientId) return;
+    if (!clientId) return;
     let cancelled = false;
     let unsubscribe: (() => void) | null = null;
     import("@/lib/utils").then(({ medicationSyncBus }) => {
       if (cancelled) return;
       const handler = (e: Event) => {
-        const detail = (e as CustomEvent).detail as { patientId?: string } | undefined;
-        if (!detail?.patientId || detail.patientId === patientId) fetchActivePrescriptions();
+        const detail = (e as CustomEvent).detail as { clientId?: string } | undefined;
+        if (!detail?.clientId || detail.clientId === clientId) fetchActivePrescriptions();
       };
       medicationSyncBus.addEventListener("medications-updated", handler);
       unsubscribe = () => medicationSyncBus.removeEventListener("medications-updated", handler);
@@ -314,17 +315,17 @@ export default function Sessions() {
       cancelled = true;
       unsubscribe?.();
     };
-  }, [patientId, fetchActivePrescriptions]);
+  }, [clientId, fetchActivePrescriptions]);
 
   // Fetch past sessions for patient (for AI clinician context)
   useEffect(() => {
     const fetchPastSessions = async () => {
-      if (!patientId) return;
+      if (!clientId) return;
       
       const { data, error } = await supabase
         .from('sessions')
         .select('id, summary, started_at, status')
-        .eq('patient_id', patientId)
+        .eq('patient_id', clientId)
         .eq('status', 'completed')
         .order('started_at', { ascending: false })
         .limit(10);
@@ -339,7 +340,7 @@ export default function Sessions() {
     };
     
     fetchPastSessions();
-  }, [patientId]);
+  }, [clientId]);
 
   // Keep refs in sync with state
   useEffect(() => {
@@ -356,11 +357,11 @@ export default function Sessions() {
   // completes (see handleSessionComplete's completeSession call) and cleared.
   useEffect(() => {
     personalNotesRef.current = personalNotes;
-    if (!personalNotesHasLoaded.current || !patientId) return;
+    if (!personalNotesHasLoaded.current || !clientId) return;
     if (personalNotesSaveTimer.current) clearTimeout(personalNotesSaveTimer.current);
     personalNotesSaveTimer.current = setTimeout(() => {
       try {
-        localStorage.setItem(`session-personal-notes-draft:${patientId}`, personalNotes);
+        localStorage.setItem(`session-personal-notes-draft:${clientId}`, personalNotes);
         toast({ title: "Notes saved", description: "Your personal notes are saved for this consultation." });
       } catch {
         toast({ title: "Error", description: "Failed to save personal notes", variant: "destructive" });
@@ -369,7 +370,7 @@ export default function Sessions() {
     return () => {
       if (personalNotesSaveTimer.current) clearTimeout(personalNotesSaveTimer.current);
     };
-  }, [personalNotes, patientId]);
+  }, [personalNotes, clientId]);
 
   // Advance to the next step in the sequential post-session queue, closing the
   // flow once every step (documents → schedule → invoice → vula) has run.
@@ -395,12 +396,12 @@ export default function Sessions() {
     sessionIdForDoc: string | null | undefined,
     templateNameLike: string,
   ): Promise<{ id: string; content: string } | null> => {
-    if (!sessionIdForDoc || !patientId) return null;
+    if (!sessionIdForDoc || !clientId) return null;
     const { data } = await supabase
       .from('documents')
       .select('id, content')
       .eq('user_id', userId)
-      .eq('patient_id', patientId)
+      .eq('patient_id', clientId)
       .eq('session_id', sessionIdForDoc)
       .ilike('template_name', `%${templateNameLike}%`)
       .order('created_at', { ascending: false })
@@ -413,7 +414,7 @@ export default function Sessions() {
     data: MedCertData,
     sessionIdArg?: string | null,
   ): Promise<GeneratedDoc | null> => {
-    if (!patientId) return null;
+    if (!clientId) return null;
     try {
       const sessionIdForDoc = sessionIdArg ?? currentSessionIdRef.current;
       const content = `<b>MEDICAL CERTIFICATE</b>\n\nPatient: ${data.patient_name || currentPatient?.name}\nDiagnosis: ${data.diagnosis}\nLeave Period: ${data.start_date} to ${data.end_date}${data.notes ? `\nNotes: ${data.notes}` : ''}`;
@@ -424,7 +425,7 @@ export default function Sessions() {
       if (!doc) {
         const { data: inserted } = await supabase.from('documents').insert({
           user_id: user.id,
-          patient_id: patientId,
+          patient_id: clientId,
           patient_name: currentPatient?.name || null,
           session_id: sessionIdForDoc,
           name: `Medical Certificate - ${new Date().toLocaleDateString()}`,
@@ -446,13 +447,13 @@ export default function Sessions() {
 
   const createPrescriptionDocument = async (data: PrescriptionData, sessionIdArg?: string | null): Promise<GeneratedDoc | null> => {
     const sessionIdForDoc = sessionIdArg ?? currentSessionIdRef.current;
-    if (!patientId || !sessionIdForDoc) return null;
+    if (!clientId || !sessionIdForDoc) return null;
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
       for (const med of data.medications) {
         await supabase.from('prescriptions').insert({
-          patient_id: patientId,
+          patient_id: clientId,
           doctor_id: user.id,
           session_id: sessionIdForDoc,
           medication: med.medication,
@@ -467,7 +468,7 @@ export default function Sessions() {
       if (!doc) {
         const { data: inserted } = await supabase.from('documents').insert({
           user_id: user.id,
-          patient_id: patientId,
+          patient_id: clientId,
           patient_name: currentPatient?.name || null,
           session_id: sessionIdForDoc,
           name: `Prescription - ${new Date().toLocaleDateString()}`,
@@ -489,7 +490,7 @@ export default function Sessions() {
 
   const createInvoiceDocument = async (data: InvoiceData, sessionIdArg?: string | null): Promise<GeneratedDoc | null> => {
     const sessionIdForDoc = sessionIdArg ?? currentSessionIdRef.current;
-    if (!patientId || !sessionIdForDoc) return null;
+    if (!clientId || !sessionIdForDoc) return null;
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
@@ -497,7 +498,7 @@ export default function Sessions() {
       const description = data.items.map(i => `${i.description}: R${i.amount}`).join('; ');
       const total = data.total || data.items.reduce((s, i) => s + (Number(i.amount) || 0), 0);
       const { data: inv } = await supabase.from('invoices').insert({
-        patient_id: patientId,
+        patient_id: clientId,
         doctor_id: user.id,
         session_id: sessionIdForDoc,
         invoice_number: invoiceNumber,
@@ -513,7 +514,7 @@ export default function Sessions() {
         .from('documents')
         .select('id, content')
         .eq('user_id', user.id)
-        .eq('patient_id', patientId)
+        .eq('patient_id', clientId)
         .eq('session_id', sessionIdForDoc)
         .ilike('template_name', '%invoice%')
         .order('created_at', { ascending: false })
@@ -524,7 +525,7 @@ export default function Sessions() {
       if (!doc) {
         const { data: inserted } = await supabase.from('documents').insert({
           user_id: user.id,
-          patient_id: patientId,
+          patient_id: clientId,
           patient_name: currentPatient?.name || null,
           session_id: sessionIdForDoc,
           name: `Invoice ${invoiceNumber} - ${currentPatient?.name || ''} - ${new Date().toISOString().split('T')[0]}`,
@@ -550,7 +551,7 @@ export default function Sessions() {
     data: ReferralData,
     sessionIdArg?: string | null,
   ): Promise<GeneratedDoc | null> => {
-    if (!patientId) return null;
+    if (!clientId) return null;
     try {
       const sessionIdForDoc = sessionIdArg ?? currentSessionIdRef.current;
       const content = `<b>REFERRAL LETTER</b>\n\nReferral To: ${data.specialist_type}${data.doctor_name ? ` - ${data.doctor_name}` : ''}\nReason: ${data.reason}\nUrgency: ${data.urgency || 'routine'}`;
@@ -561,7 +562,7 @@ export default function Sessions() {
       if (!doc) {
         const { data: inserted } = await supabase.from('documents').insert({
           user_id: user.id,
-          patient_id: patientId,
+          patient_id: clientId,
           patient_name: currentPatient?.name || null,
           session_id: sessionIdForDoc,
           name: `Referral Letter - ${data.specialist_type} - ${new Date().toLocaleDateString()}`,
@@ -661,7 +662,7 @@ export default function Sessions() {
     setPostSessionIndex(0);
     setShowPostSessionFlow(true);
 
-  }, [extractedMedCert, extractedPrescription, extractedInvoice, extractedReferral, patientId, currentPatient]);
+  }, [extractedMedCert, extractedPrescription, extractedInvoice, extractedReferral, clientId, currentPatient]);
 
   // Assigned once the live-hint hook is created below; lets the completion
   // handler run one final whole-transcript analysis without a circular dep.
@@ -716,7 +717,7 @@ export default function Sessions() {
         fullTranscript,
         currentNotes,
         {
-          patient_id: patientId!,
+          patient_id: clientId!,
           title: `Session - ${new Date().toLocaleDateString()}`,
           started_at: sessionStartTimeRef.current?.toISOString() || new Date().toISOString(),
           audio_url: savedAudioUrlRef.current || undefined,
@@ -733,8 +734,8 @@ export default function Sessions() {
           pausedSessionIdRef.current = null;
           resumedTranscriptRef.current = "";
         }
-        if (patientId) {
-          try { localStorage.removeItem(`session-personal-notes-draft:${patientId}`); } catch { /* best effort */ }
+        if (clientId) {
+          try { localStorage.removeItem(`session-personal-notes-draft:${clientId}`); } catch { /* best effort */ }
         }
         setSummary(result.summary || "");
         setActionPoints(result.action_points || []);
@@ -780,7 +781,7 @@ export default function Sessions() {
 
     setSessionState("completed");
     pendingCompletionRef.current = false;
-  }, [completeSession, patientId, generateAllDocuments]);
+  }, [completeSession, clientId, generateAllDocuments]);
 
   const { 
     isRecording, 
@@ -801,8 +802,8 @@ export default function Sessions() {
     resumeRecording,
     clearTranscript 
   } = useAudioRecording({
-    patientName: currentPatient?.name,
-    doctorName: doctorName,
+    clientName: currentPatient?.name,
+    advisorName: advisorName,
     sessionId: currentSessionId || undefined,
     onEndSessionDetected: () => {
       console.log("End session detected via Web Speech API");
@@ -885,7 +886,7 @@ export default function Sessions() {
     hintLinesRef.current = new Map();
     hintSectionsRef.current = { alerts: [], differentials: [], investigations: [] };
     setNotes("");
-  }, [patientId]);
+  }, [clientId]);
 
   useEffect(() => {
     if (!liveHint) return;
@@ -998,13 +999,13 @@ export default function Sessions() {
   useEffect(() => {
     if (searchParams.get("autoStart") !== "true") return;
     if (autoStartedRef.current) return;
-    if (!patientId || !currentPatient) return;
+    if (!clientId || !currentPatient) return;
     autoStartedRef.current = true;
     const next = new URLSearchParams(searchParams);
     next.delete("autoStart");
     setSearchParams(next, { replace: true });
     startSession();
-  }, [searchParams, patientId, currentPatient]);
+  }, [searchParams, clientId, currentPatient]);
 
   const startSession = async (resume?: PausedSessionSnapshot) => {
     // Guard against double-invocation (e.g. a stray duplicate click/effect)
@@ -1015,9 +1016,7 @@ export default function Sessions() {
     setSummary("");
     setActionPoints([]);
     setSessionDuration(resume?.elapsedSeconds ?? 0);
-    setPrescription(null);
     setInvoice(null);
-    setAiDiagnosis(null);
     setCurrentSessionId(resume?.id || crypto.randomUUID());
     // Everything captured before the pause is replayed into the finished session.
     resumedTranscriptRef.current = resume?.transcript || "";
@@ -1025,7 +1024,7 @@ export default function Sessions() {
     setPausedDraft(null);
     personalNotesHasLoaded.current = false;
     try {
-      const draft = patientId ? localStorage.getItem(`session-personal-notes-draft:${patientId}`) : null;
+      const draft = clientId ? localStorage.getItem(`session-personal-notes-draft:${clientId}`) : null;
       setPersonalNotes(resume?.privateNotes || draft || "");
     } catch {
       setPersonalNotes(resume?.privateNotes || "");
@@ -1053,16 +1052,16 @@ export default function Sessions() {
 
   // Look for a paused consultation for this patient whenever the page is idle.
   useEffect(() => {
-    if (!patientId || sessionState !== "idle") {
+    if (!clientId || sessionState !== "idle") {
       if (sessionState !== "idle") setPausedDraft(null);
       return;
     }
     let cancelled = false;
-    fetchPausedSession(patientId).then((draft) => {
+    fetchPausedSession(clientId).then((draft) => {
       if (!cancelled) setPausedDraft(draft);
     });
     return () => { cancelled = true; };
-  }, [patientId, sessionState]);
+  }, [clientId, sessionState]);
 
   /** Pause → persist a resumable draft. Resume → carry on recording. */
   const handlePauseToggle = async () => {
@@ -1071,13 +1070,13 @@ export default function Sessions() {
       return;
     }
     pauseRecording();
-    if (!patientId || !currentSessionId) return;
+    if (!clientId || !currentSessionId) return;
     setIsSavingPause(true);
     const liveText = latestTranscriptRef.current || liveTranscript || transcript || "";
     const combined = [resumedTranscriptRef.current, liveText].filter(Boolean).join("\n\n");
     const saved = await savePausedSession({
       sessionId: currentSessionId,
-      patientId,
+      clientId,
       transcript: combined,
       notes: notesRef.current || notes || "",
       privateNotes: personalNotesRef.current || personalNotes || "",
@@ -1264,10 +1263,10 @@ export default function Sessions() {
           onAdvance={advancePostSession}
           onFinish={() => setShowPostSessionFlow(false)}
           currentPatient={currentPatient ? { id: currentPatient.id, name: currentPatient.name, patient_user_id: (currentPatient as any).patient_user_id || null } : null}
-          doctorId={doctorIdRef.current}
-          doctorName={doctorName}
+          advisorId={doctorIdRef.current}
+          advisorName={advisorName}
           extractedFollowUp={extractedFollowUp}
-          patientName={currentPatient?.name}
+          clientName={currentPatient?.name}
           transcript={pendingTranscript}
           clinicianNotes={cleanClinicianNotes(notes)}
           summary={summary}
@@ -1280,7 +1279,7 @@ export default function Sessions() {
       <div className="flex items-center gap-4">
         {currentPatient && (
           <Link
-            to={`/clients/${patientId}`}
+            to={`/clients/${clientId}`}
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -1329,7 +1328,7 @@ export default function Sessions() {
               : "Choose a client to start a new consultation."}
           </p>
 
-          {/* Patient Selector with Search */}
+          {/* Client Selector with Search */}
           {!currentPatient && (
             <div className="w-full max-w-xs mb-4">
               <Popover open={patientSelectorOpen} onOpenChange={setPatientSelectorOpen}>
@@ -1340,8 +1339,8 @@ export default function Sessions() {
                     aria-expanded={patientSelectorOpen}
                     className="w-full justify-between bg-background"
                   >
-                    {selectedPatientId 
-                      ? patients.find(p => p.id === selectedPatientId)?.name 
+                    {selectedClientId 
+                      ? clients.find(p => p.id === selectedClientId)?.name 
                       : "Search clients..."}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
@@ -1357,7 +1356,7 @@ export default function Sessions() {
                     />
                     <CommandList className="max-h-[280px]">
                       <CommandEmpty>
-                        {patientsLoading ? (
+                        {clientsLoading ? (
                           <div className="flex items-center justify-center py-6">
                             <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                           </div>
@@ -1372,7 +1371,7 @@ export default function Sessions() {
                         )}
                       </CommandEmpty>
                       <CommandGroup className="p-1.5">
-                        {[...patients].sort((a, b) => {
+                        {[...clients].sort((a, b) => {
                           const surnameA = a.name.trim().split(/\s+/).pop()?.toLowerCase() || '';
                           const surnameB = b.name.trim().split(/\s+/).pop()?.toLowerCase() || '';
                           return surnameA.localeCompare(surnameB);
@@ -1399,7 +1398,7 @@ export default function Sessions() {
                             <Check
                               className={cn(
                                 "h-4 w-4 shrink-0 text-primary",
-                                selectedPatientId === patient.id ? "opacity-100" : "opacity-0"
+                                selectedClientId === patient.id ? "opacity-100" : "opacity-0"
                               )}
                             />
                           </CommandItem>
@@ -1423,7 +1422,7 @@ export default function Sessions() {
                 variant="ghost" 
                 size="sm" 
                 onClick={() => {
-                  setSelectedPatientId(null);
+                  setSelectedClientId(null);
                   setSearchParams({});
                 }}
                 className="text-xs text-muted-foreground"
@@ -1516,7 +1515,7 @@ export default function Sessions() {
           {/* Record Session — column 1, row 1 */}
           <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col order-1 self-start lg:col-start-1 lg:row-start-1">
 
-            {/* Patient Info */}
+            {/* Client Info */}
             <div className="flex items-center gap-3 p-4 border-b">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent shrink-0">
                 <User className="h-5 w-5 text-accent-foreground" />
@@ -1618,19 +1617,19 @@ export default function Sessions() {
 
           </div>
 
-          {/* Patient Overview — wide band spanning the workspace beside the recorder. */}
+          {/* Client Overview — wide band spanning the workspace beside the recorder. */}
           <div className="flex flex-col gap-4 order-2 min-w-0 lg:col-start-2 lg:row-start-1">
-            {/* Patient Overview — AI recap of the last 6 months with DISC descriptors on top. */}
+            {/* Client Overview — AI recap of the last 6 months with DISC descriptors on top. */}
             <div className="min-h-[210px] flex flex-col">
               <WealthClientOverview
                 patient={currentPatient}
-                discSlot={<SessionDiscStrip patientId={currentPatient?.id} inline />}
+                discSlot={<SessionDiscStrip clientId={currentPatient?.id} inline />}
               />
             </div>
 
-            {/* Transcript document — full width beneath Patient Overview, shown once
+            {/* Transcript document — full width beneath Client Overview, shown once
                 transcription has finished. Nothing streams while recording. */}
-            <SessionTranscriptAccordion transcript={transcript} doctorName={doctorName} />
+            <SessionTranscriptAccordion transcript={transcript} advisorName={advisorName} />
 
           </div>
 
@@ -1710,7 +1709,7 @@ export default function Sessions() {
 
               <TabsContent value="drawing" className="mt-0">
                 <DrawingPad
-                  patientId={patientId || ""}
+                  clientId={clientId || ""}
                   sessionId={currentSessionId || undefined}
                 />
               </TabsContent>
@@ -1752,8 +1751,8 @@ export default function Sessions() {
             audioUrl={audioUrl}
             actionPoints={actionPoints}
             sessionId={currentSessionId}
-            doctorName={doctorName}
-            patientName={currentPatient?.name}
+            advisorName={advisorName}
+            clientName={currentPatient?.name}
           />
 
           {/* Post-Session Actions: Create Documents */}
@@ -1770,7 +1769,7 @@ export default function Sessions() {
                 </SelectContent>
               </Select>
               <Button
-                disabled={!selectedDocType || !patientId}
+                disabled={!selectedDocType || !clientId}
                 onClick={() => {
                   if (selectedDocType === 'invoice') setShowInvoiceEditor(true);
                   else if (selectedDocType === 'general_letter') setShowGeneralLetterEditor(true);
@@ -1780,13 +1779,8 @@ export default function Sessions() {
                 Create
               </Button>
             </div>
-            {(prescription || invoice) && (
+            {invoice && (
               <div className="mt-3 flex flex-wrap gap-2">
-                {prescription && (
-                  <Badge variant="secondary" className="gap-1">
-                    <CheckCircle className="h-4 w-4 text-success" /> Prescription Saved
-                  </Badge>
-                )}
                 {invoice && (
                   <Badge variant="secondary" className="gap-1">
                     <CheckCircle className="h-4 w-4 text-success" /> Invoice R {invoice.amount.toFixed(2)}
@@ -1805,7 +1799,7 @@ export default function Sessions() {
             </Button>
             {currentPatient && (
               <Button variant="outline" asChild>
-                <Link to={`/clients/${patientId}`}>View Client Profile</Link>
+                <Link to={`/clients/${clientId}`}>View Client Profile</Link>
               </Button>
             )}
           </div>
@@ -1813,10 +1807,10 @@ export default function Sessions() {
       )}
 
       {/* Invoice Editor Modal */}
-      {showInvoiceEditor && currentPatient && patientId && (
+      {showInvoiceEditor && currentPatient && clientId && (
         <InvoiceEditor
-          patientId={patientId}
-          patientName={currentPatient.name}
+          clientId={clientId}
+          clientName={currentPatient.name}
           sessionId={currentSessionId || undefined}
           onClose={() => setShowInvoiceEditor(false)}
           onSave={setInvoice}
@@ -1824,10 +1818,10 @@ export default function Sessions() {
       )}
 
       {/* General Letter Editor Modal */}
-      {showGeneralLetterEditor && currentPatient && patientId && (
+      {showGeneralLetterEditor && currentPatient && clientId && (
         <GeneralLetterEditor
-          patientName={currentPatient.name}
-          patientId={patientId}
+          clientName={currentPatient.name}
+          clientId={clientId}
           sessionId={currentSessionId || undefined}
           onClose={() => setShowGeneralLetterEditor(false)}
           onSave={() => setShowGeneralLetterEditor(false)}

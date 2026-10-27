@@ -21,8 +21,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Paperclip, Send } from "lucide-react";
 
 interface ReferralLetterEditorProps {
-  patientId: string;
-  patientName: string;
+  clientId: string;
+  clientName: string;
   sessionId?: string;
   onClose: () => void;
   onSave: (letter: { content: string }) => void;
@@ -35,7 +35,7 @@ Practice No: [PRACTICE_NUMBER]
 Registration No: [DOCTOR_NUMBER]
 
 Date: [DATE]
-Patient: [PATIENT_NAME]
+Client: [CLIENT_NAME]
 Referring Doctor: [DOCTOR_NAME]
 
 ─────────────────────────────────────
@@ -59,8 +59,8 @@ Signature: ___________________
 `;
 
 export function ReferralLetterEditor({ 
-  patientId,
-  patientName,
+  clientId,
+  clientName,
   sessionId,
   onClose, 
   onSave 
@@ -69,7 +69,7 @@ export function ReferralLetterEditor({
   const { profile } = useProfile();
   const { formattedContent: savedTemplate, headerFooter, isLoading: templateLoading } = useTemplateWithHeaderFooter("Referral Letter");
   
-  const doctorName = profile?.full_name || "Doctor";
+  const advisorName = profile?.full_name || "Doctor";
   const practiceNumber = profile?.practice_number || "";
   const practiceAddress = profile?.practice_address || "";
   const doctorNumber = profile?.doctor_number || "";
@@ -123,12 +123,12 @@ export function ReferralLetterEditor({
       const { data } = await supabase
         .from("documents")
         .select("id, name")
-        .eq("patient_id", patientId)
+        .eq("patient_id", clientId)
         .order("created_at", { ascending: false })
         .limit(30);
       setAvailableDocs((data || []) as Array<{ id: string; name: string }>);
     })();
-  }, [patientId]);
+  }, [clientId]);
 
   // Auto-populate a referral summary from the latest session for this patient.
   useEffect(() => {
@@ -137,7 +137,7 @@ export function ReferralLetterEditor({
       const query = supabase
         .from("sessions")
         .select("started_at, summary, transcript, notes")
-        .eq("patient_id", patientId)
+        .eq("patient_id", clientId)
         .order("started_at", { ascending: false })
         .limit(1);
       const { data } = sessionId
@@ -158,7 +158,7 @@ export function ReferralLetterEditor({
       );
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [patientId, sessionId]);
+  }, [clientId, sessionId]);
 
   const generateReferralContent = () => {
     let content = "";
@@ -172,10 +172,12 @@ export function ReferralLetterEditor({
     return baseTemplate
       .replace(/\[DATE\]/g, new Date().toLocaleDateString())
       .replace(/\[ReferralDate\]/g, new Date().toLocaleDateString())
-      .replace(/\[PATIENT_NAME\]/g, patientName)
-      .replace(/\[PatientName\]/g, patientName)
-      .replace(/\[DOCTOR_NAME\]/g, doctorName)
-      .replace(/\[DoctorName\]/g, doctorName)
+      .replace(/\[PATIENT_NAME\]/g, clientName)
+      .replace(/\[PatientName\]/g, clientName)
+      .replace(/\[CLIENT_NAME\]/g, clientName)
+      .replace(/\[ClientName\]/g, clientName)
+      .replace(/\[DOCTOR_NAME\]/g, advisorName)
+      .replace(/\[DoctorName\]/g, advisorName)
       .replace(/\[PRACTICE_NUMBER\]/g, practiceNumber)
       .replace(/\[PracticeNumber\]/g, practiceNumber)
       .replace(/\[PRACTICE_ADDRESS\]/g, practiceAddress)
@@ -194,10 +196,10 @@ export function ReferralLetterEditor({
     const { data, error } = await supabase
       .from("documents")
       .insert({
-        name: `Referral Letter - ${patientName} - ${new Date().toLocaleDateString()}`,
+        name: `Referral Letter - ${clientName} - ${new Date().toLocaleDateString()}`,
         content: generateContent(),
-        patient_id: patientId,
-        patient_name: patientName,
+        patient_id: clientId,
+        patient_name: clientName,
         template_name: "Referral Letter",
         user_id: user.id,
         linked_document_ids: attachedIds,
@@ -235,10 +237,10 @@ export function ReferralLetterEditor({
       const { error } = await supabase.functions.invoke("send-document-email", {
         body: {
           to: recipient,
-          subject: `Referral Letter for ${patientName}`,
-          documentName: `Referral Letter - ${patientName}`,
+          subject: `Referral Letter for ${clientName}`,
+          documentName: `Referral Letter - ${clientName}`,
           documentContent: generateContent(),
-          senderName: doctorName,
+          senderName: advisorName,
           attachedDocumentIds: attachedIds,
         },
       });
@@ -286,10 +288,10 @@ export function ReferralLetterEditor({
       const { error } = await supabase
         .from('documents')
         .insert({
-          name: `Referral Letter - ${patientName} - ${new Date().toLocaleDateString()}`,
+          name: `Referral Letter - ${clientName} - ${new Date().toLocaleDateString()}`,
           content: content,
-          patient_id: patientId,
-          patient_name: patientName,
+          patient_id: clientId,
+          patient_name: clientName,
           template_name: 'Referral Letter',
           user_id: user.id,
           linked_document_ids: attachedIds,
@@ -319,7 +321,7 @@ export function ReferralLetterEditor({
     return (
       <DocumentPreview
         title="Referral Letter"
-        subtitle={`Patient: ${patientName}`}
+        subtitle={`Client: ${clientName}`}
         content={generateContent()}
         logoUrl={profile?.logo_url || undefined}
         fontFamily={headerFooter?.font_family || undefined}
@@ -341,7 +343,7 @@ export function ReferralLetterEditor({
             </div>
             <div>
               <h2 className="text-lg font-semibold text-foreground">Referral Letter</h2>
-              <p className="text-sm text-muted-foreground">Patient: {patientName}</p>
+              <p className="text-sm text-muted-foreground">Client: {clientName}</p>
             </div>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}>

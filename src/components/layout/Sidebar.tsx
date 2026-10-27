@@ -178,7 +178,7 @@ interface SidebarProps {
 
 export function Sidebar({ onNavigate }: SidebarProps) {
   const { t } = useTranslation();
-  const { role, loading: roleLoading, isPatient, isAdmin } = useUserRole();
+  const { role, loading: roleLoading, isClient, isAdmin } = useUserRole();
   const { isAssistant } = usePracticeAssistant();
   const { hasHospitalAffiliation, loading: affiliationLoading } = useHospitalAffiliation();
   const { v2Demo } = useV2Demo();
@@ -205,7 +205,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   // "My Profile" (/patient/details) — the route alone must not flip the nav.
   // While the role is still resolving we must NOT fall back to the route-based
   // guess, otherwise a doctor sees the patient nav for one frame.
-  const isDoctor = role === "broker";
+  const isAdvisor = role === "broker";
   const routeSaysPatient = isOnPatientRoute && !roleLoading && role !== null;
 
   /** Doctors can flip the sidebar between their professional menu and their
@@ -217,11 +217,11 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const isOnMyDashboardRoute = location.pathname.startsWith("/my-dashboard");
   const profileMode: "broker" | "client" = (isOnPatientRoute || isOnMyDashboardRoute) ? "client" : "broker";
 
-  const doctorInPatientMode = isDoctor && profileMode === "client";
+  const doctorInPatientMode = isAdvisor && profileMode === "client";
 
   const isPatientMenu =
     doctorInPatientMode ||
-    (!isDoctor && (isPatient || routeSaysPatient));
+    (!isAdvisor && (isClient || routeSaysPatient));
 
   const isReferrerMenu = role === "referral_agent";
   const isDoctorMenu = !isOnAdminRoute && !isPatientMenu && !isReferrerMenu && !(isAdmin && isOnAdminRoute);
@@ -265,7 +265,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     : withAssistant;
 
   const { preferences, savePreferences } = useSidebarPreferences();
-  const visibleItems = (!isDoctor || isOnAdminRoute)
+  const visibleItems = (!isAdvisor || isOnAdminRoute)
     ? navItems
     : applyItemPreferences(navItems, preferences.item_order, preferences.hidden_items);
 
@@ -424,7 +424,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     return () => window.removeEventListener("wealth-doc-signed", handler);
   }, [isPatientMenu, refetchPatientDocCount]);
 
-  /** Doctor|Patient pill shown next to Dashboard so a Wealth Manager can
+  /** Advisor|Client pill shown next to Dashboard so a Wealth Manager can
    *  switch the sidebar between their professional tools and their own
    *  client profile. */
   const professionalMode = "broker";

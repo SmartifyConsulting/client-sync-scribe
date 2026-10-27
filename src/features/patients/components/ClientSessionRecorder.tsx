@@ -19,8 +19,8 @@ import { useNavigate } from "react-router-dom";
 import { ListGroupToolbar } from "@/components/common/ListGroupToolbar";
 
 interface Props {
-  patientId: string;
-  patientName: string;
+  clientId: string;
+  clientName: string;
 }
 
 interface SessionRow {
@@ -32,13 +32,13 @@ interface SessionRow {
   external_doctor_specialty: string | null;
 }
 
-export function ClientSessionRecorder({ patientId, patientName }: Props) {
+export function ClientSessionRecorder({ clientId, clientName }: Props) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [sessions, setSessions] = useState<SessionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
-  const [doctorName, setDoctorName] = useState("");
+  const [advisorName, setDoctorName] = useState("");
   const [doctorSpecialty, setDoctorSpecialty] = useState("");
   const [doctorPractice, setDoctorPractice] = useState("");
   const [notes, setNotes] = useState("");
@@ -56,8 +56,8 @@ export function ClientSessionRecorder({ patientId, patientName }: Props) {
     clearTranscript,
   } = useAudioRecording({
     sessionId: sessionId ?? undefined,
-    patientName,
-    doctorName: doctorName || "External Doctor",
+    clientName,
+    advisorName: advisorName || "External Doctor",
   });
 
   const fetchSessions = async () => {
@@ -65,7 +65,7 @@ export function ClientSessionRecorder({ patientId, patientName }: Props) {
     const { data, error } = await supabase
       .from("sessions")
       .select("id, started_at, duration_minutes, summary, external_doctor_name, external_doctor_specialty")
-      .eq("patient_id", patientId)
+      .eq("patient_id", clientId)
       .order("started_at", { ascending: false });
     if (!error) setSessions((data as SessionRow[]) || []);
     setLoading(false);
@@ -73,10 +73,10 @@ export function ClientSessionRecorder({ patientId, patientName }: Props) {
 
   useEffect(() => {
     fetchSessions();
-  }, [patientId]);
+  }, [clientId]);
 
   const handleStart = async () => {
-    if (!doctorName.trim()) {
+    if (!advisorName.trim()) {
       toast({ title: "Wealth Manager name required", variant: "destructive" });
       return;
     }
@@ -86,9 +86,9 @@ export function ClientSessionRecorder({ patientId, patientName }: Props) {
       .from("sessions")
       .insert({
         user_id: user.id,
-        patient_id: patientId,
-        title: `Session with ${doctorName}`,
-        external_doctor_name: doctorName.trim(),
+        patient_id: clientId,
+        title: `Session with ${advisorName}`,
+        external_doctor_name: advisorName.trim(),
         external_doctor_specialty: doctorSpecialty.trim() || null,
         external_doctor_practice: doctorPractice.trim() || null,
         status: "in_progress",
@@ -195,7 +195,7 @@ export function ClientSessionRecorder({ patientId, patientName }: Props) {
               <Label htmlFor="ed_name">Wealth Manager name *</Label>
               <Input
                 id="ed_name"
-                value={doctorName}
+                value={advisorName}
                 onChange={(e) => setDoctorName(e.target.value)}
                 disabled={isRecording || !!sessionId}
                 placeholder="Dr. Jane Smith"

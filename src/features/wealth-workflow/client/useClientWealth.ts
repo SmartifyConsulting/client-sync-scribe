@@ -12,7 +12,7 @@ const LIAB = ["Home loan (bond)", "Vehicle finance", "Credit card", "Personal lo
 const RETIREMENT = ["Retirement annuity", "Pension fund", "Provident fund", "Preservation fund"];
 
 export interface ClientWealth {
-  patientId: string | null;
+  clientId: string | null;
   clientName: string;
   profile: Record<string, any>;
   policies: any[];
@@ -92,7 +92,7 @@ export function useClientWealth(explicitPatientId?: string) {
       const stageLabel = wf.data ? (defs.data ?? []).find((d: any) => d.stage === wf.data.current_stage)?.label ?? wf.data.current_stage : null;
 
       return {
-        patientId: pid,
+        clientId: pid,
         clientName: patient.name ?? "",
         profile,
         policies,
@@ -132,7 +132,7 @@ export function useClientWealth(explicitPatientId?: string) {
 
 function emptyWealth(): ClientWealth {
   return {
-    patientId: null, clientName: "", profile: {}, policies: [], holdings: [], issued: [], workflow: null, stageLabel: null,
+    clientId: null, clientName: "", profile: {}, policies: [], holdings: [], issued: [], workflow: null, stageLabel: null,
     todos: [], documents: [], claims: [], beneficiaries: [],
     totals: { lifeCover: 0, incomeProtection: 0, severeIllness: 0, disability: 0, monthlyPremiums: 0, monthlyExpenses: 0, investments: 0, retirement: 0, taxFree: 0, assets: 0, liabilities: 0, netWorth: 0 },
     goals: {},

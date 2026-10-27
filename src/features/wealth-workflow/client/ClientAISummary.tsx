@@ -11,16 +11,16 @@ import { Panel } from "@/components/ui/Panel";
 
 const LIFE_EVENTS = ["Marriage", "Divorce", "Birth or adoption", "New job", "Retirement", "Property purchase", "Inheritance", "Death in family", "Beneficiary change", "Policy issued", "Other"];
 
-export async function refreshClientSummary(patientId: string) {
-  const { data, error } = await supabase.functions.invoke("client-ai-summary", { body: { patientId } });
+export async function refreshClientSummary(clientId: string) {
+  const { data, error } = await supabase.functions.invoke("client-ai-summary", { body: { clientId } });
   if (error || (data as any)?.error) throw new Error((data as any)?.error || "The summary couldn't be updated.");
   return data as { summary: string; updatedAt: string };
 }
 
 /** Always-current AI summary of every consultation and life event for a client. */
-export function ClientAISummary({ patientId }: { patientId: string }) {
+export function ClientAISummary({ clientId }: { clientId: string }) {
   const qc = useQueryClient();
-  const key = ["client-ai-summary", patientId];
+  const key = ["client-ai-summary", clientId];
   const [busy, setBusy] = useState(false);
   const [evType, setEvType] = useState("");
   const [evNotes, setEvNotes] = useState("");
@@ -29,9 +29,9 @@ export function ClientAISummary({ patientId }: { patientId: string }) {
     queryKey: key,
     queryFn: async () => {
       const [{ data: p }, { data: s }, { data: e }] = await Promise.all([
-        supabase.from("client_financial_profiles").select("ai_summary, ai_summary_updated_at").eq("patient_id", patientId).maybeSingle(),
-        supabase.from("sessions").select("updated_at").eq("patient_id", patientId).order("updated_at", { ascending: false }).limit(1).maybeSingle(),
-        supabase.from("client_life_events" as any).select("created_at").eq("patient_id", patientId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+        supabase.from("client_financial_profiles").select("ai_summary, ai_summary_updated_at").eq("patient_id", clientId).maybeSingle(),
+        supabase.from("sessions").select("updated_at").eq("patient_id", clientId).order("updated_at", { ascending: false }).limit(1).maybeSingle(),
+        supabase.from("client_life_events" as any).select("created_at").eq("patient_id", clientId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
       ]);
       const latest = [s?.updated_at, (e as any)?.created_at].filter(Boolean).sort().pop() as string | undefined;
       return { summary: (p as any)?.ai_summary as string | null, updatedAt: (p as any)?.ai_summary_updated_at as string | null, latest };
@@ -41,7 +41,7 @@ export function ClientAISummary({ patientId }: { patientId: string }) {
   const run = async (silent = false) => {
     setBusy(true);
     try {
-      await refreshClientSummary(patientId);
+      await refreshClientSummary(clientId);
       qc.invalidateQueries({ queryKey: key });
     } catch (err: any) {
       if (!silent) toast.error(err.message);
@@ -61,7 +61,7 @@ export function ClientAISummary({ patientId }: { patientId: string }) {
   const addEvent = async () => {
     if (!evType) return;
     const { data: u } = await supabase.auth.getUser();
-    const { error } = await supabase.from("client_life_events" as any).insert({ patient_id: patientId, event_type: evType, notes: evNotes || null, created_by: u.user?.id });
+    const { error } = await supabase.from("client_life_events" as any).insert({ patient_id: clientId, event_type: evType, notes: evNotes || null, created_by: u.user?.id });
     if (error) return toast.error(`We couldn't save the life event: ${error.message}`);
     setEvType(""); setEvNotes("");
     toast.success("Life event added — updating your summary.");

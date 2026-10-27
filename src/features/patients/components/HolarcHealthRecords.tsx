@@ -31,23 +31,23 @@ function Section({ title, count, children }: { title: string; count: number; chi
   );
 }
 
-export function HolarcHealthRecords({ patientId }: { patientId: string }) {
+export function HolarcHealthRecords({ clientId }: { clientId: string }) {
   const qc = useQueryClient();
   const { toast } = useToast();
   const [busy, setBusy] = useState(false);
   const { data: link, isLoading } = useQuery({
-    queryKey: ["holarc-health", patientId],
+    queryKey: ["holarc-health", clientId],
     queryFn: async () => {
-      const { data } = await supabase.from("holarc_health_links").select("*").eq("patient_id", patientId).maybeSingle();
+      const { data } = await supabase.from("holarc_health_links").select("*").eq("patient_id", clientId).maybeSingle();
       return data;
     },
   });
 
   const sync = async () => {
     setBusy(true);
-    const { data, error } = await supabase.functions.invoke("holarc-health-sync", { body: { patient_id: patientId } });
+    const { data, error } = await supabase.functions.invoke("holarc-health-sync", { body: { patient_id: clientId } });
     setBusy(false);
-    qc.invalidateQueries({ queryKey: ["holarc-health", patientId] });
+    qc.invalidateQueries({ queryKey: ["holarc-health", clientId] });
     toast({ title: error ? "Sync failed" : "Holarc Health", description: error ? "Holarc Health could not be reached. Please try again." : data?.message, variant: error ? "destructive" : undefined });
   };
 

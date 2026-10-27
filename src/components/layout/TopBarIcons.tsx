@@ -38,7 +38,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
   const { t } = useTranslation();
   const isProvider = variant === "provider";
   const { profile } = useProfile();
-  const { isDoctor, isEmergency } = useUserRole();
+  const { isAdvisor, isEmergency } = useUserRole();
   const queryClient = useQueryClient();
   const location = useLocation();
   const navigate = useNavigate();

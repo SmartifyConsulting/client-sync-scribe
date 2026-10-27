@@ -12,15 +12,15 @@ import type { WealthRecommendation } from "../types";
  * The client requests changes, the Wealth Manager counters, until the client agrees.
  * Agreement locks the current version (changes_requested) and the Wealth Manager redrafts a new version.
  */
-export function RoaNegotiation({ viewer, patientId, workflowId, recs, current, clientFirst, onAccept, accepting }: {
-  viewer: "manager" | "client"; patientId?: string; workflowId: string; recs: WealthRecommendation[];
+export function RoaNegotiation({ viewer, clientId, workflowId, recs, current, clientFirst, onAccept, accepting }: {
+  viewer: "manager" | "client"; clientId?: string; workflowId: string; recs: WealthRecommendation[];
   current: WealthRecommendation; clientFirst: string; onAccept: () => void; accepting: boolean;
 }) {
   const qc = useQueryClient();
   const [busy, setBusy] = useState(false);
   const { data: pt } = useQuery({
-    queryKey: ["patient-parties", patientId], enabled: !!patientId,
-    queryFn: async () => (await (supabase as any).from("clients").select("user_id").eq("id", patientId).maybeSingle()).data,
+    queryKey: ["patient-parties", clientId], enabled: !!clientId,
+    queryFn: async () => (await (supabase as any).from("clients").select("user_id").eq("id", clientId).maybeSingle()).data,
   });
   const advisorId: string | null = pt?.user_id ?? null;
   const { data: advisor } = useQuery({
@@ -29,15 +29,15 @@ export function RoaNegotiation({ viewer, patientId, workflowId, recs, current, c
   });
   const wmFirst = advisor?.full_name?.split(" ")[0] || "Your Wealth Manager";
   // Thread spans the version under discussion; when redrafted it continues on the new version.
-  const { data: msgs = [] } = useMessages(patientId, current.id);
+  const { data: msgs = [] } = useMessages(clientId, current.id);
   const agreed = current.status === "changes_requested";
   const hasRequest = msgs.some((m) => m.kind === "change_request");
 
   const agree = async () => {
-    if (!patientId) return;
+    if (!clientId) return;
     setBusy(true);
     try {
-      await sendMessage(patientId, "I agree to these changes. Please redraft the Record of Advice.", "accept", current.id);
+      await sendMessage(clientId, "I agree to these changes. Please redraft the Record of Advice.", "accept", current.id);
       const { error } = await (supabase as any).rpc("wealth_record_decision", { _recommendation_id: current.id, _decision: "changes_requested", _reason: "Changes agreed in conversation" });
       if (error) throw error;
       qc.invalidateQueries();
@@ -48,7 +48,7 @@ export function RoaNegotiation({ viewer, patientId, workflowId, recs, current, c
   };
 
   const redraft = async () => {
-    if (!patientId) return;
+    if (!clientId) return;
     setBusy(true);
     try {
       const agreedText = msgs.filter((m) => m.kind !== "accept").map((m) => `- ${m.body}`).join("\n");
@@ -70,7 +70,7 @@ export function RoaNegotiation({ viewer, patientId, workflowId, recs, current, c
         summary: `${current.summary ?? ""}\n\nAgreed changes:\n${agreedText}`.trim(), roa_document_id: roaId,
       });
       if (error) throw error;
-      await sendMessage(patientId, `I've redrafted your Record of Advice as version ${nextVersion} with the changes we agreed.`, "redraft", current.id);
+      await sendMessage(clientId, `I've redrafted your Record of Advice as version ${nextVersion} with the changes we agreed.`, "redraft", current.id);
       qc.invalidateQueries();
       toast({ title: `Version ${nextVersion} drafted. Present it to ${clientFirst} when ready.` });
     } catch (e: any) {
@@ -78,7 +78,7 @@ export function RoaNegotiation({ viewer, patientId, workflowId, recs, current, c
     } finally { setBusy(false); }
   };
 
-  if (!patientId) return null;
+  if (!clientId) return null;
   const canAct = current.status === "presented";
 
   return (
@@ -88,7 +88,7 @@ export function RoaNegotiation({ viewer, patientId, workflowId, recs, current, c
           ? `Not quite right? Tell ${wmFirst} what you'd like changed. You can go back and forth until you're happy.`
           : `Discuss changes with ${clientFirst} here. Once ${clientFirst} agrees, redraft the Record of Advice.`}
       </p>
-      <MessageThread patientId={patientId} advisorUserId={advisorId} recommendationId={current.id} compact
+      <MessageThread clientId={clientId} advisorUserId={advisorId} recommendationId={current.id} compact
         names={{ advisor: wmFirst, client: clientFirst }} hideComposer={agreed || current.status === "draft"} />
       {viewer === "client" && canAct && (
         <div className="grid gap-2 sm:grid-cols-2">

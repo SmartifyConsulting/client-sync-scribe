@@ -18,17 +18,17 @@ type LabResult = {
  * Overview tab and the patient's own "Lab Results" nav page, so both sides
  * are looking at literally the same component/data.
  */
-export function TestResultsPanel({ patientId }: { patientId: string | null | undefined }) {
+export function TestResultsPanel({ clientId }: { clientId: string | null | undefined }) {
   const [results, setResults] = useState<LabResult[] | null>(null);
 
   useEffect(() => {
-    if (!patientId) { setResults([]); return; }
+    if (!clientId) { setResults([]); return; }
     let cancelled = false;
     (async () => {
       const { data: admissions } = await supabase
         .from("hospital_admissions" as any)
         .select("id, hospital")
-        .eq("patient_id", patientId);
+        .eq("patient_id", clientId);
       const admissionRows = ((admissions as any) ?? []) as { id: string; hospital: string | null }[];
       const admissionIds = admissionRows.map((a) => a.id);
       if (!admissionIds.length) { if (!cancelled) setResults([]); return; }
@@ -44,7 +44,7 @@ export function TestResultsPanel({ patientId }: { patientId: string | null | und
       }
     })();
     return () => { cancelled = true; };
-  }, [patientId]);
+  }, [clientId]);
 
   if (results === null) {
     return <p className="px-1 py-4 text-sm text-muted-foreground italic">Loading test results…</p>;

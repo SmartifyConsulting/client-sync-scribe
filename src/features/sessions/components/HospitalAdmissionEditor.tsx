@@ -17,8 +17,8 @@ import { SendDocumentButton } from "./SendDocumentButton";
 import { DocumentPreview } from "./DocumentPreview";
 
 interface HospitalAdmissionEditorProps {
-  patientId: string;
-  patientName: string;
+  clientId: string;
+  clientName: string;
   sessionId?: string;
   onClose: () => void;
   onSave: (doc: { content: string }) => void;
@@ -85,7 +85,7 @@ PATIENT SPECIAL INSTRUCTIONS
 
 ─────────────────────────────────────
 
-Patient: [PATIENT_NAME]
+Client: [CLIENT_NAME]
 
 Signature: ___________________
            [DOCTOR_NAME]
@@ -220,8 +220,8 @@ function CodeEntryRow({
 }
 
 export function HospitalAdmissionEditor({
-  patientId,
-  patientName,
+  clientId,
+  clientName,
   sessionId,
   onClose,
   onSave,
@@ -231,7 +231,7 @@ export function HospitalAdmissionEditor({
   const { formattedContent: savedTemplate, headerFooter, isLoading: templateLoading } =
     useTemplateWithHeaderFooter("Hospital Admission Form");
 
-  const doctorName = profile?.full_name || "Doctor";
+  const advisorName = profile?.full_name || "Doctor";
   const practiceNumber = profile?.practice_number || "";
   const practiceAddress = profile?.practice_address || "";
   const doctorNumber = profile?.doctor_number || "";
@@ -379,16 +379,18 @@ export function HospitalAdmissionEditor({
       .join("\n");
 
     return baseTemplate
-      .replace(/\[DOCTOR_NAME\]/g, doctorName)
-      .replace(/\[DoctorName\]/g, doctorName)
+      .replace(/\[DOCTOR_NAME\]/g, advisorName)
+      .replace(/\[DoctorName\]/g, advisorName)
       .replace(/\[PRACTICE_NUMBER\]/g, practiceNumber)
       .replace(/\[PracticeNumber\]/g, practiceNumber)
       .replace(/\[PRACTICE_ADDRESS\]/g, practiceAddress)
       .replace(/\[PracticeAddress\]/g, practiceAddress)
       .replace(/\[DOCTOR_NUMBER\]/g, doctorNumber)
       .replace(/\[DoctorNumber\]/g, doctorNumber)
-      .replace(/\[PATIENT_NAME\]/g, patientName)
-      .replace(/\[PatientName\]/g, patientName)
+      .replace(/\[PATIENT_NAME\]/g, clientName)
+      .replace(/\[PatientName\]/g, clientName)
+      .replace(/\[CLIENT_NAME\]/g, clientName)
+      .replace(/\[ClientName\]/g, clientName)
       .replace("[HOSPITAL]", hospital || "—")
       .replace("[ADMISSION_DATE]", admissionDate ? format(admissionDate, "dd/MM/yyyy") : "—")
       .replace("[ICD10_CODES]", icd10Text)
@@ -414,10 +416,10 @@ export function HospitalAdmissionEditor({
       const content = generateContent();
 
       const { data: docRow, error } = await supabase.from("documents").insert({
-        name: `Hospital Admission Form - ${patientName} - ${admissionDate ? format(admissionDate, "dd/MM/yyyy") : new Date().toLocaleDateString()}`,
+        name: `Hospital Admission Form - ${clientName} - ${admissionDate ? format(admissionDate, "dd/MM/yyyy") : new Date().toLocaleDateString()}`,
         content,
-        patient_id: patientId,
-        patient_name: patientName,
+        patient_id: clientId,
+        patient_name: clientName,
         template_name: "Hospital Admission Form",
         user_id: user.id,
       }).select().single();
@@ -426,7 +428,7 @@ export function HospitalAdmissionEditor({
 
       // Auto-create hospital admission record linked to this document
       const { error: admErr } = await supabase.from("hospital_admissions").insert({
-        patient_id: patientId,
+        patient_id: clientId,
         doctor_id: user.id,
         document_id: docRow?.id || null,
         hospital: hospital || null,
@@ -452,7 +454,7 @@ export function HospitalAdmissionEditor({
     return (
       <DocumentPreview
         title="Hospital Admission Form"
-        subtitle={`Patient: ${patientName}`}
+        subtitle={`Client: ${clientName}`}
         content={generateContent()}
         logoUrl={profile?.logo_url || undefined}
         fontFamily={headerFooter?.font_family || undefined}
@@ -474,7 +476,7 @@ export function HospitalAdmissionEditor({
             </div>
             <div>
               <h2 className="text-lg font-semibold text-foreground">Hospital Admission Form</h2>
-              <p className="text-sm text-muted-foreground">Patient: {patientName}</p>
+              <p className="text-sm text-muted-foreground">Client: {clientName}</p>
             </div>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}>
@@ -490,7 +492,7 @@ export function HospitalAdmissionEditor({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Admitting Doctor</Label>
-                <Input value={doctorName} disabled className="bg-muted/50" />
+                <Input value={advisorName} disabled className="bg-muted/50" />
               </div>
               <div className="space-y-2">
                 <Label>Practice Number</Label>
@@ -704,7 +706,7 @@ export function HospitalAdmissionEditor({
 
           {/* Special Instructions */}
           <div>
-            <h3 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wide">Patient Special Instructions</h3>
+            <h3 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wide">Client Special Instructions</h3>
             <div className="space-y-2">
               {specialInstructions.map((entry, i) => (
                 <div key={i} className="flex items-start gap-2">
@@ -744,8 +746,8 @@ export function HospitalAdmissionEditor({
               Preview
             </Button>
             <SendDocumentButton
-              patientId={patientId}
-              patientName={patientName}
+              clientId={clientId}
+              clientName={clientName}
               documentLabel="Hospital Admission Form"
               getContent={generateContent}
               headerFooter={headerFooter}

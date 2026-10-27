@@ -6,10 +6,10 @@ import { useToast } from "@/hooks/use-toast";
 
 interface RequestConnectionButtonProps {
   patientUserId: string | null;
-  patientName: string;
+  clientName: string;
 }
 
-export function RequestConnectionButton({ patientUserId, patientName }: RequestConnectionButtonProps) {
+export function RequestConnectionButton({ patientUserId, clientName }: RequestConnectionButtonProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'none' | 'pending' | 'connected'>('none');
@@ -78,7 +78,7 @@ export function RequestConnectionButton({ patientUserId, patientName }: RequestC
         .insert({
           sender_id: user.id,
           recipient_id: patientUserId,
-          recipient_email: patientName, // Use patient name as identifier
+          recipient_email: clientName, // Use patient name as identifier
           status: 'pending',
           message: `Dr. ${senderProfile?.full_name || 'Your doctor'} would like to connect with you on the platform.`,
         });
@@ -104,7 +104,7 @@ export function RequestConnectionButton({ patientUserId, patientName }: RequestC
       setConnectionStatus('pending');
       toast({
         title: "Connection Requested",
-        description: `Your connection request has been sent to ${patientName}.`,
+        description: `Your connection request has been sent to ${clientName}.`,
       });
     } catch (error: any) {
       console.error('Error requesting connection:', error);

@@ -23,20 +23,20 @@ interface DoctorProfileRow {
  * their details without first loading the full profile record itself.
  */
 export function AdvisorProfileDialog({
-  doctorId,
+  advisorId,
   onOpenChange,
 }: {
-  doctorId: string | null;
+  advisorId: string | null;
   onOpenChange: (open: boolean) => void;
 }) {
   const { data: doctor, isLoading } = useQuery({
-    queryKey: ["doctor-profile-dialog", doctorId],
-    enabled: !!doctorId,
+    queryKey: ["doctor-profile-dialog", advisorId],
+    enabled: !!advisorId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
         .select("id, full_name, specialty, practice_address, mobile_number, avatar_url, practice_number, about_me, preferred_language")
-        .eq("id", doctorId as string)
+        .eq("id", advisorId as string)
         .maybeSingle();
       if (error) throw error;
       return data as DoctorProfileRow | null;
@@ -44,7 +44,7 @@ export function AdvisorProfileDialog({
   });
 
   return (
-    <Dialog open={!!doctorId} onOpenChange={onOpenChange}>
+    <Dialog open={!!advisorId} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

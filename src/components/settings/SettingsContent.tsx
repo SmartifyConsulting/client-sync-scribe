@@ -47,7 +47,7 @@ export function SettingsContent() {
   const [searchParams] = useSearchParams();
   const { isConnected: googleRealConnected, isConnecting: googleRealConnecting, connect: googleConnect, disconnect: googleDisconnect } = useGoogleCalendar();
 
-  const isDoctor = role === "broker";
+  const isAdvisor = role === "broker";
   const isPatientRole = role === "client";
 
   const [outlookConnected, setOutlookConnected] = useState(false);
@@ -74,8 +74,8 @@ export function SettingsContent() {
   const [savingThreshold, setSavingThreshold] = useState(false);
 
   useEffect(() => {
-    if (user) { fetchMfaFactors(); fetchSubscription(); fetchPaymentHistory(); if (isDoctor) fetchInactiveThreshold(); }
-  }, [user, isDoctor]);
+    if (user) { fetchMfaFactors(); fetchSubscription(); fetchPaymentHistory(); if (isAdvisor) fetchInactiveThreshold(); }
+  }, [user, isAdvisor]);
 
   useEffect(() => { fetchPricing(); }, [role]);
 
@@ -314,7 +314,7 @@ export function SettingsContent() {
               )}
             </div>
 
-            {isDoctor && (
+            {isAdvisor && (
               <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
                 <div className="flex items-center gap-3">
                   <Users className="h-4 w-4 text-primary" />
@@ -449,7 +449,7 @@ export function SettingsContent() {
                   Reset tips
                 </Button>
               </div>
-              {isDoctor && (
+              {isAdvisor && (
                 <>
                   <Separator />
                   <div className="flex items-center justify-between">

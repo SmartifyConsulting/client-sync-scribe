@@ -5,12 +5,12 @@ import { supabase } from "@/integrations/supabase/client";
 const db = supabase as any;
 
 /** Read-only audit trail of every recorded Live Workspace action for one client. */
-export function TransactionLogs({ patientId }: { patientId?: string }) {
+export function TransactionLogs({ clientId }: { clientId?: string }) {
   const { data, isLoading } = useQuery({
-    queryKey: ["wealth-audit-log", patientId],
-    enabled: !!patientId,
+    queryKey: ["wealth-audit-log", clientId],
+    enabled: !!clientId,
     queryFn: async () => {
-      const { data: rows } = await db.from("wealth_audit_log").select("*").eq("patient_id", patientId).order("created_at", { ascending: false }).limit(500);
+      const { data: rows } = await db.from("wealth_audit_log").select("*").eq("patient_id", clientId).order("created_at", { ascending: false }).limit(500);
       const ids = [...new Set(((rows ?? []) as any[]).map((r) => r.actor_user_id).filter(Boolean))];
       const { data: people } = ids.length ? await db.from("profiles").select("id,full_name").in("id", ids) : { data: [] };
       const names = new Map(((people ?? []) as any[]).map((p) => [p.id, p.full_name]));

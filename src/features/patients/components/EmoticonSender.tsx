@@ -15,11 +15,11 @@ const EMOTICONS = ["👍", "💪", "❤️", "🌟", "👏", "🎉", "🙏", "�
 
 interface EmoticonSenderProps {
   recipientId: string;
-  patientId: string;
+  clientId: string;
   recipientName: string;
 }
 
-export function EmoticonSender({ recipientId, patientId, recipientName }: EmoticonSenderProps) {
+export function EmoticonSender({ recipientId, clientId, recipientName }: EmoticonSenderProps) {
   const [sending, setSending] = useState(false);
   const [open, setOpen] = useState(false);
   const [emoticon, setEmoticon] = useState<string>(EMOTICONS[0]);
@@ -47,7 +47,7 @@ export function EmoticonSender({ recipientId, patientId, recipientName }: Emotic
         .from('profile_view_log' as any)
         .select('id')
         .eq('viewer_id', user.id)
-        .eq('patient_id', patientId)
+        .eq('patient_id', clientId)
         .gte('viewed_at', twentyFourHoursAgo);
 
       const profileViewed = (views?.length || 0) > 0;
@@ -68,7 +68,7 @@ export function EmoticonSender({ recipientId, patientId, recipientName }: Emotic
       try {
         const { data: verdict, error: verdictError } = await supabase.functions.invoke(
           "validate-checkin-message",
-          { body: { message, patientName: recipientName } },
+          { body: { message, clientName: recipientName } },
         );
         if (verdictError) throw verdictError;
         aiGenuine = !!verdict?.genuine;
@@ -84,7 +84,7 @@ export function EmoticonSender({ recipientId, patientId, recipientName }: Emotic
       await supabase.from('emoticon_messages' as any).insert({
         sender_id: user.id,
         recipient_id: recipientId,
-        patient_id: patientId,
+        patient_id: clientId,
         emoticon,
         message,
         ai_verdict: aiGenuine ? 'genuine' : 'not_genuine',
@@ -100,7 +100,7 @@ export function EmoticonSender({ recipientId, patientId, recipientName }: Emotic
         type: 'emoticon_received',
         title: `${emoticon} Check-in from your doctor`,
         description: message,
-        reference_id: patientId,
+        reference_id: clientId,
         is_read: false,
       });
 

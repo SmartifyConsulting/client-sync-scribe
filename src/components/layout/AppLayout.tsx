@@ -20,7 +20,7 @@ export function AppLayout() {
   const { t, i18n } = useTranslation();
   const location = useLocation();
   const { isBlocked, daysRemaining, loading } = useSubscriptionGate();
-  const { isPatient, isAdmin, loading: roleLoading } = useUserRole();
+  const { isClient, isAdmin, loading: roleLoading } = useUserRole();
 
   // Allow access to settings page even when blocked (so they can subscribe)
   const isSettingsPage = location.pathname.startsWith("/settings");
@@ -31,7 +31,7 @@ export function AppLayout() {
   // or they're on My Dashboard, which is shared across every role and lives
   // in this layout's route group regardless of who's viewing it.
   const isSharedDashboard = location.pathname === "/my-dashboard" || location.pathname.startsWith("/my-future") || location.pathname.startsWith("/my-workspace") || location.pathname.startsWith("/claims") || location.pathname.startsWith("/messenger") || location.pathname.startsWith("/calendar");
-  if (!roleLoading && isPatient && !(isAdmin && isAdminRoute) && !isSharedDashboard) {
+  if (!roleLoading && isClient && !(isAdmin && isAdminRoute) && !isSharedDashboard) {
     return <Navigate to="/client/details" replace />;
   }
 

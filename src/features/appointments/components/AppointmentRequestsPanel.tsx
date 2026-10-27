@@ -97,7 +97,7 @@ export function AppointmentRequestsPanel() {
       setRequests(
         reqs.map((r) => ({
           ...r,
-          patient_name: patientMap[r.patient_id] || profileMap[r.patient_user_id] || "Unknown Patient",
+          patient_name: patientMap[r.patient_id] || profileMap[r.patient_user_id] || "Unknown Client",
           service_name: r.service_id ? serviceMap[r.service_id] : undefined,
         }))
       );
@@ -122,7 +122,7 @@ export function AppointmentRequestsPanel() {
       const { error: aptErr } = await supabase.from("appointments").insert({
         user_id: req.doctor_id,
         patient_id: req.patient_id,
-        title: req.service_name || "Patient Appointment",
+        title: req.service_name || "Client Appointment",
         start_time: req.requested_start,
         end_time: req.requested_end,
         type: "session",

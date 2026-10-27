@@ -39,7 +39,7 @@ export default function ExpiringRecordings() {
 
       const { data, error } = await supabase
         .from("sessions")
-        .select("id, started_at, audio_url, transcript, patient_id, title, patients:clients(name)")
+        .select("id, started_at, audio_url, transcript, patient_id, title, client:clients(name)")
         .eq("user_id", user.id)
         .not("audio_url", "is", null)
         .gte("started_at", sevenDaysAgo.toISOString())
@@ -125,7 +125,7 @@ export default function ExpiringRecordings() {
         <div className="space-y-3">
           {sessions.map((session: any) => {
             const daysLeft = getDaysRemaining(session.started_at);
-            const patientName = session.patients?.name || "Unknown Patient";
+            const clientName = session.client?.name || "Unknown Client";
             
             return (
               <Card key={session.id} className={daysLeft <= 1 ? "border-destructive/50" : "border-border"}>
@@ -136,10 +136,10 @@ export default function ExpiringRecordings() {
                     </div>
                     <div className="min-w-0">
                       <p className="font-medium text-foreground truncate">
-                        {session.title || patientName}
+                        {session.title || clientName}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {format(parseISO(session.started_at), "MMM d, yyyy · h:mm a")} · {patientName}
+                        {format(parseISO(session.started_at), "MMM d, yyyy · h:mm a")} · {clientName}
                       </p>
                     </div>
                   </div>

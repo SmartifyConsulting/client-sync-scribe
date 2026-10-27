@@ -49,8 +49,8 @@ type GroupBy = "type" | "date" | "patient";
 
 interface DocumentsBrowserProps {
   /** Restrict to a single patient's documents. */
-  patientId?: string;
-  patientName?: string;
+  clientId?: string;
+  clientName?: string;
   /** Show documents from every owner the RLS policies allow. */
   allOwners?: boolean;
   /** Only list documents whose template name matches one of these (case-insensitive). */
@@ -73,8 +73,8 @@ const groupLabel = (doc: Document, groupBy: GroupBy) => {
  * of handwritten records, and link-only sharing via Inform.
  */
 export function DocumentsBrowser({
-  patientId,
-  patientName,
+  clientId,
+  clientName,
   allOwners,
   templateFilter,
   emptyLabel,
@@ -82,7 +82,7 @@ export function DocumentsBrowser({
 }: DocumentsBrowserProps) {
   const { toast } = useToast();
   const { documents, loading, fetchDocuments, deleteDocument } = useDocuments(
-    patientId,
+    clientId,
     { allOwners },
   );
 
@@ -97,7 +97,7 @@ export function DocumentsBrowser({
   const [extractingId, setExtractingId] = useState<string | null>(null);
   const [pendingHistory, setPendingHistory] = useState<{
     history: ExtractedHistory;
-    patientId: string | null;
+    clientId: string | null;
   } | null>(null);
 
 
@@ -222,7 +222,7 @@ export function DocumentsBrowser({
         if (Object.keys(updates).length) {
           await supabase.from("documents").update(updates as any).eq("id", doc.id);
         }
-        setPendingHistory({ history, patientId: (doc as any).patient_id || patientId || null });
+        setPendingHistory({ history, clientId: (doc as any).patient_id || clientId || null });
         void fetchDocuments();
       } catch (err: any) {
         toast({
@@ -234,7 +234,7 @@ export function DocumentsBrowser({
         setExtractingId(null);
       }
     },
-    [toast, fetchDocuments, patientId],
+    [toast, fetchDocuments, clientId],
   );
 
   const handleUploaded = useCallback(
@@ -251,8 +251,8 @@ export function DocumentsBrowser({
   return (
     <div className={cn("space-y-4", className)}>
       <AiUploadZone
-        patientId={patientId}
-        patientName={patientName}
+        clientId={clientId}
+        clientName={clientName}
         knownCategories={knownCategories}
         onUploaded={handleUploaded}
       />
@@ -447,11 +447,11 @@ export function DocumentsBrowser({
         />
       )}
 
-      {pendingHistory?.patientId && (
+      {pendingHistory?.clientId && (
         <ApplyHistoryDialog
           open
           onOpenChange={(o) => !o && setPendingHistory(null)}
-          patientId={pendingHistory.patientId}
+          clientId={pendingHistory.clientId}
           history={pendingHistory.history}
           recordDate={pendingHistory.history.record_date || undefined}
           onApplied={() => {

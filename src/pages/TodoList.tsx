@@ -430,8 +430,8 @@ export default function TodoList() {
       await supabase.from('documents').update({ email_sent_at: new Date().toISOString(), is_draft: false } as any).eq('id', todo.document_id);
       await supabase.from('todos').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', todo.id);
 
-      // If this is a Patient Task Assignment, create actual patient todos
-      if (doc.template_name === 'Patient Task Assignment' && patient?.patient_user_id && todo.patient_id) {
+      // If this is a Client Task Assignment, create actual client todos
+      if ((doc.template_name === 'Client Task Assignment' || doc.template_name === 'Patient Task Assignment') && patient?.patient_user_id && todo.patient_id) {
         try {
           // Parse tasks from document content
           const titleMatches = doc.content.match(/<strong>\d+\.\s*(.+?)<\/strong>/g) || [];

@@ -59,7 +59,7 @@ export function DocumentPreviewWithLetterhead({
   return (
     <DocumentPreview
       title={doc.name}
-      subtitle={doc.patient_name ? `Patient: ${doc.patient_name}` : undefined}
+      subtitle={doc.patient_name ? `Client: ${doc.patient_name}` : undefined}
       content={resolvedContent}
       logoUrl={logoUrl}
       fontFamily={templateFontFamily || headerFooter?.font_family || undefined}

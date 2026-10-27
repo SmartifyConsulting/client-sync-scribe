@@ -33,12 +33,12 @@ import type { Session } from "@/hooks/useSessions";
 
 interface SessionHistoryTableProps {
   sessions: Session[];
-  patientId: string;
-  patientName: string;
+  clientId: string;
+  clientName: string;
   allergies?: string | null;
 }
 
-export function SessionHistoryTable({ sessions, patientId, patientName, allergies }: SessionHistoryTableProps) {
+export function SessionHistoryTable({ sessions, clientId, clientName, allergies }: SessionHistoryTableProps) {
   const navigate = useNavigate();
   const [prescriptionOpen, setPrescriptionOpen] = useState(false);
   const [invoiceOpen, setInvoiceOpen] = useState(false);
@@ -61,7 +61,7 @@ export function SessionHistoryTable({ sessions, patientId, patientName, allergie
   };
 
   const handleGenerateDocument = (session: Session, templateType: string) => {
-    navigate(`/documents?template=${templateType}&patient=${patientId}&session=${session.id}`);
+    navigate(`/documents?template=${templateType}&client=${clientId}&session=${session.id}`);
   };
 
   return (
@@ -158,8 +158,8 @@ export function SessionHistoryTable({ sessions, patientId, patientName, allergie
       {/* Prescription Editor */}
       {prescriptionOpen && selectedSession && (
         <PrescriptionEditor
-          patientId={patientId}
-          patientName={patientName}
+          clientId={clientId}
+          clientName={clientName}
           allergies={allergies}
           onClose={() => {
             setPrescriptionOpen(false);
@@ -174,8 +174,8 @@ export function SessionHistoryTable({ sessions, patientId, patientName, allergie
       {/* Invoice Editor */}
       {invoiceOpen && selectedSession && (
         <InvoiceEditor
-          patientId={patientId}
-          patientName={patientName}
+          clientId={clientId}
+          clientName={clientName}
           sessionId={selectedSession.id}
           onClose={() => {
             setInvoiceOpen(false);
@@ -190,8 +190,8 @@ export function SessionHistoryTable({ sessions, patientId, patientName, allergie
       {/* Hospital Admission Editor */}
       {hospitalAdmissionOpen && selectedSession && (
         <HospitalAdmissionEditor
-          patientId={patientId}
-          patientName={patientName}
+          clientId={clientId}
+          clientName={clientName}
           sessionId={selectedSession.id}
           onClose={() => {
             setHospitalAdmissionOpen(false);

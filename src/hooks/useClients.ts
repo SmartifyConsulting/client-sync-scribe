@@ -73,7 +73,7 @@ export interface Allergy {
   date_identified?: string;
 }
 
-export interface Patient {
+export interface Client {
   id: string;
   user_id: string;
   name: string;
@@ -176,8 +176,8 @@ const parseAllergiesStructured = (data: Json | null): Allergy[] | null => {
   return null;
 };
 
-// Helper to convert patient from DB to typed Patient
-const toPatient = (data: any, lastVisit?: string | null): Patient => ({
+// Helper to convert client from DB to typed Client
+const toClient = (data: any, lastVisit?: string | null): Client => ({
   ...data,
   surgeries: parseSurgeries(data.surgeries),
   pharmacies: parsePharmacies(data.pharmacies),
@@ -189,8 +189,8 @@ const toPatient = (data: any, lastVisit?: string | null): Patient => ({
   last_visit: lastVisit ?? data.last_visit ?? null,
 });
 
-// Helper to prepare patient data for DB (convert surgeries/pharmacies to JSON)
-const toDbPatient = (updates: Partial<Patient>): Record<string, any> => {
+// Helper to prepare client data for DB (convert surgeries/pharmacies to JSON)
+const toDbClient = (updates: Partial<Client>): Record<string, any> => {
   const { surgeries, pharmacies, family_history, organ_donor_organs, last_visit, next_of_kin_members, current_medications, conditions_diagnoses, allergies_structured, ...rest } = updates as any;
   return {
     ...rest,
@@ -205,7 +205,7 @@ const toDbPatient = (updates: Partial<Patient>): Record<string, any> => {
   };
 };
 
-// Helper to determine if patient should be inactive based on last visit and threshold
+// Helper to determine if client should be inactive based on last visit and threshold
 const shouldBeInactive = (lastVisit: string | null, thresholdMonths: number): boolean => {
   if (!lastVisit) return false;
   const lastVisitDate = new Date(lastVisit);
@@ -216,10 +216,10 @@ const shouldBeInactive = (lastVisit: string | null, thresholdMonths: number): bo
 
 export function useClients() {
   const { toast } = useToast();
-  const [patients, setPatients] = useState<Patient[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchPatients = async () => {
+  const fetchClients = async () => {
     try {
       setLoading(true);
       
@@ -245,52 +245,52 @@ export function useClients() {
 
       if (error) throw error;
 
-      const patientsWithLastVisit = await Promise.all(
-        (data || []).map(async (patient) => {
+      const clientsWithLastVisit = await Promise.all(
+        (data || []).map(async (client) => {
           const { data: sessionData } = await supabase
             .from('sessions')
             .select('started_at')
-            .eq('patient_id', patient.id)
+            .eq('patient_id', client.id)
             .eq('status', 'completed')
             .order('started_at', { ascending: false })
             .limit(1)
             .maybeSingle();
           
           const lastVisit = sessionData?.started_at || null;
-          const typedPatient = toPatient(patient, lastVisit);
+          const typedClient = toClient(client, lastVisit);
           
           const shouldSetInactive = shouldBeInactive(lastVisit, inactiveThresholdMonths);
-          if (shouldSetInactive && typedPatient.status === 'active') {
+          if (shouldSetInactive && typedClient.status === 'active') {
             await supabase
               .from('clients')
               .update({ status: 'inactive' })
-              .eq('id', patient.id);
-            typedPatient.status = 'inactive';
-          } else if (!shouldSetInactive && lastVisit && typedPatient.status === 'inactive') {
+              .eq('id', client.id);
+            typedClient.status = 'inactive';
+          } else if (!shouldSetInactive && lastVisit && typedClient.status === 'inactive') {
             await supabase
               .from('clients')
               .update({ status: 'active' })
-              .eq('id', patient.id);
-            typedPatient.status = 'active';
+              .eq('id', client.id);
+            typedClient.status = 'active';
           }
           
-          return typedPatient;
+          return typedClient;
         })
       );
 
-      patientsWithLastVisit.sort((a, b) => {
+      clientsWithLastVisit.sort((a, b) => {
         const aLast = a.name.trim().split(/\s+/).pop()?.toLowerCase() || '';
         const bLast = b.name.trim().split(/\s+/).pop()?.toLowerCase() || '';
         if (aLast !== bLast) return aLast.localeCompare(bLast);
         return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
       });
 
-      setPatients(patientsWithLastVisit);
+      setClients(clientsWithLastVisit);
     } catch (error: any) {
-      console.error('Error fetching patients:', error);
+      console.error('Error fetching clients:', error);
       toast({
         title: 'Error',
-        description: 'Failed to load patients',
+        description: 'Failed to load clients',
         variant: 'destructive',
       });
     } finally {
@@ -298,68 +298,68 @@ export function useClients() {
     }
   };
 
-  const createPatient = async (patient: Omit<Patient, 'id' | 'user_id' | 'created_at' | 'updated_at'>, opts?: { silent?: boolean }) => {
+  const createClient = async (client: Omit<Client, 'id' | 'user_id' | 'created_at' | 'updated_at'>, opts?: { silent?: boolean }) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      const dbPatient = toDbPatient(patient as Partial<Patient>);
+      const dbClient = toDbClient(client as Partial<Client>);
 
-      if (patient.patient_user_id) {
+      if (client.patient_user_id) {
         const { data: existing, error: existingError } = await supabase
           .from('clients')
           .select('*')
-          .eq('patient_user_id', patient.patient_user_id)
+          .eq('patient_user_id', client.patient_user_id)
           .neq('status', 'archived')
           .order('created_at', { ascending: true })
           .limit(1)
           .maybeSingle();
         if (existingError) throw existingError;
-        if (existing) return toPatient(existing);
+        if (existing) return toClient(existing);
       }
 
       const { data, error } = await supabase
         .from('clients')
         .insert({
-          name: patient.name,
-          ...dbPatient,
+          name: client.name,
+          ...dbClient,
           user_id: user.id,
         } as any)
         .select()
         .single();
 
       if (error) {
-        if (error.code === '23505' && patient.patient_user_id) {
+        if (error.code === '23505' && client.patient_user_id) {
           const { data: existing } = await supabase
             .from('clients')
             .select('*')
-            .eq('patient_user_id', patient.patient_user_id)
+            .eq('patient_user_id', client.patient_user_id)
             .neq('status', 'archived')
             .order('created_at', { ascending: true })
             .limit(1)
             .maybeSingle();
-          if (existing) return toPatient(existing);
+          if (existing) return toClient(existing);
         }
         throw error;
       }
-      const typedPatient = toPatient(data);
-      setPatients((prev) => [typedPatient, ...prev]);
-      if (!opts?.silent) toast({ title: 'Success', description: 'Patient added successfully' });
-      return typedPatient;
+      const typedClient = toClient(data);
+      setClients((prev) => [typedClient, ...prev]);
+      if (!opts?.silent) toast({ title: 'Success', description: 'Client added successfully' });
+      return typedClient;
     } catch (error: any) {
-      console.error('Error creating patient:', error);
+      console.error('Error creating client:', error);
       toast({
         title: 'Error',
-        description: error.message || 'Failed to add patient',
+        description: error.message || 'Failed to add client',
         variant: 'destructive',
       });
       return null;
     }
   };
 
-  const updatePatient = async (id: string, updates: Partial<Patient>) => {
+  const updateClient = async (id: string, updates: Partial<Client>) => {
     try {
-      const dbUpdates = toDbPatient(updates);
+      const dbUpdates = toDbClient(updates);
 
       const { data, error } = await supabase
         .from('clients')
@@ -369,34 +369,34 @@ export function useClients() {
         .single();
 
       if (error) throw error;
-      const typedPatient = toPatient(data);
-      setPatients((prev) => prev.map((p) => (p.id === id ? typedPatient : p)));
-      toast({ title: 'Success', description: 'Patient updated successfully' });
-      return typedPatient;
+      const typedClient = toClient(data);
+      setClients((prev) => prev.map((p) => (p.id === id ? typedClient : p)));
+      toast({ title: 'Success', description: 'Client updated successfully' });
+      return typedClient;
     } catch (error: any) {
-      console.error('Error updating patient:', error);
+      console.error('Error updating client:', error);
       toast({
         title: 'Error',
-        description: 'Failed to update patient',
+        description: 'Failed to update client',
         variant: 'destructive',
       });
       return null;
     }
   };
 
-  const deletePatient = async (id: string) => {
+  const deleteClient = async (id: string) => {
     try {
       const { error } = await supabase.from('clients').delete().eq('id', id);
 
       if (error) throw error;
-      setPatients((prev) => prev.filter((p) => p.id !== id));
-      toast({ title: 'Success', description: 'Patient deleted successfully' });
+      setClients((prev) => prev.filter((p) => p.id !== id));
+      toast({ title: 'Success', description: 'Client deleted successfully' });
       return true;
     } catch (error: any) {
-      console.error('Error deleting patient:', error);
+      console.error('Error deleting client:', error);
       toast({
         title: 'Error',
-        description: 'Failed to delete patient',
+        description: 'Failed to delete client',
         variant: 'destructive',
       });
       return false;
@@ -404,25 +404,25 @@ export function useClients() {
   };
 
   useEffect(() => {
-    fetchPatients();
+    fetchClients();
   }, []);
 
   return {
-    patients,
+    clients,
     loading,
-    fetchPatients,
-    createPatient,
-    updatePatient,
-    deletePatient,
+    fetchClients,
+    createClient,
+    updateClient,
+    deleteClient,
   };
 }
 
 export function useClient(id: string) {
   const { toast } = useToast();
-  const [patient, setPatient] = useState<Patient | null>(null);
+  const [client, setClient] = useState<Client | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchPatient = async () => {
+  const fetchClient = async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -461,15 +461,15 @@ export function useClient(id: string) {
           .limit(1)
           .maybeSingle();
 
-        setPatient(toPatient(resolved, sessionData?.started_at || null));
+        setClient(toClient(resolved, sessionData?.started_at || null));
       } else {
-        setPatient(null);
+        setClient(null);
       }
     } catch (error: any) {
-      console.error('Error fetching patient:', error);
+      console.error('Error fetching client:', error);
       toast({
         title: 'Error',
-        description: 'Failed to load patient',
+        description: 'Failed to load client',
         variant: 'destructive',
       });
     } finally {
@@ -477,28 +477,28 @@ export function useClient(id: string) {
     }
   };
 
-  const updatePatient = async (updates: Partial<Patient>) => {
+  const updateClient = async (updates: Partial<Client>) => {
     try {
-      const dbUpdates = toDbPatient(updates);
-      const patientId = patient?.id || id;
+      const dbUpdates = toDbClient(updates);
+      const clientId = client?.id || id;
 
       const { data, error } = await supabase
         .from('clients')
         .update(dbUpdates)
-        .eq('id', patientId)
+        .eq('id', clientId)
         .select()
         .single();
 
       if (error) throw error;
-      const typedPatient = toPatient(data);
-      setPatient(typedPatient);
-      toast({ title: 'Success', description: 'Patient updated successfully' });
-      return typedPatient;
+      const typedClient = toClient(data);
+      setClient(typedClient);
+      toast({ title: 'Success', description: 'Client updated successfully' });
+      return typedClient;
     } catch (error: any) {
-      console.error('Error updating patient:', error);
+      console.error('Error updating client:', error);
       toast({
         title: 'Error',
-        description: 'Failed to update patient',
+        description: 'Failed to update client',
         variant: 'destructive',
       });
       return null;
@@ -506,8 +506,8 @@ export function useClient(id: string) {
   };
 
   useEffect(() => {
-    if (id) fetchPatient();
+    if (id) fetchClient();
   }, [id]);
 
-  return { patient, loading, updatePatient, refetch: fetchPatient };
+  return { client, loading, updateClient, refetch: fetchClient };
 }

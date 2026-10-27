@@ -245,7 +245,7 @@ export default function ClientTasks() {
           {filteredTodos.length === 0 ? (
             <p className="text-xs text-muted-foreground px-1 py-6 text-center">No actions match your search.</p>
           ) : groupBy === "date" ? (
-            <div className="patient-section-frame rounded-xl border border-border bg-card overflow-hidden divide-y divide-white">
+            <div className="client-section-frame rounded-xl border border-border bg-card overflow-hidden divide-y divide-white">
               {dateGroups.map((group, idx) => (
                 <Collapsible key={group.key} defaultOpen={idx === 0} className="bg-card overflow-hidden">
                   <SectionHeader icon={Clock} label={group.label} extra={<SectionCountPill count={group.items.length} />} />
@@ -260,7 +260,7 @@ export default function ClientTasks() {
               ))}
             </div>
           ) : (
-            <div className="patient-section-frame rounded-xl border border-border bg-card overflow-hidden divide-y divide-white">
+            <div className="client-section-frame rounded-xl border border-border bg-card overflow-hidden divide-y divide-white">
               {pendingTodos.length > 0 && (
                 <Collapsible defaultOpen className="bg-card overflow-hidden">
                   <SectionHeader icon={Clock} label="Pending" extra={<SectionCountPill count={pendingTodos.length} />} />
@@ -482,7 +482,7 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
             imageUrls,
             filePaths,
             prescriptionId: todo.id,
-            patientId: todo.patient_id,
+            clientId: todo.patient_id,
           },
         }
       );

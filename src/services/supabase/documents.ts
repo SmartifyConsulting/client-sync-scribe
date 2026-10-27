@@ -9,12 +9,12 @@ export type DocumentRow = Database["public"]["Tables"]["documents"]["Row"];
 export type DocumentInsert = Database["public"]["Tables"]["documents"]["Insert"];
 export type DocumentUpdate = Database["public"]["Tables"]["documents"]["Update"];
 
-export async function listDocuments(opts?: { patientId?: string; userId?: string }) {
+export async function listDocuments(opts?: { clientId?: string; userId?: string }) {
   let query = supabase
     .from("documents")
     .select("*")
     .order("created_at", { ascending: false });
-  if (opts?.patientId) query = query.eq("patient_id", opts.patientId);
+  if (opts?.clientId) query = query.eq("patient_id", opts.clientId);
   else if (opts?.userId) query = query.eq("user_id", opts.userId);
   const { data, error } = await query;
   if (error) throw error;

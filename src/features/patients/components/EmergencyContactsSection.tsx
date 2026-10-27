@@ -25,12 +25,12 @@ export interface EmergencyContact {
 }
 
 interface Props {
-  patientId: string;
+  clientId: string;
   contacts: EmergencyContact[];
   onChange: (next: EmergencyContact[]) => void;
 }
 
-export function EmergencyContactsSection({ patientId, contacts, onChange }: Props) {
+export function EmergencyContactsSection({ clientId, contacts, onChange }: Props) {
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
 
@@ -39,7 +39,7 @@ export function EmergencyContactsSection({ patientId, contacts, onChange }: Prop
     const { error } = await supabase
       .from("clients")
       .update({ emergency_contacts: next as any })
-      .eq("id", patientId);
+      .eq("id", clientId);
     setSaving(false);
     if (error) {
       toast({ title: "Save failed", description: error.message, variant: "destructive" });

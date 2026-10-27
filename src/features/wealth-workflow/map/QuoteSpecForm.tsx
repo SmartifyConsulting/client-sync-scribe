@@ -30,7 +30,7 @@ const toPlan = (spec: any): Plan =>
 
 /** Step 4: insurers first (they set the tabs), then the products the needs analysis asks for,
  *  each pre-filled with three graded options ready for the WM to adjust. */
-export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: string; isWM: boolean; patientId?: string }) {
+export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: string; isWM: boolean; clientId?: string }) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const { data: spec, isLoading } = useQuery({
@@ -38,8 +38,8 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
     queryFn: async () => (await db.from("wealth_quote_specs").select("*").eq("workflow_id", workflowId).order("created_at", { ascending: false }).limit(1).maybeSingle()).data,
   });
   const { data: fin, isFetched: finReady } = useQuery({
-    queryKey: ["fin-needs", patientId], enabled: !!patientId,
-    queryFn: async () => (await db.from("client_financial_profiles").select("cash_flow,assets_liabilities,risk_portfolio").eq("patient_id", patientId).maybeSingle()).data,
+    queryKey: ["fin-needs", clientId], enabled: !!clientId,
+    queryFn: async () => (await db.from("client_financial_profiles").select("cash_flow,assets_liabilities,risk_portfolio").eq("patient_id", clientId).maybeSingle()).data,
   });
   const { data: insurerRows = [] } = useQuery({
     queryKey: ["quote-insurer-rows", user?.id], enabled: !!user && isWM,
@@ -77,9 +77,9 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
   useEffect(() => {
     if (isLoading) return;
     if (spec) { setPlan(toPlan(spec)); setChosen(spec.insurers ?? []); return; }
-    if (patientId && !finReady) return;
+    if (clientId && !finReady) return;
     setPlan(Object.fromEntries(productsFromNeeds(fin).map(({ product, amount }) => [product, defaultVariations(product, amount)])));
-  }, [spec, isLoading, fin, finReady, patientId]);
+  }, [spec, isLoading, fin, finReady, clientId]);
 
   // Messages from the broker-side add-on driving the insurer login.
   useEffect(() => {
@@ -315,7 +315,7 @@ export function QuoteSpecForm({ workflowId, isWM, patientId }: { workflowId: str
             {login[activeTab] !== "connected" && <span className={label}>Connect {activeTab} first — insurers can run at the same time.</span>}
           </div>
           <QuoteJobsPanel jobs={jobs} onRetry={(ins, n) => submitScenarios(ins, [n])} />
-          {patientId && <QuotePdfCapture workflowId={workflowId} patientId={patientId} insurer={activeTab} onActivity={(ins, phase, detail) => { recordActivity(ins, phase, detail); if (phase === "saved" && !detail) setJobs((j) => markCaptured(j, ins, Date.now())); }} />}
+          {clientId && <QuotePdfCapture workflowId={workflowId} clientId={clientId} insurer={activeTab} onActivity={(ins, phase, detail) => { recordActivity(ins, phase, detail); if (phase === "saved" && !detail) setJobs((j) => markCaptured(j, ins, Date.now())); }} />}
           {/^discovery$/i.test(activeTab) && <DiscoveryScreenScan workflowId={workflowId} connected={login[activeTab] === "connected"} />}
 
 

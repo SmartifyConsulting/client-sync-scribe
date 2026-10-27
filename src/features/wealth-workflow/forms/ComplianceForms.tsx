@@ -43,7 +43,7 @@ function FormDialog({ form, onClose }: { form: ComplianceForm; onClose: () => vo
   const { user } = useAuth();
   const { profile } = useProfile();
   const qc = useQueryClient();
-  const [patientId, setPatientId] = useState("");
+  const [clientId, setPatientId] = useState("");
   const [v, setV] = useState<Record<string, any>>({});
   const [saving, setSaving] = useState(false);
   const [files, setFiles] = useState<Record<string, File>>({});
@@ -57,7 +57,7 @@ function FormDialog({ form, onClose }: { form: ComplianceForm; onClose: () => vo
       return data ?? [];
     },
   });
-  const client = clients.find((c: any) => c.id === patientId) as any;
+  const client = clients.find((c: any) => c.id === clientId) as any;
   const adviser = (profile as any)?.full_name || "Wealth Manager";
   const single = form.id === "fna" && v.singleNeed;
 
@@ -125,7 +125,7 @@ function FormDialog({ form, onClose }: { form: ComplianceForm; onClose: () => vo
         <div className="space-y-4">
           <div className="space-y-1.5">
             <Label>Client *</Label>
-            <Select value={patientId} onValueChange={(id) => { setPatientId(id); const c: any = clients.find((x: any) => x.id === id); if (c) setV((p) => ({ ...p, fullName: p.fullName || c.name, idNumber: p.idNumber || c.id_passport_number || "" })); }}>
+            <Select value={clientId} onValueChange={(id) => { setPatientId(id); const c: any = clients.find((x: any) => x.id === id); if (c) setV((p) => ({ ...p, fullName: p.fullName || c.name, idNumber: p.idNumber || c.id_passport_number || "" })); }}>
               <SelectTrigger><SelectValue placeholder="Select a client" /></SelectTrigger>
               <SelectContent>{clients.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
             </Select>

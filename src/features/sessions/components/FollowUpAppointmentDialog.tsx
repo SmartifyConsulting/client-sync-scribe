@@ -12,11 +12,11 @@ import { useToast } from "@/hooks/use-toast";
 interface FollowUpAppointmentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  doctorId: string;
-  doctorName?: string;
-  patientId: string;
+  advisorId: string;
+  advisorName?: string;
+  clientId: string;
   patientUserId?: string | null;
-  patientName?: string;
+  clientName?: string;
   suggestedDate?: string; // ISO YYYY-MM-DD from AI extraction
   suggestedTime?: string; // HH:MM 24h from AI extraction
   onDone: () => void;
@@ -46,7 +46,7 @@ function parseIsoDateLocal(iso?: string): Date | undefined {
 }
 
 export function FollowUpAppointmentDialog({
-  open, onOpenChange, doctorId, doctorName, patientId, patientUserId, patientName, suggestedDate, suggestedTime, onDone,
+  open, onOpenChange, advisorId, advisorName, clientId, patientUserId, clientName, suggestedDate, suggestedTime, onDone,
 }: FollowUpAppointmentDialogProps) {
   const { toast } = useToast();
   const initialDate = parseIsoDateLocal(suggestedDate) || addDays(new Date(), 7);
@@ -78,19 +78,19 @@ export function FollowUpAppointmentDialog({
   }, [open, suggestedDate, suggestedTime]);
 
   useEffect(() => {
-    if (!open || !date || !doctorId) return;
+    if (!open || !date || !advisorId) return;
     const dayStart = new Date(date); dayStart.setHours(0, 0, 0, 0);
     const dayEnd = new Date(date); dayEnd.setHours(23, 59, 59, 999);
     supabase
       .from("doctor_busy_slots")
       .select("start_time, end_time")
-      .eq("doctor_id", doctorId)
+      .eq("doctor_id", advisorId)
       .gte("start_time", dayStart.toISOString())
       .lte("start_time", dayEnd.toISOString())
       .then(({ data }) => {
         setBusy((data || []).map((a: any) => ({ start: parseISO(a.start_time), end: parseISO(a.end_time) })));
       });
-  }, [open, date, doctorId]);
+  }, [open, date, advisorId]);
 
   const isBusy = (s: { hour: number; minute: number }) => {
     if (!date) return false;
@@ -112,11 +112,11 @@ export function FollowUpAppointmentDialog({
       const start = setMinutes(setHours(new Date(date), slot.hour), slot.minute);
       start.setSeconds(0, 0);
       const end = new Date(start.getTime() + SLOT_DURATION * 60000);
-      const title = `Follow-up — ${patientName || "Patient"}`;
+      const title = `Follow-up — ${clientName || "Client"}`;
 
       const { error } = await supabase.from("appointments").insert({
-        user_id: doctorId,
-        patient_id: patientId,
+        user_id: advisorId,
+        patient_id: clientId,
         title,
         type: "follow_up",
         start_time: start.toISOString(),
@@ -129,7 +129,7 @@ export function FollowUpAppointmentDialog({
           user_id: patientUserId,
           type: "appointment_booked",
           title: "Follow-up appointment booked",
-          description: `${doctorName || "Your doctor"} scheduled a follow-up on ${format(start, "MMM d, yyyy")} at ${slot.label}.`,
+          description: `${advisorName || "Your doctor"} scheduled a follow-up on ${format(start, "MMM d, yyyy")} at ${slot.label}.`,
         } as any);
       }
 
@@ -154,7 +154,7 @@ export function FollowUpAppointmentDialog({
         <DialogHeader>
           <DialogTitle>Schedule follow-up</DialogTitle>
           <DialogDescription>
-            Pick a slot for a follow-up with {patientName || "the patient"}. Greyed-out times are already booked.
+            Pick a slot for a follow-up with {clientName || "the patient"}. Greyed-out times are already booked.
             Tap "Skip" if no follow-up is needed.
           </DialogDescription>
         </DialogHeader>

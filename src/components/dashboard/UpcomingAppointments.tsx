@@ -10,8 +10,8 @@ import { cn } from "@/lib/utils";
 
 interface Appointment {
   id: string;
-  patientId: string | null;
-  patientName: string;
+  clientId: string | null;
+  clientName: string;
   patientCreatedAt?: string | null;
   time: string;
   type: "in-person" | "video";
@@ -23,8 +23,8 @@ export function UpcomingAppointments() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const handleStartSession = (patientId: string) => {
-    navigate(`/sessions?patient=${patientId}&autoStart=true`);
+  const handleStartSession = (clientId: string) => {
+    navigate(`/sessions?client=${clientId}&autoStart=true`);
   };
 
   useEffect(() => {
@@ -64,8 +64,8 @@ export function UpcomingAppointments() {
 
           const mapped: Appointment[] = data.map(apt => ({
             id: apt.id,
-            patientId: apt.patient_id,
-            patientName: apt.patient_id ? (patientMap[apt.patient_id] || apt.title) : apt.title,
+            clientId: apt.patient_id,
+            clientName: apt.patient_id ? (patientMap[apt.patient_id] || apt.title) : apt.title,
             patientCreatedAt: apt.patient_id ? patientCreatedAtMap[apt.patient_id] || null : null,
             time: format(new Date(apt.start_time), "h:mm a"),
             type: apt.type === "video" || apt.location?.toLowerCase().includes("video") ? "video" : "in-person",
@@ -118,18 +118,18 @@ export function UpcomingAppointments() {
                 <User className="h-5 w-5 text-accent-foreground" />
               </div>
               <div className="flex-1">
-                {appointment.patientId ? (
+                {appointment.clientId ? (
                   <Link
-                    to={`/clients/${appointment.patientId}`}
+                    to={`/clients/${appointment.clientId}`}
                     className="font-medium text-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
                   >
-                    {appointment.patientName}
-                    {isSampleClient({ name: appointment.patientName, created_at: appointment.patientCreatedAt }) && <SampleBadge />}
+                    {appointment.clientName}
+                    {isSampleClient({ name: appointment.clientName, created_at: appointment.patientCreatedAt }) && <SampleBadge />}
                   </Link>
                 ) : (
                   <span className="font-medium text-foreground inline-flex items-center gap-1">
-                    {appointment.patientName}
-                    {isSampleClient({ name: appointment.patientName, created_at: appointment.patientCreatedAt }) && <SampleBadge />}
+                    {appointment.clientName}
+                    {isSampleClient({ name: appointment.clientName, created_at: appointment.patientCreatedAt }) && <SampleBadge />}
                   </span>
                 )}
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -152,10 +152,10 @@ export function UpcomingAppointments() {
                   </span>
                 </div>
               </div>
-              {appointment.patientId && (
+              {appointment.clientId && (
                 <Button
                   size="sm"
-                  onClick={() => handleStartSession(appointment.patientId!)}
+                  onClick={() => handleStartSession(appointment.clientId!)}
                 >
                   Start Consultation
                 </Button>

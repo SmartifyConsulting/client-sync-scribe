@@ -25,34 +25,34 @@ export interface WorkspaceItem {
   documentId?: string | null;
 }
 
-export function useLiveWorkspace(patientId?: string) {
-  const m = useWorkflowMap(patientId);
+export function useLiveWorkspace(clientId?: string) {
+  const m = useWorkflowMap(clientId);
   const wf = m.workflow;
-  useWorkflowRealtime(patientId, wf?.id);
+  useWorkflowRealtime(clientId, wf?.id);
   const { data: audit = [] } = useWorkflowAudit(wf?.id);
   const curDef = m.defs.find((d) => d.stage === wf?.current_stage);
   const nextStage = curDef?.next_stages.find((s) => !["closed_declined", "recommendation", "consultation"].includes(s)) ?? curDef?.next_stages[0];
   const { data: nextBlockers = [] } = useWorkflowBlockers(wf?.id, nextStage as any);
 
   const { data: lastSession } = useQuery({
-    queryKey: ["wealth-last-session", patientId],
-    enabled: !!patientId,
+    queryKey: ["wealth-last-session", clientId],
+    enabled: !!clientId,
     queryFn: async () => {
       const { data } = await supabase.from("sessions").select("id,title,started_at,created_at")
-        .eq("patient_id", patientId!).neq("status", "paused").order("created_at", { ascending: false }).limit(1).maybeSingle();
+        .eq("patient_id", clientId!).neq("status", "paused").order("created_at", { ascending: false }).limit(1).maybeSingle();
       return data;
     },
   });
 
   // Unanswered client question (existing messages)
   const { data: unread } = useQuery({
-    queryKey: ["wealth-client-question", patientId],
-    enabled: !!patientId,
+    queryKey: ["wealth-client-question", clientId],
+    enabled: !!clientId,
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return null;
       const { data } = await supabase.from("messages").select("id,subject,content,created_at")
-        .eq("patient_id", patientId!).eq("recipient_id", u.user.id).eq("is_read", false)
+        .eq("patient_id", clientId!).eq("recipient_id", u.user.id).eq("is_read", false)
         .order("created_at", { ascending: false }).limit(1).maybeSingle();
       return data;
     },

@@ -57,7 +57,7 @@ export default function MyFuture() {
   if (isLoading) {
     return <div className="flex justify-center p-10"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>;
   }
-  if (!data?.patientId) {
+  if (!data?.clientId) {
     return (
       <div className="container mx-auto max-w-5xl p-4">
         <h1 className="page-title">My Future</h1>
@@ -77,13 +77,13 @@ export default function MyFuture() {
     try {
       let attachment_path: string | null = null;
       if (claimFile) {
-        const path = `${data.patientId}/claims/${Date.now()}-${claimFile.name}`;
+        const path = `${data.clientId}/claims/${Date.now()}-${claimFile.name}`;
         const { error } = await supabase.storage.from("compliance-docs").upload(path, claimFile);
         if (error) throw error;
         attachment_path = path;
       }
       const { error } = await (supabase as any).from("wealth_claims").insert({
-        patient_id: data.patientId, claim_type: claimType, description: claimDesc || null, attachment_path, created_by: user?.id,
+        patient_id: data.clientId, claim_type: claimType, description: claimDesc || null, attachment_path, created_by: user?.id,
       });
       if (error) throw error;
       toast.success("Claim logged. Your Wealth Manager has been notified and will be in touch.");

@@ -56,7 +56,7 @@ const PATIENT_PATTERNS: RegExp[] = [
 
 /**
  * Items the AI emits that are not real tasks:
- *  - unresolved-patient placeholders ("Unknown Patient", "Patient not specified", …)
+ *  - unresolved-client placeholders ("Unknown Client", "Client not specified", …)
  *  - scheduling instructions (handled by the Schedule step of the post-session queue)
  *  - "issue/generate <document>" duplicates of documents already produced this session
  */

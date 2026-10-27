@@ -22,7 +22,7 @@ interface DiscProfile {
 }
 
 interface Props {
-  patientId: string;
+  clientId: string;
   hasSessions: boolean;
 }
 
@@ -33,8 +33,8 @@ const TILES = [
   { key: "conscientiousness", letter: "C", label: "Conscientiousness", barClass: "bg-blue-500" },
 ] as const;
 
-export function DiscPersonalityCard({ patientId, hasSessions }: Props) {
-  const { isDoctor, loading: roleLoading } = useUserRole();
+export function DiscPersonalityCard({ clientId, hasSessions }: Props) {
+  const { isAdvisor, loading: roleLoading } = useUserRole();
   const { toast } = useToast();
   const { t } = useTranslation();
   const [profile, setProfile] = useState<DiscProfile | null>(null);
@@ -42,14 +42,14 @@ export function DiscPersonalityCard({ patientId, hasSessions }: Props) {
   const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
-    if (!isDoctor || !patientId) return;
+    if (!isAdvisor || !clientId) return;
     let cancelled = false;
     (async () => {
       setLoading(true);
       const { data } = await supabase
         .from("patient_disc_profiles")
         .select("*")
-        .eq("patient_id", patientId)
+        .eq("patient_id", clientId)
         .maybeSingle();
       if (!cancelled) {
         setProfile((data as DiscProfile) ?? null);
@@ -59,13 +59,13 @@ export function DiscPersonalityCard({ patientId, hasSessions }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [patientId, isDoctor]);
+  }, [clientId, isAdvisor]);
 
   const generate = async () => {
     setGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke("analyze-patient-disc", {
-        body: { patient_id: patientId },
+        body: { patient_id: clientId },
       });
       if (error) {
         // Surface the function's own message instead of the generic
@@ -97,7 +97,7 @@ export function DiscPersonalityCard({ patientId, hasSessions }: Props) {
   };
 
 
-  if (roleLoading || !isDoctor) return null;
+  if (roleLoading || !isAdvisor) return null;
 
   return (
     <div className="rounded-xl border border-primary/40 bg-card p-5">

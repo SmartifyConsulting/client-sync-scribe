@@ -169,22 +169,22 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
           )}
 
           {isAstute && (
-            <AstutePanel patientId={records?.patientId} holdings={records?.holdings ?? []} viewer={viewer} />
+            <AstutePanel clientId={records?.clientId} holdings={records?.holdings ?? []} viewer={viewer} />
           )}
           {isPersonal && reached && viewer === "client" && (
             <a href="/patient/details?section=health&returnTo=/my-workspace" className="mb-3 inline-flex items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline">
               Open my profile to complete personal information →
             </a>
           )}
-          {isPersonal && reached && <PersonalInfoPanel patientId={records?.patientId} personal={records?.personal} />}
+          {isPersonal && reached && <PersonalInfoPanel clientId={records?.clientId} personal={records?.personal} />}
           {isQuote && reached && <QuotesPanel label={step.label} viewer={viewer} workflowId={workflowId} records={records} clientFirst={first} />}
           {isLater && reached && <LaterStepPanel label={step.label} viewer={viewer} workflowId={workflowId} records={records} clientFirst={first} clientFullName={clientName} onOpenDocuments={onOpenDocuments} />}
           {isSchedule && reached && <ScheduleMeetingPanel appointments={records?.appointments ?? []} viewer={viewer} />}
           {isCapture && reached && (
-            <CaptureFinancialsPanel patientId={records?.patientId} sessions={records?.sessions ?? []} financials={records?.financials} viewer={viewer} clientFirst={first} />
+            <CaptureFinancialsPanel clientId={records?.clientId} sessions={records?.sessions ?? []} financials={records?.financials} viewer={viewer} clientFirst={first} />
           )}
           {isVerify && reached && (
-            <VerifyFinancialsPanel patientId={records?.patientId} financials={records?.financials} viewer={viewer} clientFirst={first} />
+            <VerifyFinancialsPanel clientId={records?.clientId} financials={records?.financials} viewer={viewer} clientFirst={first} />
           )}
 
           {mine && step.state === "next" && t?.action && !custom && (

@@ -11,14 +11,14 @@ export type SessionUpdate = Database["public"]["Tables"]["sessions"]["Update"];
 
 const WITH_PATIENT = `*, patient:clients(id, name)` as const;
 
-export async function listSessions(patientId?: string) {
+export async function listSessions(clientId?: string) {
   let query = supabase
     .from("sessions")
     .select(WITH_PATIENT)
     // Paused drafts are resumable work-in-progress, never session history.
     .neq("status", "paused")
     .order("started_at", { ascending: false });
-  if (patientId) query = query.eq("patient_id", patientId);
+  if (clientId) query = query.eq("patient_id", clientId);
   const { data, error } = await query;
   if (error) throw error;
   return data ?? [];

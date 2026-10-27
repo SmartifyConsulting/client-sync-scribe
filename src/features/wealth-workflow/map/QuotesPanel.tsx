@@ -39,8 +39,8 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
   const [form, setForm] = useState({ insurer: "", product: "Life cover", premium: "", cover: "" });
   const { data: recs = [] } = useRecommendationHistory(workflowId);
   const { data: fin } = useQuery({
-    queryKey: ["fin-cashflow", records?.patientId], enabled: !!records?.patientId,
-    queryFn: async () => (await db.from("client_financial_profiles").select("cash_flow").eq("patient_id", records.patientId).maybeSingle()).data,
+    queryKey: ["fin-cashflow", records?.clientId], enabled: !!records?.clientId,
+    queryFn: async () => (await db.from("client_financial_profiles").select("cash_flow").eq("patient_id", records.clientId).maybeSingle()).data,
   });
   const refresh = () => qc.invalidateQueries({ queryKey: ["wealth-map-records"] });
   const run = async (fn: () => Promise<any>, ok: string) => {
@@ -101,8 +101,8 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
               ))}
             </ul>
           ) : <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">No policy schedules found yet.</p>}
-          {isWM && records?.patientId && (
-            <DocumentRequestComposer kind="schedules_claims" workflowId={workflowId} patientId={records.patientId} clientName={clientFirst} />
+          {isWM && records?.clientId && (
+            <DocumentRequestComposer kind="schedules_claims" workflowId={workflowId} clientId={records.clientId} clientName={clientFirst} />
           )}
         </div>
       );
@@ -124,9 +124,9 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
       if (!quotes.length) {
         return isWM ? (
           <div className="space-y-3">
-            <QuoteSpecForm workflowId={workflowId} isWM={isWM} patientId={records?.patientId} />
-            {records?.patientId && (
-              <DocumentRequestComposer kind="quotes" workflowId={workflowId} patientId={records.patientId} clientName={clientFirst} />
+            <QuoteSpecForm workflowId={workflowId} isWM={isWM} clientId={records?.clientId} />
+            {records?.clientId && (
+              <DocumentRequestComposer kind="quotes" workflowId={workflowId} clientId={records.clientId} clientName={clientFirst} />
             )}
           </div>
         ) : <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">Quotes are being gathered from insurers.</p>;
@@ -137,7 +137,7 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
       const mine = quotes.filter((q) => q.insurer === active);
       return (
         <div className="space-y-2">
-          {isWM && <QuoteSpecForm workflowId={workflowId} isWM={isWM} patientId={records?.patientId} />}
+          {isWM && <QuoteSpecForm workflowId={workflowId} isWM={isWM} clientId={records?.clientId} />}
           <div role="tablist" className="flex flex-wrap gap-1">
             {[...insurerTabs, FINAL].map((t) => (
               <button key={t} role="tab" aria-selected={active === t} onClick={() => setTab(t)}

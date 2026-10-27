@@ -68,7 +68,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
   const { profile } = useProfile();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { patients, loading, createPatient, deletePatient, fetchPatients } = useClients();
+  const { clients, loading, createClient, deleteClient, fetchClients } = useClients();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
@@ -140,7 +140,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
         setPatientSuggestions(filtered);
         setShowPatientSuggestions(true);
       } catch (e) {
-        console.error("Patient search error:", e);
+        console.error("Client search error:", e);
       } finally {
         setSearchingPatients(false);
       }
@@ -174,9 +174,9 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
       const { error } = await supabase.functions.invoke("send-patient-invitation", {
         body: {
           patientEmail: newPatient.email,
-          patientName: newPatient.name,
-          patientId: null,
-          doctorName: profile?.full_name || "Your Wealth Manager",
+          clientName: newPatient.name,
+          clientId: null,
+          advisorName: profile?.full_name || "Your Wealth Manager",
           practiceName: profile?.practice_address || "Your Firm",
         },
       });
@@ -217,7 +217,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
           formattedName = `${surname}, ${firstNames}`;
         }
       }
-      await createPatient({
+      await createClient({
         name: formattedName,
         email: user.email || null,
         phone: null,
@@ -268,9 +268,9 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
 
     void ensureSelfRecord();
     return () => { cancelled = true; };
-  }, [loading, user, patients, profile]);
+  }, [loading, user, clients, profile]);
 
-  const filteredPatients = patients.filter((patient) => {
+  const filteredPatients = clients.filter((patient) => {
     // Name filter
     if (searchQuery && !patient.name.toLowerCase().includes(searchQuery.toLowerCase())) {
       return false;
@@ -357,7 +357,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
     }
 
     setCreating(true);
-    const result = await createPatient({
+    const result = await createClient({
       name: newPatient.name,
       email: newPatient.email || null,
       phone: newPatient.phone || null,
@@ -407,13 +407,13 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
   const confirmDeletePatient = async () => {
     if (!pendingDelete) return;
     setDeleting(true);
-    await deletePatient(pendingDelete.id);
+    await deleteClient(pendingDelete.id);
     setDeleting(false);
     setPendingDelete(null);
   };
 
-  const handleStartSession = (patientId: string) => {
-    navigate(`/sessions?patient=${patientId}&autoStart=true`);
+  const handleStartSession = (clientId: string) => {
+    navigate(`/sessions?client=${clientId}&autoStart=true`);
   };
 
   if (loading) {
@@ -432,7 +432,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
           <div>
             <h1 className="page-title">{t("nav.myPatients", "Clients")}</h1>
             <p className="mt-1 text-muted-foreground text-xs">
-              {t("patients.subtitle")}
+              {t("clients.subtitle")}
             </p>
           </div>
         )}
@@ -443,10 +443,10 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
             trigger={
               <Button variant="outline" className="gap-1.5 h-8 md:h-9 text-xs md:text-xs">
                 <Upload className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                {t("patients.importPatients")}
+                {t("clients.importPatients")}
               </Button>
             }
-            onImportComplete={() => fetchPatients()}
+            onImportComplete={() => fetchClients()}
           />
           {/* Legacy manual-entry dialog — superseded by NewClientInvite above; left mounted (closed) rather than deleting its form logic outright */}
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -723,7 +723,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder={t("patients.searchPlaceholder")}
+            placeholder={t("clients.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -733,7 +733,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
           <PopoverTrigger asChild>
             <Button variant="outline" className={cn("gap-2", hasActiveFilters && "border-primary text-primary")}>
               <Filter className="h-4 w-4" />
-              {t("patients.filter")}
+              {t("clients.filter")}
               {hasActiveFilters && (
                 <span className="ml-1 rounded-full bg-primary text-primary-foreground px-1.5 py-0.5 text-xs">
                   {[statusFilter !== "all", dateFrom, dateTo].filter(Boolean).length}
@@ -758,7 +758,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                 <Label>Status</Label>
                 <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
                   <SelectTrigger>
-                    <SelectValue placeholder={t("patients.allStatuses")} />
+                    <SelectValue placeholder={t("clients.allStatuses")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All statuses</SelectItem>
@@ -848,11 +848,11 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
         </div>
       )}
 
-      {/* Patient List */}
+      {/* Client List */}
       <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
         {sortedPatients.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
-            {searchQuery ? t("patients.noPatientsFound") : t("patients.noPatientsHint")}
+            {searchQuery ? t("clients.noPatientsFound") : t("clients.noPatientsHint")}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -860,19 +860,19 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
               <thead>
                 <tr className="bg-primary">
                   <th className="px-2 lg:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
-                    {t("patients.colPatient")}
+                    {t("clients.colPatient")}
                   </th>
                   <th className="hidden lg:table-cell px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
-                    {t("patients.colContact")}
+                    {t("clients.colContact")}
                   </th>
                   <th className="px-3 lg:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
-                    {t("patients.colLastSeen")}
+                    {t("clients.colLastSeen")}
                   </th>
                   <th className="hidden lg:table-cell px-3 lg:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
-                    {t("patients.colSince")}
+                    {t("clients.colSince")}
                   </th>
                   <th className="px-3 lg:px-4 py-2.5 text-right text-xs font-medium text-primary-foreground">
-                    {t("patients.colActions")}
+                    {t("clients.colActions")}
                   </th>
                 </tr>
               </thead>
@@ -1035,11 +1035,11 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => handleStartSession(patient.id)}>
                                 <Clock className="mr-2 h-4 w-4" />
-                                {t("patients.startSession")}
+                                {t("clients.startSession")}
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => navigate(`/clients/${patient.id}`)}>
                                 <Edit3 className="mr-2 h-4 w-4" />
-                                {t("patients.viewProfile")}
+                                {t("clients.viewProfile")}
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem 
@@ -1047,7 +1047,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                                 className="text-destructive focus:text-destructive"
                               >
                                 <Trash2 className="mr-2 h-4 w-4" />
-                                {t("patients.deletePatient")}
+                                {t("clients.deleteClient")}
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>

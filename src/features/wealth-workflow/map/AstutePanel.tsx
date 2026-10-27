@@ -9,16 +9,16 @@ import { InsurerBadge } from "./insurerColors";
 
 const rand = (n: number | null) => (n == null ? "—" : `R${Number(n).toLocaleString("en-ZA", { maximumFractionDigits: 0 })}`);
 
-export function AstutePanel({ patientId, holdings, viewer }: { patientId?: string; holdings: any[]; viewer: "manager" | "client" }) {
+export function AstutePanel({ clientId, holdings, viewer }: { clientId?: string; holdings: any[]; viewer: "manager" | "client" }) {
   const qc = useQueryClient();
   const [busy, setBusy] = useState(false);
   const last = holdings.reduce<string | null>((m, h) => (!m || h.synced_at > m ? h.synced_at : m), null);
   const ref = holdings[0]?.reference;
 
   const pull = async () => {
-    if (!patientId) return;
+    if (!clientId) return;
     setBusy(true);
-    const { data, error } = await safeInvoke<any>("astute-sync", { patientId });
+    const { data, error } = await safeInvoke<any>("astute-sync", { clientId });
     setBusy(false);
     const msg = (data as any)?.error ?? error;
     if (msg || !data?.ok) { toast({ title: "Astute pull didn't finish", description: msg ?? "Please try again.", variant: "destructive" }); return; }
@@ -36,7 +36,7 @@ export function AstutePanel({ patientId, holdings, viewer }: { patientId?: strin
           </p>
         </div>
         {viewer === "manager" && (
-          <Button size="sm" variant="outline" className="rounded-full" onClick={pull} disabled={busy || !patientId}>
+          <Button size="sm" variant="outline" className="rounded-full" onClick={pull} disabled={busy || !clientId}>
             <RefreshCw className={busy ? "mr-1.5 h-3.5 w-3.5 animate-spin" : "mr-1.5 h-3.5 w-3.5"} />
             {busy ? "Pulling…" : "Pull from Astute"}
           </Button>

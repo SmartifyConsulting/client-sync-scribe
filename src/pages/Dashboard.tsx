@@ -16,15 +16,15 @@ import { useTranslation } from "react-i18next";
 export default function Dashboard() {
   const { t } = useTranslation();
   const { profile, loading: profileLoading } = useProfile();
-  const { isDoctor, isPatient, loading: roleLoading } = useUserRole();
+  const { isAdvisor, isClient, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   useGenerateWmActionItems();
 
-  const shouldRedirectPatient = !roleLoading && isPatient;
+  const shouldRedirectPatient = !roleLoading && isClient;
 
   const displayName = (() => {
     if (profileLoading || roleLoading) return '';
-    if (!profile?.full_name) return isDoctor ? 'Wealth Manager' : '';
+    if (!profile?.full_name) return isAdvisor ? 'Wealth Manager' : '';
     const nameParts = profile.full_name.split(' ');
     const surname = nameParts.length > 1 ? nameParts[nameParts.length - 1] : nameParts[0];
     return `${nameParts[0]} ${surname !== nameParts[0] ? surname : ''}`.trim();
@@ -40,7 +40,7 @@ export default function Dashboard() {
     return <Navigate to="/client/details" replace />;
   }
 
-  const doctorIncomplete = isDoctor && profile && (
+  const doctorIncomplete = isAdvisor && profile && (
     !(profile as any).specialty ||
     !(profile as any).practice_number ||
     !(profile as any).doctor_number ||
@@ -60,7 +60,7 @@ export default function Dashboard() {
             <span className="block md:inline"> {formattedDate}</span>
           </p>
         </div>
-        {isDoctor && <NewClientInvite />}
+        {isAdvisor && <NewClientInvite />}
       </div>
 
       {doctorIncomplete && (

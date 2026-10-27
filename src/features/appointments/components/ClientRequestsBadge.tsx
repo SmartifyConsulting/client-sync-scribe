@@ -88,7 +88,7 @@ export function ClientRequestsBadge() {
       await supabase.from("appointments").insert({
         user_id: req.doctor_id,
         patient_id: req.patient_id,
-        title: req.service_name || "Patient Appointment",
+        title: req.service_name || "Client Appointment",
         start_time: req.proposed_start,
         end_time: req.proposed_end,
         type: "session",
@@ -99,7 +99,7 @@ export function ClientRequestsBadge() {
         user_id: req.doctor_id,
         type: "appointment_confirmed",
         title: "Appointment Confirmed",
-        description: `Patient confirmed the proposed time: ${format(parseISO(req.proposed_start), "MMM d 'at' h:mm a")}.`,
+        description: `Client confirmed the proposed time: ${format(parseISO(req.proposed_start), "MMM d 'at' h:mm a")}.`,
       });
 
       toast({ title: "Confirmed", description: "Appointment confirmed!" });

@@ -7,8 +7,8 @@ interface UseAudioRecordingOptions {
   onTranscriptionComplete?: (text: string) => void;
   onAudioSaved?: (audioUrl: string) => void;
   onEndSessionDetected?: () => void;
-  patientName?: string;
-  doctorName?: string;
+  clientName?: string;
+  advisorName?: string;
   sessionId?: string;
   language?: string;
 }
@@ -129,8 +129,8 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
       const { data, error } = await supabase.functions.invoke('transcribe-audio', {
         body: {
           audio: base64,
-          patientName: optionsRef.current.patientName,
-          doctorName: optionsRef.current.doctorName,
+          clientName: optionsRef.current.clientName,
+          advisorName: optionsRef.current.advisorName,
           language: optionsRef.current.language,
         },
       });
@@ -433,8 +433,8 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
         logger.debug('Sending audio storage URL for transcription');
         body = {
           audioUrl: storageUrl,
-          patientName: optionsRef.current.patientName,
-          doctorName: optionsRef.current.doctorName,
+          clientName: optionsRef.current.clientName,
+          advisorName: optionsRef.current.advisorName,
           language: optionsRef.current.language,
         };
       } else {
@@ -452,8 +452,8 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
         logger.debug('Sending audio as base64 for transcription, size:', base64Audio.length);
         body = {
           audio: base64Audio,
-          patientName: optionsRef.current.patientName,
-          doctorName: optionsRef.current.doctorName,
+          clientName: optionsRef.current.clientName,
+          advisorName: optionsRef.current.advisorName,
           language: optionsRef.current.language,
         };
       }

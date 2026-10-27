@@ -22,7 +22,7 @@ const fmt = (d: string) => new Date(d).toLocaleString("en-ZA", { day: "numeric",
 const refresh = (qc: ReturnType<typeof useQueryClient>) => qc.invalidateQueries({ queryKey: ["wealth-map-records"] });
 
 /* ---------------- Step 1: personal information ---------------- */
-export function PersonalInfoPanel({ patientId, personal }: { patientId?: string; personal: any }) {
+export function PersonalInfoPanel({ clientId, personal }: { clientId?: string; personal: any }) {
   const qc = useQueryClient();
   const [f, setF] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
@@ -41,10 +41,10 @@ export function PersonalInfoPanel({ patientId, personal }: { patientId?: string;
   ].filter(Boolean) as string[];
 
   const save = async () => {
-    if (!patientId) return;
+    if (!clientId) return;
     if (missing.length) return toast({ title: "A few details are missing", description: `Please add your ${missing.join(", ")}.`, variant: "destructive" });
     setBusy(true);
-    const { error } = await db.from("clients").update({ ...f, address: f.physical_address, dob: f.dob || null }).eq("id", patientId);
+    const { error } = await db.from("clients").update({ ...f, address: f.physical_address, dob: f.dob || null }).eq("id", clientId);
     setBusy(false);
     if (error) return toast({ title: "Couldn't save your details", description: "Please try again. If it keeps happening, contact your Wealth Manager.", variant: "destructive" });
     toast({ title: "Personal information saved" });
@@ -75,7 +75,7 @@ export function PersonalInfoPanel({ patientId, personal }: { patientId?: string;
         <Field label="Residential address *" wide><Textarea rows={2} value={f.physical_address ?? ""} onChange={(e) => set("physical_address")(e.target.value)} /></Field>
         <Field label="Postal address (if different)" wide><Textarea rows={2} value={f.postal_address ?? ""} onChange={(e) => set("postal_address")(e.target.value)} /></Field>
       </div>
-      <Button className="w-full rounded-full" onClick={save} disabled={busy || !patientId}>
+      <Button className="w-full rounded-full" onClick={save} disabled={busy || !clientId}>
         {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}Save and continue
       </Button>
     </div>
@@ -108,7 +108,7 @@ export function ScheduleMeetingPanel({ appointments, viewer }: { appointments: a
 }
 
 /* ---------------- Record meeting (Wealth Manager) ---------------- */
-function RecordMeeting({ patientId, onDone }: { patientId: string; onDone: (sessionId: string) => void }) {
+function RecordMeeting({ clientId, onDone }: { clientId: string; onDone: (sessionId: string) => void }) {
   const [rec, setRec] = useState<MediaRecorder | null>(null);
   const [secs, setSecs] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -128,7 +128,7 @@ function RecordMeeting({ patientId, onDone }: { patientId: string; onDone: (sess
         setBusy(true);
         const { data: sess } = await supabase.auth.getSession();
         const fd = new FormData();
-        fd.append("patientId", patientId);
+        fd.append("clientId", clientId);
         fd.append("file", blob, "meeting.webm");
         try {
           const r = await fetch(`https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/transcribe-meeting`, {
@@ -163,7 +163,7 @@ function RecordMeeting({ patientId, onDone }: { patientId: string; onDone: (sess
 }
 
 /* ---------------- Step 2a: capture from consultation (Wealth Manager) ---------------- */
-export function CaptureFinancialsPanel({ patientId, sessions, financials, viewer, clientFirst }: { patientId?: string; sessions: any[]; financials: any; viewer: Viewer; clientFirst: string }) {
+export function CaptureFinancialsPanel({ clientId, sessions, financials, viewer, clientFirst }: { clientId?: string; sessions: any[]; financials: any; viewer: Viewer; clientFirst: string }) {
   const qc = useQueryClient();
   const usable = sessions.filter((s) => s.hasText);
   const [sessionId, setSessionId] = useState<string>("");
@@ -180,9 +180,9 @@ export function CaptureFinancialsPanel({ patientId, sessions, financials, viewer
   }
 
   const run = async (sid?: string) => {
-    if (!patientId) return;
+    if (!clientId) return;
     setBusy(true);
-    const { data, error } = await safeInvoke<any>("extract-financials", sid ? { patientId, sessionId: sid } : notes.trim() ? { patientId, text: notes } : { patientId, sessionId });
+    const { data, error } = await safeInvoke<any>("extract-financials", sid ? { clientId, sessionId: sid } : notes.trim() ? { clientId, text: notes } : { clientId, sessionId });
     setBusy(false);
     const msg = (data as any)?.error ?? error;
     if (msg || !data?.ok) return toast({ title: "Couldn't capture the financial information", description: msg ?? "Please try again.", variant: "destructive" });
@@ -193,7 +193,7 @@ export function CaptureFinancialsPanel({ patientId, sessions, financials, viewer
   return (
     <div className="space-y-3 text-sm">
       <p className="text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Record the meeting</p>
-      {patientId && <RecordMeeting patientId={patientId} onDone={(sid) => { setSessionId(sid); refresh(qc); run(sid); }} />}
+      {clientId && <RecordMeeting clientId={clientId} onDone={(sid) => { setSessionId(sid); refresh(qc); run(sid); }} />}
       <p className="text-2xs text-muted-foreground">Elysian AI transcribes the meeting and fills in the financial information automatically.</p>
       <p className="pt-2 text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Or capture from an earlier consultation</p>
       {usable.length > 0 && (
@@ -216,7 +216,7 @@ export function CaptureFinancialsPanel({ patientId, sessions, financials, viewer
       {financials?.extracted_at && (
         <>
           <p className="text-xs text-muted-foreground">Last captured {fmt(financials.extracted_at)}. Check and correct it before {clientFirst} verifies.</p>
-          {patientId && <FinancialInformation patientId={patientId} />}
+          {clientId && <FinancialInformation clientId={clientId} />}
         </>
       )}
     </div>
@@ -224,7 +224,7 @@ export function CaptureFinancialsPanel({ patientId, sessions, financials, viewer
 }
 
 /* ---------------- Step 2b: client verifies complete & correct ---------------- */
-export function VerifyFinancialsPanel({ patientId, financials, viewer, clientFirst }: { patientId?: string; financials: any; viewer: Viewer; clientFirst: string }) {
+export function VerifyFinancialsPanel({ clientId, financials, viewer, clientFirst }: { clientId?: string; financials: any; viewer: Viewer; clientFirst: string }) {
   const qc = useQueryClient();
   const [complete, setComplete] = useState(false);
   const [correct, setCorrect] = useState(false);
@@ -242,15 +242,15 @@ export function VerifyFinancialsPanel({ patientId, financials, viewer, clientFir
     return (
       <div className="space-y-3">
         <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">Waiting for {clientFirst} to confirm the information is complete and correct. If you change anything, they confirm again.</p>
-        {patientId && <FinancialInformation patientId={patientId} />}
+        {clientId && <FinancialInformation clientId={clientId} />}
       </div>
     );
   }
 
   const verify = async () => {
-    if (!patientId) return;
+    if (!clientId) return;
     setBusy(true);
-    const { error } = await db.rpc("wealth_financials_verify", { _patient_id: patientId });
+    const { error } = await db.rpc("wealth_financials_verify", { _patient_id: clientId });
     setBusy(false);
     if (error) return toast({ title: "Couldn't record your confirmation", description: error.message, variant: "destructive" });
     toast({ title: "Thank you. Your financial information is confirmed." });
@@ -262,8 +262,8 @@ export function VerifyFinancialsPanel({ patientId, financials, viewer, clientFir
       <p className="text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Captured from your meeting</p>
       <p className="text-xs text-muted-foreground">Open each section, correct anything that's wrong and press Save. Then confirm below.</p>
       <p className="text-xs text-muted-foreground">The full meeting transcript is stored in your Documents folder, so you can see how each figure was captured.</p>
-      <TranscriptButton sessionId={financials?.extracted_from_session_id} patientId={patientId} />
-      {patientId && <FinancialInformation patientId={patientId} />}
+      <TranscriptButton sessionId={financials?.extracted_from_session_id} clientId={clientId} />
+      {clientId && <FinancialInformation clientId={clientId} />}
       <div className="space-y-3 rounded-lg border border-border/70 p-3">
         <label className="flex items-start gap-2.5 text-xs leading-relaxed"><Checkbox checked={complete} onCheckedChange={(v) => setComplete(!!v)} className="mt-0.5 shrink-0" /><span>I confirm this financial information is <strong>complete</strong>. Nothing important is missing.</span></label>
         <label className="flex items-start gap-2.5 text-xs leading-relaxed"><Checkbox checked={correct} onCheckedChange={(v) => setCorrect(!!v)} className="mt-0.5 shrink-0" /><span>I confirm the figures, assets and debts above are <strong>correct</strong>.</span></label>

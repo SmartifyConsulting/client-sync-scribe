@@ -157,6 +157,7 @@ function buildReplacements(ctx: FillContext): { lookup: Record<string, string>; 
     FirstName: patient?.first_name || "",
     LastName: patient?.last_name || "",
     PatientAddress: patientAddr,
+    ClientAddress: patientAddr,
     MedicalAid: patient?.medical_aid || "",
     MedicalAidNumber: patient?.medical_aid_number || "",
     PrimaryMember: patient?.primary_member || "",
@@ -170,7 +171,9 @@ function buildReplacements(ctx: FillContext): { lookup: Record<string, string>; 
 
     // Practice / Doctor
     DoctorName: profile?.full_name || "",
+    AdvisorName: profile?.full_name || "",
     DoctorNumber: profile?.doctor_number || "",
+    AdvisorNumber: profile?.doctor_number || "",
     RegistrationNumber: profile?.doctor_number || "",
     PracticeNumber: profile?.practice_number || "",
     PracticeAddress: profile?.practice_address || "",
@@ -222,7 +225,9 @@ function buildReplacements(ctx: FillContext): { lookup: Record<string, string>; 
 
     // Contact details used across referral / admission letters
     PatientContact: patient?.phone || patient?.email || "",
+    ClientContact: patient?.phone || patient?.email || "",
     PatientDOB: patient?.dob || "",
+    ClientDOB: patient?.dob || "",
     PracticePhone: (profile as any)?.phone || (profile as any)?.practice_phone || "",
 
 
@@ -230,6 +235,7 @@ function buildReplacements(ctx: FillContext): { lookup: Record<string, string>; 
     // (font / colour / size configured in My Practice). Plain-text callers
     // (raw textarea editors) get the doctor's name instead of signature markup.
     DoctorSignature: plainText ? profile?.full_name || "" : renderSignatureHtml(profile),
+    AdvisorSignature: plainText ? profile?.full_name || "" : renderSignatureHtml(profile),
     Signature: plainText ? profile?.full_name || "" : renderSignatureHtml(profile),
 
 

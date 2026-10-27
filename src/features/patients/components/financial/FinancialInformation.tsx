@@ -78,16 +78,16 @@ export function estateDuty(netEstate: number) {
   return dutiable <= 30_000_000 ? dutiable * 0.2 : 6_000_000 + (dutiable - 30_000_000) * 0.25;
 }
 
-export function FinancialInformation({ patientId }: { patientId: string }) {
+export function FinancialInformation({ clientId }: { clientId: string }) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const q = useQuery({
-    queryKey: ["client-financial-profile", patientId],
-    queryFn: async () => (await (supabase as any).from("client_financial_profiles").select("*").eq("patient_id", patientId).maybeSingle()).data,
+    queryKey: ["client-financial-profile", clientId],
+    queryFn: async () => (await (supabase as any).from("client_financial_profiles").select("*").eq("patient_id", clientId).maybeSingle()).data,
   });
   const issued = useQuery({
-    queryKey: ["client-issued-policies", patientId],
-    queryFn: async () => (await (supabase as any).from("wealth_applications").select("id,product,provider,monthly_premium,status,wealth_workflows!inner(patient_id)").eq("wealth_workflows.patient_id", patientId).eq("status", "issued")).data ?? [],
+    queryKey: ["client-issued-policies", clientId],
+    queryFn: async () => (await (supabase as any).from("wealth_applications").select("id,product,provider,monthly_premium,status,wealth_workflows!inner(patient_id)").eq("wealth_workflows.patient_id", clientId).eq("status", "issued")).data ?? [],
   });
   const [data, setData] = useState<Record<string, any>>({});
   const [saving, setSaving] = useState<string | null>(null);
@@ -122,31 +122,31 @@ export function FinancialInformation({ patientId }: { patientId: string }) {
   const logChange = async (sectionLabel: string) => {
     if (!user) return;
     await supabase.from("wealth_audit_log").insert({
-      patient_id: patientId,
+      patient_id: clientId,
       actor_user_id: user.id,
       action: `Financial information updated — ${sectionLabel}`,
       record_type: "client_financial_profiles",
-      record_id: patientId,
+      record_id: clientId,
     } as any);
   };
 
   const save = async (k: SectionKey) => {
     setSaving(k);
-    const { error } = await (supabase as any).from("client_financial_profiles").upsert({ patient_id: patientId, [k]: sec(k) }, { onConflict: "patient_id" });
+    const { error } = await (supabase as any).from("client_financial_profiles").upsert({ patient_id: clientId, [k]: sec(k) }, { onConflict: "patient_id" });
     setSaving(null);
     if (error) return toast.error("Couldn't save. You may not have access to this client's record.");
     toast.success("Saved");
-    qc.invalidateQueries({ queryKey: ["client-financial-profile", patientId] });
+    qc.invalidateQueries({ queryKey: ["client-financial-profile", clientId] });
     await logChange(SECTIONS.find((s) => s.key === k)?.label ?? k);
   };
 
   const saveNotes = async () => {
     setSaving(GENERAL_NOTES_KEY);
-    const { error } = await (supabase as any).from("client_financial_profiles").upsert({ patient_id: patientId, general_notes: data[GENERAL_NOTES_KEY] ?? null }, { onConflict: "patient_id" });
+    const { error } = await (supabase as any).from("client_financial_profiles").upsert({ patient_id: clientId, general_notes: data[GENERAL_NOTES_KEY] ?? null }, { onConflict: "patient_id" });
     setSaving(null);
     if (error) return toast.error("Couldn't save. You may not have access to this client's record.");
     toast.success("Saved");
-    qc.invalidateQueries({ queryKey: ["client-financial-profile", patientId] });
+    qc.invalidateQueries({ queryKey: ["client-financial-profile", clientId] });
     await logChange("General Notes");
   };
 
@@ -178,7 +178,7 @@ export function FinancialInformation({ patientId }: { patientId: string }) {
         <span className="font-medium text-foreground">Needs Analysis progress</span>
         <span className="text-muted-foreground">{completedSections} of {SECTIONS.length} sections started</span>
       </div>
-      <div className="patient-section-frame rounded-xl border border-border bg-card overflow-hidden divide-y divide-white">
+      <div className="client-section-frame rounded-xl border border-border bg-card overflow-hidden divide-y divide-white">
       {SECTIONS.map((s) => {
         const v = sec(s.key);
         const p = progress(s);
@@ -278,7 +278,7 @@ export function FinancialInformation({ patientId }: { patientId: string }) {
                     <span className="block text-xs text-muted-foreground">Guide only: 20% on the net estate above R3.5m and 25% above R30m. Excludes executor fees, CGT and spousal deductions.</span></p>
                   <div className="space-y-1.5">
                     <Label className="text-xs">Last Will and Testament</Label>
-                    <DocumentUploadList patientId={patientId} documentKind="Will" addLabel="Upload will" />
+                    <DocumentUploadList clientId={clientId} documentKind="Will" addLabel="Upload will" />
                   </div>
                 </>
               )}

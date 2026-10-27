@@ -38,7 +38,7 @@ interface Template {
 
 interface DocumentEditorProps {
   template: Template;
-  preSelectedPatientId?: string;
+  preSelectedClientId?: string;
   onClose: () => void;
   onSave: (document: { name: string; content: string }) => void;
 }
@@ -144,14 +144,14 @@ function ProcedureSearchInput({
   );
 }
 
-export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave }: DocumentEditorProps) {
+export function DocumentEditor({ template, preSelectedClientId, onClose, onSave }: DocumentEditorProps) {
   const { toast } = useToast();
-  const { patients } = useClients();
+  const { clients } = useClients();
   const { profile } = useProfile();
   const { createDocument } = useDocuments();
   const [documentName, setDocumentName] = useState(`${template.name} - ${new Date().toLocaleDateString()}`);
   const [content, setContent] = useState(template.content);
-  const [selectedPatientId, setSelectedPatientId] = useState<string>(preSelectedPatientId || "");
+  const [selectedClientId, setSelectedClientId] = useState<string>(preSelectedClientId || "");
   const [isSaving, setIsSaving] = useState(false);
 
   const isAdmissionTemplate =
@@ -163,8 +163,8 @@ export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave
   // always resolve even before a patient is chosen.
   useEffect(() => {
     const patient =
-      selectedPatientId && selectedPatientId !== "none"
-        ? patients.find((p) => p.id === selectedPatientId)
+      selectedClientId && selectedClientId !== "none"
+        ? clients.find((p) => p.id === selectedClientId)
         : undefined;
 
     const { content: updatedContent } = fillDocumentPlaceholders(template.content, {
@@ -179,7 +179,7 @@ export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave
     }
 
     setContent(updatedContent);
-  }, [selectedPatientId, profile, patients, template.content, template.name]);
+  }, [selectedClientId, profile, clients, template.content, template.name]);
 
 
   const handleProcedureSelect = (procedure: ProcedureSuggestion) => {
@@ -194,10 +194,10 @@ export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave
   const handleSave = async () => {
     setIsSaving(true);
     
-    const selectedPatient = patients.find(p => p.id === selectedPatientId);
+    const selectedPatient = clients.find(p => p.id === selectedClientId);
     
     const result = await createDocument({
-      patient_id: selectedPatientId || undefined,
+      patient_id: selectedClientId || undefined,
       template_id: template.id,
       name: documentName,
       content: content,
@@ -235,16 +235,16 @@ export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave
 
         {/* Main Editor */}
         <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
-          {/* Patient Selection */}
+          {/* Client Selection */}
           <div className="space-y-2">
             <Label htmlFor="patient">Select Client (for auto-fill)</Label>
-            <Select value={selectedPatientId} onValueChange={setSelectedPatientId}>
+            <Select value={selectedClientId} onValueChange={setSelectedClientId}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a client to auto-fill placeholders" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">No client selected</SelectItem>
-                {patients.map((patient) => (
+                {clients.map((patient) => (
                   <SelectItem key={patient.id} value={patient.id}>
                     <span className="flex items-center gap-2">
                       <User className="h-4 w-4" />
@@ -254,9 +254,9 @@ export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave
                 ))}
               </SelectContent>
             </Select>
-            {selectedPatientId && selectedPatientId !== "none" && (
+            {selectedClientId && selectedClientId !== "none" && (
               <p className="text-xs text-primary">
-                ✓ Patient data has been auto-filled into the document
+                ✓ Client data has been auto-filled into the document
               </p>
             )}
           </div>

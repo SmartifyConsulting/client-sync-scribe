@@ -36,9 +36,9 @@ export interface Session {
 }
 
 // Helper to notify patient when a task is assigned to them
-const notifyPatientOfTask = async (patientId: string, taskTitle: string, taskId: string) => {
+const notifyClientOfTask = async (clientId: string, taskTitle: string, taskId: string) => {
   try {
-    const { data: patient } = await supabase.from('clients').select('patient_user_id').eq('id', patientId).maybeSingle();
+    const { data: patient } = await supabase.from('clients').select('patient_user_id').eq('id', clientId).maybeSingle();
     if (patient?.patient_user_id) {
       await supabase.from('notifications').insert({
         user_id: patient.patient_user_id,
@@ -58,7 +58,7 @@ const insertActionPointTodos = async (
   actionPoints: string[],
   userId: string,
   sessionId: string,
-  patientId?: string | null,
+  clientId?: string | null,
 ) => {
   const rows = actionPoints
     .map((point) => ({ point, owner: classifyTask(point) }))
@@ -66,7 +66,7 @@ const insertActionPointTodos = async (
     .map((r) => ({
       user_id: userId,
       session_id: sessionId,
-      patient_id: patientId || null,
+      patient_id: clientId || null,
       title: r.point,
       priority: 'medium',
       status: 'pending',
@@ -74,9 +74,9 @@ const insertActionPointTodos = async (
     }));
   if (rows.length === 0) return;
   await supabase.from('todos').insert(rows as any);
-  if (patientId) {
+  if (clientId) {
     for (const row of rows) {
-      if (row.assignee === 'patient') await notifyPatientOfTask(patientId, row.title, sessionId);
+      if (row.assignee === 'patient') await notifyClientOfTask(clientId, row.title, sessionId);
     }
   }
 };
@@ -90,7 +90,7 @@ const transformSession = (dbSession: any): Session => ({
     : [],
 });
 
-export function useSessions(patientId?: string) {
+export function useSessions(clientId?: string) {
   const { toast } = useToast();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
@@ -108,8 +108,8 @@ export function useSessions(patientId?: string) {
         .neq('status', 'paused')
         .order('started_at', { ascending: false });
 
-      if (patientId) {
-        query = query.eq('patient_id', patientId);
+      if (clientId) {
+        query = query.eq('patient_id', clientId);
       }
 
       const { data, error } = await query;
@@ -129,7 +129,7 @@ export function useSessions(patientId?: string) {
     }
   };
 
-  const createSession = async (patientId: string, title?: string) => {
+  const createSession = async (clientId: string, title?: string) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
@@ -138,7 +138,7 @@ export function useSessions(patientId?: string) {
         .from('sessions')
         .insert({
           user_id: user.id,
-          patient_id: patientId,
+          patient_id: clientId,
           title: title || `Session - ${new Date().toLocaleDateString()}`,
           status: 'in_progress',
         })
@@ -236,11 +236,11 @@ const completeSession = async (
       const now = new Date().toISOString();
       const startedAt = creationData?.started_at || now;
       const durationMinutes = Math.round((Date.now() - new Date(startedAt).getTime()) / 60000);
-      const patientId = creationData?.patient_id || '';
+      const clientId = creationData?.patient_id || '';
 
       const sessionRecord: any = {
         user_id: user.id,
-        patient_id: patientId,
+        patient_id: clientId,
         title: creationData?.title || `Session - ${new Date().toLocaleDateString()}`,
         transcript: content,
         notes: additionalNotes || null,
@@ -305,8 +305,8 @@ const completeSession = async (
         await saveSessionTranscriptDocument({
           userId: user.id,
           sessionId,
-          patientId: patientId || null,
-          patientName: resultData?.patient?.name || null,
+          clientId: clientId || null,
+          clientName: resultData?.patient?.name || null,
           transcript: content,
           sessionTitle: sessionRecord.title,
           sessionDate: startedAt,
@@ -326,7 +326,7 @@ const completeSession = async (
           if (processError) {
             console.error('Error auto-executing action points:', processError);
             // Fallback: save as pending todos, routed to the right owner
-            await insertActionPointTodos(summaryData.action_points, user.id, sessionId!, patientId);
+            await insertActionPointTodos(summaryData.action_points, user.id, sessionId!, clientId);
           } else {
             logger.debug('Auto-execution result:', processResult);
             const autoCount = processResult?.results?.filter((r: any) => r.auto_executed).length || 0;
@@ -338,17 +338,17 @@ const completeSession = async (
         } catch (execError) {
           console.error('Failed to invoke process-todo-actions:', execError);
           // Fallback: save as pending todos, routed to the right owner
-          await insertActionPointTodos(summaryData.action_points, user.id, sessionId!, patientId);
+          await insertActionPointTodos(summaryData.action_points, user.id, sessionId!, clientId);
         }
 
       }
 
       // Auto-create hospital admission document if detected
-      if (summaryData?.hospital_admission && patientId) {
+      if (summaryData?.hospital_admission && clientId) {
         try {
           const admission = summaryData.hospital_admission;
           const [patientRes, profileRes, templateRes] = await Promise.all([
-            supabase.from('clients').select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email').eq('id', patientId).maybeSingle(),
+            supabase.from('clients').select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email').eq('id', clientId).maybeSingle(),
             supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty, practice_address').eq('id', user.id).maybeSingle(),
             supabase.from('templates').select('id, name, content, header_footer_template_id').eq('user_id', user.id),
           ]);
@@ -369,15 +369,17 @@ const completeSession = async (
             const replacements: Record<string, string> = {
               'ClientName': patientRecord?.name || 'Unknown',
               'PatientName': patientRecord?.name || 'Unknown',
-              'Patient Name': patientRecord?.name || 'Unknown',
+              'Client Name': patientRecord?.name || 'Unknown',
               'Date': today,
               'SessionDate': today,
               'DoctorName': profileData?.full_name || '',
+              'AdvisorName': profileData?.full_name || '',
               'DoctorNumber': profileData?.doctor_number || '',
               'PracticeNumber': profileData?.practice_number || '',
               'RegistrationNumber': profileData?.doctor_number || '',
               'PracticeAddress': (profileData as any)?.practice_address || '',
               'PatientAddress': (patientRecord as any)?.physical_address || (patientRecord as any)?.address || '',
+              'ClientAddress': (patientRecord as any)?.physical_address || (patientRecord as any)?.address || '',
               'MedicalAid': (patientRecord as any)?.medical_aid || '',
               'MedicalAidNumber': (patientRecord as any)?.medical_aid_number || '',
               'IDNumber': (patientRecord as any)?.id_passport_number || '',
@@ -398,7 +400,7 @@ const completeSession = async (
           } else {
             admissionContent = `<h2>Hospital Admission Form</h2>
 <p><strong>Date:</strong> ${today}</p>
-<p><strong>Patient:</strong> ${patientRecord?.name || 'Unknown'}</p>
+<p><strong>Client:</strong> ${patientRecord?.name || 'Unknown'}</p>
 <p><strong>Doctor:</strong> ${profileData?.full_name || ''}</p>
 <p><strong>Practice Number:</strong> ${profileData?.practice_number || ''}</p>
 <p><strong>Registration Number:</strong> ${profileData?.doctor_number || ''}</p>
@@ -419,8 +421,8 @@ const completeSession = async (
 
           const { data: admissionDoc } = await supabase.from('documents').insert({
             user_id: user.id,
-            patient_id: patientId,
-            name: `Hospital Admission - ${patientRecord?.name || 'Patient'} - ${today}`,
+            patient_id: clientId,
+            name: `Hospital Admission - ${patientRecord?.name || 'Client'} - ${today}`,
             content: admissionContent,
             template_name: 'Hospital Admission Form',
             patient_name: patientRecord?.name || null,
@@ -434,8 +436,8 @@ const completeSession = async (
             await supabase.from('todos').insert({
               user_id: user.id,
               session_id: sessionId,
-              patient_id: patientId,
-              title: `Review Hospital Admission - ${patientRecord?.name || 'Patient'}`,
+              patient_id: clientId,
+              title: `Review Hospital Admission - ${patientRecord?.name || 'Client'}`,
               document_id: admissionDoc.id,
               task_type: 'document_review',
               priority: 'high',
@@ -448,13 +450,13 @@ const completeSession = async (
       }
 
       // Auto-create prescription document if detected
-      if (summaryData?.prescription && patientId) {
+      if (summaryData?.prescription && clientId) {
         try {
           const rx = summaryData.prescription;
           const medications = rx.medications || rx.items || [];
           if (medications.length > 0 || rx.medication) {
             const [patientRes, profileRes, templateRes] = await Promise.all([
-              supabase.from('clients').select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email, allergies, pharmacy_name').eq('id', patientId).maybeSingle(),
+              supabase.from('clients').select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email, allergies, pharmacy_name').eq('id', clientId).maybeSingle(),
               supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty, practice_address').eq('id', user.id).maybeSingle(),
               supabase.from('templates').select('id, name, content, header_footer_template_id').eq('user_id', user.id),
             ]);
@@ -477,16 +479,18 @@ const completeSession = async (
               const replacements: Record<string, string> = {
                 'ClientName': patientRecord?.name || 'Unknown',
                 'PatientName': patientRecord?.name || 'Unknown',
-                'Patient Name': patientRecord?.name || 'Unknown',
+                'Client Name': patientRecord?.name || 'Unknown',
                 'Date': today,
                 'SessionDate': today,
                 'PrescriptionDate': today,
                 'DoctorName': docProfile?.full_name || '',
+                'AdvisorName': docProfile?.full_name || '',
                 'DoctorNumber': docProfile?.doctor_number || '',
                 'PracticeNumber': docProfile?.practice_number || '',
                 'RegistrationNumber': docProfile?.doctor_number || '',
                 'PracticeAddress': docProfile?.practice_address || '',
                 'PatientAddress': (patientRecord as any)?.physical_address || (patientRecord as any)?.address || '',
+              'ClientAddress': (patientRecord as any)?.physical_address || (patientRecord as any)?.address || '',
                 'MedicalAid': (patientRecord as any)?.medical_aid || '',
                 'MedicalAidNumber': (patientRecord as any)?.medical_aid_number || '',
                 'IDNumber': (patientRecord as any)?.id_passport_number || '',
@@ -534,7 +538,7 @@ const completeSession = async (
                 .join('');
               rxContent = `<h2>Prescription</h2>
 <p><strong>Date:</strong> ${today}</p>
-<p><strong>Patient:</strong> ${patientRecord?.name || 'Unknown'}</p>
+<p><strong>Client:</strong> ${patientRecord?.name || 'Unknown'}</p>
 <p><strong>Doctor:</strong> ${docProfile?.full_name || ''}</p>
 <p><strong>Practice Number:</strong> ${docProfile?.practice_number || ''}</p>
 <br/>
@@ -543,8 +547,8 @@ const completeSession = async (
 
             const { data: rxDoc } = await supabase.from('documents').insert({
               user_id: user.id,
-              patient_id: patientId,
-              name: `Prescription - ${patientRecord?.name || 'Patient'} - ${today}`,
+              patient_id: clientId,
+              name: `Prescription - ${patientRecord?.name || 'Client'} - ${today}`,
               content: rxContent,
               template_name: 'Prescription',
               patient_name: patientRecord?.name || null,
@@ -557,8 +561,8 @@ const completeSession = async (
               await supabase.from('todos').insert({
                 user_id: user.id,
                 session_id: sessionId,
-                patient_id: patientId,
-                title: `Review Prescription - ${patientRecord?.name || 'Patient'}`,
+                patient_id: clientId,
+                title: `Review Prescription - ${patientRecord?.name || 'Client'}`,
                 document_id: rxDoc.id,
                 task_type: 'document_review',
                 priority: 'high',
@@ -579,11 +583,11 @@ const completeSession = async (
       }
 
       // Auto-create medical certificate if detected
-      if (summaryData?.medical_certificate && patientId) {
+      if (summaryData?.medical_certificate && clientId) {
         try {
           const cert = summaryData.medical_certificate;
           const [patientRes, profileRes, templateRes] = await Promise.all([
-            supabase.from('clients').select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email').eq('id', patientId).maybeSingle(),
+            supabase.from('clients').select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email').eq('id', clientId).maybeSingle(),
             supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty, practice_address').eq('id', user.id).maybeSingle(),
             supabase.from('templates').select('id, name, content').eq('user_id', user.id),
           ]);
@@ -607,7 +611,7 @@ const completeSession = async (
             const replacements: Record<string, string> = {
               'ClientName': patientRecord?.name || 'Unknown',
               'PatientName': patientRecord?.name || 'Unknown',
-              'Patient Name': patientRecord?.name || 'Unknown',
+              'Client Name': patientRecord?.name || 'Unknown',
               'Date': today,
               'IssuedDate': today,
               'SessionDate': today,
@@ -615,11 +619,13 @@ const completeSession = async (
               'ConsultationTime': nowTime,
               'SignatureDate': today,
               'DoctorName': docProfile?.full_name || '',
+                'AdvisorName': docProfile?.full_name || '',
               'DoctorNumber': docProfile?.doctor_number || '',
               'PracticeNumber': docProfile?.practice_number || '',
               'RegistrationNumber': docProfile?.doctor_number || '',
               'PracticeAddress': docProfile?.practice_address || '',
               'PatientAddress': (patientRecord as any)?.physical_address || (patientRecord as any)?.address || '',
+              'ClientAddress': (patientRecord as any)?.physical_address || (patientRecord as any)?.address || '',
               'MedicalAid': (patientRecord as any)?.medical_aid || '',
               'MedicalAidNumber': (patientRecord as any)?.medical_aid_number || '',
               'IDNumber': (patientRecord as any)?.id_passport_number || '',
@@ -647,7 +653,7 @@ const completeSession = async (
           } else {
             certContent = `<h2>Medical Certificate</h2>
 <p><strong>Date:</strong> ${today}</p>
-<p><strong>Patient:</strong> ${patientRecord?.name || 'Unknown'}</p>
+<p><strong>Client:</strong> ${patientRecord?.name || 'Unknown'}</p>
 <p><strong>Doctor:</strong> ${docProfile?.full_name || ''}</p>
 <p><strong>Practice Number:</strong> ${docProfile?.practice_number || ''}</p>
 <br/>
@@ -659,8 +665,8 @@ const completeSession = async (
 
           const { data: certDoc } = await supabase.from('documents').insert({
             user_id: user.id,
-            patient_id: patientId,
-            name: `Medical Certificate - ${patientRecord?.name || 'Patient'} - ${today}`,
+            patient_id: clientId,
+            name: `Medical Certificate - ${patientRecord?.name || 'Client'} - ${today}`,
             content: certContent,
             template_name: 'Medical Certificate',
             patient_name: patientRecord?.name || null,
@@ -673,8 +679,8 @@ const completeSession = async (
             await supabase.from('todos').insert({
               user_id: user.id,
               session_id: sessionId,
-              patient_id: patientId,
-              title: `Review Medical Certificate - ${patientRecord?.name || 'Patient'}`,
+              patient_id: clientId,
+              title: `Review Medical Certificate - ${patientRecord?.name || 'Client'}`,
               document_id: certDoc.id,
               task_type: 'document_review',
               priority: 'high',
@@ -694,11 +700,11 @@ const completeSession = async (
       }
 
       // Auto-create referral letter if detected
-      if (summaryData?.referral && patientId) {
+      if (summaryData?.referral && clientId) {
         try {
           const ref = summaryData.referral;
           const [patientRes, profileRes, templateRes] = await Promise.all([
-            supabase.from('clients').select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email').eq('id', patientId).maybeSingle(),
+            supabase.from('clients').select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email').eq('id', clientId).maybeSingle(),
             supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty, practice_address').eq('id', user.id).maybeSingle(),
             supabase.from('templates').select('id, name, content').eq('user_id', user.id),
           ]);
@@ -720,12 +726,13 @@ const completeSession = async (
             const replacements: Record<string, string> = {
               'ClientName': patientRecord?.name || 'Unknown',
               'PatientName': patientRecord?.name || 'Unknown',
-              'Patient Name': patientRecord?.name || 'Unknown',
+              'Client Name': patientRecord?.name || 'Unknown',
               'Date': today,
               'SessionDate': today,
               'ReferralDate': today,
               'SignatureDate': today,
               'DoctorName': docProfile?.full_name || '',
+                'AdvisorName': docProfile?.full_name || '',
               'DoctorNumber': docProfile?.doctor_number || '',
               'PracticeNumber': docProfile?.practice_number || '',
               'RegistrationNumber': docProfile?.doctor_number || '',
@@ -734,13 +741,16 @@ const completeSession = async (
               'Specialty': docProfile?.specialty || '',
               'ReferringDoctor': docProfile?.full_name || '',
               'PatientAddress': (patientRecord as any)?.physical_address || (patientRecord as any)?.address || '',
+              'ClientAddress': (patientRecord as any)?.physical_address || (patientRecord as any)?.address || '',
               'MedicalAid': (patientRecord as any)?.medical_aid || '',
               'MedicalAidNumber': (patientRecord as any)?.medical_aid_number || '',
               'IDNumber': (patientRecord as any)?.id_passport_number || '',
               'DOB': (patientRecord as any)?.dob || '',
               'PatientDOB': (patientRecord as any)?.dob || '',
+              'ClientDOB': (patientRecord as any)?.dob || '',
               'Phone': (patientRecord as any)?.phone || '',
               'PatientContact': (patientRecord as any)?.phone || (patientRecord as any)?.email || '',
+              'ClientContact': (patientRecord as any)?.phone || (patientRecord as any)?.email || '',
               'Email': (patientRecord as any)?.email || '',
               'ReferralDoctor': specialistName,
               'SpecialistName': specialistName,
@@ -780,8 +790,8 @@ const completeSession = async (
 
           const { data: refDoc } = await supabase.from('documents').insert({
             user_id: user.id,
-            patient_id: patientId,
-            name: `Referral Letter - ${patientRecord?.name || 'Patient'} - ${today}`,
+            patient_id: clientId,
+            name: `Referral Letter - ${patientRecord?.name || 'Client'} - ${today}`,
             content: refContent,
             template_name: 'Referral Letter',
             patient_name: patientRecord?.name || null,
@@ -794,8 +804,8 @@ const completeSession = async (
             await supabase.from('todos').insert({
               user_id: user.id,
               session_id: sessionId,
-              patient_id: patientId,
-              title: `Review Referral Letter - ${patientRecord?.name || 'Patient'}`,
+              patient_id: clientId,
+              title: `Review Referral Letter - ${patientRecord?.name || 'Client'}`,
               document_id: refDoc.id,
               task_type: 'document_review',
               priority: 'high',
@@ -815,12 +825,12 @@ const completeSession = async (
       }
 
       // Auto-generate invoice after session completion
-      if (patientId) {
+      if (clientId) {
         try {
           const [patientRes, profileRes, templateRes, servicePricesRes, priorSessionsRes] = await Promise.all([
             supabase.from('clients')
               .select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email')
-              .eq('id', patientId).maybeSingle(),
+              .eq('id', clientId).maybeSingle(),
             supabase.from('profiles')
               .select('full_name, practice_number, doctor_number, practice_address, specialty, signature_url, signature_font, signature_color, signature_font_size, signature_bold, signature_italic')
               .eq('id', user.id).maybeSingle(),
@@ -830,7 +840,7 @@ const completeSession = async (
               .eq('user_id', user.id),
             supabase.from('sessions')
               .select('id', { count: 'exact', head: true })
-              .eq('patient_id', patientId)
+              .eq('patient_id', clientId)
               .eq('user_id', user.id),
           ]);
 
@@ -921,11 +931,11 @@ const completeSession = async (
             t.name.toLowerCase().includes('invoice')
           );
 
-          const patientName = patientRecord?.name || 'Unknown';
+          const clientName = patientRecord?.name || 'Unknown';
 
           let invoiceContent: string;
           if (invoiceTemplate) {
-            // Use the shared placeholder filler so every alias ([Patient Name],
+            // Use the shared placeholder filler so every alias ([Client Name],
             // [ClientName], [TotalAmount], [Services], signature, bank details…)
             // resolves against the real patient / practice / invoice data.
             invoiceContent = fillDocumentPlaceholders(invoiceTemplate.content, {
@@ -946,7 +956,7 @@ const completeSession = async (
             invoiceContent = `<h2>Invoice ${generatedInvoiceNumber}</h2>
 <p><strong>Date:</strong> ${todayLong}</p>
 <p><strong>Due Date:</strong> ${dueDateLong}</p>
-<p><strong>Patient:</strong> ${patientName}</p>
+<p><strong>Client:</strong> ${clientName}</p>
 ${patientRecord?.physical_address || patientRecord?.address ? `<p><strong>Address:</strong> ${patientRecord?.physical_address || patientRecord?.address}</p>` : ''}
 ${patientRecord?.medical_aid ? `<p><strong>Medical Aid:</strong> ${patientRecord.medical_aid}${patientRecord.medical_aid_number ? ` (${patientRecord.medical_aid_number})` : ''}</p>` : ''}
 <p><strong>Doctor:</strong> ${docProfile?.full_name || ''}</p>
@@ -960,11 +970,11 @@ ${sessionSignature ? `<br/><div>${sessionSignature}</div><div style="border-top:
 
           const { data: invoiceDoc } = await supabase.from('documents').insert({
             user_id: user.id,
-            patient_id: patientId,
-            name: `Invoice ${generatedInvoiceNumber} - ${patientName} - ${today}`,
+            patient_id: clientId,
+            name: `Invoice ${generatedInvoiceNumber} - ${clientName} - ${today}`,
             content: invoiceContent,
             template_name: 'Invoice',
-            patient_name: patientName,
+            patient_name: clientName,
             is_draft: true,
             session_id: sessionId,
           } as any).select('id').single();
@@ -975,7 +985,7 @@ ${sessionSignature ? `<br/><div>${sessionSignature}</div><div style="border-top:
           try {
             const { data: insertedInvoice } = await supabase.from('invoices').insert({
               doctor_id: user.id,
-              patient_id: patientId,
+              patient_id: clientId,
               session_id: sessionId,
               invoice_number: generatedInvoiceNumber,
               description: plainDescription,
@@ -992,8 +1002,8 @@ ${sessionSignature ? `<br/><div>${sessionSignature}</div><div style="border-top:
             await supabase.from('todos').insert({
               user_id: user.id,
               session_id: sessionId,
-              patient_id: patientId,
-              title: `Review Invoice - ${patientName}`,
+              patient_id: clientId,
+              title: `Review Invoice - ${clientName}`,
               document_id: invoiceDoc.id,
               invoice_id: newInvoiceRow?.id ?? null,
               task_type: 'document_review',
@@ -1017,30 +1027,30 @@ ${sessionSignature ? `<br/><div>${sessionSignature}</div><div style="border-top:
       }
 
       // Auto-create patient task assignment document if detected
-      if (summaryData?.patient_tasks?.tasks?.length > 0 && patientId) {
+      if (summaryData?.patient_tasks?.tasks?.length > 0 && clientId) {
         try {
           const tasks = summaryData.patient_tasks.tasks;
-          const { data: patientRes } = await supabase.from('clients').select('name').eq('id', patientId).maybeSingle();
-          const patientName = patientRes?.name || 'Patient';
+          const { data: patientRes } = await supabase.from('clients').select('name').eq('id', clientId).maybeSingle();
+          const clientName = patientRes?.name || 'Client';
           const today = new Date().toISOString().split('T')[0];
 
           const tasksHtml = tasks.map((t: any, i: number) => 
             `<p><strong>${i + 1}. ${t.title}</strong></p><p>${t.description || ''}</p><p><em>Frequency: ${t.frequency || 'As needed'}</em> | <em>Vulas: ${t.vulas_reward || 1}</em></p><br/>`
           ).join('');
-          const taskDocContent = `<h2>Patient Task Assignment</h2>
+          const taskDocContent = `<h2>Client Task Assignment</h2>
 <p><strong>Date:</strong> ${today}</p>
-<p><strong>Patient:</strong> ${patientName}</p>
+<p><strong>Client:</strong> ${clientName}</p>
 <br/>
 <h3>Assigned Tasks</h3>
 ${tasksHtml}`;
 
           const { data: taskDoc } = await supabase.from('documents').insert({
             user_id: user.id,
-            patient_id: patientId,
-            name: `Patient Tasks - ${patientName} - ${today}`,
+            patient_id: clientId,
+            name: `Client Tasks - ${clientName} - ${today}`,
             content: taskDocContent,
-            template_name: 'Patient Task Assignment',
-            patient_name: patientName,
+            template_name: 'Client Task Assignment',
+            patient_name: clientName,
             is_draft: true,
             session_id: sessionId,
           } as any).select('id').single();
@@ -1049,8 +1059,8 @@ ${tasksHtml}`;
             await supabase.from('todos').insert({
               user_id: user.id,
               session_id: sessionId,
-              patient_id: patientId,
-              title: `Review Patient Tasks - ${patientName}`,
+              patient_id: clientId,
+              title: `Review Client Tasks - ${clientName}`,
               document_id: taskDoc.id,
               task_type: 'document_review',
               priority: 'high',
@@ -1065,7 +1075,7 @@ ${tasksHtml}`;
             .map((t: any) => ({
               user_id: user.id,
               session_id: sessionId,
-              patient_id: patientId,
+              patient_id: clientId,
               title: t.title,
               description: t.description || null,
               priority: 'medium',
@@ -1076,7 +1086,7 @@ ${tasksHtml}`;
           if (patientTaskRows.length > 0) {
             await supabase.from('todos').insert(patientTaskRows as any);
             for (const row of patientTaskRows) {
-              await notifyPatientOfTask(patientId, row.title, sessionId!);
+              await notifyClientOfTask(clientId, row.title, sessionId!);
             }
           }
 
@@ -1095,9 +1105,9 @@ ${tasksHtml}`;
       }
 
       // Fire-and-forget: refresh DISC personality profile from the new session content.
-      if (patientId) {
+      if (clientId) {
         supabase.functions
-          .invoke('analyze-patient-disc', { body: { patient_id: patientId } })
+          .invoke('analyze-patient-disc', { body: { patient_id: clientId } })
           .catch((e) => logger.debug('DISC refresh skipped:', e?.message || e));
       }
 
@@ -1142,12 +1152,12 @@ ${tasksHtml}`;
       const { data: { user } } = await supabase.auth.getUser();
       if (!user || cancelled) return;
 
-      const filter = patientId
-        ? `patient_id=eq.${patientId}`
+      const filter = clientId
+        ? `patient_id=eq.${clientId}`
         : `user_id=eq.${user.id}`;
 
       channel = supabase
-        .channel(`sessions-${patientId || user.id}`)
+        .channel(`sessions-${clientId || user.id}`)
         .on(
           'postgres_changes' as any,
           { event: '*', schema: 'public', table: 'sessions', filter },
@@ -1165,7 +1175,7 @@ ${tasksHtml}`;
       window.removeEventListener('focus', onFocus);
       if (channel) supabase.removeChannel(channel);
     };
-  }, [patientId]);
+  }, [clientId]);
 
   return {
     sessions,

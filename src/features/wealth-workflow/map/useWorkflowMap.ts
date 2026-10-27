@@ -15,24 +15,24 @@ export interface GroupView {
   steps: { label: string; owner: string; state: StepState }[];
 }
 
-export function useWorkflowRecords(workflowId?: string, patientId?: string) {
+export function useWorkflowRecords(workflowId?: string, clientId?: string) {
   return useQuery({
-    queryKey: ["wealth-map-records", workflowId, patientId],
-    enabled: !!workflowId && !!patientId,
+    queryKey: ["wealth-map-records", workflowId, clientId],
+    enabled: !!workflowId && !!clientId,
     queryFn: async () => {
       const [apps, comp, tasks, docs, kyc, signed, pat, holdings, fin, sessions, appts, quotes, docRequests] = await Promise.all([
         db.from("wealth_applications").select("*").eq("workflow_id", workflowId).order("created_at", { ascending: false }),
         db.from("wealth_compliance_checks").select("*").eq("workflow_id", workflowId).maybeSingle(),
         db.from("todos").select("id,title,status,due_date,owner_role,workflow_stage,priority")
           .eq("workflow_id", workflowId).order("due_date", { ascending: true }),
-        db.from("documents").select("id,name,document_kind,created_at").eq("patient_id", patientId).not("document_kind", "is", null),
+        db.from("documents").select("id,name,document_kind,created_at").eq("patient_id", clientId).not("document_kind", "is", null),
         db.from("wealth_kyc_checks").select("*").eq("workflow_id", workflowId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
         db.from("wealth_signed_documents").select("*").eq("workflow_id", workflowId).order("signed_at"),
-        db.from("clients").select("user_id,patient_user_id,name,id_passport_number,dob,physical_address,address,postal_address,marital_status,marital_regime,phone,email").eq("id", patientId).maybeSingle(),
-        db.from("wealth_portfolio_holdings").select("*").eq("patient_id", patientId).order("provider"),
-        db.from("client_financial_profiles").select("extracted_at,verified_at,extracted_from_session_id").eq("patient_id", patientId).maybeSingle(),
-        db.from("sessions").select("id,title,created_at,transcript,notes,summary").eq("patient_id", patientId).order("created_at", { ascending: false }).limit(10),
-        db.from("appointments").select("id,title,start_time").eq("patient_id", patientId).order("start_time", { ascending: false }).limit(5),
+        db.from("clients").select("user_id,patient_user_id,name,id_passport_number,dob,physical_address,address,postal_address,marital_status,marital_regime,phone,email").eq("id", clientId).maybeSingle(),
+        db.from("wealth_portfolio_holdings").select("*").eq("patient_id", clientId).order("provider"),
+        db.from("client_financial_profiles").select("extracted_at,verified_at,extracted_from_session_id").eq("patient_id", clientId).maybeSingle(),
+        db.from("sessions").select("id,title,created_at,transcript,notes,summary").eq("patient_id", clientId).order("created_at", { ascending: false }).limit(10),
+        db.from("appointments").select("id,title,start_time").eq("patient_id", clientId).order("start_time", { ascending: false }).limit(5),
         db.from("wealth_quotes").select("*").eq("workflow_id", workflowId).order("rank", { ascending: true, nullsFirst: false }),
         db.from("wealth_document_requests").select("kind").eq("workflow_id", workflowId),
       ]);
@@ -45,7 +45,7 @@ export function useWorkflowRecords(workflowId?: string, patientId?: string) {
         kyc: kyc.data ?? null,
         signed: (signed.data ?? []) as any[],
         clientLinked: !!p?.patient_user_id,
-        patientId,
+        clientId,
         personal: p ?? null,
         personalDone: !!(p?.id_passport_number && p?.dob && (p?.physical_address || p?.address) && p?.marital_status),
         holdings: (holdings.data ?? []) as any[],
@@ -59,12 +59,12 @@ export function useWorkflowRecords(workflowId?: string, patientId?: string) {
   });
 }
 
-export function useWorkflowMap(patientId?: string, viewer: "manager" | "client" = "manager") {
-  const wfQ = useClientWorkflow(patientId);
+export function useWorkflowMap(clientId?: string, viewer: "manager" | "client" = "manager") {
+  const wfQ = useClientWorkflow(clientId);
   const wf = wfQ.data;
   const { data: defs = [] } = useStageDefs();
   const { data: recs = [] } = useRecommendationHistory(wf?.id);
-  const { data: rec } = useWorkflowRecords(wf?.id, patientId);
+  const { data: rec } = useWorkflowRecords(wf?.id, clientId);
 
   const posOf = (s: string) => defs.find((d) => d.stage === s)?.position ?? 0;
   const stagePos = wf ? posOf(wf.current_stage) : 0;

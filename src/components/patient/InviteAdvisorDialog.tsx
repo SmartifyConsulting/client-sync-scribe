@@ -152,7 +152,7 @@ export function InviteAdvisorDialog({
       try {
         const { error: notifErr } = await supabase.rpc("create_doctor_invite_notification" as any, {
           _doctor_id: doctorRow.id,
-          _title: "Patient Invitation",
+          _title: "Client Invitation",
           _description: `${profile?.full_name || "A patient"} has invited you to their panel of healthcare providers.`,
           _reference_id: user.id,
         });

@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useClientWorkflow, useRecommendationHistory, useRecordDecision, useStageDefs, useTransition } from "./hooks";
 
 /** Compact workflow status. Not mounted anywhere yet (Workflow Map / Workspace are separate tasks). */
-export function WorkflowStatusCard({ patientId }: { patientId: string }) {
-  const { data: wf } = useClientWorkflow(patientId);
+export function WorkflowStatusCard({ clientId }: { clientId: string }) {
+  const { data: wf } = useClientWorkflow(clientId);
   const { data: defs = [] } = useStageDefs();
   const { data: recs = [] } = useRecommendationHistory(wf?.id);
   const transition = useTransition();

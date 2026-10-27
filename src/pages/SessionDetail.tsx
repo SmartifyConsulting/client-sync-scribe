@@ -107,7 +107,7 @@ export default function SessionDetail() {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
   const [sessionDocs, setSessionDocs] = useState<any[]>([]);
   const [sendingDocId, setSendingDocId] = useState<string | null>(null);
-  const [doctorName, setDoctorName] = useState<string>("");
+  const [advisorName, setDoctorName] = useState<string>("");
   const [signedAudioUrl, setSignedAudioUrl] = useState<string | null>(null);
   const [editingPrivateNotes, setEditingPrivateNotes] = useState(false);
   const [privateNotesDraft, setPrivateNotesDraft] = useState("");
@@ -427,7 +427,7 @@ export default function SessionDetail() {
       </div>
 
 
-      {/* Quick Actions — brand teal dropdown, right-aligned directly above Patient Overview */}
+      {/* Quick Actions — brand teal dropdown, right-aligned directly above Client Overview */}
       {session.status === "completed" && session.patient && (
         <div className="flex justify-end">
           <DropdownMenu>
@@ -452,13 +452,13 @@ export default function SessionDetail() {
         </div>
       )}
 
-      {/* Patient Overview — full width */}
+      {/* Client Overview — full width */}
       <WealthClientOverview
         patient={session.patient}
-        discSlot={<SessionDiscStrip patientId={session.patient?.id} inline />}
+        discSlot={<SessionDiscStrip clientId={session.patient?.id} inline />}
       />
 
-      {/* AI Summary — directly underneath Patient Overview, no outer frame */}
+      {/* AI Summary — directly underneath Client Overview, no outer frame */}
       <div>
         <p className="mb-2 text-xs text-muted-foreground">{format(new Date(session.started_at), "MMM d, yyyy · h:mm a")}</p>
         <AISummaryCard
@@ -487,8 +487,8 @@ export default function SessionDetail() {
       {/* Session results — Session transcript removed; the transcription is
           available for download from Session Documents below instead. */}
       <SessionResultPanels
-        doctorName={doctorName}
-        patientName={session.patient?.name}
+        advisorName={advisorName}
+        clientName={session.patient?.name}
         sessionId={session.id}
         hideSummary
         leftSlot={
@@ -633,8 +633,8 @@ export default function SessionDetail() {
 
       {showPrescriptionEditor && session.patient && (
         <PrescriptionEditor
-          patientId={session.patient_id}
-          patientName={session.patient.name}
+          clientId={session.patient_id}
+          clientName={session.patient.name}
           onClose={() => setShowPrescriptionEditor(false)}
           onSave={(prescription) => {
             toast({
@@ -648,8 +648,8 @@ export default function SessionDetail() {
       {/* Invoice Editor Modal */}
       {showInvoiceEditor && session.patient && (
         <InvoiceEditor
-          patientId={session.patient_id}
-          patientName={session.patient.name}
+          clientId={session.patient_id}
+          clientName={session.patient.name}
           sessionId={id}
           onClose={() => setShowInvoiceEditor(false)}
           onSave={(invoice) => {
@@ -664,8 +664,8 @@ export default function SessionDetail() {
       {/* Referral Letter Editor Modal */}
       {showReferralLetterEditor && session.patient && (
         <ReferralLetterEditor
-          patientId={session.patient_id}
-          patientName={session.patient.name}
+          clientId={session.patient_id}
+          clientName={session.patient.name}
           sessionId={id}
           onClose={() => setShowReferralLetterEditor(false)}
           onSave={() => {
@@ -680,8 +680,8 @@ export default function SessionDetail() {
       {/* General Letter Editor Modal */}
       {showGeneralLetterEditor && session.patient && (
         <GeneralLetterEditor
-          patientId={session.patient_id}
-          patientName={session.patient.name}
+          clientId={session.patient_id}
+          clientName={session.patient.name}
           sessionId={id}
           onClose={() => setShowGeneralLetterEditor(false)}
           onSave={() => {
@@ -696,8 +696,8 @@ export default function SessionDetail() {
       {/* Hospital Admission Editor Modal */}
       {showHospitalAdmissionEditor && session.patient && (
         <HospitalAdmissionEditor
-          patientId={session.patient_id}
-          patientName={session.patient.name}
+          clientId={session.patient_id}
+          clientName={session.patient.name}
           sessionId={id}
           onClose={() => setShowHospitalAdmissionEditor(false)}
           onSave={() => {
@@ -720,9 +720,9 @@ export default function SessionDetail() {
           </DialogHeader>
           <div className="flex-1 overflow-hidden h-full">
             <DrawingPad
-              patientId={session.patient_id}
+              clientId={session.patient_id}
               sessionId={id}
-              patientName={session.patient?.name}
+              clientName={session.patient?.name}
               isModal
             />
           </div>

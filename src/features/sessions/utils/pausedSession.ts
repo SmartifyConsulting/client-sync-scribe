@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export interface PausedSessionSnapshot {
   id: string;
-  patientId: string;
+  clientId: string;
   transcript: string;
   notes: string;
   privateNotes: string;
@@ -22,7 +22,7 @@ export interface PausedSessionSnapshot {
 
 interface SavePausedSessionArgs {
   sessionId: string;
-  patientId: string;
+  clientId: string;
   transcript: string;
   notes: string;
   privateNotes: string;
@@ -39,7 +39,7 @@ export async function savePausedSession(args: SavePausedSessionArgs): Promise<bo
     const payload = {
       id: args.sessionId,
       user_id: user.id,
-      patient_id: args.patientId,
+      patient_id: args.clientId,
       title: `Paused session - ${new Date(args.startedAt).toLocaleDateString()}`,
       status: "paused",
       transcript: args.transcript || null,
@@ -60,7 +60,7 @@ export async function savePausedSession(args: SavePausedSessionArgs): Promise<bo
 }
 
 /** Most recent paused draft for a patient belonging to the signed-in doctor. */
-export async function fetchPausedSession(patientId: string): Promise<PausedSessionSnapshot | null> {
+export async function fetchPausedSession(clientId: string): Promise<PausedSessionSnapshot | null> {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
@@ -69,7 +69,7 @@ export async function fetchPausedSession(patientId: string): Promise<PausedSessi
       .from("sessions")
       .select("id, patient_id, transcript, notes, private_notes, elapsed_seconds, started_at, paused_at")
       .eq("user_id", user.id)
-      .eq("patient_id", patientId)
+      .eq("patient_id", clientId)
       .eq("status", "paused")
       .order("paused_at", { ascending: false })
       .limit(1)
@@ -81,7 +81,7 @@ export async function fetchPausedSession(patientId: string): Promise<PausedSessi
     const row = data as Record<string, unknown>;
     return {
       id: String(row.id),
-      patientId: String(row.patient_id),
+      clientId: String(row.patient_id),
       transcript: (row.transcript as string) || "",
       notes: (row.notes as string) || "",
       privateNotes: (row.private_notes as string) || "",

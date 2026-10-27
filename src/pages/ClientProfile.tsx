@@ -79,7 +79,7 @@ export default function ClientProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { patient, loading: patientLoading, updatePatient } = useClient(id || "");
+  const { client, loading: clientLoading, updateClient } = useClient(id || "");
   const { sessions, loading: sessionsLoading } = useSessions(id);
   const { templates, loading: templatesLoading } = useTemplates();
   const { documents, loading: documentsLoading, fetchDocuments, updateDocument } = useDocuments(id);
@@ -117,7 +117,7 @@ export default function ClientProfile() {
   // Log profile view for engagement tracking / "My Views"
   useEffect(() => {
     if (!user?.id || !id) return;
-    logProfileView(id, "Patient Profile");
+    logProfileView(id, "Client Profile");
   }, [user?.id, id]);
 
   const displayEmail = mailboxAlias
@@ -126,7 +126,7 @@ export default function ClientProfile() {
       ? `docs-${mailboxId.slice(0, 8)}@inbox.holarc.health`
       : "";
 
-  // This patient's own document intake address — readable by every provider in their
+  // This client's own document intake address — readable by every provider in their
   // holarchy via a security-definer lookup, so the care team can share it with labs.
   const [patientDocEmail, setPatientDocEmail] = useState<string>("");
   useEffect(() => {
@@ -180,13 +180,13 @@ export default function ClientProfile() {
       } = await supabase.auth.getUser();
       setCurrentUserId(user?.id || null);
 
-      const patientUserId = (patient as any)?.patient_user_id;
+      const patientUserId = (client as any)?.patient_user_id;
       if (!patientUserId || !user) {
         setCanViewAllSessions(true); // Owner sees all
         return;
       }
 
-      // Check if this doctor has session_summaries permission from the patient
+      // Check if this doctor has session_summaries permission from the client
       const { data: accessRecords } = await supabase
         .from("broker_client_access")
         .select("permissions")
@@ -198,40 +198,40 @@ export default function ClientProfile() {
         return;
       }
 
-      // Check if any doctor has session_summaries permission (meaning patient shares across doctors)
+      // Check if any doctor has session_summaries permission (meaning client shares across doctors)
       const hasSharedSessions = accessRecords.some((record) => record.permissions.includes("session_summaries"));
 
       setCanViewAllSessions(hasSharedSessions);
     };
 
-    if (patient) {
+    if (client) {
       checkPermissions();
     }
-  }, [patient]);
+  }, [client]);
 
-  // Initialize notes from patient data
+  // Initialize notes from client data
   useEffect(() => {
-    if (patient?.notes) {
-      setAdditionalNotes(patient.notes);
+    if (client?.notes) {
+      setAdditionalNotes(client.notes);
     }
-  }, [patient?.notes]);
+  }, [client?.notes]);
 
   const handleSaveNotes = async () => {
-    if (!patient) return;
+    if (!client) return;
     setSavingNotes(true);
-    await updatePatient({ notes: additionalNotes });
+    await updateClient({ notes: additionalNotes });
     setSavingNotes(false);
   };
 
   const handleStartSession = () => {
-    navigate(`/sessions?patient=${id}&autoStart=true`);
+    navigate(`/sessions?client=${id}&autoStart=true`);
   };
 
   const handleScheduleAppointment = () => {
-    navigate(`/calendar?patient=${id}`);
+    navigate(`/calendar?client=${id}`);
   };
 
-  if (patientLoading) {
+  if (clientLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -239,7 +239,7 @@ export default function ClientProfile() {
     );
   }
 
-  if (!patient) {
+  if (!client) {
     return (
       <div className="space-y-6 animate-fade-in">
         <Link
@@ -256,7 +256,7 @@ export default function ClientProfile() {
     );
   }
 
-  const initials = patient.name
+  const initials = client.name
     .split(" ")
     .map((n) => n[0])
     .join("")
@@ -291,39 +291,39 @@ export default function ClientProfile() {
             </div>
             <div>
               <h1 className="page-title flex items-center gap-2">
-                {patient.name}
-                <div className={cn("h-2.5 w-2.5 rounded-full flex-shrink-0", patient.status === "active" ? "bg-sky-500" : "bg-red-400")} />
-                {isSampleClient(patient) && <SampleBadge size="md" />}
+                {client.name}
+                <div className={cn("h-2.5 w-2.5 rounded-full flex-shrink-0", client.status === "active" ? "bg-sky-500" : "bg-red-400")} />
+                {isSampleClient(client) && <SampleBadge size="md" />}
               </h1>
 
               <div className="flex flex-wrap items-center gap-3 text-base text-muted-foreground mt-1">
-                {patient.email && (
+                {client.email && (
                   <span className="flex items-center gap-1.5">
                     <Mail className="h-3.5 w-3.5 text-primary/70" />
-                    {patient.email}
+                    {client.email}
                   </span>
                 )}
-                {patient.phone && (
+                {client.phone && (
                   <span className="flex items-center gap-1.5">
                     <Phone className="h-3.5 w-3.5 text-primary/70" />
-                    {patient.phone}
+                    {client.phone}
                   </span>
                 )}
               </div>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Since {format(new Date(patient.created_at), "MMM yyyy")} · Last seen{" "}
-                {patient.last_visit ? format(new Date(patient.last_visit), "d MMM yyyy") : "—"}
+                Since {format(new Date(client.created_at), "MMM yyyy")} · Last seen{" "}
+                {client.last_visit ? format(new Date(client.last_visit), "d MMM yyyy") : "—"}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {(patient as any).patient_user_id !== currentUserId && (
+            {(client as any).patient_user_id !== currentUserId && (
               <>
-                {(patient as any).patient_user_id && (
+                {(client as any).patient_user_id && (
                   <EmoticonSender
-                    recipientId={(patient as any).patient_user_id}
-                    patientId={patient.id}
-                    recipientName={patient.name}
+                    recipientId={(client as any).patient_user_id}
+                    clientId={client.id}
+                    recipientName={client.name}
                   />
                 )}
                 {null}
@@ -334,7 +334,7 @@ export default function ClientProfile() {
               <Calendar className="h-3.5 w-3.5" />
               {t("patientProfile.schedule")}
             </Button>
-            {(patient as any).patient_user_id !== currentUserId && (
+            {(client as any).patient_user_id !== currentUserId && (
               <Button size="sm" className="gap-1.5" onClick={handleStartSession}>
                 <Clock className="h-3.5 w-3.5" />
                 {t("patientProfile.startSession")}
@@ -345,7 +345,7 @@ export default function ClientProfile() {
       </div>
 
       {/* Existing cover - hide when the WM views their own record */}
-      {(patient as any).patient_user_id !== currentUserId && <ExistingCoverCard patientId={patient.id} />}
+      {(client as any).patient_user_id !== currentUserId && <ExistingCoverCard clientId={client.id} />}
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
@@ -391,16 +391,16 @@ export default function ClientProfile() {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="logs">
-          <TransactionLogs patientId={patient.id} />
+          <TransactionLogs clientId={client.id} />
         </TabsContent>
 
         {/* Overview Tab - AI Summary */}
         <TabsContent value="overview">
-          <ClientOverview patient={patient} sessions={sessions} />
+          <ClientOverview client={client} sessions={sessions} />
         </TabsContent>
 
         <TabsContent value="workflow">
-          <WorkflowMap patientId={patient.id} clientName={patient.name} onOpenDocuments={() => handleTabChange("documents")}
+          <WorkflowMap clientId={client.id} clientName={client.name} onOpenDocuments={() => handleTabChange("documents")}
             initialGroup={searchParams.get("group") ?? undefined} />
         </TabsContent>
 
@@ -461,9 +461,9 @@ export default function ClientProfile() {
                   )}
                   <SessionHistoryTable
                     sessions={completedSessions}
-                    patientId={patient.id}
-                    patientName={patient.name}
-                    allergies={patient.allergies}
+                    clientId={client.id}
+                    clientName={client.name}
+                    allergies={client.allergies}
                   />
                 </div>
               )}
@@ -478,7 +478,7 @@ export default function ClientProfile() {
         {/* Doctors Tab */}
         <TabsContent value="doctors">
           <div className="rounded-2xl bg-card p-6 shadow-card">
-            <AdvisorsOnProfile patientId={patient.id} patientName={patient.name} />
+            <AdvisorsOnProfile clientId={client.id} clientName={client.name} />
           </div>
         </TabsContent>
 
@@ -486,20 +486,20 @@ export default function ClientProfile() {
         <TabsContent value="programmes">
           <div className="rounded-2xl bg-card p-4 shadow-card">
             <ClientProgrammesTab
-              patientId={patient.id}
-              patientName={patient.name}
+              clientId={client.id}
+              clientName={client.name}
               canManage
-              isSelf={(patient as any).patient_user_id === currentUserId}
+              isSelf={(client as any).patient_user_id === currentUserId}
             />
           </div>
         </TabsContent>
 
 
         <TabsContent value="documents" className="space-y-4">
-          {/* Document intake address — own record uses your alias, otherwise the patient's */}
+          {/* Document intake address — own record uses your alias, otherwise the client's */}
           {(() => {
             const isOwnRecord =
-              patient.email?.toLowerCase() === user?.email?.toLowerCase();
+              client.email?.toLowerCase() === user?.email?.toLowerCase();
             const intakeEmail = isOwnRecord ? displayEmail : patientDocEmail;
             if (!intakeEmail) return null;
             return (
@@ -521,7 +521,7 @@ export default function ClientProfile() {
                   >
                     <Copy className="h-3.5 w-3.5" />
                   </button>
-                  , and they will be saved under {isOwnRecord ? "your" : `${patient.name}'s`} Documents.
+                  , and they will be saved under {isOwnRecord ? "your" : `${client.name}'s`} Documents.
                 </p>
               </div>
             </div>
@@ -554,7 +554,7 @@ export default function ClientProfile() {
                       });
                       return;
                     }
-                    const fileName = `${patient.id}/${Date.now()}.webm`;
+                    const fileName = `${client.id}/${Date.now()}.webm`;
                     const { error: uploadError } = await supabase.storage
                       .from("patient-media")
                       .upload(fileName, blob, { contentType: "audio/webm" });
@@ -575,8 +575,8 @@ export default function ClientProfile() {
                         name: `Audio Recording ${format(new Date(), "dd MMM yyyy HH:mm")}`,
                         content: "[AUDIO Recording]",
                         user_id: user.id,
-                        patient_id: patient.id,
-                        patient_name: patient.name,
+                        patient_id: client.id,
+                        patient_name: client.name,
                         media_url: publicUrl,
                         media_type: "audio",
                       });
@@ -630,7 +630,7 @@ export default function ClientProfile() {
                       });
                       return;
                     }
-                    const fileName = `${patient.id}/${Date.now()}.webm`;
+                    const fileName = `${client.id}/${Date.now()}.webm`;
                     const { error: uploadError } = await supabase.storage
                       .from("patient-media")
                       .upload(fileName, blob, { contentType: "video/webm" });
@@ -651,8 +651,8 @@ export default function ClientProfile() {
                         name: `Video Recording ${format(new Date(), "dd MMM yyyy HH:mm")}`,
                         content: "[VIDEO Recording]",
                         user_id: user.id,
-                        patient_id: patient.id,
-                        patient_name: patient.name,
+                        patient_id: client.id,
+                        patient_name: client.name,
                         media_url: publicUrl,
                         media_type: "video",
                       });
@@ -699,7 +699,7 @@ export default function ClientProfile() {
                     return;
                   }
                   try {
-                    const fileName = `${patient.id}/${Date.now()}-${file.name}`;
+                    const fileName = `${client.id}/${Date.now()}-${file.name}`;
                     const { error: uploadError } = await supabase.storage.from("patient-media").upload(fileName, file);
                     if (uploadError) throw uploadError;
                     const {
@@ -713,8 +713,8 @@ export default function ClientProfile() {
                       name: file.name,
                       content: `[Uploaded File] ${file.name}`,
                       user_id: user.id,
-                      patient_id: patient.id,
-                      patient_name: patient.name,
+                      patient_id: client.id,
+                      patient_name: client.name,
                       media_url: publicUrl,
                       media_type: file.type.startsWith("video")
                         ? "video"
@@ -752,11 +752,11 @@ export default function ClientProfile() {
               <GitCompareArrows className="h-5 w-5" />
             </Button>
           </div>
-          <DocumentsBrowser patientId={patient.id} patientName={patient.name} />
+          <DocumentsBrowser clientId={client.id} clientName={client.name} />
         </TabsContent>
 
         <TabsContent value="details">
-          <ClientDetailsEditor patient={patient} onSave={updatePatient} />
+          <ClientDetailsEditor client={client} onSave={updateClient} />
         </TabsContent>
 
         {/* Notes tab removed - notes now in General Notes frame under Details */}
@@ -765,8 +765,8 @@ export default function ClientProfile() {
         <TabsContent value="roundtable">
           <div className="rounded-2xl bg-card p-6 shadow-card">
             <RoundTable
-              patientId={patient.id}
-              patientName={patient.name}
+              clientId={client.id}
+              clientName={client.name}
               onUnreadCountChange={setUnreadRoundTableCount}
               hideHeader
             />
@@ -819,10 +819,10 @@ export default function ClientProfile() {
       </Dialog>
 
       {/* Document Editor */}
-      {selectedTemplate && patient && (
+      {selectedTemplate && client && (
         <DocumentEditor
           template={selectedTemplate}
-          preSelectedPatientId={patient.id}
+          preSelectedClientId={client.id}
           onClose={() => setSelectedTemplate(null)}
           onSave={() => {
             setSelectedTemplate(null);
@@ -836,8 +836,8 @@ export default function ClientProfile() {
       )}
 
       {/* Image Comparison Dialog */}
-      {patient && (
-        <ImageComparisonDialog open={showCompareDialog} onOpenChange={setShowCompareDialog} patientId={patient.id} />
+      {client && (
+        <ImageComparisonDialog open={showCompareDialog} onOpenChange={setShowCompareDialog} clientId={client.id} />
       )}
 
       {/* Document Preview */}
@@ -1087,7 +1087,7 @@ function DocumentPreviewWithLetterhead({
   return (
     <DocumentPreview
       title={document.name}
-      subtitle={document.patient_name ? `Patient: ${document.patient_name}` : undefined}
+      subtitle={document.patient_name ? `Client: ${document.patient_name}` : undefined}
       content={resolvedContent}
       logoUrl={logoUrl}
       fontFamily={templateFontFamily || headerFooter?.font_family || undefined}

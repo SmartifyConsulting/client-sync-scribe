@@ -9,7 +9,7 @@ import type {
 const db = supabase as any;
 
 const keys = {
-  workflow: (patientId: string) => ["wealth-workflow", patientId] as const,
+  workflow: (clientId: string) => ["wealth-workflow", clientId] as const,
   defs: ["wealth-stage-defs"] as const,
   recs: (wf: string) => ["wealth-recs", wf] as const,
   audit: (wf: string) => ["wealth-audit", wf] as const,
@@ -28,13 +28,13 @@ export function useStageDefs() {
   });
 }
 
-export function useClientWorkflow(patientId?: string) {
+export function useClientWorkflow(clientId?: string) {
   return useQuery({
-    queryKey: keys.workflow(patientId ?? ""),
-    enabled: !!patientId,
+    queryKey: keys.workflow(clientId ?? ""),
+    enabled: !!clientId,
     queryFn: async (): Promise<WealthWorkflow | null> => {
       const { data, error } = await db
-        .from("wealth_workflows").select("*").eq("patient_id", patientId)
+        .from("wealth_workflows").select("*").eq("patient_id", clientId)
         .order("cycle_number", { ascending: false }).limit(1).maybeSingle();
       if (error) throw error;
       return data;
@@ -92,8 +92,8 @@ function useInvalidate() {
 export function useStartWorkflow() {
   const inv = useInvalidate();
   return useMutation({
-    mutationFn: async (p: { patientId: string; sessionId?: string }) => {
-      const { data, error } = await db.rpc("wealth_start_workflow", { _patient_id: p.patientId, _session_id: p.sessionId ?? null });
+    mutationFn: async (p: { clientId: string; sessionId?: string }) => {
+      const { data, error } = await db.rpc("wealth_start_workflow", { _patient_id: p.clientId, _session_id: p.sessionId ?? null });
       if (error) throw error;
       return data as string;
     },

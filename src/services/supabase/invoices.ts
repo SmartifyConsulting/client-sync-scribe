@@ -9,10 +9,10 @@ export type InvoiceRow = Database["public"]["Tables"]["invoices"]["Row"];
 export type InvoiceInsert = Database["public"]["Tables"]["invoices"]["Insert"];
 export type InvoiceUpdate = Database["public"]["Tables"]["invoices"]["Update"];
 
-export async function listInvoices(opts?: { doctorId?: string; patientId?: string }) {
+export async function listInvoices(opts?: { advisorId?: string; clientId?: string }) {
   let query = supabase.from("invoices").select("*").order("created_at", { ascending: false });
-  if (opts?.doctorId) query = query.eq("doctor_id", opts.doctorId);
-  if (opts?.patientId) query = query.eq("patient_id", opts.patientId);
+  if (opts?.advisorId) query = query.eq("doctor_id", opts.advisorId);
+  if (opts?.clientId) query = query.eq("patient_id", opts.clientId);
   const { data, error } = await query;
   if (error) throw error;
   return data ?? [];

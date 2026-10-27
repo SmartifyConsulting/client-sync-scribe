@@ -10,7 +10,7 @@ export type PrescriptionInsert = Database["public"]["Tables"]["prescriptions"]["
 export type PrescriptionUpdate = Database["public"]["Tables"]["prescriptions"]["Update"];
 
 export async function listPrescriptions(opts?: {
-  patientId?: string;
+  clientId?: string;
   sessionId?: string;
   status?: "active" | "completed" | "cancelled";
 }) {
@@ -18,7 +18,7 @@ export async function listPrescriptions(opts?: {
     .from("prescriptions")
     .select("*")
     .order("created_at", { ascending: false });
-  if (opts?.patientId) query = query.eq("patient_id", opts.patientId);
+  if (opts?.clientId) query = query.eq("patient_id", opts.clientId);
   if (opts?.sessionId) query = query.eq("session_id", opts.sessionId);
   if (opts?.status) query = query.eq("status", opts.status);
   const { data, error } = await query;

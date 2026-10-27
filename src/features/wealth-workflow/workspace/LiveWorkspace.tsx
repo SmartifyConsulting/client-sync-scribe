@@ -12,7 +12,7 @@ import { useLiveWorkspace, type WorkspaceItem } from "./useLiveWorkspace";
 import { ScheduleMeetingPanel } from "./ScheduleMeetingPanel";
 
 interface Props {
-  patientId: string;
+  clientId: string;
   clientName?: string;
   onViewWorkflow: (group: string) => void;
   onOpenDocuments: () => void;
@@ -21,8 +21,8 @@ interface Props {
   onOpenMessages?: () => void;
 }
 
-export function LiveWorkspace({ patientId, clientName, onViewWorkflow, onOpenDocuments, onOpenDocument, onOpenClientRecord, onOpenMessages }: Props) {
-  const ws = useLiveWorkspace(patientId);
+export function LiveWorkspace({ clientId, clientName, onViewWorkflow, onOpenDocuments, onOpenDocument, onOpenClientRecord, onOpenMessages }: Props) {
+  const ws = useLiveWorkspace(clientId);
   const [scheduling, setScheduling] = useState(false);
   const { toast } = useToast();
   const qc = useQueryClient();
@@ -36,7 +36,7 @@ export function LiveWorkspace({ patientId, clientName, onViewWorkflow, onOpenDoc
     return (
       <div className="rounded-xl border bg-card p-6 text-center text-sm">
         <p className="text-muted-foreground">No wealth workflow for this client yet.</p>
-        <Button className="mt-3" size="sm" disabled={start.isPending} onClick={() => start.mutate({ patientId })}>Start workflow</Button>
+        <Button className="mt-3" size="sm" disabled={start.isPending} onClick={() => start.mutate({ clientId })}>Start workflow</Button>
       </div>
     );
   }
@@ -95,7 +95,7 @@ export function LiveWorkspace({ patientId, clientName, onViewWorkflow, onOpenDoc
   return (
     <div className="space-y-4">
       {scheduling && (
-        <ScheduleMeetingPanel patientId={patientId} clientName={clientName ?? "Client"} onClose={() => setScheduling(false)} />
+        <ScheduleMeetingPanel clientId={clientId} clientName={clientName ?? "Client"} onClose={() => setScheduling(false)} />
       )}
 
       {/* Context strip */}

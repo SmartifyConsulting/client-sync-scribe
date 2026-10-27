@@ -12,8 +12,8 @@ export function cn(...inputs: ClassValue[]) {
  * `medications-updated` and invalidate its query caches.
  */
 export const medicationSyncBus = new EventTarget();
-export const emitMedicationsUpdated = (patientId?: string) => {
+export const emitMedicationsUpdated = (clientId?: string) => {
   medicationSyncBus.dispatchEvent(
-    new CustomEvent("medications-updated", { detail: { patientId } }),
+    new CustomEvent("medications-updated", { detail: { clientId } }),
   );
 };

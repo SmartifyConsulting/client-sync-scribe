@@ -104,7 +104,7 @@ function SessionCard({ s, t }: { s: SessionRow; t: any }) {
 export default function MySessions() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { isDoctor, role } = useUserRole();
+  const { isAdvisor, role } = useUserRole();
   const isHospitalUser = role === "emergency";
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -194,7 +194,7 @@ export default function MySessions() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {isDoctor && (
+          {isAdvisor && (
             <ToggleGroup
               type="single"
               value={ownerFilter}
@@ -206,7 +206,7 @@ export default function MySessions() {
               <ToggleGroupItem value="mine" className="text-xs px-3">Mine</ToggleGroupItem>
             </ToggleGroup>
           )}
-          {isDoctor && (
+          {isAdvisor && (
             <Button asChild size="sm" className="gap-2">
               <Link to="/sessions">
                 <Plus className="h-4 w-4" />

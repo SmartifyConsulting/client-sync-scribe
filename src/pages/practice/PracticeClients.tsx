@@ -44,7 +44,7 @@ export default function PracticeClients() {
     })();
   }, [doctors, practiceLoading]);
 
-  const doctorName = useMemo(
+  const advisorName = useMemo(
     () => new Map(doctors.map((d) => [d.user_id, d.full_name || "Doctor"])),
     [doctors],
   );
@@ -83,7 +83,7 @@ export default function PracticeClients() {
               <div className="flex items-center gap-2">
                 <span className="truncate text-sm font-medium">{p.name}</span>
                 <Badge variant="outline" className="shrink-0">
-                  {doctorName.get(p.user_id) || "Doctor"}
+                  {advisorName.get(p.user_id) || "Doctor"}
                 </Badge>
               </div>
               <p className="truncate text-xs text-muted-foreground">
@@ -109,7 +109,7 @@ export default function PracticeClients() {
       <AssignTaskDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        patientId={taskPatientId}
+        clientId={taskPatientId}
       />
     </div>
   );

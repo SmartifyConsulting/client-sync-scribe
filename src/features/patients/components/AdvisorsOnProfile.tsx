@@ -34,8 +34,8 @@ interface DoctorAccess {
 }
 
 interface AdvisorsOnProfileProps {
-  patientId: string;
-  patientName: string;
+  clientId: string;
+  clientName: string;
 }
 
 const permissionLabels: Record<string, { label: string; icon: React.ComponentType<any> }> = {
@@ -45,7 +45,7 @@ const permissionLabels: Record<string, { label: string; icon: React.ComponentTyp
   prescription_history: { label: "Prescriptions", icon: Pill },
 };
 
-export function AdvisorsOnProfile({ patientId, patientName }: AdvisorsOnProfileProps) {
+export function AdvisorsOnProfile({ clientId, clientName }: AdvisorsOnProfileProps) {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const [doctors, setDoctors] = useState<DoctorAccess[]>([]);
@@ -65,7 +65,7 @@ export function AdvisorsOnProfile({ patientId, patientName }: AdvisorsOnProfileP
     if (currentUserId) {
       fetchDoctors();
     }
-  }, [patientId, currentUserId]);
+  }, [clientId, currentUserId]);
 
   // Check for reply parameter
   useEffect(() => {
@@ -89,7 +89,7 @@ export function AdvisorsOnProfile({ patientId, patientName }: AdvisorsOnProfileP
       const { data: patient, error: patientError } = await supabase
         .from('clients')
         .select('patient_user_id')
-        .eq('id', patientId)
+        .eq('id', clientId)
         .maybeSingle();
 
       if (patientError) throw patientError;
@@ -144,7 +144,7 @@ export function AdvisorsOnProfile({ patientId, patientName }: AdvisorsOnProfileP
   const openMessageDialog = (doctor: DoctorAccess) => {
     setSelectedDoctor(doctor);
     setMessageForm({ 
-      subject: `Regarding patient: ${patientName}`, 
+      subject: `Regarding patient: ${clientName}`, 
       content: "" 
     });
     setShowMessageDialog(true);
@@ -169,7 +169,7 @@ export function AdvisorsOnProfile({ patientId, patientName }: AdvisorsOnProfileP
         .insert({
           sender_id: currentUserId,
           recipient_id: selectedDoctor.doctor_id,
-          patient_id: patientId,
+          patient_id: clientId,
           subject: messageForm.subject,
           content: messageForm.content,
         });

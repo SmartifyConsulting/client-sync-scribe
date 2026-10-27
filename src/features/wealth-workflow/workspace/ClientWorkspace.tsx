@@ -8,11 +8,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 /** First name of the client's Wealth Manager, for personal copy. */
-function useManagerFirst(patientId: string) {
+function useManagerFirst(clientId: string) {
   return useQuery({
-    queryKey: ["wm-first", patientId],
+    queryKey: ["wm-first", clientId],
     queryFn: async () => {
-      const { data: p } = await supabase.from("clients").select("user_id").eq("id", patientId).maybeSingle();
+      const { data: p } = await supabase.from("clients").select("user_id").eq("id", clientId).maybeSingle();
       if (!p?.user_id) return null;
       const { data: pr } = await supabase.from("profiles").select("full_name").eq("id", p.user_id).maybeSingle();
       return (pr?.full_name || "").split(" ")[0] || null;
@@ -21,16 +21,16 @@ function useManagerFirst(patientId: string) {
 }
 
 /** Simplified client workspace: journey, actions, waiting, recently completed. */
-export function ClientWorkspace({ patientId }: { patientId: string }) {
-  const ws = useLiveWorkspace(patientId);
-  const wm = useManagerFirst(patientId);
+export function ClientWorkspace({ clientId }: { clientId: string }) {
+  const ws = useLiveWorkspace(clientId);
+  const wm = useManagerFirst(clientId);
   if (!ws.workflow) return null;
   const mine = ws.openTasks.filter((t) => t.owner_role === "client");
   const done = ws.completed.filter((c) => c.clientLabel).slice(0, 5);
 
   return (
     <div className="space-y-3">
-      <ClientJourney patientId={patientId} />
+      <ClientJourney clientId={clientId} />
       <div className="grid gap-3 md:grid-cols-3">
         <Panel title="Your actions" icon={ListChecks}>
           <p className="font-medium text-sm">{mine.length === 0 ? "Nothing to do right now" : `${mine.length} action${mine.length > 1 ? "s" : ""} to complete`}</p>

@@ -7,10 +7,10 @@ import { InsurerBadge } from "@/features/wealth-workflow/map/insurerColors";
 const num = (v: any) => Number(String(v ?? "").replace(/[^\d.]/g, "")) || 0;
 
 /** Broker-facing summary of the client's current cover (per policy, with insurer), so new advice doesn't over-extend them. */
-export function ExistingCoverCard({ patientId }: { patientId: string }) {
+export function ExistingCoverCard({ clientId }: { clientId: string }) {
   const { data } = useQuery({
-    queryKey: ["existing-cover", patientId],
-    queryFn: async () => (await (supabase as any).from("client_financial_profiles").select("risk_portfolio").eq("patient_id", patientId).maybeSingle()).data,
+    queryKey: ["existing-cover", clientId],
+    queryFn: async () => (await (supabase as any).from("client_financial_profiles").select("risk_portfolio").eq("patient_id", clientId).maybeSingle()).data,
   });
   const policies: any[] = data?.risk_portfolio?.policies ?? [];
   const premium = policies.reduce((a, p) => a + num(p.premium), 0);

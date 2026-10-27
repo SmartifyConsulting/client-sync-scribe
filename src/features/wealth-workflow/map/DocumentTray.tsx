@@ -13,20 +13,20 @@ type Doc = { id: string; kind: "signed" | "transcript" | "file"; title: string; 
 
 const fmt = (d: string) => new Date(d).toLocaleDateString("en-ZA", { day: "2-digit", month: "short", year: "numeric" });
 
-export function useClientDocuments(patientId?: string) {
+export function useClientDocuments(clientId?: string) {
   return useQuery({
-    queryKey: ["wealth-doc-tray", patientId],
-    enabled: !!patientId,
+    queryKey: ["wealth-doc-tray", clientId],
+    enabled: !!clientId,
     queryFn: async (): Promise<Doc[]> => {
       const [signed, sessions, files] = await Promise.all([
-        db.from("wealth_signed_documents").select("*").eq("patient_id", patientId).order("signed_at", { ascending: false }),
-        db.from("sessions").select("id,title,transcript,created_at").eq("patient_id", patientId).not("transcript", "is", null).order("created_at", { ascending: false }),
+        db.from("wealth_signed_documents").select("*").eq("patient_id", clientId).order("signed_at", { ascending: false }),
+        db.from("sessions").select("id,title,transcript,created_at").eq("patient_id", clientId).not("transcript", "is", null).order("created_at", { ascending: false }),
         // Exclude *_signed rows: sign-wealth-document auto-files a copy of every
         // signed Disclosure/LOA into `documents` for the firm's records, but
         // the authoritative signed copy is already listed from
         // wealth_signed_documents above — including both here doubled every
         // signed document in the tray.
-        db.from("documents").select("id,name,content,media_url,created_at,document_kind").eq("patient_id", patientId).not("document_kind", "in", "(loa_signed,disclosure_signed)").order("created_at", { ascending: false }).limit(50),
+        db.from("documents").select("id,name,content,media_url,created_at,document_kind").eq("patient_id", clientId).not("document_kind", "in", "(loa_signed,disclosure_signed)").order("created_at", { ascending: false }).limit(50),
       ]);
       return [
         ...((signed.data ?? []) as any[]).map((d) => ({ id: d.id, kind: "signed" as const, title: `${d.title} (signed v${d.version})`, date: d.signed_at, html: sealedHtml(d) })),
@@ -103,11 +103,11 @@ export function DocPreviewDialog({ doc, onClose }: { doc: Doc | null; onClose: (
 
 const ICON = { signed: FileSignature, transcript: Mic, file: FileText };
 
-export function DocumentTray({ patientId, count }: { patientId?: string; count: number }) {
+export function DocumentTray({ clientId, count }: { clientId?: string; count: number }) {
   const [open, setOpen] = useState(false);
   const [preview, setPreview] = useState<Doc | null>(null);
   const ref = useRef<HTMLDivElement>(null);
-  const { data = [], isLoading } = useClientDocuments(open ? patientId : undefined);
+  const { data = [], isLoading } = useClientDocuments(open ? clientId : undefined);
 
   useEffect(() => {
     if (!open) return;
@@ -161,11 +161,11 @@ export function DocumentTray({ patientId, count }: { patientId?: string; count: 
 }
 
 /** Opens the consultation transcript the financial information was captured from. */
-export function TranscriptButton({ sessionId, patientId }: { sessionId?: string | null; patientId?: string }) {
+export function TranscriptButton({ sessionId, clientId }: { sessionId?: string | null; clientId?: string }) {
   const [doc, setDoc] = useState<Doc | null>(null);
   const open = async () => {
     let q = db.from("sessions").select("id,title,transcript,created_at").not("transcript", "is", null);
-    q = sessionId ? q.eq("id", sessionId) : q.eq("patient_id", patientId).order("created_at", { ascending: false }).limit(1);
+    q = sessionId ? q.eq("id", sessionId) : q.eq("patient_id", clientId).order("created_at", { ascending: false }).limit(1);
     const { data } = await q.maybeSingle();
     if (data) setDoc({ id: data.id, kind: "transcript", title: `${data.title || "Meeting"} transcript`, date: data.created_at, text: data.transcript });
   };

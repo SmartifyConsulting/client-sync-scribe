@@ -5,11 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Panel } from "@/components/ui/Panel";
 
 /** History of every Wealth Manager / broker who has served this client. */
-export function MyAdvisorsHistory({ patientId }: { patientId: string }) {
+export function MyAdvisorsHistory({ clientId }: { clientId: string }) {
   const { data = [], isLoading } = useQuery({
-    queryKey: ["my-advisors-history", patientId],
+    queryKey: ["my-advisors-history", clientId],
     queryFn: async () => {
-      const { data: p } = await supabase.from("clients").select("user_id, patient_user_id, created_at").eq("id", patientId).maybeSingle();
+      const { data: p } = await supabase.from("clients").select("user_id, patient_user_id, created_at").eq("id", clientId).maybeSingle();
       const rows: { id: string; from: string; to: string | null; active: boolean }[] = [];
       if (p?.patient_user_id) {
         const { data: acc } = await supabase

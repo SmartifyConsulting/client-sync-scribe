@@ -120,7 +120,7 @@ function RoleSection({ title, badgeLabel, monthly, annual, onChange }: RoleSecti
 export default function PricingAdmin() {
   const { toast } = useToast();
   const { user } = useAuth();
-  const { isAdmin, isDoctor, loading: roleLoading } = useUserRole();
+  const { isAdmin, isAdvisor, loading: roleLoading } = useUserRole();
   const [pricing, setPricing] = useState<PricingConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -198,7 +198,7 @@ export default function PricingAdmin() {
     );
   }
 
-  if (!isAdmin && !isDoctor) {
+  if (!isAdmin && !isAdvisor) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
         <ShieldAlert className="h-16 w-16 text-destructive" />
@@ -210,8 +210,8 @@ export default function PricingAdmin() {
 
   const doctorMonthly = pricing.find((p) => p.role === "doctor" && p.billing_cycle === "monthly");
   const doctorAnnual = pricing.find((p) => p.role === "doctor" && p.billing_cycle === "annual");
-  const patientMonthly = pricing.find((p) => p.role === "patient" && p.billing_cycle === "monthly");
-  const patientAnnual = pricing.find((p) => p.role === "patient" && p.billing_cycle === "annual");
+  const clientMonthly = pricing.find((p) => p.role === "patient" && p.billing_cycle === "monthly");
+  const clientAnnual = pricing.find((p) => p.role === "patient" && p.billing_cycle === "annual");
   const emergencyMonthly = pricing.find((p) => p.role === "emergency" && p.billing_cycle === "monthly");
   const emergencyAnnual = pricing.find((p) => p.role === "emergency" && p.billing_cycle === "annual");
 
@@ -224,7 +224,7 @@ export default function PricingAdmin() {
     >
       <div className="space-y-3">
         <RoleSection title="Tier 01 — Healthcare Providers" badgeLabel="Doctor"     monthly={doctorMonthly}    annual={doctorAnnual}    onChange={handleChange} />
-        <RoleSection title="Tier 02 — Patient"              badgeLabel="Patient"    monthly={patientMonthly}   annual={patientAnnual}   onChange={handleChange} />
+        <RoleSection title="Tier 02 — Client"              badgeLabel="Client"    monthly={clientMonthly}   annual={clientAnnual}   onChange={handleChange} />
         <RoleSection title="Tier 03 — Emergency Services"   badgeLabel="Emergency"  monthly={emergencyMonthly} annual={emergencyAnnual} onChange={handleChange} />
       </div>
     </AdminPage>

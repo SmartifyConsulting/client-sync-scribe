@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { Loader2, Search, Plus, MoreVertical, Trash2, Upload, Send } from "lucide-react";
 import { ClientDetailsEditor } from "@/components/patients/ClientDetailsEditor";
 import { ClientWorkspace } from "@/features/wealth-workflow/workspace/ClientWorkspace";
-import { Patient, useClients } from "@/hooks/useClients";
+import { Client, useClients } from "@/hooks/useClients";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-function AutoCreatePatientFallback({ user, onCreated }: { user: any; onCreated: (record: Patient) => void }) {
+function AutoCreateClientFallback({ user, onCreated }: { user: any; onCreated: (record: Client) => void }) {
   const [creating, setCreating] = useState(false);
   const { toast } = useToast();
 
@@ -83,7 +83,7 @@ function AutoCreatePatientFallback({ user, onCreated }: { user: any; onCreated: 
           
           next_of_kin_members: [],
           current_medications: [],
-        } as unknown as Patient);
+        } as unknown as Client);
         toast({ title: "Record created", description: "Your Profile has been initialized." });
       }
     } catch (err: any) {
@@ -103,12 +103,12 @@ function AutoCreatePatientFallback({ user, onCreated }: { user: any; onCreated: 
   );
 }
 
-function DoctorPatientsTab() {
+function AdvisorClientsTab() {
   const { user } = useAuth();
   const { profile } = useProfile();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { patients, loading, createPatient, deletePatient, fetchPatients } = useClients();
+  const { clients, loading, createClient, deleteClient, fetchClients } = useClients();
   const [searchQuery, setSearchQuery] = useState("");
 
   const getSurname = (name: string) => {
@@ -116,12 +116,12 @@ function DoctorPatientsTab() {
     return parts[parts.length - 1].toUpperCase();
   };
 
-  const filteredPatients = patients.filter((p) =>
+  const filteredClients = clients.filter((p) =>
     !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const sortedPatients = useMemo(() => {
-    const sorted = [...filteredPatients].sort((a, b) =>
+  const sortedClients = useMemo(() => {
+    const sorted = [...filteredClients].sort((a, b) =>
       getSurname(a.name).localeCompare(getSurname(b.name))
     );
     if (user?.email) {
@@ -132,7 +132,7 @@ function DoctorPatientsTab() {
       }
     }
     return sorted;
-  }, [filteredPatients, user?.email]);
+  }, [filteredClients, user?.email]);
 
   if (loading) {
     return (
@@ -161,7 +161,7 @@ function DoctorPatientsTab() {
               Import
             </Button>
           }
-          onImportComplete={() => fetchPatients()}
+          onImportComplete={() => fetchClients()}
         />
         <Button size="sm" className="gap-1" onClick={() => navigate("/clients")}>
           <Plus className="h-4 w-4" />
@@ -170,9 +170,9 @@ function DoctorPatientsTab() {
       </div>
 
       <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
-        {sortedPatients.length === 0 ? (
+        {sortedClients.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
-            {searchQuery ? "No patients found" : "No patients yet"}
+            {searchQuery ? "No clients found" : "No clients yet"}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -186,30 +186,30 @@ function DoctorPatientsTab() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {sortedPatients.map((patient) => {
-                  const isMe = patient.email?.toLowerCase() === user?.email?.toLowerCase();
+                {sortedClients.map((client) => {
+                  const isMe = client.email?.toLowerCase() === user?.email?.toLowerCase();
                   return (
-                    <tr key={patient.id} className={cn("group transition-colors hover:bg-muted/50", isMe && "bg-muted/30")}>
+                    <tr key={client.id} className={cn("group transition-colors hover:bg-muted/50", isMe && "bg-muted/30")}>
                       <td className="px-4 py-2.5">
-                        <Link to={`/clients/${patient.id}`} className="flex items-center gap-2">
+                        <Link to={`/clients/${client.id}`} className="flex items-center gap-2">
                           <div className={cn(
                             "flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs text-primary-foreground",
                             isMe ? "bg-terracotta" : "bg-primary"
                           )}>
-                            {isMe ? "ME" : patient.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                            {isMe ? "ME" : client.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
                           </div>
-                          <span className="text-sm font-medium text-foreground">{patient.name}</span>
+                          <span className="text-sm font-medium text-foreground">{client.name}</span>
                         </Link>
                       </td>
                       <td className="px-4 py-2.5 text-sm text-muted-foreground">
-                        {patient.email || patient.phone || "—"}
+                        {client.email || client.phone || "—"}
                       </td>
                       <td className="px-4 py-2.5">
                         <span className={cn(
                           "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
-                          patient.status === "active" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
+                          client.status === "active" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
                         )}>
-                          {patient.status}
+                          {client.status}
                         </span>
                       </td>
                       <td className="px-4 py-2.5 text-right">
@@ -220,17 +220,17 @@ function DoctorPatientsTab() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => navigate(`/clients/${patient.id}`)}>
+                            <DropdownMenuItem onClick={() => navigate(`/clients/${client.id}`)}>
                               View Profile
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => navigate(`/sessions?patient=${patient.id}&autoStart=true`)}>
+                            <DropdownMenuItem onClick={() => navigate(`/sessions?client=${client.id}&autoStart=true`)}>
                               Start Consultation
                             </DropdownMenuItem>
                             {!isMe && (
                               <DropdownMenuItem
                                 className="text-destructive"
                                 onClick={() => {
-                                  if (confirm(`Delete ${patient.name}?`)) deletePatient(patient.id);
+                                  if (confirm(`Delete ${client.name}?`)) deleteClient(client.id);
                                 }}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
@@ -258,18 +258,18 @@ export default function Profile() {
   const { role } = useUserRole();
   const { profile, loading } = useProfile();
   const navigate = useNavigate();
-  const [patientRecord, setPatientRecord] = useState<Patient | null>(null);
-  const [patientLoading, setPatientLoading] = useState(false);
+  const [clientRecord, setClientRecord] = useState<Client | null>(null);
+  const [clientLoading, setClientLoading] = useState(false);
   const lastSavedToastRef = useRef<number>(0);
 
-  const isDoctor = role === "broker";
-  const isPatient = role === "client";
+  const isAdvisor = role === "broker";
+  const isClientRole = role === "client";
 
   // Fetch patient record for Holarchive
   useEffect(() => {
     if (!user) return;
-    const fetchPatientRecord = async () => {
-      setPatientLoading(true);
+    const fetchClientRecord = async () => {
+      setClientLoading(true);
       try {
         const { data, error } = await supabase
           .from("clients")
@@ -280,22 +280,22 @@ export default function Profile() {
           .maybeSingle();
         if (error) throw error;
         if (data) {
-          setPatientRecord({
+          setClientRecord({
             ...data,
-            surgeries: Array.isArray(data.surgeries) ? data.surgeries as unknown as Patient["surgeries"] : [],
-            pharmacies: Array.isArray(data.pharmacies) ? data.pharmacies as unknown as Patient["pharmacies"] : [],
-            family_history: Array.isArray(data.family_history) ? data.family_history as unknown as Patient["family_history"] : [],
-            next_of_kin_members: Array.isArray(data.next_of_kin_members) ? data.next_of_kin_members as unknown as Patient["next_of_kin_members"] : [],
-            current_medications: Array.isArray(data.current_medications) ? data.current_medications as unknown as Patient["current_medications"] : [],
-          } as unknown as Patient);
+            surgeries: Array.isArray(data.surgeries) ? data.surgeries as unknown as Client["surgeries"] : [],
+            pharmacies: Array.isArray(data.pharmacies) ? data.pharmacies as unknown as Client["pharmacies"] : [],
+            family_history: Array.isArray(data.family_history) ? data.family_history as unknown as Client["family_history"] : [],
+            next_of_kin_members: Array.isArray(data.next_of_kin_members) ? data.next_of_kin_members as unknown as Client["next_of_kin_members"] : [],
+            current_medications: Array.isArray(data.current_medications) ? data.current_medications as unknown as Client["current_medications"] : [],
+          } as unknown as Client);
         }
       } catch (err) {
         console.error("Error fetching patient record:", err);
       } finally {
-        setPatientLoading(false);
+        setClientLoading(false);
       }
     };
-    fetchPatientRecord();
+    fetchClientRecord();
   }, [user]);
 
   return (
@@ -305,25 +305,25 @@ export default function Profile() {
         <p className="text-muted-foreground text-xs">Manage your financial information</p>
       </div>
 
-      {patientLoading ? (
+      {clientLoading ? (
         <div className="flex h-40 items-center justify-center">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
-      ) : patientRecord ? (
+      ) : clientRecord ? (
         <div className="space-y-4">
-        <ClientWorkspace patientId={patientRecord.id} />
+        <ClientWorkspace clientId={clientRecord.id} />
         <ClientDetailsEditor
-          patient={patientRecord}
-          onSave={async (updates: Partial<Patient>) => {
+          client={clientRecord}
+          onSave={async (updates: Partial<Client>) => {
             const { error } = await supabase
               .from("clients")
               .update(updates as any)
-              .eq("id", patientRecord.id);
+              .eq("id", clientRecord.id);
             if (error) {
               toast({ title: "Error saving", description: error.message, variant: "destructive" });
               throw error;
             }
-            setPatientRecord((prev) => prev ? { ...prev, ...updates } : prev);
+            setClientRecord((prev) => prev ? { ...prev, ...updates } : prev);
 
             // Autosave fires frequently while typing — only surface a toast
             // every 20s so it doesn't interrupt the user mid-keystroke.
@@ -337,9 +337,9 @@ export default function Profile() {
         />
         </div>
       ) : (
-        <AutoCreatePatientFallback
+        <AutoCreateClientFallback
           user={user}
-          onCreated={(record) => setPatientRecord(record)}
+          onCreated={(record) => setClientRecord(record)}
         />
       )}
     </div>

@@ -25,9 +25,9 @@ export interface BuildInvoiceArgs {
     created_at?: string | null;
     paid_at?: string | null;
     session_id?: string | null;
-    patient: { id: string; name: string } | null;
+    client: { id: string; name: string } | null;
   };
-  patient: FillPatient | null;
+  client: FillPatient | null;
   profile: FillProfile | null;
   currency?: string;
   paid?: boolean;
@@ -53,7 +53,7 @@ function fmtDateLong(d: Date) {
 async function fetchExistingInvoiceContent(
   args: BuildInvoiceArgs,
 ): Promise<string | null> {
-  const { invoice, patient, profile, currency = "ZAR" } = args;
+  const { invoice, client, profile, currency = "ZAR" } = args;
   if (!invoice.session_id) return null;
   const { data } = await supabase
     .from("documents")
@@ -66,7 +66,7 @@ async function fetchExistingInvoiceContent(
   if (!data?.content) return null;
 
   const filled = fillDocumentPlaceholders(data.content, {
-    patient,
+    patient: client,
     profile,
     invoice: {
       invoice_number: invoice.invoice_number,
@@ -90,9 +90,9 @@ async function fetchExistingInvoiceContent(
 }
 
 function buildFallbackInvoiceBody(args: BuildInvoiceArgs): string {
-  const { invoice, patient, profile, currency = "ZAR" } = args;
-  const patientAddr =
-    patient?.physical_address || patient?.postal_address || patient?.address || "";
+  const { invoice, client, profile, currency = "ZAR" } = args;
+  const clientAddr =
+    client?.physical_address || client?.postal_address || client?.address || "";
   return `
 <div style="padding:24px;font-family:Arial,sans-serif;color:#222;">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;">
@@ -112,10 +112,10 @@ function buildFallbackInvoiceBody(args: BuildInvoiceArgs): string {
 
   <div style="margin-bottom:18px;">
     <div style="font-weight:bold;margin-bottom:4px;">Bill To</div>
-    <div>${patient?.name || invoice.patient?.name || ""}</div>
-    ${patientAddr ? `<div style="white-space:pre-line;">${patientAddr}</div>` : ""}
-    ${patient?.medical_aid ? `<div>Medical Aid: ${patient.medical_aid}${patient.medical_aid_number ? ` (${patient.medical_aid_number})` : ""}</div>` : ""}
-    ${patient?.primary_member ? `<div>Primary Member: ${patient.primary_member}</div>` : ""}
+    <div>${client?.name || invoice.client?.name || ""}</div>
+    ${clientAddr ? `<div style="white-space:pre-line;">${clientAddr}</div>` : ""}
+    ${client?.medical_aid ? `<div>Medical Aid: ${client.medical_aid}${client.medical_aid_number ? ` (${client.medical_aid_number})` : ""}</div>` : ""}
+    ${client?.primary_member ? `<div>Primary Member: ${client.primary_member}</div>` : ""}
   </div>
 
   <table style="width:100%;border-collapse:collapse;margin-bottom:18px;">

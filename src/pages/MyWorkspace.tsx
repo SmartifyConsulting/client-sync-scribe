@@ -15,8 +15,8 @@ export default function MyWorkspace() {
       </div>
       {isLoading ? (
         <div className="flex h-32 items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-      ) : data?.patientId ? (
-        <WorkflowMap patientId={data.patientId} clientName={data.clientName} viewer="client" stepperLayout
+      ) : data?.clientId ? (
+        <WorkflowMap clientId={data.clientId} clientName={data.clientName} viewer="client" stepperLayout
           onOpenDocuments={() => navigate("/my-future?tab=documents")} />
       ) : (
         <p className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">Your workspace will appear once your Wealth Manager starts your plan.</p>

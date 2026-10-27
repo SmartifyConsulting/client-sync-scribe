@@ -19,7 +19,7 @@ import type { MapAvatars } from "./StepAvatar";
 import { CancelWorkflowButton, CancelledNotice } from "../workspace/CancelWorkflow";
 
 interface Props {
-  patientId: string;
+  clientId: string;
   clientName?: string;
   onOpenDocuments?: () => void;
   initialGroup?: string;
@@ -30,9 +30,9 @@ interface Props {
 }
 
 /** Live Workspace: step list on the left, working window for the active step on the right. */
-export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGroup, onBackToLive, viewer = "manager" }: Props) {
-  const m = useWorkflowMap(patientId, viewer);
-  useWorkflowRealtime(patientId, m.workflow?.id);
+export function WorkflowMap({ clientId, clientName, onOpenDocuments, initialGroup, onBackToLive, viewer = "manager" }: Props) {
+  const m = useWorkflowMap(clientId, viewer);
+  useWorkflowRealtime(clientId, m.workflow?.id);
   const [picked, setPicked] = useState<{ group: string; step: string } | null>(null);
   const start = useStartWorkflow();
   const { toast } = useToast();
@@ -85,7 +85,7 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
             : cancelled ? "Start a new Live Workspace when the client is ready." : "No wealth workflow for this client yet."}</p>
           {viewer !== "client" && (
             <Button className="mt-3" size="sm" disabled={start.isPending}
-              onClick={() => start.mutate({ patientId }, { onError: (e: any) => toast({ title: "Could not start", description: e.message, variant: "destructive" }) })}>
+              onClick={() => start.mutate({ clientId }, { onError: (e: any) => toast({ title: "Could not start", description: e.message, variant: "destructive" }) })}>
               Start workflow
             </Button>
           )}
@@ -154,7 +154,7 @@ export function WorkflowMap({ patientId, clientName, onOpenDocuments, initialGro
               <span className="h-2 w-2 animate-pulse rounded-full bg-primary" /> Working window
               {shownStep && <span className="normal-case tracking-normal text-foreground">· {shownStep}</span>}
             </span>
-            <DocumentTray patientId={patientId} count={docCount} />
+            <DocumentTray clientId={clientId} count={docCount} />
           </div>
           {!isLive && <button onClick={() => setPicked(null)} className="mb-2 text-xs font-medium text-primary hover:underline">← Back to current step</button>}
           {renderWorking(isLive)}

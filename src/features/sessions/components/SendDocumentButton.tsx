@@ -16,8 +16,8 @@ interface PharmacyOption {
 }
 
 interface SendDocumentButtonProps {
-  patientId: string;
-  patientName: string;
+  clientId: string;
+  clientName: string;
   /** Human readable document name, e.g. "Prescription". */
   documentLabel: string;
   /** Produces the HTML/text content that gets emailed. */
@@ -59,8 +59,8 @@ interface SendDocumentButtonProps {
  * editors expose the same Cancel · Preview · Send · Save footer.
  */
 export function SendDocumentButton({
-  patientId,
-  patientName,
+  clientId,
+  clientName,
   documentLabel,
   getContent,
   preferredField = "email",
@@ -84,7 +84,7 @@ export function SendDocumentButton({
     if (!recipient) {
       toast({
         title: "No recipient email",
-        description: `Add an email address for ${patientName} before sending.`,
+        description: `Add an email address for ${clientName} before sending.`,
         variant: "destructive",
       });
       return;
@@ -118,13 +118,13 @@ export function SendDocumentButton({
         body: {
           to: recipient,
           cc: ccPatient,
-          subject: `${documentLabel} for ${patientName}`,
-          documentName: `${documentLabel} - ${patientName}`,
+          subject: `${documentLabel} for ${clientName}`,
+          documentName: `${documentLabel} - ${clientName}`,
           documentContent: content,
           documentHtml,
           senderName,
           attachments: pdfBase64
-            ? [{ filename: pdfFileName(`${documentLabel}-${patientName}`), content: pdfBase64 }]
+            ? [{ filename: pdfFileName(`${documentLabel}-${clientName}`), content: pdfBase64 }]
             : undefined,
         },
       });
@@ -161,7 +161,7 @@ export function SendDocumentButton({
         const { data: patient } = await supabase
           .from("clients")
           .select("email, pharmacy_name, pharmacy_email, pharmacies")
-          .eq("id", patientId)
+          .eq("id", clientId)
           .maybeSingle();
 
         const patientEmail = (patient as any)?.email || undefined;
@@ -197,7 +197,7 @@ export function SendDocumentButton({
     const { data: patient } = await supabase
       .from("clients")
       .select("email, pharmacy_email, claims_email, reporting_to_email")
-      .eq("id", patientId)
+      .eq("id", clientId)
       .maybeSingle();
 
     const insuranceEmail = insuranceOverrideField ? (patient as any)?.[insuranceOverrideField] : "";

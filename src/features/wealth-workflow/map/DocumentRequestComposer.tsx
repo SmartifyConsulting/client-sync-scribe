@@ -22,7 +22,7 @@ const DEFAULT_BODY: Record<Kind, (client: string) => string> = {
 
 type Kind = "schedules_claims" | "quotes";
 
-export function DocumentRequestComposer({ kind, workflowId, patientId, clientName }: { kind: Kind; workflowId: string; patientId: string; clientName: string }) {
+export function DocumentRequestComposer({ kind, workflowId, clientId, clientName }: { kind: Kind; workflowId: string; clientId: string; clientName: string }) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [checkedInsurers, setCheckedInsurers] = useState<Set<string>>(new Set());
@@ -50,9 +50,9 @@ export function DocumentRequestComposer({ kind, workflowId, patientId, clientNam
   });
 
   const docs = useQuery({
-    queryKey: ["client-documents-for-request", patientId],
-    enabled: kind === "quotes" && !!patientId,
-    queryFn: async () => (await db.from("documents").select("id,name,document_kind").eq("patient_id", patientId).order("created_at", { ascending: false }).limit(30)).data ?? [],
+    queryKey: ["client-documents-for-request", clientId],
+    enabled: kind === "quotes" && !!clientId,
+    queryFn: async () => (await db.from("documents").select("id,name,document_kind").eq("patient_id", clientId).order("created_at", { ascending: false }).limit(30)).data ?? [],
   });
 
   const requests = useQuery({
@@ -83,7 +83,7 @@ export function DocumentRequestComposer({ kind, workflowId, patientId, clientNam
     setBusy(true);
     const { data, error } = await supabase.functions.invoke("wealth-send-document-request", {
       body: {
-        workflowId, patientId, kind, subject, body,
+        workflowId, clientId, kind, subject, body,
         insurers: selectedInsurers.map((i: any) => ({ name: i.label ?? i.insurer_name, address: i.request_address })),
         attachedDocumentIds: kind === "quotes" ? Array.from(checkedDocs) : [],
       },

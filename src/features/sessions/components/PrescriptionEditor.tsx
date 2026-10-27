@@ -52,9 +52,9 @@ interface MedicationItem {
 }
 
 interface PrescriptionEditorProps {
-  patientName: string;
-  patientId: string;
-  doctorName?: string;
+  clientName: string;
+  clientId: string;
+  advisorName?: string;
   allergies?: string | null;
   currentMedications?: CurrentMedication[];
   onClose: () => void;
@@ -62,9 +62,9 @@ interface PrescriptionEditorProps {
 }
 
 export function PrescriptionEditor({ 
-  patientName,
-  patientId,
-  doctorName: propDoctorName,
+  clientName,
+  clientId,
+  advisorName: propDoctorName,
   allergies,
   currentMedications = [],
   onClose, 
@@ -73,7 +73,7 @@ export function PrescriptionEditor({
   const { toast } = useToast();
   const { profile } = useProfile();
   const { formattedContent: savedTemplate, headerFooter } = useTemplateWithHeaderFooter("Prescription");
-  const doctorName = propDoctorName || profile?.full_name || "Doctor";
+  const advisorName = propDoctorName || profile?.full_name || "Doctor";
   
   const [medications, setMedications] = useState<MedicationItem[]>([
     { id: crypto.randomUUID(), medication: "", dosage: "", frequency: "", duration: "", instructions: "", repeats: "0" }
@@ -125,8 +125,8 @@ export function PrescriptionEditor({
     const prescriptionBody = `PRESCRIPTION
 
 Date: ${new Date().toLocaleDateString()}
-Patient: ${patientName}
-Doctor: ${doctorName}
+Client: ${clientName}
+Doctor: ${advisorName}
 
 ─────────────────────────────────────
 
@@ -140,7 +140,7 @@ Instructions: Take medications as prescribed above.
 Follow-up: As directed by physician.
 
 Signature: ___________________
-           ${doctorName}`;
+           ${advisorName}`;
 
     // If we have a saved template with header/footer, use it as wrapper
     if (savedTemplate) {
@@ -148,10 +148,12 @@ Signature: ___________________
       return filled
         .replace(/\[DATE\]/g, new Date().toLocaleDateString())
         .replace(/\[PrescriptionDate\]/g, new Date().toLocaleDateString())
-        .replace(/\[PATIENT_NAME\]/g, patientName)
-        .replace(/\[PatientName\]/g, patientName)
-        .replace(/\[DOCTOR_NAME\]/g, doctorName)
-        .replace(/\[DoctorName\]/g, doctorName)
+        .replace(/\[PATIENT_NAME\]/g, clientName)
+        .replace(/\[PatientName\]/g, clientName)
+        .replace(/\[CLIENT_NAME\]/g, clientName)
+        .replace(/\[ClientName\]/g, clientName)
+        .replace(/\[DOCTOR_NAME\]/g, advisorName)
+        .replace(/\[DoctorName\]/g, advisorName)
         .replace(/\[PRESCRIPTION_CONTENT\]/g, prescriptionBody);
     }
 
@@ -233,7 +235,7 @@ Signature: ___________________
         const { data: patientData } = await supabase
           .from('clients')
           .select('pharmacy_email, pharmacy_name, patient_user_id, pharmacies')
-          .eq('id', patientId)
+          .eq('id', clientId)
           .maybeSingle();
 
         if (patientData?.patient_user_id) {
@@ -256,10 +258,10 @@ Signature: ___________________
               await supabase.functions.invoke('send-document-email', {
                 body: {
                   to: pharmacyEmail,
-                  subject: `Prescription for ${patientName}`,
-                  documentName: `Prescription - ${patientName}`,
+                  subject: `Prescription for ${clientName}`,
+                  documentName: `Prescription - ${clientName}`,
                   documentContent: content,
-                  senderName: doctorName,
+                  senderName: advisorName,
                 },
               });
               toast({
@@ -278,7 +280,7 @@ Signature: ___________________
         const { data: patientCheck } = await supabase
           .from('clients')
           .select('is_chronic, patient_user_id')
-          .eq('id', patientId)
+          .eq('id', clientId)
           .maybeSingle();
 
         if (patientCheck?.is_chronic) {
@@ -288,7 +290,7 @@ Signature: ___________________
           for (const med of validMeds) {
             // Save prescription record to DB
             await supabase.from('prescriptions').insert({
-              patient_id: patientId,
+              patient_id: clientId,
               doctor_id: user!.id,
               medication: med.medication,
               dosage: med.dosage,
@@ -300,7 +302,7 @@ Signature: ___________________
             // Create a todo task for the patient
             await supabase.from('todos').insert({
               user_id: user!.id,
-              patient_id: patientId,
+              patient_id: clientId,
               title: `Take ${med.medication} - ${med.dosage}`,
               description: `Daily medication: ${med.frequency}. ${med.instructions || ''}`.trim(),
               task_type: 'medication',
@@ -316,7 +318,7 @@ Signature: ___________________
               title: 'New Chronic Medication Assigned',
               description: `Your doctor has prescribed chronic medication. Track your daily adherence from your dashboard.`,
               type: 'medication_assigned',
-              reference_id: patientId,
+              reference_id: clientId,
             });
           }
 
@@ -339,7 +341,7 @@ Signature: ___________________
     return (
       <DocumentPreview
         title="Prescription"
-        subtitle={`Patient: ${patientName}`}
+        subtitle={`Client: ${clientName}`}
         content={generateContent()}
         logoUrl={profile?.logo_url || headerFooter?.header?.center?.imageUrl || undefined}
         fontFamily={headerFooter?.font_family || undefined}
@@ -361,7 +363,7 @@ Signature: ___________________
             </div>
             <div>
               <h2 className="text-lg font-semibold text-foreground">Prescription</h2>
-              <p className="text-sm text-muted-foreground">Patient: {patientName}</p>
+              <p className="text-sm text-muted-foreground">Client: {clientName}</p>
             </div>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}>
@@ -541,8 +543,8 @@ Signature: ___________________
               Preview
             </Button>
             <SendDocumentButton
-              patientId={patientId}
-              patientName={patientName}
+              clientId={clientId}
+              clientName={clientName}
               documentLabel="Prescription"
               getContent={generateContent}
               preferredField="pharmacy_email"
@@ -559,7 +561,7 @@ Signature: ___________________
                   const { data: patientData } = await supabase
                     .from('clients')
                     .select('pharmacy_email, pharmacy_name')
-                    .eq('id', patientId)
+                    .eq('id', clientId)
                     .maybeSingle();
 
                   if (!patientData?.pharmacy_email) {
@@ -575,10 +577,10 @@ Signature: ___________________
                   const { error } = await supabase.functions.invoke('send-document-email', {
                     body: {
                       to: patientData.pharmacy_email,
-                      subject: `Prescription for ${patientName}`,
-                      documentName: `Prescription - ${patientName}`,
+                      subject: `Prescription for ${clientName}`,
+                      documentName: `Prescription - ${clientName}`,
                       documentContent: content,
-                      senderName: doctorName,
+                      senderName: advisorName,
                     },
                   });
                   if (error) throw error;

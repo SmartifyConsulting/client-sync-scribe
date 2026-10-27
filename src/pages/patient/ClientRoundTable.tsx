@@ -43,7 +43,7 @@ export default function ClientRoundTable({ hideHeader = false }: { hideHeader?: 
   const { toast } = useToast();
   const [notes, setNotes] = useState<RoundTableNote[]>([]);
   const [loading, setLoading] = useState(true);
-  const [patientId, setPatientId] = useState<string | null>(null);
+  const [clientId, setPatientId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -94,7 +94,7 @@ export default function ClientRoundTable({ hideHeader = false }: { hideHeader?: 
   };
 
   const handleSave = async () => {
-    if (!draft.trim() || !patientId || !user) return;
+    if (!draft.trim() || !clientId || !user) return;
     setSaving(true);
     try {
       if (editingId) {
@@ -105,7 +105,7 @@ export default function ClientRoundTable({ hideHeader = false }: { hideHeader?: 
         if (error) throw error;
       } else {
         const { error } = await supabase.from("round_table_notes" as any).insert({
-          patient_id: patientId,
+          patient_id: clientId,
           content: draft.trim(),
           author_type: "patient",
           patient_author_id: user.id,
@@ -188,7 +188,7 @@ export default function ClientRoundTable({ hideHeader = false }: { hideHeader?: 
       )}
 
       <div className="flex justify-end">
-        <Button size="sm" onClick={openNew} disabled={!patientId}>
+        <Button size="sm" onClick={openNew} disabled={!clientId}>
           <Plus className="h-4 w-4 mr-1" /> Add entry
         </Button>
       </div>

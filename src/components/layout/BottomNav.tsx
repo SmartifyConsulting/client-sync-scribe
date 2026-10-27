@@ -46,7 +46,7 @@ const adminNavItems = [
 
 export function BottomNav() {
   const { t } = useTranslation();
-  const { isPatient, isDoctor, loading } = useUserRole();
+  const { isClient, isAdvisor, loading } = useUserRole();
   const { isAdmin } = useIsAdmin();
   const { v2Demo } = useV2Demo();
   const navigate = useNavigate();
@@ -95,7 +95,7 @@ export function BottomNav() {
   }
 
   const isOnPatientRoute = location.pathname.startsWith("/patient/");
-  const showPatientNav = !isDoctor && (isPatient || isOnPatientRoute);
+  const showPatientNav = !isAdvisor && (isClient || isOnPatientRoute);
 
   if (!showPatientNav) {
     return (
@@ -152,7 +152,7 @@ export function BottomNav() {
     );
   }
 
-  // Patient nav - section-based
+  // Client nav - section-based
   const currentSection = searchParams.get("section") || "health";
   const isOnDetails = location.pathname === "/client/details";
 

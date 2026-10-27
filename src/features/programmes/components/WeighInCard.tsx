@@ -9,9 +9,9 @@ import { useWeighIns } from "../useClientProgrammes";
 import { VULA_MATRIX, kgToStones } from "../types";
 
 /** Doctors log a weigh-in at check-in and award Vulas for weight lost. */
-export function WeighInCard({ patientId, canRecord }: { patientId: string; canRecord: boolean }) {
+export function WeighInCard({ clientId, canRecord }: { clientId: string; canRecord: boolean }) {
   const { toast } = useToast();
-  const { weighIns, latest, record } = useWeighIns(patientId);
+  const { weighIns, latest, record } = useWeighIns(clientId);
   const [weight, setWeight] = useState("");
   const [award, setAward] = useState(true);
 

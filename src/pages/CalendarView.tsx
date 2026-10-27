@@ -92,7 +92,7 @@ interface CalendarEvent {
   time: string;
   day: number;
   type: string;
-  patientId?: string;
+  clientId?: string;
   notes?: string;
   location?: string;
   ownerId: string;
@@ -114,7 +114,7 @@ export default function CalendarView() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { patients } = useClients();
+  const { clients } = useClients();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
@@ -131,17 +131,17 @@ export default function CalendarView() {
   const events = useMemo(() => {
     if (!debouncedEventQuery) return allEvents;
     return allEvents.filter((e) =>
-      [e.title, e.type, e.notes, e.location, e.ownerName, patients.find((p) => p.id === e.patientId)?.name]
+      [e.title, e.type, e.notes, e.location, e.ownerName, clients.find((p) => p.id === e.clientId)?.name]
         .filter(Boolean)
         .join(" ")
         .toLowerCase()
         .includes(debouncedEventQuery),
     );
-  }, [allEvents, debouncedEventQuery, patients]);
+  }, [allEvents, debouncedEventQuery, clients]);
   const [eventsLoading, setEventsLoading] = useState(true);
   const [serviceColors, setServiceColors] = useState<ServicePriceColor[]>([]);
   const [newAppointment, setNewAppointment] = useState({
-    patientId: "",
+    clientId: "",
     date: "",
     time: "",
     type: "session",
@@ -241,7 +241,7 @@ export default function CalendarView() {
             time: format(new Date(apt.start_time), "h:mm a"),
             day: new Date(apt.start_time).getDate(),
             type: apt.type || "session",
-            patientId: apt.patient_id || undefined,
+            clientId: apt.patient_id || undefined,
             notes: apt.description || undefined,
             location: apt.location || undefined,
             ownerId: apt.user_id,
@@ -314,7 +314,7 @@ export default function CalendarView() {
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
-      if (!newAppointment.patientId || !newAppointment.date) {
+      if (!newAppointment.clientId || !newAppointment.date) {
         setConflicts(new Set());
         return;
       }
@@ -323,7 +323,7 @@ export default function CalendarView() {
       const { data } = await supabase
         .from("appointments")
         .select("id, start_time")
-        .eq("patient_id", newAppointment.patientId)
+        .eq("patient_id", newAppointment.clientId)
         .gte("start_time", dayStart)
         .lte("start_time", dayEnd);
       if (cancelled) return;
@@ -334,13 +334,13 @@ export default function CalendarView() {
     return () => {
       cancelled = true;
     };
-  }, [newAppointment.patientId, newAppointment.date]);
+  }, [newAppointment.clientId, newAppointment.date]);
 
   // Conflict detection for the edit modal
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
-      if (!editedEvent || !editedEvent.patientId) {
+      if (!editedEvent || !editedEvent.clientId) {
         setEditConflicts(new Set());
         return;
       }
@@ -353,7 +353,7 @@ export default function CalendarView() {
       const { data } = await supabase
         .from("appointments")
         .select("id, start_time")
-        .eq("patient_id", editedEvent.patientId)
+        .eq("patient_id", editedEvent.clientId)
         .gte("start_time", dayStart)
         .lte("start_time", dayEnd);
       if (cancelled) return;
@@ -366,11 +366,11 @@ export default function CalendarView() {
     return () => {
       cancelled = true;
     };
-  }, [editedEvent?.patientId, editedEvent?.day, editedEvent?.id, selectedDate]);
+  }, [editedEvent?.clientId, editedEvent?.day, editedEvent?.id, selectedDate]);
 
 
   const handleCreateAppointment = async () => {
-    if (!newAppointment.patientId || !newAppointment.date || !newAppointment.time) {
+    if (!newAppointment.clientId || !newAppointment.date || !newAppointment.time) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -387,7 +387,7 @@ export default function CalendarView() {
       return;
     }
 
-    const selectedPatient = patients.find(p => p.id === newAppointment.patientId);
+    const selectedPatient = clients.find(p => p.id === newAppointment.clientId);
 
     // Re-check conflicts at submit time
     if (conflicts.has(newAppointment.time)) {
@@ -406,7 +406,7 @@ export default function CalendarView() {
       .from('appointments')
       .insert({
         user_id: user.id,
-        patient_id: newAppointment.patientId,
+        patient_id: newAppointment.clientId,
         title: selectedPatient?.name || 'Appointment',
         type: newAppointment.type,
         description: newAppointment.notes || null,
@@ -429,7 +429,7 @@ export default function CalendarView() {
         time: format(new Date(data.start_time), "h:mm a"),
         day: new Date(data.start_time).getDate(),
         type: data.type || "session",
-        patientId: data.patient_id || undefined,
+        clientId: data.patient_id || undefined,
         notes: data.description || undefined,
         location: data.location || undefined,
         ownerId: data.user_id,
@@ -445,7 +445,7 @@ export default function CalendarView() {
       description: `Appointment scheduled for ${selectedPatient?.name} on ${newAppointment.date} at ${newAppointment.time}`,
     });
     setIsDialogOpen(false);
-    setNewAppointment({ patientId: "", date: "", time: "", type: "session", notes: "" });
+    setNewAppointment({ clientId: "", date: "", time: "", type: "session", notes: "" });
   };
 
   const openCreateFor = (date: Date) => {
@@ -551,9 +551,9 @@ export default function CalendarView() {
   const requestDeleteEvent = () => setDeleteConfirmOpen(true);
 
   const handleStartSession = () => {
-    if (selectedEvent?.patientId) {
+    if (selectedEvent?.clientId) {
       setIsEventDetailOpen(false);
-      navigate(`/sessions?patient=${selectedEvent.patientId}&autoStart=true`);
+      navigate(`/sessions?client=${selectedEvent.clientId}&autoStart=true`);
     }
   };
 
@@ -562,7 +562,7 @@ export default function CalendarView() {
     const match = serviceColors.find(sc => sc.service_name.toLowerCase() === type.toLowerCase());
     if (match) return match.service_name;
     switch (type) {
-      case "session": return "Patient Session";
+      case "session": return "Client Session";
       case "followup": return "Follow-up";
       case "internal": return "Internal Meeting";
       default: return type.charAt(0).toUpperCase() + type.slice(1);
@@ -668,14 +668,14 @@ export default function CalendarView() {
               <div>
                 <label className="text-sm font-medium text-foreground">Client *</label>
                 <Select
-                  value={newAppointment.patientId}
-                  onValueChange={(value) => setNewAppointment({ ...newAppointment, patientId: value })}
+                  value={newAppointment.clientId}
+                  onValueChange={(value) => setNewAppointment({ ...newAppointment, clientId: value })}
                 >
                   <SelectTrigger className="min-h-11">
                     <SelectValue placeholder="Select a client" />
                   </SelectTrigger>
                   <SelectContent className="z-[100] bg-popover max-h-[60vh]">
-                    {[...patients]
+                    {[...clients]
                       .sort((a, b) => {
                         const surnameA = a.name.split(' ').slice(-1)[0] || '';
                         const surnameB = b.name.split(' ').slice(-1)[0] || '';
@@ -853,7 +853,7 @@ export default function CalendarView() {
                           <div className="mt-2 space-y-1 w-full">
                             {dayEvents.slice(0, 2).map((event) => (
                               <div key={event.id} onClick={(e) => { e.stopPropagation(); handleEventClick(event); }} className="text-xs truncate text-center opacity-80 hover:underline">
-                                {event.time} {(() => { const p = patients.find(pt => pt.id === event.patientId); if (!p) return ''; const parts = p.name.split(' '); return parts.map(w => w[0]).join('').toUpperCase(); })()}
+                                {event.time} {(() => { const p = clients.find(pt => pt.id === event.clientId); if (!p) return ''; const parts = p.name.split(' '); return parts.map(w => w[0]).join('').toUpperCase(); })()}
                               </div>
                             ))}
                             {dayEvents.length > 2 && <div className="text-xs text-center opacity-60">+{dayEvents.length - 2}</div>}
@@ -918,11 +918,11 @@ export default function CalendarView() {
                       {dayEvents.length > 0 && (
                         <div className="mt-1 space-y-0.5">
                           {dayEvents.slice(0, 2).map((event) => {
-                            const patientName = event.patientId
-                              ? patients.find(p => p.id === event.patientId)?.name
+                            const clientName = event.clientId
+                              ? clients.find(p => p.id === event.clientId)?.name
                               : null;
-                            const initials = patientName
-                              ? patientName.split(/\s+/).map(w => w[0]).join("").toUpperCase().slice(0, 2)
+                            const initials = clientName
+                              ? clientName.split(/\s+/).map(w => w[0]).join("").toUpperCase().slice(0, 2)
                               : null;
                             const isPracticeScope = scope === 'practice';
                             const tileColor = isPracticeScope
@@ -959,7 +959,7 @@ export default function CalendarView() {
                                           {initials}
                                         </span>
                                       </TooltipTrigger>
-                                      <TooltipContent>{patientName}</TooltipContent>
+                                      <TooltipContent>{clientName}</TooltipContent>
                                     </Tooltip>
                                   </TooltipProvider>
                                 ) : null}
@@ -1043,11 +1043,11 @@ export default function CalendarView() {
           <div className="divide-y divide-border">
             {todayEvents.length > 0 ? (
               todayEvents.map((event) => {
-                const patientName = event.patientId
-                  ? patients.find(p => p.id === event.patientId)?.name
+                const clientName = event.clientId
+                  ? clients.find(p => p.id === event.clientId)?.name
                   : null;
-                const initials = patientName
-                  ? patientName.split(/\s+/).map(w => w[0]).join("").toUpperCase().slice(0, 2)
+                const initials = clientName
+                  ? clientName.split(/\s+/).map(w => w[0]).join("").toUpperCase().slice(0, 2)
                   : null;
                 return (
                 <div
@@ -1063,7 +1063,7 @@ export default function CalendarView() {
                             {initials}
                           </div>
                         </TooltipTrigger>
-                        <TooltipContent>{patientName}</TooltipContent>
+                        <TooltipContent>{clientName}</TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
                   ) : (
@@ -1225,13 +1225,13 @@ export default function CalendarView() {
                   <DialogHeader>
                     <DialogTitle>{getEventTypeLabel(selectedEvent.type)}</DialogTitle>
                     <DialogDescription className="space-y-1">
-                      {selectedEvent.patientId && (() => {
-                        const patient = patients.find(p => p.id === selectedEvent.patientId);
+                      {selectedEvent.clientId && (() => {
+                        const patient = clients.find(p => p.id === selectedEvent.clientId);
                         return patient ? (
                           <button
                             onClick={() => {
                               setIsEventDetailOpen(false);
-                              navigate(`/clients/${selectedEvent.patientId}`);
+                              navigate(`/clients/${selectedEvent.clientId}`);
                             }}
                             className="text-primary hover:underline font-medium block"
                           >
@@ -1272,7 +1272,7 @@ export default function CalendarView() {
                             <p className="text-sm text-muted-foreground italic">
                               Owned by {selectedEvent.ownerName || 'another Wealth Manager'}. Only they can change this.
                             </p>
-                            {selectedEvent.type !== "internal" && selectedEvent.patientId && (
+                            {selectedEvent.type !== "internal" && selectedEvent.clientId && (
                               <Button className="mt-3 w-full bg-primary hover:bg-primary-dark text-white" onClick={handleStartSession}>
                                 <Play className="h-3.5 w-3.5 mr-1" />
                                 Start Consultation
@@ -1291,7 +1291,7 @@ export default function CalendarView() {
                             <Button variant="destructive" size="icon" className="h-11 w-11" onClick={requestDeleteEvent}>
                               <Trash2 className="h-4 w-4" />
                             </Button>
-                            {selectedEvent.type !== "internal" && selectedEvent.patientId && (
+                            {selectedEvent.type !== "internal" && selectedEvent.clientId && (
                               <Button size="icon" className="h-11 w-11 bg-primary hover:bg-primary-dark text-white" onClick={handleStartSession}>
                                 <Play className="h-4 w-4" />
                               </Button>
@@ -1308,7 +1308,7 @@ export default function CalendarView() {
                               <Trash2 className="h-3.5 w-3.5 mr-1" />
                               Delete
                             </Button>
-                            {selectedEvent.type !== "internal" && selectedEvent.patientId && (
+                            {selectedEvent.type !== "internal" && selectedEvent.clientId && (
                               <Button className="bg-primary hover:bg-primary-dark text-white" onClick={handleStartSession}>
                                 <Play className="h-3.5 w-3.5 mr-1" />
                                 Start Consultation

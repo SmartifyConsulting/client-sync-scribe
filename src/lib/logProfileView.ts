@@ -5,8 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
  * The owner of the record (their user account, when they have one) is stored
  * alongside so they can see who viewed their profile under "My Views".
  */
-export async function logProfileView(patientId: string | null | undefined, screen: string) {
-  if (!patientId) return;
+export async function logProfileView(clientId: string | null | undefined, screen: string) {
+  if (!clientId) return;
   try {
     const { data: auth } = await supabase.auth.getUser();
     const viewerId = auth.user?.id;
@@ -15,7 +15,7 @@ export async function logProfileView(patientId: string | null | undefined, scree
     const { data: patient } = await supabase
       .from("clients")
       .select("patient_user_id")
-      .eq("id", patientId)
+      .eq("id", clientId)
       .maybeSingle();
 
     const ownerId = (patient as { patient_user_id?: string | null } | null)?.patient_user_id ?? null;
@@ -23,7 +23,7 @@ export async function logProfileView(patientId: string | null | undefined, scree
 
     await supabase.from("profile_view_log" as any).insert({
       viewer_id: viewerId,
-      patient_id: patientId,
+      patient_id: clientId,
       owner_id: ownerId,
       screen,
     } as any);

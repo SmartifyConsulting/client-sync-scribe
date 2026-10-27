@@ -13,7 +13,7 @@ import { useTranslation } from "react-i18next";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface ClientOverviewProps {
-  patient: {
+  client: {
     id: string;
     name: string;
     dob?: string | null;
@@ -92,25 +92,11 @@ interface SummaryData {
   conflicts: MedicationConflict[];
 }
 
-function PhysicalOverview({ patient, sessions, isSelfService = false }: ClientOverviewProps) {
+function PhysicalOverview({ client, sessions, isSelfService = false }: ClientOverviewProps) {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [summaryData, setSummaryData] = useState<SummaryData | null>(null);
-
-  const [emotional, setEmotional] = useState<{ theme?: string | null; metaphysical_note?: string | null } | null>(null);
-
-  const loadEmotional = async () => {
-    const { data } = await supabase
-      .from("patient_emotional_insights")
-      .select("theme, metaphysical_note")
-      .eq("patient_id", patient.id)
-      .is("entry_id", null)
-      .order("generated_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    setEmotional((data as any) || null);
-  };
 
   const generateSummary = async (force = false) => {
     setLoading(true);
@@ -121,7 +107,7 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: ClientOv
       const { data: docRows } = await supabase
         .from("documents")
         .select("name, content, ai_analysis, is_transcribed, record_date, created_at")
-        .eq("patient_id", patient.id)
+        .eq("patient_id", client.id)
         .or("is_transcribed.eq.true,ai_analysis.not.is.null")
         .order("record_date", { ascending: true })
         .limit(60);
@@ -141,14 +127,14 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: ClientOv
       const fingerprint = JSON.stringify({
         s: (sessions || []).map((x: any) => [x.id, x.status, x.summary?.length || 0]),
         h: (historicalRecords || []).map((r: any) => [r.name, r.record_date, (r.content || "").length]),
-        p: [patient.notes || "", patient.allergies || ""],
+        p: [client.notes || "", client.allergies || ""],
       });
 
       if (!force) {
         const { data: cached } = await supabase
           .from("patient_history_timelines")
           .select("timeline, source_fingerprint")
-          .eq("patient_id", patient.id)
+          .eq("patient_id", client.id)
           .maybeSingle();
         if (cached && cached.source_fingerprint === fingerprint && cached.timeline) {
           setSummaryData(cached.timeline as unknown as SummaryData);
@@ -157,16 +143,16 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: ClientOv
       }
 
       const { data, error } = await supabase.functions.invoke("summarize-patient-history", {
-        body: { patient, sessions, historicalRecords: historicalRecords || [] },
+        body: { client, sessions, historicalRecords: historicalRecords || [] },
       });
 
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      // Lookup table of patient.current_medications keyed by lowercased name
+      // Lookup table of client.current_medications keyed by lowercased name
       const medMeta: Record<string, { end_date?: string; status?: string }> = {};
-      const pmedSrc: any[] = Array.isArray((patient as any).current_medications)
-        ? (patient as any).current_medications
+      const pmedSrc: any[] = Array.isArray((client as any).current_medications)
+        ? (client as any).current_medications
         : [];
       for (const pm of pmedSrc) {
         if (pm?.name) medMeta[String(pm.name).toLowerCase()] = { end_date: pm.end_date, status: pm.status };
@@ -200,7 +186,7 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: ClientOv
         .from("patient_history_timelines")
         .upsert(
           {
-            patient_id: patient.id,
+            patient_id: client.id,
             timeline: processedData as any,
             source_fingerprint: fingerprint,
             generated_at: new Date().toISOString(),
@@ -211,7 +197,7 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: ClientOv
       console.error("Error generating summary:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to generate patient summary",
+        description: error.message || "Failed to generate client summary",
         variant: "destructive",
       });
     } finally {
@@ -220,12 +206,11 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: ClientOv
   };
 
   useEffect(() => {
-    if (patient && !summaryData) {
+    if (client && !summaryData) {
       generateSummary();
     }
-    loadEmotional();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [patient.id]);
+  }, [client.id]);
 
   const toggleStatus = (
     type: "medications" | "symptoms" | "conditions",
@@ -503,26 +488,26 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: ClientOv
   return (
     <div className="space-y-6">
       {/* Blood Type Badge */}
-      {patient.blood_type && (
+      {client.blood_type && (
         <div className="flex items-center gap-2 -mt-2">
           <Badge className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 border-0 text-xs font-bold">
             <Droplets className="h-4 w-4 mr-1" />
-            Blood Type: {patient.blood_type}
+            Blood Type: {client.blood_type}
           </Badge>
         </div>
       )}
 
-      {/* Emergency Contact (visible to doctors and patient) */}
+      {/* Emergency Contact (visible to doctors and client) */}
       {(() => {
-        const primary = patient.emergency_contact_name
+        const primary = client.emergency_contact_name
           ? {
-              name: patient.emergency_contact_name,
-              phone: patient.emergency_contact_phone,
-              email: patient.emergency_contact_email,
-              relationship: patient.emergency_contact_relationship,
+              name: client.emergency_contact_name,
+              phone: client.emergency_contact_phone,
+              email: client.emergency_contact_email,
+              relationship: client.emergency_contact_relationship,
             }
-          : Array.isArray(patient.emergency_contacts) && patient.emergency_contacts.length > 0
-            ? patient.emergency_contacts[0]
+          : Array.isArray(client.emergency_contacts) && client.emergency_contacts.length > 0
+            ? client.emergency_contacts[0]
             : null;
         if (!primary?.name) return null;
         return (
@@ -595,18 +580,6 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: ClientOv
           </div>
         )}
 
-        {/* Emotional context — generalised, sanitised output only. */}
-        {(emotional?.theme || emotional?.metaphysical_note) && (
-          <div className="mb-4 p-4 rounded-lg bg-orange-500/5 border border-orange-500/20 space-y-1">
-            {emotional?.theme && (
-              <p className="text-sm font-bold text-orange-600">{emotional.theme}</p>
-            )}
-            {emotional?.metaphysical_note && (
-              <p className="text-sm font-bold text-orange-600">{emotional.metaphysical_note}</p>
-            )}
-          </div>
-        )}
-
         {/* Timeline breakdown */}
         <div className="prose prose-sm max-w-none">
           <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">{t("patientProfile.aiSummarySectionTimeline")}</h4>
@@ -650,7 +623,7 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: ClientOv
             <h4 className="font-semibold text-foreground">Conflicting Medication Alert</h4>
           </div>
           <p className="text-xs text-muted-foreground mb-4">
-            The following medications may conflict with each other or with patient allergies. Please review before prescribing.
+            The following medications may conflict with each other or with client allergies. Please review before prescribing.
           </p>
           <div className="space-y-3">
             {summaryData.conflicts.map((conflict, i) => (
@@ -720,8 +693,8 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: ClientOv
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-1.5">
               <div className="flex flex-wrap gap-1">
-                {patient.allergies_structured && patient.allergies_structured.length > 0 ? (
-                  patient.allergies_structured.map((allergy) => (
+                {client.allergies_structured && client.allergies_structured.length > 0 ? (
+                  client.allergies_structured.map((allergy) => (
                     <Badge
                       key={allergy.id}
                       variant="outline"
@@ -740,8 +713,8 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: ClientOv
                       {allergy.name} ({allergy.severity})
                     </Badge>
                   ))
-                ) : patient.allergies ? (
-                  <span className="text-xs text-foreground">{patient.allergies}</span>
+                ) : client.allergies ? (
+                  <span className="text-xs text-foreground">{client.allergies}</span>
                 ) : (
                   <span className="text-xs text-muted-foreground italic">No allergies recorded</span>
                 )}
@@ -874,12 +847,12 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: ClientOv
 
       {/* DISC profile (doctor-only) */}
       <div className="grid gap-4 md:grid-cols-2 items-start">
-        <DiscPersonalityCard patientId={patient.id} hasSessions={(sessions || []).some((s) => s.status === "completed")} />
+        <DiscPersonalityCard clientId={client.id} hasSessions={(sessions || []).some((s) => s.status === "completed")} />
       </div>
 
-      {/* Chronic Medications — from the patient's own current_medications list (distinct shape from the AI-summarised Medications card above). */}
+      {/* Chronic Medications — from the client's own current_medications list (distinct shape from the AI-summarised Medications card above). */}
       {(() => {
-        const chronicMeds = (patient.current_medications || []).filter((m) => m?.is_chronic);
+        const chronicMeds = (client.current_medications || []).filter((m) => m?.is_chronic);
         if (chronicMeds.length === 0) return null;
         return (
           <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card p-5">
@@ -918,7 +891,7 @@ export function ClientOverview(props: ClientOverviewProps) {
   return (
     <div className="space-y-4">
       <h2 className="text-base font-semibold text-foreground">Financial Health Summary</h2>
-      <WorkflowStatusCard patientId={props.patient.id} />
+      <WorkflowStatusCard clientId={props.client.id} />
     </div>
   );
 }

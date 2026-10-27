@@ -44,15 +44,15 @@ const defaultTemplates: Omit<Template, "id" | "user_id">[] = [
 
 Practice Number: [PracticeNumber]
 
-Doctor Registration Number: [DoctorNumber]
+Advisor Registration Number: [AdvisorNumber]
 
 Practice Address: [PracticeAddress]
 
 I have today examined:
 
-Patient: [PatientName]
+Client: [ClientName]
 
-Of: [PatientAddress]
+Of: [ClientAddress]
 
 Date of consultation: [ConsultationDate]
 
@@ -66,9 +66,9 @@ Other information / recommendations: [OtherRecommendations]
 
 
 
-[DoctorSignature]
+[AdvisorSignature]
 
-[DoctorName]
+[AdvisorName]
 
 Date: [SignatureDate]`,
     logo_url: null,
@@ -93,11 +93,11 @@ To: [SpecialistName]
 
 Dear [SpecialistTitle] [SpecialistName],
 
-RE: REFERRAL OF PATIENT - [PatientName]
+RE: REFERRAL OF PATIENT - [ClientName]
 
-Patient Details:
-- Name: [PatientName]
-- Contact: [PatientContact]
+Client Details:
+- Name: [ClientName]
+- Contact: [ClientContact]
 
 I am writing to refer the above-named patient for your expert opinion and management.
 
@@ -108,9 +108,9 @@ I would be grateful if you could see this patient at your earliest convenience. 
 
 Yours sincerely,
 
-[DoctorSignature]
+[AdvisorSignature]
 
-[DoctorName]
+[AdvisorName]
 Practice Number: [PracticeNumber]
 Tel: [PracticePhone]`,
     logo_url: null,
@@ -131,7 +131,7 @@ Date: [PrescriptionDate]
 
 PATIENT DETAILS
 
-Name: [PatientName]
+Name: [ClientName]
 
 Medical Aid: [MedicalAid]
 
@@ -147,11 +147,11 @@ Repeats: [NumberOfRepeats]
 
 Special Instructions: [SpecialInstructions]
 
-[DoctorSignature]
+[AdvisorSignature]
 
-Prescribing Doctor: [DoctorName]
+Prescribing Advisor: [AdvisorName]
 
-Registration Number: [DoctorNumber]
+Registration Number: [AdvisorNumber]
 
 Date: [SignatureDate]`,
     logo_url: null,
@@ -170,7 +170,7 @@ Date: [SignatureDate]`,
 
 Practice Number: [PracticeNumber]
 
-Doctor Registration Number: [DoctorNumber]
+Advisor Registration Number: [AdvisorNumber]
 
 Practice Address: [PracticeAddress]
 
@@ -178,9 +178,9 @@ Date: [Date]
 
 [Content]
 
-[DoctorSignature]
+[AdvisorSignature]
 
-[DoctorName]
+[AdvisorName]
 
 Date: [SignatureDate]`,
     logo_url: null,
@@ -203,9 +203,9 @@ Date: [InvoiceDate]
 
 BILL TO:
 
-Patient: [PatientName]
+Client: [ClientName]
 
-Address: [PatientAddress]
+Address: [ClientAddress]
 
 Medical Aid: [MedicalAid]
 
@@ -225,9 +225,9 @@ Bank Details: [BankDetails]
 
 Thank you.
 
-[DoctorSignature]
+[AdvisorSignature]
 
-[DoctorName]
+[AdvisorName]
 
 [PracticeNumber]`,
     logo_url: null,
@@ -246,13 +246,13 @@ Thank you.
 
 Practice Address: [PracticeAddress]
 Practice No: [PracticeNumber]
-Registration No: [DoctorNumber]
+Registration No: [AdvisorNumber]
 
 ─────────────────────────────────────
 
 ADMISSION DETAILS
 
-Admitting Doctor: [DoctorName]
+Admitting Advisor: [AdvisorName]
 Practice Number: [PracticeNumber]
 Hospital: [Hospital]
 Date of Admission: [AdmissionDate]
@@ -280,11 +280,11 @@ PATIENT SPECIAL INSTRUCTIONS
 
 ─────────────────────────────────────
 
-Patient: [PatientName]
+Client: [ClientName]
 
-[DoctorSignature]
+[AdvisorSignature]
 
-[DoctorName]`,
+[AdvisorName]`,
     logo_url: null,
     logo_position: null,
     font_family: "sans",
@@ -299,9 +299,9 @@ Patient: [PatientName]
     category: "Lifestyle",
     content: `EXERCISE PROGRAMME
 
-Patient: [PatientName]
+Client: [ClientName]
 Date: [ConsultationDate]
-Prescribed by: [DoctorName]
+Prescribed by: [AdvisorName]
 
 GOAL
 [Goal]
@@ -328,9 +328,9 @@ PRECAUTIONS
 REVIEW DATE
 [ReviewDate]
 
-[DoctorSignature]
+[AdvisorSignature]
 
-[DoctorName]`,
+[AdvisorName]`,
     logo_url: null,
     logo_position: null,
     font_family: "sans",
@@ -345,9 +345,9 @@ REVIEW DATE
     category: "Lifestyle",
     content: `EATING PLAN
 
-Patient: [PatientName]
+Client: [ClientName]
 Date: [ConsultationDate]
-Prescribed by: [DoctorName]
+Prescribed by: [AdvisorName]
 
 GOAL
 [Goal]
@@ -383,9 +383,9 @@ NOTES
 REVIEW DATE
 [ReviewDate]
 
-[DoctorSignature]
+[AdvisorSignature]
 
-[DoctorName]`,
+[AdvisorName]`,
     logo_url: null,
     logo_position: null,
     font_family: "sans",
@@ -516,12 +516,12 @@ export function useTemplates() {
       }
 
       // One-time reconcile: refresh untouched default templates that lack the
-      // new [DoctorSignature] placeholder so the signature renders above the
+      // new [AdvisorSignature] placeholder so the signature renders above the
       // doctor name on rollout.
       const stale = parsedTemplates.filter(
         (t) =>
           t.is_default &&
-          !(t.content || "").includes("[DoctorSignature]") &&
+          !(t.content || "").includes("[AdvisorSignature]") &&
           t.updated_at === t.created_at,
       );
       if (stale.length > 0) {

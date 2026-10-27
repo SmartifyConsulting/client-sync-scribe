@@ -129,7 +129,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function RoleBasedRedirect() {
-  const { isReferralAgent, hasDoctorRole, loading } = useUserRole();
+  const { isReferralAgent, hasAdvisorRole, loading } = useUserRole();
   const { isLoading: adminLoading } = useIsAdmin();
 
   if (loading || adminLoading) {
@@ -140,7 +140,7 @@ function RoleBasedRedirect() {
     );
   }
 
-  if (hasDoctorRole) {
+  if (hasAdvisorRole) {
     return <Navigate to="/broker-dashboard" replace />;
   }
 
@@ -155,10 +155,10 @@ function RoleBasedRedirect() {
 function WealthRouteGuard() {
   const loc = useLocation();
   const { isAdmin, isLoading } = useIsAdmin();
-  const { hasDoctorRole, hasPatientRole, loading: roleLoading } = useUserRole();
+  const { hasAdvisorRole, hasClientRole, loading: roleLoading } = useUserRole();
   if (!isLoading && !isAdmin && isWealthHidden(loc.pathname)) return <Navigate to="/dashboard" replace />;
   // Clients never reach firm-facing screens (My Business, My Clients).
-  const clientOnly = !roleLoading && !isLoading && !isAdmin && hasPatientRole && !hasDoctorRole;
+  const clientOnly = !roleLoading && !isLoading && !isAdmin && hasClientRole && !hasAdvisorRole;
   if (clientOnly && (loc.pathname === "/business" || loc.pathname.startsWith("/business/") || loc.pathname === "/clients")) {
     return <Navigate to="/my-dashboard" replace />;
   }
@@ -199,7 +199,7 @@ const App = () => (
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           
-          {/* Patient routes - using ClientAppLayout (no sidebar/bottom nav) */}
+          {/* Client routes - using ClientAppLayout (no sidebar/bottom nav) */}
           <Route
             element={
               <ProtectedRoute>

@@ -10,8 +10,8 @@ import { ListGroupToolbar } from "@/components/common/ListGroupToolbar";
 
 
 interface RoundTableEntry {
-  patientId: string;
-  patientName: string;
+  clientId: string;
+  clientName: string;
   latestNoteDate: string;
   totalNotes: number;
   unreadCount: number;
@@ -80,8 +80,8 @@ export function AdvisorRoundTables({ compact = false }: { compact?: boolean } = 
         const isUnread = note.doctor_id !== user!.id && !readNoteIds.has(note.id);
         if (!existing) {
           grouped.set(note.patient_id, {
-            patientId: note.patient_id,
-            patientName: patientMap.get(note.patient_id) || "Unknown",
+            clientId: note.patient_id,
+            clientName: patientMap.get(note.patient_id) || "Unknown",
             latestNoteDate: note.created_at,
             totalNotes: 1,
             unreadCount: isUnread ? 1 : 0,
@@ -113,13 +113,13 @@ export function AdvisorRoundTables({ compact = false }: { compact?: boolean } = 
   const items = visible.map((entry) => ({
     item: entry,
     date: entry.latestNoteDate,
-    patient: entry.patientName,
-    search: entry.patientName,
+    patient: entry.clientName,
+    search: entry.clientName,
   }));
 
   const renderEntry = (entry: RoundTableEntry) => (
     <div
-      onClick={() => navigate(`/clients/${entry.patientId}?tab=roundtable`)}
+      onClick={() => navigate(`/clients/${entry.clientId}?tab=roundtable`)}
       className={`mb-2 flex items-center gap-3 py-2 px-3 rounded-xl border cursor-pointer transition-colors hover:bg-muted/50 ${
         entry.unreadCount > 0 ? "border-primary/50 bg-primary/5" : "border-border bg-card"
       }`}
@@ -129,7 +129,7 @@ export function AdvisorRoundTables({ compact = false }: { compact?: boolean } = 
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <p className="font-medium text-sm text-foreground truncate">{entry.patientName}</p>
+          <p className="font-medium text-sm text-foreground truncate">{entry.clientName}</p>
           {entry.unreadCount > 0 && (
             <Badge variant="destructive" className="text-xs h-5 px-1.5">
               {entry.unreadCount} new

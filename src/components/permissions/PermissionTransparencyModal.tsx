@@ -163,7 +163,7 @@ export function PermissionTransparencyModal({
       </div>
 
 
-      {/* Patient-facing holistic nudge */}
+      {/* Client-facing holistic nudge */}
       {isPatientFacing && !isDoctorMode && (
         <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
           <div className="flex items-start gap-3">

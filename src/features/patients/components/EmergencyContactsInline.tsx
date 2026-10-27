@@ -21,7 +21,7 @@ import type { EmergencyContact } from "./EmergencyContactsSection";
 import type { NextOfKinMember } from "@/hooks/useClients";
 
 interface Props {
-  patientId: string;
+  clientId: string;
   contacts: EmergencyContact[];
   onChange: (next: EmergencyContact[]) => void;
   nokMembers: NextOfKinMember[];
@@ -36,7 +36,7 @@ interface Props {
  * profile with. Next of Kin is listed here by default; each member carries an
  * explicit list of what they can see.
  */
-export function EmergencyContactsInline({ patientId, contacts, onChange, nokMembers, legacyNok, bare }: Props) {
+export function EmergencyContactsInline({ clientId, contacts, onChange, nokMembers, legacyNok, bare }: Props) {
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
   const seeded = useRef(false);
@@ -79,7 +79,7 @@ export function EmergencyContactsInline({ patientId, contacts, onChange, nokMemb
     const { error } = await supabase
       .from("clients")
       .update({ emergency_contacts: next as any })
-      .eq("id", patientId);
+      .eq("id", clientId);
     setSaving(false);
     if (error) {
       toast({ title: "Save failed", description: error.message, variant: "destructive" });

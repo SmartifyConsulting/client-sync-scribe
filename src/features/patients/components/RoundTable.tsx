@@ -38,9 +38,9 @@ const BUBBLE_TONES = [
   { bubble: "bg-sky-500/10 text-foreground", avatar: "bg-sky-500/20 text-primary" },
 ];
 
-function bubbleTone(doctorId: string) {
+function bubbleTone(advisorId: string) {
   let hash = 0;
-  for (let i = 0; i < (doctorId || "").length; i++) hash = (hash * 31 + doctorId.charCodeAt(i)) >>> 0;
+  for (let i = 0; i < (advisorId || "").length; i++) hash = (hash * 31 + advisorId.charCodeAt(i)) >>> 0;
   return BUBBLE_TONES[hash % BUBBLE_TONES.length];
 }
 
@@ -50,13 +50,13 @@ function initials(name?: string) {
 }
 
 interface RoundTableProps {
-  patientId: string;
-  patientName: string;
+  clientId: string;
+  clientName: string;
   onUnreadCountChange?: (count: number) => void;
   hideHeader?: boolean;
 }
 
-export function RoundTable({ patientId, patientName, hideHeader = false }: RoundTableProps) {
+export function RoundTable({ clientId, clientName, hideHeader = false }: RoundTableProps) {
   const { toast } = useToast();
   const [topics, setTopics] = useState<RTTopic[]>([]);
   const [messagesByTopic, setMessagesByTopic] = useState<Record<string, RTMessage[]>>({});
@@ -89,7 +89,7 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
     const { data, error } = await supabase
       .from('round_table_topics')
       .select('*')
-      .eq('patient_id', patientId)
+      .eq('patient_id', clientId)
       .order('created_at', { ascending: false });
     if (!error) setTopics((data || []) as RTTopic[]);
     setLoading(false);
@@ -106,13 +106,13 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
 
   useEffect(() => {
     loadTopics();
-  }, [patientId]);
+  }, [clientId]);
 
   // Realtime: topics + messages + presence
   useEffect(() => {
     if (!currentUserId) return;
-    const channel = supabase.channel(`rt_${patientId}`, { config: { presence: { key: currentUserId } } })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'round_table_topics', filter: `patient_id=eq.${patientId}` }, () => loadTopics())
+    const channel = supabase.channel(`rt_${clientId}`, { config: { presence: { key: currentUserId } } })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'round_table_topics', filter: `patient_id=eq.${clientId}` }, () => loadTopics())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'round_table_messages' }, (payload: any) => {
         const tId = payload.new?.topic_id || payload.old?.topic_id;
         if (tId) loadMessages(tId);
@@ -130,14 +130,14 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
       });
     presenceRef.current = channel;
     return () => { supabase.removeChannel(channel); };
-  }, [patientId, currentUserId, currentUserName]);
+  }, [clientId, currentUserId, currentUserName]);
 
   const createTopic = async () => {
     if (!subject.trim() || !body.trim() || !currentUserId) return;
     setSubmitting(true);
     try {
       const { error } = await supabase.from('round_table_topics').insert({
-        patient_id: patientId, doctor_id: currentUserId, doctor_name: currentUserName,
+        patient_id: clientId, doctor_id: currentUserId, doctor_name: currentUserName,
         subject: subject.trim(), body: body.trim(),
       });
       if (error) throw error;
@@ -208,7 +208,7 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-semibold">Round Table — {patientName}</h3>
+            <h3 className="text-sm font-semibold">Round Table — {clientName}</h3>
           </div>
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <Circle className="h-2 w-2 fill-primary text-primary" />

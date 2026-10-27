@@ -48,18 +48,18 @@ export function MedCertReviewDialog({
   open,
   onOpenChange,
   data,
-  patientName,
+  clientName,
   onApprove,
   loading,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   data: MedCertData;
-  patientName: string;
+  clientName: string;
   onApprove: (data: MedCertData) => void;
   loading?: boolean;
 }) {
-  const [formData, setFormData] = useState<MedCertData>({ ...data, patient_name: data.patient_name || patientName });
+  const [formData, setFormData] = useState<MedCertData>({ ...data, patient_name: data.patient_name || clientName });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -611,17 +611,17 @@ export function CompactTodoList() {
                           <p className="px-1 py-2 text-xs text-muted-foreground">Nothing due today.</p>
                         ) : (
                         <Accordion type="multiple" className="space-y-2">
-                          {patientGroups(grouped[b.key]).map(([patientName, items]) => (
+                          {patientGroups(grouped[b.key]).map(([clientName, items]) => (
                             <AccordionItem
-                              key={`${b.key}-${patientName}`}
-                              value={`${b.key}-${patientName}`}
+                              key={`${b.key}-${clientName}`}
+                              value={`${b.key}-${clientName}`}
                               className="border-0 !border-b-0 rounded-lg bg-muted/30 overflow-hidden"
                             >
                               <AccordionTrigger className="px-3 py-1 border-0 rounded-none bg-transparent hover:no-underline hover:bg-muted/50">
                                 <div className="flex items-center gap-1.5 flex-1 min-w-0">
                                   <UserIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                                  {isSampleClient({ name: patientName }) && <SampleBadge />}
-                                  <span className="text-sm font-medium text-foreground truncate text-left">{patientName}</span>
+                                  {isSampleClient({ name: clientName }) && <SampleBadge />}
+                                  <span className="text-sm font-medium text-foreground truncate text-left">{clientName}</span>
                                   <SectionCountPill count={items.length} className="ml-auto mr-1" />
                                 </div>
                               </AccordionTrigger>

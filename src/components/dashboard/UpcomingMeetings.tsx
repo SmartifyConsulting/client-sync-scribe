@@ -7,8 +7,8 @@ import { format, startOfDay, addDays, isToday, isTomorrow } from "date-fns";
 
 interface Meeting {
   id: string;
-  patientId: string | null;
-  patientName: string;
+  clientId: string | null;
+  clientName: string;
   startTime: string;
   type: "in-person" | "video";
 }
@@ -48,8 +48,8 @@ export function UpcomingMeetings() {
 
         setMeetings((data ?? []).map((a) => ({
           id: a.id,
-          patientId: a.patient_id,
-          patientName: a.patient_id ? (nameById[a.patient_id] || a.title) : a.title,
+          clientId: a.patient_id,
+          clientName: a.patient_id ? (nameById[a.patient_id] || a.title) : a.title,
           startTime: a.start_time,
           type: a.type === "video" || a.location?.toLowerCase().includes("video") ? "video" : "in-person",
         })));
@@ -79,12 +79,12 @@ export function UpcomingMeetings() {
                 <User className="h-3.5 w-3.5 text-accent-foreground" />
               </div>
               <div className="min-w-0 flex-1">
-                {m.patientId ? (
-                  <Link to={`/clients/${m.patientId}`} className="font-medium text-foreground hover:text-primary transition-colors truncate block">
-                    {m.patientName}
+                {m.clientId ? (
+                  <Link to={`/clients/${m.clientId}`} className="font-medium text-foreground hover:text-primary transition-colors truncate block">
+                    {m.clientName}
                   </Link>
                 ) : (
-                  <span className="font-medium text-foreground truncate block">{m.patientName}</span>
+                  <span className="font-medium text-foreground truncate block">{m.clientName}</span>
                 )}
                 <div className="flex items-center gap-2 text-2xs text-muted-foreground">
                   <span>{dayLabel(new Date(m.startTime))} · {format(new Date(m.startTime), "h:mm a")}</span>

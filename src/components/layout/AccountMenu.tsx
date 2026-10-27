@@ -24,7 +24,7 @@ interface AccountMenuProps {
 export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: AccountMenuProps) {
   const { t } = useTranslation();
   const { profile } = useProfile();
-  const { isDoctor, isEmergency, isNurse } = useUserRole();
+  const { isAdvisor, isEmergency, isNurse } = useUserRole();
   const location = useLocation();
   const navigate = useNavigate();
   const isOnPatientRoute = location.pathname.startsWith("/patient/");
@@ -55,7 +55,7 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
       <PopoverContent className="p-1.5 w-[calc(var(--sidebar-width)_-_16px)]" align={align} alignOffset={alignOffset} sideOffset={8}>
         {/* Profile switcher */}
-        {isDoctor && (
+        {isAdvisor && (
           <div className="border-b border-border mb-1 space-y-1">
             <button
               onClick={() => { if (isOnPatientRoute) navigate("/dashboard"); }}
@@ -73,7 +73,7 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
           </div>
         )}
 
-        {!isDoctor && (() => {
+        {!isAdvisor && (() => {
           const path = location.pathname;
           const roleLabel = path.startsWith("/provider/ambulance")
             ? t("topbar.er")

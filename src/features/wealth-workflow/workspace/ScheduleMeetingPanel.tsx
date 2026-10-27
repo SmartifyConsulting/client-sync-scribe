@@ -17,7 +17,7 @@ const SLOTS = Array.from({ length: 22 }, (_, i) => {
 });
 
 interface Props {
-  patientId: string;
+  clientId: string;
   clientName: string;
   onScheduled?: () => void;
   onClose: () => void;
@@ -25,7 +25,7 @@ interface Props {
 
 /** Inline date/time picker so a WM can schedule a meeting with this client
  *  without leaving the Live Workspace for the calendar page. */
-export function ScheduleMeetingPanel({ patientId, clientName, onScheduled, onClose }: Props) {
+export function ScheduleMeetingPanel({ clientId, clientName, onScheduled, onClose }: Props) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [date, setDate] = useState<Date | undefined>(undefined);
@@ -40,7 +40,7 @@ export function ScheduleMeetingPanel({ patientId, clientName, onScheduled, onClo
     start.setHours(slot.hour, slot.minute, 0, 0);
     const end = new Date(start.getTime() + 30 * 60000);
     const { error } = await supabase.from("appointments").insert({
-      user_id: user.id, patient_id: patientId, title: clientName, type: "session",
+      user_id: user.id, patient_id: clientId, title: clientName, type: "session",
       description: notes || null, start_time: start.toISOString(), end_time: end.toISOString(),
     });
     setBusy(false);

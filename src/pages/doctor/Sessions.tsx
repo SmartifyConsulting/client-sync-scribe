@@ -41,7 +41,7 @@ export default function Sessions() {
           session_date,
           notes,
           created_at,
-          patients(full_name)
+          clients(full_name)
         `)
         .eq("doctor_id", user.id)
         .order("session_date", { ascending: false });
@@ -50,7 +50,7 @@ export default function Sessions() {
 
       const sessionsWithNames = data?.map((s: any) => ({
         ...s,
-        patient_name: s.patients?.full_name || "Unknown Patient",
+        patient_name: s.clients?.full_name || "Unknown Client",
       })) || [];
 
       setSessions(sessionsWithNames);
@@ -118,7 +118,7 @@ export default function Sessions() {
         <div>
           <h1 className="page-title">My Consultations</h1>
           <p className="text-muted-foreground text-xs mt-1">
-            View your past and upcoming sessions with patients
+            View your past and upcoming sessions with clients
           </p>
         </div>
 

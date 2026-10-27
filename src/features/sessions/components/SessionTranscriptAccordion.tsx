@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 interface Props {
   transcript: string;
-  doctorName?: string;
+  advisorName?: string;
 }
 
 /**
@@ -11,7 +11,7 @@ interface Props {
  * transcript is never streamed live on screen; it only appears here once
  * transcription finishes.
  */
-export function SessionTranscriptAccordion({ transcript, doctorName }: Props) {
+export function SessionTranscriptAccordion({ transcript, advisorName }: Props) {
   if (!transcript) return null;
 
   const lines = transcript.split("\n").filter((l) => l.trim());
@@ -29,14 +29,14 @@ export function SessionTranscriptAccordion({ transcript, doctorName }: Props) {
             const speaker = line.substring(0, colonIndex);
             const text = line.substring(colonIndex + 1);
             const speakerLower = speaker.toLowerCase().trim();
-            const isDoctor =
+            const isAdvisor =
               speakerLower.includes("dr") ||
               speakerLower.includes("doctor") ||
-              (doctorName && speakerLower.includes(doctorName.toLowerCase()));
+              (advisorName && speakerLower.includes(advisorName.toLowerCase()));
             return (
               <p
                 key={index}
-                className={cn("text-sm leading-relaxed", isDoctor ? "text-primary" : "text-foreground")}
+                className={cn("text-sm leading-relaxed", isAdvisor ? "text-primary" : "text-foreground")}
               >
                 <span className="font-bold">{speaker}</span>:{text}
               </p>

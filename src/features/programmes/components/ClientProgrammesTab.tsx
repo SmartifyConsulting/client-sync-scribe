@@ -2,8 +2,8 @@ import { DocumentsBrowser } from "@/features/documents/components/DocumentsBrows
 import { WeighInCard } from "./WeighInCard";
 
 interface Props {
-  patientId: string;
-  patientName?: string;
+  clientId: string;
+  clientName?: string;
   /** Doctors and practice assistants maintain the programme and record weigh-ins. */
   canManage: boolean;
   /** The patient themselves viewing their own record. */
@@ -11,18 +11,18 @@ interface Props {
 }
 
 /** Programme documents (exercise programmes and eating plans) plus weigh-ins. */
-export function ClientProgrammesTab({ patientId, patientName, canManage }: Props) {
+export function ClientProgrammesTab({ clientId, clientName, canManage }: Props) {
   return (
     <div className="grid gap-4 lg:grid-cols-[1fr_280px]">
       <div className="min-w-0">
         <DocumentsBrowser
-          patientId={patientId}
-          patientName={patientName}
+          clientId={clientId}
+          clientName={clientName}
           templateFilter={["exercise programme", "eating plan"]}
           emptyLabel="No programmes yet."
         />
       </div>
-      <WeighInCard patientId={patientId} canRecord={canManage} />
+      <WeighInCard clientId={clientId} canRecord={canManage} />
     </div>
   );
 }
