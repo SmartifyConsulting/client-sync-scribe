@@ -31,11 +31,11 @@ import {
   Info,
 } from "lucide-react";
 
-import ReferralDoctors from "@/pages/ReferralDoctors";
+import ReferralAdvisors from "@/pages/ReferralAdvisors";
 import { ComplianceForms } from "@/features/wealth-workflow/forms/ComplianceForms";
 import { TargetsCommission } from "@/features/wealth-workflow/TargetsCommission";
 
-import Patients from "@/pages/Patients";
+import Clients from "@/pages/Clients";
 import DoctorInvoices from "@/pages/doctor/Invoices";
 import Documents from "@/pages/Documents";
 import { AdvisorRoundTables } from "@/components/doctor/AdvisorRoundTables";
@@ -1582,7 +1582,7 @@ export default function MyPractice() {
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-base font-semibold text-primary-dark">Referral Wealth Managers</h3>
             </div>
-            <ReferralDoctors hideHeader />
+            <ReferralAdvisors hideHeader />
           </div>
         </TabsContent>
 

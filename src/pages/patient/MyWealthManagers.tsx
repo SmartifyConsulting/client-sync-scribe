@@ -56,7 +56,7 @@ interface DoctorAccess {
   doctor?: DoctorProfile;
 }
 
-export default function MyDoctors({ hideHeader = false, showAccessReminder = false }: { hideHeader?: boolean; showAccessReminder?: boolean }) {
+export default function MyWealthManagers({ hideHeader = false, showAccessReminder = false }: { hideHeader?: boolean; showAccessReminder?: boolean }) {
   const [nameQuery, setNameQuery] = useState("");
   const [specialtyQuery, setSpecialtyQuery] = useState<string>("any");
   const [languageQuery, setLanguageQuery] = useState<string>("any");

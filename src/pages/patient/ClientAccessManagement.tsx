@@ -54,7 +54,7 @@ interface IncomingInvitation {
   sender_name?: string;
 }
 
-export default function PatientAccessManagement() {
+export default function ClientAccessManagement() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);

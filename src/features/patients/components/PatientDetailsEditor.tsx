@@ -94,14 +94,14 @@ import { TransactionLogs } from "@/features/wealth-workflow/TransactionLogs";
 import { isValidOptionalEmail } from "@/lib/validation";
 
 
-const PatientDocuments = lazy(() => import("@/pages/patient/PatientDocuments"));
+const ClientDocuments = lazy(() => import("@/pages/patient/ClientDocuments"));
 const ClaimsPage = lazy(() => import("@/pages/Claims"));
 const TestResultsPanel = lazy(() =>
   import("@/modules/holarchelp/components/TestResultsPanel").then((m) => ({ default: m.TestResultsPanel })),
 );
-const MyDoctors = lazy(() => import("@/pages/patient/MyDoctors"));
-const PatientRoundTable = lazy(() => import("@/pages/patient/PatientRoundTable"));
-const PatientCalendarLazy = lazy(() => import("@/pages/patient/PatientCalendar"));
+const MyWealthManagers = lazy(() => import("@/pages/patient/MyWealthManagers"));
+const ClientRoundTable = lazy(() => import("@/pages/patient/ClientRoundTable"));
+const ClientCalendarLazy = lazy(() => import("@/pages/patient/ClientCalendar"));
 
 const SettingsContentLazy = lazy(() =>
   import("@/components/settings/SettingsContent").then((m) => ({ default: m.SettingsContent })),
@@ -109,8 +109,8 @@ const SettingsContentLazy = lazy(() =>
 const SessionHistoryTableLazy = lazy(() =>
   import("@/components/patients/SessionHistoryTable").then((m) => ({ default: m.SessionHistoryTable })),
 );
-const PatientDashboardLazy = lazy(() => import("@/pages/patient/PatientDashboard"));
-const PatientTasksLazy = lazy(() => import("@/pages/patient/PatientTasks"));
+const ClientDashboardLazy = lazy(() => import("@/pages/patient/ClientDashboard"));
+const ClientTasksLazy = lazy(() => import("@/pages/patient/ClientTasks"));
 
 interface PatientDetailsEditorProps {
   patient: Patient;
@@ -1850,7 +1850,7 @@ export function PatientDetailsEditor({
                     </div>
                   }
                 >
-                  <PatientTasksLazy />
+                  <ClientTasksLazy />
                 </Suspense>
               </TabsContent>
             )}
@@ -1880,7 +1880,7 @@ export function PatientDetailsEditor({
                     </div>
                   }
                 >
-                  <PatientCalendarLazy />
+                  <ClientCalendarLazy />
                 </Suspense>
               </TabsContent>
             )}
@@ -1901,7 +1901,7 @@ export function PatientDetailsEditor({
                     </div>
                   }
                 >
-                  <PatientDocuments hideHeader={false} />
+                  <ClientDocuments hideHeader={false} />
                 </Suspense>
               </TabsContent>
             )}
@@ -1939,7 +1939,7 @@ export function PatientDetailsEditor({
                     </div>
                   }
                 >
-                  <PatientRoundTable hideHeader />
+                  <ClientRoundTable hideHeader />
                 </Suspense>
               </TabsContent>
             )}
@@ -2489,7 +2489,7 @@ export function PatientDetailsEditor({
                   </div>
                 }
               >
-                <PatientTasksLazy />
+                <ClientTasksLazy />
               </Suspense>
             </TabsContent>
           )}
@@ -2557,7 +2557,7 @@ export function PatientDetailsEditor({
                   </div>
                 }
               >
-                <PatientCalendarLazy />
+                <ClientCalendarLazy />
               </Suspense>
             </TabsContent>
           )}
@@ -2577,7 +2577,7 @@ export function PatientDetailsEditor({
                   </div>
                 }
               >
-                <PatientDocuments hideHeader />
+                <ClientDocuments hideHeader />
               </Suspense>
             </TabsContent>
           )}
@@ -2621,7 +2621,7 @@ export function PatientDetailsEditor({
                   </div>
                 }
               >
-                <PatientRoundTable hideHeader />
+                <ClientRoundTable hideHeader />
               </Suspense>
             </TabsContent>
           )}

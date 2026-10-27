@@ -20,7 +20,7 @@ interface PracticePatient {
  * Practice Management Assistant view of the practice doctors' patients.
  * Administrative details only — no clinical records are shown here.
  */
-export default function PracticePatients() {
+export default function PracticeClients() {
   const { doctors, loading: practiceLoading } = usePracticeAssistant();
   const [patients, setPatients] = useState<PracticePatient[]>([]);
   const [query, setQuery] = useState("");

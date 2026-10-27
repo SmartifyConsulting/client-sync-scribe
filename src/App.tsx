@@ -15,8 +15,8 @@ import Claims from "@/pages/Claims";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import Landing from "./pages/IndigroWelcome";
 import Dashboard from "./pages/Dashboard";
-import Patients from "./pages/Patients";
-import PatientProfile from "./pages/PatientProfile";
+import Clients from "./pages/Clients";
+import ClientProfile from "./pages/ClientProfile";
 import CalendarView from "./pages/CalendarView";
 import Sessions from "./pages/Sessions";
 import SessionDetail from "./pages/SessionDetail";
@@ -24,7 +24,7 @@ import MySessions from "./pages/MySessions";
 import MyPersonalDashboard from "./pages/MyPersonalDashboard";
 import MyViews from "./pages/MyViews";
 
-// Documents page is now wrapped inside DoctorDocumentsPage
+// Documents page is now wrapped inside AdvisorDocumentsPage
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 import TodoList from "./pages/TodoList";
@@ -48,27 +48,27 @@ import WealthManagerAgreement from "./pages/WealthManagerAgreement";
 import Legal from "./pages/Legal";
 
 // Client pages
-import PatientDashboard from "./pages/patient/PatientDashboard";
-import PatientCalendar from "./pages/patient/PatientCalendar";
+import ClientDashboard from "./pages/patient/ClientDashboard";
+import ClientCalendar from "./pages/patient/ClientCalendar";
 import Invoices from "./pages/patient/Invoices";
-import PatientAccessManagement from "./pages/patient/PatientAccessManagement";
-import MyDoctors from "./pages/patient/MyDoctors";
-import PatientTasks from "./pages/patient/PatientTasks";
-import PatientDocuments from "./pages/patient/PatientDocuments";
+import ClientAccessManagement from "./pages/patient/ClientAccessManagement";
+import MyWealthManagers from "./pages/patient/MyWealthManagers";
+import ClientTasks from "./pages/patient/ClientTasks";
+import ClientDocuments from "./pages/patient/ClientDocuments";
 import MyDetails from "./pages/patient/MyDetails";
 import DoctorInvoices from "./pages/doctor/Invoices";
 
 import MyPractice from "./pages/MyPractice";
-import PracticePatients from "./pages/practice/PracticePatients";
+import PracticeClients from "./pages/practice/PracticeClients";
 import PricingAdmin from "./pages/admin/PricingAdmin";
 import IntegrationsAdmin from "./pages/admin/IntegrationsAdmin";
 import CountryPerformance from "./pages/admin/CountryPerformance";
 import BulkPasswordReset from "./pages/admin/BulkPasswordReset";
 
-import ReferralDoctors from "./pages/ReferralDoctors";
+import ReferralAdvisors from "./pages/ReferralAdvisors";
 import ExpiringRecordings from "./pages/ExpiringRecordings";
 import Admin from "./pages/Admin";
-import DoctorDocumentsPage from "./pages/doctor/DoctorDocumentsPage";
+import AdvisorDocumentsPage from "./pages/doctor/AdvisorDocumentsPage";
 import DoctorSessions from "./pages/doctor/Sessions";
 import ProviderSignup from "./pages/ProviderSignup";
 import ProviderApprovalAction from "./pages/admin/ProviderApprovalAction";
@@ -207,12 +207,12 @@ const App = () => (
               </ProtectedRoute>
             }
           >
-            <Route path="/client/advisors" element={<MyDoctors />} />
-            <Route path="/client/calendar" element={<PatientCalendar />} />
+            <Route path="/client/advisors" element={<MyWealthManagers />} />
+            <Route path="/client/calendar" element={<ClientCalendar />} />
             <Route path="/client/invoices" element={<Invoices />} />
-            <Route path="/client/invites" element={<PatientAccessManagement />} />
-            <Route path="/client/tasks" element={<PatientTasks />} />
-            <Route path="/client/documents" element={<PatientDocuments />} />
+            <Route path="/client/invites" element={<ClientAccessManagement />} />
+            <Route path="/client/tasks" element={<ClientTasks />} />
+            <Route path="/client/documents" element={<ClientDocuments />} />
             <Route path="/client/details" element={<MyDetails />} />
             <Route path="/sessions/:id" element={<SessionDetail />} />
             <Route path="/settings" element={<Settings />} />
@@ -230,8 +230,8 @@ const App = () => (
             <Route path="/broker-dashboard" element={<Dashboard />} />
             
             {/* Doctor routes */}
-            <Route path="/clients" element={<Patients />} />
-            <Route path="/clients/:id" element={<PatientProfile />} />
+            <Route path="/clients" element={<Clients />} />
+            <Route path="/clients/:id" element={<ClientProfile />} />
             <Route path="/broker/consultations" element={<DoctorSessions />} />
             <Route path="/calendar" element={<CalendarView />} />
             <Route path="/todos" element={<TodoList />} />
@@ -244,12 +244,12 @@ const App = () => (
             <Route path="/claims" element={<Claims />} />
             <Route path="/sessions/:id" element={<SessionDetail />} />
 
-            <Route path="/documents" element={<DoctorDocumentsPage />} />
+            <Route path="/documents" element={<AdvisorDocumentsPage />} />
             <Route path="/my-views" element={<MyViews />} />
             <Route path="/invoices" element={<DoctorInvoices />} />
             <Route path="/business" element={<MyPractice />} />
-            <Route path="/firm-clients" element={<PracticePatients />} />
-            <Route path="/referral-partners" element={<ReferralDoctors />} />
+            <Route path="/firm-clients" element={<PracticeClients />} />
+            <Route path="/referral-partners" element={<ReferralAdvisors />} />
             <Route path="/cpd-certificates" element={<Navigate to="/profile" replace />} />
             <Route path="/expiring-recordings" element={<ExpiringRecordings />} />
             <Route path="/connections" element={<Connections />} />

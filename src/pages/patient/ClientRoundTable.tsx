@@ -37,7 +37,7 @@ interface RoundTableNote {
   patient_author_id: string | null;
 }
 
-export default function PatientRoundTable({ hideHeader = false }: { hideHeader?: boolean }) {
+export default function ClientRoundTable({ hideHeader = false }: { hideHeader?: boolean }) {
   const { user } = useAuth();
   const { profile } = useProfile();
   const { toast } = useToast();

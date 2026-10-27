@@ -223,7 +223,7 @@ function deriveDocType(
   return "file";
 }
 
-export default function PatientDocuments({ hideHeader = false }: { hideHeader?: boolean }) {
+export default function ClientDocuments({ hideHeader = false }: { hideHeader?: boolean }) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();

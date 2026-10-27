@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
-import DoctorDocumentsTab from "./DoctorDocumentsTab";
+import AdvisorDocumentsTab from "./AdvisorDocumentsTab";
 
-export default function DoctorDocumentsPage() {
+export default function AdvisorDocumentsPage() {
   const { t } = useTranslation();
   return (
     <div className="space-y-3">
@@ -9,7 +9,7 @@ export default function DoctorDocumentsPage() {
         <h1 className="page-title">{t("documents.title")}</h1>
         <p className="mt-1 text-muted-foreground text-xs">Manage client documents and reusable templates.</p>
       </div>
-      <DoctorDocumentsTab />
+      <AdvisorDocumentsTab />
     </div>
   );
 }

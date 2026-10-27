@@ -92,7 +92,7 @@ function DocumentCard({ doc, onPreview }: { doc: DocRow; onPreview: (doc: DocRow
   );
 }
 
-export default function DoctorDocumentsTab() {
+export default function AdvisorDocumentsTab() {
   // Documents where the doctor is themself the patient are covered by the My Profile
   // view now, so this list is just every practice document — no owner filter needed.
   const { documents, loading, fetchDocuments } = useDocuments(undefined, { allOwners: true });

@@ -1,6 +1,6 @@
 // Shared helper that resolves a stored document's [Token] placeholders to real
 // values before previewing. Centralises the logic used by every preview entry
-// point (Dashboard To-Do, /todos, /documents, PatientProfile, PatientDocuments)
+// point (Dashboard To-Do, /todos, /documents, ClientProfile, ClientDocuments)
 // so all surfaces behave identically.
 //
 // Responsibilities:

@@ -37,7 +37,7 @@ interface Appointment {
 
 type CalendarViewMode = "week" | "month" | "year";
 
-export default function PatientCalendar() {
+export default function ClientCalendar() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();

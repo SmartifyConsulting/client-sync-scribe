@@ -74,7 +74,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { INTAKE_EMAIL_DOMAIN } from "@/lib/mailboxDomain";
 
-export default function PatientProfile() {
+export default function ClientProfile() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();

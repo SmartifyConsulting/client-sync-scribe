@@ -57,7 +57,7 @@ const getSpecialtyColor = (specialty: string): string => {
   return "bg-accent text-accent-foreground dark:bg-primary/20 dark:text-primary";
 };
 
-export default function PatientDashboard() {
+export default function ClientDashboard() {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
   const { user } = useAuth();

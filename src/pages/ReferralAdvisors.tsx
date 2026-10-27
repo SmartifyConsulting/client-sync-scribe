@@ -99,11 +99,11 @@ interface DoctorProfileSuggestion {
 
 type AddMode = "search" | "manual" | "invite";
 
-interface ReferralDoctorsProps {
+interface ReferralAdvisorsProps {
   hideHeader?: boolean;
 }
 
-export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsProps) {
+export default function ReferralAdvisors({ hideHeader = false }: ReferralAdvisorsProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const { profile } = useProfile();

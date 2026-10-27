@@ -31,7 +31,7 @@ interface PatientTodo {
   task_type: string;
 }
 
-export default function PatientTasks() {
+export default function ClientTasks() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [todos, setTodos] = useState<PatientTodo[]>([]);
