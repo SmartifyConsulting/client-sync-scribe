@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
     if (ins.error) { log.push(`${name}: ${ins.error.message}`); continue; }
     p = ins.data;
     if ((c as any).linkClient) {
-      await admin.from("doctor_patient_access").insert({ doctor_id: ids.wm, patient_user_id: ids.client, is_active: true } as any);
+      await admin.from("broker_client_access").insert({ doctor_id: ids.wm, patient_user_id: ids.client, is_active: true } as any);
     }
     const wf = await admin.from("wealth_workflows").insert({
       patient_id: p!.id, practice_id: firm!.id, owner_user_id: ids.wm, current_stage: "consultation", status: "active",

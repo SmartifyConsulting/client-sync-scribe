@@ -59,7 +59,7 @@ serve(async (req) => {
         hasAccess = true;
       } else if (patient.patient_user_id) {
         const { data: dpa } = await supa
-          .from("doctor_patient_access")
+          .from("broker_client_access")
           .select("id")
           .eq("doctor_id", user.id)
           .eq("patient_user_id", patient.patient_user_id)

@@ -98,16 +98,16 @@ const handler = async (req: Request): Promise<Response> => {
           .is('patient_user_id', null);
       }
 
-      // Create doctor_patient_access record if not exists
+      // Create broker_client_access record if not exists
       const { data: existingAccess } = await supabaseAdmin
-        .from('doctor_patient_access')
+        .from('broker_client_access')
         .select('id')
         .eq('doctor_id', user.id)
         .eq('patient_user_id', existingUser.id)
         .maybeSingle();
 
       if (!existingAccess) {
-        await supabaseAdmin.from('doctor_patient_access').insert({
+        await supabaseAdmin.from('broker_client_access').insert({
           doctor_id: user.id,
           patient_user_id: existingUser.id,
           permissions: ['view_records', 'create_sessions'],
@@ -172,7 +172,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("User does not exist, sending invitation email");
 
     const { data: invitation, error: inviteError } = await supabaseAuth
-      .from("patient_invitations")
+      .from("client_invitations")
       .insert({
         doctor_id: user.id,
         patient_email: patientEmail,
