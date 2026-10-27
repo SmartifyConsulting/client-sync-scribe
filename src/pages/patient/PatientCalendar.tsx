@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { BookAppointmentDialog } from "@/components/appointments/BookAppointmentDialog";
-import { PatientRequestsBadge } from "@/components/appointments/PatientRequestsBadge";
+import { ClientRequestsBadge } from "@/components/appointments/ClientRequestsBadge";
 import { useTranslation } from "react-i18next";
 import {
   formatCalendarMonthYear,
@@ -394,7 +394,7 @@ export default function PatientCalendar() {
         </div>
       </div>
 
-      <PatientRequestsBadge />
+      <ClientRequestsBadge />
 
       {/* Upcoming Appointments - compact at top */}
       {upcomingAppointments.length > 0 && (

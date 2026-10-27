@@ -18,7 +18,7 @@ interface RoundTableEntry {
   myNotes: number;
 }
 
-export function DoctorRoundTables({ compact = false }: { compact?: boolean } = {}) {
+export function AdvisorRoundTables({ compact = false }: { compact?: boolean } = {}) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [entries, setEntries] = useState<RoundTableEntry[]>([]);

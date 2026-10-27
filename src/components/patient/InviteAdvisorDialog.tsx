@@ -21,7 +21,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 type AccessPermission = "patient_info" | "calendar" | "session_summaries" | "prescription_history";
 
-interface InviteDoctorDialogProps {
+interface InviteAdvisorDialogProps {
   prefillDoctorId?: string;
   prefillPracticeNumber?: string;
   prefillRegistrationNumber?: string;
@@ -30,14 +30,14 @@ interface InviteDoctorDialogProps {
   prefillSpecialty?: string;
 }
 
-export function InviteDoctorDialog({
+export function InviteAdvisorDialog({
   prefillDoctorId,
   prefillPracticeNumber,
   prefillRegistrationNumber,
   prefillDoctorName,
   prefillAvatarUrl,
   prefillSpecialty,
-}: InviteDoctorDialogProps = {}) {
+}: InviteAdvisorDialogProps = {}) {
   const [open, setOpen] = useState(false);
   const [selectedPermissions, setSelectedPermissions] = useState<AccessPermission[]>([
     "patient_info", "calendar", "session_summaries", "prescription_history",

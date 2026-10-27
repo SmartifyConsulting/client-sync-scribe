@@ -17,7 +17,7 @@ import { RouteTipHost } from "@/components/RouteTipHost";
 
 
 
-export function PatientAppLayout() {
+export function ClientAppLayout() {
   const { t, i18n } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO, addDays, isSameDay } from "date-fns";
-import { DoctorProfileDialog } from "@/components/doctors/DoctorProfileDialog";
+import { AdvisorProfileDialog } from "@/components/doctors/AdvisorProfileDialog";
 
 
 interface RoundTableNote {
@@ -800,7 +800,7 @@ export function TodaysBriefing() {
         </div>
       )}
 
-      <DoctorProfileDialog doctorId={viewDoctorId} onOpenChange={(o) => !o && setViewDoctorId(null)} />
+      <AdvisorProfileDialog doctorId={viewDoctorId} onOpenChange={(o) => !o && setViewDoctorId(null)} />
     </div>
   );
 }

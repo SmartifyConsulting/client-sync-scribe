@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { isWealthHidden } from "@/lib/terminology";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { PatientAppLayout } from "@/components/layout/PatientAppLayout";
+import { ClientAppLayout } from "@/components/layout/ClientAppLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import MyFuture from "@/pages/MyFuture";
@@ -199,11 +199,11 @@ const App = () => (
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           
-          {/* Patient routes - using PatientAppLayout (no sidebar/bottom nav) */}
+          {/* Patient routes - using ClientAppLayout (no sidebar/bottom nav) */}
           <Route
             element={
               <ProtectedRoute>
-                <PatientAppLayout />
+                <ClientAppLayout />
               </ProtectedRoute>
             }
           >

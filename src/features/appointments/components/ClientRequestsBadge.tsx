@@ -24,7 +24,7 @@ interface PatientRequest {
   service_name?: string;
 }
 
-export function PatientRequestsBadge() {
+export function ClientRequestsBadge() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [requests, setRequests] = useState<PatientRequest[]>([]);

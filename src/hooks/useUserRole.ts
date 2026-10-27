@@ -21,7 +21,7 @@ export function useUserRole() {
   useEffect(() => {
     async function fetchRole() {
       // useAuth() has no cache of its own — every remount (e.g. crossing between
-      // layouts that structurally differ, like PatientAppLayout <-> AppLayout)
+      // layouts that structurally differ, like ClientAppLayout <-> AppLayout)
       // resets it to user=null, loading=true while it re-checks the session.
       // Treating that transient null the same as "signed out" would flash the
       // wrong nav (defaulting to doctor) before the real user resolves a moment

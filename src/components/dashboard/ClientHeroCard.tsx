@@ -56,7 +56,7 @@ function uploadErrorMessage(err: unknown): string {
   return raw ? `We couldn't save your photo: ${raw}` : "We couldn't save your photo. Please try again.";
 }
 
-export function PatientHeroCard({
+export function ClientHeroCard({
   action,
   emotionalLine,
 }: {
@@ -206,4 +206,4 @@ export function PatientHeroCard({
   );
 }
 
-export default PatientHeroCard;
+export default ClientHeroCard;

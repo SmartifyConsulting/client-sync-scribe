@@ -38,7 +38,7 @@ import { TargetsCommission } from "@/features/wealth-workflow/TargetsCommission"
 import Patients from "@/pages/Patients";
 import DoctorInvoices from "@/pages/doctor/Invoices";
 import Documents from "@/pages/Documents";
-import { DoctorRoundTables } from "@/components/doctor/DoctorRoundTables";
+import { AdvisorRoundTables } from "@/components/doctor/AdvisorRoundTables";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -1186,7 +1186,7 @@ export default function MyPractice() {
           <h1 className="page-title">Round Tables</h1>
           <p className="text-muted-foreground text-xs">View round table discussions you've contributed to</p>
         </div>
-        <DoctorRoundTables />
+        <AdvisorRoundTables />
       </div>
     );
   }

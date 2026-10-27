@@ -13,8 +13,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { InviteDoctorDialog } from "@/components/patient/InviteDoctorDialog";
-import { DoctorProfileDialog } from "@/components/doctors/DoctorProfileDialog";
+import { InviteAdvisorDialog } from "@/components/patient/InviteAdvisorDialog";
+import { AdvisorProfileDialog } from "@/components/doctors/AdvisorProfileDialog";
 import { useToast } from "@/hooks/use-toast";
 import { LANGUAGES, COMMON_SPECIALTIES } from "@/lib/languages";
 import { cn } from "@/lib/utils";
@@ -498,7 +498,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
                    <p className="text-sm text-muted-foreground text-center">
                      No healthcare providers found. Check the spelling, or try their surname, email address or practice number.
                    </p>
-                   <InviteDoctorDialog />
+                   <InviteAdvisorDialog />
                  </div>
               ) : (
                 <div className="space-y-4">
@@ -572,7 +572,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
                                   <TableCell className="p-2">
                                     <div className="flex items-center gap-1">
                                       {doctor.kind === 'doctor' && !alreadyConnected && (
-                                        <InviteDoctorDialog
+                                        <InviteAdvisorDialog
                                           prefillDoctorId={doctor.id}
                                           prefillDoctorName={doctor.full_name || ""}
                                           prefillAvatarUrl={doctor.avatar_url || ""}
@@ -747,7 +747,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
         </DialogContent>
       </Dialog>
 
-      <DoctorProfileDialog doctorId={viewDoctorId} onOpenChange={(o) => !o && setViewDoctorId(null)} />
+      <AdvisorProfileDialog doctorId={viewDoctorId} onOpenChange={(o) => !o && setViewDoctorId(null)} />
     </div>
   );
 }

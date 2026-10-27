@@ -37,7 +37,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { PatientHeroCard } from "@/components/dashboard/PatientHeroCard";
+import { ClientHeroCard } from "@/components/dashboard/ClientHeroCard";
 import { Panel } from "@/components/ui/Panel";
 import { ClientAISummary } from "@/features/wealth-workflow/client/ClientAISummary";
 import { useClientWealth, zar, zarShort, num } from "@/features/wealth-workflow/client/useClientWealth";
@@ -189,7 +189,7 @@ export default function MyPersonalDashboard() {
   return (
     <div className="container mx-auto p-4 max-w-7xl space-y-4">
       {/* Hero: photo, greeting, Vulas, appointments */}
-      <PatientHeroCard emotionalLine={GREETING_LINE[state]} />
+      <ClientHeroCard emotionalLine={GREETING_LINE[state]} />
 
       {w?.patientId && <ClientAISummary patientId={w.patientId} />}
 

@@ -22,7 +22,7 @@ interface DoctorProfileRow {
  * screen that only has a doctor's id (or name) on hand can drill down into
  * their details without first loading the full profile record itself.
  */
-export function DoctorProfileDialog({
+export function AdvisorProfileDialog({
   doctorId,
   onOpenChange,
 }: {
