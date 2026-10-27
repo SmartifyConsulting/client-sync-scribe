@@ -53,7 +53,7 @@ export function UpcomingAppointments() {
 
           if (patientIds.length > 0) {
             const { data: patients } = await supabase
-              .from('patients')
+              .from('clients')
               .select('id, name, created_at')
               .in('id', patientIds);
             if (patients) {

@@ -240,7 +240,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
   const fetchPatients = async () => {
     try {
       const { data, error } = await supabase
-        .from('patients')
+        .from('clients')
         .select('id, name')
         .order('name');
       
@@ -283,7 +283,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
     try {
       // Pull patient details + linked patient profile (for auto-email toggle).
       const { data: patientData } = await supabase
-        .from("patients")
+        .from("clients")
         .select("id, name, email, physical_address, postal_address, address, medical_aid, medical_aid_number, primary_member, claims_email, patient_user_id")
         .eq("id", invoice.patient.id)
         .maybeSingle();
@@ -397,7 +397,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
     setUpdatingId(invoice.id);
     try {
       const { data: patientData } = await supabase
-        .from("patients")
+        .from("clients")
         .select("id, name, email, physical_address, postal_address, address, medical_aid, medical_aid_number, primary_member")
         .eq("id", invoice.patient.id)
         .maybeSingle();
@@ -493,7 +493,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
       if (updatedInvoice?.patient?.id) {
         try {
           const { data: patientData } = await supabase
-            .from('patients')
+            .from('clients')
             .select('claims_email, patient_user_id')
             .eq('id', updatedInvoice.patient.id)
             .maybeSingle();
@@ -571,7 +571,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
     try {
       const { data: patientData } = invoice.patient?.id
         ? await supabase
-            .from("patients")
+            .from("clients")
             .select("id, name, physical_address, postal_address, address, medical_aid, medical_aid_number, primary_member, claims_email")
             .eq("id", invoice.patient.id)
             .maybeSingle()

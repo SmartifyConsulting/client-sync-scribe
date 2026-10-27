@@ -167,7 +167,7 @@ export default function SessionDetail() {
     try {
       // Get patient email for sending
       const { data: patient } = await supabase
-        .from('patients')
+        .from('clients')
         .select('email, pharmacy_email, name')
         .eq('id', doc.patient_id)
         .maybeSingle();

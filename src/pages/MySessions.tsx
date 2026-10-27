@@ -119,7 +119,7 @@ export default function MySessions() {
       setLoading(true);
       setLoadError(null);
       const { data: myPatients, error: patientsError } = await supabase
-        .from("patients")
+        .from("clients")
         .select("id")
         .eq("patient_user_id", user.id);
       if (patientsError) {

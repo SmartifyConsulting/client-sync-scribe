@@ -1,6 +1,6 @@
 /**
  * Patient-domain Supabase queries. Functions throw on error and return data.
- * Hooks/components can adopt these to remove inline `supabase.from('patients')`
+ * Hooks/components can adopt these to remove inline `supabase.from('clients')`
  * calls. Behaviour is identical to existing inline queries.
  */
 
@@ -13,7 +13,7 @@ export type PatientUpdate = Database["public"]["Tables"]["patients"]["Update"];
 
 export async function listPatients(): Promise<PatientRow[]> {
   const { data, error } = await supabase
-    .from("patients")
+    .from("clients")
     .select("*")
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -22,7 +22,7 @@ export async function listPatients(): Promise<PatientRow[]> {
 
 export async function fetchPatientById(id: string): Promise<PatientRow | null> {
   const { data, error } = await supabase
-    .from("patients")
+    .from("clients")
     .select("*")
     .eq("id", id)
     .maybeSingle();
@@ -45,7 +45,7 @@ export async function fetchPatientLastVisit(patientId: string): Promise<string |
 
 export async function findPatientByUserId(userId: string): Promise<PatientRow | null> {
   const { data, error } = await supabase
-    .from("patients")
+    .from("clients")
     .select("*")
     .eq("patient_user_id", userId)
     .maybeSingle();
@@ -57,7 +57,7 @@ export async function createPatient(
   payload: PatientInsert,
 ): Promise<PatientRow> {
   const { data, error } = await supabase
-    .from("patients")
+    .from("clients")
     .insert(payload)
     .select()
     .single();
@@ -70,7 +70,7 @@ export async function updatePatient(
   updates: PatientUpdate,
 ): Promise<PatientRow> {
   const { data, error } = await supabase
-    .from("patients")
+    .from("clients")
     .update(updates)
     .eq("id", id)
     .select()
@@ -80,7 +80,7 @@ export async function updatePatient(
 }
 
 export async function deletePatient(id: string): Promise<void> {
-  const { error } = await supabase.from("patients").delete().eq("id", id);
+  const { error } = await supabase.from("clients").delete().eq("id", id);
   if (error) throw error;
 }
 
@@ -88,6 +88,6 @@ export async function setPatientStatus(
   id: string,
   status: "active" | "inactive" | "archived",
 ): Promise<void> {
-  const { error } = await supabase.from("patients").update({ status }).eq("id", id);
+  const { error } = await supabase.from("clients").update({ status }).eq("id", id);
   if (error) throw error;
 }

@@ -76,7 +76,7 @@ export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSa
     const fetchData = async () => {
       // Fetch patient details
       const { data: patientData, error: patientError } = await supabase
-        .from('patients')
+        .from('clients')
         .select('name, medical_aid, medical_aid_number')
         .eq('id', patientId)
         .single();

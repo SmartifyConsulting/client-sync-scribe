@@ -20,7 +20,7 @@ export default function ActivityLog() {
     queryKey: ["wealth-activity-log", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data: patients } = await db.from("patients").select("id,name").eq("user_id", user!.id);
+      const { data: patients } = await db.from("clients").select("id,name").eq("user_id", user!.id);
       const ids = (patients ?? []).map((p: any) => p.id);
       if (!ids.length) return [];
       const namesByPatient = new Map((patients ?? []).map((p: any) => [p.id, p.name]));

@@ -26,7 +26,7 @@ export function BiologEmotionalState({ ownerUserId }: { ownerUserId?: string }) 
         return;
       }
       const { data } = await supabase
-        .from("patients")
+        .from("clients")
         .select("id")
         .eq("patient_user_id", uid)
         .order("created_at")

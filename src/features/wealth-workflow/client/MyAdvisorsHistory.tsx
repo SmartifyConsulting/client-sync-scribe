@@ -9,7 +9,7 @@ export function MyAdvisorsHistory({ patientId }: { patientId: string }) {
   const { data = [], isLoading } = useQuery({
     queryKey: ["my-advisors-history", patientId],
     queryFn: async () => {
-      const { data: p } = await supabase.from("patients").select("user_id, patient_user_id, created_at").eq("id", patientId).maybeSingle();
+      const { data: p } = await supabase.from("clients").select("user_id, patient_user_id, created_at").eq("id", patientId).maybeSingle();
       const rows: { id: string; from: string; to: string | null; active: boolean }[] = [];
       if (p?.patient_user_id) {
         const { data: acc } = await supabase

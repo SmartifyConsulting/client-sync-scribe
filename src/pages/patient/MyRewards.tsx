@@ -192,7 +192,7 @@ export default function MyRewards({ embedded = false }: { embedded?: boolean } =
 
       // Get patient id for the deduction record
       const { data: patient } = await supabase
-        .from("patients")
+        .from("clients")
         .select("id")
         .eq("patient_user_id", user.id)
         .order("created_at", { ascending: false })

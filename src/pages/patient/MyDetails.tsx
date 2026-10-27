@@ -43,7 +43,7 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
 
       // 1) Prefer a non-archived row linked to this user
       let { data, error } = await supabase
-        .from("patients")
+        .from("clients")
         .select("*")
         .eq("patient_user_id", user.id)
         .neq("status", "archived")
@@ -56,7 +56,7 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
       // 2) Fallback: find a non-archived row by email and self-heal the link
       if (!data && user.email) {
         const { data: byEmail } = await supabase
-          .from("patients")
+          .from("clients")
           .select("*")
           .ilike("email", user.email)
           .neq("status", "archived")
@@ -66,7 +66,7 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
 
         if (byEmail) {
           const { data: healed } = await supabase
-            .from("patients")
+            .from("clients")
             .update({ patient_user_id: user.id })
             .eq("id", byEmail.id)
             .select("*")
@@ -88,7 +88,7 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
           (user.email ? user.email.split("@")[0] : "New Patient");
 
         const { data: created, error: insertErr } = await supabase
-          .from("patients")
+          .from("clients")
           .insert({
             user_id: user.id,
             patient_user_id: user.id,
@@ -105,7 +105,7 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
           // user's record — fetch it instead of surfacing an error.
           if ((insertErr as any).code === "23505") {
             const { data: winner } = await supabase
-              .from("patients")
+              .from("clients")
               .select("*")
               .eq("patient_user_id", user.id)
               .order("created_at", { ascending: false })
@@ -147,7 +147,7 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
   const handleSave = async (updates: Partial<Patient>) => {
     if (!patient) return;
     const { error } = await supabase
-      .from("patients")
+      .from("clients")
       .update(updates as any)
       .eq("id", patient.id);
 

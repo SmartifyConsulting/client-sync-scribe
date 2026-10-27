@@ -81,7 +81,7 @@ export function AppointmentRequestsPanel() {
       let serviceMap: Record<string, string> = {};
 
       if (patientIds.length) {
-        const { data: patients } = await supabase.from("patients").select("id, name").in("id", patientIds);
+        const { data: patients } = await supabase.from("clients").select("id, name").in("id", patientIds);
         (patients || []).forEach((p) => { patientMap[p.id] = p.name; });
       }
       // Fallback: fetch from profiles using patient_user_id

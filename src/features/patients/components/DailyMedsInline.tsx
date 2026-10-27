@@ -109,7 +109,7 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
       return;
     }
     if (isChronic) {
-      await supabase.from("patients").update({ is_chronic: true } as any).eq("id", patientId);
+      await supabase.from("clients").update({ is_chronic: true } as any).eq("id", patientId);
     }
     setPickedId(""); setShowCustom(false); setCustomName("");
     toast({ title: "Added — you'll be reminded" });

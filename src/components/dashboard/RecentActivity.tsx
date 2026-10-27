@@ -52,7 +52,7 @@ export function RecentActivity() {
     const fetchRecentPatients = async () => {
       try {
         const { data: patients } = await supabase
-          .from('patients')
+          .from('clients')
           .select('id, name, created_at')
           .order('created_at', { ascending: false })
           .limit(4);

@@ -54,7 +54,7 @@ export default function PatientRoundTable({ hideHeader = false }: { hideHeader?:
     if (!user) return;
     setLoading(true);
     const { data: patients } = await supabase
-      .from("patients")
+      .from("clients")
       .select("id")
       .eq("patient_user_id", user.id);
 

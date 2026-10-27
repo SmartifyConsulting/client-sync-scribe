@@ -341,7 +341,7 @@ export default function TodoList() {
       // Notify patient if task has a patient_id
       if (data.patient_id) {
         try {
-          const { data: patient } = await supabase.from('patients').select('patient_user_id').eq('id', data.patient_id).maybeSingle();
+          const { data: patient } = await supabase.from('clients').select('patient_user_id').eq('id', data.patient_id).maybeSingle();
           if (patient?.patient_user_id) {
             await supabase.from('notifications').insert({
               user_id: patient.patient_user_id,

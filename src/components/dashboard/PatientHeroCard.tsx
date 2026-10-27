@@ -84,7 +84,7 @@ export function PatientHeroCard({
     queryKey: ["hero-client-record-name", user?.id],
     enabled: !!user?.id && !profile?.full_name && !profileLoading,
     queryFn: async () => {
-      const { data } = await supabase.from("patients").select("name").eq("patient_user_id", user!.id).order("created_at").limit(1).maybeSingle();
+      const { data } = await supabase.from("clients").select("name").eq("patient_user_id", user!.id).order("created_at").limit(1).maybeSingle();
       return (data?.name as string) || "";
     },
   });

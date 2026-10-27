@@ -54,7 +54,7 @@ export function RelationshipProfileExercise({ patientId }: { patientId: string }
       const { data: auth } = await supabase.auth.getUser();
       const uid = auth?.user?.id ?? null;
       const { data: pat } = await supabase
-        .from("patients")
+        .from("clients")
         .select("patient_user_id")
         .eq("id", patientId)
         .maybeSingle();

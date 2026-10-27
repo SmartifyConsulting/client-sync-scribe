@@ -38,7 +38,7 @@ export function DoctorRoundTables({ compact = false }: { compact?: boolean } = {
         .eq("doctor_id", user!.id);
 
       const { data: rosterPatients } = await supabase
-        .from("patients")
+        .from("clients")
         .select("id")
         .eq("user_id", user!.id);
 
@@ -67,7 +67,7 @@ export function DoctorRoundTables({ compact = false }: { compact?: boolean } = {
 
       // Get patient names
       const { data: patients } = await supabase
-        .from("patients")
+        .from("clients")
         .select("id, name")
         .in("id", patientIds);
 

@@ -36,7 +36,7 @@ export default function PracticePatients() {
         return;
       }
       const { data } = await supabase
-        .from("patients")
+        .from("clients")
         .select("id, name, email, phone, user_id")
         .in("user_id", doctorIds)
         .order("name", { ascending: true });

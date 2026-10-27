@@ -403,7 +403,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return 0;
       const sbx = supabase as any;
-      const { data: patient } = await sbx.from("patients").select("id")
+      const { data: patient } = await sbx.from("clients").select("id")
         .or(`user_id.eq.${user.id},patient_user_id.eq.${user.id}`).maybeSingle();
       if (!patient) return 0;
       const [{ count: docsCount }, { data: workflows }] = await Promise.all([

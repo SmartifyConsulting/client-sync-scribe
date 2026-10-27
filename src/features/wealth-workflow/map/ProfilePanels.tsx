@@ -44,7 +44,7 @@ export function PersonalInfoPanel({ patientId, personal }: { patientId?: string;
     if (!patientId) return;
     if (missing.length) return toast({ title: "A few details are missing", description: `Please add your ${missing.join(", ")}.`, variant: "destructive" });
     setBusy(true);
-    const { error } = await db.from("patients").update({ ...f, address: f.physical_address, dob: f.dob || null }).eq("id", patientId);
+    const { error } = await db.from("clients").update({ ...f, address: f.physical_address, dob: f.dob || null }).eq("id", patientId);
     setBusy(false);
     if (error) return toast({ title: "Couldn't save your details", description: "Please try again. If it keeps happening, contact your Wealth Manager.", variant: "destructive" });
     toast({ title: "Personal information saved" });

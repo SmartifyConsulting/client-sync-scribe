@@ -239,7 +239,7 @@ export function usePatients() {
       }
       
       const { data, error } = await supabase
-        .from('patients')
+        .from('clients')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -262,13 +262,13 @@ export function usePatients() {
           const shouldSetInactive = shouldBeInactive(lastVisit, inactiveThresholdMonths);
           if (shouldSetInactive && typedPatient.status === 'active') {
             await supabase
-              .from('patients')
+              .from('clients')
               .update({ status: 'inactive' })
               .eq('id', patient.id);
             typedPatient.status = 'inactive';
           } else if (!shouldSetInactive && lastVisit && typedPatient.status === 'inactive') {
             await supabase
-              .from('patients')
+              .from('clients')
               .update({ status: 'active' })
               .eq('id', patient.id);
             typedPatient.status = 'active';
@@ -307,7 +307,7 @@ export function usePatients() {
 
       if (patient.patient_user_id) {
         const { data: existing, error: existingError } = await supabase
-          .from('patients')
+          .from('clients')
           .select('*')
           .eq('patient_user_id', patient.patient_user_id)
           .neq('status', 'archived')
@@ -319,7 +319,7 @@ export function usePatients() {
       }
 
       const { data, error } = await supabase
-        .from('patients')
+        .from('clients')
         .insert({
           name: patient.name,
           ...dbPatient,
@@ -331,7 +331,7 @@ export function usePatients() {
       if (error) {
         if (error.code === '23505' && patient.patient_user_id) {
           const { data: existing } = await supabase
-            .from('patients')
+            .from('clients')
             .select('*')
             .eq('patient_user_id', patient.patient_user_id)
             .neq('status', 'archived')
@@ -362,7 +362,7 @@ export function usePatients() {
       const dbUpdates = toDbPatient(updates);
 
       const { data, error } = await supabase
-        .from('patients')
+        .from('clients')
         .update(dbUpdates)
         .eq('id', id)
         .select()
@@ -386,7 +386,7 @@ export function usePatients() {
 
   const deletePatient = async (id: string) => {
     try {
-      const { error } = await supabase.from('patients').delete().eq('id', id);
+      const { error } = await supabase.from('clients').delete().eq('id', id);
 
       if (error) throw error;
       setPatients((prev) => prev.filter((p) => p.id !== id));
@@ -426,7 +426,7 @@ export function usePatient(id: string) {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('patients')
+        .from('clients')
         .select('*')
         .eq('id', id)
         .maybeSingle();
@@ -440,7 +440,7 @@ export function usePatient(id: string) {
       // hospital admissions) attached to any of the duplicates surfaces.
       if (resolved?.patient_user_id) {
         const { data: siblings } = await supabase
-          .from('patients')
+          .from('clients')
           .select('*')
           .eq('patient_user_id', resolved.patient_user_id)
           .order('updated_at', { ascending: false });
@@ -483,7 +483,7 @@ export function usePatient(id: string) {
       const patientId = patient?.id || id;
 
       const { data, error } = await supabase
-        .from('patients')
+        .from('clients')
         .update(dbUpdates)
         .eq('id', patientId)
         .select()

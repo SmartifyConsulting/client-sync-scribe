@@ -470,7 +470,7 @@ export default function Auth() {
           if (invitation) {
             await supabase.from("client_invitations").update({ status: "accepted" }).eq("id", invitation.id);
             if (invitation.patient_id) {
-              await supabase.from("patients").update({
+              await supabase.from("clients").update({
                 patient_user_id: userId,
                 email: email || null,
                 phone: fullPhone,
@@ -513,7 +513,7 @@ export default function Auth() {
           // e.g. MyDetails' own self-heal, concurrently created this user's
           // record first) are intentionally not fatal to signup — MyDetails
           // will find/use whichever record exists on next load either way.
-          await supabase.from("patients").insert({
+          await supabase.from("clients").insert({
             user_id: userId,
             patient_user_id: userId,
             name: fullName,

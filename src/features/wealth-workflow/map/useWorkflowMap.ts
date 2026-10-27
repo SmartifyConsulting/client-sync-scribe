@@ -28,7 +28,7 @@ export function useWorkflowRecords(workflowId?: string, patientId?: string) {
         db.from("documents").select("id,name,document_kind,created_at").eq("patient_id", patientId).not("document_kind", "is", null),
         db.from("wealth_kyc_checks").select("*").eq("workflow_id", workflowId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
         db.from("wealth_signed_documents").select("*").eq("workflow_id", workflowId).order("signed_at"),
-        db.from("patients").select("user_id,patient_user_id,name,id_passport_number,dob,physical_address,address,postal_address,marital_status,marital_regime,phone,email").eq("id", patientId).maybeSingle(),
+        db.from("clients").select("user_id,patient_user_id,name,id_passport_number,dob,physical_address,address,postal_address,marital_status,marital_regime,phone,email").eq("id", patientId).maybeSingle(),
         db.from("wealth_portfolio_holdings").select("*").eq("patient_id", patientId).order("provider"),
         db.from("client_financial_profiles").select("extracted_at,verified_at,extracted_from_session_id").eq("patient_id", patientId).maybeSingle(),
         db.from("sessions").select("id,title,created_at,transcript,notes,summary").eq("patient_id", patientId).order("created_at", { ascending: false }).limit(10),

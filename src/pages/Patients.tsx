@@ -197,7 +197,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
 
     const ensureSelfRecord = async () => {
       const { data: existing } = await supabase
-        .from("patients")
+        .from("clients")
         .select("id")
         .eq("patient_user_id", user.id)
         .neq("status", "archived")

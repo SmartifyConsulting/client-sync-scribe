@@ -71,7 +71,7 @@ export function PillBaselineCapture({
     if (!open || !patientId) return;
     (async () => {
       const { data } = await supabase
-        .from("patients")
+        .from("clients")
         .select("emergency_contact_name, emergency_contact_phone, next_of_kin_name, next_of_kin_phone")
         .eq("id", patientId)
         .maybeSingle();
@@ -408,7 +408,7 @@ export function PillBaselineCapture({
             if (editPhone.trim() && !patientContacts?.next_of_kin_phone) patch.next_of_kin_phone = editPhone.trim();
           }
           if (Object.keys(patch).length) {
-            await supabase.from("patients").update(patch).eq("id", patientId);
+            await supabase.from("clients").update(patch).eq("id", patientId);
           }
         }
       } catch (e) {

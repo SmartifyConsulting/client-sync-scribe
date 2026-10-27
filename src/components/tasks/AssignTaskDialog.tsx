@@ -64,7 +64,7 @@ export function AssignTaskDialog({
     if (!open) return;
     (async () => {
       const { data } = await supabase
-        .from("patients")
+        .from("clients")
         .select("id, name, patient_user_id")
         .order("name", { ascending: true });
       setPatients((data || []) as any);

@@ -100,7 +100,7 @@ export function useOwnerDob(ownerUserId?: string) {
     staleTime: 30 * 60 * 1000,
     queryFn: async (): Promise<string | null> => {
       const { data, error } = await db
-        .from("patients")
+        .from("clients")
         .select("dob")
         .eq("user_id", owner)
         .order("created_at")

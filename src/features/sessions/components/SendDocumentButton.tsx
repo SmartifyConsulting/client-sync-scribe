@@ -159,7 +159,7 @@ export function SendDocumentButton({
       setSending(true);
       try {
         const { data: patient } = await supabase
-          .from("patients")
+          .from("clients")
           .select("email, pharmacy_name, pharmacy_email, pharmacies")
           .eq("id", patientId)
           .maybeSingle();
@@ -195,7 +195,7 @@ export function SendDocumentButton({
     }
 
     const { data: patient } = await supabase
-      .from("patients")
+      .from("clients")
       .select("email, pharmacy_email, claims_email, reporting_to_email")
       .eq("id", patientId)
       .maybeSingle();

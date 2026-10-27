@@ -205,7 +205,7 @@ export function TodaysBriefing() {
           if (apt.patient_id) {
             // Get patient info
             const { data: patient } = await supabase
-              .from('patients')
+              .from('clients')
               .select('name, allergies, patient_user_id')
               .eq('id', apt.patient_id)
               .maybeSingle();

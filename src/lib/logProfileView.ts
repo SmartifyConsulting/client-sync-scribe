@@ -13,7 +13,7 @@ export async function logProfileView(patientId: string | null | undefined, scree
     if (!viewerId) return;
 
     const { data: patient } = await supabase
-      .from("patients")
+      .from("clients")
       .select("patient_user_id")
       .eq("id", patientId)
       .maybeSingle();

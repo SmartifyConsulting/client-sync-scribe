@@ -87,7 +87,7 @@ export function DoctorsOnProfile({ patientId, patientName }: DoctorsOnProfilePro
     try {
       // Get the patient record to find the patient_user_id
       const { data: patient, error: patientError } = await supabase
-        .from('patients')
+        .from('clients')
         .select('patient_user_id')
         .eq('id', patientId)
         .maybeSingle();

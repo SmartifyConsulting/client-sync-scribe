@@ -12,7 +12,7 @@ function useManagerFirst(patientId: string) {
   return useQuery({
     queryKey: ["wm-first", patientId],
     queryFn: async () => {
-      const { data: p } = await supabase.from("patients").select("user_id").eq("id", patientId).maybeSingle();
+      const { data: p } = await supabase.from("clients").select("user_id").eq("id", patientId).maybeSingle();
       if (!p?.user_id) return null;
       const { data: pr } = await supabase.from("profiles").select("full_name").eq("id", p.user_id).maybeSingle();
       return (pr?.full_name || "").split(" ")[0] || null;

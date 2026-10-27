@@ -211,7 +211,7 @@ export function MedicalCertificateEditor({
       // Auto-email to employer if patient allows
       try {
         const { data: patientData } = await supabase
-          .from('patients')
+          .from('clients')
           .select('reporting_to_email, patient_user_id')
           .eq('id', patientId)
           .maybeSingle();

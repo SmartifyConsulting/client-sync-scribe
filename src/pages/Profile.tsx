@@ -41,7 +41,7 @@ function AutoCreatePatientFallback({ user, onCreated }: { user: any; onCreated: 
       // Re-check right before inserting — another tab/flow (signup, MyDetails'
       // own self-heal) may have created this user's record in the meantime.
       const { data: existing } = await supabase
-        .from("patients")
+        .from("clients")
         .select("*")
         .eq("patient_user_id", user.id)
         .order("created_at", { ascending: false })
@@ -50,7 +50,7 @@ function AutoCreatePatientFallback({ user, onCreated }: { user: any; onCreated: 
       let data = existing;
       if (!data) {
         const { data: profileData } = await supabase.from("profiles").select("full_name, mobile_number").eq("id", user.id).single();
-        const { data: inserted, error } = await supabase.from("patients").insert({
+        const { data: inserted, error } = await supabase.from("clients").insert({
           user_id: user.id,
           patient_user_id: user.id,
           name: profileData?.full_name || "My Record",
@@ -61,7 +61,7 @@ function AutoCreatePatientFallback({ user, onCreated }: { user: any; onCreated: 
         // fall back to fetching the record it created instead of erroring.
         if (error && (error as any).code === "23505") {
           const { data: winner } = await supabase
-            .from("patients")
+            .from("clients")
             .select("*")
             .eq("patient_user_id", user.id)
             .order("created_at", { ascending: false })
@@ -272,7 +272,7 @@ export default function Profile() {
       setPatientLoading(true);
       try {
         const { data, error } = await supabase
-          .from("patients")
+          .from("clients")
           .select("*")
           .eq("patient_user_id", user.id)
           .order("created_at", { ascending: false })
@@ -316,7 +316,7 @@ export default function Profile() {
           patient={patientRecord}
           onSave={async (updates: Partial<Patient>) => {
             const { error } = await supabase
-              .from("patients")
+              .from("clients")
               .update(updates as any)
               .eq("id", patientRecord.id);
             if (error) {

@@ -109,7 +109,7 @@ export default function MyPersonalDashboard() {
     queryKey: ["dashboard-patient-ids", user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
-      const { data } = await supabase.from("patients").select("id").eq("patient_user_id", user!.id);
+      const { data } = await supabase.from("clients").select("id").eq("patient_user_id", user!.id);
       return (data || []).map((p) => p.id);
     },
   });
@@ -119,7 +119,7 @@ export default function MyPersonalDashboard() {
     enabled: patientIds.length > 0,
     queryFn: async () => {
       const { data } = await supabase
-        .from("patients")
+        .from("clients")
         .select("emergency_contacts")
         .in("id", patientIds)
         .limit(1)

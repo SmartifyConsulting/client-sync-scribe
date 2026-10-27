@@ -88,7 +88,7 @@ export function EmotionalJournal({ patientId }: { patientId: string }) {
       setUserId(uid);
 
       const { data: pat } = await supabase
-        .from("patients")
+        .from("clients")
         .select("patient_user_id")
         .eq("id", patientId)
         .maybeSingle();

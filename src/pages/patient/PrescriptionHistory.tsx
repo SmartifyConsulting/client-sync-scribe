@@ -59,7 +59,7 @@ export default function Documentation() {
     try {
       // Resolve the patient record id for this user (needed for renewals).
       const { data: patient } = await supabase
-        .from("patients")
+        .from("clients")
         .select("id")
         .eq("patient_user_id", user.id)
         .order("created_at", { ascending: false })

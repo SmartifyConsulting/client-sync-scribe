@@ -21,7 +21,7 @@ export default function Messenger() {
     enabled: !!me,
     refetchInterval: 15000,
     queryFn: async (): Promise<Thread[]> => {
-      const { data: pts } = await (supabase as any).from("patients")
+      const { data: pts } = await (supabase as any).from("clients")
         .select("id, name, user_id, patient_user_id")
         .or(`patient_user_id.eq.${me},and(user_id.eq.${me},patient_user_id.not.is.null)`)
         .order("name");

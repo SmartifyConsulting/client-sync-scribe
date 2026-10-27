@@ -231,7 +231,7 @@ Signature: ___________________
       // Auto-email to pharmacy if patient allows
       try {
         const { data: patientData } = await supabase
-          .from('patients')
+          .from('clients')
           .select('pharmacy_email, pharmacy_name, patient_user_id, pharmacies')
           .eq('id', patientId)
           .maybeSingle();
@@ -276,7 +276,7 @@ Signature: ___________________
       // Auto-assign medication adherence tasks for chronic patients
       try {
         const { data: patientCheck } = await supabase
-          .from('patients')
+          .from('clients')
           .select('is_chronic, patient_user_id')
           .eq('id', patientId)
           .maybeSingle();
@@ -557,7 +557,7 @@ Signature: ___________________
               onClick={async () => {
                 try {
                   const { data: patientData } = await supabase
-                    .from('patients')
+                    .from('clients')
                     .select('pharmacy_email, pharmacy_name')
                     .eq('id', patientId)
                     .maybeSingle();

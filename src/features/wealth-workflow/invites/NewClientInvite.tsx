@@ -114,7 +114,7 @@ export function NewClientInvite({ compact = false }: { compact?: boolean }) {
     if (error || data?.error) return toast({ title: "Couldn't create client", description: msg ?? "Please try again.", variant: "destructive" });
     setResult(data.url);
     qc.invalidateQueries({ queryKey: ["client-invites"] });
-    qc.invalidateQueries({ queryKey: ["patients"] });
+    qc.invalidateQueries({ queryKey: ["clients"] });
   };
   const close = (v: boolean) => { setOpen(v); if (!v) { setResult(null); setF({ firstName: "", lastName: "", phone: "", email: "" }); } };
 

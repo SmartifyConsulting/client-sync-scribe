@@ -38,7 +38,7 @@ export interface Session {
 // Helper to notify patient when a task is assigned to them
 const notifyPatientOfTask = async (patientId: string, taskTitle: string, taskId: string) => {
   try {
-    const { data: patient } = await supabase.from('patients').select('patient_user_id').eq('id', patientId).maybeSingle();
+    const { data: patient } = await supabase.from('clients').select('patient_user_id').eq('id', patientId).maybeSingle();
     if (patient?.patient_user_id) {
       await supabase.from('notifications').insert({
         user_id: patient.patient_user_id,
@@ -357,7 +357,7 @@ const completeSession = async (
         try {
           const admission = summaryData.hospital_admission;
           const [patientRes, profileRes, templateRes] = await Promise.all([
-            supabase.from('patients').select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email').eq('id', patientId).maybeSingle(),
+            supabase.from('clients').select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email').eq('id', patientId).maybeSingle(),
             supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty, practice_address').eq('id', user.id).maybeSingle(),
             supabase.from('templates').select('id, name, content, header_footer_template_id').eq('user_id', user.id),
           ]);
@@ -463,7 +463,7 @@ const completeSession = async (
           const medications = rx.medications || rx.items || [];
           if (medications.length > 0 || rx.medication) {
             const [patientRes, profileRes, templateRes] = await Promise.all([
-              supabase.from('patients').select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email, allergies, pharmacy_name').eq('id', patientId).maybeSingle(),
+              supabase.from('clients').select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email, allergies, pharmacy_name').eq('id', patientId).maybeSingle(),
               supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty, practice_address').eq('id', user.id).maybeSingle(),
               supabase.from('templates').select('id, name, content, header_footer_template_id').eq('user_id', user.id),
             ]);
@@ -592,7 +592,7 @@ const completeSession = async (
         try {
           const cert = summaryData.medical_certificate;
           const [patientRes, profileRes, templateRes] = await Promise.all([
-            supabase.from('patients').select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email').eq('id', patientId).maybeSingle(),
+            supabase.from('clients').select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email').eq('id', patientId).maybeSingle(),
             supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty, practice_address').eq('id', user.id).maybeSingle(),
             supabase.from('templates').select('id, name, content').eq('user_id', user.id),
           ]);
@@ -707,7 +707,7 @@ const completeSession = async (
         try {
           const ref = summaryData.referral;
           const [patientRes, profileRes, templateRes] = await Promise.all([
-            supabase.from('patients').select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email').eq('id', patientId).maybeSingle(),
+            supabase.from('clients').select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email').eq('id', patientId).maybeSingle(),
             supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty, practice_address').eq('id', user.id).maybeSingle(),
             supabase.from('templates').select('id, name, content').eq('user_id', user.id),
           ]);
@@ -827,7 +827,7 @@ const completeSession = async (
       if (patientId) {
         try {
           const [patientRes, profileRes, templateRes, servicePricesRes, priorSessionsRes] = await Promise.all([
-            supabase.from('patients')
+            supabase.from('clients')
               .select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email')
               .eq('id', patientId).maybeSingle(),
             supabase.from('profiles')
@@ -1029,7 +1029,7 @@ ${sessionSignature ? `<br/><div>${sessionSignature}</div><div style="border-top:
       if (summaryData?.patient_tasks?.tasks?.length > 0 && patientId) {
         try {
           const tasks = summaryData.patient_tasks.tasks;
-          const { data: patientRes } = await supabase.from('patients').select('name').eq('id', patientId).maybeSingle();
+          const { data: patientRes } = await supabase.from('clients').select('name').eq('id', patientId).maybeSingle();
           const patientName = patientRes?.name || 'Patient';
           const today = new Date().toISOString().split('T')[0];
 
@@ -1116,7 +1116,7 @@ ${tasksHtml}`;
         const lollipopsToAward = configData?.lollipops_awarded || 1;
 
         const { data: patientData } = await supabase
-          .from('patients')
+          .from('clients')
           .select('patient_user_id')
           .eq('id', patientId)
           .maybeSingle();

@@ -183,7 +183,7 @@ function ChronicAdherenceSection({ patientId, patientName }: { patientId: string
 
       // Notify patient
       const { data: patientData } = await supabase
-        .from("patients")
+        .from("clients")
         .select("patient_user_id")
         .eq("id", patientId)
         .maybeSingle();

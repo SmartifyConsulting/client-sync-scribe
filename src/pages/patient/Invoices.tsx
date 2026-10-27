@@ -98,7 +98,7 @@ export default function Invoices() {
         // Fetch patient info if not already fetched
         if (!patientMap[inv.patient_id]) {
           const { data: patientData } = await supabase
-            .from("patients")
+            .from("clients")
             .select("name, email, claims_email, medical_aid, medical_aid_number")
             .eq("id", inv.patient_id)
             .maybeSingle();

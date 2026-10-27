@@ -219,7 +219,7 @@ export async function resolveDocumentPreviewContent(
 
   const [patientRes, profileRes] = await Promise.all([
     patientId
-      ? supabase.from("patients").select("*").eq("id", patientId).maybeSingle()
+      ? supabase.from("clients").select("*").eq("id", patientId).maybeSingle()
       : Promise.resolve({ data: null } as any),
     doc.user_id
       ? supabase.from("profiles").select("*").eq("id", doc.user_id).maybeSingle()

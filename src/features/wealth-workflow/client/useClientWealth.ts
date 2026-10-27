@@ -50,9 +50,9 @@ export function useClientWealth(explicitPatientId?: string) {
     queryFn: async (): Promise<ClientWealth> => {
       let patient: any = null;
       if (explicitPatientId) {
-        patient = (await sb.from("patients").select("id,name,next_of_kin_members,next_of_kin_name,next_of_kin_relationship").eq("id", explicitPatientId).maybeSingle()).data;
+        patient = (await sb.from("clients").select("id,name,next_of_kin_members,next_of_kin_name,next_of_kin_relationship").eq("id", explicitPatientId).maybeSingle()).data;
       } else {
-        patient = (await sb.from("patients").select("id,name,next_of_kin_members,next_of_kin_name,next_of_kin_relationship").eq("patient_user_id", user!.id).order("created_at").limit(1).maybeSingle()).data;
+        patient = (await sb.from("clients").select("id,name,next_of_kin_members,next_of_kin_name,next_of_kin_relationship").eq("patient_user_id", user!.id).order("created_at").limit(1).maybeSingle()).data;
       }
       const pid = patient?.id ?? null;
       if (!pid) {

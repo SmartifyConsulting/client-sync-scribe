@@ -334,7 +334,7 @@ export function useMyRewards() {
 
         // Find patient record linked to this user
         const { data: patientData } = await supabase
-          .from('patients')
+          .from('clients')
           .select('id')
           .eq('patient_user_id', user.id)
           .maybeSingle();
@@ -379,7 +379,7 @@ export function useMyChronicPatientId() {
       if (!user) return null;
 
       const { data: patients } = await supabase
-        .from('patients')
+        .from('clients')
         .select('id, is_chronic, created_at, status')
         .eq('patient_user_id', user.id)
         .neq('status', 'archived');
@@ -459,7 +459,7 @@ export function useMyStreaks() {
 
         // Find patient record linked to this user
         const { data: patientData } = await supabase
-          .from('patients')
+          .from('clients')
           .select('id')
           .eq('patient_user_id', user.id)
           .maybeSingle();

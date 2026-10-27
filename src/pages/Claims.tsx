@@ -46,7 +46,7 @@ export default function Claims() {
     queryKey: ["claims-clients", user?.id, isClient],
     enabled: !!user && role !== null,
     queryFn: async () => {
-      let query = sb.from("patients").select("id,name").order("name");
+      let query = sb.from("clients").select("id,name").order("name");
       if (isClient) query = query.eq("patient_user_id", user!.id);
       const { data, error } = await query;
       if (error) throw error;

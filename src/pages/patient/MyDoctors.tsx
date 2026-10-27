@@ -159,7 +159,7 @@ export default function MyDoctors({ hideHeader = false, showAccessReminder = fal
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
       const { data: patientRow } = await supabase
-        .from("patients")
+        .from("clients")
         .select("general_practitioner")
         .eq("patient_user_id", user.id)
         .maybeSingle();

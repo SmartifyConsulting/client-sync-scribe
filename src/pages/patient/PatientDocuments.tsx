@@ -281,7 +281,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
     setLoading(true);
 
     const { data: patients } = await supabase
-      .from("patients")
+      .from("clients")
       .select("id, name")
       .eq("patient_user_id", user.id);
 

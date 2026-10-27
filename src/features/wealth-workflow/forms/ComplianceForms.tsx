@@ -53,7 +53,7 @@ function FormDialog({ form, onClose }: { form: ComplianceForm; onClose: () => vo
   const { data: clients = [] } = useQuery({
     queryKey: ["compliance-form-clients"],
     queryFn: async () => {
-      const { data } = await supabase.from("patients").select("id, name, id_passport_number").order("name");
+      const { data } = await supabase.from("clients").select("id, name, id_passport_number").order("name");
       return data ?? [];
     },
   });

@@ -77,7 +77,7 @@ export function EmergencyContactsInline({ patientId, contacts, onChange, nokMemb
   const persist = async (next: EmergencyContact[]) => {
     setSaving(true);
     const { error } = await supabase
-      .from("patients")
+      .from("clients")
       .update({ emergency_contacts: next as any })
       .eq("id", patientId);
     setSaving(false);

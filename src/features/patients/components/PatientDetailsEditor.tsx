@@ -906,7 +906,7 @@ export function PatientDetailsEditor({
           patient_id: patient.id,
           actor_user_id: userId,
           action: "Personal information updated",
-          record_type: "patients",
+          record_type: "clients",
           record_id: patient.id,
         } as any);
       }

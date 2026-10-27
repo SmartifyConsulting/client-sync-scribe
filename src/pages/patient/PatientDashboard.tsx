@@ -74,7 +74,7 @@ export default function PatientDashboard() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
       const { data } = await supabase
-        .from("patients")
+        .from("clients")
         .select("id, name, is_chronic, pharmacies, pharmacy_name, pharmacy_email, allergies, dob, status, created_at, notes, occupation, general_practitioner, medical_aid")
         .eq("patient_user_id", user.id)
         .order("created_at", { ascending: false })

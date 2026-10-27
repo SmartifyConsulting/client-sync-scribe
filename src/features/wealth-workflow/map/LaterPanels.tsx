@@ -42,7 +42,7 @@ function IdOnFile({ patientId }: { patientId?: string }) {
     enabled: !!patientId,
     queryFn: async () => {
       const sbx = supabase as any;
-      const { data: pat } = await sbx.from("patients").select("id_document_front_path, id_document_back_path").eq("id", patientId).maybeSingle();
+      const { data: pat } = await sbx.from("clients").select("id_document_front_path, id_document_back_path").eq("id", patientId).maybeSingle();
       if (!pat?.id_document_front_path && !pat?.id_document_back_path) return null;
       const sign = async (path?: string | null) => path ? (await sbx.storage.from("identity-documents").createSignedUrl(path, 3600)).data?.signedUrl ?? null : null;
       return { front: await sign(pat.id_document_front_path), back: await sign(pat.id_document_back_path) };

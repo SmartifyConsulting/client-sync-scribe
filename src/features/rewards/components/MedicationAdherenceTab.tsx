@@ -147,7 +147,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return { hasUnsyncedChronic: false };
       const { data: patient } = await supabase
-        .from("patients")
+        .from("clients")
         .select("current_medications, patient_user_id")
         .eq("id", patientId)
         .maybeSingle();

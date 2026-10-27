@@ -42,7 +42,7 @@ export function UpcomingMeetings() {
         const patientIds = Array.from(new Set((data ?? []).filter((a) => a.patient_id).map((a) => a.patient_id!)));
         let nameById: Record<string, string> = {};
         if (patientIds.length > 0) {
-          const { data: patients } = await supabase.from("patients").select("id, name").in("id", patientIds);
+          const { data: patients } = await supabase.from("clients").select("id, name").in("id", patientIds);
           nameById = Object.fromEntries((patients ?? []).map((p) => [p.id, p.name]));
         }
 

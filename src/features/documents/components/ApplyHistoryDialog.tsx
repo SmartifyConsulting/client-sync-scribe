@@ -165,7 +165,7 @@ export function ApplyHistoryDialog({
     setSaving(true);
     try {
       const { data: patient, error: readError } = await supabase
-        .from("patients")
+        .from("clients")
         .select(
           "conditions_diagnoses, current_medications, allergies, surgeries, family_history, notes",
         )
@@ -227,7 +227,7 @@ export function ApplyHistoryDialog({
         return;
       }
 
-      const { error } = await supabase.from("patients").update(updates as any).eq("id", patientId);
+      const { error } = await supabase.from("clients").update(updates as any).eq("id", patientId);
       if (error) throw error;
 
       toast({

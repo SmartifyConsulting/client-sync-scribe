@@ -96,7 +96,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
   const fetchPatientId = async () => {
     if (!user) return;
     const { data } = await supabase
-      .from("patients")
+      .from("clients")
       .select("id")
       .eq("patient_user_id", user.id)
       .limit(1)

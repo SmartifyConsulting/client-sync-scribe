@@ -55,7 +55,7 @@ export default function PatientTasks() {
           .eq("assignee", "patient")
           .order("created_at", { ascending: false }),
 
-        supabase.from("patients").select("id").eq("patient_user_id", user!.id),
+        supabase.from("clients").select("id").eq("patient_user_id", user!.id),
       ]);
 
       if (todosRes.error) throw todosRes.error;

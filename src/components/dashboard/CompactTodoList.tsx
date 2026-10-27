@@ -186,7 +186,7 @@ export function CompactTodoList() {
       const nameById = new Map<string, string>();
       if (patientIds.length > 0) {
         const { data: patientRows } = await supabase
-          .from("patients")
+          .from("clients")
           .select("id, name")
           .in("id", patientIds);
         (patientRows || []).forEach((p: any) => nameById.set(p.id, p.name));
@@ -569,7 +569,7 @@ export function CompactTodoList() {
                     try {
                       const { data: doc } = await (supabase.from('documents').select('*') as any).eq('id', t.document_id).maybeSingle();
                       if (!doc) return;
-                      const { data: patient } = await supabase.from('patients').select('email, pharmacy_email').eq('id', doc.patient_id).maybeSingle();
+                      const { data: patient } = await supabase.from('clients').select('email, pharmacy_email').eq('id', doc.patient_id).maybeSingle();
                       const email = doc.template_name?.toLowerCase().includes('prescription') ? patient?.pharmacy_email || patient?.email : patient?.email;
                       if (email) await supabase.functions.invoke('send-document-email', { body: { documentId: t.document_id, recipientEmail: email } });
                       await (supabase.from('documents').update({ email_sent_at: new Date().toISOString(), is_draft: false } as any) as any).eq('id', t.document_id);

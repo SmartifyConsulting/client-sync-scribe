@@ -486,7 +486,7 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
       const patient = parsedPatients[i];
       
       try {
-        const { error } = await supabase.from("patients").insert({
+        const { error } = await supabase.from("clients").insert({
           user_id: user.id,
           name: patient.name,
           email: patient.email || null,
