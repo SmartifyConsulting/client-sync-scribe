@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useClientWealth, zar } from "@/features/wealth-workflow/client/useClientWealth";
 
 /** Consultation-screen recap of the client's financial position (replaces the clinical overview). */
-export function WealthClientOverview({ client, discSlot }: { client: any | undefined; discSlot?: ReactNode }) {
+export function WealthClientOverview({ client }: { client: any | undefined }) {
   const { data: w, isLoading } = useClientWealth(client?.id);
   const { data: lastConsult } = useQuery({
     queryKey: ["last-consultation", client?.id],
@@ -39,7 +39,6 @@ export function WealthClientOverview({ client, discSlot }: { client: any | undef
         <p className="text-xs font-medium text-foreground">Client Overview</p>
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto p-3">
-        {discSlot && <div className="mb-2 pb-2 border-b border-border">{discSlot}</div>}
         {isLoading ? (
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Loader2 className="h-3.5 w-3.5 animate-spin" /> Building overview...

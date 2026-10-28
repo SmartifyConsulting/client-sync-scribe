@@ -41,7 +41,6 @@ import {
 import { GeneralLetterEditor } from "@/components/sessions/GeneralLetterEditor";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { WealthClientOverview } from "@/features/sessions/components/WealthClientOverview";
-import { SessionDiscStrip } from "@/features/sessions/components/SessionDiscStrip";
 import { SessionProcessingDialog } from "@/features/sessions/components/SessionProcessingDialog";
 import { SessionTranscriptAccordion } from "@/features/sessions/components/SessionTranscriptAccordion";
 import {
@@ -1490,12 +1489,9 @@ export default function Sessions() {
 
           {/* Client Overview — wide band spanning the workspace beside the recorder. */}
           <div className="flex flex-col gap-4 order-2 min-w-0 lg:col-start-2 lg:row-start-1">
-            {/* Client Overview — AI recap of the last 6 months with DISC descriptors on top. */}
+            {/* Client Overview — AI recap of the last 6 months. */}
             <div className="min-h-[210px] flex flex-col">
-              <WealthClientOverview
-                client={currentPatient}
-                discSlot={<SessionDiscStrip clientId={currentPatient?.id} inline />}
-              />
+              <WealthClientOverview client={currentPatient} />
             </div>
 
             {/* Transcript document — full width beneath Client Overview, shown once

@@ -53,7 +53,6 @@ import { DocumentPreviewWithLetterhead } from "@/features/documents/components/D
 
 import { SessionResultPanels, AISummaryCard } from "@/features/sessions/components/SessionResultPanels";
 import { WealthClientOverview } from "@/features/sessions/components/WealthClientOverview";
-import { SessionDiscStrip } from "@/features/sessions/components/SessionDiscStrip";
 import { ClinicianNotesColumns } from "@/features/sessions/components/ClinicianNotesAccordion";
 import {
   DropdownMenu,
@@ -438,10 +437,7 @@ export default function SessionDetail() {
       )}
 
       {/* Client Overview — full width */}
-      <WealthClientOverview
-        client={session.client}
-        discSlot={<SessionDiscStrip clientId={session.client?.id} inline />}
-      />
+      <WealthClientOverview client={session.client} />
 
       {/* AI Summary — directly underneath Client Overview, no outer frame */}
       <div>

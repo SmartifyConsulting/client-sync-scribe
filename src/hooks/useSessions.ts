@@ -899,13 +899,6 @@ ${tasksHtml}`;
         }
       }
 
-      // Fire-and-forget: refresh DISC personality profile from the new session content.
-      if (clientId) {
-        supabase.functions
-          .invoke('analyze-patient-disc', { body: { patient_id: clientId } })
-          .catch((e) => logger.debug('DISC refresh skipped:', e?.message || e));
-      }
-
       return transformedData;
     } catch (error: any) {
       console.error('Error completing session:', error);

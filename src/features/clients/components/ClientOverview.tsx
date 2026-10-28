@@ -1,7 +1,6 @@
 import { WorkflowStatusCard } from "@/features/wealth-workflow/WorkflowStatusCard";
 import { useState, useEffect } from "react";
 import { Loader2, Sparkles, Wallet as Pill, LineChart as HeartPulse, RefreshCw, TrendingUp as Activity, AlertTriangle, Check, X, ChevronDown, ChevronRight, Droplets, ShieldAlert, Phone, Mail } from "lucide-react";
-import { DiscPersonalityCard } from "@/features/clients/components/DiscPersonalityCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -843,11 +842,6 @@ function PhysicalOverview({ client, sessions, isSelfService = false }: ClientOve
             )}
           </CollapsibleContent>
         </Collapsible>
-      </div>
-
-      {/* DISC profile (advisor-only) */}
-      <div className="grid gap-4 md:grid-cols-2 items-start">
-        <DiscPersonalityCard clientId={client.id} hasSessions={(sessions || []).some((s) => s.status === "completed")} />
       </div>
 
       {/* Chronic Medications — from the client's own current_medications list (distinct shape from the AI-summarised Medications card above). */}
