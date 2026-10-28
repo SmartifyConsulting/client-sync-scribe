@@ -100,7 +100,6 @@ const TestResultsPanel = lazy(() =>
   import("@/modules/holarchelp/components/TestResultsPanel").then((m) => ({ default: m.TestResultsPanel })),
 );
 const MyWealthManagers = lazy(() => import("@/pages/client/MyWealthManagers"));
-const ClientRoundTable = lazy(() => import("@/pages/client/ClientRoundTable"));
 const ClientCalendarLazy = lazy(() => import("@/pages/client/ClientCalendar"));
 
 const SettingsContentLazy = lazy(() =>
@@ -1504,7 +1503,7 @@ export function ClientDetailsEditor({
 
   // Parent tab groups for desktop/tablet
   const PROFILE_TABS = ["personal", "medical", "overview"];
-  const CARE_TABS = ["history", "roundtable"];
+  const CARE_TABS = ["history"];
   const ADMIN_TABS = ["calendar", "tasks", "documents"];
 
   const handleParentTabClick = (parent: string, tabs: string[]) => {
@@ -1526,7 +1525,7 @@ export function ClientDetailsEditor({
     const activeTabs = isSelfService && section ? SECTION_TABS[section] || null : null;
     // Healthcare-only tabs with no wealth equivalent yet: hidden from clients
     // regardless of section mapping (admins bypass, matching WEALTH_HIDDEN_MODULES).
-    const WEALTH_HIDDEN_TABS = ["labresults", "roundtable"];
+    const WEALTH_HIDDEN_TABS = ["labresults"];
     const show = (tab: string) =>
       (!activeTabs || activeTabs.includes(tab)) && (isAdmin || !WEALTH_HIDDEN_TABS.includes(tab));
     const triggerClass =
@@ -1574,11 +1573,6 @@ export function ClientDetailsEditor({
           {show("labresults") && (
             <TabsTrigger value="labresults" className={triggerClass}>
               {t("nav.labResults", "Lab Results")}
-            </TabsTrigger>
-          )}
-          {show("roundtable") && (
-            <TabsTrigger value="roundtable" className={triggerClass}>
-              {t("patientProfile.tabRoundTable")}
             </TabsTrigger>
           )}
           {show("calendar") && (
@@ -1924,25 +1918,6 @@ export function ClientDetailsEditor({
               </TabsContent>
             )}
 
-            {isSelfService && isAdmin && (
-              <TabsContent value="roundtable" className="mt-4">
-                <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-primary-dark">My Round Table</h2>
-                  <p className="text-xs text-muted-foreground">
-                    Notes shared by your healthcare providers about your care
-                  </p>
-                </div>
-                <Suspense
-                  fallback={
-                    <div className="flex items-center justify-center py-12">
-                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                    </div>
-                  }
-                >
-                  <ClientRoundTable hideHeader />
-                </Suspense>
-              </TabsContent>
-            )}
           </Tabs>
         </div>
       </div>
@@ -2606,25 +2581,6 @@ export function ClientDetailsEditor({
             </TabsContent>
           )}
 
-          {isSelfService && isAdmin && (
-            <TabsContent value="roundtable" className="mt-4">
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold text-primary-dark">My Round Table</h2>
-                <p className="text-xs text-muted-foreground">
-                  Notes shared by your healthcare providers about your care
-                </p>
-              </div>
-              <Suspense
-                fallback={
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                }
-              >
-                <ClientRoundTable hideHeader />
-              </Suspense>
-            </TabsContent>
-          )}
         </Tabs>
       </div>
     </div>

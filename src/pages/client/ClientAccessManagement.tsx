@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { 
@@ -12,8 +11,7 @@ import {
   CheckCircle, 
   UserCheck,
   UserX,
-  EyeOff,
-  MessageSquare
+  EyeOff
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -60,8 +58,6 @@ export default function ClientAccessManagement() {
   const [loading, setLoading] = useState(true);
   const [approvedInvites, setApprovedInvites] = useState<ApprovedInvite[]>([]);
   const [incomingInvitations, setIncomingInvitations] = useState<IncomingInvitation[]>([]);
-  const [roundTableEnabled, setRoundTableEnabled] = useState(false);
-  const [updatingRoundTable, setUpdatingRoundTable] = useState(false);
   const [permissionsPerInvitation, setPermissionsPerInvitation] = useState<Record<string, AccessPermission[]>>({});
 
   useEffect(() => {
@@ -153,15 +149,6 @@ export default function ClientAccessManagement() {
         });
       }
       setIncomingInvitations(incomingWithNames);
-
-      // Fetch round table preference
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("round_table_enabled")
-        .eq("id", user.id)
-        .single();
-
-      setRoundTableEnabled(profileData?.round_table_enabled || false);
     } catch (error: any) {
       console.error("Error fetching invite data:", error);
       toast({
@@ -237,35 +224,6 @@ export default function ClientAccessManagement() {
     }
   };
 
-  const handleRoundTableToggle = async (enabled: boolean) => {
-    if (!user) return;
-    setUpdatingRoundTable(true);
-    try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ round_table_enabled: enabled })
-        .eq("id", user.id);
-
-      if (error) throw error;
-
-      setRoundTableEnabled(enabled);
-      toast({
-        title: enabled ? "Round Table enabled" : "Round Table disabled",
-        description: enabled 
-          ? "All your doctors can now exchange thoughts about your care."
-          : "Doctors can no longer see the Round Table for your profile.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setUpdatingRoundTable(false);
-    }
-  };
-
   const permissionLabel = (p: string) => {
     const found = permissionOptions.find((o) => o.id === p);
     return found ? found.label : p;
@@ -285,37 +243,6 @@ export default function ClientAccessManagement() {
         <h1 className="page-title">Invites</h1>
         <p className="text-muted-foreground text-xs">Manage your wealth manager invitations and preferences</p>
       </div>
-
-      {/* Round Table Access */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5" />
-            Round Table Access
-          </CardTitle>
-          <CardDescription>
-            Allow all your doctors to exchange thoughts and collaborate on your care
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between p-4 rounded-xl border border-border">
-            <div className="space-y-1">
-              <Label htmlFor="round-table-toggle" className="font-medium">
-                Enable Round Table
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                When enabled, all doctors on your profile can view and contribute to your Round Table discussions.
-              </p>
-            </div>
-            <Switch
-              id="round-table-toggle"
-              checked={roundTableEnabled}
-              onCheckedChange={handleRoundTableToggle}
-              disabled={updatingRoundTable}
-            />
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Incoming Invitations */}
       {incomingInvitations.length > 0 && (

@@ -38,7 +38,6 @@ import { TargetsCommission } from "@/features/wealth-workflow/TargetsCommission"
 import Clients from "@/pages/Clients";
 import DoctorInvoices from "@/pages/advisor/Invoices";
 import Documents from "@/pages/Documents";
-import { AdvisorRoundTables } from "@/components/advisor/AdvisorRoundTables";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -1178,18 +1177,6 @@ export default function MyPractice() {
   };
 
   const activeTab = searchParams.get("tab");
-
-  if (activeTab === "roundtables") {
-    return (
-      <div className="space-y-4 animate-fade-in">
-        <div>
-          <h1 className="page-title">Round Tables</h1>
-          <p className="text-muted-foreground text-xs">View round table discussions you've contributed to</p>
-        </div>
-        <AdvisorRoundTables />
-      </div>
-    );
-  }
 
   // ── RENDER ──
   return (

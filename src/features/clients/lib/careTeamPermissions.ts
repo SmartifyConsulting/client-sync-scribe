@@ -23,7 +23,6 @@ export const CARE_TEAM_PERMISSIONS: CareTeamPermission[] = [
   { id: "documents", label: "My Documents" },
   { id: "calendar", label: "My Calendar" },
   { id: "tasks", label: "My Tasks" },
-  { id: "round_table", label: "My Round Table" },
 ];
 
 /** Sharing is opt-in — only the SOS entries are on for a new care team member. */

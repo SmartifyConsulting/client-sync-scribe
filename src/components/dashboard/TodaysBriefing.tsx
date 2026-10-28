@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { Clock, User, Volume2, VolumeX, Loader2, AlertCircle, Play, Pause, Wallet as Pill, Users, MessageCircle, ChevronLeft, ChevronRight, ChevronDown, SkipBack, SkipForward } from "lucide-react";
+import { Clock, User, Volume2, VolumeX, Loader2, AlertCircle, Play, Pause, Wallet as Pill, Users, ChevronLeft, ChevronRight, ChevronDown, SkipBack, SkipForward } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,12 +9,6 @@ import { useToast } from "@/hooks/use-toast";
 import { format, parseISO, addDays, isSameDay } from "date-fns";
 import { AdvisorProfileDialog } from "@/components/advisors/AdvisorProfileDialog";
 
-
-interface RoundTableNote {
-  clientName: string;
-  advisorName: string;
-  content: string;
-}
 
 interface LinkedDoctor {
   id: string;
@@ -33,7 +27,6 @@ interface AppointmentWithHistory {
   conditions: string | null;
   lastPrescription: string | null;
   linkedDoctors: LinkedDoctor[];
-  unreadRoundTableNotes: RoundTableNote[];
 }
 
 export function TodaysBriefing() {
@@ -129,13 +122,6 @@ export function TodaysBriefing() {
               ...apt.linkedDoctors.map(d => d.specialty ? translateText(d.specialty) : Promise.resolve(null)),
             ]);
 
-            const translatedNotes = await Promise.all(
-              apt.unreadRoundTableNotes.map(async (note) => ({
-                ...note,
-                content: await translateText(note.content),
-              }))
-            );
-
             return {
               ...apt,
               lastSessionSummary: summary,
@@ -145,7 +131,6 @@ export function TodaysBriefing() {
                 ...d,
                 specialty: doctorSpecs[i] || d.specialty,
               })),
-              unreadRoundTableNotes: translatedNotes,
             };
           })
         );
@@ -200,7 +185,6 @@ export function TodaysBriefing() {
           let lastPrescription: string | null = null;
           let linkedDoctors: LinkedDoctor[] = [];
           let patientUserId: string | null = null;
-          let unreadRoundTableNotes: RoundTableNote[] = [];
 
           if (apt.patient_id) {
             // Get client info
@@ -266,34 +250,9 @@ export function TodaysBriefing() {
                       name: d.full_name as string,
                       specialty: (d as any).specialty || null
                     }));
+                }
               }
             }
-
-            // Get unread round table notes for this client
-            const { data: allNotes } = await supabase
-              .from('round_table_notes')
-              .select('id, doctor_id, doctor_name, content')
-              .eq('patient_id', apt.patient_id)
-              .neq('doctor_id', user.id)
-              .order('created_at', { ascending: false });
-
-            if (allNotes && allNotes.length > 0) {
-              const { data: readNotes } = await supabase
-                .from('round_table_reads')
-                .select('note_id')
-                .eq('doctor_id', user.id);
-
-              const readNoteIds = new Set(readNotes?.map(r => r.note_id) || []);
-              
-              unreadRoundTableNotes = allNotes
-                .filter(note => !readNoteIds.has(note.id))
-                .map(note => ({
-                  clientName,
-                  advisorName: note.doctor_name,
-                  content: note.content
-                }));
-            }
-          }
           }
 
           return {
@@ -307,7 +266,6 @@ export function TodaysBriefing() {
             conditions: null,
             lastPrescription,
             linkedDoctors,
-            unreadRoundTableNotes,
           };
         })
       );
@@ -357,13 +315,6 @@ export function TodaysBriefing() {
         text += `Other doctors on this client's profile include: ${doctorList}. `;
       }
 
-      if (apt.unreadRoundTableNotes.length > 0) {
-        text += `There ${apt.unreadRoundTableNotes.length === 1 ? 'is' : 'are'} ${apt.unreadRoundTableNotes.length} unread Round Table note${apt.unreadRoundTableNotes.length > 1 ? 's' : ''} for this client. `;
-        apt.unreadRoundTableNotes.forEach((note) => {
-          text += `${note.advisorName} wrote: ${note.content} `;
-        });
-      }
-      
       if (index === appointments.length - 1) {
         text += "That concludes your briefing for today.";
       }
@@ -706,11 +657,6 @@ export function TodaysBriefing() {
                         {apt.allergies && (
                           <AlertCircle className="h-3.5 w-3.5 text-destructive shrink-0" />
                         )}
-                        {apt.unreadRoundTableNotes.length > 0 && (
-                          <span className="bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 text-xs px-1.5 py-0.5 rounded-full">
-                            {apt.unreadRoundTableNotes.length}
-                          </span>
-                        )}
                       </div>
                     </div>
                     <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
@@ -773,26 +719,6 @@ export function TodaysBriefing() {
                     </div>
                   )}
 
-                  {apt.unreadRoundTableNotes.length > 0 && (
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-1.5 text-xs">
-                        <MessageCircle className="h-4 w-4 text-amber-600" />
-                        <span className="font-medium text-amber-600">
-                          {apt.unreadRoundTableNotes.length} {apt.unreadRoundTableNotes.length > 1 ? (translatedLabels['unread notes'] || 'unread notes') : (translatedLabels['unread note'] || 'unread note')}
-                        </span>
-                      </div>
-                      {apt.unreadRoundTableNotes.slice(0, 1).map((note, noteIndex) => (
-                        <div key={noteIndex} className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded p-2">
-                          <p className="text-xs font-medium text-amber-700 dark:text-amber-400">
-                            {note.advisorName}
-                          </p>
-                          <p className="text-xs text-foreground mt-0.5">
-                            {note.content.length > 100 ? note.content.substring(0, 100) + '...' : note.content}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </CollapsibleContent>
               </div>
             </Collapsible>

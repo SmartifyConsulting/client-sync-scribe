@@ -125,20 +125,6 @@ export default function MyPersonalDashboard() {
     },
   });
 
-  const { data: roundTableNotes = [], isLoading: roundTableLoading } = useQuery({
-    queryKey: ["dashboard-round-table-notes", patientIds],
-    enabled: patientIds.length > 0,
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("round_table_notes")
-        .select("id, doctor_name, content, created_at")
-        .in("patient_id", patientIds)
-        .order("created_at", { ascending: false })
-        .limit(4);
-      return data || [];
-    },
-  });
-
   // Real signals behind the emotional headlines. Absent data simply reads as calm.
   const { data: signals } = useQuery({
     queryKey: ["dashboard-emotional-signals", user?.id, patientIds],

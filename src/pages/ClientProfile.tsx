@@ -59,7 +59,6 @@ import { AdvisorsOnProfile } from "@/components/clients/AdvisorsOnProfile";
 import { DocumentsBrowser } from "@/features/documents/components/DocumentsBrowser";
 import { ClientDetailsEditor } from "@/components/clients/ClientDetailsEditor";
 import { RequestConnectionButton } from "@/components/clients/RequestConnectionButton";
-import { RoundTable } from "@/components/clients/RoundTable";
 import { useTemplates } from "@/hooks/useTemplates";
 import { useDocuments, Document as DocumentRecord } from "@/hooks/useDocuments";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
@@ -146,7 +145,6 @@ export default function ClientProfile() {
   const [savingNotes, setSavingNotes] = useState(false);
   const [canViewAllSessions, setCanViewAllSessions] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [unreadRoundTableCount, setUnreadRoundTableCount] = useState(0);
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [previewDoc, setPreviewDoc] = useState<DocumentRecord | null>(null);
@@ -760,18 +758,6 @@ export default function ClientProfile() {
         </TabsContent>
 
         {/* Notes tab removed - notes now in General Notes frame under Details */}
-
-        {/* Round Table Tab */}
-        <TabsContent value="roundtable">
-          <div className="rounded-2xl bg-card p-6 shadow-card">
-            <RoundTable
-              clientId={client.id}
-              clientName={client.name}
-              onUnreadCountChange={setUnreadRoundTableCount}
-              hideHeader
-            />
-          </div>
-        </TabsContent>
       </Tabs>
 
       {/* Template Selector Dialog */}
