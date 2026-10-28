@@ -4,8 +4,8 @@
 // so all surfaces behave identically.
 //
 // Responsibilities:
-//   1. Load client, advisor profile, linked invoice, and linked prescriptions
-//      based on the document's metadata.
+//   1. Load client, advisor profile, and linked prescriptions based on the
+//      document's metadata.
 //   2. Pass that context to fillDocumentPlaceholders so all known [Tokens] —
 //      including indexed prescription slots like [Medication1], [Dosage1] —
 //      get resolved.
@@ -43,9 +43,6 @@ export interface ResolvedDocumentPreview {
   userId?: string | null;
   didChange: boolean;
 }
-
-const isInvoiceTemplate = (name?: string | null) =>
-  !!name && /invoice/i.test(name);
 
 const isPrescriptionTemplate = (name?: string | null) =>
   !!name && /prescription/i.test(name);
@@ -229,45 +226,6 @@ export async function resolveDocumentPreviewContent(
   const client = patientRes?.data || null;
   const profile = profileRes?.data || null;
 
-  // Invoice context — prefer the invoice raised for this session, then fall
-  // back to the client's most recent invoice so standalone invoice documents
-  // still preview with real amounts instead of [Tokens].
-  let invoice: FillContext["invoice"] = null;
-  if (isInvoiceTemplate(doc.template_name)) {
-    let invRow: any = null;
-    if (doc.session_id) {
-      const { data } = await supabase
-        .from("invoices")
-        .select("*")
-        .eq("session_id", doc.session_id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      invRow = data || null;
-    }
-    if (!invRow && clientId) {
-      const { data } = await supabase
-        .from("invoices")
-        .select("*")
-        .eq("patient_id", clientId)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      invRow = data || null;
-    }
-    if (invRow) {
-      invoice = {
-        invoice_number: invRow.invoice_number,
-        description: invRow.description,
-        amount: invRow.amount,
-        due_date: invRow.due_date,
-        created_at: invRow.created_at,
-        paid_at: invRow.paid_at,
-        currency: "ZAR",
-      };
-    }
-  }
-
   // Prescription context — prefer rows linked to the same session, fall back
   // to the client's latest active prescriptions so legacy/standalone Rx docs
   // still render with real meds.
@@ -382,7 +340,6 @@ export async function resolveDocumentPreviewContent(
   const filled = fillDocumentPlaceholders(source, {
     patient: client,
     profile,
-    invoice,
     prescription,
     certificate,
     referral,
