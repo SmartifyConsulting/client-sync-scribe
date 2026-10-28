@@ -6,9 +6,7 @@ import {
   Eye,
   FileText,
   Receipt,
-  Wallet as Pill,
   MoreHorizontal,
-  Landmark as Hospital,
 } from "lucide-react";
 import {
   Table,
@@ -26,9 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
-import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmissionEditor";
 import type { Session } from "@/hooks/useSessions";
 
 interface SessionHistoryTableProps {
@@ -40,24 +36,12 @@ interface SessionHistoryTableProps {
 
 export function SessionHistoryTable({ sessions, clientId, clientName, allergies }: SessionHistoryTableProps) {
   const navigate = useNavigate();
-  const [prescriptionOpen, setPrescriptionOpen] = useState(false);
   const [invoiceOpen, setInvoiceOpen] = useState(false);
-  const [hospitalAdmissionOpen, setHospitalAdmissionOpen] = useState(false);
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
-
-  const handleCreatePrescription = (session: Session) => {
-    setSelectedSession(session);
-    setPrescriptionOpen(true);
-  };
 
   const handleGenerateInvoice = (session: Session) => {
     setSelectedSession(session);
     setInvoiceOpen(true);
-  };
-
-  const handleHospitalAdmission = (session: Session) => {
-    setSelectedSession(session);
-    setHospitalAdmissionOpen(true);
   };
 
   const handleGenerateDocument = (session: Session, templateType: string) => {
@@ -124,10 +108,6 @@ export function SessionHistoryTable({ sessions, clientId, clientName, allergies 
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuItem onClick={() => handleCreatePrescription(session)}>
-                          <Pill className="mr-2 h-4 w-4" />
-                          Create Prescription
-                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleGenerateInvoice(session)}>
                           <Receipt className="mr-2 h-4 w-4" />
                           Create Invoice
@@ -141,10 +121,6 @@ export function SessionHistoryTable({ sessions, clientId, clientName, allergies 
                           <FileText className="mr-2 h-4 w-4" />
                           Referral Letter
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleHospitalAdmission(session)}>
-                          <Hospital className="mr-2 h-4 w-4" />
-                          Hospital Admission
-                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -154,22 +130,6 @@ export function SessionHistoryTable({ sessions, clientId, clientName, allergies 
           </TableBody>
         </Table>
       </div>
-
-      {/* Prescription Editor */}
-      {prescriptionOpen && selectedSession && (
-        <PrescriptionEditor
-          clientId={clientId}
-          clientName={clientName}
-          allergies={allergies}
-          onClose={() => {
-            setPrescriptionOpen(false);
-            setSelectedSession(null);
-          }}
-          onSave={(prescription) => {
-            console.log("Prescription saved:", prescription);
-          }}
-        />
-      )}
 
       {/* Invoice Editor */}
       {invoiceOpen && selectedSession && (
@@ -187,21 +147,6 @@ export function SessionHistoryTable({ sessions, clientId, clientName, allergies 
         />
       )}
 
-      {/* Hospital Admission Editor */}
-      {hospitalAdmissionOpen && selectedSession && (
-        <HospitalAdmissionEditor
-          clientId={clientId}
-          clientName={clientName}
-          sessionId={selectedSession.id}
-          onClose={() => {
-            setHospitalAdmissionOpen(false);
-            setSelectedSession(null);
-          }}
-          onSave={(doc) => {
-            console.log("Hospital admission created:", doc);
-          }}
-        />
-      )}
     </>
   );
 }

@@ -96,9 +96,6 @@ import { isValidOptionalEmail } from "@/lib/validation";
 
 const ClientDocuments = lazy(() => import("@/pages/client/ClientDocuments"));
 const ClaimsPage = lazy(() => import("@/pages/Claims"));
-const TestResultsPanel = lazy(() =>
-  import("@/modules/holarchelp/components/TestResultsPanel").then((m) => ({ default: m.TestResultsPanel })),
-);
 const MyWealthManagers = lazy(() => import("@/pages/client/MyWealthManagers"));
 const ClientCalendarLazy = lazy(() => import("@/pages/client/ClientCalendar"));
 
@@ -1525,7 +1522,7 @@ export function ClientDetailsEditor({
     const activeTabs = isSelfService && section ? SECTION_TABS[section] || null : null;
     // Healthcare-only tabs with no wealth equivalent yet: hidden from clients
     // regardless of section mapping (admins bypass, matching WEALTH_HIDDEN_MODULES).
-    const WEALTH_HIDDEN_TABS = ["labresults"];
+    const WEALTH_HIDDEN_TABS: string[] = [];
     const show = (tab: string) =>
       (!activeTabs || activeTabs.includes(tab)) && (isAdmin || !WEALTH_HIDDEN_TABS.includes(tab));
     const triggerClass =
@@ -1568,11 +1565,6 @@ export function ClientDetailsEditor({
           {show("lifeEvents") && (
             <TabsTrigger value="lifeEvents" className={triggerClass}>
               Life Events
-            </TabsTrigger>
-          )}
-          {show("labresults") && (
-            <TabsTrigger value="labresults" className={triggerClass}>
-              {t("nav.labResults", "Lab Results")}
             </TabsTrigger>
           )}
           {show("calendar") && (
@@ -1896,24 +1888,6 @@ export function ClientDetailsEditor({
                   }
                 >
                   <ClientDocuments hideHeader={false} />
-                </Suspense>
-              </TabsContent>
-            )}
-
-            {isSelfService && isAdmin && (
-              <TabsContent value="labresults" className="mt-4">
-                <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-primary-dark">Lab Results</h2>
-                  <p className="text-xs text-muted-foreground">Lab requests and results shared by your care team.</p>
-                </div>
-                <Suspense
-                  fallback={
-                    <div className="flex items-center justify-center py-12">
-                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                    </div>
-                  }
-                >
-                  <TestResultsPanel clientId={client.id} />
                 </Suspense>
               </TabsContent>
             )}
@@ -2560,24 +2534,6 @@ export function ClientDetailsEditor({
           {isSelfService && (
             <TabsContent value="lifeEvents" className="mt-4">
               <LifeEventsPanel clientId={client.id} />
-            </TabsContent>
-          )}
-
-          {isSelfService && isAdmin && (
-            <TabsContent value="labresults" className="mt-4">
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold text-primary-dark">Lab Results</h2>
-                <p className="text-xs text-muted-foreground">Lab requests and results shared by your care team.</p>
-              </div>
-              <Suspense
-                fallback={
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                }
-              >
-                <TestResultsPanel clientId={client.id} />
-              </Suspense>
             </TabsContent>
           )}
 

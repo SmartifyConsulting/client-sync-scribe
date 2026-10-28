@@ -11,12 +11,10 @@ import {
   Loader2,
   Trash2,
   Volume2,
-  Wallet as Pill,
   Receipt,
   FileText,
   FileEdit,
   PenTool,
-  Landmark as Hospital,
   Languages,
   Download,
   Eye,
@@ -27,10 +25,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmissionEditor";
-import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
-import { ReferralLetterEditor } from "@/components/sessions/ReferralLetterEditor";
 import { GeneralLetterEditor } from "@/components/sessions/GeneralLetterEditor";
 import { DrawingPad } from "@/components/drawings/DrawingPad";
 import { Button } from "@/components/ui/button";
@@ -96,12 +91,9 @@ export default function SessionDetail() {
   const { session, loading, refetch } = useSession(id || "");
   const { deleteSession } = useSessions();
   const { isAdmin } = useIsAdmin();
-  const [showPrescriptionEditor, setShowPrescriptionEditor] = useState(false);
   const [showInvoiceEditor, setShowInvoiceEditor] = useState(false);
-  const [showReferralLetterEditor, setShowReferralLetterEditor] = useState(false);
   const [showGeneralLetterEditor, setShowGeneralLetterEditor] = useState(false);
   const [showDrawingPad, setShowDrawingPad] = useState(false);
-  const [showHospitalAdmissionEditor, setShowHospitalAdmissionEditor] = useState(false);
   const [translatedSummary, setTranslatedSummary] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
@@ -441,12 +433,9 @@ export default function SessionDetail() {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem onSelect={() => setShowPrescriptionEditor(true)}><Pill className="mr-2 h-4 w-4" />Prescription</DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setShowInvoiceEditor(true)}><Receipt className="mr-2 h-4 w-4" />Fee statement</DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setShowReferralLetterEditor(true)}><FileText className="mr-2 h-4 w-4" />Referral Letter</DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setShowGeneralLetterEditor(true)}><FileEdit className="mr-2 h-4 w-4" />General Letter</DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setShowDrawingPad(true)}><PenTool className="mr-2 h-4 w-4" />Drawing Pad</DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setShowHospitalAdmissionEditor(true)}><Hospital className="mr-2 h-4 w-4" />Hospital Admission</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -629,22 +618,6 @@ export default function SessionDetail() {
         <DocumentPreviewWithLetterhead document={previewDoc} onClose={() => setPreviewDoc(null)} />
       )}
 
-      {/* Prescription Editor Modal */}
-
-      {showPrescriptionEditor && session.client && (
-        <PrescriptionEditor
-          clientId={session.patient_id}
-          clientName={session.client.name}
-          onClose={() => setShowPrescriptionEditor(false)}
-          onSave={(prescription) => {
-            toast({
-              title: "Prescription created",
-              description: "The prescription has been saved successfully.",
-            });
-          }}
-        />
-      )}
-
       {/* Invoice Editor Modal */}
       {showInvoiceEditor && session.client && (
         <InvoiceEditor
@@ -661,22 +634,6 @@ export default function SessionDetail() {
         />
       )}
 
-      {/* Referral Letter Editor Modal */}
-      {showReferralLetterEditor && session.client && (
-        <ReferralLetterEditor
-          clientId={session.patient_id}
-          clientName={session.client.name}
-          sessionId={id}
-          onClose={() => setShowReferralLetterEditor(false)}
-          onSave={() => {
-            toast({
-              title: "Referral Letter created",
-              description: "The referral letter has been saved.",
-            });
-          }}
-        />
-      )}
-
       {/* General Letter Editor Modal */}
       {showGeneralLetterEditor && session.client && (
         <GeneralLetterEditor
@@ -688,22 +645,6 @@ export default function SessionDetail() {
             toast({
               title: "General Letter created",
               description: "The letter has been saved.",
-            });
-          }}
-        />
-      )}
-
-      {/* Hospital Admission Editor Modal */}
-      {showHospitalAdmissionEditor && session.client && (
-        <HospitalAdmissionEditor
-          clientId={session.patient_id}
-          clientName={session.client.name}
-          sessionId={id}
-          onClose={() => setShowHospitalAdmissionEditor(false)}
-          onSave={() => {
-            toast({
-              title: "Hospital Admission Form created",
-              description: "The form has been saved.",
             });
           }}
         />
