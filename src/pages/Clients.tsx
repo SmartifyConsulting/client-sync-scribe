@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ClientImportDialog } from "@/components/patients/ClientImport";
+import { ClientImportDialog } from "@/components/clients/ClientImport";
 import { useClients } from "@/hooks/useClients";
 import {
   Dialog,
@@ -58,7 +58,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
-import { SampleBadge } from "@/components/patients/SampleBadge";
+import { SampleBadge } from "@/components/clients/SampleBadge";
 import { isSampleClient } from "@/lib/sampleClients";
 
 

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Loader2, Search, Plus, MoreVertical, Trash2, Upload, Send } from "lucide-react";
-import { ClientDetailsEditor } from "@/components/patients/ClientDetailsEditor";
+import { ClientDetailsEditor } from "@/components/clients/ClientDetailsEditor";
 import { ClientWorkspace } from "@/features/wealth-workflow/workspace/ClientWorkspace";
 import { Client, useClients } from "@/hooks/useClients";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ClientImportDialog } from "@/components/patients/ClientImport";
+import { ClientImportDialog } from "@/components/clients/ClientImport";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,

@@ -48,15 +48,15 @@ import WealthManagerAgreement from "./pages/WealthManagerAgreement";
 import Legal from "./pages/Legal";
 
 // Client pages
-import ClientDashboard from "./pages/patient/ClientDashboard";
-import ClientCalendar from "./pages/patient/ClientCalendar";
-import Invoices from "./pages/patient/Invoices";
-import ClientAccessManagement from "./pages/patient/ClientAccessManagement";
-import MyWealthManagers from "./pages/patient/MyWealthManagers";
-import ClientTasks from "./pages/patient/ClientTasks";
-import ClientDocuments from "./pages/patient/ClientDocuments";
-import MyDetails from "./pages/patient/MyDetails";
-import DoctorInvoices from "./pages/doctor/Invoices";
+import ClientDashboard from "./pages/client/ClientDashboard";
+import ClientCalendar from "./pages/client/ClientCalendar";
+import Invoices from "./pages/client/Invoices";
+import ClientAccessManagement from "./pages/client/ClientAccessManagement";
+import MyWealthManagers from "./pages/client/MyWealthManagers";
+import ClientTasks from "./pages/client/ClientTasks";
+import ClientDocuments from "./pages/client/ClientDocuments";
+import MyDetails from "./pages/client/MyDetails";
+import DoctorInvoices from "./pages/advisor/Invoices";
 
 import MyPractice from "./pages/MyPractice";
 import PracticeClients from "./pages/practice/PracticeClients";
@@ -68,8 +68,8 @@ import BulkPasswordReset from "./pages/admin/BulkPasswordReset";
 import ReferralAdvisors from "./pages/ReferralAdvisors";
 import ExpiringRecordings from "./pages/ExpiringRecordings";
 import Admin from "./pages/Admin";
-import AdvisorDocumentsPage from "./pages/doctor/AdvisorDocumentsPage";
-import DoctorSessions from "./pages/doctor/Sessions";
+import AdvisorDocumentsPage from "./pages/advisor/AdvisorDocumentsPage";
+import DoctorSessions from "./pages/advisor/Sessions";
 import ProviderSignup from "./pages/ProviderSignup";
 import ProviderApprovalAction from "./pages/admin/ProviderApprovalAction";
 import WealthUsers from "./pages/admin/WealthUsers";

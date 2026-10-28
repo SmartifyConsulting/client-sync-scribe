@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import DoctorInvoices from "@/pages/doctor/Invoices";
+import DoctorInvoices from "@/pages/advisor/Invoices";
 import Documents from "@/pages/Documents";
 import CalendarView from "@/pages/CalendarView";
 import TodoList from "@/pages/TodoList";

@@ -5,12 +5,12 @@ import { LifeEventsPanel } from "@/features/wealth-workflow/client/LifeEventsPan
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { LANGUAGES } from "@/lib/languages";
-import { ClientSessionRecorder } from "@/features/patients/components/ClientSessionRecorder";
+import { ClientSessionRecorder } from "@/features/clients/components/ClientSessionRecorder";
 import { useV2Demo } from "@/hooks/useV2Demo";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn, emitMedicationsUpdated } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
-import { AddressAutocomplete } from "@/components/patients/AddressAutocomplete";
+import { AddressAutocomplete } from "@/components/clients/AddressAutocomplete";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -94,23 +94,23 @@ import { TransactionLogs } from "@/features/wealth-workflow/TransactionLogs";
 import { isValidOptionalEmail } from "@/lib/validation";
 
 
-const ClientDocuments = lazy(() => import("@/pages/patient/ClientDocuments"));
+const ClientDocuments = lazy(() => import("@/pages/client/ClientDocuments"));
 const ClaimsPage = lazy(() => import("@/pages/Claims"));
 const TestResultsPanel = lazy(() =>
   import("@/modules/holarchelp/components/TestResultsPanel").then((m) => ({ default: m.TestResultsPanel })),
 );
-const MyWealthManagers = lazy(() => import("@/pages/patient/MyWealthManagers"));
-const ClientRoundTable = lazy(() => import("@/pages/patient/ClientRoundTable"));
-const ClientCalendarLazy = lazy(() => import("@/pages/patient/ClientCalendar"));
+const MyWealthManagers = lazy(() => import("@/pages/client/MyWealthManagers"));
+const ClientRoundTable = lazy(() => import("@/pages/client/ClientRoundTable"));
+const ClientCalendarLazy = lazy(() => import("@/pages/client/ClientCalendar"));
 
 const SettingsContentLazy = lazy(() =>
   import("@/components/settings/SettingsContent").then((m) => ({ default: m.SettingsContent })),
 );
 const SessionHistoryTableLazy = lazy(() =>
-  import("@/components/patients/SessionHistoryTable").then((m) => ({ default: m.SessionHistoryTable })),
+  import("@/components/clients/SessionHistoryTable").then((m) => ({ default: m.SessionHistoryTable })),
 );
-const ClientDashboardLazy = lazy(() => import("@/pages/patient/ClientDashboard"));
-const ClientTasksLazy = lazy(() => import("@/pages/patient/ClientTasks"));
+const ClientDashboardLazy = lazy(() => import("@/pages/client/ClientDashboard"));
+const ClientTasksLazy = lazy(() => import("@/pages/client/ClientTasks"));
 
 interface ClientDetailsEditorProps {
   client: Client;

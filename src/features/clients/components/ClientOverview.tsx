@@ -1,7 +1,7 @@
 import { WorkflowStatusCard } from "@/features/wealth-workflow/WorkflowStatusCard";
 import { useState, useEffect } from "react";
 import { Loader2, Sparkles, Wallet as Pill, LineChart as HeartPulse, RefreshCw, TrendingUp as Activity, AlertTriangle, Check, X, ChevronDown, ChevronRight, Droplets, ShieldAlert, Phone, Mail } from "lucide-react";
-import { DiscPersonalityCard } from "@/features/patients/components/DiscPersonalityCard";
+import { DiscPersonalityCard } from "@/features/clients/components/DiscPersonalityCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";

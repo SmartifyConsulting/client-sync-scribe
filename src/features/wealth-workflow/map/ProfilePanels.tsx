@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { safeInvoke } from "@/services/edge/safeInvoke";
-import { FinancialInformation } from "@/features/patients/components/financial/FinancialInformation";
+import { FinancialInformation } from "@/features/clients/components/financial/FinancialInformation";
 import { TranscriptButton } from "./DocumentTray";
 
 type Viewer = "manager" | "client";

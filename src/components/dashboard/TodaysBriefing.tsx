@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO, addDays, isSameDay } from "date-fns";
-import { AdvisorProfileDialog } from "@/components/doctors/AdvisorProfileDialog";
+import { AdvisorProfileDialog } from "@/components/advisors/AdvisorProfileDialog";
 
 
 interface RoundTableNote {

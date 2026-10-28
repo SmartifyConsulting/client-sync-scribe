@@ -4,7 +4,7 @@ import { ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { translateTodoTitle } from "@/lib/translateTodoTitle";
 import { isSampleClient } from "@/lib/sampleClients";
-import { SampleBadge } from "@/components/patients/SampleBadge";
+import { SampleBadge } from "@/components/clients/SampleBadge";
 import {
   Mic,
   MicOff,

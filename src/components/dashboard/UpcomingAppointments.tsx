@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, startOfDay, endOfDay } from "date-fns";
-import { SampleBadge } from "@/components/patients/SampleBadge";
+import { SampleBadge } from "@/components/clients/SampleBadge";
 import { isSampleClient } from "@/lib/sampleClients";
 import { cn } from "@/lib/utils";
 

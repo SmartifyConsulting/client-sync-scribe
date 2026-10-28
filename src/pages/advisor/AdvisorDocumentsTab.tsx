@@ -36,7 +36,7 @@ import { MailboxIntakeAddress } from "@/components/documents/MailboxIntakeAddres
 import { AiUploadZone } from "@/features/documents/components/AiUploadZone";
 
 import { format } from "date-fns";
-import { SampleBadge } from "@/components/patients/SampleBadge";
+import { SampleBadge } from "@/components/clients/SampleBadge";
 import { isSampleClient } from "@/lib/sampleClients";
 import { documentTypeBadgeClass } from "@/lib/documentTypeColors";
 import { cn } from "@/lib/utils";

@@ -15,7 +15,7 @@ import {
   DEFAULT_CARE_TEAM_PERMISSIONS,
   resolvePermissions,
   togglePermission,
-} from "@/features/patients/lib/careTeamPermissions";
+} from "@/features/clients/lib/careTeamPermissions";
 
 import type { EmergencyContact } from "./EmergencyContactsSection";
 import type { NextOfKinMember } from "@/hooks/useClients";

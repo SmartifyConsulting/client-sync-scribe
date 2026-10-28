@@ -36,9 +36,9 @@ import { ComplianceForms } from "@/features/wealth-workflow/forms/ComplianceForm
 import { TargetsCommission } from "@/features/wealth-workflow/TargetsCommission";
 
 import Clients from "@/pages/Clients";
-import DoctorInvoices from "@/pages/doctor/Invoices";
+import DoctorInvoices from "@/pages/advisor/Invoices";
 import Documents from "@/pages/Documents";
-import { AdvisorRoundTables } from "@/components/doctor/AdvisorRoundTables";
+import { AdvisorRoundTables } from "@/components/advisor/AdvisorRoundTables";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

@@ -71,7 +71,7 @@ import {
   DATE_BUCKETS,
   dateBucketFor,
 } from "@/components/ui/section-accordion";
-import { SectionHeader } from "@/features/patients/components/sectionStyles";
+import { SectionHeader } from "@/features/clients/components/sectionStyles";
 
 const STORAGE_LIMIT_MB = 100;
 

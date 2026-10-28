@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
-import { SampleBadge } from "@/components/patients/SampleBadge";
+import { SampleBadge } from "@/components/clients/SampleBadge";
 import { isSampleClient } from "@/lib/sampleClients";
 import { useTranslation } from "react-i18next";
 import { relativeTimeLabel } from "@/lib/relativeTimeLabel";

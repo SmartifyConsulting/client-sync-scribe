@@ -30,7 +30,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { resolvePermissions } from "@/features/patients/lib/careTeamPermissions";
+import { resolvePermissions } from "@/features/clients/lib/careTeamPermissions";
 import {
   DropdownMenu,
   DropdownMenuContent,
