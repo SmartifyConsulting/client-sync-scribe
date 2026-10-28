@@ -19,15 +19,8 @@ interface StarRatingDialogProps {
   sessionId: string;
   ratedUserId: string;
   ratedUserName: string;
-  raterRole: "doctor" | "patient";
   onRated?: () => void;
 }
-
-const DOCTOR_CRITERIA = [
-  { key: "communication", label: "Communication" },
-  { key: "expertise", label: "Expertise" },
-  { key: "professionalism", label: "Professionalism" },
-] as const;
 
 function StarRow({
   label,
@@ -72,16 +65,15 @@ function StarRow({
   );
 }
 
+/** Rates a Wealth Manager after a session — the only direction this rating flows. */
 export function StarRatingDialog({
   open,
   onOpenChange,
   sessionId,
   ratedUserId,
   ratedUserName,
-  raterRole,
   onRated,
 }: StarRatingDialogProps) {
-  // For patient rating doctor: multi-criteria
   const [communicationRating, setCommunicationRating] = useState(0);
   const [expertiseRating, setExpertiseRating] = useState(0);
   const [professionalismRating, setProfessionalismRating] = useState(0);
@@ -89,20 +81,11 @@ export function StarRatingDialog({
   const [hoveredExp, setHoveredExp] = useState(0);
   const [hoveredProf, setHoveredProf] = useState(0);
 
-  // For doctor rating patient: single rating
-  const [rating, setRating] = useState(0);
-  const [hoveredRating, setHoveredRating] = useState(0);
-
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const isMultiCriteria = raterRole === "patient";
-  const overallRating = isMultiCriteria
-    ? Math.round((communicationRating + expertiseRating + professionalismRating) / 3)
-    : rating;
-  const canSubmit = isMultiCriteria
-    ? communicationRating > 0 && expertiseRating > 0 && professionalismRating > 0
-    : rating > 0;
+  const overallRating = Math.round((communicationRating + expertiseRating + professionalismRating) / 3);
+  const canSubmit = communicationRating > 0 && expertiseRating > 0 && professionalismRating > 0;
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
@@ -111,21 +94,16 @@ export function StarRatingDialog({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const insertData: any = {
+      const { error } = await supabase.from('visit_ratings' as any).insert({
         session_id: sessionId,
         rater_id: user.id,
         rated_user_id: ratedUserId,
         rating: overallRating,
-        rater_role: raterRole,
-      };
-
-      if (isMultiCriteria) {
-        insertData.communication_rating = communicationRating;
-        insertData.expertise_rating = expertiseRating;
-        insertData.professionalism_rating = professionalismRating;
-      }
-
-      const { error } = await supabase.from('visit_ratings' as any).insert(insertData);
+        rater_role: "client",
+        communication_rating: communicationRating,
+        expertise_rating: expertiseRating,
+        professionalism_rating: professionalismRating,
+      });
       if (error) throw error;
 
       toast({
@@ -149,7 +127,6 @@ export function StarRatingDialog({
   };
 
   const resetState = () => {
-    setRating(0);
     setCommunicationRating(0);
     setExpertiseRating(0);
     setProfessionalismRating(0);
@@ -159,8 +136,6 @@ export function StarRatingDialog({
     onOpenChange(false);
     resetState();
   };
-
-  const displayRating = hoveredRating || rating;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -172,73 +147,37 @@ export function StarRatingDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {isMultiCriteria ? (
-          <div className="space-y-4 py-4">
-            <StarRow
-              label="Communication"
-              rating={communicationRating}
-              hoveredRating={hoveredComm}
-              onRate={setCommunicationRating}
-              onHover={setHoveredComm}
-              onLeave={() => setHoveredComm(0)}
-            />
-            <StarRow
-              label="Expertise"
-              rating={expertiseRating}
-              hoveredRating={hoveredExp}
-              onRate={setExpertiseRating}
-              onHover={setHoveredExp}
-              onLeave={() => setHoveredExp(0)}
-            />
-            <StarRow
-              label="Professionalism"
-              rating={professionalismRating}
-              hoveredRating={hoveredProf}
-              onRate={setProfessionalismRating}
-              onHover={setHoveredProf}
-              onLeave={() => setHoveredProf(0)}
-            />
-            {canSubmit && (
-              <p className="text-center text-sm text-muted-foreground mt-2">
-                Overall: {overallRating} ★ — +{overallRating} Ⓜ️
-              </p>
-            )}
-          </div>
-        ) : (
-          <>
-            <div className="flex justify-center gap-2 py-6">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  onClick={() => setRating(star)}
-                  onMouseEnter={() => setHoveredRating(star)}
-                  onMouseLeave={() => setHoveredRating(0)}
-                  className="transition-transform hover:scale-110"
-                >
-                  <Star
-                    className={cn(
-                      "h-10 w-10 transition-colors",
-                      star <= displayRating
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-muted-foreground/30"
-                    )}
-                  />
-                </button>
-              ))}
-            </div>
-
-            {displayRating > 0 && (
-              <p className="text-center text-sm text-muted-foreground">
-                {displayRating === 1 && "Poor"}
-                {displayRating === 2 && "Fair"}
-                {displayRating === 3 && "Good"}
-                {displayRating === 4 && "Very Good"}
-                {displayRating === 5 && "Excellent"}
-                {" — "}+{displayRating} Ⓜ️
-              </p>
-            )}
-          </>
-        )}
+        <div className="space-y-4 py-4">
+          <StarRow
+            label="Communication"
+            rating={communicationRating}
+            hoveredRating={hoveredComm}
+            onRate={setCommunicationRating}
+            onHover={setHoveredComm}
+            onLeave={() => setHoveredComm(0)}
+          />
+          <StarRow
+            label="Expertise"
+            rating={expertiseRating}
+            hoveredRating={hoveredExp}
+            onRate={setExpertiseRating}
+            onHover={setHoveredExp}
+            onLeave={() => setHoveredExp(0)}
+          />
+          <StarRow
+            label="Professionalism"
+            rating={professionalismRating}
+            hoveredRating={hoveredProf}
+            onRate={setProfessionalismRating}
+            onHover={setHoveredProf}
+            onLeave={() => setHoveredProf(0)}
+          />
+          {canSubmit && (
+            <p className="text-center text-sm text-muted-foreground mt-2">
+              Overall: {overallRating} ★ — +{overallRating} Ⓜ️
+            </p>
+          )}
+        </div>
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
           <Button variant="ghost" onClick={handleSkip} className="sm:mr-auto">

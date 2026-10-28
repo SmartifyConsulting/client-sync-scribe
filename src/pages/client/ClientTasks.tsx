@@ -52,7 +52,7 @@ export default function ClientTasks() {
         (supabase.from("todos") as any)
           .select("*, patients!inner(id)")
           .eq("patients.patient_user_id", user!.id)
-          .eq("assignee", "patient")
+          .eq("assignee", "client")
           .order("created_at", { ascending: false }),
 
         supabase.from("clients").select("id").eq("patient_user_id", user!.id),
@@ -154,7 +154,7 @@ export default function ClientTasks() {
         status: "pending",
         priority: "medium",
         task_type: "general",
-        assignee: "patient",
+        assignee: "client",
       } as any);
 
       if (error) throw error;

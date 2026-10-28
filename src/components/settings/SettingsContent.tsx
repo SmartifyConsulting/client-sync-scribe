@@ -86,9 +86,7 @@ export function SettingsContent() {
     else if (paymentResult === "cancelled") { toast({ title: "Payment Cancelled", description: "Your payment was cancelled." }); }
   }, [searchParams]);
 
-  const EMERGENCY_ROLES = ["ambulance_staff", "hospital_staff", "blood_bank"];
-  const planType: "doctor" | "patient" | "emergency" =
-    role === "client" ? "patient" : EMERGENCY_ROLES.includes(role || "") ? "emergency" : "doctor";
+  const planType: "advisor" | "client" = role === "client" ? "client" : "advisor";
 
   const fetchPricing = async () => {
     setLoadingPricing(true);

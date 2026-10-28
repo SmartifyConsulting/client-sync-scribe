@@ -173,7 +173,7 @@ export function CompactTodoList() {
         .from("todos")
         .select("*")
         .eq("user_id", user.id)
-        .eq("assignee", "doctor")
+        .eq("assignee", "advisor")
         .order("created_at", { ascending: false });
 
 
@@ -370,7 +370,7 @@ export function CompactTodoList() {
       if (!user) return;
       const { data, error } = await supabase
         .from("todos")
-        .insert({ user_id: user.id, title: newTaskText.trim(), priority: "medium", status: "pending", assignee: "doctor" } as any)
+        .insert({ user_id: user.id, title: newTaskText.trim(), priority: "medium", status: "pending", assignee: "advisor" } as any)
         .select()
         .single();
       if (error) throw error;

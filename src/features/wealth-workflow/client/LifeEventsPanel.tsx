@@ -47,7 +47,7 @@ export function LifeEventsPanel({ clientId, workflowId }: { clientId: string | n
     const { data: { user } } = await supabase.auth.getUser();
     const { error } = await (supabase as any).from("todos").insert({
       title: `Client question: ${question.slice(0, 140)}`, patient_id: clientId, user_id: user?.id,
-      owner_role: "wealth_manager", workflow_id: workflowId ?? null, status: "pending", assignee: "doctor",
+      owner_role: "wealth_manager", workflow_id: workflowId ?? null, status: "pending", assignee: "advisor",
     });
     if (error) return toast({ title: "Couldn't share", description: error.message, variant: "destructive" });
     toast({ title: "Shared with your Wealth Manager" });

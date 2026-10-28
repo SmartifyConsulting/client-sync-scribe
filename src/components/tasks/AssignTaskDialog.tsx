@@ -114,7 +114,7 @@ export function AssignTaskDialog({
         priority,
         status: "pending",
         due_date: dueDate || null,
-        assignee: isClient ? "patient" : "doctor",
+        assignee: isClient ? "client" : "advisor",
         assigned_to_user_id: isClient ? client?.patient_user_id ?? null : id,
         patient_id: isClient ? id : clientId ?? null,
       };

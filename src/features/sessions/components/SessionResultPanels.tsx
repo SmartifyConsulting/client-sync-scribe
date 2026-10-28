@@ -133,7 +133,7 @@ export function SessionResultPanels({
   const assigneeLabel = (point: string) => {
     const todo = matchedTodo(point);
     if (!todo) return null;
-    if (todo.assignee === "patient") return clientName || "Client";
+    if (todo.assignee === "client") return clientName || "Client";
     return advisorName || "Advisor";
   };
 

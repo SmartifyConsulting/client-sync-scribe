@@ -47,13 +47,13 @@ export function useGenerateWmActionItems() {
       const patientIds = [...new Set(wanted.map((t) => t.patient_id))];
       const { data: existing } = await supabase.from("todos")
         .select("title,patient_id")
-        .eq("user_id", user.id).eq("assignee", "doctor").eq("status", "pending")
+        .eq("user_id", user.id).eq("assignee", "advisor").eq("status", "pending")
         .in("patient_id", patientIds);
       const existingKeys = new Set((existing ?? []).map((t: any) => `${t.patient_id}::${t.title}`));
 
       const toInsert = wanted
         .filter((t) => !existingKeys.has(`${t.patient_id}::${t.title}`))
-        .map((t) => ({ user_id: user.id, assignee: "doctor", status: "pending", priority: "medium", title: t.title, patient_id: t.patient_id }));
+        .map((t) => ({ user_id: user.id, assignee: "advisor", status: "pending", priority: "medium", title: t.title, patient_id: t.patient_id }));
       if (!toInsert.length || cancelled) return;
       await supabase.from("todos").insert(toInsert as any);
     })();

@@ -212,7 +212,7 @@ export default function TodoList() {
       const { data, error } = await supabase
         .from('todos')
         .select('*, client:clients(name)')
-        .or(`assignee.eq.doctor,assigned_to_user_id.eq.${user?.id ?? '00000000-0000-0000-0000-000000000000'}`)
+        .or(`assignee.eq.advisor,assigned_to_user_id.eq.${user?.id ?? '00000000-0000-0000-0000-000000000000'}`)
         .order('created_at', { ascending: false });
 
 
@@ -335,7 +335,7 @@ export default function TodoList() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
-      const { data, error } = await supabase.from('todos').insert({ user_id: user.id, title: newTaskText.trim(), priority: newTaskPriority, status: 'pending', assignee: 'doctor' } as any).select().single();
+      const { data, error } = await supabase.from('todos').insert({ user_id: user.id, title: newTaskText.trim(), priority: newTaskPriority, status: 'pending', assignee: 'advisor' } as any).select().single();
       if (error) throw error;
 
       // Notify client if task has a patient_id

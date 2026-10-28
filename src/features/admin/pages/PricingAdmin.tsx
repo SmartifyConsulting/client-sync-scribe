@@ -136,9 +136,8 @@ export default function PricingAdmin() {
 
       if (error) throw error;
       let result = (data || []) as PricingConfig[];
-      result = calculateSavings(result, "doctor");
-      result = calculateSavings(result, "patient");
-      result = calculateSavings(result, "emergency");
+      result = calculateSavings(result, "advisor");
+      result = calculateSavings(result, "client");
       setPricing(result);
     } catch (error) {
       console.error("Error fetching pricing:", error);
@@ -208,24 +207,21 @@ export default function PricingAdmin() {
     );
   }
 
-  const advisorMonthly = pricing.find((p) => p.role === "doctor" && p.billing_cycle === "monthly");
-  const advisorAnnual = pricing.find((p) => p.role === "doctor" && p.billing_cycle === "annual");
-  const clientMonthly = pricing.find((p) => p.role === "patient" && p.billing_cycle === "monthly");
-  const clientAnnual = pricing.find((p) => p.role === "patient" && p.billing_cycle === "annual");
-  const emergencyMonthly = pricing.find((p) => p.role === "emergency" && p.billing_cycle === "monthly");
-  const emergencyAnnual = pricing.find((p) => p.role === "emergency" && p.billing_cycle === "annual");
+  const advisorMonthly = pricing.find((p) => p.role === "advisor" && p.billing_cycle === "monthly");
+  const advisorAnnual = pricing.find((p) => p.role === "advisor" && p.billing_cycle === "annual");
+  const clientMonthly = pricing.find((p) => p.role === "client" && p.billing_cycle === "monthly");
+  const clientAnnual = pricing.find((p) => p.role === "client" && p.billing_cycle === "annual");
 
   return (
     <AdminPage
       eyebrow="Admin"
       title="Subscription Pricing"
-      description="Define monthly and annual rates for providers, patients, and emergency services."
+      description="Define monthly and annual rates for Wealth Managers and clients."
       actions={<AutosaveIndicator status={autosaveStatus} error={autosaveError} />}
     >
       <div className="space-y-3">
         <RoleSection title="Tier 01 — Wealth Managers"     badgeLabel="Advisor"     monthly={advisorMonthly}    annual={advisorAnnual}    onChange={handleChange} />
         <RoleSection title="Tier 02 — Client"              badgeLabel="Client"    monthly={clientMonthly}   annual={clientAnnual}   onChange={handleChange} />
-        <RoleSection title="Tier 03 — Emergency Services"   badgeLabel="Emergency"  monthly={emergencyMonthly} annual={emergencyAnnual} onChange={handleChange} />
       </div>
     </AdminPage>
   );

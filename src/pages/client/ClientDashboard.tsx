@@ -90,7 +90,7 @@ export default function ClientDashboard() {
         .from("todos")
         .select("id, title, description, vulas_reward, due_date, status")
         .eq("patient_id", patientRecord.id)
-        .eq("assignee", "patient")
+        .eq("assignee", "client")
         .eq("status", "pending")
         .order("due_date", { ascending: true })
         .limit(5);

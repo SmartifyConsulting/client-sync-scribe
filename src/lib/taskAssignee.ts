@@ -1,14 +1,14 @@
 /**
  * Decides who a generated task belongs to.
  *
- * - "doctor"  → clinical admin work (write prescription/certificate/referral/invoice,
+ * - "advisor" → clinical admin work (write prescription/certificate/referral,
  *               schedule appointment, review a generated document, clinical follow-up)
- * - "patient" → self-care instructions (exercise, diet, sleep, hydration, home care…)
+ * - "client"  → self-care instructions (exercise, diet, sleep, hydration, home care…)
  * - "skip"    → medication/prescription instructions. These are already covered by the
  *               prescription document and the medication adherence module, so they must
  *               never become a task on either list.
  */
-export type TaskAssignee = "doctor" | "patient";
+export type TaskAssignee = "advisor" | "client";
 export type TaskClassification = TaskAssignee | "skip";
 
 const MEDICATION_PATTERNS: RegExp[] = [
@@ -28,7 +28,7 @@ const MEDICATION_PATTERNS: RegExp[] = [
   /\bmorning and night\b/i,
 ];
 
-const PATIENT_PATTERNS: RegExp[] = [
+const CLIENT_PATTERNS: RegExp[] = [
   /\bexercis/i,
   /\bstretch/i,
   /\bphysio/i,
@@ -69,7 +69,7 @@ const NON_ACTIONABLE_PATTERNS: RegExp[] = [
   /\bschedule\b.*\bappointment\b/i,
   /\bbook\b.*\bappointment\b/i,
   /\bfollow[- ]up appointment\b/i,
-  /\b(issue|generate|create|prepare|draft)\b.*\b(medical certificate|sick note|prescription|referral( letter)?|invoice)\b/i,
+  /\b(issue|generate|create|prepare|draft)\b.*\b(medical certificate|sick note|prescription|referral( letter)?)\b/i,
 ];
 
 /**
@@ -109,11 +109,11 @@ export function sanitizeTaskTitle(title: string): string {
 
 export function classifyTask(title: string, taskType?: string | null): TaskClassification {
   // Document review tasks are always the practitioner's work.
-  if (taskType === "document_review") return "doctor";
+  if (taskType === "document_review") return "advisor";
 
   const text = title || "";
   if (isNonActionableTask(text)) return "skip";
   if (MEDICATION_PATTERNS.some((re) => re.test(text))) return "skip";
-  if (PATIENT_PATTERNS.some((re) => re.test(text))) return "patient";
-  return "doctor";
+  if (CLIENT_PATTERNS.some((re) => re.test(text))) return "client";
+  return "advisor";
 }

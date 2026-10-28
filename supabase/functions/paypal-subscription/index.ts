@@ -12,7 +12,7 @@ const PAYPAL_BASE = PAYPAL_ENV === "live"
   ? "https://api-m.paypal.com"
   : "https://api-m.sandbox.paypal.com";
 
-const PLAN_TYPES = ["doctor", "patient", "emergency"] as const;
+const PLAN_TYPES = ["advisor", "client"] as const;
 const BILLING_CYCLES = ["monthly", "annual"] as const;
 
 const BodySchema = z.object({

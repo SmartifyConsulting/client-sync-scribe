@@ -672,7 +672,6 @@ function NotificationList({
           sessionId={ratingNotification.reference_id || ""}
           ratedUserId={ratedDoctorId}
           ratedUserName={ratedAdvisorName}
-          raterRole="patient"
           onRated={() => {
             onMarkAsRead(ratingNotification.id);
             setRatingNotification(null);

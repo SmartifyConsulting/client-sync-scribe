@@ -74,7 +74,7 @@ const insertActionPointTodos = async (
   await supabase.from('todos').insert(rows as any);
   if (clientId) {
     for (const row of rows) {
-      if (row.assignee === 'patient') await notifyClientOfTask(clientId, row.title, sessionId);
+      if (row.assignee === 'client') await notifyClientOfTask(clientId, row.title, sessionId);
     }
   }
 };
@@ -860,7 +860,7 @@ ${tasksHtml}`;
               task_type: 'document_review',
               priority: 'high',
               status: 'pending',
-              assignee: 'doctor',
+              assignee: 'advisor',
             } as any);
           }
 
@@ -876,7 +876,7 @@ ${tasksHtml}`;
               priority: 'medium',
               status: 'pending',
               vulas_reward: t.vulas_reward || 1,
-              assignee: 'patient',
+              assignee: 'client',
             }));
           if (patientTaskRows.length > 0) {
             await supabase.from('todos').insert(patientTaskRows as any);
@@ -890,7 +890,7 @@ ${tasksHtml}`;
             .delete()
             .eq('session_id', sessionId!)
             .eq('user_id', user.id)
-            .eq('assignee', 'doctor')
+            .eq('assignee', 'advisor')
             .neq('task_type', 'document_review')
             .ilike('title', '%exercise%');
 
