@@ -15,7 +15,6 @@ import {
   Clock,
   User,
   Sparkles,
-  CheckCircle,
   Info,
   AlertCircle,
   Loader2,
@@ -39,7 +38,6 @@ import {
   Save,
   CalendarCheck,
 } from "lucide-react";
-import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
 import { GeneralLetterEditor } from "@/components/sessions/GeneralLetterEditor";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { WealthClientOverview } from "@/features/sessions/components/WealthClientOverview";
@@ -56,7 +54,7 @@ import {
 
 import { ClinicianNotesColumns } from "@/features/sessions/components/ClinicianNotesAccordion";
 import { DrawingPad } from "@/components/drawings/DrawingPad";
-import type { MedCertData, PrescriptionData, InvoiceData, ReferralData } from "@/components/sessions/TranscriptionReviewDialogs";
+import type { MedCertData, PrescriptionData, ReferralData } from "@/components/sessions/TranscriptionReviewDialogs";
 import { GeneratedDocumentsDialog, type GeneratedDoc, type GeneratedDocKey } from "@/features/sessions/components/GeneratedDocumentsDialog";
 import { PostSessionStepDialog, type PostSessionStepType } from "@/features/sessions/components/PostSessionStepDialog";
 import { cleanClinicianNotes, fuzzyKey } from "@/features/sessions/utils/clinicianNotesSections";
@@ -74,7 +72,6 @@ import { useLiveDiagnosticHint } from "@/hooks/useLiveDiagnosticHint";
 import { AudioWaveform } from "@/components/sessions/AudioWaveform";
 import { useSessions } from "@/hooks/useSessions";
 import { useClients } from "@/hooks/useClients";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
@@ -100,47 +97,6 @@ import {
 } from "@/components/ui/command";
 
 type SessionState = "idle" | "active" | "processing" | "completed";
-
-/**
- * Best-guess price for a standard GP consultation from the advisor's own
- * Service Offerings & Pricing. Scores each service name against consultation
- * keywords and prefers a plain/general consultation over specialised entries.
- * Never returns a hard-coded R0 when any priced service exists.
- */
-async function lookupConsultationPrice(): Promise<number> {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return 0;
-    const { data: prices } = await supabase
-      .from("service_prices")
-      .select("default_price, service_name")
-      .eq("user_id", user.id)
-      .limit(100);
-    const rows = (prices || []).filter((p: any) => Number(p.default_price) > 0);
-    if (!rows.length) return 0;
-
-    const score = (name: string) => {
-      const n = (name || "").toLowerCase();
-      let s = 0;
-      if (n.includes("consult")) s += 10;
-      if (n.includes("gp") || n.includes("general practitioner")) s += 6;
-      if (n.includes("general")) s += 4;
-      if (n.includes("standard") || n.includes("basic")) s += 3;
-      if (n.includes("follow")) s -= 6;
-      if (n.includes("after hours") || n.includes("after-hours") || n.includes("emergency")) s -= 6;
-      if (n.includes("specialist") || n.includes("procedure") || n.includes("home visit")) s -= 5;
-      // Shorter, plainer names are usually the standard consult.
-      s -= Math.min(3, Math.floor(n.length / 25));
-      return s;
-    };
-
-    const best = [...rows].sort((a: any, b: any) => score(b.service_name) - score(a.service_name))[0];
-    return Number(best?.default_price) || Number(rows[0]?.default_price) || 0;
-  } catch (e) {
-    console.error("Pricing lookup failed:", e);
-    return 0;
-  }
-}
 
 export default function Sessions() {
   const { t } = useTranslation();
@@ -180,8 +136,6 @@ export default function Sessions() {
   const [actionPoints, setActionPoints] = useState<string[]>([]);
   const [sessionDuration, setSessionDuration] = useState(0);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-  const [showInvoiceEditor, setShowInvoiceEditor] = useState(false);
-  const [invoice, setInvoice] = useState<{ id: string; invoice_number: string; amount: number } | null>(null);
   const [currentMedications, setCurrentMedications] = useState<{ medication: string; dosage: string; frequency: string }[]>([]);
   const [patientSelectorOpen, setPatientSelectorOpen] = useState(false);
   const [doctorLanguage, setDoctorLanguage] = useState<string>("English");
@@ -219,14 +173,13 @@ export default function Sessions() {
   // AI-extracted document state
   const [extractedMedCert, setExtractedMedCert] = useState<MedCertData | null>(null);
   const [extractedPrescription, setExtractedPrescription] = useState<PrescriptionData | null>(null);
-  const [extractedInvoice, setExtractedInvoice] = useState<InvoiceData | null>(null);
   const [extractedReferral, setExtractedReferral] = useState<ReferralData | null>(null);
   // Single summary dialog for all documents generated from this session
   const [showGeneratedDocsDialog, setShowGeneratedDocsDialog] = useState(false);
   const [generatedDocs, setGeneratedDocs] = useState<GeneratedDoc[]>([]);
   const [previewDocKey, setPreviewDocKey] = useState<GeneratedDocKey | null>(null);
   const [extractedFollowUp, setExtractedFollowUp] = useState<{ follow_up_date?: string; follow_up_time?: string; notes?: string } | null>(null);
-  // Sequential post-session flow: one step (document / schedule / invoice / vula) at a time.
+  // Sequential post-session flow: one step (document / schedule) at a time.
   const [postSessionQueue, setPostSessionQueue] = useState<PostSessionStepType[]>([]);
   const [postSessionIndex, setPostSessionIndex] = useState(0);
   const [showPostSessionFlow, setShowPostSessionFlow] = useState(false);
@@ -373,7 +326,7 @@ export default function Sessions() {
   }, [personalNotes, clientId]);
 
   // Advance to the next step in the sequential post-session queue, closing the
-  // flow once every step (documents → schedule → invoice → vula) has run.
+  // flow once every step (documents → schedule) has run.
   const advancePostSession = useCallback(() => {
     setPostSessionIndex((prev) => {
       const next = prev + 1;
@@ -488,65 +441,6 @@ export default function Sessions() {
     } catch (e) { console.error(e); return null; }
   };
 
-  const createInvoiceDocument = async (data: InvoiceData, sessionIdArg?: string | null): Promise<GeneratedDoc | null> => {
-    const sessionIdForDoc = sessionIdArg ?? currentSessionIdRef.current;
-    if (!clientId || !sessionIdForDoc) return null;
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
-      const invoiceNumber = `INV-${Date.now().toString().slice(-8)}`;
-      const description = data.items.map(i => `${i.description}: R${i.amount}`).join('; ');
-      const total = data.total || data.items.reduce((s, i) => s + (Number(i.amount) || 0), 0);
-      const { data: inv } = await supabase.from('invoices').insert({
-        patient_id: clientId,
-        doctor_id: user.id,
-        session_id: sessionIdForDoc,
-        invoice_number: invoiceNumber,
-        description,
-        amount: total,
-        due_date: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
-      }).select().single();
-      if (inv) setInvoice({ id: inv.id, invoice_number: inv.invoice_number, amount: inv.amount });
-      const content = `<b>INVOICE ${invoiceNumber}</b>\n\nPatient: ${currentPatient?.name || ''}\n\n${data.items.map(i => `• ${i.description} — R${i.amount}`).join('\n')}\n\nTotal: R${total}`;
-      // The session finaliser may already have created a letterhead invoice document
-      // for this session — reuse it instead of inserting a duplicate plain copy.
-      const { data: existing } = await supabase
-        .from('documents')
-        .select('id, content')
-        .eq('user_id', user.id)
-        .eq('patient_id', clientId)
-        .eq('session_id', sessionIdForDoc)
-        .ilike('template_name', '%invoice%')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      let doc: { id: string } | null = existing ? { id: existing.id } : null;
-      if (!doc) {
-        const { data: inserted } = await supabase.from('documents').insert({
-          user_id: user.id,
-          patient_id: clientId,
-          patient_name: currentPatient?.name || null,
-          session_id: sessionIdForDoc,
-          name: `Invoice ${invoiceNumber} - ${currentPatient?.name || ''} - ${new Date().toISOString().split('T')[0]}`,
-          content,
-          template_name: 'Invoice',
-        }).select('id').single();
-        doc = inserted ?? null;
-      }
-
-      return {
-        key: 'invoice',
-        label: 'Invoice',
-        documentId: doc?.id || null,
-        content: existing?.content || content,
-        recipientEmail: (currentPatient as any)?.email || null,
-        recipientName: currentPatient?.name || null,
-      };
-
-    } catch (e) { console.error(e); return null; }
-  };
-
   const createReferralDocument = async (
     data: ReferralData,
     sessionIdArg?: string | null,
@@ -600,30 +494,17 @@ export default function Sessions() {
   const generateAllDocuments = useCallback(async (payload?: {
     medCert?: MedCertData | null;
     prescription?: PrescriptionData | null;
-    invoice?: InvoiceData | null;
     referral?: ReferralData | null;
     sessionId?: string | null;
   }) => {
     const medCert = payload?.medCert ?? extractedMedCert;
     const prescriptionData = payload?.prescription ?? extractedPrescription;
-    let invoiceData = payload?.invoice ?? extractedInvoice;
     const referralData = payload?.referral ?? extractedReferral;
     // Never rely on currentSessionIdRef here — it is only synced by an effect
     // on the next render, so it can still be null in this same tick.
     const sessionIdForDocs = payload?.sessionId ?? currentSessionIdRef.current;
 
-    // Every consultation is billable — if the AI didn't pick up explicit billing
-    // talk, raise a standard consultation invoice (single source of truth).
-    if (!invoiceData?.items?.length) {
-      const amount = await lookupConsultationPrice();
-      invoiceData = {
-        items: [{ description: `Consultation — ${new Date().toLocaleDateString()}`, amount }],
-        total: amount,
-      } as InvoiceData;
-      setExtractedInvoice(invoiceData);
-    }
-
-    // Create documents in the review order: prescription → med cert → referral → invoice.
+    // Create documents in the review order: prescription → med cert → referral.
     const results: GeneratedDoc[] = [];
     if (prescriptionData) {
       const d = await createPrescriptionDocument(prescriptionData, sessionIdForDocs);
@@ -637,15 +518,10 @@ export default function Sessions() {
       const d = await createReferralDocument(referralData, sessionIdForDocs);
       if (d) results.push(d);
     }
-    if (invoiceData) {
-      const d = await createInvoiceDocument(invoiceData, sessionIdForDocs);
-      if (d) results.push(d);
-    }
     setGeneratedDocs(results);
 
     // Review order: AI scribed notes → prescription → referral → hospital
-    // admission → medical certificate → next appointment → invoice → vulas.
-    // The invoice step is always queued — every consultation is billable.
+    // admission → medical certificate → next appointment → vulas.
     const steps: PostSessionStepType[] = ["summary"];
     const ORDER: PostSessionStepType[] = ["prescription", "referral", "admission" as PostSessionStepType, "medcert"];
     for (const key of ORDER) {
@@ -653,16 +529,15 @@ export default function Sessions() {
     }
     for (const d of results) {
       const key = d.key as PostSessionStepType;
-      if (!steps.includes(key) && key !== "invoice") steps.push(key);
+      if (!steps.includes(key)) steps.push(key);
     }
     steps.push("schedule");
-    steps.push("invoice");
 
     setPostSessionQueue(steps);
     setPostSessionIndex(0);
     setShowPostSessionFlow(true);
 
-  }, [extractedMedCert, extractedPrescription, extractedInvoice, extractedReferral, clientId, currentPatient]);
+  }, [extractedMedCert, extractedPrescription, extractedReferral, clientId, currentPatient]);
 
   // Assigned once the live-hint hook is created below; lets the completion
   // handler run one final whole-transcript analysis without a circular dep.
@@ -747,11 +622,9 @@ export default function Sessions() {
         }
         const medCert = docs?.medical_certificate || null;
         const prescriptionData = docs?.prescription || null;
-        const invoiceData = docs?.invoice?.items?.length ? docs.invoice : null;
         const referralData = docs?.referral || null;
         if (medCert) { setExtractedMedCert(medCert); hasDocs = true; }
         if (prescriptionData) { setExtractedPrescription(prescriptionData); hasDocs = true; }
-        if (invoiceData) { setExtractedInvoice(invoiceData); hasDocs = true; }
         if (referralData) { setExtractedReferral(referralData); hasDocs = true; }
 
         // Create every detected document from the freshly returned payload
@@ -759,7 +632,6 @@ export default function Sessions() {
         await generateAllDocuments({
           medCert,
           prescription: prescriptionData,
-          invoice: invoiceData,
           referral: referralData,
           sessionId: result.id,
         });
@@ -1016,7 +888,6 @@ export default function Sessions() {
     setSummary("");
     setActionPoints([]);
     setSessionDuration(resume?.elapsedSeconds ?? 0);
-    setInvoice(null);
     setCurrentSessionId(resume?.id || crypto.randomUUID());
     // Everything captured before the pause is replayed into the finished session.
     resumedTranscriptRef.current = resume?.transcript || "";
@@ -1241,7 +1112,7 @@ export default function Sessions() {
       />
 
       {/* Sequential post-session flow — one step at a time: generated documents,
-          then schedule follow-up, then invoice, then Award Vula. */}
+          then schedule follow-up. */}
       {showPostSessionFlow && postSessionQueue.length > 0 && (
         <PostSessionStepDialog
           queue={postSessionQueue}
@@ -1764,30 +1635,19 @@ export default function Sessions() {
                   <SelectValue placeholder="Select document type..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="invoice">Fee statement</SelectItem>
                   <SelectItem value="general_letter">General Letter</SelectItem>
                 </SelectContent>
               </Select>
               <Button
                 disabled={!selectedDocType || !clientId}
                 onClick={() => {
-                  if (selectedDocType === 'invoice') setShowInvoiceEditor(true);
-                  else if (selectedDocType === 'general_letter') setShowGeneralLetterEditor(true);
+                  if (selectedDocType === 'general_letter') setShowGeneralLetterEditor(true);
                 }}
               >
                 <FileText className="h-4 w-4 mr-1" />
                 Create
               </Button>
             </div>
-            {invoice && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {invoice && (
-                  <Badge variant="secondary" className="gap-1">
-                    <CheckCircle className="h-4 w-4 text-success" /> Invoice R {invoice.amount.toFixed(2)}
-                  </Badge>
-                )}
-              </div>
-            )}
           </div>
 
           <div className="flex gap-3">
@@ -1804,17 +1664,6 @@ export default function Sessions() {
             )}
           </div>
         </div>
-      )}
-
-      {/* Invoice Editor Modal */}
-      {showInvoiceEditor && currentPatient && clientId && (
-        <InvoiceEditor
-          clientId={clientId}
-          clientName={currentPatient.name}
-          sessionId={currentSessionId || undefined}
-          onClose={() => setShowInvoiceEditor(false)}
-          onSave={setInvoice}
-        />
       )}
 
       {/* General Letter Editor Modal */}

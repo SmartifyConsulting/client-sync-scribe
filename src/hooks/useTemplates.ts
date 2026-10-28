@@ -192,53 +192,6 @@ Date: [SignatureDate]`,
     footer_template_id: null,
   },
   {
-    name: "Invoice",
-    description: "Billing invoice for client services",
-    category: "Invoice",
-    content: `INVOICE
-
-TAX Invoice Number: [InvoiceNumber]
-
-Date: [InvoiceDate]
-
-BILL TO:
-
-Client: [ClientName]
-
-Address: [ClientAddress]
-
-Medical Aid: [MedicalAid]
-
-Medical Aid Number: [MedicalAidNumber]
-
-SERVICES PROVIDED
------------------
-[Services]
-
-AMOUNT DUE
-----------
-Total: [TotalAmount]
-
-Payment Terms: Due within 30 days
-
-Bank Details: [BankDetails]
-
-Thank you.
-
-[AdvisorSignature]
-
-[AdvisorName]
-
-[PracticeNumber]`,
-    logo_url: null,
-    logo_position: null,
-    font_family: "sans",
-    is_default: true,
-    header_footer_template_id: null,
-    header_template_id: null,
-    footer_template_id: null,
-  },
-  {
     name: "Hospital Admission Form",
     description: "Form for requesting hospital admission for a client",
     category: "Admission",

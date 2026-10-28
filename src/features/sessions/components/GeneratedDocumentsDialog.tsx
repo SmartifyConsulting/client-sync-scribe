@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FileText, Wallet as Pill, Receipt, Users, Send, Pencil, Check, Loader2, ArrowLeft, Eye } from "lucide-react";
+import { FileText, Wallet as Pill, Users, Send, Pencil, Check, Loader2, ArrowLeft, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -13,7 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-export type GeneratedDocKey = "medcert" | "prescription" | "invoice" | "referral";
+export type GeneratedDocKey = "medcert" | "prescription" | "referral";
 
 export interface GeneratedDoc {
   key: GeneratedDocKey;
@@ -28,7 +28,6 @@ export interface GeneratedDoc {
 const DOC_ICONS: Record<GeneratedDocKey, typeof FileText> = {
   medcert: FileText,
   prescription: Pill,
-  invoice: Receipt,
   referral: Users,
 };
 

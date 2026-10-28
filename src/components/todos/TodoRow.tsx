@@ -17,7 +17,6 @@ import {
   Clock,
   Timer,
   X,
-  CheckCircle2,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -43,7 +42,6 @@ export interface TodoRowItem extends TodoDisplayInput {
   priority: "low" | "medium" | "high";
   is_auto_executed?: boolean;
   document_id?: string | null;
-  invoice_id?: string | null;
 }
 
 interface TodoRowProps {
@@ -60,8 +58,6 @@ interface TodoRowProps {
   onEditAppointment?: (todo: TodoRowItem) => void;
   onSetPriority?: (id: string, p: "low" | "medium" | "high") => void;
   onAssign?: (todo: TodoRowItem) => void;
-  onMarkInvoicePaid?: (todo: TodoRowItem) => void;
-  markingInvoicePaid?: boolean;
   isEditing?: boolean;
   editText?: string;
   setEditText?: (v: string) => void;
@@ -100,8 +96,6 @@ export function TodoRow({
   onEditAppointment,
   onSetPriority,
   onAssign,
-  onMarkInvoicePaid,
-  markingInvoicePaid,
   isEditing,
   editText,
   setEditText,
@@ -308,16 +302,6 @@ export function TodoRow({
                     <Send className="h-4 w-4 mr-2" />
                   )}
                   {t("todo.actions.send")}
-                </DropdownMenuItem>
-              )}
-              {display.kind === "invoice" && todo.invoice_id && onMarkInvoicePaid && !todo.completed && (
-                <DropdownMenuItem disabled={markingInvoicePaid} onClick={() => onMarkInvoicePaid(todo)}>
-                  {markingInvoicePaid ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <CheckCircle2 className="h-4 w-4 mr-2" />
-                  )}
-                  Mark Invoice as Paid
                 </DropdownMenuItem>
               )}
               {onDuplicate && !isAppointment && (

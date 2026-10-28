@@ -25,7 +25,6 @@ export const SCREEN_TIPS: ScreenTip[] = [
   { id: "client.calendar", match: "/client/calendar", title: "My Calendar", body: "Your upcoming consultations and annual reviews." },
   { id: "client.tasks", match: "/client/tasks", title: "My Actions", body: "What your Wealth Manager needs from you, with the reason and due date." },
   { id: "client.access", match: "/client/access", title: "Access Management", body: "Control which Wealth Managers can view your information and what they can see." },
-  { id: "client.invoices", match: "/client/invoices", title: "My Fees", body: "Advice fees and statements from your Wealth Manager. Tap any item to view or download." },
 
   // Wealth Manager / shared
   { id: "advisor.dashboard", match: "/advisor/dashboard", title: "Today's Briefing", body: "Today's consultations, client decisions and outstanding actions." },
@@ -34,7 +33,6 @@ export const SCREEN_TIPS: ScreenTip[] = [
   { id: "advisor.documents", match: "/documents", title: "Documents", body: "Records of Advice, letters and supporting documents. Create from templates or draft from a consultation." },
   { id: "advisor.calendar", match: "/calendar", title: "Calendar", body: "Consultations and annual reviews. Drag to reschedule and colour-code by type." },
   { id: "advisor.todo", match: "/todo", title: "Actions", body: "Actions from consultations and the wealth workflow, plus your own reminders." },
-  { id: "advisor.invoices", match: "/advisor/invoices", title: "Fees & Remuneration", body: "Create and track advice-fee statements. Line items pre-fill from your fee schedule." },
   { id: "advisor.referrals", match: "/referrals", title: "Referral Network", body: "Advisers and specialists you refer clients to. Invite new ones by email." },
   { id: "advisor.connections", match: "/connections", title: "Connections", body: "Pending client invites, access requests and firm member approvals." },
   { id: "advisor.practice", match: "/my-practice", title: "My Business", body: "Add firm members, set your fee schedule, design your letterhead and configure how clients reach you." },

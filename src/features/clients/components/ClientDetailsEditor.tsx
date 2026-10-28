@@ -2516,7 +2516,7 @@ export function ClientDetailsEditor({
               <div className="mb-4">
                 <h2 className="text-lg font-semibold text-primary-dark">Documents</h2>
                 <p className="text-xs text-muted-foreground">
-                  All your prescriptions, invoices, certificates and uploaded files
+                  All your prescriptions, certificates and uploaded files
                 </p>
               </div>
               <Suspense

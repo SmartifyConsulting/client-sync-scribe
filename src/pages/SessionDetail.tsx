@@ -11,7 +11,6 @@ import {
   Loader2,
   Trash2,
   Volume2,
-  Receipt,
   FileText,
   FileEdit,
   PenTool,
@@ -25,7 +24,6 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
 import { GeneralLetterEditor } from "@/components/sessions/GeneralLetterEditor";
 import { DrawingPad } from "@/components/drawings/DrawingPad";
 import { Button } from "@/components/ui/button";
@@ -91,7 +89,6 @@ export default function SessionDetail() {
   const { session, loading, refetch } = useSession(id || "");
   const { deleteSession } = useSessions();
   const { isAdmin } = useIsAdmin();
-  const [showInvoiceEditor, setShowInvoiceEditor] = useState(false);
   const [showGeneralLetterEditor, setShowGeneralLetterEditor] = useState(false);
   const [showDrawingPad, setShowDrawingPad] = useState(false);
   const [translatedSummary, setTranslatedSummary] = useState<string | null>(null);
@@ -433,7 +430,6 @@ export default function SessionDetail() {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem onSelect={() => setShowInvoiceEditor(true)}><Receipt className="mr-2 h-4 w-4" />Fee statement</DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setShowGeneralLetterEditor(true)}><FileEdit className="mr-2 h-4 w-4" />General Letter</DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setShowDrawingPad(true)}><PenTool className="mr-2 h-4 w-4" />Drawing Pad</DropdownMenuItem>
             </DropdownMenuContent>
@@ -616,22 +612,6 @@ export default function SessionDetail() {
 
       {previewDoc && (
         <DocumentPreviewWithLetterhead document={previewDoc} onClose={() => setPreviewDoc(null)} />
-      )}
-
-      {/* Invoice Editor Modal */}
-      {showInvoiceEditor && session.client && (
-        <InvoiceEditor
-          clientId={session.patient_id}
-          clientName={session.client.name}
-          sessionId={id}
-          onClose={() => setShowInvoiceEditor(false)}
-          onSave={(invoice) => {
-            toast({
-              title: "Fee statement created",
-              description: `Invoice #${invoice.invoice_number} has been created.`,
-            });
-          }}
-        />
       )}
 
       {/* General Letter Editor Modal */}

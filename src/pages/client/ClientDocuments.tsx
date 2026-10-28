@@ -22,7 +22,6 @@ import {
   Loader2,
   Trash2,
   Save,
-  Receipt,
   Wallet as Pill,
   FileCheck,
   Send,
@@ -77,7 +76,6 @@ const STORAGE_LIMIT_MB = 100;
 
 type DocType =
   | "prescription"
-  | "invoice"
   | "medical_certificate"
   | "referral_letter"
   | "general_letter"
@@ -95,7 +93,7 @@ interface UnifiedDocument {
   type: DocType;
   date: string;
   sizeBytes: number;
-  source: "documents" | "prescriptions" | "invoices";
+  source: "documents" | "prescriptions";
   content?: string;
   mediaUrl?: string;
   aiAnalysis?: string | null;
@@ -116,12 +114,6 @@ const DOC_TYPE_CONFIG: Record<
     color: "bg-sky-50 text-primary dark:bg-primary/15 dark:text-primary",
     borderColor: "border-primary/40",
     icon: Pill,
-  },
-  invoice: {
-    label: "Fee statement",
-    color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
-    borderColor: "border-amber-400",
-    icon: Receipt,
   },
   medical_certificate: {
     label: "Advice Letter",
@@ -188,7 +180,6 @@ const DOC_TYPE_CONFIG: Record<
 const FILTER_OPTIONS: { value: DocType | "all"; label: string }[] = [
   { value: "all", label: "All" },
   { value: "prescription", label: "Prescriptions" },
-  { value: "invoice", label: "Fee statements" },
   { value: "medical_certificate", label: "Certificates" },
   { value: "referral_letter", label: "Referrals" },
   { value: "general_letter", label: "Letters" },
@@ -209,7 +200,6 @@ function deriveDocType(
   if (mediaType === "image") return "image";
   const lower = (templateName || "").toLowerCase();
   if (lower.includes("prescription")) return "prescription";
-  if (lower.includes("invoice")) return "invoice";
   if (lower.includes("hospital admission")) return "hospital_admission";
   if (lower.includes("medical certificate") || lower.includes("certificate"))
     return "medical_certificate";
@@ -294,7 +284,7 @@ export default function ClientDocuments({ hideHeader = false }: { hideHeader?: b
     setPatientIds(ids);
     setPatientName(patients[0]?.name || "");
 
-    const [docsRes, rxRes, invRes] = await Promise.all([
+    const [docsRes, rxRes] = await Promise.all([
       supabase
         .from("documents")
         .select("id, name, content, template_name, created_at, media_type, media_url, ai_analysis, ai_analyzed_at, email_sent_at, patient_id, user_id, attachments")
@@ -303,11 +293,6 @@ export default function ClientDocuments({ hideHeader = false }: { hideHeader?: b
       supabase
         .from("prescriptions")
         .select("id, medication, dosage, frequency, created_at, status")
-        .in("patient_id", ids)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("invoices")
-        .select("id, invoice_number, description, amount, status, created_at")
         .in("patient_id", ids)
         .order("created_at", { ascending: false }),
     ]);
@@ -346,19 +331,6 @@ export default function ClientDocuments({ hideHeader = false }: { hideHeader?: b
         date: rx.created_at,
         sizeBytes: new Blob([desc]).size,
         source: "prescriptions",
-        content: desc,
-      });
-    }
-
-    for (const inv of invRes.data || []) {
-      const desc = `${inv.invoice_number}: ${inv.description} – R${inv.amount}`;
-      unified.push({
-        id: inv.id,
-        name: `Invoice ${inv.invoice_number}`,
-        type: "invoice",
-        date: inv.created_at,
-        sizeBytes: new Blob([desc]).size,
-        source: "invoices",
         content: desc,
       });
     }

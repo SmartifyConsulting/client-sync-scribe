@@ -50,13 +50,11 @@ import Legal from "./pages/Legal";
 // Client pages
 import ClientDashboard from "./pages/client/ClientDashboard";
 import ClientCalendar from "./pages/client/ClientCalendar";
-import Invoices from "./pages/client/Invoices";
 import ClientAccessManagement from "./pages/client/ClientAccessManagement";
 import MyWealthManagers from "./pages/client/MyWealthManagers";
 import ClientTasks from "./pages/client/ClientTasks";
 import ClientDocuments from "./pages/client/ClientDocuments";
 import MyDetails from "./pages/client/MyDetails";
-import DoctorInvoices from "./pages/advisor/Invoices";
 
 import MyPractice from "./pages/MyPractice";
 import PracticeClients from "./pages/practice/PracticeClients";
@@ -209,7 +207,6 @@ const App = () => (
           >
             <Route path="/client/advisors" element={<MyWealthManagers />} />
             <Route path="/client/calendar" element={<ClientCalendar />} />
-            <Route path="/client/invoices" element={<Invoices />} />
             <Route path="/client/invites" element={<ClientAccessManagement />} />
             <Route path="/client/tasks" element={<ClientTasks />} />
             <Route path="/client/documents" element={<ClientDocuments />} />
@@ -246,7 +243,6 @@ const App = () => (
 
             <Route path="/documents" element={<AdvisorDocumentsPage />} />
             <Route path="/my-views" element={<MyViews />} />
-            <Route path="/invoices" element={<DoctorInvoices />} />
             <Route path="/business" element={<MyPractice />} />
             <Route path="/firm-clients" element={<PracticeClients />} />
             <Route path="/referral-partners" element={<ReferralAdvisors />} />

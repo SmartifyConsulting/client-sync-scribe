@@ -7,7 +7,6 @@
 
 export * as sessionsService from "./supabase/sessions";
 export * as documentsService from "./supabase/documents";
-export * as invoicesService from "./supabase/invoices";
 export * as prescriptionsService from "./supabase/prescriptions";
 export * as profilesService from "./supabase/profiles";
 export * as appointmentsService from "./supabase/appointments";

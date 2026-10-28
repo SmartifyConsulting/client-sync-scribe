@@ -65,11 +65,6 @@ export const sendDocumentEmail = (payload: {
   content?: string;
 }) => safeInvoke("send-document-email", payload);
 
-export const sendInvoiceReport = (payload: Record<string, unknown>) =>
-  safeInvoke("send-invoice-report", payload);
-
-export const submitInsuranceClaim = (payload: Record<string, unknown>) =>
-  safeInvoke("submit-insurance-claim", payload);
 
 export const receiveEmailDocument = (payload: Record<string, unknown>) =>
   safeInvoke("receive-email-document", payload);

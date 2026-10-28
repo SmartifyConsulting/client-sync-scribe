@@ -1,5 +1,4 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import DoctorInvoices from "@/pages/advisor/Invoices";
 import Documents from "@/pages/Documents";
 import CalendarView from "@/pages/CalendarView";
 import TodoList from "@/pages/TodoList";
@@ -23,12 +22,6 @@ export default function Admin() {
             To-Do
           </TabsTrigger>
           <TabsTrigger
-            value="invoices"
-            className="tab-brand text-xs whitespace-nowrap px-3 py-1.5"
-          >
-            Invoices
-          </TabsTrigger>
-          <TabsTrigger
             value="templates"
             className="tab-brand text-xs whitespace-nowrap px-3 py-1.5"
           >
@@ -45,12 +38,6 @@ export default function Admin() {
         <TabsContent value="todo" className="mt-4">
           <div className="admin-tab-scope">
             <TodoList />
-          </div>
-        </TabsContent>
-
-        <TabsContent value="invoices" className="mt-4">
-          <div className="admin-tab-scope">
-            <DoctorInvoices hideHeader />
           </div>
         </TabsContent>
 

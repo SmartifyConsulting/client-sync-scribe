@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, FileText, Wallet as Pill, Receipt, UserPlus, Trash2, Plus } from "lucide-react";
+import { Loader2, FileText, Wallet as Pill, UserPlus, Trash2, Plus } from "lucide-react";
 
 interface MedCertData {
   patient_name?: string;
@@ -24,16 +24,6 @@ interface PrescriptionMed {
 
 interface PrescriptionData {
   medications: PrescriptionMed[];
-}
-
-interface InvoiceItem {
-  description: string;
-  amount: number;
-}
-
-interface InvoiceData {
-  items: InvoiceItem[];
-  total?: number;
 }
 
 interface ReferralData {
@@ -176,71 +166,6 @@ export function PrescriptionReviewDialog({
   );
 }
 
-// Invoice Review Dialog
-export function InvoiceReviewDialog({
-  open,
-  onOpenChange,
-  data,
-  onApprove,
-  loading,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  data: InvoiceData;
-  onApprove: (data: InvoiceData) => void;
-  loading?: boolean;
-}) {
-  const [items, setItems] = useState<InvoiceItem[]>([...data.items]);
-
-  const updateItem = (index: number, field: keyof InvoiceItem, value: string | number) => {
-    const updated = [...items];
-    updated[index] = { ...updated[index], [field]: value };
-    setItems(updated);
-  };
-
-  const removeItem = (index: number) => setItems(items.filter((_, i) => i !== index));
-  const addItem = () => setItems([...items, { description: "", amount: 0 }]);
-  const total = items.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Receipt className="h-5 w-5 text-primary" />
-            Review Invoice
-          </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-3">
-          {items.map((item, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <Input className="flex-1" placeholder="Service" value={item.description} onChange={(e) => updateItem(i, "description", e.target.value)} />
-              <Input className="w-24" type="number" placeholder="Amount" value={item.amount} onChange={(e) => updateItem(i, "amount", parseFloat(e.target.value) || 0)} />
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => removeItem(i)}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-          <Button variant="outline" size="sm" className="gap-1" onClick={addItem}>
-            <Plus className="h-4 w-4" /> Add Item
-          </Button>
-          <div className="flex justify-between font-semibold pt-2 border-t">
-            <span>Total</span>
-            <span>R {total.toFixed(2)}</span>
-          </div>
-        </div>
-        <DialogFooter>
-
-          <Button onClick={() => onApprove({ items, total })} disabled={loading}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-            Approve & Create
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 // Referral Review Dialog
 export function ReferralReviewDialog({
   open,
@@ -296,4 +221,4 @@ export function ReferralReviewDialog({
   );
 }
 
-export type { MedCertData, PrescriptionData, PrescriptionMed, InvoiceData, InvoiceItem, ReferralData };
+export type { MedCertData, PrescriptionData, PrescriptionMed, ReferralData };

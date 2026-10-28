@@ -420,7 +420,7 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
               you can see session summaries, medical overview, prescriptions, referral letters, hospital
               admission forms, admissions, and images, videos, lab results and scans from hospital
               admissions. You cannot see full transcriptions, raw audio recordings, AI diagnostics,
-              clinical drawings, invoices and billing, or medical certificates.
+              clinical drawings, or medical certificates.
             </p>
           </div>
         </div>

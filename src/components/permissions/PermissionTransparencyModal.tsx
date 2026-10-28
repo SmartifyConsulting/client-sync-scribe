@@ -43,7 +43,6 @@ export const getPrivateItems = (t: any): PermissionItem[] => [
   { label: t("permissions.rawAudioRecordings") },
   { label: t("permissions.aiDiagnostics") },
   { label: t("permissions.clinicalDrawings") },
-  { label: t("permissions.invoicesAndBilling") },
   { label: t("permissions.medicalCertificates") },
 ];
 
@@ -61,7 +60,6 @@ const getDoctorPrivateItems = (t: any): PermissionItem[] => [
   { label: t("permissions.sessionHistory") },
   { label: t("permissions.rawAudioRecordings") },
   { label: t("permissions.fullTranscriptions") },
-  { label: t("permissions.invoicesAndBilling") },
   { label: t("permissions.medicalCertificates") },
   { label: t("permissions.draftNotes") },
 ];

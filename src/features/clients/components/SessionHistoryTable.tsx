@@ -1,11 +1,9 @@
-import { useState } from "react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import {
   Clock,
   Eye,
   FileText,
-  Receipt,
   MoreHorizontal,
 } from "lucide-react";
 import {
@@ -21,10 +19,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
 import type { Session } from "@/hooks/useSessions";
 
 interface SessionHistoryTableProps {
@@ -36,14 +32,6 @@ interface SessionHistoryTableProps {
 
 export function SessionHistoryTable({ sessions, clientId, clientName, allergies }: SessionHistoryTableProps) {
   const navigate = useNavigate();
-  const [invoiceOpen, setInvoiceOpen] = useState(false);
-  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
-
-  const handleGenerateInvoice = (session: Session) => {
-    setSelectedSession(session);
-    setInvoiceOpen(true);
-  };
-
   const handleGenerateDocument = (session: Session, templateType: string) => {
     navigate(`/documents?template=${templateType}&client=${clientId}&session=${session.id}`);
   };
@@ -108,11 +96,6 @@ export function SessionHistoryTable({ sessions, clientId, clientName, allergies 
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuItem onClick={() => handleGenerateInvoice(session)}>
-                          <Receipt className="mr-2 h-4 w-4" />
-                          Create Invoice
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => handleGenerateDocument(session, "medical-certificate")}>
                           <FileText className="mr-2 h-4 w-4" />
                           Medical Certificate
@@ -130,22 +113,6 @@ export function SessionHistoryTable({ sessions, clientId, clientName, allergies 
           </TableBody>
         </Table>
       </div>
-
-      {/* Invoice Editor */}
-      {invoiceOpen && selectedSession && (
-        <InvoiceEditor
-          clientId={clientId}
-          clientName={clientName}
-          sessionId={selectedSession.id}
-          onClose={() => {
-            setInvoiceOpen(false);
-            setSelectedSession(null);
-          }}
-          onSave={(invoice) => {
-            console.log("Invoice created:", invoice);
-          }}
-        />
-      )}
 
     </>
   );

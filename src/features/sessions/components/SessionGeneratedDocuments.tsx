@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FileText, Wallet as Pill, Receipt, Users, Send, Eye, Loader2, BookmarkCheck, Sparkles } from "lucide-react";
+import { FileText, Wallet as Pill, Users, Send, Eye, Loader2, BookmarkCheck, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { GeneratedDoc, GeneratedDocKey } from "./GeneratedDocumentsDialog";
@@ -7,7 +7,6 @@ import type { GeneratedDoc, GeneratedDocKey } from "./GeneratedDocumentsDialog";
 const DOC_ICONS: Record<GeneratedDocKey, typeof FileText> = {
   medcert: FileText,
   prescription: Pill,
-  invoice: Receipt,
   referral: Users,
 };
 

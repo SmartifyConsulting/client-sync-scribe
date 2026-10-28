@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Calendar, FileText, Clock, User, Loader2, ListChecks, ArrowRight, Info, Sparkles, Building2, Receipt, Star, Trophy, Heart, Mic } from "lucide-react";
+import { Calendar, FileText, Clock, User, Loader2, ListChecks, ArrowRight, Info, Sparkles, Building2, Star, Trophy, Heart, Mic } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -201,23 +201,6 @@ export default function ClientDashboard() {
     },
   });
 
-  // Fetch recent claims (invoices submitted to insurance)
-  const { data: recentClaims = [] } = useQuery({
-    queryKey: ["client-recent-claims", patientRecord?.id],
-    queryFn: async () => {
-      if (!patientRecord?.id) return [];
-      const { data } = await supabase
-        .from("invoices")
-        .select("id, invoice_number, amount, status, created_at, email_sent_at")
-        .eq("patient_id", patientRecord.id)
-        .not("email_sent_at", "is", null)
-        .order("email_sent_at", { ascending: false })
-        .limit(5);
-      return data || [];
-    },
-    enabled: !!patientRecord?.id,
-  });
-
   // AI Health Summary
   const { data: aiSummary, isLoading: aiSummaryLoading } = useQuery({
     queryKey: ["client-ai-summary", patientRecord?.id],
@@ -253,9 +236,6 @@ export default function ClientDashboard() {
     queryClient.invalidateQueries({ queryKey: ["unread-notifications-client-dashboard"] });
     queryClient.invalidateQueries({ queryKey: ["recent-notifications-client-dashboard"] });
   };
-
-  const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat("en-ZA", { style: "currency", currency: "ZAR" }).format(amount);
 
   // Parse pharmacies from client record
   const pharmacies: Pharmacy[] = (() => {
@@ -400,62 +380,21 @@ export default function ClientDashboard() {
         </Card>
       </div>
 
-      {/* Row 3: Recent Claims + Documentation (hidden on mobile) */}
+      {/* Row 3: Documentation (hidden on mobile) */}
       {!isMobile && (
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-sm">
-                  <Receipt className="h-4 w-4 text-primary" />
-                  {t("patientDashboard.claimsTitle")}
-                </CardTitle>
-                <Link to="/client/invoices">
-                  <Button variant="ghost" size="sm" className="text-xs h-6 text-primary gap-1">
-                    {t("patientDashboard.claimsAllInvoices")} <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
-              <CardDescription className="text-xs">{t("patientDashboard.claimsDescription")}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {recentClaims.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">{t("patientDashboard.claimsEmpty")}</p>
-              ) : (
-                <div className="space-y-1.5">
-                  {recentClaims.map((claim: any) => (
-                    <div key={claim.id} className="flex items-center justify-between p-2.5 rounded-xl border border-border">
-                      <div>
-                        <p className="text-xs font-medium text-foreground">#{claim.invoice_number}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Submitted {claim.email_sent_at ? format(parseISO(claim.email_sent_at), "MMM d, yyyy") : "—"}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs font-semibold text-foreground">{formatCurrency(Number(claim.amount))}</p>
-                        <Badge variant="outline" className="text-xs capitalize">{claim.status}</Badge>
-                      </div>
-                    </div>
-                  ))}
+        <Link to="/client/documents">
+          <Card className="cursor-pointer border-primary/10 hover:border-primary/30 hover:shadow-md transition-all">
+            <CardHeader className="p-4">
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary">
+                  <FileText className="h-4 w-4 text-primary" />
                 </div>
-              )}
-            </CardContent>
+                Documents
+              </CardTitle>
+              <CardDescription className="text-xs">View and manage your documents</CardDescription>
+            </CardHeader>
           </Card>
-
-          <Link to="/client/documents">
-            <Card className="cursor-pointer border-primary/10 hover:border-primary/30 hover:shadow-md transition-all h-full">
-              <CardHeader className="p-4">
-                <CardTitle className="flex items-center gap-2 text-sm">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary">
-                    <FileText className="h-4 w-4 text-primary" />
-                  </div>
-                  Documents
-                </CardTitle>
-                <CardDescription className="text-xs">View and manage your documents</CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
-        </div>
+        </Link>
       )}
 
       {/* Assigned Tasks */}
