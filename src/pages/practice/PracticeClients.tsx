@@ -17,11 +17,11 @@ interface PracticePatient {
 }
 
 /**
- * Practice Management Assistant view of the practice doctors' patients.
+ * Practice Management Assistant view of the practice advisors' clients.
  * Administrative details only — no clinical records are shown here.
  */
 export default function PracticeClients() {
-  const { doctors, loading: practiceLoading } = usePracticeAssistant();
+  const { advisors, loading: practiceLoading } = usePracticeAssistant();
   const [patients, setPatients] = useState<PracticePatient[]>([]);
   const [query, setQuery] = useState("");
   const [taskPatientId, setTaskPatientId] = useState<string | null>(null);
@@ -30,23 +30,23 @@ export default function PracticeClients() {
   useEffect(() => {
     if (practiceLoading) return;
     (async () => {
-      const doctorIds = doctors.map((d) => d.user_id);
-      if (!doctorIds.length) {
+      const advisorIds = advisors.map((d) => d.user_id);
+      if (!advisorIds.length) {
         setPatients([]);
         return;
       }
       const { data } = await supabase
         .from("clients")
         .select("id, name, email, phone, user_id")
-        .in("user_id", doctorIds)
+        .in("user_id", advisorIds)
         .order("name", { ascending: true });
       setPatients((data || []) as PracticePatient[]);
     })();
-  }, [doctors, practiceLoading]);
+  }, [advisors, practiceLoading]);
 
   const advisorName = useMemo(
-    () => new Map(doctors.map((d) => [d.user_id, d.full_name || "Doctor"])),
-    [doctors],
+    () => new Map(advisors.map((d) => [d.user_id, d.full_name || "Advisor"])),
+    [advisors],
   );
 
   const filtered = patients.filter((p) =>
@@ -60,7 +60,7 @@ export default function PracticeClients() {
         <h1 className="page-title">Firm Clients</h1>
       </div>
       <p className="text-sm text-muted-foreground">
-        Administrative view of the practice doctors' patients. Clinical records are not shown.
+        Administrative view of the practice advisors' clients. Clinical records are not shown.
       </p>
 
       <div className="relative max-w-sm">
@@ -83,7 +83,7 @@ export default function PracticeClients() {
               <div className="flex items-center gap-2">
                 <span className="truncate text-sm font-medium">{p.name}</span>
                 <Badge variant="outline" className="shrink-0">
-                  {advisorName.get(p.user_id) || "Doctor"}
+                  {advisorName.get(p.user_id) || "Advisor"}
                 </Badge>
               </div>
               <p className="truncate text-xs text-muted-foreground">

@@ -541,7 +541,7 @@ function NotificationList({
   const { t } = useTranslation();
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [ratingNotification, setRatingNotification] = useState<Notification | null>(null);
-  const [ratedDoctorName, setRatedDoctorName] = useState("");
+  const [ratedAdvisorName, setRatedAdvisorName] = useState("");
   const [ratedDoctorId, setRatedDoctorId] = useState("");
 
   const handleInvitationResponse = async (notification: Notification, accept: boolean) => {
@@ -621,7 +621,7 @@ function NotificationList({
 
   const handleRateDoctor = async (notification: Notification) => {
     if (!notification.reference_id) return;
-    // reference_id is the session_id, fetch session to get doctor (user_id)
+    // reference_id is the session_id, fetch session to get advisor (user_id)
     try {
       const { data: session } = await supabase
         .from('sessions')
@@ -635,7 +635,7 @@ function NotificationList({
         .eq('id', session.user_id)
         .single();
       setRatedDoctorId(session.user_id);
-      setRatedDoctorName(profile?.full_name || "Your Doctor");
+      setRatedAdvisorName(profile?.full_name || "Your Advisor");
       setRatingNotification(notification);
     } catch (err) {
       console.error("Error fetching session for rating:", err);
@@ -671,7 +671,7 @@ function NotificationList({
           onOpenChange={(open) => { if (!open) setRatingNotification(null); }}
           sessionId={ratingNotification.reference_id || ""}
           ratedUserId={ratedDoctorId}
-          ratedUserName={ratedDoctorName}
+          ratedUserName={ratedAdvisorName}
           raterRole="patient"
           onRated={() => {
             onMarkAsRead(ratingNotification.id);

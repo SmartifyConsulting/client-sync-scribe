@@ -87,7 +87,7 @@ export function usePracticeAssistant() {
     isAssistant,
     practiceId,
     colleagues,
-    doctors: colleagues.filter((c) => c.role !== "assistant"),
+    advisors: colleagues.filter((c) => c.role !== "assistant"),
     assistants: colleagues.filter((c) => c.role === "assistant"),
     loading,
     refresh: load,

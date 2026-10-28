@@ -22,19 +22,19 @@ import { useAuth } from "@/hooks/useAuth";
 type AccessPermission = "patient_info" | "calendar" | "session_summaries" | "prescription_history";
 
 interface InviteAdvisorDialogProps {
-  prefillDoctorId?: string;
+  prefillAdvisorId?: string;
   prefillPracticeNumber?: string;
   prefillRegistrationNumber?: string;
-  prefillDoctorName?: string;
+  prefillAdvisorName?: string;
   prefillAvatarUrl?: string;
   prefillSpecialty?: string;
 }
 
 export function InviteAdvisorDialog({
-  prefillDoctorId,
+  prefillAdvisorId,
   prefillPracticeNumber,
   prefillRegistrationNumber,
-  prefillDoctorName,
+  prefillAdvisorName,
   prefillAvatarUrl,
   prefillSpecialty,
 }: InviteAdvisorDialogProps = {}) {
@@ -61,15 +61,15 @@ export function InviteAdvisorDialog({
     try {
       // Resolve target advisor via SECURITY DEFINER RPC (bypasses profiles RLS,
       // which otherwise hides advisor profiles from patients without an existing link).
-      let doctorRow: { id: string; practice_number: string | null; doctor_number: string | null } | null = null;
+      let advisorRow: { id: string; practice_number: string | null; doctor_number: string | null } | null = null;
 
-      if (prefillDoctorId) {
+      if (prefillAdvisorId) {
         const { data, error } = await supabase
-          .rpc("get_doctor_invite_card", { _doctor_id: prefillDoctorId });
+          .rpc("get_doctor_invite_card", { _doctor_id: prefillAdvisorId });
         if (error) throw error;
         const row = Array.isArray(data) ? data[0] : data;
         if (row) {
-          doctorRow = {
+          advisorRow = {
             id: (row as any).id,
             practice_number: (row as any).practice_number ?? null,
             doctor_number: (row as any).doctor_number ?? null,
@@ -83,17 +83,17 @@ export function InviteAdvisorDialog({
           .eq("doctor_number", prefillRegistrationNumber.trim())
           .maybeSingle();
         if (error) throw error;
-        doctorRow = data as any;
+        advisorRow = data as any;
       }
 
-      if (!doctorRow) {
+      if (!advisorRow) {
         toast({ title: "Wealth Manager not found", description: "We couldn't locate this provider's account.", variant: "destructive" });
         setIsLoading(false);
         return;
       }
 
-      const practiceNum = doctorRow.practice_number ?? prefillPracticeNumber ?? null;
-      const registrationNum = doctorRow.doctor_number ?? prefillRegistrationNumber ?? null;
+      const practiceNum = advisorRow.practice_number ?? prefillPracticeNumber ?? null;
+      const registrationNum = advisorRow.doctor_number ?? prefillRegistrationNumber ?? null;
 
       if (!practiceNum || !registrationNum) {
         toast({
@@ -151,7 +151,7 @@ export function InviteAdvisorDialog({
       // direct cross-user inserts on notifications)
       try {
         const { error: notifErr } = await supabase.rpc("create_doctor_invite_notification" as any, {
-          _doctor_id: doctorRow.id,
+          _doctor_id: advisorRow.id,
           _title: "Client Invitation",
           _description: `${profile?.full_name || "A client"} has invited you to their panel of healthcare providers.`,
           _reference_id: user.id,
@@ -196,16 +196,16 @@ export function InviteAdvisorDialog({
 
         <div className="grid gap-3 py-2">
           {/* Selected Advisor Info */}
-          {prefillDoctorName && (
+          {prefillAdvisorName && (
             <div className="flex items-center gap-3 p-3 rounded-xl border border-primary/40 bg-sky-50/30">
               <Avatar className="h-10 w-10">
-                {prefillAvatarUrl && <AvatarImage src={prefillAvatarUrl} alt={prefillDoctorName} />}
+                {prefillAvatarUrl && <AvatarImage src={prefillAvatarUrl} alt={prefillAdvisorName} />}
                 <AvatarFallback className="text-xs font-semibold">
-                  {prefillDoctorName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                  {prefillAdvisorName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="text-sm font-semibold text-foreground">{prefillDoctorName}</p>
+                <p className="text-sm font-semibold text-foreground">{prefillAdvisorName}</p>
                 {prefillSpecialty && (
                   <Badge variant="secondary" className="text-xs mt-0.5">{prefillSpecialty}</Badge>
                 )}

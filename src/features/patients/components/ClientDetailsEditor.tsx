@@ -556,9 +556,9 @@ export function ClientDetailsEditor({
   const [gpSearchTerm, setGpSearchTerm] = useState("");
   const [gpAutoDetected, setGpAutoDetected] = useState<{ id: string; full_name: string } | null>(null);
 
-  // Auto-detect: if the GP field is empty, suggest a connected doctor whose
+  // Auto-detect: if the GP field is empty, suggest a connected advisor whose
   // specialty is "General Practitioner" (falls back to the first connected
-  // doctor) so patients don't have to search from scratch.
+  // advisor) so clients don't have to search from scratch.
   useEffect(() => {
     if (!isSelfService || !client.patient_user_id || formData.general_practitioner) {
       setGpAutoDetected(null);
@@ -1276,7 +1276,7 @@ export function ClientDetailsEditor({
       setGpSearchResults([]);
       return;
     }
-    // Doctor role can live in either `profiles.role` or the separate
+    // Advisor role can live in either `profiles.role` or the separate
     // `user_roles` table depending on when the account was created, so
     // check both and match on either to avoid missing real doctors.
     const [{ data: roleRows }, { data: matchingProfiles }] = await Promise.all([
@@ -1436,7 +1436,7 @@ export function ClientDetailsEditor({
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="font-medium text-foreground truncate">
-                        {doctorProfile?.full_name || "Doctor"}
+                        {doctorProfile?.full_name || "Advisor"}
                       </span>
                       {doctorProfile?.specialty && (
                         <Badge variant="secondary" className="text-xs px-1.5 py-0 h-4 shrink-0">
@@ -1605,7 +1605,7 @@ export function ClientDetailsEditor({
       );
     }
 
-    // Desktop/Tablet for doctor-viewed client: Personal & Medical tabs on the green bar
+    // Desktop/Tablet for advisor-viewed client: Personal & Medical tabs on the green bar
     return (
       <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
         <TabsTrigger

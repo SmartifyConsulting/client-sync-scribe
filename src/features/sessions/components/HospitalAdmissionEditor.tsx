@@ -55,7 +55,7 @@ Registration No: [DOCTOR_NUMBER]
 
 ADMISSION DETAILS
 
-Admitting Doctor: [DOCTOR_NAME]
+Admitting Advisor: [ADVISOR_NAME]
 Practice Number: [PRACTICE_NUMBER]
 Hospital: [HOSPITAL]
 Date of Admission: [ADMISSION_DATE]
@@ -88,7 +88,7 @@ PATIENT SPECIAL INSTRUCTIONS
 Client: [CLIENT_NAME]
 
 Signature: ___________________
-           [DOCTOR_NAME]
+           [ADVISOR_NAME]
 `;
 
 function useCodeSearch(country: string) {
@@ -231,7 +231,7 @@ export function HospitalAdmissionEditor({
   const { formattedContent: savedTemplate, headerFooter, isLoading: templateLoading } =
     useTemplateWithHeaderFooter("Hospital Admission Form");
 
-  const advisorName = profile?.full_name || "Doctor";
+  const advisorName = profile?.full_name || "Advisor";
   const practiceNumber = profile?.practice_number || "";
   const practiceAddress = profile?.practice_address || "";
   const doctorNumber = profile?.doctor_number || "";
@@ -381,6 +381,8 @@ export function HospitalAdmissionEditor({
     return baseTemplate
       .replace(/\[DOCTOR_NAME\]/g, advisorName)
       .replace(/\[DoctorName\]/g, advisorName)
+      .replace(/\[ADVISOR_NAME\]/g, advisorName)
+      .replace(/\[AdvisorName\]/g, advisorName)
       .replace(/\[PRACTICE_NUMBER\]/g, practiceNumber)
       .replace(/\[PracticeNumber\]/g, practiceNumber)
       .replace(/\[PRACTICE_ADDRESS\]/g, practiceAddress)
@@ -491,7 +493,7 @@ export function HospitalAdmissionEditor({
             <h3 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wide">Admission Details</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Admitting Doctor</Label>
+                <Label>Admitting Advisor</Label>
                 <Input value={advisorName} disabled className="bg-muted/50" />
               </div>
               <div className="space-y-2">

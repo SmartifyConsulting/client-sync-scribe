@@ -16,7 +16,7 @@ interface SessionResultPanelsProps {
   actionPoints?: string[];
   /** Session id — used to look up whether each action point's linked to-do is done. */
   sessionId?: string | null;
-  /** Shown as the assignee for action points whose linked to-do is assigned to the patient. */
+  /** Shown as the assignee for action points whose linked to-do is assigned to the client. */
   clientName?: string | null;
   /** AI Clinician decision-support write-up. */
   clinicianNotes?: string | null;
@@ -134,7 +134,7 @@ export function SessionResultPanels({
     const todo = matchedTodo(point);
     if (!todo) return null;
     if (todo.assignee === "patient") return clientName || "Client";
-    return advisorName || "Doctor";
+    return advisorName || "Advisor";
   };
 
   return (

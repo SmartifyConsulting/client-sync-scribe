@@ -48,7 +48,7 @@ import { cn } from "@/lib/utils";
 type GroupBy = "type" | "date" | "client";
 
 interface DocumentsBrowserProps {
-  /** Restrict to a single patient's documents. */
+  /** Restrict to a single client's documents. */
   clientId?: string;
   clientName?: string;
   /** Show documents from every owner the RLS policies allow. */
@@ -67,7 +67,7 @@ const groupLabel = (doc: Document, groupBy: GroupBy) => {
 };
 
 /**
- * Shared document list used by the Documents screen and by a patient profile's
+ * Shared document list used by the Documents screen and by a client profile's
  * Documents tab so both behave identically: search, grouping (by type by
  * default, newest first), inline preview, upload with optional AI transcription
  * of handwritten records, and link-only sharing via Inform.

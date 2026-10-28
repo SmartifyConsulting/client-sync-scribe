@@ -359,7 +359,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
           documentName: `Invoice ${invoice.invoice_number} — PAID`,
           documentId: invoice.id,
           documentHtml: html,
-          senderName: profile?.full_name || "Doctor",
+          senderName: profile?.full_name || "Advisor",
           practiceName: profile?.practice_number || undefined,
           attachments: pdfBase64
             ? [{ filename: pdfFileName(`Invoice-${invoice.invoice_number}-PAID`), content: pdfBase64 }]
@@ -439,7 +439,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
           documentName: `Invoice ${invoice.invoice_number}`,
           documentId: invoice.id,
           documentHtml: html,
-          senderName: profile?.full_name || "Doctor",
+          senderName: profile?.full_name || "Advisor",
           practiceName: profile?.practice_number || undefined,
           attachments: pdfBase64
             ? [{ filename: pdfFileName(`Invoice-${invoice.invoice_number}`), content: pdfBase64 }]
@@ -923,7 +923,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
       const { error } = await supabase.functions.invoke("send-invoice-report", {
         body: {
           email: emailAddress,
-          advisorName: profile?.full_name || "Doctor",
+          advisorName: profile?.full_name || "Advisor",
           practiceNumber: profile?.practice_number || "",
           dateFrom: reportDateFrom ? format(reportDateFrom, "yyyy-MM-dd") : "",
           dateTo: reportDateTo ? format(reportDateTo, "yyyy-MM-dd") : "",
@@ -1903,7 +1903,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">From</p>
-                  <p className="font-semibold text-foreground">{profile?.full_name || "Doctor"}</p>
+                  <p className="font-semibold text-foreground">{profile?.full_name || "Advisor"}</p>
                   {profile?.practice_number && (
                     <p className="text-sm text-muted-foreground">Practice No: {profile.practice_number}</p>
                   )}

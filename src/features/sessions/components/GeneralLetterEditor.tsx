@@ -48,7 +48,7 @@ export function GeneralLetterEditor({
   const { profile } = useProfile();
   const { formattedContent: savedTemplate, headerFooter, isLoading: templateLoading } = useTemplateWithHeaderFooter("General");
   
-  const advisorName = profile?.full_name || "Doctor";
+  const advisorName = profile?.full_name || "Advisor";
   const practiceNumber = profile?.practice_number || "";
   const practiceAddress = profile?.practice_address || "";
   const doctorNumber = profile?.doctor_number || "";

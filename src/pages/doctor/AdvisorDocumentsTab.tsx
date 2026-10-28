@@ -42,7 +42,7 @@ import { documentTypeBadgeClass } from "@/lib/documentTypeColors";
 import { cn } from "@/lib/utils";
 
 type DocRow = ReturnType<typeof useDocuments>["documents"][number];
-type GroupMode = "date" | "type" | "patient";
+type GroupMode = "date" | "type" | "client";
 
 function getSurname(name: string) {
   const parts = name.trim().split(/\s+/);
@@ -93,7 +93,7 @@ function DocumentCard({ doc, onPreview }: { doc: DocRow; onPreview: (doc: DocRow
 }
 
 export default function AdvisorDocumentsTab() {
-  // Documents where the doctor is themself the patient are covered by the My Profile
+  // Documents where the advisor is themself the client are covered by the My Profile
   // view now, so this list is just every practice document — no owner filter needed.
   const { documents, loading, fetchDocuments } = useDocuments(undefined, { allOwners: true });
   const { templates } = useTemplates();
@@ -137,10 +137,10 @@ export default function AdvisorDocumentsTab() {
     return out;
   }, [filtered]);
 
-  const groupedByPatient = useMemo(() => {
+  const groupedByClient = useMemo(() => {
     const map = new Map<string, DocRow[]>();
     for (const d of filtered) {
-      const name = d.patient_name || "No patient";
+      const name = d.patient_name || "No client";
       if (!map.has(name)) map.set(name, []);
       map.get(name)!.push(d);
     }
@@ -166,7 +166,7 @@ export default function AdvisorDocumentsTab() {
           label: b.label,
           rows: groupedByDate[b.key],
         }))
-      : (groupMode === "type" ? groupedByType : groupedByPatient).map(([name, rows]) => ({
+      : (groupMode === "type" ? groupedByType : groupedByClient).map(([name, rows]) => ({
           key: name,
           label: name,
           rows,
@@ -214,7 +214,7 @@ export default function AdvisorDocumentsTab() {
             <ToggleGroupItem value="type" className="text-xs px-3">
               Type
             </ToggleGroupItem>
-            <ToggleGroupItem value="patient" className="text-xs px-3">
+            <ToggleGroupItem value="client" className="text-xs px-3">
               Client
             </ToggleGroupItem>
           </ToggleGroup>
@@ -279,7 +279,7 @@ export default function AdvisorDocumentsTab() {
                   <Accordion type="multiple" className="space-y-2 py-1">
                     {Array.from(
                       g.rows.reduce((map, d) => {
-                        const name = d.patient_name || "No patient";
+                        const name = d.patient_name || "No client";
                         if (!map.has(name)) map.set(name, []);
                         map.get(name)!.push(d);
                         return map;

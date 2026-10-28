@@ -64,7 +64,7 @@ export default function ClientDashboard() {
   const { profile } = useProfile();
   const queryClient = useQueryClient();
 
-  // Fetch patient record
+  // Fetch client record
   const { data: patientRecord } = useQuery({
     queryKey: ["my-client-record-dashboard"],
     queryFn: async () => {
@@ -134,7 +134,7 @@ export default function ClientDashboard() {
 
   // Fetch prescriptions (medications)
   const { data: medications = [] } = useQuery({
-    queryKey: ["patient-medications-dashboard", patientRecord?.id],
+    queryKey: ["client-medications-dashboard", patientRecord?.id],
     queryFn: async () => {
       if (!patientRecord?.id) return [];
       const { data } = await supabase
@@ -170,7 +170,7 @@ export default function ClientDashboard() {
           .eq("id", access.doctor_id)
           .maybeSingle();
 
-        // Last session with this doctor
+        // Last session with this advisor
         const { data: lastSession } = await supabase
           .from("sessions")
           .select("ended_at")
@@ -180,7 +180,7 @@ export default function ClientDashboard() {
           .limit(1)
           .maybeSingle();
 
-        // Next appointment with this doctor
+        // Next appointment with this advisor
         const { data: nextAppt } = await supabase
           .from("appointments")
           .select("start_time")
@@ -203,7 +203,7 @@ export default function ClientDashboard() {
 
   // Fetch recent claims (invoices submitted to insurance)
   const { data: recentClaims = [] } = useQuery({
-    queryKey: ["patient-recent-claims", patientRecord?.id],
+    queryKey: ["client-recent-claims", patientRecord?.id],
     queryFn: async () => {
       if (!patientRecord?.id) return [];
       const { data } = await supabase
@@ -220,7 +220,7 @@ export default function ClientDashboard() {
 
   // AI Health Summary
   const { data: aiSummary, isLoading: aiSummaryLoading } = useQuery({
-    queryKey: ["patient-ai-summary", patientRecord?.id],
+    queryKey: ["client-ai-summary", patientRecord?.id],
     queryFn: async () => {
       if (!patientRecord) return null;
       // Fetch sessions for context
@@ -257,7 +257,7 @@ export default function ClientDashboard() {
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat("en-ZA", { style: "currency", currency: "ZAR" }).format(amount);
 
-  // Parse pharmacies from patient record
+  // Parse pharmacies from client record
   const pharmacies: Pharmacy[] = (() => {
     const list: Pharmacy[] = [];
     if (patientRecord?.pharmacies && Array.isArray(patientRecord.pharmacies)) {

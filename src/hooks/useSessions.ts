@@ -35,13 +35,13 @@ export interface Session {
   };
 }
 
-// Helper to notify patient when a task is assigned to them
+// Helper to notify client when a task is assigned to them
 const notifyClientOfTask = async (clientId: string, taskTitle: string, taskId: string) => {
   try {
-    const { data: patient } = await supabase.from('clients').select('patient_user_id').eq('id', clientId).maybeSingle();
-    if (patient?.patient_user_id) {
+    const { data: client } = await supabase.from('clients').select('patient_user_id').eq('id', clientId).maybeSingle();
+    if (client?.patient_user_id) {
       await supabase.from('notifications').insert({
-        user_id: patient.patient_user_id,
+        user_id: client.patient_user_id,
         title: `📋 New task assigned: ${taskTitle}`,
         description: 'You have been assigned a new task by your healthcare provider.',
         type: 'task_assigned',
@@ -51,8 +51,8 @@ const notifyClientOfTask = async (clientId: string, taskTitle: string, taskId: s
   } catch (err) { console.error('Error sending task notification:', err); }
 };
 
-// Saves session action points as todos, routing each one to the doctor or the
-// patient. Medication/prescription instructions are dropped — the prescription
+// Saves session action points as todos, routing each one to the advisor or the
+// client. Medication/prescription instructions are dropped — the prescription
 // document and medication adherence module already cover them.
 const insertActionPointTodos = async (
   actionPoints: string[],
@@ -359,7 +359,7 @@ const completeSession = async (
 
           const today = new Date().toISOString().split('T')[0];
 
-          // Try to use doctor's Hospital Admission template
+          // Try to use advisor's Hospital Admission template
           const admissionTemplate = doctorTemplates.find(t => 
             t.name.toLowerCase().includes('hospital admission') || t.name.toLowerCase().includes('admission')
           );
@@ -401,7 +401,7 @@ const completeSession = async (
             admissionContent = `<h2>Hospital Admission Form</h2>
 <p><strong>Date:</strong> ${today}</p>
 <p><strong>Client:</strong> ${patientRecord?.name || 'Unknown'}</p>
-<p><strong>Doctor:</strong> ${profileData?.full_name || ''}</p>
+<p><strong>Advisor:</strong> ${profileData?.full_name || ''}</p>
 <p><strong>Practice Number:</strong> ${profileData?.practice_number || ''}</p>
 <p><strong>Registration Number:</strong> ${profileData?.doctor_number || ''}</p>
 <br/>
@@ -539,7 +539,7 @@ const completeSession = async (
               rxContent = `<h2>Prescription</h2>
 <p><strong>Date:</strong> ${today}</p>
 <p><strong>Client:</strong> ${patientRecord?.name || 'Unknown'}</p>
-<p><strong>Doctor:</strong> ${docProfile?.full_name || ''}</p>
+<p><strong>Advisor:</strong> ${docProfile?.full_name || ''}</p>
 <p><strong>Practice Number:</strong> ${docProfile?.practice_number || ''}</p>
 <br/>
 <table><thead><tr><th>Medication</th><th>Dosage</th><th>Frequency</th><th>Instructions</th><th>Repeats</th></tr></thead><tbody>${medsHtml}</tbody></table>`;
@@ -654,10 +654,10 @@ const completeSession = async (
             certContent = `<h2>Medical Certificate</h2>
 <p><strong>Date:</strong> ${today}</p>
 <p><strong>Client:</strong> ${patientRecord?.name || 'Unknown'}</p>
-<p><strong>Doctor:</strong> ${docProfile?.full_name || ''}</p>
+<p><strong>Advisor:</strong> ${docProfile?.full_name || ''}</p>
 <p><strong>Practice Number:</strong> ${docProfile?.practice_number || ''}</p>
 <br/>
-<p>This is to certify that ${patientRecord?.name || 'the patient'} was examined on ${today} and is unfit for duty from <strong>${cert.from_date || today}</strong> to <strong>${cert.to_date || today}</strong>.</p>
+<p>This is to certify that ${patientRecord?.name || 'the client'} was examined on ${today} and is unfit for duty from <strong>${cert.from_date || today}</strong> to <strong>${cert.to_date || today}</strong>.</p>
 <br/>
 <p><strong>Diagnosis:</strong> ${cert.diagnosis || 'As discussed'}</p>
 <p><strong>Reason:</strong> ${cert.reason || ''}</p>`;
@@ -782,7 +782,7 @@ const completeSession = async (
 <p><strong>To:</strong> ${ref.referred_to || 'Specialist'}</p>
 <br/>
 <p>${buildGreeting({ fullName: ref.referred_to, isPractitioner: true })},</p>
-<p>I am referring <strong>${patientRecord?.name || 'the patient'}</strong> for your expert opinion regarding:</p>
+<p>I am referring <strong>${patientRecord?.name || 'the client'}</strong> for your expert opinion regarding:</p>
 <p>${ref.reason || ref.diagnosis || 'As discussed during consultation'}</p>
 <br/>
 <p><strong>Clinical Notes:</strong> ${ref.clinical_notes || ''}</p>`;
@@ -906,7 +906,7 @@ const completeSession = async (
             }).join('<br/>');
             plainDescription = lineItems.map((li: any) => li.description || li.name || 'Service').join(', ');
           } else {
-            // No AI line items — fall back to the doctor's default service price.
+            // No AI line items — fall back to the advisor's default service price.
             const defaultService = pickDefaultService();
             if (!defaultService) {
               // No service prices configured — skip ONLY the auto-invoice block
@@ -937,7 +937,7 @@ const completeSession = async (
           if (invoiceTemplate) {
             // Use the shared placeholder filler so every alias ([Client Name],
             // [ClientName], [TotalAmount], [Services], signature, bank details…)
-            // resolves against the real patient / practice / invoice data.
+            // resolves against the real client / practice / invoice data.
             invoiceContent = fillDocumentPlaceholders(invoiceTemplate.content, {
               patient: patientRecord as any,
               profile: docProfile as any,
@@ -959,7 +959,7 @@ const completeSession = async (
 <p><strong>Client:</strong> ${clientName}</p>
 ${patientRecord?.physical_address || patientRecord?.address ? `<p><strong>Address:</strong> ${patientRecord?.physical_address || patientRecord?.address}</p>` : ''}
 ${patientRecord?.medical_aid ? `<p><strong>Medical Aid:</strong> ${patientRecord.medical_aid}${patientRecord.medical_aid_number ? ` (${patientRecord.medical_aid_number})` : ''}</p>` : ''}
-<p><strong>Doctor:</strong> ${docProfile?.full_name || ''}</p>
+<p><strong>Advisor:</strong> ${docProfile?.full_name || ''}</p>
 ${docProfile?.practice_number ? `<p><strong>Practice Number:</strong> ${docProfile.practice_number}</p>` : ''}
 <br/>
 <p><strong>Services:</strong><br/>${servicesLine}</p>
@@ -1026,7 +1026,7 @@ ${sessionSignature ? `<br/><div>${sessionSignature}</div><div style="border-top:
 
       }
 
-      // Auto-create patient task assignment document if detected
+      // Auto-create client task assignment document if detected
       if (summaryData?.patient_tasks?.tasks?.length > 0 && clientId) {
         try {
           const tasks = summaryData.patient_tasks.tasks;
@@ -1069,7 +1069,7 @@ ${tasksHtml}`;
             } as any);
           }
 
-          // The instructions themselves belong on the patient's task list
+          // The instructions themselves belong on the client's task list
           const patientTaskRows = tasks
             .filter((t: any) => t?.title && classifyTask(t.title) !== 'skip')
             .map((t: any) => ({
@@ -1090,7 +1090,7 @@ ${tasksHtml}`;
             }
           }
 
-          // Remove duplicate doctor-side action_point todos for exercises/tasks
+          // Remove duplicate advisor-side action_point todos for exercises/tasks
           await supabase.from('todos')
             .delete()
             .eq('session_id', sessionId!)
@@ -1100,7 +1100,7 @@ ${tasksHtml}`;
             .ilike('title', '%exercise%');
 
         } catch (taskError) {
-          console.error('Error creating patient task assignment:', taskError);
+          console.error('Error creating client task assignment:', taskError);
         }
       }
 

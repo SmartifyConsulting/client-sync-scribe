@@ -179,7 +179,7 @@ export function CompactTodoList() {
 
       if (error) throw error;
 
-      // Resolve the real patient names so grouping never has to guess from the title.
+      // Resolve the real client names so grouping never has to guess from the title.
       const patientIds = Array.from(
         new Set((data || []).map((t: any) => t.patient_id).filter(Boolean)),
       ) as string[];
@@ -521,7 +521,7 @@ export function CompactTodoList() {
           </div>
         )}
 
-        {/* Task list — grouped by date, then patient. Grows to fit its content;
+        {/* Task list — grouped by date, then client. Grows to fit its content;
             Round Tables below caps its own height instead so it doesn't get
             pushed past the bottom of Recent Activity in the left column. */}
         <div>
@@ -569,8 +569,8 @@ export function CompactTodoList() {
                     try {
                       const { data: doc } = await (supabase.from('documents').select('*') as any).eq('id', t.document_id).maybeSingle();
                       if (!doc) return;
-                      const { data: patient } = await supabase.from('clients').select('email, pharmacy_email').eq('id', doc.patient_id).maybeSingle();
-                      const email = doc.template_name?.toLowerCase().includes('prescription') ? patient?.pharmacy_email || patient?.email : patient?.email;
+                      const { data: client } = await supabase.from('clients').select('email, pharmacy_email').eq('id', doc.patient_id).maybeSingle();
+                      const email = doc.template_name?.toLowerCase().includes('prescription') ? client?.pharmacy_email || client?.email : client?.email;
                       if (email) await supabase.functions.invoke('send-document-email', { body: { documentId: t.document_id, recipientEmail: email } });
                       await (supabase.from('documents').update({ email_sent_at: new Date().toISOString(), is_draft: false } as any) as any).eq('id', t.document_id);
                       await supabase.from('todos').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', t.id);
@@ -591,7 +591,7 @@ export function CompactTodoList() {
               if (buckets.length === 0) return null;
               // LOCKED LAYOUT — see mem://design/todo-accordion-and-row-spec.
               // Date accordion (always-green bar + calendar icon + count pill) wrapping
-              // muted patient sub-accordions wrapping TodoRow cards. Do not restructure
+              // muted client sub-accordions wrapping TodoRow cards. Do not restructure
               // or restyle without updating that memory rule first.
               return (
                 <Accordion type="multiple" defaultValue={[buckets[0].key]} className="space-y-2">

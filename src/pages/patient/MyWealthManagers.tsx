@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 
 interface ProviderResult {
   id: string;
-  kind: 'doctor' | 'hospital' | 'ambulance';
+  kind: 'advisor' | 'hospital' | 'ambulance';
   full_name: string | null;
   specialty: string | null;
   address: string | null;
@@ -34,7 +34,7 @@ interface ProviderResult {
   ownership?: string | null;
 }
 
-interface DoctorProfile {
+interface AdvisorProfile {
   id: string;
   full_name: string | null;
   specialty: string | null;
@@ -47,13 +47,13 @@ interface DoctorProfile {
   preferred_language?: string | null;
 }
 
-interface DoctorAccess {
+interface AdvisorAccess {
   id: string;
   doctor_id: string;
   permissions: string[];
   granted_at: string;
   is_active: boolean;
-  doctor?: DoctorProfile;
+  advisor?: AdvisorProfile;
 }
 
 export default function MyWealthManagers({ hideHeader = false, showAccessReminder = false }: { hideHeader?: boolean; showAccessReminder?: boolean }) {
@@ -64,10 +64,10 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
   const [searchResults, setSearchResults] = useState<ProviderResult[]>([]);
   const [totalFound, setTotalFound] = useState(0);
   const [hasSearched, setHasSearched] = useState(false);
-  const [uninviteTarget, setUninviteTarget] = useState<DoctorAccess | null>(null);
+  const [uninviteTarget, setUninviteTarget] = useState<AdvisorAccess | null>(null);
   const [uninviteLoading, setUninviteLoading] = useState(false);
-  const [detailsDoctor, setDetailsDoctor] = useState<ProviderResult | null>(null);
-  const [viewDoctorId, setViewDoctorId] = useState<string | null>(null);
+  const [detailsAdvisor, setDetailsAdvisor] = useState<ProviderResult | null>(null);
+  const [viewAdvisorId, setViewAdvisorId] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -93,19 +93,19 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
     return filtered.length >= 4 ? "full" : "limited";
   };
 
-  const matchesFilters = (access: DoctorAccess) => {
-    const doctor = access.doctor;
-    if (!doctor) return false;
+  const matchesFilters = (access: AdvisorAccess) => {
+    const advisor = access.advisor;
+    if (!advisor) return false;
     const q = appliedFilters.search.trim().toLowerCase();
-    if (q && !(doctor.full_name?.toLowerCase().includes(q) || doctor.practice_number?.toLowerCase().includes(q))) return false;
-    if (appliedFilters.specialty !== "any" && doctor.specialty !== appliedFilters.specialty) return false;
-    if (appliedFilters.language !== "any" && doctor.preferred_language !== appliedFilters.language) return false;
+    if (q && !(advisor.full_name?.toLowerCase().includes(q) || advisor.practice_number?.toLowerCase().includes(q))) return false;
+    if (appliedFilters.specialty !== "any" && advisor.specialty !== appliedFilters.specialty) return false;
+    if (appliedFilters.language !== "any" && advisor.preferred_language !== appliedFilters.language) return false;
     if (appliedFilters.accessLevel !== "any" && getAccessLevel(access.permissions) !== appliedFilters.accessLevel) return false;
     return true;
   };
 
-  const sortAccess = (list: DoctorAccess[]) => {
-    const sorted = [...list].sort((a, b) => (a.doctor?.full_name || "").localeCompare(b.doctor?.full_name || ""));
+  const sortAccess = (list: AdvisorAccess[]) => {
+    const sorted = [...list].sort((a, b) => (a.advisor?.full_name || "").localeCompare(b.advisor?.full_name || ""));
     return sortBy === "name-desc" ? sorted.reverse() : sorted;
   };
 
@@ -113,7 +113,7 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
     queryKey: ["client-advisors-with-hidden"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return { active: [] as DoctorAccess[], hidden: [] as DoctorAccess[], hiddenIds: new Set<string>() };
+      if (!user) return { active: [] as AdvisorAccess[], hidden: [] as AdvisorAccess[], hiddenIds: new Set<string>() };
 
       const [{ data: accessData, error: accessError }, { data: hiddenRows }] = await Promise.all([
         supabase
@@ -142,8 +142,8 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
 
       const enriched = accessData.map((access: any) => ({
         ...access,
-        doctor: profilesData?.find((p: any) => p.id === access.doctor_id),
-      })) as DoctorAccess[];
+        advisor: profilesData?.find((p: any) => p.id === access.doctor_id),
+      })) as AdvisorAccess[];
 
       const active = enriched.filter((d) => d.is_active && !hiddenIds.has(d.doctor_id));
       const hidden = enriched.filter((d) => hiddenIds.has(d.doctor_id) || !d.is_active);
@@ -152,7 +152,7 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
   });
 
   // General Practitioner — always shown in the list (by default), flagged
-  // with whether they're a registered Holarc Health doctor or an external GP.
+  // with whether they're a registered Holarc Health advisor or an external GP.
   const { data: gpInfo } = useQuery({
     queryKey: ["patient-gp-holarc-status"],
     queryFn: async () => {
@@ -176,10 +176,10 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
   });
 
   const doctors = doctorsData?.active ?? [];
-  const hiddenDoctors = doctorsData?.hidden ?? [];
+  const hiddenAdvisors = doctorsData?.hidden ?? [];
   const hiddenIds = doctorsData?.hiddenIds ?? new Set<string>();
 
-  const handleHide = async (access: DoctorAccess) => {
+  const handleHide = async (access: AdvisorAccess) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     const { error } = await supabase.from("client_hidden_advisors").insert({
@@ -194,7 +194,7 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
     queryClient.invalidateQueries({ queryKey: ["client-advisors-with-hidden"] });
   };
 
-  const handleRestore = async (access: DoctorAccess) => {
+  const handleRestore = async (access: AdvisorAccess) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     // Unhide
@@ -275,7 +275,7 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
         .update({ is_active: false, revoked_at: new Date().toISOString() } as any)
         .eq("id", uninviteTarget.id);
 
-      // Intentionally do NOT notify the doctor when a patient revokes access.
+      // Intentionally do NOT notify the advisor when a patient revokes access.
       toast({ title: "Wealth Manager deactivated", description: "They no longer have live access. Historic records are preserved." });
       queryClient.invalidateQueries({ queryKey: ["client-advisors-with-hidden"] });
       setUninviteTarget(null);
@@ -286,7 +286,7 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
     }
   };
 
-  const DoctorRow = ({ access, doctor, permissions, mode }: { access: DoctorAccess; doctor: DoctorProfile; permissions?: string[]; mode: "active" | "hidden" }) => {
+  const AdvisorRow = ({ access, advisor, permissions, mode }: { access: AdvisorAccess; advisor: AdvisorProfile; permissions?: string[]; mode: "active" | "hidden" }) => {
     const filteredPermissions = permissions?.filter(p => p !== 'patient_info' && p !== 'patient_information') || [];
     const accessLevel = getAccessLevel(permissions);
 
@@ -294,28 +294,28 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
       <div className="flex items-center justify-between gap-3 p-3">
         <button
           type="button"
-          onClick={() => setViewDoctorId(doctor.id)}
+          onClick={() => setViewAdvisorId(advisor.id)}
           className="flex items-center gap-3 min-w-0 text-left hover:opacity-80 transition-opacity"
         >
           <Avatar className="h-10 w-10 shrink-0">
-            <AvatarImage src={doctor.avatar_url || undefined} />
+            <AvatarImage src={advisor.avatar_url || undefined} />
             <AvatarFallback className="bg-primary/10 text-primary text-sm">
-              {doctor.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "DR"}
+              {advisor.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "DR"}
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col min-w-0">
-            <span className="font-medium text-sm text-foreground truncate hover:underline">{doctor.full_name || "Unknown Wealth Manager"}</span>
+            <span className="font-medium text-sm text-foreground truncate hover:underline">{advisor.full_name || "Unknown Wealth Manager"}</span>
             <div className="flex items-center gap-1.5 flex-wrap">
-              {doctor.specialty && (
-                <Badge className={`text-xs font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
-                  {doctor.specialty}
+              {advisor.specialty && (
+                <Badge className={`text-xs font-medium border-0 ${getSpecialtyColor(advisor.specialty)}`}>
+                  {advisor.specialty}
                 </Badge>
               )}
-              {doctor.practice_number && (
-                <span className="text-xs text-muted-foreground">PR#: {doctor.practice_number}</span>
+              {advisor.practice_number && (
+                <span className="text-xs text-muted-foreground">PR#: {advisor.practice_number}</span>
               )}
-              {doctor.practice_address && (
-                <span className="text-xs text-muted-foreground">· {doctor.practice_address.split(",")[0]}</span>
+              {advisor.practice_address && (
+                <span className="text-xs text-muted-foreground">· {advisor.practice_address.split(",")[0]}</span>
               )}
             </div>
             {mode === "hidden" && (
@@ -405,7 +405,7 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
           <div>
             <h1 className="page-title">My Wealth Managers</h1>
             <p className="text-muted-foreground text-xs">
-              Healthcare providers with access to your profile
+              Wealth Managers with access to your profile
             </p>
           </div>
         </div>
@@ -452,7 +452,7 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
         </Card>
       )}
 
-      {/* Doctor Search */}
+      {/* Advisor Search */}
       <Card>
         <CardHeader className="pb-1 pt-3 px-4">
           <CardTitle className="text-sm">Find a Wealth Manager on Holarc Wealth</CardTitle>
@@ -496,16 +496,16 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
               ) : searchResults.length === 0 ? (
                  <div className="flex flex-col items-center gap-2 py-4">
                    <p className="text-sm text-muted-foreground text-center">
-                     No healthcare providers found. Check the spelling, or try their surname, email address or practice number.
+                     No Wealth Managers found. Check the spelling, or try their surname, email address or practice number.
                    </p>
                    <InviteAdvisorDialog />
                  </div>
               ) : (
                 <div className="space-y-4">
-                  {(['doctor','hospital','ambulance'] as const).map((groupKind) => {
+                  {(['advisor','hospital','ambulance'] as const).map((groupKind) => {
                     const groupRows = searchResults.filter((r) => r.kind === groupKind);
                     if (groupRows.length === 0) return null;
-                    const groupLabel = groupKind === 'doctor' ? 'Doctors' : groupKind === 'hospital' ? 'Hospitals' : 'Emergency Responders';
+                    const groupLabel = groupKind === 'advisor' ? 'Advisors' : groupKind === 'hospital' ? 'Hospitals' : 'Emergency Responders';
                     const GroupIcon = groupKind === 'hospital' ? Building2 : groupKind === 'ambulance' ? Ambulance : Stethoscope;
                     return (
                       <div key={groupKind} className="space-y-1">
@@ -517,33 +517,33 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
                           <TableHeader>
                             <TableRow>
                               <TableHead className="w-[45%]">Provider</TableHead>
-                              <TableHead className="w-[30%]">{groupKind === 'doctor' ? 'Specialty' : 'Type'}</TableHead>
+                              <TableHead className="w-[30%]">{groupKind === 'advisor' ? 'Specialty' : 'Type'}</TableHead>
                               <TableHead className="w-[25%]">Action</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {groupRows.map((doctor) => {
-                              const KindIcon = doctor.kind === 'hospital' ? Building2 : doctor.kind === 'ambulance' ? Ambulance : Stethoscope;
-                              const alreadyConnected = doctor.kind === 'doctor' && (doctors || []).some((d) => d.doctor_id === doctor.id);
+                            {groupRows.map((advisor) => {
+                              const KindIcon = advisor.kind === 'hospital' ? Building2 : advisor.kind === 'ambulance' ? Ambulance : Stethoscope;
+                              const alreadyConnected = advisor.kind === 'advisor' && (doctors || []).some((d) => d.doctor_id === advisor.id);
                               return (
-                                <TableRow key={`${doctor.kind}-${doctor.id}`}>
+                                <TableRow key={`${advisor.kind}-${advisor.id}`}>
                                   <TableCell className="p-2">
                                     <div className="flex items-center gap-2">
                                       <Avatar className="h-7 w-7 shrink-0">
-                                        <AvatarImage src={doctor.avatar_url || undefined} />
+                                        <AvatarImage src={advisor.avatar_url || undefined} />
                                         <AvatarFallback className="bg-primary/10 text-primary text-xs">
                                           <KindIcon className="h-3.5 w-3.5" />
                                         </AvatarFallback>
                                       </Avatar>
                                       <div className="flex flex-col min-w-0">
                                         <span className="font-medium text-foreground text-xs truncate flex items-center gap-1.5">
-                                          {doctor.full_name || "Unknown"}
+                                          {advisor.full_name || "Unknown"}
                                           {alreadyConnected && (
                                             <Badge variant="outline" className="text-2xs px-1 py-0 border-primary text-primary">Already connected</Badge>
                                           )}
                                         </span>
                                         <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                          {Array.from({ length: Math.min(5, Math.max(0, Math.round(Number(doctor.stars) || 0))) }).map((_, i) => (
+                                          {Array.from({ length: Math.min(5, Math.max(0, Math.round(Number(advisor.stars) || 0))) }).map((_, i) => (
                                             <Star key={i} className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
                                           ))}
                                         </span>
@@ -551,19 +551,19 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
                                     </div>
                                   </TableCell>
                                   <TableCell className="p-2">
-                                    {doctor.kind === 'doctor' && doctor.specialty ? (
-                                      <Badge className={`text-xs font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
-                                        {doctor.specialty}
+                                    {advisor.kind === 'advisor' && advisor.specialty ? (
+                                      <Badge className={`text-xs font-medium border-0 ${getSpecialtyColor(advisor.specialty)}`}>
+                                        {advisor.specialty}
                                       </Badge>
                                     ) : (
                                       <div className="flex flex-col gap-0.5">
-                                        <Badge variant="outline" className="text-xs capitalize">{doctor.kind}</Badge>
-                                        {doctor.ownership && (
+                                        <Badge variant="outline" className="text-xs capitalize">{advisor.kind}</Badge>
+                                        {advisor.ownership && (
                                           <Badge
                                             variant="outline"
-                                            className={`text-xs capitalize ${doctor.ownership === 'public' ? 'border-primary/40 text-primary' : 'border-blue-500 text-blue-700'}`}
+                                            className={`text-xs capitalize ${advisor.ownership === 'public' ? 'border-primary/40 text-primary' : 'border-blue-500 text-blue-700'}`}
                                           >
-                                            {doctor.ownership}
+                                            {advisor.ownership}
                                           </Badge>
                                         )}
                                       </div>
@@ -571,19 +571,19 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
                                   </TableCell>
                                   <TableCell className="p-2">
                                     <div className="flex items-center gap-1">
-                                      {doctor.kind === 'doctor' && !alreadyConnected && (
+                                      {advisor.kind === 'advisor' && !alreadyConnected && (
                                         <InviteAdvisorDialog
-                                          prefillDoctorId={doctor.id}
-                                          prefillDoctorName={doctor.full_name || ""}
-                                          prefillAvatarUrl={doctor.avatar_url || ""}
-                                          prefillSpecialty={doctor.specialty || ""}
+                                          prefillAdvisorId={advisor.id}
+                                          prefillAdvisorName={advisor.full_name || ""}
+                                          prefillAvatarUrl={advisor.avatar_url || ""}
+                                          prefillSpecialty={advisor.specialty || ""}
                                         />
                                       )}
                                       <Button
                                         variant="ghost"
                                         size="icon"
                                         className="h-7 w-7"
-                                        onClick={() => setDetailsDoctor(doctor)}
+                                        onClick={() => setDetailsAdvisor(advisor)}
                                         aria-label="View details"
                                       >
                                         <MoreVertical className="h-3.5 w-3.5" />
@@ -605,18 +605,18 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
         </CardContent>
       </Card>
 
-      {/* Connected Doctors — Sidebar filters + Active / Hidden list */}
+      {/* Connected Advisors — Sidebar filters + Active / Hidden list */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      ) : doctors.length === 0 && hiddenDoctors.length === 0 ? (
+      ) : doctors.length === 0 && hiddenAdvisors.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Stethoscope className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold text-foreground">No wealth managers on your profile</h3>
              <p className="text-muted-foreground text-center mt-2 max-w-md">
-               Search for a healthcare provider above or use the invite button to connect.
+               Search for a Wealth Manager above or use the invite button to connect.
             </p>
           </CardContent>
         </Card>
@@ -651,7 +651,7 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
             <Tabs defaultValue="active" className="w-full">
               <TabsList className="bg-primary">
                 <TabsTrigger value="active" className="tab-brand whitespace-nowrap text-xs px-3 py-1.5">Active ({doctors.length})</TabsTrigger>
-                <TabsTrigger value="hidden" className="tab-brand whitespace-nowrap text-xs px-3 py-1.5">Hidden ({hiddenDoctors.length})</TabsTrigger>
+                <TabsTrigger value="hidden" className="tab-brand whitespace-nowrap text-xs px-3 py-1.5">Hidden ({hiddenAdvisors.length})</TabsTrigger>
               </TabsList>
               <TabsContent value="active" className="mt-3">
                 <div className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-border">
@@ -661,8 +661,8 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
                     <p className="text-sm text-muted-foreground text-center py-8">No providers match your filters.</p>
                   ) : (
                     sortAccess(doctors).filter(matchesFilters).map((access) =>
-                      access.doctor ? (
-                        <DoctorRow key={access.id} access={access} doctor={access.doctor} permissions={access.permissions} mode="active" />
+                      access.advisor ? (
+                        <AdvisorRow key={access.id} access={access} advisor={access.advisor} permissions={access.permissions} mode="active" />
                       ) : null
                     )
                   )}
@@ -670,14 +670,14 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
               </TabsContent>
               <TabsContent value="hidden" className="mt-3">
                 <div className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-border">
-                  {hiddenDoctors.length === 0 ? (
+                  {hiddenAdvisors.length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-8">No hidden or deactivated providers. Historic records always remain visible elsewhere.</p>
-                  ) : sortAccess(hiddenDoctors).filter(matchesFilters).length === 0 ? (
+                  ) : sortAccess(hiddenAdvisors).filter(matchesFilters).length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-8">No providers match your filters.</p>
                   ) : (
-                    sortAccess(hiddenDoctors).filter(matchesFilters).map((access) =>
-                      access.doctor ? (
-                        <DoctorRow key={access.id} access={access} doctor={access.doctor} permissions={access.permissions} mode="hidden" />
+                    sortAccess(hiddenAdvisors).filter(matchesFilters).map((access) =>
+                      access.advisor ? (
+                        <AdvisorRow key={access.id} access={access} advisor={access.advisor} permissions={access.permissions} mode="hidden" />
                       ) : null
                     )
                   )}
@@ -694,7 +694,7 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
           <DialogHeader>
             <DialogTitle>Remove Wealth Manager</DialogTitle>
             <DialogDescription>
-              Are you sure you want to remove {uninviteTarget?.doctor?.full_name || "this doctor"} from your healthcare providers? They will lose access to your health information.
+              Are you sure you want to remove {uninviteTarget?.advisor?.full_name || "this advisor"} as your Wealth Manager? They will lose access to your financial information.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -707,38 +707,38 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
         </DialogContent>
       </Dialog>
 
-      {/* Doctor Details (credentials + About Me) */}
-      <Dialog open={!!detailsDoctor} onOpenChange={(o) => !o && setDetailsDoctor(null)}>
+      {/* Advisor Details (credentials + About Me) */}
+      <Dialog open={!!detailsAdvisor} onOpenChange={(o) => !o && setDetailsAdvisor(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={detailsDoctor?.avatar_url || undefined} />
+                <AvatarImage src={detailsAdvisor?.avatar_url || undefined} />
                 <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                  {detailsDoctor?.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "DR"}
+                  {detailsAdvisor?.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "DR"}
                 </AvatarFallback>
               </Avatar>
-              <span>{detailsDoctor?.full_name || "Provider"}</span>
+              <span>{detailsAdvisor?.full_name || "Provider"}</span>
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-2 text-xs">
             <div className="flex items-center gap-1">
-              {Array.from({ length: Math.min(5, Math.max(0, Math.round(Number(detailsDoctor?.stars) || 0))) }).map((_, i) => (
+              {Array.from({ length: Math.min(5, Math.max(0, Math.round(Number(detailsAdvisor?.stars) || 0))) }).map((_, i) => (
                 <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
               ))}
-              <span className="text-muted-foreground ml-1 capitalize">({detailsDoctor?.kind})</span>
+              <span className="text-muted-foreground ml-1 capitalize">({detailsAdvisor?.kind})</span>
             </div>
-            {detailsDoctor?.specialty && <div><span className="text-muted-foreground">Specialty:</span> {detailsDoctor.specialty}</div>}
-            {detailsDoctor?.registration && <div><span className="text-muted-foreground">Registration #:</span> {detailsDoctor.registration}</div>}
-            {detailsDoctor?.preferred_language && (
-              <div><span className="text-muted-foreground">Language:</span> {LANGUAGES.find(l => l.code === detailsDoctor.preferred_language)?.name || detailsDoctor.preferred_language}</div>
+            {detailsAdvisor?.specialty && <div><span className="text-muted-foreground">Specialty:</span> {detailsAdvisor.specialty}</div>}
+            {detailsAdvisor?.registration && <div><span className="text-muted-foreground">Registration #:</span> {detailsAdvisor.registration}</div>}
+            {detailsAdvisor?.preferred_language && (
+              <div><span className="text-muted-foreground">Language:</span> {LANGUAGES.find(l => l.code === detailsAdvisor.preferred_language)?.name || detailsAdvisor.preferred_language}</div>
             )}
-            {detailsDoctor?.address && <div><span className="text-muted-foreground">Address:</span> {detailsDoctor.address}</div>}
-            {detailsDoctor?.phone && <div><span className="text-muted-foreground">Phone:</span> {detailsDoctor.phone}</div>}
+            {detailsAdvisor?.address && <div><span className="text-muted-foreground">Address:</span> {detailsAdvisor.address}</div>}
+            {detailsAdvisor?.phone && <div><span className="text-muted-foreground">Phone:</span> {detailsAdvisor.phone}</div>}
             <div className="hidden pt-2 border-t">
               <div className="text-muted-foreground mb-1 font-medium">About Me</div>
-              {detailsDoctor?.about_me ? (
-                <p className="whitespace-pre-wrap leading-relaxed">{detailsDoctor.about_me}</p>
+              {detailsAdvisor?.about_me ? (
+                <p className="whitespace-pre-wrap leading-relaxed">{detailsAdvisor.about_me}</p>
               ) : (
                 <p className="italic text-muted-foreground">Not provided yet.</p>
               )}
@@ -747,7 +747,7 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
         </DialogContent>
       </Dialog>
 
-      <AdvisorProfileDialog advisorId={viewDoctorId} onOpenChange={(o) => !o && setViewDoctorId(null)} />
+      <AdvisorProfileDialog advisorId={viewAdvisorId} onOpenChange={(o) => !o && setViewAdvisorId(null)} />
     </div>
   );
 }

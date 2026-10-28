@@ -208,8 +208,8 @@ export default function PricingAdmin() {
     );
   }
 
-  const doctorMonthly = pricing.find((p) => p.role === "doctor" && p.billing_cycle === "monthly");
-  const doctorAnnual = pricing.find((p) => p.role === "doctor" && p.billing_cycle === "annual");
+  const advisorMonthly = pricing.find((p) => p.role === "doctor" && p.billing_cycle === "monthly");
+  const advisorAnnual = pricing.find((p) => p.role === "doctor" && p.billing_cycle === "annual");
   const clientMonthly = pricing.find((p) => p.role === "patient" && p.billing_cycle === "monthly");
   const clientAnnual = pricing.find((p) => p.role === "patient" && p.billing_cycle === "annual");
   const emergencyMonthly = pricing.find((p) => p.role === "emergency" && p.billing_cycle === "monthly");
@@ -223,7 +223,7 @@ export default function PricingAdmin() {
       actions={<AutosaveIndicator status={autosaveStatus} error={autosaveError} />}
     >
       <div className="space-y-3">
-        <RoleSection title="Tier 01 — Healthcare Providers" badgeLabel="Doctor"     monthly={doctorMonthly}    annual={doctorAnnual}    onChange={handleChange} />
+        <RoleSection title="Tier 01 — Wealth Managers"     badgeLabel="Advisor"     monthly={advisorMonthly}    annual={advisorAnnual}    onChange={handleChange} />
         <RoleSection title="Tier 02 — Client"              badgeLabel="Client"    monthly={clientMonthly}   annual={clientAnnual}   onChange={handleChange} />
         <RoleSection title="Tier 03 — Emergency Services"   badgeLabel="Emergency"  monthly={emergencyMonthly} annual={emergencyAnnual} onChange={handleChange} />
       </div>

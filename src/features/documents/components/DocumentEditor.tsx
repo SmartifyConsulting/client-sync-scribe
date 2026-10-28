@@ -158,24 +158,24 @@ export function DocumentEditor({ template, preSelectedClientId, onClose, onSave 
     template.name?.toLowerCase().includes("admission") ||
     template.category?.toLowerCase().includes("admission");
 
-  // Auto-fill placeholders from the signed-in doctor + selected patient using
-  // the shared filler, so doctor-scoped tokens (name, numbers, [DoctorSignature])
-  // always resolve even before a patient is chosen.
+  // Auto-fill placeholders from the signed-in advisor + selected client using
+  // the shared filler, so advisor-scoped tokens (name, numbers, [AdvisorSignature])
+  // always resolve even before a client is chosen.
   useEffect(() => {
-    const patient =
+    const client =
       selectedClientId && selectedClientId !== "none"
         ? clients.find((p) => p.id === selectedClientId)
         : undefined;
 
     const { content: updatedContent } = fillDocumentPlaceholders(template.content, {
       profile: (profile as any) ?? null,
-      patient: (patient as any) ?? null,
+      patient: (client as any) ?? null,
       // The editor is a raw textarea — keep signature/blank markup out of it.
       plainText: true,
     });
 
-    if (patient) {
-      setDocumentName(`${template.name} - ${patient.name} - ${new Date().toLocaleDateString()}`);
+    if (client) {
+      setDocumentName(`${template.name} - ${client.name} - ${new Date().toLocaleDateString()}`);
     }
 
     setContent(updatedContent);
@@ -237,18 +237,18 @@ export function DocumentEditor({ template, preSelectedClientId, onClose, onSave 
         <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
           {/* Client Selection */}
           <div className="space-y-2">
-            <Label htmlFor="patient">Select Client (for auto-fill)</Label>
+            <Label htmlFor="client">Select Client (for auto-fill)</Label>
             <Select value={selectedClientId} onValueChange={setSelectedClientId}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a client to auto-fill placeholders" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">No client selected</SelectItem>
-                {clients.map((patient) => (
-                  <SelectItem key={patient.id} value={patient.id}>
+                {clients.map((client) => (
+                  <SelectItem key={client.id} value={client.id}>
                     <span className="flex items-center gap-2">
                       <User className="h-4 w-4" />
-                      {patient.name}
+                      {client.name}
                     </span>
                   </SelectItem>
                 ))}
@@ -314,7 +314,7 @@ export function DocumentEditor({ template, preSelectedClientId, onClose, onSave 
                 Auto-filled from Your Profile
               </p>
               <div className="text-xs text-muted-foreground space-y-1">
-                {profile.full_name && <p>• Doctor: {profile.full_name}</p>}
+                {profile.full_name && <p>• Advisor: {profile.full_name}</p>}
                 {profile.practice_number && <p>• Practice #: {profile.practice_number}</p>}
                 {profile.doctor_number && <p>• Registration #: {profile.doctor_number}</p>}
                 {profile.practice_address && <p>• Address: {profile.practice_address}</p>}

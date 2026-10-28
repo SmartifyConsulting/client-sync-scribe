@@ -26,7 +26,7 @@ import { usePracticeAssistant } from "@/hooks/usePracticeAssistant";
 interface AssignTaskDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Pre-selected patient (optional). */
+  /** Pre-selected client (optional). */
   clientId?: string | null;
   /** Existing task being re-assigned (optional). */
   task?: { id: string; title?: string | null; patient_id?: string | null } | null;
@@ -35,11 +35,11 @@ interface AssignTaskDialogProps {
 
 type Target =
   | { kind: "colleague"; userId: string; label: string }
-  | { kind: "patient"; clientId: string; label: string };
+  | { kind: "client"; clientId: string; label: string };
 
 /**
- * Creates a task and assigns it to a practice colleague (doctor or Practice
- * Management Assistant) or to a patient.
+ * Creates a task and assigns it to a practice colleague (advisor or Practice
+ * Management Assistant) or to a client.
  */
 export function AssignTaskDialog({
   open,
@@ -57,7 +57,7 @@ export function AssignTaskDialog({
   const [dueDate, setDueDate] = useState("");
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
   const [targetKey, setTargetKey] = useState("");
-  const [patients, setPatients] = useState<{ id: string; name: string; patient_user_id: string | null }[]>([]);
+  const [clients, setClients] = useState<{ id: string; name: string; patient_user_id: string | null }[]>([]);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -67,14 +67,14 @@ export function AssignTaskDialog({
         .from("clients")
         .select("id, name, patient_user_id")
         .order("name", { ascending: true });
-      setPatients((data || []) as any);
+      setClients((data || []) as any);
     })();
   }, [open]);
 
   useEffect(() => {
     if (!open) return;
     const pid = task?.patient_id ?? clientId;
-    if (pid) setTargetKey(`patient:${pid}`);
+    if (pid) setTargetKey(`client:${pid}`);
     if (task?.title) setTitle(task.title);
   }, [open, clientId, task?.id]);
 
@@ -84,11 +84,11 @@ export function AssignTaskDialog({
       userId: c.user_id,
       label: `${c.full_name || "Colleague"}${c.role === "assistant" ? " (Assistant)" : ""}`,
     }));
-    for (const p of patients) {
-      list.push({ kind: "patient", clientId: p.id, label: `${p.name} (Client)` });
+    for (const p of clients) {
+      list.push({ kind: "client", clientId: p.id, label: `${p.name} (Client)` });
     }
     return list;
-  }, [colleagues, patients]);
+  }, [colleagues, clients]);
 
   const reset = () => {
     setTitle("");
@@ -103,8 +103,8 @@ export function AssignTaskDialog({
     setSaving(true);
     try {
       const [kind, id] = targetKey.split(":");
-      const isClient = kind === "patient";
-      const patient = isClient ? patients.find((p) => p.id === id) : undefined;
+      const isClient = kind === "client";
+      const client = isClient ? clients.find((p) => p.id === id) : undefined;
 
       const payload: Record<string, unknown> = {
         user_id: user.id,
@@ -115,7 +115,7 @@ export function AssignTaskDialog({
         status: "pending",
         due_date: dueDate || null,
         assignee: isClient ? "patient" : "doctor",
-        assigned_to_user_id: isClient ? patient?.patient_user_id ?? null : id,
+        assigned_to_user_id: isClient ? client?.patient_user_id ?? null : id,
         patient_id: isClient ? id : clientId ?? null,
       };
 
@@ -146,7 +146,7 @@ export function AssignTaskDialog({
         data = created;
       }
 
-      const notifyUser = isClient ? patient?.patient_user_id : id;
+      const notifyUser = isClient ? client?.patient_user_id : id;
       if (notifyUser) {
         await supabase.from("notifications").insert({
           user_id: notifyUser,
@@ -192,8 +192,8 @@ export function AssignTaskDialog({
               <SelectContent className="max-h-72">
                 {targets.map((t) => (
                   <SelectItem
-                    key={t.kind === "patient" ? `patient:${t.clientId}` : `colleague:${t.userId}`}
-                    value={t.kind === "patient" ? `patient:${t.clientId}` : `colleague:${t.userId}`}
+                    key={t.kind === "client" ? `client:${t.clientId}` : `colleague:${t.userId}`}
+                    value={t.kind === "client" ? `client:${t.clientId}` : `colleague:${t.userId}`}
                   >
                     {t.label}
                   </SelectItem>

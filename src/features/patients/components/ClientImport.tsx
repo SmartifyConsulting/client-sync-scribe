@@ -27,7 +27,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-interface ParsedPatient {
+interface ParsedClient {
   name: string;
   first_name?: string;
   last_name?: string;
@@ -55,13 +55,15 @@ interface ParsedPatient {
 }
 
 // Common column name mappings
-const COLUMN_MAPPINGS: Record<string, keyof ParsedPatient> = {
+const COLUMN_MAPPINGS: Record<string, keyof ParsedClient> = {
   // Name variations
   "name": "name",
   "full name": "name",
   "fullname": "name",
   "patient name": "name",
+  "client name": "name",
   "patient": "name",
+  "client": "name",
   
   // First name variations
   "first name": "first_name",
@@ -84,6 +86,7 @@ const COLUMN_MAPPINGS: Record<string, keyof ParsedPatient> = {
   "email address": "email",
   "emailaddress": "email",
   "patient email": "email",
+  "client email": "email",
   
   // Phone variations
   "phone": "phone",
@@ -202,10 +205,11 @@ const COLUMN_MAPPINGS: Record<string, keyof ParsedPatient> = {
   // Status
   "status": "status",
   "patient status": "status",
+  "client status": "status",
   "active/inactive": "status",
 };
 
-function mapColumnName(header: string): keyof ParsedPatient | null {
+function mapColumnName(header: string): keyof ParsedClient | null {
   const normalized = header.toLowerCase().trim();
   return COLUMN_MAPPINGS[normalized] || null;
 }
@@ -262,7 +266,7 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isAiProcessing, setIsAiProcessing] = useState(false);
-  const [parsedPatients, setParsedPatients] = useState<ParsedPatient[]>([]);
+  const [parsedClients, setParsedClients] = useState<ParsedClient[]>([]);
   const [importProgress, setImportProgress] = useState(0);
   const [isImporting, setIsImporting] = useState(false);
   const [importResults, setImportResults] = useState<{ success: number; failed: number } | null>(null);
@@ -278,7 +282,7 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
       if (error) throw error;
       
       if (data?.patients && data.patients.length > 0) {
-        setParsedPatients(data.patients);
+        setParsedClients(data.patients);
         toast({
           title: "AI Processing Complete",
           description: `Found ${data.patients.length} client${data.patients.length === 1 ? "" : "s"} to import`,
@@ -304,7 +308,7 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
 
   const processSpreadsheet = useCallback(async (file: File) => {
     setIsProcessing(true);
-    setParsedPatients([]);
+    setParsedClients([]);
     setImportResults(null);
 
     try {
@@ -346,7 +350,7 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
 
       // First row is headers
       const headers = jsonData[0] as string[];
-      const columnMap: Record<number, keyof ParsedPatient> = {};
+      const columnMap: Record<number, keyof ParsedClient> = {};
 
       // Map headers to our fields
       headers.forEach((header, index) => {
@@ -372,13 +376,13 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
       }
 
       // Parse data rows
-      const patients: ParsedPatient[] = [];
+      const clients: ParsedClient[] = [];
 
       for (let i = 1; i < jsonData.length; i++) {
         const row = jsonData[i];
         if (!row || row.every(cell => !cell)) continue; // Skip empty rows
 
-        const patient: ParsedPatient = { name: "" };
+        const client: ParsedClient = { name: "" };
 
         Object.entries(columnMap).forEach(([indexStr, field]) => {
           const index = parseInt(indexStr);
@@ -386,35 +390,35 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
           
           if (value !== undefined && value !== null && value !== "") {
             if (field === "dob") {
-              patient.dob = parseExcelDate(value);
+              client.dob = parseExcelDate(value);
             } else {
-              (patient as any)[field] = String(value).trim();
+              (client as any)[field] = String(value).trim();
             }
           }
         });
 
         // Combine first_name and last_name into name if no full name was provided
-        if (!patient.name && (patient.first_name || patient.last_name)) {
-          patient.name = `${patient.first_name || ""} ${patient.last_name || ""}`.trim();
+        if (!client.name && (client.first_name || client.last_name)) {
+          client.name = `${client.first_name || ""} ${client.last_name || ""}`.trim();
         }
 
         // Only add if we have a name
-        if (patient.name) {
-          patients.push(patient);
+        if (client.name) {
+          clients.push(client);
         }
       }
 
-      if (patients.length === 0) {
+      if (clients.length === 0) {
         toast({
           title: "No valid clients",
           description: "Could not parse any valid client records from the file",
           variant: "destructive",
         });
       } else {
-        setParsedPatients(patients);
+        setParsedClients(clients);
         toast({
           title: "File processed",
-          description: `Found ${patients.length} client${patients.length === 1 ? "" : "s"} to import`,
+          description: `Found ${clients.length} client${clients.length === 1 ? "" : "s"} to import`,
         });
       }
     } catch (error) {
@@ -435,7 +439,7 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
     if (extension === 'txt') {
       // Text/Notepad file - use AI parsing
       setIsProcessing(true);
-      setParsedPatients([]);
+      setParsedClients([]);
       setImportResults(null);
       
       try {
@@ -475,55 +479,55 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
   };
 
   const handleImport = async () => {
-    if (!user || parsedPatients.length === 0) return;
+    if (!user || parsedClients.length === 0) return;
 
     setIsImporting(true);
     setImportProgress(0);
     let successCount = 0;
     let failedCount = 0;
 
-    for (let i = 0; i < parsedPatients.length; i++) {
-      const patient = parsedPatients[i];
+    for (let i = 0; i < parsedClients.length; i++) {
+      const client = parsedClients[i];
       
       try {
         const { error } = await supabase.from("clients").insert({
           user_id: user.id,
-          name: patient.name,
-          email: patient.email || null,
-          phone: patient.phone || null,
-          dob: patient.dob || null,
-          physical_address: patient.physical_address || null,
-          postal_address: patient.postal_address || null,
-          medical_aid: patient.medical_aid || null,
-          medical_aid_number: patient.medical_aid_number || null,
-          medical_insurance_product: patient.medical_insurance_product || null,
-          allergies: patient.allergies || null,
-          employer: patient.employer || null,
-          occupation: patient.occupation || null,
-          referred_by: patient.referred_by || null,
-          general_practitioner: patient.general_practitioner || null,
-          next_of_kin_name: patient.next_of_kin_name || null,
-          next_of_kin_phone: patient.next_of_kin_phone || null,
-          next_of_kin_email: patient.next_of_kin_email || null,
-          notes: patient.notes || null,
-          id_passport_number: patient.id_passport_number || null,
-          gender: patient.gender || null,
-          marital_status: patient.marital_status || null,
-          status: patient.status || "active",
+          name: client.name,
+          email: client.email || null,
+          phone: client.phone || null,
+          dob: client.dob || null,
+          physical_address: client.physical_address || null,
+          postal_address: client.postal_address || null,
+          medical_aid: client.medical_aid || null,
+          medical_aid_number: client.medical_aid_number || null,
+          medical_insurance_product: client.medical_insurance_product || null,
+          allergies: client.allergies || null,
+          employer: client.employer || null,
+          occupation: client.occupation || null,
+          referred_by: client.referred_by || null,
+          general_practitioner: client.general_practitioner || null,
+          next_of_kin_name: client.next_of_kin_name || null,
+          next_of_kin_phone: client.next_of_kin_phone || null,
+          next_of_kin_email: client.next_of_kin_email || null,
+          notes: client.notes || null,
+          id_passport_number: client.id_passport_number || null,
+          gender: client.gender || null,
+          marital_status: client.marital_status || null,
+          status: client.status || "active",
         });
 
         if (error) {
-          console.error("Error importing patient:", patient.name, error);
+          console.error("Error importing client:", client.name, error);
           failedCount++;
         } else {
           successCount++;
         }
       } catch (err) {
-        console.error("Error importing patient:", patient.name, err);
+        console.error("Error importing client:", client.name, err);
         failedCount++;
       }
 
-      setImportProgress(Math.round(((i + 1) / parsedPatients.length) * 100));
+      setImportProgress(Math.round(((i + 1) / parsedClients.length) * 100));
     }
 
     setIsImporting(false);
@@ -545,7 +549,7 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
   };
 
   const clearData = () => {
-    setParsedPatients([]);
+    setParsedClients([]);
     setImportResults(null);
     setImportProgress(0);
   };
@@ -555,7 +559,7 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
   return (
     <div className="space-y-6">
       {/* Upload area */}
-      {parsedPatients.length === 0 && (
+      {parsedClients.length === 0 && (
         <div
           className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
             isDragging ? "border-primary bg-primary/5" : "border-border"
@@ -615,13 +619,13 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
       )}
 
       {/* Preview table */}
-      {parsedPatients.length > 0 && !importResults && (
+      {parsedClients.length > 0 && !importResults && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-primary" />
               <p className="text-sm font-medium text-foreground">
-                Preview ({parsedPatients.length} client{parsedPatients.length === 1 ? "" : "s"})
+                Preview ({parsedClients.length} client{parsedClients.length === 1 ? "" : "s"})
               </p>
             </div>
             <Button variant="ghost" size="sm" onClick={clearData}>
@@ -650,22 +654,22 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {parsedPatients.map((patient, index) => (
+                {parsedClients.map((client, index) => (
                   <TableRow key={index}>
                     <TableCell className="text-muted-foreground text-xs px-1">{index + 1}</TableCell>
-                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={patient.name} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], name: e.target.value }; setParsedPatients(updated); }} /></TableCell>
-                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={patient.email || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], email: e.target.value }; setParsedPatients(updated); }} /></TableCell>
-                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={patient.phone || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], phone: e.target.value }; setParsedPatients(updated); }} /></TableCell>
-                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" type="date" value={patient.dob || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], dob: e.target.value }; setParsedPatients(updated); }} /></TableCell>
-                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={patient.gender || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], gender: e.target.value }; setParsedPatients(updated); }} /></TableCell>
-                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={patient.id_passport_number || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], id_passport_number: e.target.value }; setParsedPatients(updated); }} /></TableCell>
-                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={patient.medical_aid || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], medical_aid: e.target.value }; setParsedPatients(updated); }} /></TableCell>
-                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={patient.employer || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], employer: e.target.value }; setParsedPatients(updated); }} /></TableCell>
-                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={patient.allergies || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], allergies: e.target.value }; setParsedPatients(updated); }} /></TableCell>
-                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={patient.physical_address || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], physical_address: e.target.value }; setParsedPatients(updated); }} /></TableCell>
-                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={patient.status || "active"} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], status: e.target.value }; setParsedPatients(updated); }} /></TableCell>
+                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={client.name} onChange={(e) => { const updated = [...parsedClients]; updated[index] = { ...updated[index], name: e.target.value }; setParsedClients(updated); }} /></TableCell>
+                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={client.email || ""} onChange={(e) => { const updated = [...parsedClients]; updated[index] = { ...updated[index], email: e.target.value }; setParsedClients(updated); }} /></TableCell>
+                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={client.phone || ""} onChange={(e) => { const updated = [...parsedClients]; updated[index] = { ...updated[index], phone: e.target.value }; setParsedClients(updated); }} /></TableCell>
+                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" type="date" value={client.dob || ""} onChange={(e) => { const updated = [...parsedClients]; updated[index] = { ...updated[index], dob: e.target.value }; setParsedClients(updated); }} /></TableCell>
+                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={client.gender || ""} onChange={(e) => { const updated = [...parsedClients]; updated[index] = { ...updated[index], gender: e.target.value }; setParsedClients(updated); }} /></TableCell>
+                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={client.id_passport_number || ""} onChange={(e) => { const updated = [...parsedClients]; updated[index] = { ...updated[index], id_passport_number: e.target.value }; setParsedClients(updated); }} /></TableCell>
+                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={client.medical_aid || ""} onChange={(e) => { const updated = [...parsedClients]; updated[index] = { ...updated[index], medical_aid: e.target.value }; setParsedClients(updated); }} /></TableCell>
+                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={client.employer || ""} onChange={(e) => { const updated = [...parsedClients]; updated[index] = { ...updated[index], employer: e.target.value }; setParsedClients(updated); }} /></TableCell>
+                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={client.allergies || ""} onChange={(e) => { const updated = [...parsedClients]; updated[index] = { ...updated[index], allergies: e.target.value }; setParsedClients(updated); }} /></TableCell>
+                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={client.physical_address || ""} onChange={(e) => { const updated = [...parsedClients]; updated[index] = { ...updated[index], physical_address: e.target.value }; setParsedClients(updated); }} /></TableCell>
+                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={client.status || "active"} onChange={(e) => { const updated = [...parsedClients]; updated[index] = { ...updated[index], status: e.target.value }; setParsedClients(updated); }} /></TableCell>
                     <TableCell className="px-1">
-                      <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => setParsedPatients(parsedPatients.filter((_, i) => i !== index))}>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => setParsedClients(parsedClients.filter((_, i) => i !== index))}>
                         <X className="h-4 w-4" />
                       </Button>
                     </TableCell>
@@ -723,7 +727,7 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
       )}
 
       {/* Supported formats hint */}
-      {parsedPatients.length === 0 && !isLoading && (
+      {parsedClients.length === 0 && !isLoading && (
         <div className="p-4 rounded-lg bg-muted/30">
           <p className="text-sm font-medium text-foreground mb-2">Supported Formats</p>
           <div className="flex flex-wrap gap-2 mb-3">

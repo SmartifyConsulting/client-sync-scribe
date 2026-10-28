@@ -207,11 +207,11 @@ export default function TodoList() {
   const fetchTodos = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      // Own doctor tasks, plus anything explicitly assigned to me (e.g. by a
+      // Own advisor tasks, plus anything explicitly assigned to me (e.g. by a
       // Practice Management Assistant or a practice colleague).
       const { data, error } = await supabase
         .from('todos')
-        .select('*, patients:clients(name)')
+        .select('*, client:clients(name)')
         .or(`assignee.eq.doctor,assigned_to_user_id.eq.${user?.id ?? '00000000-0000-0000-0000-000000000000'}`)
         .order('created_at', { ascending: false });
 
@@ -234,7 +234,7 @@ export default function TodoList() {
         completed: todo.status === 'completed',
         priority: todo.priority as "low" | "medium" | "high",
         is_auto_executed: todo.is_auto_executed || false,
-        patient_name: todo.patients?.name || null,
+        patient_name: todo.client?.name || null,
         document_id: todo.document_id || null,
         task_type: todo.task_type || 'standard',
       })));
@@ -338,13 +338,13 @@ export default function TodoList() {
       const { data, error } = await supabase.from('todos').insert({ user_id: user.id, title: newTaskText.trim(), priority: newTaskPriority, status: 'pending', assignee: 'doctor' } as any).select().single();
       if (error) throw error;
 
-      // Notify patient if task has a patient_id
+      // Notify client if task has a patient_id
       if (data.patient_id) {
         try {
-          const { data: patient } = await supabase.from('clients').select('patient_user_id').eq('id', data.patient_id).maybeSingle();
-          if (patient?.patient_user_id) {
+          const { data: client } = await supabase.from('clients').select('patient_user_id').eq('id', data.patient_id).maybeSingle();
+          if (client?.patient_user_id) {
             await supabase.from('notifications').insert({
-              user_id: patient.patient_user_id,
+              user_id: client.patient_user_id,
               title: `📋 New task assigned: ${data.title}`,
               description: data.description || 'You have been assigned a new task by your healthcare provider.',
               type: 'task_assigned',
@@ -408,9 +408,9 @@ export default function TodoList() {
         priority: todo.priority,
         patient_id: todo.patient_id ?? null,
         status: 'pending',
-      }).select('*, patients:clients(name)').single();
+      }).select('*, client:clients(name)').single();
       if (error) throw error;
-      setTodos([{ ...(data as any), completed: false, patient_name: (data as any).patients?.name || null, is_auto_executed: false, task_type: (data as any).task_type || 'standard' }, ...todos]);
+      setTodos([{ ...(data as any), completed: false, patient_name: (data as any).client?.name || null, is_auto_executed: false, task_type: (data as any).task_type || 'standard' }, ...todos]);
       toast({ title: "Action duplicated" });
     } catch { toast({ title: "Error", variant: "destructive" }); }
   };
@@ -419,11 +419,11 @@ export default function TodoList() {
     if (!todo.document_id) return;
     setSendingDocId(todo.document_id);
     try {
-      const { data: doc } = await supabase.from('documents').select('*, patients:patient_id(email, pharmacy_email, patient_user_id, name)').eq('id', todo.document_id).maybeSingle();
+      const { data: doc } = await supabase.from('documents').select('*, client:patient_id(email, pharmacy_email, patient_user_id, name)').eq('id', todo.document_id).maybeSingle();
       if (!doc) throw new Error('Document not found');
-      const patient = (doc as any).patients;
+      const client = (doc as any).client;
       const recipientEmail = doc.template_name?.toLowerCase().includes('prescription')
-        ? patient?.pharmacy_email || patient?.email : patient?.email;
+        ? client?.pharmacy_email || client?.email : client?.email;
       if (recipientEmail) {
         await supabase.functions.invoke('send-document-email', { body: { documentId: todo.document_id, recipientEmail } });
       }
@@ -431,14 +431,14 @@ export default function TodoList() {
       await supabase.from('todos').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', todo.id);
 
       // If this is a Client Task Assignment, create actual client todos
-      if ((doc.template_name === 'Client Task Assignment' || doc.template_name === 'Patient Task Assignment') && patient?.patient_user_id && todo.patient_id) {
+      if ((doc.template_name === 'Client Task Assignment' || doc.template_name === 'Patient Task Assignment') && client?.patient_user_id && todo.patient_id) {
         try {
           // Parse tasks from document content
           const titleMatches = doc.content.match(/<strong>\d+\.\s*(.+?)<\/strong>/g) || [];
           for (const match of titleMatches) {
             const title = match.replace(/<\/?strong>/g, '').replace(/^\d+\.\s*/, '').trim();
             const { data: newTodo } = await supabase.from('todos').insert({
-              user_id: patient.patient_user_id,
+              user_id: client.patient_user_id,
               patient_id: todo.patient_id,
               title,
               task_type: 'patient_assignment',
@@ -448,7 +448,7 @@ export default function TodoList() {
             }).select('id').single();
             if (newTodo) {
               await supabase.from('notifications').insert({
-                user_id: patient.patient_user_id,
+                user_id: client.patient_user_id,
                 title: `📋 New task assigned: ${title}`,
                 description: 'You have been assigned a new task by your healthcare provider.',
                 type: 'task_assigned',
@@ -456,7 +456,7 @@ export default function TodoList() {
               });
             }
           }
-        } catch (ptErr) { console.error('Error creating patient tasks:', ptErr); }
+        } catch (ptErr) { console.error('Error creating client tasks:', ptErr); }
       }
 
       setTodos(todos.map(t => t.id === todo.id ? { ...t, completed: true } : t));
@@ -496,7 +496,7 @@ export default function TodoList() {
     });
   };
 
-  const [groupMode, setGroupMode] = useState<"date" | "patient">("date");
+  const [groupMode, setGroupMode] = useState<"date" | "client">("date");
   const [ownerFilter, setOwnerFilter] = useState<"mine" | "all">("all");
   const [showAddTask, setShowAddTask] = useState(false);
   const [taskQuery, setTaskQuery] = useState("");
@@ -518,7 +518,7 @@ export default function TodoList() {
   });
 
 
-  // Group by patient
+  // Group by client
   const groupedByPatient = filteredTodos.reduce<Record<string, TodoItem[]>>((groups, todo) => {
     const key = todo.patient_name || (getTodoDisplay(todo as any).client) || "Unassigned";
     if (!groups[key]) groups[key] = [];
@@ -545,7 +545,7 @@ export default function TodoList() {
     { today: [], week: [], month: [], older: [] } as Record<DateBucket, TodoItem[]>,
   );
 
-  const groups: { key: string; label: string; items: TodoItem[]; icon: "date" | "patient" }[] =
+  const groups: { key: string; label: string; items: TodoItem[]; icon: "date" | "client" }[] =
     groupMode === "date"
       ? DATE_BUCKETS.map((b) => ({
           key: b.key,
@@ -557,11 +557,11 @@ export default function TodoList() {
           key: k,
           label: k,
           items: groupedByPatient[k],
-          icon: "patient" as const,
+          icon: "client" as const,
         }));
   const defaultOpenGroup = groups.length ? [groups[0].key] : [];
 
-  // Sub-group a bucket's tasks by patient (collapsed by default)
+  // Sub-group a bucket's tasks by client (collapsed by default)
   const patientSubGroups = (items: TodoItem[]) => {
     const map = items.reduce<Record<string, TodoItem[]>>((acc, todo) => {
       const key = todo.patient_name || getTodoDisplay(todo as any).client || "Unassigned";
@@ -639,12 +639,12 @@ export default function TodoList() {
           <ToggleGroup
             type="single"
             value={groupMode}
-            onValueChange={(v) => v && setGroupMode(v as "date" | "patient")}
+            onValueChange={(v) => v && setGroupMode(v as "date" | "client")}
             size="sm"
             variant="outline"
           >
             <ToggleGroupItem value="date" className="text-xs px-3">{t("todo.groupByDate", "Date")}</ToggleGroupItem>
-            <ToggleGroupItem value="patient" className="text-xs px-3">{t("todo.groupByPatient", "Client")}</ToggleGroupItem>
+            <ToggleGroupItem value="client" className="text-xs px-3">{t("todo.groupByPatient", "Client")}</ToggleGroupItem>
           </ToggleGroup>
           <Button size="sm" variant="outline" className="gap-2" onClick={() => setShowAssignTask(true)}>
             <UserPlus className="h-4 w-4" />
@@ -756,7 +756,7 @@ export default function TodoList() {
 
 
 
-      {/* Task List — grouped by date or patient */}
+      {/* Task List — grouped by date or client */}
       {groups.every((g) => g.items.length === 0) ? (
         <div className="rounded-xl border border-border bg-card shadow-sm p-8 text-center text-muted-foreground text-sm">
           {filter === "all" ? "No tasks yet. Add your first task with the Add Task button." : filter === "active" ? "No active tasks. Great job!" : "No completed tasks yet."}
