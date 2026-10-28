@@ -78,15 +78,15 @@ export function RequestConnectionButton({ patientUserId, clientName }: RequestCo
         .insert({
           sender_id: user.id,
           recipient_id: patientUserId,
-          recipient_email: clientName, // Use patient name as identifier
+          recipient_email: clientName, // Use client name as identifier
           status: 'pending',
-          message: `Dr. ${senderProfile?.full_name || 'Your doctor'} would like to connect with you on the platform.`,
+          message: `Dr. ${senderProfile?.full_name || 'Your advisor'} would like to connect with you on the platform.`,
         });
 
       if (inviteError) throw inviteError;
 
-      // Create notification for the patient
-      const senderName = senderProfile?.full_name || 'A doctor';
+      // Create notification for the client
+      const senderName = senderProfile?.full_name || 'A advisor';
       const specialty = senderProfile?.specialty ? ` [${senderProfile.specialty}]` : '';
 
       const { error: notifError } = await supabase
@@ -118,7 +118,7 @@ export function RequestConnectionButton({ patientUserId, clientName }: RequestCo
     }
   };
 
-  // Don't show if patient doesn't have a linked account
+  // Don't show if client doesn't have a linked account
   if (!patientUserId) return null;
 
   if (checkingStatus) {

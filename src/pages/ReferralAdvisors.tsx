@@ -240,7 +240,7 @@ export default function ReferralAdvisors({ hideHeader = false }: ReferralAdvisor
         body: {
           recipientEmail: inviteEmail.trim(),
           senderName: profile?.full_name || "A colleague",
-          message: `${profile?.full_name || "A colleague"} has invited you to join Holarc Health for referrals. Sign up to connect and collaborate on patient care.`,
+          message: `${profile?.full_name || "A colleague"} has invited you to join Holarc Health for referrals. Sign up to connect and collaborate on client care.`,
         },
       });
       if (error) throw error;
@@ -354,7 +354,7 @@ export default function ReferralAdvisors({ hideHeader = false }: ReferralAdvisor
             <p className="mt-1 text-muted-foreground text-xs">Manage wealth managers you refer clients to</p>
           </div>
           <Button size="sm" variant="outline" onClick={() => { resetForm(); setShowForm(true); }} className="gap-2">
-            <Plus className="h-4 w-4" /> Add Doctor
+            <Plus className="h-4 w-4" /> Add Advisor
           </Button>
         </div>
       )}
@@ -362,7 +362,7 @@ export default function ReferralAdvisors({ hideHeader = false }: ReferralAdvisor
         <div className="flex items-center justify-between">
           <p className="text-muted-foreground text-xs">Manage wealth managers you refer clients to</p>
           <Button size="sm" onClick={() => { resetForm(); setShowForm(true); }} className="gap-1.5">
-            <Plus className="h-3.5 w-3.5" /> Add Doctor
+            <Plus className="h-3.5 w-3.5" /> Add Advisor
           </Button>
         </div>
       )}
@@ -546,7 +546,7 @@ export default function ReferralAdvisors({ hideHeader = false }: ReferralAdvisor
           </Select>
         </div>
 
-        {/* Referral doctor list */}
+        {/* Referral advisor list */}
         <div className="space-y-2">
           {loading ? (
             <div className="p-10 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" /></div>

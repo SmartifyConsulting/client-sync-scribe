@@ -845,7 +845,7 @@ function PhysicalOverview({ client, sessions, isSelfService = false }: ClientOve
         </Collapsible>
       </div>
 
-      {/* DISC profile (doctor-only) */}
+      {/* DISC profile (advisor-only) */}
       <div className="grid gap-4 md:grid-cols-2 items-start">
         <DiscPersonalityCard clientId={client.id} hasSessions={(sessions || []).some((s) => s.status === "completed")} />
       </div>

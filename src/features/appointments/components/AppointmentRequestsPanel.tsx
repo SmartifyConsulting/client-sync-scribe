@@ -47,7 +47,7 @@ export function AppointmentRequestsPanel() {
   useEffect(() => {
     if (!user) return;
     const channel = supabase
-      .channel("appointment-requests-doctor")
+      .channel("appointment-requests-advisor")
       .on("postgres_changes", {
         event: "*",
         schema: "public",
@@ -71,7 +71,7 @@ export function AppointmentRequestsPanel() {
       if (error) throw error;
       const reqs: AppointmentRequest[] = data || [];
 
-      // Enrich with patient names
+      // Enrich with client names
       const patientIds = [...new Set(reqs.map((r) => r.patient_id))];
       const patientUserIds = [...new Set(reqs.map((r) => r.patient_user_id))];
       const serviceIds = [...new Set(reqs.filter((r) => r.service_id).map((r) => r.service_id!))];
@@ -130,7 +130,7 @@ export function AppointmentRequestsPanel() {
       });
       if (aptErr) throw aptErr;
 
-      // Notify patient
+      // Notify client
       await supabase.from("notifications").insert({
         user_id: req.patient_user_id,
         type: "appointment_accepted",
@@ -204,7 +204,7 @@ export function AppointmentRequestsPanel() {
         user_id: selectedRequest.patient_user_id,
         type: "appointment_proposed",
         title: "New Time Proposed",
-        description: `Your doctor has proposed a new time: ${format(proposedStart, "MMM d, yyyy 'at' h:mm a")}.`,
+        description: `Your advisor has proposed a new time: ${format(proposedStart, "MMM d, yyyy 'at' h:mm a")}.`,
       });
 
       toast({ title: "Proposed", description: "Alternative time sent to client." });
@@ -257,7 +257,7 @@ export function AppointmentRequestsPanel() {
               {req.notes && <p className="text-xs text-muted-foreground italic">"{req.notes}"</p>}
               {req.status === "proposed" && req.proposed_start && (
                 <p className="text-xs text-primary font-medium">
-                  Proposed: {format(parseISO(req.proposed_start), "MMM d 'at' h:mm a")} — waiting for patient
+                  Proposed: {format(parseISO(req.proposed_start), "MMM d 'at' h:mm a")} — waiting for client
                 </p>
               )}
               {req.status === "pending" && (

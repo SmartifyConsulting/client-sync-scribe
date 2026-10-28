@@ -346,7 +346,7 @@ function MailboxSection({ userId }: { userId?: string }) {
   );
 }
 
-// ── About Me accordion (doctor pitch, max 600 words) ──
+// ── About Me accordion (advisor pitch, max 600 words) ──
 function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string) => Promise<void> }) {
   const { t } = useTranslation();
   const [draft, setDraft] = useState(value);
@@ -711,7 +711,7 @@ export default function MyPractice() {
   }, [formData]);
 
   /** Renders the typed signature to a PNG and stores it on the profile so that
-   *  outbound emails can embed the doctor's real signature font. */
+   *  outbound emails can embed the advisor's real signature font. */
   const syncSignatureRender = async (override?: typeof sigFormData) => {
     if (!user) return;
     const sig = override || sigFormData;
@@ -790,7 +790,7 @@ export default function MyPractice() {
     }
   };
 
-  // ── Fetch doctor data ──
+  // ── Fetch advisor data ──
   useEffect(() => {
     if (user) {
       fetchPartners();

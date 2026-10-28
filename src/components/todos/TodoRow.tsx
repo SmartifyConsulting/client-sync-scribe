@@ -118,7 +118,7 @@ export function TodoRow({
     ? (isAppointment
         ? (todo.title || display.shortLabel)
         : (REVIEW_LABEL[display.kind] || display.shortLabel))
-    : (display.patient || display.shortLabel);
+    : (display.client || display.shortLabel);
 
   if (isEditing) {
     return (

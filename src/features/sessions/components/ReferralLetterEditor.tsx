@@ -36,13 +36,13 @@ Registration No: [DOCTOR_NUMBER]
 
 Date: [DATE]
 Client: [CLIENT_NAME]
-Referring Doctor: [DOCTOR_NAME]
+Referring Advisor: [DOCTOR_NAME]
 
 ─────────────────────────────────────
 
 [GREETING],
 
-I am referring the above-named patient for your expert opinion and management.
+I am referring the above-named client for your expert opinion and management.
 
 Referred To: [REFERRED_TO]
 
@@ -50,7 +50,7 @@ Referred To: [REFERRED_TO]
 
 ─────────────────────────────────────
 
-Thank you for seeing this patient.
+Thank you for seeing this client.
 
 Yours sincerely,
 
@@ -69,7 +69,7 @@ export function ReferralLetterEditor({
   const { profile } = useProfile();
   const { formattedContent: savedTemplate, headerFooter, isLoading: templateLoading } = useTemplateWithHeaderFooter("Referral Letter");
   
-  const advisorName = profile?.full_name || "Doctor";
+  const advisorName = profile?.full_name || "Advisor";
   const practiceNumber = profile?.practice_number || "";
   const practiceAddress = profile?.practice_address || "";
   const doctorNumber = profile?.doctor_number || "";
@@ -82,7 +82,7 @@ export function ReferralLetterEditor({
   const [isSending, setIsSending] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
-  // Documents on file for this patient that can be emailed together with the referral.
+  // Documents on file for this client that can be emailed together with the referral.
   const [availableDocs, setAvailableDocs] = useState<Array<{ id: string; name: string }>>([]);
   const [attachedIds, setAttachedIds] = useState<string[]>([]);
 
@@ -93,7 +93,7 @@ export function ReferralLetterEditor({
   >([]);
   const [selectedReferralId, setSelectedReferralId] = useState<string>("");
 
-  // Load the doctor's saved referral doctors so the user can pick one
+  // Load the advisor's saved referral doctors so the user can pick one
   // instead of typing the name from scratch.
   useEffect(() => {
     (async () => {
@@ -116,7 +116,7 @@ export function ReferralLetterEditor({
     })();
   }, []);
 
-  // Documents already on file for this patient — these can be attached so they
+  // Documents already on file for this client — these can be attached so they
   // are emailed together with the referral letter.
   useEffect(() => {
     (async () => {
@@ -130,7 +130,7 @@ export function ReferralLetterEditor({
     })();
   }, [clientId]);
 
-  // Auto-populate a referral summary from the latest session for this patient.
+  // Auto-populate a referral summary from the latest session for this client.
   useEffect(() => {
     if (clinicalHistory || currentDiagnosis) return; // don't overwrite user input
     (async () => {
@@ -211,7 +211,7 @@ export function ReferralLetterEditor({
   };
 
   /** Saves the referral and emails it — with any attached documents — to the
-   *  referring doctor in one message. */
+   *  referring advisor in one message. */
   const handleSendToReferringDoctor = async () => {
     const recipient =
       referralOptions.find((o) => o.id === selectedReferralId)?.email || "";
@@ -470,7 +470,7 @@ export function ReferralLetterEditor({
               ) : (
                 <Send className="h-4 w-4" />
               )}
-              Send to Referring Doctor
+              Send to Referring Advisor
             </Button>
             <Button onClick={handleSave} className="gap-2" disabled={isSaving}>
               {isSaving ? (

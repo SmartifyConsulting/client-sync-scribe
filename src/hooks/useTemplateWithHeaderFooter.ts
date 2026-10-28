@@ -63,7 +63,7 @@ export function useTemplateWithHeaderFooter(templateName: string): CombinedTempl
       formattedContent += template.content;
     }
 
-    // Resolve every known token (doctor name/number, practice number & address,
+    // Resolve every known token (advisor name/number, practice number & address,
     // dates, signature — typed or uploaded) through the shared filler so previews
     // show real values by default instead of raw [Brackets].
     if (formattedContent) {

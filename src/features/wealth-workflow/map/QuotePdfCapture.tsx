@@ -27,7 +27,7 @@ export function QuotePdfCapture({ workflowId, clientId, insurer, onActivity }: {
         if (error || data?.error) throw new Error(data?.error ?? "Could not attach PDF.");
         toast.success(data.duplicate ? "Quote PDF is already filed." : "Quote PDF attached to Working Window and Documents.");
         onActivity?.(d.insurer, "saved", data.duplicate ? "Already filed, so the document count does not increase." : undefined);
-        await Promise.all(["quote-pdfs", "wealth-map-records", "wealth-doc-tray", "patient-documents", "documents"].map((key) => qc.invalidateQueries({ queryKey: [key] })));
+        await Promise.all(["quote-pdfs", "wealth-map-records", "wealth-doc-tray", "client-documents", "documents"].map((key) => qc.invalidateQueries({ queryKey: [key] })));
         window.postMessage({ source: "holarc", type: "insurer-pdf-ack", workflowId, captureId: d.captureId, ok: true }, location.origin);
       } catch (e) {
         const message = e instanceof Error ? e.message : "PDF capture failed. Upload the downloaded file instead.";

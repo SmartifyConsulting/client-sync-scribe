@@ -31,7 +31,7 @@ export function AdvisorRoundTables({ compact = false }: { compact?: boolean } = 
 
   const fetchRoundTables = async () => {
     try {
-      // Get all notes where this doctor contributed
+      // Get all notes where this advisor contributed
       const { data: myNotes } = await supabase
         .from("round_table_notes")
         .select("patient_id")
@@ -65,7 +65,7 @@ export function AdvisorRoundTables({ compact = false }: { compact?: boolean } = 
 
       const readNoteIds = new Set(reads?.map(r => r.note_id) || []);
 
-      // Get patient names
+      // Get client names
       const { data: patients } = await supabase
         .from("clients")
         .select("id, name")
@@ -73,7 +73,7 @@ export function AdvisorRoundTables({ compact = false }: { compact?: boolean } = 
 
       const patientMap = new Map(patients?.map(p => [p.id, p.name]) || []);
 
-      // Group by patient
+      // Group by client
       const grouped = new Map<string, RoundTableEntry>();
       for (const note of allNotes || []) {
         const existing = grouped.get(note.patient_id);
@@ -113,7 +113,7 @@ export function AdvisorRoundTables({ compact = false }: { compact?: boolean } = 
   const items = visible.map((entry) => ({
     item: entry,
     date: entry.latestNoteDate,
-    patient: entry.clientName,
+    client: entry.clientName,
     search: entry.clientName,
   }));
 

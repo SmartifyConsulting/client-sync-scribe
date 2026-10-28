@@ -66,7 +66,7 @@ export default function ClientDashboard() {
 
   // Fetch patient record
   const { data: patientRecord } = useQuery({
-    queryKey: ["my-patient-record-dashboard"],
+    queryKey: ["my-client-record-dashboard"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
@@ -102,7 +102,7 @@ export default function ClientDashboard() {
 
   // Fetch notifications
   const { data: unreadNotifCount = 0 } = useQuery({
-    queryKey: ["unread-notifications-patient-dashboard"],
+    queryKey: ["unread-notifications-client-dashboard"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return 0;
@@ -117,7 +117,7 @@ export default function ClientDashboard() {
   });
 
   const { data: recentNotifications = [] } = useQuery({
-    queryKey: ["recent-notifications-patient-dashboard"],
+    queryKey: ["recent-notifications-client-dashboard"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
@@ -149,7 +149,7 @@ export default function ClientDashboard() {
 
   // Fetch doctors with last seen / next appointment
   const { data: doctors = [] } = useQuery({
-    queryKey: ["patient-doctors-dashboard"],
+    queryKey: ["client-advisors-dashboard"],
     queryFn: async () => {
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       if (!currentUser) return [];
@@ -250,8 +250,8 @@ export default function ClientDashboard() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     await supabase.from("notifications").update({ is_read: true }).eq("user_id", user.id).eq("is_read", false);
-    queryClient.invalidateQueries({ queryKey: ["unread-notifications-patient-dashboard"] });
-    queryClient.invalidateQueries({ queryKey: ["recent-notifications-patient-dashboard"] });
+    queryClient.invalidateQueries({ queryKey: ["unread-notifications-client-dashboard"] });
+    queryClient.invalidateQueries({ queryKey: ["recent-notifications-client-dashboard"] });
   };
 
   const formatCurrency = (amount: number) =>

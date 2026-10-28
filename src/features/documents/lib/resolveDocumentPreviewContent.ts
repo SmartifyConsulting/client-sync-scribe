@@ -4,12 +4,12 @@
 // so all surfaces behave identically.
 //
 // Responsibilities:
-//   1. Load patient, doctor profile, linked invoice, and linked prescriptions
+//   1. Load client, advisor profile, linked invoice, and linked prescriptions
 //      based on the document's metadata.
 //   2. Pass that context to fillDocumentPlaceholders so all known [Tokens] —
 //      including indexed prescription slots like [Medication1], [Dosage1] —
 //      get resolved.
-//   3. Inline [DoctorSignature] using the doctor's stored signature URL.
+//   3. Inline [DoctorSignature] using the advisor's stored signature URL.
 //   4. Auto-heal: if resolution actually changed the stored content (i.e. the
 //      doc was sitting in the DB with raw placeholders), persist the cleaned
 //      version so subsequent prints/emails are already correct.
@@ -56,7 +56,7 @@ const isCertificateTemplate = (name?: string | null) =>
 const isReferralTemplate = (name?: string | null) =>
   !!name && /referral/i.test(name);
 
-/** Renders the patient's stored conditions as readable lines. */
+/** Renders the client's stored conditions as readable lines. */
 function formatConditions(items: unknown): string | null {
   if (!Array.isArray(items) || items.length === 0) return null;
   const lines = items
@@ -65,7 +65,7 @@ function formatConditions(items: unknown): string | null {
   return lines.length ? lines.join("\n") : null;
 }
 
-/** Renders the patient's stored medication list as readable lines. */
+/** Renders the client's stored medication list as readable lines. */
 function formatMedications(meds: unknown): string | null {
   if (!Array.isArray(meds) || meds.length === 0) return null;
   const lines = meds
@@ -206,7 +206,7 @@ export async function resolveDocumentPreviewContent(
 
   // Documents created outside a session (or older rows) may not carry a
   // patient_id — recover it from the linked session so certificates/invoices
-  // still resolve real patient details.
+  // still resolve real client details.
   let clientId = doc.patient_id || null;
   if (!clientId && doc.session_id) {
     const { data: sessionRow } = await supabase
@@ -226,11 +226,11 @@ export async function resolveDocumentPreviewContent(
       : Promise.resolve({ data: null } as any),
   ]);
 
-  const patient = patientRes?.data || null;
+  const client = patientRes?.data || null;
   const profile = profileRes?.data || null;
 
   // Invoice context — prefer the invoice raised for this session, then fall
-  // back to the patient's most recent invoice so standalone invoice documents
+  // back to the client's most recent invoice so standalone invoice documents
   // still preview with real amounts instead of [Tokens].
   let invoice: FillContext["invoice"] = null;
   if (isInvoiceTemplate(doc.template_name)) {
@@ -269,7 +269,7 @@ export async function resolveDocumentPreviewContent(
   }
 
   // Prescription context — prefer rows linked to the same session, fall back
-  // to the patient's latest active prescriptions so legacy/standalone Rx docs
+  // to the client's latest active prescriptions so legacy/standalone Rx docs
   // still render with real meds.
   let prescription: FillPrescription | null = null;
   if (isPrescriptionTemplate(doc.template_name)) {
@@ -338,7 +338,7 @@ export async function resolveDocumentPreviewContent(
 
   // Referral letter context — the specialist comes from the document name (the
   // generator stores "Referral Letter - <Specialist> - <date>"), and the
-  // clinical body from the linked session plus the patient's own record, so
+  // clinical body from the linked session plus the client's own record, so
   // referral letters never preview as a skeleton of blanks.
   let referral: FillContext["referral"] = null;
   if (isReferralTemplate(doc.template_name) || isReferralTemplate(doc.name)) {
@@ -356,7 +356,7 @@ export async function resolveDocumentPreviewContent(
     const fromName = nameParts.length > 1 ? nameParts[1].trim() : "";
     const specialist =
       sess?.external_doctor_name ||
-      (fromName && !/^\d/.test(fromName) && fromName !== (patient as any)?.name ? fromName : "");
+      (fromName && !/^\d/.test(fromName) && fromName !== (client as any)?.name ? fromName : "");
 
     const firstLine = (text?: string | null) =>
       text ? String(text).split("\n").find((l) => l.trim())?.trim() || "" : "";
@@ -370,8 +370,8 @@ export async function resolveDocumentPreviewContent(
       specialist_name: specialist || null,
       specialist_type: sess?.external_doctor_specialty || null,
       presenting_complaint: complaint || null,
-      relevant_history: formatConditions((patient as any)?.conditions_diagnoses),
-      current_medications: formatMedications((patient as any)?.current_medications),
+      relevant_history: formatConditions((client as any)?.conditions_diagnoses),
+      current_medications: formatMedications((client as any)?.current_medications),
       reason: diagnosis || complaint || null,
       diagnosis: diagnosis || null,
       clinical_notes: sess?.summary ? String(sess.summary).trim() : null,
@@ -380,7 +380,7 @@ export async function resolveDocumentPreviewContent(
   }
 
   const filled = fillDocumentPlaceholders(source, {
-    patient,
+    patient: client,
     profile,
     invoice,
     prescription,
@@ -391,7 +391,7 @@ export async function resolveDocumentPreviewContent(
 
   let content = filled.content;
 
-  // Inline the doctor's signature (uploaded image or typed signature).
+  // Inline the advisor's signature (uploaded image or typed signature).
   const signatureUrl = (profile as any)?.signature_url || undefined;
   const signatureHtml = renderSignatureHtml(profile as any);
   if (signatureHtml) {

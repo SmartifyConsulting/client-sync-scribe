@@ -46,7 +46,7 @@ export function UpcomingAppointments() {
         if (error) throw error;
 
         if (data && data.length > 0) {
-          // Fetch patient names for appointments that have patient_id
+          // Fetch client names for appointments that have patient_id
           const patientIds = data.filter(a => a.patient_id).map(a => a.patient_id!);
           let patientMap: Record<string, string> = {};
           let patientCreatedAtMap: Record<string, string> = {};

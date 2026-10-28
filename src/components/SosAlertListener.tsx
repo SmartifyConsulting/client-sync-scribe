@@ -90,7 +90,7 @@ export const SosAlertListener = () => {
         action: row.reference_id
           ? {
               label: "Open",
-              onClick: () => navigate(`/patient/holarchelp/incident/${row.reference_id}`),
+              onClick: () => navigate(`/client/holarchelp/incident/${row.reference_id}`),
             }
           : undefined,
       });
@@ -171,7 +171,7 @@ export const SosAlertListener = () => {
             className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white"
             onClick={() => {
               if (active.reference_id) {
-                navigate(`/patient/holarchelp/incident/${active.reference_id}`);
+                navigate(`/client/holarchelp/incident/${active.reference_id}`);
               }
               setActive(null);
             }}

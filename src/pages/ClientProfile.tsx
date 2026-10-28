@@ -172,7 +172,7 @@ export default function ClientProfile() {
 
 
 
-  // Check if current doctor has access to all sessions
+  // Check if current advisor has access to all sessions
   useEffect(() => {
     const checkPermissions = async () => {
       const {
@@ -186,7 +186,7 @@ export default function ClientProfile() {
         return;
       }
 
-      // Check if this doctor has session_summaries permission from the client
+      // Check if this advisor has session_summaries permission from the client
       const { data: accessRecords } = await supabase
         .from("broker_client_access")
         .select("permissions")
@@ -198,7 +198,7 @@ export default function ClientProfile() {
         return;
       }
 
-      // Check if any doctor has session_summaries permission (meaning client shares across doctors)
+      // Check if any advisor has session_summaries permission (meaning client shares across doctors)
       const hasSharedSessions = accessRecords.some((record) => record.permissions.includes("session_summaries"));
 
       setCanViewAllSessions(hasSharedSessions);

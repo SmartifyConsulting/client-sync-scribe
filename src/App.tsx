@@ -226,10 +226,10 @@ const App = () => (
               </ProtectedRoute>
             }
           >
-            {/* Doctor dashboard */}
+            {/* Advisor dashboard */}
             <Route path="/broker-dashboard" element={<Dashboard />} />
             
-            {/* Doctor routes */}
+            {/* Advisor routes */}
             <Route path="/clients" element={<Clients />} />
             <Route path="/clients/:id" element={<ClientProfile />} />
             <Route path="/broker/consultations" element={<DoctorSessions />} />

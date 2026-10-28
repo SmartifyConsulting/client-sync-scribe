@@ -94,11 +94,11 @@ export function EmoticonSender({ recipientId, clientId, recipientName }: Emotico
         profile_viewed: profileViewed,
       });
 
-      // Create notification for recipient (patient can reply from Notifications)
+      // Create notification for recipient (client can reply from Notifications)
       await supabase.from('notifications').insert({
         user_id: recipientId,
         type: 'emoticon_received',
-        title: `${emoticon} Check-in from your doctor`,
+        title: `${emoticon} Check-in from your advisor`,
         description: message,
         reference_id: clientId,
         is_read: false,

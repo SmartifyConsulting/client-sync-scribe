@@ -28,7 +28,7 @@ interface RTMessage {
   edited_at?: string | null;
 }
 
-/** Deterministic soft tint per doctor so a doctor keeps the same colour everywhere. */
+/** Deterministic soft tint per advisor so a advisor keeps the same colour everywhere. */
 const BUBBLE_TONES = [
   { bubble: "bg-primary/10 text-foreground", avatar: "bg-primary/20 text-primary" },
   { bubble: "bg-blue-500/10 text-foreground", avatar: "bg-blue-500/20 text-blue-700" },
@@ -62,7 +62,7 @@ export function RoundTable({ clientId, clientName, hideHeader = false }: RoundTa
   const [messagesByTopic, setMessagesByTopic] = useState<Record<string, RTMessage[]>>({});
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [currentUserName, setCurrentUserName] = useState<string>("Doctor");
+  const [currentUserName, setCurrentUserName] = useState<string>("Advisor");
   const [onlineDoctors, setOnlineDoctors] = useState<Record<string, string>>({});
   const [showCompose, setShowCompose] = useState(false);
   const [subject, setSubject] = useState("");
@@ -80,7 +80,7 @@ export function RoundTable({ clientId, clientName, hideHeader = false }: RoundTa
       if (!user) return;
       setCurrentUserId(user.id);
       const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).maybeSingle();
-      setCurrentUserName(profile?.full_name || 'Doctor');
+      setCurrentUserName(profile?.full_name || 'Advisor');
     })();
   }, []);
 
@@ -120,7 +120,7 @@ export function RoundTable({ clientId, clientName, hideHeader = false }: RoundTa
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState() as Record<string, Array<{ name: string }>>;
         const online: Record<string, string> = {};
-        Object.entries(state).forEach(([uid, metas]) => { online[uid] = metas[0]?.name || 'Doctor'; });
+        Object.entries(state).forEach(([uid, metas]) => { online[uid] = metas[0]?.name || 'Advisor'; });
         setOnlineDoctors(online);
       })
       .subscribe(async (status) => {
@@ -254,7 +254,7 @@ export function RoundTable({ clientId, clientName, hideHeader = false }: RoundTa
                 </div>
               </AccordionTrigger>
               <AccordionContent className="space-y-3">
-                {/* Opening message from the doctor who started the round table */}
+                {/* Opening message from the advisor who started the round table */}
                 <div className="flex items-end gap-2">
                   <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-2xs font-semibold text-primary">
                     {initials(t.doctor_name)}

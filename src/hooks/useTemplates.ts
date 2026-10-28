@@ -99,12 +99,12 @@ Client Details:
 - Name: [ClientName]
 - Contact: [ClientContact]
 
-I am writing to refer the above-named patient for your expert opinion and management.
+I am writing to refer the above-named client for your expert opinion and management.
 
 PRESENTING COMPLAINT
 [PresentingComplaint]
 
-I would be grateful if you could see this patient at your earliest convenience. Please do not hesitate to contact me if you require any further information.
+I would be grateful if you could see this client at your earliest convenience. Please do not hesitate to contact me if you require any further information.
 
 Yours sincerely,
 
@@ -193,7 +193,7 @@ Date: [SignatureDate]`,
   },
   {
     name: "Invoice",
-    description: "Billing invoice for patient services",
+    description: "Billing invoice for client services",
     category: "Invoice",
     content: `INVOICE
 
@@ -240,7 +240,7 @@ Thank you.
   },
   {
     name: "Hospital Admission Form",
-    description: "Form for requesting hospital admission for a patient",
+    description: "Form for requesting hospital admission for a client",
     category: "Admission",
     content: `HOSPITAL ADMISSION FORM
 
@@ -295,7 +295,7 @@ Client: [ClientName]
   },
   {
     name: "General Exercise Programme",
-    description: "Structured exercise plan the patient follows between visits",
+    description: "Structured exercise plan the client follows between visits",
     category: "Lifestyle",
     content: `EXERCISE PROGRAMME
 
@@ -341,7 +341,7 @@ REVIEW DATE
   },
   {
     name: "General Eating Plan",
-    description: "Daily eating plan with targets and guidance for the patient",
+    description: "Daily eating plan with targets and guidance for the client",
     category: "Lifestyle",
     content: `EATING PLAN
 
@@ -517,7 +517,7 @@ export function useTemplates() {
 
       // One-time reconcile: refresh untouched default templates that lack the
       // new [AdvisorSignature] placeholder so the signature renders above the
-      // doctor name on rollout.
+      // advisor name on rollout.
       const stale = parsedTemplates.filter(
         (t) =>
           t.is_default &&

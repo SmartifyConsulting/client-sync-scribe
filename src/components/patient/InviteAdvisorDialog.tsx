@@ -59,8 +59,8 @@ export function InviteAdvisorDialog({
 
     setIsLoading(true);
     try {
-      // Resolve target doctor via SECURITY DEFINER RPC (bypasses profiles RLS,
-      // which otherwise hides doctor profiles from patients without an existing link).
+      // Resolve target advisor via SECURITY DEFINER RPC (bypasses profiles RLS,
+      // which otherwise hides advisor profiles from patients without an existing link).
       let doctorRow: { id: string; practice_number: string | null; doctor_number: string | null } | null = null;
 
       if (prefillDoctorId) {
@@ -147,13 +147,13 @@ export function InviteAdvisorDialog({
         if (insertError) throw insertError;
       }
 
-      // Create notification for the doctor (via SECURITY DEFINER RPC — RLS blocks
+      // Create notification for the advisor (via SECURITY DEFINER RPC — RLS blocks
       // direct cross-user inserts on notifications)
       try {
         const { error: notifErr } = await supabase.rpc("create_doctor_invite_notification" as any, {
           _doctor_id: doctorRow.id,
           _title: "Client Invitation",
-          _description: `${profile?.full_name || "A patient"} has invited you to their panel of healthcare providers.`,
+          _description: `${profile?.full_name || "A client"} has invited you to their panel of healthcare providers.`,
           _reference_id: user.id,
         });
         if (notifErr) throw notifErr;
@@ -195,7 +195,7 @@ export function InviteAdvisorDialog({
         </DialogHeader>
 
         <div className="grid gap-3 py-2">
-          {/* Selected Doctor Info */}
+          {/* Selected Advisor Info */}
           {prefillDoctorName && (
             <div className="flex items-center gap-3 p-3 rounded-xl border border-primary/40 bg-sky-50/30">
               <Avatar className="h-10 w-10">

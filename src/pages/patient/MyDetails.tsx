@@ -19,7 +19,7 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
   const returnTo = rawReturn && rawReturn.startsWith("/") && !rawReturn.startsWith("//") ? rawReturn : null;
   const rawSection = searchParams.get("section");
   const section = embedded ? "workspace" : rawSection === "home" ? "health" : rawSection || "health";
-  const [patient, setPatient] = useState<Client | null>(null);
+  const [client, setPatient] = useState<Client | null>(null);
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string>("");
   const [userId, setUserId] = useState<string>("");
@@ -112,7 +112,7 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
             data = winner;
           } else {
             toast({
-              title: t("patient.myDetails.errorInitializeTitle"),
+              title: t("client.myDetails.errorInitializeTitle"),
               description: insertErr.message,
               variant: "destructive",
             });
@@ -136,21 +136,21 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
         setEmergencyContacts(Array.isArray(ec) ? ec : []);
       }
     } catch (err) {
-      console.error("Error fetching patient record:", err);
+      console.error("Error fetching client record:", err);
     } finally {
       setLoading(false);
     }
   };
 
   const handleSave = async (updates: Partial<Client>) => {
-    if (!patient) return;
+    if (!client) return;
     const { error } = await supabase
       .from("clients")
       .update(updates as any)
-      .eq("id", patient.id);
+      .eq("id", client.id);
 
     if (error) {
-      toast({ title: t("patient.myDetails.errorSaveTitle"), description: error.message, variant: "destructive" });
+      toast({ title: t("client.myDetails.errorSaveTitle"), description: error.message, variant: "destructive" });
       throw error;
     }
 
@@ -161,20 +161,20 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
     const now = Date.now();
     if (now - lastSavedToastRef.current > 20000) {
       lastSavedToastRef.current = now;
-      toast({ title: t("common.saved"), description: t("patient.myDetails.detailsUpdated") });
+      toast({ title: t("common.saved"), description: t("client.myDetails.detailsUpdated") });
     }
   };
 
   const isIncomplete = useMemo(() => {
-    if (!patient) return true;
-    const p: any = patient;
+    if (!client) return true;
+    const p: any = client;
     return (
       !p.dob ||
       !p.physical_address ||
       !p.phone ||
       (!(emergencyContacts && emergencyContacts.length > 0) && !p.next_of_kin_name)
     );
-  }, [patient, emergencyContacts]);
+  }, [client, emergencyContacts]);
 
   if (loading) {
     return (
@@ -185,14 +185,14 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
   }
 
   if (!embedded && rawSection === "home") {
-    return <Navigate to="/patient/details?section=health" replace />;
+    return <Navigate to="/client/details?section=health" replace />;
   }
 
 
   const sectionHeading: Record<string, { title: string; subtitle: string }> = {
-    health: { title: t("patient.myDetails.myHolarchy", "My Profile"), subtitle: t("patient.myDetails.holarchySubtitle", "Your personal and financial details, advisers and consultation history") },
-    admin: { title: t("patient.myDetails.myDesk", "My Desk"), subtitle: t("patient.myDetails.deskSubtitle", "Calendar, actions and documents") },
-    rewards: { title: t("patient.myDetails.myRewards", "My Rewards"), subtitle: t("patient.myDetails.rewardsSubtitle", "Track your Vulas and rewards") },
+    health: { title: t("client.myDetails.myHolarchy", "My Profile"), subtitle: t("client.myDetails.holarchySubtitle", "Your personal and financial details, advisers and consultation history") },
+    admin: { title: t("client.myDetails.myDesk", "My Desk"), subtitle: t("client.myDetails.deskSubtitle", "Calendar, actions and documents") },
+    rewards: { title: t("client.myDetails.myRewards", "My Rewards"), subtitle: t("client.myDetails.rewardsSubtitle", "Track your Vulas and rewards") },
   };
   const heading = sectionHeading[section] || sectionHeading.health;
 
@@ -214,9 +214,9 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
         )}
       </div>}
 
-      {patient ? (
+      {client ? (
         <ClientDetailsEditor
-          client={patient}
+          client={client}
           onSave={handleSave}
           isSelfService
           userEmail={userEmail}
@@ -227,7 +227,7 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
         />
       ) : (
         <div className="p-6 text-center text-muted-foreground border border-dashed border-border rounded-lg">
-          <p>{t("patient.myDetails.recordSetupMessage")}</p>
+          <p>{t("client.myDetails.recordSetupMessage")}</p>
         </div>
       )}
     </div>

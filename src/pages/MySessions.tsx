@@ -26,7 +26,7 @@ interface SessionRow {
   status: string;
   started_at: string;
   duration_minutes: number | null;
-  patient?: { id: string; name: string } | null;
+  client?: { id: string; name: string } | null;
 }
 
 type Bucket = "today" | "week" | "month" | "older";
@@ -76,7 +76,7 @@ function SessionCard({ s, t }: { s: SessionRow; t: any }) {
           <p className="text-sm font-medium truncate flex items-center gap-1.5 min-w-0">
             <FileText className="h-3.5 w-3.5 text-primary shrink-0" />
             <span className="truncate">
-              {s.patient?.name || t("mySessions.noPatient", "No client")} — {format(new Date(s.started_at), "MMMM d, yyyy")}
+              {s.client?.name || t("mySessions.noPatient", "No client")} — {format(new Date(s.started_at), "MMMM d, yyyy")}
             </span>
           </p>
           <div className="flex items-center gap-3 shrink-0">
@@ -133,7 +133,7 @@ export default function MySessions() {
 
       let q = supabase
         .from("sessions")
-        .select("id, title, status, started_at, duration_minutes, user_id, patient:clients(id, name)")
+        .select("id, title, status, started_at, duration_minutes, user_id, client:clients(id, name)")
         .neq("status", "paused")
         .order("started_at", { ascending: false })
         .limit(500);
@@ -175,9 +175,9 @@ export default function MySessions() {
       visibleSessions.map((s) => ({
         item: s,
         date: s.started_at,
-        patient: s.patient?.name || t("mySessions.noPatient", "No client"),
+        client: s.client?.name || t("mySessions.noPatient", "No client"),
         hospital: (s as any).hospital || null,
-        search: [s.title, s.patient?.name, s.status].filter(Boolean).join(" "),
+        search: [s.title, s.client?.name, s.status].filter(Boolean).join(" "),
       })),
     [visibleSessions, t],
   );

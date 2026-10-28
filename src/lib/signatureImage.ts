@@ -1,5 +1,5 @@
 /**
- * Renders a doctor's typed signature to a PNG.
+ * Renders a advisor's typed signature to a PNG.
  *
  * Email clients (Gmail in particular) strip web fonts, so a typed signature
  * styled with Great Vibes / Allura / … falls back to a generic system font in

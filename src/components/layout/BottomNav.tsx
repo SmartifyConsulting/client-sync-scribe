@@ -23,24 +23,24 @@ import { isWealthHidden } from "@/lib/terminology";
 
 const doctorNavItems = [
   { icon: LayoutDashboard, labelKey: "nav.home", to: "/broker-dashboard" },
-  { icon: User, labelKey: "nav.myProfile", to: "/patient/details?section=health" },
+  { icon: User, labelKey: "nav.myProfile", to: "/client/details?section=health" },
   { icon: Briefcase, labelKey: "bottomNav.practice", to: "/business" },
   { icon: Sparkles, labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
-  { icon: Siren, labelKey: "nav.sos", to: "/doctor/holarchelp", danger: true },
+  { icon: Siren, labelKey: "nav.sos", to: "/advisor/holarchelp", danger: true },
 ].filter((i) => !isWealthHidden(i.to));
 
 const patientSections = [
-  { icon: FolderOpen, labelKey: "bottomNav.myDesk", section: "admin", to: "/patient/details?section=admin" },
+  { icon: FolderOpen, labelKey: "bottomNav.myDesk", section: "admin", to: "/client/details?section=admin" },
   { icon: Activity, labelKey: "nav.liveWorkspace", section: "workspace", to: "/my-workspace" },
   { icon: FileText, labelKey: "nav.myClaims", section: "claims", to: "/claims" },
   { icon: Sparkles, labelKey: "nav.askMaeve", section: "maeve", to: "/ask-maeve", accent: true },
-  { icon: Siren, labelKey: "nav.sos", section: "sos", to: "/patient/holarchelp", danger: true },
+  { icon: Siren, labelKey: "nav.sos", section: "sos", to: "/client/holarchelp", danger: true },
 ].filter((i) => !isWealthHidden(i.to));
 
 const adminNavItems = [
   { icon: Users, labelKey: "nav.users", to: "/admin/users" },
   { icon: DollarSign, labelKey: "nav.pricing", to: "/admin/pricing" },
-  { icon: Siren, labelKey: "nav.sos", to: "/patient/holarchelp", danger: true },
+  { icon: Siren, labelKey: "nav.sos", to: "/client/holarchelp", danger: true },
   { icon: Home, labelKey: "bottomNav.exit", to: "/broker-dashboard" },
 ].filter((i) => !isWealthHidden(i.to));
 
@@ -94,7 +94,7 @@ export function BottomNav() {
     );
   }
 
-  const isOnPatientRoute = location.pathname.startsWith("/patient/");
+  const isOnPatientRoute = location.pathname.startsWith("/client/");
   const showPatientNav = !isAdvisor && (isClient || isOnPatientRoute);
 
   if (!showPatientNav) {
@@ -170,7 +170,7 @@ export function BottomNav() {
               : item.section === "claims"
               ? location.pathname.startsWith("/claims")
               : item.section === "sos"
-              ? location.pathname.startsWith("/patient/holarchelp")
+              ? location.pathname.startsWith("/client/holarchelp")
               : isOnDetails && currentSection === item.section;
           const danger = (item as any).danger;
           const accent = (item as any).accent;

@@ -23,21 +23,21 @@ interface SendDocumentButtonProps {
   /** Produces the HTML/text content that gets emailed. */
   getContent: () => string;
   /**
-   * Which patient field to prefer as recipient. Falls back to the patient's
+   * Which client field to prefer as recipient. Falls back to the client's
    * own email address when the preferred field is empty.
    */
   preferredField?: "email" | "pharmacy_email" | "claims_email" | "reporting_to_email";
   /**
-   * If the patient has a value in this field, it takes priority over
-   * `preferredField` as the "to" recipient, and the patient's own email
+   * If the client has a value in this field, it takes priority over
+   * `preferredField` as the "to" recipient, and the client's own email
    * (if on file) is automatically cc'd.
    */
   insuranceOverrideField?: "claims_email";
   /**
-   * Prescriptions: email the patient's pharmacy instead of `preferredField`.
-   * If the patient has multiple pharmacies on file, the doctor is asked to
+   * Prescriptions: email the client's pharmacy instead of `preferredField`.
+   * If the client has multiple pharmacies on file, the advisor is asked to
    * pick one (defaulting to whichever is marked primary) before sending.
-   * The patient is always cc'd in this mode. Falls back to the legacy
+   * The client is always cc'd in this mode. Falls back to the legacy
    * pharmacy_name/pharmacy_email fields when no `pharmacies` entries exist.
    */
   pharmacyMode?: boolean;
@@ -158,15 +158,15 @@ export function SendDocumentButton({
     if (pharmacyMode) {
       setSending(true);
       try {
-        const { data: patient } = await supabase
+        const { data: client } = await supabase
           .from("clients")
           .select("email, pharmacy_name, pharmacy_email, pharmacies")
           .eq("id", clientId)
           .maybeSingle();
 
-        const patientEmail = (patient as any)?.email || undefined;
-        const pharmacies: PharmacyOption[] = Array.isArray((patient as any)?.pharmacies)
-          ? (patient as any).pharmacies
+        const patientEmail = (client as any)?.email || undefined;
+        const pharmacies: PharmacyOption[] = Array.isArray((client as any)?.pharmacies)
+          ? (client as any).pharmacies
           : [];
 
         if (pharmacies.length > 1) {
@@ -180,7 +180,7 @@ export function SendDocumentButton({
         }
 
         const single = pharmacies[0];
-        const recipient = single?.email || (patient as any)?.pharmacy_email || "";
+        const recipient = single?.email || (client as any)?.pharmacy_email || "";
         setSending(false);
         await deliver(recipient, patientEmail);
       } catch (err: any) {
@@ -194,16 +194,16 @@ export function SendDocumentButton({
       return;
     }
 
-    const { data: patient } = await supabase
+    const { data: client } = await supabase
       .from("clients")
       .select("email, pharmacy_email, claims_email, reporting_to_email")
       .eq("id", clientId)
       .maybeSingle();
 
-    const insuranceEmail = insuranceOverrideField ? (patient as any)?.[insuranceOverrideField] : "";
+    const insuranceEmail = insuranceOverrideField ? (client as any)?.[insuranceOverrideField] : "";
     const recipient =
-      insuranceEmail || (patient as any)?.[preferredField] || (patient as any)?.email || "";
-    const ccPatient = insuranceEmail && (patient as any)?.email ? (patient as any).email : undefined;
+      insuranceEmail || (client as any)?.[preferredField] || (client as any)?.email || "";
+    const ccPatient = insuranceEmail && (client as any)?.email ? (client as any).email : undefined;
 
     await deliver(recipient, ccPatient);
   };

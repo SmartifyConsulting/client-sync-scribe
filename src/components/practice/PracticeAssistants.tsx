@@ -22,8 +22,8 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 /**
  * Practice Management Assistant (PMA) administration.
  *
- * The PMA keeps their own patient profile, but gains access to the practice
- * doctors' patient list, the shared calendar and task assignment.
+ * The PMA keeps their own client profile, but gains access to the practice
+ * doctors' client list, the shared calendar and task assignment.
  */
 export function PracticeAssistants() {
   const {
@@ -99,7 +99,7 @@ export function PracticeAssistants() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        A Practice Management Assistant can see your patient list and calendar, and can create and
+        A Practice Management Assistant can see your client list and calendar, and can create and
         assign tasks to the doctors of the practice and to patients. They cannot see clinical notes,
         prescriptions or documents — apart from hospital admission forms.
       </p>
@@ -225,7 +225,7 @@ export function PracticeAssistants() {
           <AlertDialogHeader>
             <AlertDialogTitle>Remove assistant?</AlertDialogTitle>
             <AlertDialogDescription>
-              {confirmRemove?.name} will immediately lose access to your patient list, calendar and tasks.
+              {confirmRemove?.name} will immediately lose access to your client list, calendar and tasks.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

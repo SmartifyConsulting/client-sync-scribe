@@ -116,14 +116,14 @@ export default function SessionDetail() {
   const [currentMedications, setCurrentMedications] = useState<Array<{ medication: string; dosage: string; frequency: string }>>([]);
 
 
-  // Fetch doctor name
+  // Fetch advisor name
   useEffect(() => {
     if (!session?.user_id) return;
     supabase.from('profiles').select('full_name').eq('id', session.user_id).maybeSingle()
       .then(({ data }) => { if (data?.full_name) setDoctorName(data.full_name); });
   }, [session?.user_id]);
 
-  // Log this record view for the patient's "My Views" list
+  // Log this record view for the client's "My Views" list
   useEffect(() => {
     if (!session?.patient_id) return;
     logProfileView(session.patient_id, "Session Detail");
@@ -162,16 +162,16 @@ export default function SessionDetail() {
   const handleSendDocument = async (doc: any) => {
     setSendingDocId(doc.id);
     try {
-      // Get patient email for sending
-      const { data: patient } = await supabase
+      // Get client email for sending
+      const { data: client } = await supabase
         .from('clients')
         .select('email, pharmacy_email, name')
         .eq('id', doc.patient_id)
         .maybeSingle();
       
       const recipientEmail = doc.template_name?.toLowerCase().includes('prescription')
-        ? patient?.pharmacy_email || patient?.email
-        : patient?.email;
+        ? client?.pharmacy_email || client?.email
+        : client?.email;
 
       if (recipientEmail) {
         await supabase.functions.invoke('send-document-email', {
@@ -339,13 +339,13 @@ export default function SessionDetail() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Back Button */}
-      {session.patient ? (
+      {session.client ? (
         <Link
           to={`/clients/${session.patient_id}`}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to {session.patient.name}
+          Back to {session.client.name}
         </Link>
       ) : (
         <button
@@ -383,13 +383,13 @@ export default function SessionDetail() {
               </span>
               <PrivacyBadge />
             </div>
-            {session.patient && (
+            {session.client && (
               <Link
                 to={`/clients/${session.patient_id}`}
                 className="mt-2 inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
               >
                 <User className="h-4 w-4" />
-                {session.patient.name}
+                {session.client.name}
               </Link>
             )}
           </div>
@@ -428,7 +428,7 @@ export default function SessionDetail() {
 
 
       {/* Quick Actions — brand teal dropdown, right-aligned directly above Client Overview */}
-      {session.status === "completed" && session.patient && (
+      {session.status === "completed" && session.client && (
         <div className="flex justify-end">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -454,8 +454,8 @@ export default function SessionDetail() {
 
       {/* Client Overview — full width */}
       <WealthClientOverview
-        patient={session.patient}
-        discSlot={<SessionDiscStrip clientId={session.patient?.id} inline />}
+        client={session.client}
+        discSlot={<SessionDiscStrip clientId={session.client?.id} inline />}
       />
 
       {/* AI Summary — directly underneath Client Overview, no outer frame */}
@@ -488,7 +488,7 @@ export default function SessionDetail() {
           available for download from Session Documents below instead. */}
       <SessionResultPanels
         advisorName={advisorName}
-        clientName={session.patient?.name}
+        clientName={session.client?.name}
         sessionId={session.id}
         hideSummary
         leftSlot={
@@ -631,10 +631,10 @@ export default function SessionDetail() {
 
       {/* Prescription Editor Modal */}
 
-      {showPrescriptionEditor && session.patient && (
+      {showPrescriptionEditor && session.client && (
         <PrescriptionEditor
           clientId={session.patient_id}
-          clientName={session.patient.name}
+          clientName={session.client.name}
           onClose={() => setShowPrescriptionEditor(false)}
           onSave={(prescription) => {
             toast({
@@ -646,10 +646,10 @@ export default function SessionDetail() {
       )}
 
       {/* Invoice Editor Modal */}
-      {showInvoiceEditor && session.patient && (
+      {showInvoiceEditor && session.client && (
         <InvoiceEditor
           clientId={session.patient_id}
-          clientName={session.patient.name}
+          clientName={session.client.name}
           sessionId={id}
           onClose={() => setShowInvoiceEditor(false)}
           onSave={(invoice) => {
@@ -662,10 +662,10 @@ export default function SessionDetail() {
       )}
 
       {/* Referral Letter Editor Modal */}
-      {showReferralLetterEditor && session.patient && (
+      {showReferralLetterEditor && session.client && (
         <ReferralLetterEditor
           clientId={session.patient_id}
-          clientName={session.patient.name}
+          clientName={session.client.name}
           sessionId={id}
           onClose={() => setShowReferralLetterEditor(false)}
           onSave={() => {
@@ -678,10 +678,10 @@ export default function SessionDetail() {
       )}
 
       {/* General Letter Editor Modal */}
-      {showGeneralLetterEditor && session.patient && (
+      {showGeneralLetterEditor && session.client && (
         <GeneralLetterEditor
           clientId={session.patient_id}
-          clientName={session.patient.name}
+          clientName={session.client.name}
           sessionId={id}
           onClose={() => setShowGeneralLetterEditor(false)}
           onSave={() => {
@@ -694,10 +694,10 @@ export default function SessionDetail() {
       )}
 
       {/* Hospital Admission Editor Modal */}
-      {showHospitalAdmissionEditor && session.patient && (
+      {showHospitalAdmissionEditor && session.client && (
         <HospitalAdmissionEditor
           clientId={session.patient_id}
-          clientName={session.patient.name}
+          clientName={session.client.name}
           sessionId={id}
           onClose={() => setShowHospitalAdmissionEditor(false)}
           onSave={() => {
@@ -715,14 +715,14 @@ export default function SessionDetail() {
           <DialogHeader className="px-4 py-3 border-b">
             <DialogTitle className="flex items-center gap-2">
               <PenTool className="h-5 w-5 text-primary" />
-              Drawing Pad - {session.patient?.name}
+              Drawing Pad - {session.client?.name}
             </DialogTitle>
           </DialogHeader>
           <div className="flex-1 overflow-hidden h-full">
             <DrawingPad
               clientId={session.patient_id}
               sessionId={id}
-              clientName={session.patient?.name}
+              clientName={session.client?.name}
               isModal
             />
           </div>

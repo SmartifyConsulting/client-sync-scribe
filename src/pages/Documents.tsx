@@ -138,7 +138,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
   const [activeTab, setActiveTab] = useState("content");
   const [templateSearchQuery, setTemplateSearchQuery] = useState("");
   const [documentSearchQuery, setDocumentSearchQuery] = useState("");
-  const [groupBy, setGroupBy] = useState<"date" | "type" | "patient">("date");
+  const [groupBy, setGroupBy] = useState<"date" | "type" | "client">("date");
   const DOC_PAGE_SIZE = 10;
   const [visibleDocCount, setVisibleDocCount] = useState(DOC_PAGE_SIZE);
   useEffect(() => { setVisibleDocCount(DOC_PAGE_SIZE); }, [documentSearchQuery]);
@@ -224,7 +224,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
     const map = new Map<string, Document[]>();
     for (const doc of filteredDocuments) {
       const key =
-        groupBy === "patient"
+        groupBy === "client"
           ? doc.patient_name || "No client"
           : doc.template_name || "Custom";
       if (!map.has(key)) map.set(key, []);
@@ -828,7 +828,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
             >
               <ToggleGroupItem value="date" className="text-xs px-3">Date</ToggleGroupItem>
               <ToggleGroupItem value="type" className="text-xs px-3">Type</ToggleGroupItem>
-              <ToggleGroupItem value="patient" className="text-xs px-3">Client</ToggleGroupItem>
+              <ToggleGroupItem value="client" className="text-xs px-3">Client</ToggleGroupItem>
             </ToggleGroup>
           </div>
         </div>

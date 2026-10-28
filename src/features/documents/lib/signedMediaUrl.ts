@@ -1,5 +1,5 @@
 // Stored documents keep the *public* storage URL of their attachment, but the
-// buckets holding patient media are private — that URL returns HTTP 400 and the
+// buckets holding client media are private — that URL returns HTTP 400 and the
 // image/PDF renders blank. These helpers turn a stored URL back into a signed,
 // readable one.
 

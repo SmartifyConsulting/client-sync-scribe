@@ -84,7 +84,7 @@ export default function Invoices() {
 
       if (error) throw error;
 
-      // Fetch doctor profiles, patient info, and update status for overdue invoices
+      // Fetch advisor profiles, client info, and update status for overdue invoices
       const invoicesWithDoctors: Invoice[] = [];
       const patientMap: Record<string, PatientInfo> = {};
 
@@ -95,7 +95,7 @@ export default function Invoices() {
           .eq("id", inv.doctor_id)
           .maybeSingle();
 
-        // Fetch patient info if not already fetched
+        // Fetch client info if not already fetched
         if (!patientMap[inv.patient_id]) {
           const { data: patientData } = await supabase
             .from("clients")
@@ -199,7 +199,7 @@ export default function Invoices() {
           invoiceNumber: invoice.invoice_number,
           amount: invoice.amount,
           description: invoice.description,
-          advisorName: invoice.doctor_profile?.full_name || "Doctor",
+          advisorName: invoice.doctor_profile?.full_name || "Advisor",
           dueDate: format(parseISO(invoice.due_date), "MMM d, yyyy"),
           medicalInsurance: patientInfo.medical_aid,
           medicalInsuranceNumber: patientInfo.medical_aid_number,
@@ -303,7 +303,7 @@ export default function Invoices() {
             {filteredInvoices.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">
                 {invoices.length === 0
-                  ? "No invoices found. Your invoices will appear here once your doctor creates them."
+                  ? "No invoices found. Your invoices will appear here once your advisor creates them."
                   : "No invoices match your filter criteria."
                 }
               </p>

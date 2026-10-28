@@ -15,7 +15,7 @@ type LabResult = {
 
 /**
  * Shared "Test Results" view — used both inside the hospital bedside chart's
- * Overview tab and the patient's own "Lab Results" nav page, so both sides
+ * Overview tab and the client's own "Lab Results" nav page, so both sides
  * are looking at literally the same component/data.
  */
 export function TestResultsPanel({ clientId }: { clientId: string | null | undefined }) {

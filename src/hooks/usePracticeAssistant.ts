@@ -13,7 +13,7 @@ export interface PracticePerson {
  * Practice Management Assistant (PMA) context.
  *
  * A PMA is a `practice_members` row with role = 'assistant'. They keep their
- * own patient profile — this hook only exposes the extra practice-admin
+ * own client profile — this hook only exposes the extra practice-admin
  * capability so the sidebar and task tools can adapt.
  */
 export function usePracticeAssistant() {

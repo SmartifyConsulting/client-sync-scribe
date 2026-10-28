@@ -32,7 +32,7 @@ interface Props {
 }
 
 /**
- * My Holarc Care Team — the friends and family a patient shares parts of their
+ * My Holarc Care Team — the friends and family a client shares parts of their
  * profile with. Next of Kin is listed here by default; each member carries an
  * explicit list of what they can see.
  */
@@ -63,7 +63,7 @@ export function EmergencyContactsInline({ clientId, contacts, onChange, nokMembe
     return list;
   };
 
-  // With nothing captured yet, the patient's Next of Kin is listed as the first
+  // With nothing captured yet, the client's Next of Kin is listed as the first
   // care team member. It can be edited, kept or deleted like any other.
   useEffect(() => {
     if (seeded.current || contacts.length > 0) return;

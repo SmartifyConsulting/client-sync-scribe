@@ -102,7 +102,7 @@ import {
 type SessionState = "idle" | "active" | "processing" | "completed";
 
 /**
- * Best-guess price for a standard GP consultation from the doctor's own
+ * Best-guess price for a standard GP consultation from the advisor's own
  * Service Offerings & Pricing. Scores each service name against consultation
  * keywords and prefers a plain/general consultation over specialised entries.
  * Never returns a hard-coded R0 when any priced service exists.
@@ -148,12 +148,12 @@ export default function Sessions() {
   const [searchParams, setSearchParams] = useSearchParams();
   const urlClientId = searchParams.get("client");
   const [selectedClientId, setSelectedClientId] = useState<string | null>(urlClientId);
-  const [advisorName, setDoctorName] = useState<string>("Doctor");
+  const [advisorName, setDoctorName] = useState<string>("Advisor");
   
-  // Use URL param if provided, otherwise use selected patient
+  // Use URL param if provided, otherwise use selected client
   const clientId = urlClientId || selectedClientId;
 
-  // Fetch logged-in doctor's name and language preference
+  // Fetch logged-in advisor's name and language preference
   useEffect(() => {
     const fetchDoctorProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -248,13 +248,13 @@ export default function Sessions() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
   const currentPatient = clients.find(p => p.id === clientId);
-  // Arriving from a patient profile's "Start Session" link — suppress the
-  // patient-selector idle screen entirely while the session auto-starts.
+  // Arriving from a client profile's "Start Session" link — suppress the
+  // client-selector idle screen entirely while the session auto-starts.
   const [autoStartTimedOut, setAutoStartTimedOut] = useState(false);
   const isAutoStarting = searchParams.get("autoStart") === "true" && !autoStartTimedOut;
 
-  // Safety net — if the patient never resolves (stale link, load failure), don't
-  // trap the doctor on "Starting session..." forever; fall back to manual selection.
+  // Safety net — if the client never resolves (stale link, load failure), don't
+  // trap the advisor on "Starting session..." forever; fall back to manual selection.
   useEffect(() => {
     if (searchParams.get("autoStart") !== "true") return;
     const timer = setTimeout(() => {
@@ -263,13 +263,13 @@ export default function Sessions() {
     return () => clearTimeout(timer);
   }, [searchParams, currentPatient]);
 
-  // Handle patient selection
+  // Handle client selection
   const handlePatientSelect = (value: string) => {
     setSelectedClientId(value);
-    setSearchParams({ patient: value });
+    setSearchParams({ client: value });
   };
 
-  // Fetch active prescriptions when patient changes — refreshable on med updates
+  // Fetch active prescriptions when client changes — refreshable on med updates
   const fetchActivePrescriptions = useCallback(async () => {
     if (!clientId) return;
     const { data, error } = await supabase
@@ -286,8 +286,8 @@ export default function Sessions() {
     fetchActivePrescriptions();
   }, [fetchActivePrescriptions]);
 
-  // Pre-warm the mic permission as soon as a patient is selected (idle screen), so the
-  // browser has already granted access by the time the doctor clicks "Start Session" —
+  // Pre-warm the mic permission as soon as a client is selected (idle screen), so the
+  // browser has already granted access by the time the advisor clicks "Start Session" —
   // the permission prompt is usually what makes that click feel slow.
   useEffect(() => {
     if (!currentPatient || sessionState !== "idle" || micPreWarmedRef.current) return;
@@ -317,7 +317,7 @@ export default function Sessions() {
     };
   }, [clientId, fetchActivePrescriptions]);
 
-  // Fetch past sessions for patient (for AI clinician context)
+  // Fetch past sessions for client (for AI clinician context)
   useEffect(() => {
     const fetchPastSessions = async () => {
       if (!clientId) return;
@@ -351,8 +351,8 @@ export default function Sessions() {
     notesRef.current = notes;
   }, [notes]);
 
-  // Personal Notes autosave — persisted as a draft (per-patient) so a refresh
-  // mid-session never loses what the doctor typed, with a reassuring toast.
+  // Personal Notes autosave — persisted as a draft (per-client) so a refresh
+  // mid-session never loses what the advisor typed, with a reassuring toast.
   // The draft is folded into sessions.private_notes once the session
   // completes (see handleSessionComplete's completeSession call) and cleared.
   useEffect(() => {
@@ -739,7 +739,7 @@ export default function Sessions() {
         }
         setSummary(result.summary || "");
         setActionPoints(result.action_points || []);
-        // No automatic AI assessment — the doctor triggers it manually via "AI Consult".
+        // No automatic AI assessment — the advisor triggers it manually via "AI Consult".
 
         const docs = (result as any)._extractedDocuments;
         if (docs?.follow_up_appointment?.follow_up_date) {
@@ -847,7 +847,7 @@ export default function Sessions() {
     }
   });
 
-  // Live AI diagnostic hint while doctor is recording (before they conclude).
+  // Live AI diagnostic hint while advisor is recording (before they conclude).
   // Always on for a recording — no toggle gate; the AI Consult button just runs it now.
   const { hint: liveHint, isLoading: liveHintLoading, error: liveHintError, lastRunAt: liveHintLastRunAt, analyze: analyzeLive } = useLiveDiagnosticHint({
     enabled: isRecording && !isPaused,
@@ -879,7 +879,7 @@ export default function Sessions() {
     differentials: [],
     investigations: [],
   });
-  // Never carry clinical reasoning across consultations: switching patient or
+  // Never carry clinical reasoning across consultations: switching client or
   // starting a new session wipes the accumulated hint state and the notes body.
   useEffect(() => {
     hintImpressionRef.current = "";
@@ -994,7 +994,7 @@ export default function Sessions() {
     }
   };
 
-  // Auto-start when arriving from a patient profile ("Start Session")
+  // Auto-start when arriving from a client profile ("Start Session")
   const autoStartedRef = useRef(false);
   useEffect(() => {
     if (searchParams.get("autoStart") !== "true") return;
@@ -1045,12 +1045,12 @@ export default function Sessions() {
     // Safety net — if mic access fails/is denied, don't leave the UI stuck "preparing".
     setTimeout(() => setIsPreparingSession(false), 8000);
 
-    // Recording only actually starts once the doctor has acknowledged the
+    // Recording only actually starts once the advisor has acknowledged the
     // About the Session Recording notice and answered the AI Consult prompt.
     setShowAboutRecordingDialog(true);
   };
 
-  // Look for a paused consultation for this patient whenever the page is idle.
+  // Look for a paused consultation for this client whenever the page is idle.
   useEffect(() => {
     if (!clientId || sessionState !== "idle") {
       if (sessionState !== "idle") setPausedDraft(null);
@@ -1183,7 +1183,7 @@ export default function Sessions() {
                   Session Recordings
                 </DialogTitle>
                 <DialogDescription className="text-base">
-                  This session recording is only shared between you and your patient. It's
+                  This session recording is only shared between you and your client. It's
                   automatically deleted from our servers within 7 days — download it beforehand
                   if either of you wants to keep a copy.
                 </DialogDescription>
@@ -1225,7 +1225,7 @@ export default function Sessions() {
           if (ok) {
             await completeSessionTodo(doc.label);
             setGeneratedDocs((prev) => prev.map((d) => (d.key === doc.key ? { ...d, sent: true } : d)));
-            toast({ title: 'Sent', description: `${doc.label} emailed to ${doc.recipientName || 'the patient'}.` });
+            toast({ title: 'Sent', description: `${doc.label} emailed to ${doc.recipientName || 'the client'}.` });
           }
         }}
         onSaveEdit={async (doc, newContent) => {
@@ -1297,8 +1297,8 @@ export default function Sessions() {
 
       {/* Session States */}
       {sessionState === "idle" && isAutoStarting && (
-        // Arriving from a patient's profile "Start Session" link — never show the
-        // patient-selector widget, it's confusing when a patient is already chosen.
+        // Arriving from a client's profile "Start Session" link — never show the
+        // client-selector widget, it's confusing when a client is already chosen.
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card p-6 text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent mb-3">
             <Loader2 className="h-6 w-6 text-accent-foreground animate-spin" />
@@ -1375,19 +1375,19 @@ export default function Sessions() {
                           const surnameA = a.name.trim().split(/\s+/).pop()?.toLowerCase() || '';
                           const surnameB = b.name.trim().split(/\s+/).pop()?.toLowerCase() || '';
                           return surnameA.localeCompare(surnameB);
-                        }).map((patient) => {
-                          const parts = patient.name.trim().split(/\s+/);
+                        }).map((client) => {
+                          const parts = client.name.trim().split(/\s+/);
                           const displayName = parts.length > 1
                             ? `${parts[parts.length - 1]}, ${parts.slice(0, -1).join(' ')}`
-                            : patient.name;
+                            : client.name;
                           const initials = parts.slice(0, 2).map(p => p[0]).join('').toUpperCase();
                           return (
                           <CommandItem
-                            key={patient.id}
-                            value={patient.name}
+                            key={client.id}
+                            value={client.name}
                             className="flex h-11 items-center gap-2.5 rounded-lg px-2 text-sm cursor-pointer data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground"
                             onSelect={() => {
-                              handlePatientSelect(patient.id);
+                              handlePatientSelect(client.id);
                               setPatientSelectorOpen(false);
                             }}
                           >
@@ -1398,7 +1398,7 @@ export default function Sessions() {
                             <Check
                               className={cn(
                                 "h-4 w-4 shrink-0 text-primary",
-                                selectedClientId === patient.id ? "opacity-100" : "opacity-0"
+                                selectedClientId === client.id ? "opacity-100" : "opacity-0"
                               )}
                             />
                           </CommandItem>
@@ -1427,7 +1427,7 @@ export default function Sessions() {
                 }}
                 className="text-xs text-muted-foreground"
               >
-                Change patient
+                Change client
               </Button>
             </div>
           )}
@@ -1475,7 +1475,7 @@ export default function Sessions() {
           </Button>
 
 
-          {/* Past Sessions — quick recap of this patient's previous consultations. */}
+          {/* Past Sessions — quick recap of this client's previous consultations. */}
           {currentPatient && (
             <div className="mt-6 w-full max-w-[54.6rem] text-left rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
               <div className="px-3 py-2 border-b bg-primary/5">
@@ -1622,7 +1622,7 @@ export default function Sessions() {
             {/* Client Overview — AI recap of the last 6 months with DISC descriptors on top. */}
             <div className="min-h-[210px] flex flex-col">
               <WealthClientOverview
-                patient={currentPatient}
+                client={currentPatient}
                 discSlot={<SessionDiscStrip clientId={currentPatient?.id} inline />}
               />
             </div>
@@ -1734,13 +1734,13 @@ export default function Sessions() {
               if (ok) {
                 await completeSessionTodo(doc.label);
                 setGeneratedDocs((prev) => prev.map((d) => (d.key === doc.key ? { ...d, sent: true } : d)));
-                toast({ title: 'Sent', description: `${doc.label} emailed to ${doc.recipientName || 'the patient'}.` });
+                toast({ title: 'Sent', description: `${doc.label} emailed to ${doc.recipientName || 'the client'}.` });
               }
             }}
             onSaveForReview={(doc) => {
               toast({
                 title: 'Saved for review',
-                description: `${doc.label} is saved to the patient's documents for later review.`,
+                description: `${doc.label} is saved to the client's documents for later review.`,
               });
             }}
           />

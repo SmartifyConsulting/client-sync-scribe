@@ -83,16 +83,16 @@ const DOCTOR_SECTIONS: NavSection[] = [
   {
     title: "My Business",
     items: [
-      { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.dashboard", to: "/broker-dashboard", tour: "doctor-home" },
+      { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.dashboard", to: "/broker-dashboard", tour: "advisor-home" },
       { icon: Settings2, label: "My Business", labelKey: "nav.myPractice", to: "/business", tour: "practice-settings" },
       { icon: Clock, label: "My Shifts", labelKey: "nav.myShift", to: "/my-shift" },
-      { icon: Users, label: "My Clients", labelKey: "nav.myPatients", to: "/clients", tour: "import-patients" },
+      { icon: Users, label: "My Clients", labelKey: "nav.myPatients", to: "/clients", tour: "import-clients" },
       { icon: UserPlus, label: "Referrers", labelKey: "nav.referrers", to: "/referrers" },
       { icon: BedDouble, label: "Admissions", labelKey: "nav.admissions", to: "/admissions" },
       { icon: Stethoscope, label: "Consultations", labelKey: "nav.mySessions", to: "/sessions" },
       { icon: FolderOpen, label: "Documents", labelKey: "nav.allDocuments", to: "/documents" },
       { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
-      { icon: Users2, label: "Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
+      { icon: Users2, label: "Round Tables", labelKey: "nav.myRoundTables", to: "/advisor/round-tables" },
       { icon: Plug, label: "App Integrations", labelKey: "nav.appIntegrations", to: "/app-integrations" },
     ],
   },
@@ -101,11 +101,11 @@ const DOCTOR_SECTIONS: NavSection[] = [
 
 const DOCTOR_BOTTOM_ITEMS: (NavItem & { tour?: string })[] = [
   { icon: MessageCircle, label: "Messenger", labelKey: "nav.messenger", to: "/messenger" },
-  { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/doctor/holarchelp", danger: true },
+  { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/advisor/holarchelp", danger: true },
 ];
 
 
-/** Flat view of the doctor menu, used for preference-based reordering/hiding
+/** Flat view of the advisor menu, used for preference-based reordering/hiding
  *  and the "Customise menu" popover, which don't need to know about sections. */
 const doctorModeItems: (NavItem & { tour?: string })[] = [
   ...DOCTOR_TOP_ITEMS,
@@ -119,13 +119,13 @@ const CLIENT_BLOCKED_PATHS = ["/business", "/clients"];
 const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.myPersonalDashboard", to: "/my-dashboard" },
   { icon: Activity, label: "Live Workspace", labelKey: "nav.liveWorkspace", to: "/my-workspace" },
-  { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/patient/details?section=health" },
+  { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/client/details?section=health" },
   { icon: ClientFolder, label: "Documents", labelKey: "nav.clientDocuments", to: "/client/documents" },
   { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
-  { icon: BedDouble, label: "My Admissions", labelKey: "nav.myAdmissions", to: "/patient/admissions" },
+  { icon: BedDouble, label: "My Admissions", labelKey: "nav.myAdmissions", to: "/client/admissions" },
   { icon: Sparkles, label: "Ask Holarc Wealth", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
   { icon: MessageCircle, label: "Messenger", labelKey: "nav.messenger", to: "/messenger" },
-  { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true, tour: "patient-sos" },
+  { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/client/holarchelp", danger: true, tour: "client-sos" },
 ];
 
 /** Referral Agents only need their own referral pipeline and earnings. */
@@ -147,7 +147,7 @@ const adminNavItems: NavItem[] = [
   { icon: BarChart3, label: "Performance", labelKey: "nav.performance", to: "/admin/performance" },
   { icon: DollarSign, label: "Pricing", labelKey: "nav.pricing", to: "/admin/pricing" },
   { icon: Plug, label: "Integrations", labelKey: "nav.integrationsAdmin", to: "/admin/integrations" },
-  { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true },
+  { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/client/holarchelp", danger: true },
   { icon: Siren, label: "Hospital Portal", labelKey: "nav.hospitalPortal", to: "/provider/hospital", danger: true },
   { icon: Siren, label: "ER Portal", labelKey: "nav.erPortal", to: "/provider/ambulance", danger: true },
 ];
@@ -182,7 +182,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const { isAssistant } = usePracticeAssistant();
   const { hasHospitalAffiliation, loading: affiliationLoading } = useHospitalAffiliation();
   const { v2Demo } = useV2Demo();
-  // Ensures a doctor's typed signature exists as a PNG for outbound email.
+  // Ensures a advisor's typed signature exists as a PNG for outbound email.
   useSignatureBackfill();
 
   const loading = roleLoading;
@@ -190,7 +190,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isOnPatientRoute = location.pathname.startsWith("/patient/");
+  const isOnPatientRoute = location.pathname.startsWith("/client/");
   const isOnAdminRoute = location.pathname.startsWith("/admin");
 
   const mailboxAlias = (profile as any)?.mailbox_alias as string | null | undefined;
@@ -201,15 +201,15 @@ export function Sidebar({ onNavigate }: SidebarProps) {
       ? `docs-${mailboxId.slice(0, 8)}@inbox.holarc.health`
       : "";
 
-  // Doctors keep their own menu even when viewing patient-scoped routes such as
-  // "My Profile" (/patient/details) — the route alone must not flip the nav.
+  // Advisors keep their own menu even when viewing client-scoped routes such as
+  // "My Profile" (/client/details) — the route alone must not flip the nav.
   // While the role is still resolving we must NOT fall back to the route-based
-  // guess, otherwise a doctor sees the patient nav for one frame.
+  // guess, otherwise a advisor sees the client nav for one frame.
   const isAdvisor = role === "broker";
   const routeSaysPatient = isOnPatientRoute && !roleLoading && role !== null;
 
   /** Doctors can flip the sidebar between their professional menu and their
-   *  own patient menu with the badge next to the dashboard. Derived from the
+   *  own client menu with the badge next to the dashboard. Derived from the
    *  current route (rather than local state) so the active pill stays correct
    *  even if the sidebar remounts on navigation — local state was resetting
    *  to "broker" on every route change, leaving the pill stuck showing the
@@ -252,7 +252,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 
 
 
-  // Practice Management Assistants keep their own (patient) menu plus the
+  // Practice Management Assistants keep their own (client) menu plus the
   // practice-admin tools they are responsible for.
   const withAssistant = isAssistant && !isOnAdminRoute
     ? [...baseNav.filter((i) => !assistantNavItems.some((a) => a.to === i.to)), ...assistantNavItems]
@@ -300,7 +300,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 
     // "My Dashboard" is the universal post-login landing page (see
     // RoleBasedRedirect in App.tsx) but isn't itself a nav item — treat it as
-    // the doctor Dashboard link's route too, so Dashboard highlights on landing
+    // the advisor Dashboard link's route too, so Dashboard highlights on landing
     // instead of nothing being highlighted at all.
     const isDashboardLandingAlias = itemPath === "/broker-dashboard" && location.pathname === "/my-dashboard";
 
@@ -393,18 +393,18 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   });
 
   const { data: patientDocCount = 0, refetch: refetchPatientDocCount } = useQuery({
-    queryKey: ["patient-nav-doc-count"],
+    queryKey: ["client-nav-doc-count"],
     enabled: isPatientMenu,
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return 0;
       const sbx = supabase as any;
-      const { data: patient } = await sbx.from("clients").select("id")
+      const { data: client } = await sbx.from("clients").select("id")
         .or(`user_id.eq.${user.id},patient_user_id.eq.${user.id}`).maybeSingle();
-      if (!patient) return 0;
+      if (!client) return 0;
       const [{ count: docsCount }, { data: workflows }] = await Promise.all([
-        sbx.from("documents").select("*", { count: "exact", head: true }).eq("patient_id", patient.id).not("document_kind", "is", null),
-        sbx.from("wealth_workflows").select("id").eq("patient_id", patient.id),
+        sbx.from("documents").select("*", { count: "exact", head: true }).eq("patient_id", client.id).not("document_kind", "is", null),
+        sbx.from("wealth_workflows").select("id").eq("patient_id", client.id),
       ]);
       let signedCount = 0;
       const workflowIds = (workflows ?? []).map((w: any) => w.id);

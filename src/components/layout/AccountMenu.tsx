@@ -27,7 +27,7 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
   const { isAdvisor, isEmergency, isNurse } = useUserRole();
   const location = useLocation();
   const navigate = useNavigate();
-  const isOnPatientRoute = location.pathname.startsWith("/patient/");
+  const isOnPatientRoute = location.pathname.startsWith("/client/");
   const isOnHospitalRoute = location.pathname.startsWith("/provider/hospital");
   const isOnAmbulanceRoute = location.pathname.startsWith("/provider/ambulance");
   const providerProfilePath = isNurse
@@ -67,7 +67,7 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
               <Stethoscope className="h-3.5 w-3.5 text-primary" />
               <div className="text-left">
                 <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
-                <p className="text-xs text-muted-foreground">{t("topbar.doctor")}</p>
+                <p className="text-xs text-muted-foreground">{t("topbar.advisor")}</p>
               </div>
             </button>
           </div>
@@ -81,7 +81,7 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
               ? t("topbar.hospital")
               : isEmergency
                 ? t("topbar.er")
-                : t("topbar.patient");
+                : t("topbar.client");
           return (
             <div className="px-2 py-1.5 border-b border-border mb-1">
               <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>

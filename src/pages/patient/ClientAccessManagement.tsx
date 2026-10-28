@@ -98,7 +98,7 @@ export default function ClientAccessManagement() {
 
       if (reqError) throw reqError;
 
-      // Get doctor names and permissions for accepted requests
+      // Get advisor names and permissions for accepted requests
       const approvedWithNames: ApprovedInvite[] = [];
       for (const req of acceptedRequests || []) {
         const { data: profile } = await supabase
@@ -211,7 +211,7 @@ export default function ClientAccessManagement() {
       toast({
         title: `Invitation ${actionLabel}`,
         description: action === "accepted" 
-          ? "The doctor now has access to your profile." 
+          ? "The advisor now has access to your profile." 
           : `The invitation has been ${actionLabel}.`,
       });
 
@@ -336,7 +336,7 @@ export default function ClientAccessManagement() {
                   key={invitation.id}
                   className="rounded-xl border border-border bg-amber-50/50 dark:bg-amber-900/10"
                 >
-                  {/* Doctor info row */}
+                  {/* Advisor info row */}
                   <div className="flex items-center gap-4 p-4">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
                       <User className="h-5 w-5 text-primary" />

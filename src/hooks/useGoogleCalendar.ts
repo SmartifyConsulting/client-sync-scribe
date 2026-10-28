@@ -123,9 +123,9 @@ export function useGoogleCalendar() {
       return null;
     }
 
-    // Individual-only sync: never mirror another doctor's appointments to this user's Google Calendar
+    // Individual-only sync: never mirror another advisor's appointments to this user's Google Calendar
     if (appointment?.user_id && user?.id && appointment.user_id !== user.id) {
-      logger.debug('Skipping Google sync: appointment owned by another doctor');
+      logger.debug('Skipping Google sync: appointment owned by another advisor');
       return null;
     }
 

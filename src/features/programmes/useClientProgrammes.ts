@@ -6,11 +6,11 @@ import { VULA_MATRIX } from "./types";
 
 const db = supabase as any;
 
-/** Doctor-recorded weigh-ins and the Vulas awarded for weight lost. */
+/** Advisor-recorded weigh-ins and the Vulas awarded for weight lost. */
 export function useWeighIns(clientId?: string) {
   const { user } = useAuth();
   const qc = useQueryClient();
-  const key = ["patient-weigh-ins", clientId];
+  const key = ["client-weigh-ins", clientId];
 
   const query = useQuery({
     queryKey: key,

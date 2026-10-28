@@ -151,7 +151,7 @@ export function MediaCapture({ clientId, clientName, onSaved }: MediaCaptureProp
 
       if (docError) throw docError;
 
-      toast({ title: "Media Saved", description: `${mediaType === "video" ? "Video" : "Audio"} saved to patient documents` });
+      toast({ title: "Media Saved", description: `${mediaType === "video" ? "Video" : "Audio"} saved to client documents` });
       discardRecording();
       setTitle("");
       onSaved?.();

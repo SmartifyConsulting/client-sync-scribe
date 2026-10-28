@@ -4,13 +4,13 @@ import { Quote, Star } from "lucide-react";
 const QUOTES = [
   {
     quote:
-      "The AI summaries save me at least an hour every day. I can focus on the patient instead of typing notes.",
+      "The AI summaries save me at least an hour every day. I can focus on the client instead of typing notes.",
     name: "Dr. Naledi M.",
     role: "General Practitioner · Johannesburg",
   },
   {
     quote:
-      "I love that I finally have one place where every doctor's notes, my prescriptions and my appointments live together.",
+      "I love that I finally have one place where every advisor's notes, my prescriptions and my appointments live together.",
     name: "Thandi K.",
     role: "Client · Cape Town",
   },

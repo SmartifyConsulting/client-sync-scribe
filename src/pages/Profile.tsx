@@ -265,7 +265,7 @@ export default function Profile() {
   const isAdvisor = role === "broker";
   const isClientRole = role === "client";
 
-  // Fetch patient record for Holarchive
+  // Fetch client record for Holarchive
   useEffect(() => {
     if (!user) return;
     const fetchClientRecord = async () => {
@@ -290,7 +290,7 @@ export default function Profile() {
           } as unknown as Client);
         }
       } catch (err) {
-        console.error("Error fetching patient record:", err);
+        console.error("Error fetching client record:", err);
       } finally {
         setClientLoading(false);
       }

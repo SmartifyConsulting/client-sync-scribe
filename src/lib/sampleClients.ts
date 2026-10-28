@@ -1,5 +1,5 @@
 /**
- * Helper to detect whether a patient/doctor record is demo data.
+ * Helper to detect whether a client/advisor record is demo data.
  *
  * MVP goes live 2026-08-18 — everything created before that date is demo
  * data captured while building/testing the app, not a real person. Records
@@ -13,7 +13,7 @@ export const DEMO_DATA_CUTOFF = "2026-08-18T00:00:00Z";
 const SAMPLE_NAME_HINTS = [
   "sample",
   "demo",
-  "test patient",
+  "test client",
   // Known seeded demo names — keep lowercase
   "sharon kennedy",
   "john sample",
@@ -28,14 +28,14 @@ export interface SampleClientLike {
   created_at?: string | null;
 }
 
-export function isSampleClient(patient: SampleClientLike | null | undefined): boolean {
-  if (!patient) return false;
-  if (patient.created_at && patient.created_at < DEMO_DATA_CUTOFF) return true;
-  if (patient.is_sample === true) return true;
+export function isSampleClient(client: SampleClientLike | null | undefined): boolean {
+  if (!client) return false;
+  if (client.created_at && client.created_at < DEMO_DATA_CUTOFF) return true;
+  if (client.is_sample === true) return true;
   // Seeded demo records all use placeholder @email.* addresses.
-  const email = (patient.email || "").trim().toLowerCase();
+  const email = (client.email || "").trim().toLowerCase();
   if (/@email\./.test(email)) return true;
-  const name = (patient.name || "").trim().toLowerCase();
+  const name = (client.name || "").trim().toLowerCase();
   if (!name) return false;
   return SAMPLE_NAME_HINTS.some((hint) => name.includes(hint));
 }

@@ -6,7 +6,7 @@ import { renderSignaturePngBase64 } from "@/lib/signatureImage";
 /**
  * Email clients strip web fonts, so a typed signature falls back to a generic
  * cursive (Comic Sans in Gmail) whenever we send it as HTML. To guarantee the
- * doctor's chosen script font, the app renders the signature once to a PNG and
+ * advisor's chosen script font, the app renders the signature once to a PNG and
  * stores it on the profile — outbound email then embeds that image inline.
  *
  * My Practice does this when the signature is saved, but profiles configured

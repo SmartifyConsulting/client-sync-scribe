@@ -24,7 +24,7 @@ export function useUserRole() {
       // layouts that structurally differ, like ClientAppLayout <-> AppLayout)
       // resets it to user=null, loading=true while it re-checks the session.
       // Treating that transient null the same as "signed out" would flash the
-      // wrong nav (defaulting to doctor) before the real user resolves a moment
+      // wrong nav (defaulting to advisor) before the real user resolves a moment
       // later. Only resolve to role=null once auth itself is done loading.
       if (!user) {
         if (authLoading) return;

@@ -47,7 +47,7 @@ export const getPrivateItems = (t: any): PermissionItem[] => [
   { label: t("permissions.medicalCertificates") },
 ];
 
-// What other doctors on the patient's profile will see vs. what stays private to this practice
+// What other doctors on the client's profile will see vs. what stays private to this practice
 const getDoctorSharedItems = (t: any): PermissionItem[] => [
   { label: t("permissions.doctorContribution") },
   { label: t("permissions.visitSummary") },

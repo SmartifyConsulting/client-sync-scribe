@@ -30,7 +30,7 @@ interface Args {
 }
 
 /**
- * Polls the live-diagnostic-hint edge function while the doctor is recording,
+ * Polls the live-diagnostic-hint edge function while the advisor is recording,
  * so a working diagnostic impression appears BEFORE they conclude the visit.
  * `analyze()` runs the same analysis on demand (manual AI Consult, or the final
  * whole-transcript pass once recording stops).

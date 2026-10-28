@@ -26,7 +26,7 @@ export interface Session {
   ended_at: string | null;
   created_at: string;
   updated_at: string;
-  patient?: {
+  client?: {
     id: string;
     name: string;
     allergies?: string | null;
@@ -102,7 +102,7 @@ export function useSessions(clientId?: string) {
         .from('sessions')
         .select(`
           *,
-          patient:clients(id, name, allergies, current_medications, conditions_diagnoses)
+          client:clients(id, name, allergies, current_medications, conditions_diagnoses)
         `)
         // Paused drafts are resumable work-in-progress, never session history.
         .neq('status', 'paused')
@@ -144,7 +144,7 @@ export function useSessions(clientId?: string) {
         })
         .select(`
           *,
-          patient:clients(id, name)
+          client:clients(id, name)
         `)
         .single();
 
@@ -173,7 +173,7 @@ export function useSessions(clientId?: string) {
         .eq('id', id)
         .select(`
           *,
-          patient:clients(id, name)
+          client:clients(id, name)
         `)
         .single();
 
@@ -276,7 +276,7 @@ const completeSession = async (
           .from('sessions')
           .update(sessionRecord)
           .eq('id', sessionId)
-          .select(`*, patient:clients(id, name)`)
+          .select(`*, client:clients(id, name)`)
           .single();
         if (error) throw error;
         resultData = data;
@@ -285,7 +285,7 @@ const completeSession = async (
         const { data, error } = await supabase
           .from('sessions')
           .insert(sessionRecord)
-          .select(`*, patient:clients(id, name)`)
+          .select(`*, client:clients(id, name)`)
           .single();
         if (error) throw error;
         resultData = data;
@@ -306,7 +306,7 @@ const completeSession = async (
           userId: user.id,
           sessionId,
           clientId: clientId || null,
-          clientName: resultData?.patient?.name || null,
+          clientName: resultData?.client?.name || null,
           transcript: content,
           sessionTitle: sessionRecord.title,
           sessionDate: startedAt,
@@ -1202,7 +1202,7 @@ export function useSession(id: string) {
           .from('sessions')
           .select(`
             *,
-            patient:clients(id, name, allergies, current_medications, conditions_diagnoses)
+            client:clients(id, name, allergies, current_medications, conditions_diagnoses)
           `)
           .eq('id', id)
           .maybeSingle();

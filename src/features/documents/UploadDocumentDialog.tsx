@@ -113,7 +113,7 @@ export function UploadDocumentDialog({ open, onOpenChange, onUploaded }: UploadD
       }
 
       // Photos and scans of handwritten records get transcribed, then the
-      // extracted history is offered for the patient record.
+      // extracted history is offered for the client record.
       let content = `[FILE] ${name.trim()}`;
       let transcribed = false;
       const canTranscribe = file.type.startsWith("image/") || file.type === "application/pdf";

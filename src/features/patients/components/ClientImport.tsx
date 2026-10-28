@@ -600,11 +600,11 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
                 accept=".xlsx,.xls,.csv,.txt"
                 onChange={handleFileChange}
                 className="hidden"
-                id="patient-import-file"
+                id="client-import-file"
               />
               <Button
                 variant="outline"
-                onClick={() => document.getElementById("patient-import-file")?.click()}
+                onClick={() => document.getElementById("client-import-file")?.click()}
               >
                 <Upload className="h-4 w-4 mr-2" />
                 Select File

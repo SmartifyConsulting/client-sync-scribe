@@ -209,7 +209,7 @@ export default function ClientRoundTable({ hideHeader = false }: { hideHeader?: 
         </Card>
       ) : (
         <ListGroupToolbar
-          storageKey="patient-round-table"
+          storageKey="client-round-table"
           items={notes.map((n) => ({
             item: n,
             date: n.created_at,

@@ -83,7 +83,7 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
   const [selectedFooterId, setSelectedFooterId] = useState<string>(
     initialData?.footerTemplateId || ""
   );
-  // Once the doctor deliberately picks "None" we stop re-applying the default.
+  // Once the advisor deliberately picks "None" we stop re-applying the default.
   const [headerCleared, setHeaderCleared] = useState(false);
   const [footerCleared, setFooterCleared] = useState(false);
 
@@ -158,7 +158,7 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
     });
   };
 
-  // Preview shows the signed-in doctor's real details; patient-scoped tokens
+  // Preview shows the signed-in advisor's real details; client-scoped tokens
   // fall back to the shared quiet "___" placeholder instead of raw brackets.
   const replacePlaceholders = (text: string) =>
     resolveTemplatePreviewTokens(text, profile as any);

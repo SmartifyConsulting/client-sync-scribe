@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/section-accordion";
 import { isToday, isThisMonth, format } from "date-fns";
 
-export type GroupByKey = "date" | "patient" | "hospital";
+export type GroupByKey = "date" | "client" | "hospital";
 
 /** Date buckets: Today → current month (e.g. "July 2026") → older months → years. */
 export function dateGroupLabel(value: string | Date | null | undefined): string {
@@ -42,7 +42,7 @@ function groupSortValue(items: { date?: string | Date | null }[]) {
 export interface GroupableItem<T> {
   item: T;
   date?: string | Date | null;
-  patient?: string | null;
+  client?: string | null;
   hospital?: string | null;
   /** Free text used by the search box. */
   search?: string;
@@ -71,8 +71,8 @@ interface Props<T> {
   headerTone?: "green" | "grey";
   /**
    * When grouping by date, further split each date group into a collapsed
-   * light-grey sub-accordion per patient (see HolarchStyling skill §6).
-   * Ignored when groupBy is "patient" or "hospital" — there's nothing left
+   * light-grey sub-accordion per client (see HolarchStyling skill §6).
+   * Ignored when groupBy is "client" or "hospital" — there's nothing left
    * to nest by in that case.
    */
   subGroupByPatient?: boolean;
@@ -114,7 +114,7 @@ export function ListGroupToolbar<T>({
   const filtered = React.useMemo(() => {
     if (!debounced) return items;
     return items.filter((i) =>
-      [i.search, i.patient, i.hospital].filter(Boolean).join(" ").toLowerCase().includes(debounced),
+      [i.search, i.client, i.hospital].filter(Boolean).join(" ").toLowerCase().includes(debounced),
     );
   }, [items, debounced]);
 
@@ -122,7 +122,7 @@ export function ListGroupToolbar<T>({
     const map = new Map<string, GroupableItem<T>[]>();
     for (const entry of filtered) {
       let key: string;
-      if (groupBy === "patient") key = entry.patient?.trim() || "Unassigned";
+      if (groupBy === "client") key = entry.client?.trim() || "Unassigned";
       else if (groupBy === "hospital") key = entry.hospital?.trim() || "No hospital";
       else key = dateGroupLabel(entry.date);
       const list = map.get(key) || [];
@@ -145,7 +145,7 @@ export function ListGroupToolbar<T>({
   const patientSubGroups = React.useCallback((entries: GroupableItem<T>[]) => {
     const map = new Map<string, GroupableItem<T>[]>();
     for (const entry of entries) {
-      const key = entry.patient?.trim() || "Unassigned";
+      const key = entry.client?.trim() || "Unassigned";
       const list = map.get(key) || [];
       list.push(entry);
       map.set(key, list);
@@ -174,7 +174,7 @@ export function ListGroupToolbar<T>({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="date">Group by date</SelectItem>
-              <SelectItem value="patient">Group by client</SelectItem>
+              <SelectItem value="client">Group by client</SelectItem>
               {allowHospital && <SelectItem value="hospital">Group by hospital</SelectItem>}
             </SelectContent>
           </Select>

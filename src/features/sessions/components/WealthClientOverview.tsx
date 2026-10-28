@@ -6,17 +6,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { useClientWealth, zar } from "@/features/wealth-workflow/client/useClientWealth";
 
 /** Consultation-screen recap of the client's financial position (replaces the clinical overview). */
-export function WealthClientOverview({ patient, discSlot }: { patient: any | undefined; discSlot?: ReactNode }) {
-  const { data: w, isLoading } = useClientWealth(patient?.id);
+export function WealthClientOverview({ client, discSlot }: { client: any | undefined; discSlot?: ReactNode }) {
+  const { data: w, isLoading } = useClientWealth(client?.id);
   const { data: lastConsult } = useQuery({
-    queryKey: ["last-consultation", patient?.id],
-    enabled: !!patient?.id,
+    queryKey: ["last-consultation", client?.id],
+    enabled: !!client?.id,
     queryFn: async () =>
-      (await supabase.from("sessions").select("started_at").eq("patient_id", patient!.id).neq("status", "paused").order("started_at", { ascending: false }).limit(1).maybeSingle()).data?.started_at ?? null,
+      (await supabase.from("sessions").select("started_at").eq("patient_id", client!.id).neq("status", "paused").order("started_at", { ascending: false }).limit(1).maybeSingle()).data?.started_at ?? null,
   });
 
   const t = w?.totals;
-  const name = patient?.name || "This client";
+  const name = client?.name || "This client";
   const headline = !w
     ? ""
     : [

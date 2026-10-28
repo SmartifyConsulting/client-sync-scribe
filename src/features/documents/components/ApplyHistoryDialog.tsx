@@ -20,7 +20,7 @@ export interface ExtractedHistory {
   surgeries?: string[];
   family_history?: string[];
   notable_events?: string[];
-  /** Short clinical bullets appended to the patient's overview notes. */
+  /** Short clinical bullets appended to the client's overview notes. */
   overview_bullets?: string[];
   /** Date the paper record was written (YYYY-MM-DD), when the AI could read it. */
   record_date?: string | null;
@@ -44,7 +44,7 @@ const uid = () =>
 
 const SOURCE = "Transcribed handwritten record";
 
-/** Maps the extracted keys onto real patient columns and their storage shape. */
+/** Maps the extracted keys onto real client columns and their storage shape. */
 const FIELD_MAP: FieldDef[] = [
   {
     key: "conditions_diagnoses",
@@ -119,9 +119,9 @@ interface ApplyHistoryDialogProps {
 
 /**
  * Asks the clinician to confirm before any AI-extracted history from a
- * transcribed handwritten record is written back to the patient's record.
+ * transcribed handwritten record is written back to the client's record.
  * Nothing is overwritten — structured items are appended to their list
- * columns and overview bullets are appended to the patient's notes.
+ * columns and overview bullets are appended to the client's notes.
  */
 export function ApplyHistoryDialog({
   open,
@@ -164,7 +164,7 @@ export function ApplyHistoryDialog({
   const apply = async () => {
     setSaving(true);
     try {
-      const { data: patient, error: readError } = await supabase
+      const { data: client, error: readError } = await supabase
         .from("clients")
         .select(
           "conditions_diagnoses, current_medications, allergies, surgeries, family_history, notes",
@@ -181,8 +181,8 @@ export function ApplyHistoryDialog({
         if (chosen.length === 0) continue;
 
         if (row.kind === "list") {
-          const existing = Array.isArray((patient as any)?.[row.column])
-            ? [...((patient as any)[row.column] as unknown[])]
+          const existing = Array.isArray((client as any)?.[row.column])
+            ? [...((client as any)[row.column] as unknown[])]
             : [];
           const seen = new Set(existing.map((e) => entryName(e).toLowerCase()).filter(Boolean));
           const additions = chosen
@@ -191,7 +191,7 @@ export function ApplyHistoryDialog({
           if (additions.length === 0) continue;
           updates[row.column] = [...existing, ...additions];
         } else {
-          const existing = ((patient as any)?.[row.column] || "").toString().trim();
+          const existing = ((client as any)?.[row.column] || "").toString().trim();
           const additions = chosen
             .filter((item) => !existing.toLowerCase().includes(item.trim().toLowerCase()))
             .map((item) => `${item.trim()}${stamp}`);
@@ -207,7 +207,7 @@ export function ApplyHistoryDialog({
       if (keptBullets.length > 0) {
         const existingNotes = (
           (updates.notes as string | undefined) ??
-          ((patient as any)?.notes || "")
+          ((client as any)?.notes || "")
         )
           .toString()
           .trim();
@@ -257,7 +257,7 @@ export function ApplyHistoryDialog({
           <DialogDescription>
             The AI found the following history in the transcribed record
             {effectiveDate ? ` dated ${effectiveDate}` : ""}. Nothing is overwritten — selected
-            items are appended to the patient's record.
+            items are appended to the client's record.
           </DialogDescription>
         </DialogHeader>
 

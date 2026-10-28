@@ -50,7 +50,7 @@ interface Message {
   created_at: string;
   sender?: { full_name: string | null } | null;
   recipient?: { full_name: string | null } | null;
-  patient?: { name: string } | null;
+  client?: { name: string } | null;
 }
 
 interface Notification {
@@ -237,7 +237,7 @@ export default function Notifications() {
         .from('messages')
         .select(`
           *,
-          patient:clients(name)
+          client:clients(name)
         `)
         .order('created_at', { ascending: false });
 
@@ -336,7 +336,7 @@ export default function Notifications() {
       message.content.toLowerCase().includes(search) ||
       message.sender?.full_name?.toLowerCase().includes(search) ||
       message.recipient?.full_name?.toLowerCase().includes(search) ||
-      message.patient?.name?.toLowerCase().includes(search)
+      message.client?.name?.toLowerCase().includes(search)
     );
   });
 
@@ -428,13 +428,13 @@ export default function Notifications() {
                 <span>•</span>
                 <span>{format(new Date(selectedMessage.created_at), 'dd MMM yyyy, HH:mm')}</span>
               </div>
-              {selectedMessage.patient && (
+              {selectedMessage.client && (
                 <Link 
                   to={`/clients/${selectedMessage.patient_id}`}
                   className="inline-flex items-center gap-1 mt-2 text-sm text-primary hover:underline"
                 >
                   <User className="h-4 w-4" />
-                  Re: {selectedMessage.patient.name}
+                  Re: {selectedMessage.client.name}
                 </Link>
               )}
             </div>
@@ -844,9 +844,9 @@ function MessageList({
             )}>
               {message.subject}
             </p>
-            {message.patient && (
+            {message.client && (
               <p className="text-xs text-muted-foreground mt-1 truncate">
-                Re: {message.patient.name}
+                Re: {message.client.name}
               </p>
             )}
           </div>

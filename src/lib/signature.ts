@@ -1,7 +1,7 @@
 /**
- * Shared doctor-signature rendering.
+ * Shared advisor-signature rendering.
  *
- * A doctor either uploads a signature image (`profiles.signature_url`) OR
+ * A advisor either uploads a signature image (`profiles.signature_url`) OR
  * configures a typed signature (font / colour / size / bold / italic).
  * Document previews, invoices, prescriptions and exports must render whichever
  * one is configured — previously only the image variant was supported, so
@@ -49,7 +49,7 @@ const escapeHtml = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 /**
- * Returns the HTML for the doctor's signature, or "" when nothing is configured.
+ * Returns the HTML for the advisor's signature, or "" when nothing is configured.
  * Prefers the uploaded image; falls back to the typed signature.
  */
 export function renderSignatureHtml(profile?: SignatureProfileLike | null): string {

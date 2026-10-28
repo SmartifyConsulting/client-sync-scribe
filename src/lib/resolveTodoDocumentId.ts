@@ -26,7 +26,7 @@ export function isDocumentTodoKind(kind: TodoKind): boolean {
 
 /**
  * Best-effort lookup of the document behind a document-review task that has no
- * document_id stored (older / AI-created tasks). Matches on the task's patient
+ * document_id stored (older / AI-created tasks). Matches on the task's client
  * and the document type, preferring the document closest to the task date.
  */
 export async function resolveTodoDocumentId(todo: {

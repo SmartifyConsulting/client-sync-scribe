@@ -116,7 +116,7 @@ const sanitizeTagAttributes = (tag: string): string => {
     "",
   );
   // Keep style attributes but strip everything that isn't plain presentation
-  // (needed so typed doctor signatures keep their font/colour/size).
+  // (needed so typed advisor signatures keep their font/colour/size).
   cleaned = cleaned.replace(/\s+style\s*=\s*("([^"]*)"|'([^']*)')/gi, (_m, _q, dq, sq) => {
     const safe = sanitizeStyleValue(dq ?? sq ?? "");
     return safe ? ` style="${safe}"` : "";

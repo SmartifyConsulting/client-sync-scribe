@@ -2,7 +2,7 @@
  * Resumable sessions.
  *
  * Pausing a consultation persists a `paused` session row (transcript + notes +
- * elapsed time) so the doctor can close the tab and pick the consultation up
+ * elapsed time) so the advisor can close the tab and pick the consultation up
  * later. The row is deleted once the session is finalised, so paused drafts
  * never appear in session history.
  */
@@ -59,7 +59,7 @@ export async function savePausedSession(args: SavePausedSessionArgs): Promise<bo
   }
 }
 
-/** Most recent paused draft for a patient belonging to the signed-in doctor. */
+/** Most recent paused draft for a client belonging to the signed-in advisor. */
 export async function fetchPausedSession(clientId: string): Promise<PausedSessionSnapshot | null> {
   try {
     const { data: { user } } = await supabase.auth.getUser();

@@ -702,7 +702,7 @@ export function DrawingPad({ clientId, sessionId, clientName, onClose, isModal =
     if (!canvas) return;
     
     const link = document.createElement("a");
-    link.download = `drawing-${clientName || "patient"}-${format(new Date(), "yyyy-MM-dd")}.png`;
+    link.download = `drawing-${clientName || "client"}-${format(new Date(), "yyyy-MM-dd")}.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
   };

@@ -65,18 +65,18 @@ export function RecentActivity() {
           const now = Date.now();
           const offsetsMs = [2 * 3600_000, 3 * 3600_000, 5 * 3600_000, 26 * 3600_000];
 
-          const mockActivities: Activity[] = patients.map((patient, index) => ({
+          const mockActivities: Activity[] = patients.map((client, index) => ({
             id: `act-${index}`,
             type: activityTypes[index % activityTypes.length],
             title: titles[index % titles.length],
             description: descriptions[index % descriptions.length],
             timeIso: new Date(now - offsetsMs[index % offsetsMs.length]).toISOString(),
-            clientId: patient.id,
-            clientName: patient.name,
-            patientCreatedAt: patient.created_at,
+            clientId: client.id,
+            clientName: client.name,
+            patientCreatedAt: client.created_at,
           }));
 
-          // Add a task activity without patient
+          // Add a task activity without client
           if (mockActivities.length >= 3) {
             mockActivities[2] = {
               id: 'act-task',

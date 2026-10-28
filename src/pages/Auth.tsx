@@ -154,7 +154,7 @@ export default function Auth() {
   const [userRole, setUserRole] = useState<UserRole>(roleParam || "client");
   const [countryCode, setCountryCode] = useState("+27");
 
-  // Doctor fields
+  // Advisor fields
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const fullName = `${firstName} ${lastName}`.trim();
@@ -484,7 +484,7 @@ export default function Auth() {
             });
           }
         } else {
-          // Non-invited patient: minimal patient record so MyDetails has something to edit.
+          // Non-invited client: minimal client record so MyDetails has something to edit.
           // Errors here (including a 23505 unique-violation if another flow,
           // e.g. MyDetails' own self-heal, concurrently created this user's
           // record first) are intentionally not fatal to signup — MyDetails
@@ -694,7 +694,7 @@ export default function Auth() {
         return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="user-type-doctor-step">I am a...</Label>
+              <Label htmlFor="user-type-advisor-step">I am a...</Label>
               <Select
                 value={userRole}
                 onValueChange={(v) => {
@@ -707,7 +707,7 @@ export default function Auth() {
                   }
                 }}
               >
-                <SelectTrigger id="user-type-doctor-step">
+                <SelectTrigger id="user-type-advisor-step">
                   <SelectValue placeholder="Select user type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -846,7 +846,7 @@ export default function Auth() {
         return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="user-type-patient-step">I am a...</Label>
+              <Label htmlFor="user-type-client-step">I am a...</Label>
               <Select
                 value={userRole}
                 disabled={!!inviteToken}
@@ -860,7 +860,7 @@ export default function Auth() {
                   }
                 }}
               >
-                <SelectTrigger id="user-type-patient-step">
+                <SelectTrigger id="user-type-client-step">
                   <SelectValue placeholder="Select user type" />
                 </SelectTrigger>
                 <SelectContent>

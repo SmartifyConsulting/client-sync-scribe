@@ -71,9 +71,9 @@ export function AdvisorsOnProfile({ clientId, clientName }: AdvisorsOnProfilePro
   useEffect(() => {
     const replyTo = searchParams.get('reply');
     if (replyTo && doctors.length > 0) {
-      const doctor = doctors.find(d => d.doctor_id === replyTo);
-      if (doctor) {
-        openMessageDialog(doctor);
+      const advisor = doctors.find(d => d.doctor_id === replyTo);
+      if (advisor) {
+        openMessageDialog(advisor);
       }
     }
   }, [searchParams, doctors]);
@@ -85,8 +85,8 @@ export function AdvisorsOnProfile({ clientId, clientName }: AdvisorsOnProfilePro
 
   const fetchDoctors = async () => {
     try {
-      // Get the patient record to find the patient_user_id
-      const { data: patient, error: patientError } = await supabase
+      // Get the client record to find the patient_user_id
+      const { data: client, error: patientError } = await supabase
         .from('clients')
         .select('patient_user_id')
         .eq('id', clientId)
@@ -94,13 +94,13 @@ export function AdvisorsOnProfile({ clientId, clientName }: AdvisorsOnProfilePro
 
       if (patientError) throw patientError;
 
-      if (!patient?.patient_user_id) {
+      if (!client?.patient_user_id) {
         setDoctors([]);
         setLoading(false);
         return;
       }
 
-      // Get all doctors with access to this patient
+      // Get all doctors with access to this client
       const { data: accessData, error } = await supabase
         .from('broker_client_access')
         .select(`
@@ -109,12 +109,12 @@ export function AdvisorsOnProfile({ clientId, clientName }: AdvisorsOnProfilePro
           permissions,
           granted_at
         `)
-        .eq('patient_user_id', patient.patient_user_id)
+        .eq('patient_user_id', client.patient_user_id)
         .eq('is_active', true);
 
       if (error) throw error;
       
-      // Fetch doctor profiles separately
+      // Fetch advisor profiles separately
       const doctorsWithProfiles = await Promise.all((accessData || []).map(async (access) => {
         const { data: profile } = await supabase
           .from('profiles')
@@ -141,10 +141,10 @@ export function AdvisorsOnProfile({ clientId, clientName }: AdvisorsOnProfilePro
     }
   };
 
-  const openMessageDialog = (doctor: DoctorAccess) => {
-    setSelectedDoctor(doctor);
+  const openMessageDialog = (advisor: DoctorAccess) => {
+    setSelectedDoctor(advisor);
     setMessageForm({ 
-      subject: `Regarding patient: ${clientName}`, 
+      subject: `Regarding client: ${clientName}`, 
       content: "" 
     });
     setShowMessageDialog(true);
@@ -208,7 +208,7 @@ export function AdvisorsOnProfile({ clientId, clientName }: AdvisorsOnProfilePro
         <Shield className="h-12 w-12 mb-4" />
         <p className="text-lg font-medium">No Other Wealth Managers</p>
         <p className="text-sm text-center max-w-md">
-          This patient has not granted access to other doctors yet.
+          This client has not granted access to other doctors yet.
         </p>
       </div>
     );
@@ -222,18 +222,18 @@ export function AdvisorsOnProfile({ clientId, clientName }: AdvisorsOnProfilePro
       </div>
 
       <div className="divide-y rounded-xl border border-border bg-card">
-        {doctors.map((doctor) => (
-          <div key={doctor.id} className="flex items-center gap-3 p-3">
+        {doctors.map((advisor) => (
+          <div key={advisor.id} className="flex items-center gap-3 p-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
               <User className="h-4 w-4 text-primary" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-foreground">
-                {doctor.doctor_profile?.full_name || "Unknown Wealth Manager"}
-                {doctor.doctor_id === currentUserId && <span className="ml-2 text-xs text-muted-foreground">(You)</span>}
+                {advisor.doctor_profile?.full_name || "Unknown Wealth Manager"}
+                {advisor.doctor_id === currentUserId && <span className="ml-2 text-xs text-muted-foreground">(You)</span>}
               </p>
-              {(doctor as any).granted_at && (
-                <p className="text-xs text-muted-foreground">Since {new Date((doctor as any).granted_at).toLocaleDateString()}</p>
+              {(advisor as any).granted_at && (
+                <p className="text-xs text-muted-foreground">Since {new Date((advisor as any).granted_at).toLocaleDateString()}</p>
               )}
             </div>
           </div>

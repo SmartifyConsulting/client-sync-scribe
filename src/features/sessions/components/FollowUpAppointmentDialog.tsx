@@ -129,7 +129,7 @@ export function FollowUpAppointmentDialog({
           user_id: patientUserId,
           type: "appointment_booked",
           title: "Follow-up appointment booked",
-          description: `${advisorName || "Your doctor"} scheduled a follow-up on ${format(start, "MMM d, yyyy")} at ${slot.label}.`,
+          description: `${advisorName || "Your advisor"} scheduled a follow-up on ${format(start, "MMM d, yyyy")} at ${slot.label}.`,
         } as any);
       }
 
@@ -154,7 +154,7 @@ export function FollowUpAppointmentDialog({
         <DialogHeader>
           <DialogTitle>Schedule follow-up</DialogTitle>
           <DialogDescription>
-            Pick a slot for a follow-up with {clientName || "the patient"}. Greyed-out times are already booked.
+            Pick a slot for a follow-up with {clientName || "the client"}. Greyed-out times are already booked.
             Tap "Skip" if no follow-up is needed.
           </DialogDescription>
         </DialogHeader>

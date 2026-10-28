@@ -38,7 +38,7 @@ export function ClientRequestsBadge() {
   useEffect(() => {
     if (!user) return;
     const channel = supabase
-      .channel("appointment-requests-patient")
+      .channel("appointment-requests-client")
       .on("postgres_changes", {
         event: "*",
         schema: "public",
@@ -61,12 +61,12 @@ export function ClientRequestsBadge() {
 
       const reqs: PatientRequest[] = data || [];
 
-      // Enrich with doctor names
+      // Enrich with advisor names
       const doctorIds = [...new Set(reqs.map((r) => r.doctor_id))];
       let doctorMap: Record<string, string> = {};
       if (doctorIds.length) {
         const { data: profiles } = await supabase.from("profiles").select("id, full_name").in("id", doctorIds);
-        (profiles || []).forEach((p) => { doctorMap[p.id] = p.full_name || "Doctor"; });
+        (profiles || []).forEach((p) => { doctorMap[p.id] = p.full_name || "Advisor"; });
       }
 
       setRequests(reqs.map((r) => ({ ...r, doctor_name: doctorMap[r.doctor_id] })));

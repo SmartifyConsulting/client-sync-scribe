@@ -71,7 +71,7 @@ const getProviderBenefits = (t: any) => [
   {
     icon: Brain,
     title: t("landing.providerBenefits.benefit1Title", "AI-Powered Insights"),
-    description: t("landing.providerBenefits.benefit1Description", "Get comprehensive patient history summaries and medication conflict alerts before every consultation."),
+    description: t("landing.providerBenefits.benefit1Description", "Get comprehensive client history summaries and medication conflict alerts before every consultation."),
   },
   {
     icon: Share2,
@@ -96,7 +96,7 @@ const getProviderBenefits = (t: any) => [
   {
     icon: Hospital,
     title: t("landing.providerBenefits.benefit6Title", "Hospital Partners"),
-    description: t("landing.providerBenefits.benefit6Description", "Hospitals receive inbound emergencies with prefilled patient summaries, manage admissions, and coordinate with referring doctors in real time."),
+    description: t("landing.providerBenefits.benefit6Description", "Hospitals receive inbound emergencies with prefilled client summaries, manage admissions, and coordinate with referring doctors in real time."),
   },
 ];
 
@@ -316,7 +316,7 @@ export default function Landing() {
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={() => navigate("/auth?mode=login&role=doctor")}
+                    onClick={() => navigate("/auth?mode=login&role=advisor")}
                     className="btn-pill flex-1 sm:flex-initial text-sm"
                   >
                     <Stethoscope className="mr-2 h-5 w-5" />
@@ -325,7 +325,7 @@ export default function Landing() {
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={() => navigate("/auth?mode=login&role=patient")}
+                    onClick={() => navigate("/auth?mode=login&role=client")}
                     className="btn-pill flex-1 sm:flex-initial text-sm"
                   >
                     <UserCircle className="mr-2 h-5 w-5" />
@@ -547,8 +547,8 @@ export default function Landing() {
                   <SelectValue placeholder={t("landing.roleDialog.placeholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="client">{t("landing.roleDialog.options.patient")}</SelectItem>
-                  <SelectItem value="broker">{t("landing.roleDialog.options.doctor")}</SelectItem>
+                  <SelectItem value="client">{t("landing.roleDialog.options.client")}</SelectItem>
+                  <SelectItem value="broker">{t("landing.roleDialog.options.advisor")}</SelectItem>
                   <SelectItem value="insurance">{t("landing.roleDialog.options.insurance")}</SelectItem>
                 </SelectContent>
               </Select>

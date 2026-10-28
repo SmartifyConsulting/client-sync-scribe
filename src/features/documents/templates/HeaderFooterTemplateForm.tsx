@@ -116,7 +116,7 @@ export function HeaderFooterTemplateForm({
     });
   };
 
-  // Previews resolve the signed-in doctor's real details (name, numbers,
+  // Previews resolve the signed-in advisor's real details (name, numbers,
   // signature). Tokens without context render as a quiet "___".
   const replacePlaceholders = (text: string) =>
     resolveTemplatePreviewTokens(text, profile as any);

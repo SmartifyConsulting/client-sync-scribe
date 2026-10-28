@@ -33,7 +33,7 @@ export const EMOTIONAL_HEADLINE: Record<EmotionalState, string> = {
   emergency: "Help is on the way",
 };
 
-/** The second sentence of the greeting, chosen from the patient's real state. */
+/** The second sentence of the greeting, chosen from the client's real state. */
 export const GREETING_LINE: Record<EmotionalState, string> = {
   good: "",
   stable: "Things look steady. Here's what matters today.",
@@ -46,7 +46,7 @@ export const GREETING_LINE: Record<EmotionalState, string> = {
 };
 
 export interface PatientSignals {
-  /** Tasks still open for the patient. */
+  /** Tasks still open for the client. */
   openTasks: number;
   /** Tasks that are open and already past their due date. */
   overdueTasks: number;
@@ -56,12 +56,12 @@ export interface PatientSignals {
   medicationDue: number;
   /** Wellbeing / Biolog entries logged in the last week. */
   recentBiologEntries: number;
-  /** Results the patient hasn't opened yet. */
+  /** Results the client hasn't opened yet. */
   newResults: number;
 }
 
 /**
- * Derives the patient's emotional state from real signals.
+ * Derives the client's emotional state from real signals.
  *
  * Deliberately conservative: nothing routine is escalated into a warning.
  * Only genuinely overdue work reaches "attention".
@@ -109,7 +109,7 @@ export interface CarePersonSignals {
   lastSeenLabel: string;
 }
 
-/** Emotional state for a person the patient looks after. */
+/** Emotional state for a person the client looks after. */
 export function derivePersonState(s: CarePersonSignals): "well" | "needs_you" {
   return s.medicationConfirmed ? "well" : "needs_you";
 }

@@ -1,6 +1,6 @@
-/** Vula reward matrix for doctor weigh-ins. */
+/** Vula reward matrix for advisor weigh-ins. */
 export const VULA_MATRIX = {
-  /** Per kilogram of weight lost at a doctor weigh-in. */
+  /** Per kilogram of weight lost at a advisor weigh-in. */
   perKilogramLost: 50,
 } as const;
 

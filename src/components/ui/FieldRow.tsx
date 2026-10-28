@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 
 /**
- * Horizontal label + control row, matching the patient "My Personal
+ * Horizontal label + control row, matching the client "My Personal
  * Information" layout: bold fixed-width label on the left, control filling the
  * rest of the row. Wrap groups in `<div className={FIELD_GRID_CLASS}>` for the
  * two-column desktop / single-column mobile grid.

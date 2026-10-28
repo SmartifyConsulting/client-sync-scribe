@@ -57,7 +57,7 @@ export function ClientSessionRecorder({ clientId, clientName }: Props) {
   } = useAudioRecording({
     sessionId: sessionId ?? undefined,
     clientName,
-    advisorName: advisorName || "External Doctor",
+    advisorName: advisorName || "External Advisor",
   });
 
   const fetchSessions = async () => {
@@ -150,14 +150,14 @@ export function ClientSessionRecorder({ clientId, clientName }: Props) {
         </div>
       ) : (
         <ListGroupToolbar
-          storageKey="patient-sessions"
+          storageKey="client-sessions"
           items={sessions.map((s) => ({
             item: s,
             date: s.started_at,
             search: [s.external_doctor_name, s.external_doctor_specialty, s.summary].filter(Boolean).join(" "),
           }))}
           searchPlaceholder="Search sessions..."
-          emptyLabel='No sessions yet. Tap "New session" to record one with your doctor.'
+          emptyLabel='No sessions yet. Tap "New session" to record one with your advisor.'
           renderItem={(s) => (
             <button
               key={s.id}

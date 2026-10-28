@@ -1,9 +1,9 @@
 // Shared invoice HTML renderer used by:
-//   - the doctor's "Preview" action on every invoice row
+//   - the advisor's "Preview" action on every invoice row
 //   - the PAID-stamped email/document path (paidInvoice.ts wraps this)
 //   - the auto-heal preview path
 //
-// Renders either the doctor's existing Invoice template (if one was
+// Renders either the advisor's existing Invoice template (if one was
 // generated for the linked session) or a clean fallback layout.
 
 import { supabase } from "@/integrations/supabase/client";
@@ -99,7 +99,7 @@ function buildFallbackInvoiceBody(args: BuildInvoiceArgs): string {
     <div>
       <div style="font-weight:bold;font-size:16px;">${profile?.full_name || ""}</div>
       ${profile?.practice_number ? `<div>Practice No: ${profile.practice_number}</div>` : ""}
-      ${profile?.doctor_number ? `<div>Doctor No: ${profile.doctor_number}</div>` : ""}
+      ${profile?.doctor_number ? `<div>Advisor No: ${profile.doctor_number}</div>` : ""}
       ${profile?.practice_address ? `<div style="white-space:pre-line;">${profile.practice_address}</div>` : ""}
     </div>
     <div style="text-align:right;">

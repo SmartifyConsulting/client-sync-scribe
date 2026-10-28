@@ -260,7 +260,7 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
 
       mediaRecorder.start(1000);
       setLiveTranscribeError(null);
-      // Rolling live transcription feeds the AI clinician while the doctor talks.
+      // Rolling live transcription feeds the AI clinician while the advisor talks.
       startLiveChunking();
 
       setIsRecording(true);

@@ -49,7 +49,7 @@ export interface TodoDisplay {
   kind: TodoKind;
   icon: LucideIcon;
   shortLabel: string;
-  patient?: string;
+  client?: string;
   date?: string;
   time?: string;
   duration?: string;
@@ -204,7 +204,7 @@ export function getTodoDisplay(input: TodoDisplayInput): TodoDisplay {
   const kind = detectKind(input);
   const icon = ICON_MAP[kind];
   const shortLabel = i18n.t(LABEL_KEY[kind]);
-  const patient = input.patient_name?.trim() || extractPatient(input.title || "");
+  const client = input.patient_name?.trim() || extractPatient(input.title || "");
   const { date, time, duration } = extractDateTime(input);
-  return { kind, icon, shortLabel, patient, date, time, duration };
+  return { kind, icon, shortLabel, client, date, time, duration };
 }

@@ -11,8 +11,8 @@ interface CheckInReplyProps {
 }
 
 /**
- * Lets a patient reply to a doctor's check-in straight from the notification.
- * The reply is stored against the original check-in and notifies the doctor.
+ * Lets a client reply to a advisor's check-in straight from the notification.
+ * The reply is stored against the original check-in and notifies the advisor.
  */
 export function CheckInReply({ clientId }: CheckInReplyProps) {
   const [openReply, setOpenReply] = useState(false);

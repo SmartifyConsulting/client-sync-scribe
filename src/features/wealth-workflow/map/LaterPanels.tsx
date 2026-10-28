@@ -38,7 +38,7 @@ function StatusRow({ label, done, hint }: { label: string; done: boolean; hint?:
  *  manager can confirm them without re-requesting the ID at FICA stage. */
 function IdOnFile({ clientId }: { clientId?: string }) {
   const { data } = useQuery({
-    queryKey: ["patient-id-images", clientId],
+    queryKey: ["client-id-images", clientId],
     enabled: !!clientId,
     queryFn: async () => {
       const sbx = supabase as any;

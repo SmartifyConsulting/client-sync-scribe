@@ -290,7 +290,7 @@ export default function CalendarView() {
     return `${h.toString().padStart(2, "0")}:${min}`;
   };
 
-  // Fetch existing appointments for a patient on a date; returns Set of "HH:MM" blocked slots.
+  // Fetch existing appointments for a client on a date; returns Set of "HH:MM" blocked slots.
   // Each existing 30-min appointment blocks its own slot + the surrounding 15-min slot.
   const computeBlocked = (dateStr: string, existing: { start: Date }[], ignoreId?: string): Set<string> => {
     const blocked = new Set<string>();
@@ -639,7 +639,7 @@ export default function CalendarView() {
                         className="h-2.5 w-2.5 rounded-full"
                         style={{ backgroundColor: m.practice_color || '#0EA5E9' }}
                       />
-                      {m.full_name || 'Doctor'}
+                      {m.full_name || 'Advisor'}
                     </span>
                   </SelectItem>
                 ))}
@@ -681,13 +681,13 @@ export default function CalendarView() {
                         const surnameB = b.name.split(' ').slice(-1)[0] || '';
                         return surnameA.localeCompare(surnameB);
                       })
-                      .map((patient) => {
-                        const parts = patient.name.split(' ');
+                      .map((client) => {
+                        const parts = client.name.split(' ');
                         const surname = parts.length > 1 ? parts.slice(-1)[0] : parts[0];
                         const firstName = parts.length > 1 ? parts.slice(0, -1).join(' ') : '';
                         const displayName = firstName ? `${surname}, ${firstName}` : surname;
                         return (
-                          <SelectItem key={patient.id} value={patient.id}>
+                          <SelectItem key={client.id} value={client.id}>
                             {displayName}
                           </SelectItem>
                         );
@@ -947,7 +947,7 @@ export default function CalendarView() {
                                           {ownerInitials}
                                         </span>
                                       </TooltipTrigger>
-                                      <TooltipContent>{event.ownerName || 'Doctor'}</TooltipContent>
+                                      <TooltipContent>{event.ownerName || 'Advisor'}</TooltipContent>
                                     </Tooltip>
                                   </TooltipProvider>
                                 ) : null}
@@ -1079,7 +1079,7 @@ export default function CalendarView() {
                             {initialsOf(event.ownerName)}
                           </span>
                         </TooltipTrigger>
-                        <TooltipContent>{event.ownerName || 'Doctor'}</TooltipContent>
+                        <TooltipContent>{event.ownerName || 'Advisor'}</TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
                   ) : null}
@@ -1226,8 +1226,8 @@ export default function CalendarView() {
                     <DialogTitle>{getEventTypeLabel(selectedEvent.type)}</DialogTitle>
                     <DialogDescription className="space-y-1">
                       {selectedEvent.clientId && (() => {
-                        const patient = clients.find(p => p.id === selectedEvent.clientId);
-                        return patient ? (
+                        const client = clients.find(p => p.id === selectedEvent.clientId);
+                        return client ? (
                           <button
                             onClick={() => {
                               setIsEventDetailOpen(false);
@@ -1235,7 +1235,7 @@ export default function CalendarView() {
                             }}
                             className="text-primary hover:underline font-medium block"
                           >
-                            {patient.name}
+                            {client.name}
                           </button>
                         ) : null;
                       })()}

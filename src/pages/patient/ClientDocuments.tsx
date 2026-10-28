@@ -626,10 +626,10 @@ export default function ClientDocuments({ hideHeader = false }: { hideHeader?: b
         .eq("id", doc.id)
         .maybeSingle();
       if (!docData) throw new Error("Document not found");
-      const patient = (docData as any).patients;
+      const client = (docData as any).patients;
       const recipientEmail = doc.type === "prescription"
-        ? patient?.pharmacy_email || patient?.email
-        : patient?.email;
+        ? client?.pharmacy_email || client?.email
+        : client?.email;
       if (recipientEmail) {
         await supabase.functions.invoke("send-document-email", {
           body: { documentId: doc.id, recipientEmail },

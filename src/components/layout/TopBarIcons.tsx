@@ -42,7 +42,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
   const queryClient = useQueryClient();
   const location = useLocation();
   const navigate = useNavigate();
-  const isOnPatientRoute = location.pathname.startsWith("/patient/");
+  const isOnPatientRoute = location.pathname.startsWith("/client/");
   const { isAdmin } = useIsAdmin();
   const [seeded, setSeeded] = useState(false);
   const { impersonate, switching } = useImpersonate();

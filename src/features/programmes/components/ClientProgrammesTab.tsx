@@ -6,7 +6,7 @@ interface Props {
   clientName?: string;
   /** Doctors and practice assistants maintain the programme and record weigh-ins. */
   canManage: boolean;
-  /** The patient themselves viewing their own record. */
+  /** The client themselves viewing their own record. */
   isSelf: boolean;
 }
 

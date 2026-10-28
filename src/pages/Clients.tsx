@@ -101,13 +101,13 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
   const [invitingPatient, setInvitingPatient] = useState(false);
   const meAutoCreated = useRef(false);
 
-  // Autofind patient state
+  // Autofind client state
   const [patientSuggestions, setPatientSuggestions] = useState<Array<{ id: string; full_name: string | null; mobile_number: string | null }>>([]);
   const [showPatientSuggestions, setShowPatientSuggestions] = useState(false);
   const [searchingPatients, setSearchingPatients] = useState(false);
   const [selectedPatientUserId, setSelectedPatientUserId] = useState<string | null>(null);
 
-  // Debounced patient name search
+  // Debounced client name search
   useEffect(() => {
     if (newPatient.name.length < 2) {
       setPatientSuggestions([]);
@@ -134,7 +134,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
           .ilike("full_name", `%${newPatient.name}%`)
           .in("id", patientIds)
           .limit(10);
-        // Filter out the current user (doctor can't add themselves)
+        // Filter out the current user (advisor can't add themselves)
         const { data: { user: currentUser } } = await supabase.auth.getUser();
         const filtered = (profiles || []).filter(p => p.id !== currentUser?.id);
         setPatientSuggestions(filtered);
@@ -189,7 +189,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
     }
   };
 
-  // Auto-create "ME" patient record for doctors who don't have one
+  // Auto-create "ME" client record for doctors who don't have one
   useEffect(() => {
     if (loading || !user?.email || meAutoCreated.current) return;
     meAutoCreated.current = true;
@@ -270,17 +270,17 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
     return () => { cancelled = true; };
   }, [loading, user, clients, profile]);
 
-  const filteredPatients = clients.filter((patient) => {
+  const filteredPatients = clients.filter((client) => {
     // Name filter
-    if (searchQuery && !patient.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+    if (searchQuery && !client.name.toLowerCase().includes(searchQuery.toLowerCase())) {
       return false;
     }
     // Status filter
-    if (statusFilter !== "all" && patient.status !== statusFilter) {
+    if (statusFilter !== "all" && client.status !== statusFilter) {
       return false;
     }
     // Date range filter (using created_at)
-    const patientDate = new Date(patient.created_at);
+    const patientDate = new Date(client.created_at);
     if (dateFrom && patientDate < dateFrom) {
       return false;
     }
@@ -300,7 +300,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
     const sorted = [...filteredPatients].sort((a, b) => 
       getSurname(a.name).localeCompare(getSurname(b.name))
     );
-    // Move "ME" (doctor's own patient record) to top
+    // Move "ME" (advisor's own client record) to top
     if (user?.id) {
       const meIndex = sorted.findIndex(p => p.email?.toLowerCase() === user.email?.toLowerCase());
       if (meIndex > 0) {
@@ -311,16 +311,16 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
     return sorted;
   }, [filteredPatients, user?.id]);
 
-  // Extract ME patient before grouping
+  // Extract ME client before grouping
   const mePatient = sortedPatients.find(p => p.email?.toLowerCase() === user?.email?.toLowerCase()) || null;
   const patientsForGrouping = mePatient ? sortedPatients.filter(p => p.id !== mePatient.id) : sortedPatients;
 
   // Group by first letter of surname
   const groupedPatients: Record<string, typeof filteredPatients> = {};
-  patientsForGrouping.forEach((patient) => {
-    const letter = getSurname(patient.name)[0] || '#';
+  patientsForGrouping.forEach((client) => {
+    const letter = getSurname(client.name)[0] || '#';
     if (!groupedPatients[letter]) groupedPatients[letter] = [];
-    groupedPatients[letter].push(patient);
+    groupedPatients[letter].push(client);
   });
 
   const availableLetters = Object.keys(groupedPatients).sort();
@@ -489,7 +489,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                           ))}
                         </div>
                       )}
-                      {/* Invite fallback when patient not found */}
+                      {/* Invite fallback when client not found */}
                       {newPatient.name.length >= 3 && !searchingPatients && patientSuggestions.length === 0 && !selectedPatientUserId && (
                         <div className="mt-3 rounded-xl border border-dashed border-border p-4 space-y-3 bg-muted/30">
                           <p className="text-sm text-muted-foreground">Client not found on Holarc Wealth? Send an invitation</p>
@@ -877,7 +877,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {/* ME patient row - always at top */}
+                {/* ME client row - always at top */}
                 {mePatient && (
                   <>
                     <tr className="group transition-colors bg-gray-100 hover:bg-gray-200/60 dark:bg-gray-800/20 dark:hover:bg-gray-800/30">
@@ -932,7 +932,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                 {(selectedLetter ? availableLetters.filter(l => l === selectedLetter) : availableLetters.sort()).map((letter) => (
                   <React.Fragment key={letter}>
                     <tr
-                      id={`patient-group-${letter}`}
+                      id={`client-group-${letter}`}
                       className="cursor-pointer hover:bg-muted/30"
                       onClick={() => toggleLetterGroup(letter)}
                     >
@@ -947,14 +947,14 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                         </div>
                       </td>
                     </tr>
-                    {expandedLetters.has(letter) && groupedPatients[letter].map((patient) => (
+                    {expandedLetters.has(letter) && groupedPatients[letter].map((client) => (
                       <tr
-                        key={patient.id}
+                        key={client.id}
                         className="group transition-colors hover:bg-muted/30"
                       >
                         <td className="px-2 lg:px-4 py-2.5">
                           <Link
-                            to={`/clients/${patient.id}`}
+                            to={`/clients/${client.id}`}
                             className="flex items-center gap-2.5"
                           >
                             <div className={cn(
@@ -969,10 +969,10 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                                 return avatarColors[letterIdx % 3];
                               })()
                             )}>
-                              {patient.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                              {client.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                             </div>
-                            <div className={cn("h-2 w-2 rounded-full flex-shrink-0", patient.status === "active" ? "bg-sky-500" : "bg-red-400")} />
-                            {patient.is_chronic && (
+                            <div className={cn("h-2 w-2 rounded-full flex-shrink-0", client.status === "active" ? "bg-sky-500" : "bg-red-400")} />
+                            {client.is_chronic && (
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
@@ -985,45 +985,45 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                               </TooltipProvider>
                             )}
                             <span className="font-medium text-xs text-foreground group-hover:text-primary transition-colors whitespace-nowrap inline-flex items-center gap-1">
-                              {patient.name.includes(',') ? patient.name : (() => {
-                                const parts = patient.name.trim().split(/\s+/);
-                                if (parts.length <= 1) return patient.name;
+                              {client.name.includes(',') ? client.name : (() => {
+                                const parts = client.name.trim().split(/\s+/);
+                                if (parts.length <= 1) return client.name;
                                 const lastName = parts[parts.length - 1];
                                 const firstNames = parts.slice(0, -1).join(" ");
                                 return `${lastName}, ${firstNames}`;
                               })()}
-                              {user?.id && (patient as any).patient_user_id === user.id && <span className="text-muted-foreground">(me)</span>}
-                              {isSampleClient(patient) && <SampleBadge />}
+                              {user?.id && (client as any).patient_user_id === user.id && <span className="text-muted-foreground">(me)</span>}
+                              {isSampleClient(client) && <SampleBadge />}
                             </span>
                           </Link>
                         </td>
                         <td className="hidden lg:table-cell px-4 py-2.5">
                           <div className="space-y-0.5">
-                            {patient.email && (
+                            {client.email && (
                               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                                 <Mail className="h-4 w-4" />
-                                <span className="truncate max-w-[160px]">{patient.email}</span>
+                                <span className="truncate max-w-[160px]">{client.email}</span>
                               </div>
                             )}
-                            {patient.phone && (
+                            {client.phone && (
                               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                                 <Phone className="h-4 w-4" />
-                                {patient.phone}
+                                {client.phone}
                               </div>
                             )}
-                            {!patient.email && !patient.phone && (
+                            {!client.email && !client.phone && (
                               <span className="text-xs text-muted-foreground">—</span>
                             )}
                           </div>
                         </td>
                         <td className="px-3 lg:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
-                          {patient.last_visit 
-                            ? new Date(patient.last_visit).toLocaleDateString() 
+                          {client.last_visit 
+                            ? new Date(client.last_visit).toLocaleDateString() 
                             : <span className="text-muted-foreground/50">—</span>
                           }
                         </td>
                         <td className="hidden lg:table-cell px-3 lg:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
-                          {new Date(patient.created_at).toLocaleDateString()}
+                          {new Date(client.created_at).toLocaleDateString()}
                         </td>
                         <td className="px-3 lg:px-4 py-2.5 text-right">
                           <DropdownMenu>
@@ -1033,17 +1033,17 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleStartSession(patient.id)}>
+                              <DropdownMenuItem onClick={() => handleStartSession(client.id)}>
                                 <Clock className="mr-2 h-4 w-4" />
                                 {t("clients.startSession")}
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => navigate(`/clients/${patient.id}`)}>
+                              <DropdownMenuItem onClick={() => navigate(`/clients/${client.id}`)}>
                                 <Edit3 className="mr-2 h-4 w-4" />
                                 {t("clients.viewProfile")}
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem 
-                                onClick={() => handleDeletePatient(patient.id, patient.name)}
+                                onClick={() => handleDeletePatient(client.id, client.name)}
                                 className="text-destructive focus:text-destructive"
                               >
                                 <Trash2 className="mr-2 h-4 w-4" />

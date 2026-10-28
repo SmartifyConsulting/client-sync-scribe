@@ -1,5 +1,5 @@
 /**
- * My Holarc Care Team — the parts of a patient's profile a friend or family
+ * My Holarc Care Team — the parts of a client's profile a friend or family
  * member can be given access to. Defined once here so the Personal Information
  * section, the My Holarchy sub-tab and any future access checks all agree on
  * the ids, labels and ordering. Labels are Title Case.

@@ -1,7 +1,7 @@
 // Preview-time token resolution for TEMPLATES (not saved documents).
 //
-// Templates are authored before a patient is chosen, so previews should still
-// show the signed-in doctor's real details ([DoctorName], [PracticeNumber],
+// Templates are authored before a client is chosen, so previews should still
+// show the signed-in advisor's real details ([DoctorName], [PracticeNumber],
 // [DoctorSignature], …) instead of raw brackets. Client-scoped tokens have no
 // context yet and fall back to the shared quiet "___" placeholder.
 

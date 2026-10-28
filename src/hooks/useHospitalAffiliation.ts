@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
 /**
- * True when the signed-in doctor is attached to at least one hospital that
+ * True when the signed-in advisor is attached to at least one hospital that
  * still exists — used to decide whether "My Shifts" belongs in their sidebar.
  * Rows pointing at deleted hospitals (stale demo data) are ignored.
  */

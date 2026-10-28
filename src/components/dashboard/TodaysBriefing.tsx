@@ -191,7 +191,7 @@ export function TodaysBriefing() {
         return;
       }
 
-      // Fetch patient details and last session for each appointment
+      // Fetch client details and last session for each appointment
       const enrichedAppointments = await Promise.all(
         appointmentsData.map(async (apt) => {
           let clientName = apt.title || "Unknown Client";
@@ -203,17 +203,17 @@ export function TodaysBriefing() {
           let unreadRoundTableNotes: RoundTableNote[] = [];
 
           if (apt.patient_id) {
-            // Get patient info
-            const { data: patient } = await supabase
+            // Get client info
+            const { data: client } = await supabase
               .from('clients')
               .select('name, allergies, patient_user_id')
               .eq('id', apt.patient_id)
               .maybeSingle();
 
-            if (patient) {
-              clientName = patient.name;
-              allergies = patient.allergies;
-              patientUserId = patient.patient_user_id;
+            if (client) {
+              clientName = client.name;
+              allergies = client.allergies;
+              patientUserId = client.patient_user_id;
             }
 
             // Get last session summary
@@ -243,7 +243,7 @@ export function TodaysBriefing() {
               lastPrescription = `${prescription.medication} ${prescription.dosage} ${prescription.frequency}`;
             }
 
-            // Get linked doctors for this patient
+            // Get linked doctors for this client
             if (patientUserId) {
               const { data: accessRecords } = await supabase
                 .from('broker_client_access')
@@ -269,7 +269,7 @@ export function TodaysBriefing() {
               }
             }
 
-            // Get unread round table notes for this patient
+            // Get unread round table notes for this client
             const { data: allNotes } = await supabase
               .from('round_table_notes')
               .select('id, doctor_id, doctor_name, content')
@@ -337,13 +337,13 @@ export function TodaysBriefing() {
       let text = `At ${apt.formattedTime}, you have ${apt.clientName}. `;
       
       if (apt.allergies) {
-        text += `Please note: this patient has allergies to ${apt.allergies}. `;
+        text += `Please note: this client has allergies to ${apt.allergies}. `;
       }
       
       if (apt.lastSessionSummary) {
         text += `From your last session: ${apt.lastSessionSummary} `;
       } else {
-        text += `This appears to be a new patient or their first recorded session. `;
+        text += `This appears to be a new client or their first recorded session. `;
       }
 
       if (apt.lastPrescription) {
@@ -354,11 +354,11 @@ export function TodaysBriefing() {
         const doctorList = apt.linkedDoctors.map(d => 
           d.specialty ? `${d.name} (${d.specialty})` : d.name
         ).join(', ');
-        text += `Other doctors on this patient's profile include: ${doctorList}. `;
+        text += `Other doctors on this client's profile include: ${doctorList}. `;
       }
 
       if (apt.unreadRoundTableNotes.length > 0) {
-        text += `There ${apt.unreadRoundTableNotes.length === 1 ? 'is' : 'are'} ${apt.unreadRoundTableNotes.length} unread Round Table note${apt.unreadRoundTableNotes.length > 1 ? 's' : ''} for this patient. `;
+        text += `There ${apt.unreadRoundTableNotes.length === 1 ? 'is' : 'are'} ${apt.unreadRoundTableNotes.length} unread Round Table note${apt.unreadRoundTableNotes.length > 1 ? 's' : ''} for this client. `;
         apt.unreadRoundTableNotes.forEach((note) => {
           text += `${note.advisorName} wrote: ${note.content} `;
         });
@@ -556,7 +556,7 @@ export function TodaysBriefing() {
   const doneCount = appointments.filter(a => new Date(a.startTime) < new Date()).length;
 
   return (
-    <div data-tour="doctor-briefing" className="rounded-xl border border-primary bg-card shadow-sm">
+    <div data-tour="advisor-briefing" className="rounded-xl border border-primary bg-card shadow-sm">
       <div className="rounded-t-xl bg-primary p-2.5 md:p-3 flex items-center justify-between gap-1 md:gap-2">
         <div className="flex items-center gap-1 md:gap-3">
           <Button

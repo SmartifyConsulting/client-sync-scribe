@@ -72,9 +72,9 @@ const VITALS = [
 ];
 
 const CARE_ITEMS = [
-  { icon: Pill, label: "Medication", value: "1 due today", to: "/patient/rewards" },
+  { icon: Pill, label: "Medication", value: "1 due today", to: "/client/rewards" },
   { icon: CalendarDays, label: "Appointments", value: "Tomorrow 10:30", to: "/client/calendar" },
-  { icon: FlaskConical, label: "Results", value: "1 new", to: "/patient/lab-results" },
+  { icon: FlaskConical, label: "Results", value: "1 new", to: "/client/lab-results" },
 ];
 
 const CARE_CIRCLE = [
@@ -85,7 +85,7 @@ const CARE_CIRCLE = [
 
 const HAPPENING = [
   { icon: CalendarDays, title: "Tomorrow 10:30", detail: "GP appointment", to: "/client/calendar" },
-  { icon: FlaskConical, title: "Blood results", detail: "Expected Friday", to: "/patient/lab-results" },
+  { icon: FlaskConical, title: "Blood results", detail: "Expected Friday", to: "/client/lab-results" },
   { icon: Activity, title: "Physio consultation", detail: "Monday 3:00 PM", to: "/client/calendar" },
 ];
 
@@ -103,7 +103,7 @@ export default function MyPersonalDashboard() {
   const unlocked = true;
 
   const { data: patientIds = [] } = useQuery({
-    queryKey: ["dashboard-patient-ids", user?.id],
+    queryKey: ["dashboard-client-ids", user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
       const { data } = await supabase.from("clients").select("id").eq("patient_user_id", user!.id);

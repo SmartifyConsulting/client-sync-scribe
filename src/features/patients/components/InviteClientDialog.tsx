@@ -36,7 +36,7 @@ export function InviteClientDialog({ clientId, clientName }: InviteClientDialogP
     if (!email) {
       toast({
         title: t("forms.validation.required"),
-        description: t("doctor.referrals.errors.emailRequiredDesc"),
+        description: t("advisor.referrals.errors.emailRequiredDesc"),
         variant: "destructive",
       });
       return;
@@ -59,7 +59,7 @@ export function InviteClientDialog({ clientId, clientName }: InviteClientDialogP
 
       toast({
         title: t("dialogs.success"),
-        description: t("doctor.referrals.messages.inviteSentDesc") + " " + email,
+        description: t("advisor.referrals.messages.inviteSentDesc") + " " + email,
       });
 
       setEmail("");
@@ -81,14 +81,14 @@ export function InviteClientDialog({ clientId, clientName }: InviteClientDialogP
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Mail className="mr-2 h-4 w-4" />
-          {t("doctor.referrals.actions.inviteButton")}
+          {t("advisor.referrals.actions.inviteButton")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{t("doctor.referrals.form.title")}</DialogTitle>
+          <DialogTitle>{t("advisor.referrals.form.title")}</DialogTitle>
           <DialogDescription>
-            {t("doctor.referrals.form.sendInvite")}
+            {t("advisor.referrals.form.sendInvite")}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -112,7 +112,7 @@ export function InviteClientDialog({ clientId, clientName }: InviteClientDialogP
               if (!email) {
                 toast({
                   title: t("forms.validation.required"),
-                  description: t("doctor.referrals.errors.emailRequiredDesc"),
+                  description: t("advisor.referrals.errors.emailRequiredDesc"),
                   variant: "destructive",
                 });
                 return;
@@ -126,7 +126,7 @@ export function InviteClientDialog({ clientId, clientName }: InviteClientDialogP
             ) : (
               <>
                 <Send className="mr-2 h-4 w-4" />
-                {t("doctor.referrals.actions.inviteButton")}
+                {t("advisor.referrals.actions.inviteButton")}
               </>
             )}
           </Button>
@@ -136,7 +136,7 @@ export function InviteClientDialog({ clientId, clientName }: InviteClientDialogP
         open={showTransparency}
         onOpenChange={setShowTransparency}
         mode="doctor_invites_patient"
-        confirmLabel={t("doctor.referrals.messages.inviteSentTitle")}
+        confirmLabel={t("advisor.referrals.messages.inviteSentTitle")}
         onConfirm={async () => {
           setShowTransparency(false);
           await handleSendInvitation();

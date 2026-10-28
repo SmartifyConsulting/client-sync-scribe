@@ -299,7 +299,7 @@ export function SettingsContent() {
                   <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/20">
                     <div className="flex-1 mr-3">
                       <p className="text-sm font-medium text-foreground">Auto-email prescription to pharmacy</p>
-                      <p className="text-sm text-muted-foreground mt-0.5">When your doctor saves a prescription, it will be sent to your primary pharmacy.</p>
+                      <p className="text-sm text-muted-foreground mt-0.5">When your advisor saves a prescription, it will be sent to your primary pharmacy.</p>
                     </div>
                     <Switch checked={(profile as any)?.auto_email_prescription_to_pharmacy || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_prescription_to_pharmacy: c } as any); toast({ title: "Preference updated" }); }} />
                   </div>

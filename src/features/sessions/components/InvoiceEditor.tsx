@@ -71,10 +71,10 @@ export function InvoiceEditor({ clientId, clientName, sessionId, onClose, onSave
 
   const totalAmount = lineItems.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
 
-  // Fetch patient details and service prices
+  // Fetch client details and service prices
   useEffect(() => {
     const fetchData = async () => {
-      // Fetch patient details
+      // Fetch client details
       const { data: patientData, error: patientError } = await supabase
         .from('clients')
         .select('name, medical_aid, medical_aid_number')

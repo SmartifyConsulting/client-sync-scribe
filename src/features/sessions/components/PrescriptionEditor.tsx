@@ -73,7 +73,7 @@ export function PrescriptionEditor({
   const { toast } = useToast();
   const { profile } = useProfile();
   const { formattedContent: savedTemplate, headerFooter } = useTemplateWithHeaderFooter("Prescription");
-  const advisorName = propDoctorName || profile?.full_name || "Doctor";
+  const advisorName = propDoctorName || profile?.full_name || "Advisor";
   
   const [medications, setMedications] = useState<MedicationItem[]>([
     { id: crypto.randomUUID(), medication: "", dosage: "", frequency: "", duration: "", instructions: "", repeats: "0" }
@@ -126,7 +126,7 @@ export function PrescriptionEditor({
 
 Date: ${new Date().toLocaleDateString()}
 Client: ${clientName}
-Doctor: ${advisorName}
+Advisor: ${advisorName}
 
 ─────────────────────────────────────
 
@@ -230,7 +230,7 @@ Signature: ___________________
         description: "The prescription has been saved to the session",
       });
 
-      // Auto-email to pharmacy if patient allows
+      // Auto-email to pharmacy if client allows
       try {
         const { data: patientData } = await supabase
           .from('clients')
@@ -299,7 +299,7 @@ Signature: ___________________
               status: 'active',
             });
 
-            // Create a todo task for the patient
+            // Create a todo task for the client
             await supabase.from('todos').insert({
               user_id: user!.id,
               patient_id: clientId,
@@ -311,12 +311,12 @@ Signature: ___________________
             });
           }
 
-          // Notify patient about new medication tracking
+          // Notify client about new medication tracking
           if (patientCheck.patient_user_id) {
             await supabase.from('notifications').insert({
               user_id: patientCheck.patient_user_id,
               title: 'New Chronic Medication Assigned',
-              description: `Your doctor has prescribed chronic medication. Track your daily adherence from your dashboard.`,
+              description: `Your advisor has prescribed chronic medication. Track your daily adherence from your dashboard.`,
               type: 'medication_assigned',
               reference_id: clientId,
             });
@@ -324,7 +324,7 @@ Signature: ___________________
 
           toast({
             title: "Adherence Tracking Enabled",
-            description: "Daily medication tasks auto-assigned to patient",
+            description: "Daily medication tasks auto-assigned to client",
           });
         }
       } catch (adherenceErr) {
@@ -567,7 +567,7 @@ Signature: ___________________
                   if (!patientData?.pharmacy_email) {
                     toast({
                       title: "No Pharmacy Email",
-                      description: "This patient has no pharmacy email configured. Please add one in the patient details.",
+                      description: "This client has no pharmacy email configured. Please add one in the client details.",
                       variant: "destructive",
                     });
                     return;

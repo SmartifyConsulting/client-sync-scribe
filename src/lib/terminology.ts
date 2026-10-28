@@ -1,7 +1,7 @@
 /**
  * Holarc Wealth wealth-management terminology. One name per concept — use these
  * everywhere user-facing copy refers to a person, object or stage.
- * Database/table/route identifiers are unchanged (patient, doctor, session…).
+ * Database/table/route identifiers are unchanged (client, advisor, session…).
  */
 export const BRAND = "Holarc Wealth";
 
@@ -28,11 +28,11 @@ export const CLIENT_TERMS = {
  * Matched as path prefixes in navigation and the route guard.
  */
 export const WEALTH_HIDDEN_MODULES = [
-  "/doctor/holarchelp", "/patient/holarchelp", "/holarchelp", "/provider/hospital", "/provider/ambulance",
-  "/admissions", "/patient/admissions", "/patient/ward-admission", "/my-shift", "/nurse-profile",
-  "/prescriptions", "/patient/prescriptions", "/patient/lab-results", "/lab-results",
-  "/patient/rewards", "/doctor/rewards", "/vula", "/admin/gamification", "/ask-maeve",
-  "/doctor/round-tables", "/patient/round-table", "/patient/health-album",
+  "/advisor/holarchelp", "/client/holarchelp", "/holarchelp", "/provider/hospital", "/provider/ambulance",
+  "/admissions", "/client/admissions", "/client/ward-admission", "/my-shift", "/nurse-profile",
+  "/prescriptions", "/client/prescriptions", "/client/lab-results", "/lab-results",
+  "/client/rewards", "/advisor/rewards", "/vula", "/admin/gamification", "/ask-maeve",
+  "/advisor/round-tables", "/client/round-table", "/client/health-album",
   "/provider", "/admin/users", "/admin/holarchelp-providers", "/admin/holarchelp-accountability",
   "/provider-signup", "/admin/provider-approval",
 ];

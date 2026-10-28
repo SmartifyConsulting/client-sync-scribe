@@ -11,7 +11,7 @@ const db = supabase as any;
 const fmt = (d: string) => new Date(d).toLocaleString("en-ZA", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
 /** Firm-wide audit trail across every client — same records as the per-client
- *  TransactionLogs panel, just not scoped to one patient. */
+ *  TransactionLogs panel, just not scoped to one client. */
 export default function ActivityLog() {
   const { user } = useAuth();
   const [q, setQ] = useState("");

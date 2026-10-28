@@ -520,7 +520,7 @@ export default function TodoList() {
 
   // Group by patient
   const groupedByPatient = filteredTodos.reduce<Record<string, TodoItem[]>>((groups, todo) => {
-    const key = todo.patient_name || (getTodoDisplay(todo as any).patient) || "Unassigned";
+    const key = todo.patient_name || (getTodoDisplay(todo as any).client) || "Unassigned";
     if (!groups[key]) groups[key] = [];
     groups[key].push(todo);
     return groups;
@@ -564,7 +564,7 @@ export default function TodoList() {
   // Sub-group a bucket's tasks by patient (collapsed by default)
   const patientSubGroups = (items: TodoItem[]) => {
     const map = items.reduce<Record<string, TodoItem[]>>((acc, todo) => {
-      const key = todo.patient_name || getTodoDisplay(todo as any).patient || "Unassigned";
+      const key = todo.patient_name || getTodoDisplay(todo as any).client || "Unassigned";
       (acc[key] ||= []).push(todo);
       return acc;
     }, {});

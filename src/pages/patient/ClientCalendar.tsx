@@ -81,7 +81,7 @@ export default function ClientCalendar() {
 
       const apts = data || [];
 
-      // Fetch doctor names for all unique user_ids
+      // Fetch advisor names for all unique user_ids
       const doctorIds = [...new Set(apts.map((a) => a.user_id))];
       const doctorMap: Record<string, string> = {};
       if (doctorIds.length > 0) {

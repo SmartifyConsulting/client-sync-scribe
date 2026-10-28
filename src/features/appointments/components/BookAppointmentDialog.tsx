@@ -145,7 +145,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
       const serviceList = (data || []) as ServicePrice[];
       setServices(serviceList);
 
-      // Check if this is the patient's first appointment with this doctor
+      // Check if this is the client's first appointment with this advisor
       if (user && clientId) {
         const { count } = await supabase
           .from("appointment_requests")
@@ -248,12 +248,12 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
 
       if (error) throw error;
 
-      // Notify the doctor
+      // Notify the advisor
       await supabase.from("notifications").insert({
         user_id: selectedDoctor.doctor_id,
         type: "appointment_request",
         title: "New Appointment Request",
-        description: `A patient has requested an appointment on ${format(startTime, "MMM d, yyyy")} at ${selectedSlot.label}${selectedService ? ` for ${selectedService.service_name}` : ""}.`,
+        description: `A client has requested an appointment on ${format(startTime, "MMM d, yyyy")} at ${selectedSlot.label}${selectedService ? ` for ${selectedService.service_name}` : ""}.`,
       });
 
       toast({ title: "Request Sent", description: "Your appointment request has been sent to the wealth manager." });
@@ -284,7 +284,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
           </DialogDescription>
         </DialogHeader>
 
-        {/* Step 1: Select Doctor */}
+        {/* Step 1: Select Advisor */}
         {step === 1 && (
           <div className="space-y-2 pt-2">
             {loading ? (

@@ -544,7 +544,7 @@ export function CompactTodoList() {
                 const map = new Map<string, TodoItem[]>();
                 for (const todo of items) {
                   const display = getTodoDisplay(todo as any);
-                  const name = display.patient || "General Tasks";
+                  const name = display.client || "General Tasks";
                   if (!map.has(name)) map.set(name, []);
                   map.get(name)?.push(todo);
                 }

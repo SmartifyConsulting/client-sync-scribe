@@ -45,7 +45,7 @@ import { parseStorageUrl } from "../lib/signedMediaUrl";
 
 import { cn } from "@/lib/utils";
 
-type GroupBy = "type" | "date" | "patient";
+type GroupBy = "type" | "date" | "client";
 
 interface DocumentsBrowserProps {
   /** Restrict to a single patient's documents. */
@@ -61,7 +61,7 @@ interface DocumentsBrowserProps {
 }
 
 const groupLabel = (doc: Document, groupBy: GroupBy) => {
-  if (groupBy === "patient") return doc.patient_name || "Unassigned";
+  if (groupBy === "client") return doc.patient_name || "Unassigned";
   if (groupBy === "date") return format(new Date(doc.created_at), "MMMM yyyy");
   return doc.template_name || "Uploaded / Other";
 };
@@ -275,7 +275,7 @@ export function DocumentsBrowser({
           <SelectContent>
             <SelectItem value="type">Group by Type</SelectItem>
             <SelectItem value="date">Group by Date</SelectItem>
-            <SelectItem value="patient">Group by Client</SelectItem>
+            <SelectItem value="client">Group by Client</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -338,7 +338,7 @@ export function DocumentsBrowser({
                             new Date((doc as any).record_date || doc.created_at),
                             "MMM d, yyyy",
                           )}
-                          {doc.patient_name && groupBy !== "patient" ? ` · ${doc.patient_name}` : ""}
+                          {doc.patient_name && groupBy !== "client" ? ` · ${doc.patient_name}` : ""}
                         </p>
                       </div>
                       {hasAnalysis && (

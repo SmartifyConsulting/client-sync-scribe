@@ -48,13 +48,13 @@ export function useClientWealth(explicitPatientId?: string) {
     queryKey: ["client-wealth", explicitPatientId ?? user?.id],
     enabled: !!(explicitPatientId || user?.id),
     queryFn: async (): Promise<ClientWealth> => {
-      let patient: any = null;
+      let client: any = null;
       if (explicitPatientId) {
-        patient = (await sb.from("clients").select("id,name,next_of_kin_members,next_of_kin_name,next_of_kin_relationship").eq("id", explicitPatientId).maybeSingle()).data;
+        client = (await sb.from("clients").select("id,name,next_of_kin_members,next_of_kin_name,next_of_kin_relationship").eq("id", explicitPatientId).maybeSingle()).data;
       } else {
-        patient = (await sb.from("clients").select("id,name,next_of_kin_members,next_of_kin_name,next_of_kin_relationship").eq("patient_user_id", user!.id).order("created_at").limit(1).maybeSingle()).data;
+        client = (await sb.from("clients").select("id,name,next_of_kin_members,next_of_kin_name,next_of_kin_relationship").eq("patient_user_id", user!.id).order("created_at").limit(1).maybeSingle()).data;
       }
-      const pid = patient?.id ?? null;
+      const pid = client?.id ?? null;
       if (!pid) {
         return emptyWealth();
       }
@@ -82,18 +82,18 @@ export function useClientWealth(explicitPatientId?: string) {
       const investmentsAll = holdings.reduce((s, h) => s + num(h.value), 0);
       const assets = items.filter((i) => !LIAB.includes(i.kind)).reduce((s, i) => s + num(i.value), 0) + investmentsAll;
 
-      const nok: any[] = Array.isArray(patient.next_of_kin_members) ? patient.next_of_kin_members : [];
+      const nok: any[] = Array.isArray(client.next_of_kin_members) ? client.next_of_kin_members : [];
       const beneficiaries = nok.length
         ? nok.map((n: any) => ({ name: n.name || n.full_name || "Unnamed", relationship: n.relationship, share: n.share ?? n.percentage }))
-        : patient.next_of_kin_name
-          ? [{ name: patient.next_of_kin_name, relationship: patient.next_of_kin_relationship }]
+        : client.next_of_kin_name
+          ? [{ name: client.next_of_kin_name, relationship: client.next_of_kin_relationship }]
           : [];
 
       const stageLabel = wf.data ? (defs.data ?? []).find((d: any) => d.stage === wf.data.current_stage)?.label ?? wf.data.current_stage : null;
 
       return {
         clientId: pid,
-        clientName: patient.name ?? "",
+        clientName: client.name ?? "",
         profile,
         policies,
         holdings,

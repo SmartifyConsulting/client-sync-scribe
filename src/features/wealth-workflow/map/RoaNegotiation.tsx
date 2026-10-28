@@ -19,7 +19,7 @@ export function RoaNegotiation({ viewer, clientId, workflowId, recs, current, cl
   const qc = useQueryClient();
   const [busy, setBusy] = useState(false);
   const { data: pt } = useQuery({
-    queryKey: ["patient-parties", clientId], enabled: !!clientId,
+    queryKey: ["client-parties", clientId], enabled: !!clientId,
     queryFn: async () => (await (supabase as any).from("clients").select("user_id").eq("id", clientId).maybeSingle()).data,
   });
   const advisorId: string | null = pt?.user_id ?? null;

@@ -20,7 +20,7 @@ interface AiUploadZoneProps {
 
 /**
  * The prominent "upload a file and let AI describe it" drop zone.
- * Shared by the Documents screen and every patient Documents tab so both
+ * Shared by the Documents screen and every client Documents tab so both
  * behave identically: category prompt, live stage feedback, AI analysis of
  * images and transcription of handwritten PDFs.
  */

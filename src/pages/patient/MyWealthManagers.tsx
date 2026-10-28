@@ -110,7 +110,7 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
   };
 
   const { data: doctorsData, isLoading } = useQuery({
-    queryKey: ["patient-doctors-with-hidden"],
+    queryKey: ["client-advisors-with-hidden"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return { active: [] as DoctorAccess[], hidden: [] as DoctorAccess[], hiddenIds: new Set<string>() };
@@ -191,7 +191,7 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
       return;
     }
     toast({ title: "Wealth Manager hidden", description: "They won't appear in your active list. Historic records remain." });
-    queryClient.invalidateQueries({ queryKey: ["patient-doctors-with-hidden"] });
+    queryClient.invalidateQueries({ queryKey: ["client-advisors-with-hidden"] });
   };
 
   const handleRestore = async (access: DoctorAccess) => {
@@ -211,7 +211,7 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
         .eq("id", access.id);
     }
     toast({ title: "Wealth Manager restored", description: "They're back in your active list." });
-    queryClient.invalidateQueries({ queryKey: ["patient-doctors-with-hidden"] });
+    queryClient.invalidateQueries({ queryKey: ["client-advisors-with-hidden"] });
   };
 
   const handleSearch = useCallback(async () => {
@@ -277,7 +277,7 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
 
       // Intentionally do NOT notify the doctor when a patient revokes access.
       toast({ title: "Wealth Manager deactivated", description: "They no longer have live access. Historic records are preserved." });
-      queryClient.invalidateQueries({ queryKey: ["patient-doctors-with-hidden"] });
+      queryClient.invalidateQueries({ queryKey: ["client-advisors-with-hidden"] });
       setUninviteTarget(null);
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });

@@ -4,7 +4,7 @@ import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Props {
-  /** Values pulled from the patient's relationship profile when it exists. */
+  /** Values pulled from the client's relationship profile when it exists. */
   values?: string[];
   communication?: string[];
   className?: string;
