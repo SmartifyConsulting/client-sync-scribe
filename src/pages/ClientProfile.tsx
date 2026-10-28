@@ -2,7 +2,6 @@ import { TransactionLogs } from "@/features/wealth-workflow/TransactionLogs";
 import { ExistingCoverCard } from "@/features/wealth-workflow/client/ExistingCoverCard";
 import { SignedImage } from "@/features/documents/components/SignedImage";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
-import { ClientProgrammesTab } from "@/features/programmes/components/ClientProgrammesTab";
 import { WorkflowMap } from "@/features/wealth-workflow/map/WorkflowMap";
 import { LiveWorkspace } from "@/features/wealth-workflow/workspace/LiveWorkspace";
 
@@ -479,19 +478,6 @@ export default function ClientProfile() {
             <AdvisorsOnProfile clientId={client.id} clientName={client.name} />
           </div>
         </TabsContent>
-
-        {/* Programmes Tab — eating plan, exercise programme and weigh-ins */}
-        <TabsContent value="programmes">
-          <div className="rounded-2xl bg-card p-4 shadow-card">
-            <ClientProgrammesTab
-              clientId={client.id}
-              clientName={client.name}
-              canManage
-              isSelf={(client as any).patient_user_id === currentUserId}
-            />
-          </div>
-        </TabsContent>
-
 
         <TabsContent value="documents" className="space-y-4">
           {/* Document intake address — own record uses your alias, otherwise the client's */}

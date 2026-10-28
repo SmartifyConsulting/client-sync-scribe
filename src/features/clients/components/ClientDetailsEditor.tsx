@@ -1,6 +1,5 @@
 import { HolarcHealthRecords } from "./HolarcHealthRecords";
 import { dobFromSaId } from "@/lib/saId";
-import { ClientProgrammesTab } from "@/features/programmes/components/ClientProgrammesTab";
 import { LifeEventsPanel } from "@/features/wealth-workflow/client/LifeEventsPanel";
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
@@ -343,7 +342,7 @@ const formatSurgeryDate = (date: string, precision?: string) => {
 
 const SECTION_TABS: Record<string, string[]> = {
   health: ["personal", "medical", "healthrecords", "history", "documents", "logs"],
-  admin: ["calendar", "tasks", "programmes"],
+  admin: ["calendar", "tasks"],
   workspace: ["personal", "medical", "claims"],
   personal: ["personal"],
   financial: ["medical"],
@@ -1577,11 +1576,6 @@ export function ClientDetailsEditor({
               {t("nav.myTasks")}
             </TabsTrigger>
           )}
-          {show("programmes") && (
-            <TabsTrigger value="programmes" className={triggerClass}>
-              Programmes
-            </TabsTrigger>
-          )}
           {show("logs") && (
             <TabsTrigger value="logs" className={triggerClass}>
               Activity Log
@@ -1870,13 +1864,6 @@ export function ClientDetailsEditor({
                 </Suspense>
               </TabsContent>
             )}
-
-            {isSelfService && (
-              <TabsContent value="programmes" className="mt-4">
-                <ClientProgrammesTab clientId={client.id} canManage={false} isSelf />
-              </TabsContent>
-            )}
-
 
             {isSelfService && (
               <TabsContent value="documents" className="mt-4">
