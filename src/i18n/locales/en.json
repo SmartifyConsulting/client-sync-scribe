@@ -300,7 +300,7 @@
     "importPatients": "Import",
     "noPatients": "No clients yet",
     "noPatientsFound": "No clients found matching your search",
-    "noPatientsHint": "No clients yet. Add your first client!",
+    "noPatientsHint": "Your client list is empty. Add your first client to get started.",
     "allStatuses": "All statuses",
     "active": "Active",
     "inactive": "Inactive",
