@@ -291,7 +291,7 @@
     "unreadNote": "unread note",
     "unreadNotes": "unread notes"
   },
-  "patients": {
+  "clients": {
     "title": "Clients",
     "subtitle": "Manage your client profiles and history",
     "searchPlaceholder": "Search clients...",

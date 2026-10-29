@@ -161,7 +161,7 @@
     "unreadNote": "nieprzeczytana notatka",
     "unreadNotes": "nieprzeczytane notatki"
   },
-  "patients": {
+  "clients": {
     "title": "Pacjenci",
     "subtitle": "Zarządzaj kartotekami pacjentów",
     "searchPlaceholder": "Szukaj pacjentów...",

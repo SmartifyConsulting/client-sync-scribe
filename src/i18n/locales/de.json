@@ -161,7 +161,7 @@
     "unreadNote": "ungelesene Notiz",
     "unreadNotes": "ungelesene Notizen"
   },
-  "patients": {
+  "clients": {
     "title": "Patienten",
     "subtitle": "Verwalten Sie Ihre Patientenakten",
     "searchPlaceholder": "Patienten suchen...",

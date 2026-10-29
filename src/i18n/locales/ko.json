@@ -161,7 +161,7 @@
     "unreadNote": "읽지 않은 쪽지",
     "unreadNotes": "읽지 않은 쪽지"
   },
-  "patients": {
+  "clients": {
     "title": "환자",
     "subtitle": "환자 기록 관리",
     "searchPlaceholder": "환자 검색...",

@@ -161,7 +161,7 @@
     "unreadNote": "未読のメモ",
     "unreadNotes": "未読のメモ"
   },
-  "patients": {
+  "clients": {
     "title": "患者一覧",
     "subtitle": "患者記録を管理する",
     "searchPlaceholder": "患者を検索...",

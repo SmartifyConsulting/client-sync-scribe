@@ -161,7 +161,7 @@
     "unreadNote": "okunmamış not",
     "unreadNotes": "okunmamış notlar"
   },
-  "patients": {
+  "clients": {
     "title": "Hastalar",
     "subtitle": "Hasta kayıtlarınızı yönetin",
     "searchPlaceholder": "Hasta arayın...",

@@ -161,7 +161,7 @@
     "unreadNote": "未读通知",
     "unreadNotes": "未读通知"
   },
-  "patients": {
+  "clients": {
     "title": "患者",
     "subtitle": "管理您的患者记录",
     "searchPlaceholder": "搜索患者...",

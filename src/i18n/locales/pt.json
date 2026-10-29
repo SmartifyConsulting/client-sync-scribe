@@ -161,7 +161,7 @@
     "unreadNote": "nota não lida",
     "unreadNotes": "notas não lidas"
   },
-  "patients": {
+  "clients": {
     "title": "Pacientes",
     "subtitle": "Gerencie seus registros de pacientes",
     "searchPlaceholder": "Pesquisar pacientes...",

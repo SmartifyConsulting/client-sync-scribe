@@ -161,7 +161,7 @@
     "unreadNote": "ملاحظة غير مقروءة",
     "unreadNotes": "ملاحظات غير مقروءة"
   },
-  "patients": {
+  "clients": {
     "title": "المرضى",
     "subtitle": "إدارة سجلات المرضى",
     "searchPlaceholder": "البحث عن المرضى...",

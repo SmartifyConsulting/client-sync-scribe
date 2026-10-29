@@ -161,7 +161,7 @@
     "unreadNote": "ongelese nota",
     "unreadNotes": "ongelese notas"
   },
-  "patients": {
+  "clients": {
     "title": "Pasiënte",
     "subtitle": "Bestuur u pasiëntrekords",
     "searchPlaceholder": "Soek pasiënte...",
