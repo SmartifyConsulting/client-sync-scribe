@@ -16,6 +16,7 @@ import {
 
 interface Props {
   id?: string;
+  compact?: boolean;
   /** Full E.164 string, e.g. "+27821234567" */
   value: string;
   onChange: (next: string) => void;
@@ -29,7 +30,7 @@ interface Props {
  * local number still persists (parent receives "" until a local exists, but
  * the chosen flag/code stays visible).
  */
-export function PhoneNumberInput({ id, value, onChange, disabled, placeholder = "82 123 4567" }: Props) {
+export function PhoneNumberInput({ id, compact = false, value, onChange, disabled, placeholder = "82 123 4567" }: Props) {
   const parsed = splitE164(value);
   const [dial, setDial] = useState<string>(parsed.dial || DEFAULT_DIAL);
 
@@ -55,15 +56,15 @@ export function PhoneNumberInput({ id, value, onChange, disabled, placeholder = 
   return (
     <div className="flex gap-2">
       <Select value={dial} onValueChange={onDialChange} disabled={disabled}>
-        <SelectTrigger className="w-[13rem] h-12 text-lg shrink-0 font-medium">
+        <SelectTrigger className={compact ? "w-[8rem] h-10 text-xs shrink-0 font-medium" : "w-[13rem] h-12 text-lg shrink-0 font-medium"}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent className="max-h-72">
           {COUNTRY_DIAL_CODES.map((c) => (
-            <SelectItem key={`${c.code}-${c.dial}`} value={c.dial} className="text-lg">
-              <span className="mr-2 text-2xl">{c.flag}</span>
-              <span className="text-lg font-semibold">{c.dial}</span>
-              <span className="ml-2 text-sm text-muted-foreground">{c.code}</span>
+            <SelectItem key={`${c.code}-${c.dial}`} value={c.dial} className={compact ? "text-xs" : "text-lg"}>
+              <span className={compact ? "mr-1 text-xs" : "mr-2 text-2xl"}>{c.flag}</span>
+              <span className={compact ? "text-xs font-medium" : "text-lg font-semibold"}>{c.dial}</span>
+              <span className={compact ? "ml-1 text-xs text-muted-foreground" : "ml-2 text-sm text-muted-foreground"}>{c.code}</span>
             </SelectItem>
           ))}
         </SelectContent>
@@ -77,7 +78,7 @@ export function PhoneNumberInput({ id, value, onChange, disabled, placeholder = 
         disabled={disabled}
         placeholder={placeholder}
         onChange={(e) => onLocalChange(e.target.value)}
-        className="flex-1 h-12 text-lg"
+        className={compact ? "min-w-0 flex-1 h-10 text-xs" : "flex-1 h-12 text-lg"}
       />
     </div>
   );

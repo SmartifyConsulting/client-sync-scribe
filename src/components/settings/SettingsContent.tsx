@@ -399,7 +399,7 @@ export function SettingsContent() {
               </div>
               <div className="space-y-1.5 sm:col-span-2">
                 <Label>Mobile number</Label>
-                <PhoneNumberInput value={detailsPhone} onChange={setDetailsPhone} />
+                <PhoneNumberInput compact value={detailsPhone} onChange={setDetailsPhone} />
               </div>
             </div>
             <Button size="sm" onClick={saveMyDetails} disabled={savingDetails}>
