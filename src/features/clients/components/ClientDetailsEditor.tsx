@@ -897,7 +897,7 @@ export function ClientDetailsEditor({
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = setTimeout(() => {
       performSave(formData, surgeries);
-    }, 1500);
+    }, 30_000);
     return () => {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     };
