@@ -240,7 +240,7 @@ export default function ReferralAdvisors({ hideHeader = false }: ReferralAdvisor
         body: {
           recipientEmail: inviteEmail.trim(),
           senderName: profile?.full_name || "A colleague",
-          message: `${profile?.full_name || "A colleague"} has invited you to join Holarc Health for referrals. Sign up to connect and collaborate on client care.`,
+          message: `${profile?.full_name || "A colleague"} has invited you to join Holarc Wealth for referrals. Sign up to connect and collaborate on client care.`,
         },
       });
       if (error) throw error;
@@ -578,7 +578,7 @@ export default function ReferralAdvisors({ hideHeader = false }: ReferralAdvisor
             ))
           )}
 
-          {/* Doctors on Holarc Health who aren't in the saved list yet */}
+          {/* Advisors on Holarc Wealth who aren't in the saved list yet */}
           {!loading && directoryMatches.length > 0 && (
             <div className="space-y-2 pt-2">
               <p className="text-xs font-medium text-muted-foreground">On Holarc Wealth</p>

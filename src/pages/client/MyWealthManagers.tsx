@@ -152,7 +152,7 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
   });
 
   // General Practitioner — always shown in the list (by default), flagged
-  // with whether they're a registered Holarc Health advisor or an external GP.
+  // with whether they're a registered Holarc Wealth advisor or an external GP.
   const { data: gpInfo } = useQuery({
     queryKey: ["patient-gp-holarc-status"],
     queryFn: async () => {
@@ -446,7 +446,7 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
               variant={gpInfo.onHolarc ? "default" : "secondary"}
               className={cn("text-xs shrink-0", gpInfo.onHolarc && "bg-primary text-primary-foreground")}
             >
-              {gpInfo.onHolarc ? "On Holarc Health" : "Not on Holarc Health"}
+              {gpInfo.onHolarc ? "On Holarc Wealth" : "Not on Holarc Wealth"}
             </Badge>
           </CardContent>
         </Card>

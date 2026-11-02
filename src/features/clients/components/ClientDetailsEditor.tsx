@@ -1,4 +1,3 @@
-import { HolarcHealthRecords } from "./HolarcHealthRecords";
 import { dobFromSaId } from "@/lib/saId";
 import { LifeEventsPanel } from "@/features/wealth-workflow/client/LifeEventsPanel";
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
@@ -1810,9 +1809,8 @@ export function ClientDetailsEditor({
 
             {/* === MY HEALTH RECORDS TAB === */}
             <TabsContent value="healthrecords" className="mt-4 space-y-3">
-              <div><h2 className="text-lg font-semibold text-primary-dark">My Health Records</h2><p className="text-xs text-muted-foreground">Chronic conditions, chronic medication and hospital admissions from Holarc Health, plus reports shared for underwriting.</p></div>
-              <HolarcHealthRecords clientId={client.id} />
-<DocumentUploadList clientId={client.id} documentKind="Health Record" addLabel="Upload health record" />
+              <div><h2 className="text-lg font-semibold text-primary-dark">My Health Records</h2><p className="text-xs text-muted-foreground">Reports shared for underwriting.</p></div>
+              <DocumentUploadList clientId={client.id} documentKind="Health Record" addLabel="Upload health record" />
             </TabsContent>
 
 
@@ -2405,9 +2403,8 @@ export function ClientDetailsEditor({
 
           {/* === MY HEALTH RECORDS TAB (EDIT) === */}
           <TabsContent value="healthrecords" className="mt-4 space-y-3">
-            <div><h2 className="text-lg font-semibold text-primary-dark">My Health Records</h2><p className="text-xs text-muted-foreground">Chronic conditions, chronic medication and hospital admissions from Holarc Health, plus reports shared for underwriting.</p></div>
-            <HolarcHealthRecords clientId={client.id} />
-<DocumentUploadList clientId={client.id} documentKind="Health Record" addLabel="Upload health record" />
+            <div><h2 className="text-lg font-semibold text-primary-dark">My Health Records</h2><p className="text-xs text-muted-foreground">Reports shared for underwriting.</p></div>
+            <DocumentUploadList clientId={client.id} documentKind="Health Record" addLabel="Upload health record" />
           </TabsContent>
 
 

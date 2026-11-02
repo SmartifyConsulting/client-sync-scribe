@@ -59,7 +59,7 @@ export function BackupCodesScreen({ onContinue }: Props) {
   const download = () => {
     const blob = new Blob(
       [
-        `Holarc Health — Backup Codes\n` +
+        `Holarc Wealth — Backup Codes\n` +
           `Generated: ${new Date().toLocaleString()}\n\n` +
           `Each code works once. Use one if you lose your phone.\n\n` +
           codesText +

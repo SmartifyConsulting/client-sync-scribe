@@ -13,9 +13,9 @@ interface ProfileCompletionBannerProps {
   storageKey?: string;
 }
 
-const DEFAULT_TITLE = "Help us care for you better";
+const DEFAULT_TITLE = "Help us serve you better";
 const DEFAULT_MESSAGE =
-  "Please complete your profile so your providers have what they need to deliver care safely and quickly. All information is encrypted in transit and at rest, accessible only to you and the practitioners you explicitly connect with. Holarc Health is HIPAA- and POPIA-aligned and never sells or shares your data.";
+  "Please complete your profile so your Wealth Manager has what they need to advise you accurately and quickly. All information is encrypted in transit and at rest, accessible only to you and the advisors you explicitly connect with. Holarc Wealth is POPIA-aligned and never sells or shares your data.";
 
 export function ProfileCompletionBanner({
   onComplete,

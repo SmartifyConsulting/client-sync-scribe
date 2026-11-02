@@ -685,9 +685,6 @@ function NotificationList({
             if (!notification.is_read && notification.type !== 'invitation_received') {
               onMarkAsRead(notification.id);
             }
-            if (notification.type === 'sos_alert' && notification.reference_id) {
-              window.location.href = `/patient/holarchelp/incident/${notification.reference_id}`;
-            }
           }}
           className={cn(
             "flex items-start gap-4 p-4 transition-colors",

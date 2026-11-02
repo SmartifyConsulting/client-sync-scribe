@@ -8,7 +8,6 @@ import {
   Users,
   Briefcase,
   UserCog,
-  Siren,
   DollarSign,
   Home,
   Sparkles,
@@ -26,7 +25,6 @@ const doctorNavItems = [
   { icon: User, labelKey: "nav.myProfile", to: "/client/details?section=health" },
   { icon: Briefcase, labelKey: "bottomNav.practice", to: "/business" },
   { icon: Sparkles, labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
-  { icon: Siren, labelKey: "nav.sos", to: "/advisor/holarchelp", danger: true },
 ].filter((i) => !isWealthHidden(i.to));
 
 const patientSections = [
@@ -34,13 +32,11 @@ const patientSections = [
   { icon: Activity, labelKey: "nav.liveWorkspace", section: "workspace", to: "/my-workspace" },
   { icon: FileText, labelKey: "nav.myClaims", section: "claims", to: "/claims" },
   { icon: Sparkles, labelKey: "nav.askMaeve", section: "maeve", to: "/ask-maeve", accent: true },
-  { icon: Siren, labelKey: "nav.sos", section: "sos", to: "/client/holarchelp", danger: true },
 ].filter((i) => !isWealthHidden(i.to));
 
 const adminNavItems = [
   { icon: Users, labelKey: "nav.users", to: "/admin/users" },
   { icon: DollarSign, labelKey: "nav.pricing", to: "/admin/pricing" },
-  { icon: Siren, labelKey: "nav.sos", to: "/client/holarchelp", danger: true },
   { icon: Home, labelKey: "bottomNav.exit", to: "/broker-dashboard" },
 ].filter((i) => !isWealthHidden(i.to));
 
@@ -169,8 +165,6 @@ export function BottomNav() {
               ? location.pathname.startsWith("/my-workspace")
               : item.section === "claims"
               ? location.pathname.startsWith("/claims")
-              : item.section === "sos"
-              ? location.pathname.startsWith("/client/holarchelp")
               : isOnDetails && currentSection === item.section;
           const danger = (item as any).danger;
           const accent = (item as any).accent;

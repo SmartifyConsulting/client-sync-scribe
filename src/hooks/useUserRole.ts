@@ -41,10 +41,6 @@ export function useUserRole() {
         const [
           { data: profileData, error: profileError },
           { data: roleRows, error: rolesError },
-          { data: hospOwned },
-          { data: ambOwned },
-          { data: insOwned },
-          { data: pharmOwned },
         ] = await Promise.all([
           supabase
             .from('profiles')
@@ -55,10 +51,6 @@ export function useUserRole() {
             .from('user_roles')
             .select('role')
             .eq('user_id', user.id),
-          supabase.from('holarchelp_hospitals' as any).select('id').eq('owner_id', user.id).maybeSingle(),
-          supabase.from('holarchelp_ambulance_providers' as any).select('id').eq('owner_id', user.id).maybeSingle(),
-          supabase.from('holarchelp_insurance_providers' as any).select('id').eq('owner_id', user.id).maybeSingle(),
-          supabase.from('holarchelp_pharmacies' as any).select('id').eq('owner_id', user.id).maybeSingle(),
         ]);
 
         if (profileError && profileError.code !== 'PGRST116') {
@@ -71,9 +63,6 @@ export function useUserRole() {
 
         const rawRoles = (roleRows ?? []).map((row) => row.role as RawRole);
         const hasEmergencyRaw = rawRoles.some((r) => EMERGENCY_RAW.includes(r));
-        const ownsProvider = Boolean(
-          (hospOwned as any)?.id || (ambOwned as any)?.id || (insOwned as any)?.id || (pharmOwned as any)?.id
-        );
 
         const normalized: ResolvedRole[] = [];
         const profileRole = profileData?.role as ResolvedRole | undefined;
@@ -83,11 +72,8 @@ export function useUserRole() {
             if (!normalized.includes(r)) normalized.push(r);
           }
         }
-        if ((hasEmergencyRaw || ownsProvider) && !normalized.includes('emergency')) normalized.push('emergency');
+        if (hasEmergencyRaw && !normalized.includes('emergency')) normalized.push('emergency');
 
-        // Prefer the explicit profile role so a broker who also owns a hospital
-        // (or other provider) still lands on the broker dashboard. The profile
-        // switcher still surfaces the provider portal via hasEmergencyRole.
         const effectiveRole: UserRole =
           profileRole ??
           (normalized.includes('nurse')
@@ -96,7 +82,7 @@ export function useUserRole() {
             ? 'broker'
             : normalized.includes('client')
               ? 'client'
-              : (ownsProvider || normalized.includes('emergency'))
+              : normalized.includes('emergency')
                 ? 'emergency'
                 : normalized.includes('admin')
                   ? 'admin'

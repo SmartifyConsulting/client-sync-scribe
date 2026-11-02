@@ -63,7 +63,7 @@ export function useClientWealth(explicitPatientId?: string) {
         sb.from("wealth_workflows").select("*").eq("patient_id", pid).order("created_at", { ascending: false }).limit(1).maybeSingle(),
         sb.from("documents").select("id,name,document_kind,created_at").eq("patient_id", pid).eq("is_draft", false).order("created_at", { ascending: false }).limit(20),
         sb.from("wealth_claims").select("*").eq("patient_id", pid).order("created_at", { ascending: false }),
-        sb.from("todos").select("id,title,due_date,status,owner_role,stage").eq("patient_id", pid).neq("status", "completed").order("due_date", { ascending: true }).limit(20),
+        sb.from("todos").select("id,title,due_date,status,owner_role").eq("patient_id", pid).neq("status", "completed").order("due_date", { ascending: true }).limit(20),
         sb.from("wealth_workflow_stage_defs").select("stage,label"),
       ]);
       const issuedRes = await sb

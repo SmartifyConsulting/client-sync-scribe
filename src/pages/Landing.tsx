@@ -126,11 +126,7 @@ export default function Landing() {
 
   const handleRoleSelect = (role: string) => {
     setShowRoleDialog(false);
-    if (role === "client" || role === "broker") {
-      navigate(`/auth?mode=signup&role=${role}`);
-    } else {
-      navigate(`/provider-signup?kind=${role}`);
-    }
+    navigate(`/auth?mode=signup&role=${role}`);
     setSelectedRole("");
   };
 
@@ -549,7 +545,6 @@ export default function Landing() {
                 <SelectContent>
                   <SelectItem value="client">{t("landing.roleDialog.options.client")}</SelectItem>
                   <SelectItem value="broker">{t("landing.roleDialog.options.advisor")}</SelectItem>
-                  <SelectItem value="insurance">{t("landing.roleDialog.options.insurance")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

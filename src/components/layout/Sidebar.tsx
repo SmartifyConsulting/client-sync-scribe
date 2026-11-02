@@ -18,12 +18,10 @@ import {
   UserPlus,
   UserCog,
   FolderOpen,
-  Siren,
   ListChecks,
   Mic,
   BedDouble,
   SlidersHorizontal,
-  Clock,
   ChevronUp,
   ChevronDown,
   Eye,
@@ -48,7 +46,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { usePracticeAssistant } from "@/hooks/usePracticeAssistant";
-import { useHospitalAffiliation } from "@/hooks/useHospitalAffiliation";
 import { useV2Demo } from "@/hooks/useV2Demo";
 import { useSignatureBackfill } from "@/hooks/useSignatureBackfill";
 
@@ -84,7 +81,6 @@ const DOCTOR_SECTIONS: NavSection[] = [
     items: [
       { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.dashboard", to: "/broker-dashboard", tour: "advisor-home" },
       { icon: Settings2, label: "My Business", labelKey: "nav.myPractice", to: "/business", tour: "practice-settings" },
-      { icon: Clock, label: "My Shifts", labelKey: "nav.myShift", to: "/my-shift" },
       { icon: Users, label: "My Clients", labelKey: "nav.myPatients", to: "/clients", tour: "import-clients" },
       { icon: UserPlus, label: "Referrers", labelKey: "nav.referrers", to: "/referrers" },
       { icon: BedDouble, label: "Admissions", labelKey: "nav.admissions", to: "/admissions" },
@@ -99,7 +95,6 @@ const DOCTOR_SECTIONS: NavSection[] = [
 
 const DOCTOR_BOTTOM_ITEMS: (NavItem & { tour?: string })[] = [
   { icon: MessageCircle, label: "Messenger", labelKey: "nav.messenger", to: "/messenger" },
-  { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/advisor/holarchelp", danger: true },
 ];
 
 
@@ -123,7 +118,6 @@ const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: BedDouble, label: "My Admissions", labelKey: "nav.myAdmissions", to: "/client/admissions" },
   { icon: Sparkles, label: "Ask Holarc Wealth", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
   { icon: MessageCircle, label: "Messenger", labelKey: "nav.messenger", to: "/messenger" },
-  { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/client/holarchelp", danger: true, tour: "client-sos" },
 ];
 
 /** Referral Agents only need their own referral pipeline and earnings. */
@@ -145,9 +139,6 @@ const adminNavItems: NavItem[] = [
   { icon: BarChart3, label: "Performance", labelKey: "nav.performance", to: "/admin/performance" },
   { icon: DollarSign, label: "Pricing", labelKey: "nav.pricing", to: "/admin/pricing" },
   { icon: Plug, label: "Integrations", labelKey: "nav.integrationsAdmin", to: "/admin/integrations" },
-  { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/client/holarchelp", danger: true },
-  { icon: Siren, label: "Hospital Portal", labelKey: "nav.hospitalPortal", to: "/provider/hospital", danger: true },
-  { icon: Siren, label: "ER Portal", labelKey: "nav.erPortal", to: "/provider/ambulance", danger: true },
 ];
 
 /** Sorts+filters a flat item list by the saved preferences — order entries that don't
@@ -178,7 +169,6 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const { t } = useTranslation();
   const { role, loading: roleLoading, isClient, isAdmin } = useUserRole();
   const { isAssistant } = usePracticeAssistant();
-  const { hasHospitalAffiliation, loading: affiliationLoading } = useHospitalAffiliation();
   const { v2Demo } = useV2Demo();
   // Ensures a advisor's typed signature exists as a PNG for outbound email.
   useSignatureBackfill();
@@ -224,14 +214,11 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const isReferrerMenu = role === "referral_agent";
   const isDoctorMenu = !isOnAdminRoute && !isPatientMenu && !isReferrerMenu && !(isAdmin && isOnAdminRoute);
 
-  /** Doctors only see "My Shifts" once they're attached to a hospital. */
-  const hideMyShift = isDoctorMenu && (affiliationLoading || !hasHospitalAffiliation);
-
   /** Version 2.0 features (Ask Holarc) show for everyone as a greyed-out
    *  preview; only the system admin accounts (useV2Demo) can actually open them. */
   const V2_PATHS = ["/ask-maeve"];
   const withShiftRule = (items: (NavItem & { tour?: string })[]) => {
-    let next = (hideMyShift ? items.filter((i) => i.to !== "/my-shift") : items).filter((i) => !isWealthHidden(i.to));
+    let next = items.filter((i) => !isWealthHidden(i.to));
     if (!v2Demo) next = next.map((i) => (V2_PATHS.includes(i.to) ? { ...i, v2Locked: true } : i));
     return next;
   };

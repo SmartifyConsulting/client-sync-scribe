@@ -286,7 +286,7 @@ function MailboxSection({ userId }: { userId?: string }) {
           <div className="mt-2 flex items-start gap-1.5 rounded-md border border-primary/30 bg-primary/5 p-2">
             <Info className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
             <p className="text-sm leading-snug text-foreground/80">
-              This address is solely for emailing files (scans, referrals, lab results) directly to your <strong>My Documents</strong> tab — it is not for standard messaging and you will not receive replies in your normal inbox. Share it with anyone sending you medical records so they are routed straight to your Holarc Health profile.
+              This address is solely for emailing files (scans, referrals, lab results) directly to your <strong>My Documents</strong> tab — it is not for standard messaging and you will not receive replies in your normal inbox. Share it with anyone sending you medical records so they are routed straight to your Holarc Wealth profile.
             </p>
           </div>
           {displayEmail ? (
@@ -1475,38 +1475,38 @@ export default function MyPractice() {
               onClick={async () => {
                 try {
                   const SAMPLE_TEXTS: Record<string, string> = {
-                    en: "Welcome to Holarc Health. Use these settings to personalise your experience.",
-                    af: "Welkom by Holarc Health. Gebruik hierdie instellings om jou ervaring te personaliseer.",
-                    zu: "Siyakwamukela ku-Holarc Health. Sebenzisa lezi zilungiselelo ukwenza isipiliyoni sakho sibe ngesakho.",
-                    xh: "Wamkelekile kwi-Holarc Health. Sebenzisa ezi sethingi ukwenza amava akho abe ngawakho.",
-                    st: "Rea u amohela ho Holarc Health. Sebelisa litlhophiso tsena ho etsa hore boiphihlelo ba hau bo be ba hau.",
-                    tn: "O amogelesegile mo Holarc Health. Dirisa ditlhophiso tseno go itirela maitemogelo a gago.",
-                    fr: "Bienvenue chez Holarc Health. Utilisez ces paramètres pour personnaliser votre expérience.",
-                    pt: "Bem-vindo ao Holarc Health. Use estas configurações para personalizar a sua experiência.",
-                    es: "Bienvenido a Holarc Health. Usa estos ajustes para personalizar tu experiencia.",
-                    de: "Willkommen bei Holarc Health. Verwenden Sie diese Einstellungen, um Ihr Erlebnis zu personalisieren.",
-                    ar: "مرحبًا بك في Holarc Health. استخدم هذه الإعدادات لتخصيص تجربتك.",
-                    sw: "Karibu Holarc Health. Tumia mipangilio hii kubinafsisha uzoefu wako.",
-                    nr: "Siyakwamukela ku-Holarc Health. Sebenzisa iinsethingi lezi ukwenza isipiliyoni sakho sibe ngesakho.",
-                    ss: "Siyakwemukela ku-Holarc Health. Sebentisa letilungiselelo kutentisa sipiliyoni sakho sibe ngesakho.",
-                    ts: "Xa amukeriwa eka Holarc Health. Tirhisa switirhisiwa leswi ku endla leswaku ntokoto wa wena wu va wa wena.",
-                    ve: "Vho ṱanganedzwa kha Holarc Health. Shumisani zwishumiswa izwi u itela tshenzhemo yaṋu.",
-                    nl: "Welkom bij Holarc Health. Gebruik deze instellingen om uw ervaring te personaliseren.",
-                    el: "Καλώς ήρθατε στο Holarc Health. Χρησιμοποιήστε αυτές τις ρυθμίσεις για να εξατομικεύσετε την εμπειρία σας.",
-                    he: "ברוכים הבאים ל-Holarc Health. השתמשו בהגדרות אלה כדי להתאים אישית את החוויה שלכם.",
-                    hi: "Holarc Health में आपका स्वागत है। अपने अनुभव को निजीकृत करने के लिए इन सेटिंग्स का उपयोग करें।",
-                    id: "Selamat datang di Holarc Health. Gunakan pengaturan ini untuk mempersonalisasi pengalaman Anda.",
-                    it: "Benvenuti in Holarc Health. Usa queste impostazioni per personalizzare la tua esperienza.",
-                    ja: "Holarc Healthへようこそ。これらの設定を使って、あなたの体験をカスタマイズしてください。",
-                    ko: "Holarc Health에 오신 것을 환영합니다. 이 설정을 사용하여 경험을 맞춤 설정하세요.",
-                    ms: "Selamat datang ke Holarc Health. Gunakan tetapan ini untuk memperibadikan pengalaman anda.",
-                    zh: "欢迎来到Holarc Health。使用这些设置来个性化您的体验。",
-                    pl: "Witamy w Holarc Health. Użyj tych ustawień, aby spersonalizować swoje doświadczenie.",
-                    ru: "Добро пожаловать в Holarc Health. Используйте эти настройки для персонализации вашего опыта.",
-                    th: "ยินดีต้อนรับสู่ Holarc Health ใช้การตั้งค่าเหล่านี้เพื่อปรับแต่งประสบการณ์ของคุณ",
-                    tr: "Holarc Health'e hoş geldiniz. Deneyiminizi kişiselleştirmek için bu ayarları kullanın.",
-                    uk: "Ласкаво просимо до Holarc Health. Використовуйте ці налаштування, щоб персоналізувати свій досвід.",
-                    vi: "Chào mừng bạn đến với Holarc Health. Sử dụng các cài đặt này để cá nhân hóa trải nghiệm của bạn.",
+                    en: "Welcome to Holarc Wealth. Use these settings to personalise your experience.",
+                    af: "Welkom by Holarc Wealth. Gebruik hierdie instellings om jou ervaring te personaliseer.",
+                    zu: "Siyakwamukela ku-Holarc Wealth. Sebenzisa lezi zilungiselelo ukwenza isipiliyoni sakho sibe ngesakho.",
+                    xh: "Wamkelekile kwi-Holarc Wealth. Sebenzisa ezi sethingi ukwenza amava akho abe ngawakho.",
+                    st: "Rea u amohela ho Holarc Wealth. Sebelisa litlhophiso tsena ho etsa hore boiphihlelo ba hau bo be ba hau.",
+                    tn: "O amogelesegile mo Holarc Wealth. Dirisa ditlhophiso tseno go itirela maitemogelo a gago.",
+                    fr: "Bienvenue chez Holarc Wealth. Utilisez ces paramètres pour personnaliser votre expérience.",
+                    pt: "Bem-vindo ao Holarc Wealth. Use estas configurações para personalizar a sua experiência.",
+                    es: "Bienvenido a Holarc Wealth. Usa estos ajustes para personalizar tu experiencia.",
+                    de: "Willkommen bei Holarc Wealth. Verwenden Sie diese Einstellungen, um Ihr Erlebnis zu personalisieren.",
+                    ar: "مرحبًا بك في Holarc Wealth. استخدم هذه الإعدادات لتخصيص تجربتك.",
+                    sw: "Karibu Holarc Wealth. Tumia mipangilio hii kubinafsisha uzoefu wako.",
+                    nr: "Siyakwamukela ku-Holarc Wealth. Sebenzisa iinsethingi lezi ukwenza isipiliyoni sakho sibe ngesakho.",
+                    ss: "Siyakwemukela ku-Holarc Wealth. Sebentisa letilungiselelo kutentisa sipiliyoni sakho sibe ngesakho.",
+                    ts: "Xa amukeriwa eka Holarc Wealth. Tirhisa switirhisiwa leswi ku endla leswaku ntokoto wa wena wu va wa wena.",
+                    ve: "Vho ṱanganedzwa kha Holarc Wealth. Shumisani zwishumiswa izwi u itela tshenzhemo yaṋu.",
+                    nl: "Welkom bij Holarc Wealth. Gebruik deze instellingen om uw ervaring te personaliseren.",
+                    el: "Καλώς ήρθατε στο Holarc Wealth. Χρησιμοποιήστε αυτές τις ρυθμίσεις για να εξατομικεύσετε την εμπειρία σας.",
+                    he: "ברוכים הבאים ל-Holarc Wealth. השתמשו בהגדרות אלה כדי להתאים אישית את החוויה שלכם.",
+                    hi: "Holarc Wealth में आपका स्वागत है। अपने अनुभव को निजीकृत करने के लिए इन सेटिंग्स का उपयोग करें।",
+                    id: "Selamat datang di Holarc Wealth. Gunakan pengaturan ini untuk mempersonalisasi pengalaman Anda.",
+                    it: "Benvenuti in Holarc Wealth. Usa queste impostazioni per personalizzare la tua esperienza.",
+                    ja: "Holarc Wealthへようこそ。これらの設定を使って、あなたの体験をカスタマイズしてください。",
+                    ko: "Holarc Wealth에 오신 것을 환영합니다. 이 설정을 사용하여 경험을 맞춤 설정하세요.",
+                    ms: "Selamat datang ke Holarc Wealth. Gunakan tetapan ini untuk memperibadikan pengalaman anda.",
+                    zh: "欢迎来到Holarc Wealth。使用这些设置来个性化您的体验。",
+                    pl: "Witamy w Holarc Wealth. Użyj tych ustawień, aby spersonalizować swoje doświadczenie.",
+                    ru: "Добро пожаловать в Holarc Wealth. Используйте эти настройки для персонализации вашего опыта.",
+                    th: "ยินดีต้อนรับสู่ Holarc Wealth ใช้การตั้งค่าเหล่านี้เพื่อปรับแต่งประสบการณ์ของคุณ",
+                    tr: "Holarc Wealth'e hoş geldiniz. Deneyiminizi kişiselleştirmek için bu ayarları kullanın.",
+                    uk: "Ласкаво просимо до Holarc Wealth. Використовуйте ці налаштування, щоб персоналізувати свій досвід.",
+                    vi: "Chào mừng bạn đến với Holarc Wealth. Sử dụng các cài đặt này để cá nhân hóa trải nghiệm của bạn.",
                   };
                   const primaryLang = (profile as any)?.preferred_language || "en";
                   const sampleText = SAMPLE_TEXTS[primaryLang] || SAMPLE_TEXTS.en;

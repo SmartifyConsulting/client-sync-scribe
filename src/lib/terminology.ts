@@ -28,13 +28,11 @@ export const CLIENT_TERMS = {
  * Matched as path prefixes in navigation and the route guard.
  */
 export const WEALTH_HIDDEN_MODULES = [
-  "/advisor/holarchelp", "/client/holarchelp", "/holarchelp", "/provider/hospital", "/provider/ambulance",
-  "/admissions", "/client/admissions", "/client/ward-admission", "/my-shift", "/nurse-profile",
+  "/admissions", "/client/admissions", "/client/ward-admission",
   "/prescriptions", "/client/prescriptions", "/client/lab-results", "/lab-results",
   "/client/rewards", "/advisor/rewards", "/vula", "/admin/gamification", "/ask-maeve",
   "/advisor/round-tables", "/client/round-table", "/client/health-album",
-  "/provider", "/admin/users", "/admin/holarchelp-providers", "/admin/holarchelp-accountability",
-  "/provider-signup", "/admin/provider-approval",
+  "/admin/users",
 ];
 
 export const isWealthHidden = (path: string) =>

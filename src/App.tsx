@@ -68,8 +68,6 @@ import ExpiringRecordings from "./pages/ExpiringRecordings";
 import Admin from "./pages/Admin";
 import AdvisorDocumentsPage from "./pages/advisor/AdvisorDocumentsPage";
 import DoctorSessions from "./pages/advisor/Sessions";
-import ProviderSignup from "./pages/ProviderSignup";
-import ProviderApprovalAction from "./pages/admin/ProviderApprovalAction";
 import WealthUsers from "./pages/admin/WealthUsers";
 import ActivityLog from "./pages/ActivityLog";
 
@@ -92,7 +90,7 @@ if (typeof window !== "undefined" && !(window as any).__holarcNoticeShown) {
   );
   // eslint-disable-next-line no-console
   console.log(
-    "%cThis is a private application owned by Holarc Health (Pty) Ltd.\n" +
+    "%cThis is a private application owned by Holarc Wealth (Pty) Ltd.\n" +
       "Unauthorised access, scraping, reverse engineering, or any attempt to\n" +
       "copy, clone, or white-label this service is strictly prohibited and\n" +
       "may result in legal action.\n\n" +
@@ -187,8 +185,6 @@ const App = () => (
           <Route path="/login" element={<Auth />} />
           <Route path="/signup" element={<Auth />} />
           <Route path="/onboarding" element={<Auth />} />
-          <Route path="/provider-signup" element={<ProviderSignup />} />
-          <Route path="/admin/provider-approval" element={<ProviderApprovalAction />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
           <Route path="/intellectual-property" element={<Navigate to="/terms-and-conditions#intellectual-property" replace />} />
           <Route path="/client-consent" element={<ClientConsent />} />

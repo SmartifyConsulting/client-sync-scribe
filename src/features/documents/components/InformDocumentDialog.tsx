@@ -53,7 +53,7 @@ export function InformDocumentDialog({
       toast({
         title: "Link sent",
         description: data?.isRegistered
-          ? `${recipient} can open the document in Holarc Health.`
+          ? `${recipient} can open the document in Holarc Wealth.`
           : `${recipient} was invited to register to access the document.`,
       });
       setEmail("");
@@ -80,7 +80,7 @@ export function InformDocumentDialog({
           </DialogTitle>
           <DialogDescription className="text-xs">
             Sends a secure link to “{documentName}”. The document itself is never
-            attached — it stays in Holarc Health.
+            attached — it stays in Holarc Wealth.
           </DialogDescription>
         </DialogHeader>
 
