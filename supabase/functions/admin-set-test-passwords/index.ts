@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
             email: t.email,
             password: PASSWORD,
             email_confirm: true,
-            user_metadata: { full_name: t.full_name, role: "patient" },
+            user_metadata: { full_name: t.full_name, role: "client" },
           });
           if (ce) throw ce;
           userId = created.user!.id;

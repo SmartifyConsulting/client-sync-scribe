@@ -213,7 +213,7 @@ serve(async (req) => {
     if (!greeting && to) {
       try {
         const { data: pt } = await admin
-          .from("patients")
+          .from("clients")
           .select("name")
           .ilike("email", String(to))
           .limit(1)

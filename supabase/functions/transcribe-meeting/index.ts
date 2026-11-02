@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
     if (file.size > MAX_BYTES) return json({ error: "The recording is too long (over about 60 minutes). Record shorter parts." }, 400);
 
     const admin = createClient(url, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-    const { data: pat } = await admin.from("patients").select("id,user_id,name").eq("id", patientId).maybeSingle();
+    const { data: pat } = await admin.from("clients").select("id,user_id,name").eq("id", patientId).maybeSingle();
     if (!pat || pat.user_id !== uid) return json({ error: "Only this client's Wealth Manager can record the meeting." }, 403);
 
     const key = Deno.env.get("LOVABLE_API_KEY");

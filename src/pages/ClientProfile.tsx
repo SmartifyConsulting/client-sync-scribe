@@ -25,14 +25,12 @@ import {
   Mic,
   Video,
   FilePlus,
-  GitCompareArrows,
   Eye,
   Edit3,
   Sparkles,
   Trash2,
   RotateCw,
 } from "lucide-react";
-import { ImageComparisonDialog } from "@/components/documents/ImageComparisonDialog";
 import { cn } from "@/lib/utils";
 import vulaSymbol from "@/assets/vula-symbol.png";
 import { SampleBadge } from "@/components/clients/SampleBadge";
@@ -84,7 +82,6 @@ export default function ClientProfile() {
   const { user } = useAuth();
   const [mailboxAlias, setMailboxAlias] = useState<string | null>(null);
   const [mailboxId, setMailboxId] = useState<string | null>(null);
-  const [showCompareDialog, setShowCompareDialog] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const rawTab = searchParams.get("tab") || "details";
   const activeTab = rawTab === "live" ? "workflow" : rawTab;
@@ -726,15 +723,6 @@ export default function ClientProfile() {
             >
               <FilePlus className="h-5 w-5" />
             </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-12 w-12 rounded-xl"
-              title="Compare Images"
-              onClick={() => setShowCompareDialog(true)}
-            >
-              <GitCompareArrows className="h-5 w-5" />
-            </Button>
           </div>
           <DocumentsBrowser clientId={client.id} clientName={client.name} />
         </TabsContent>
@@ -805,11 +793,6 @@ export default function ClientProfile() {
             });
           }}
         />
-      )}
-
-      {/* Image Comparison Dialog */}
-      {client && (
-        <ImageComparisonDialog open={showCompareDialog} onOpenChange={setShowCompareDialog} clientId={client.id} />
       )}
 
       {/* Document Preview */}

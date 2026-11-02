@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
     const { patientId, sessionId, text } = parsed.data;
 
     const admin = createClient(url, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-    const { data: pat } = await admin.from("patients").select("id,user_id").eq("id", patientId).maybeSingle();
+    const { data: pat } = await admin.from("clients").select("id,user_id").eq("id", patientId).maybeSingle();
     if (!pat || pat.user_id !== uid) return json({ error: "Only this client's Wealth Manager can capture their financial information." }, 403);
 
     let source = text?.trim() ?? "";
@@ -87,12 +87,12 @@ Deno.serve(async (req) => {
     // Auto-populate Personal Information from the first meeting — only fill
     // blanks, never overwrite something the client or WM already entered.
     if (facts.personal_info && typeof facts.personal_info === "object") {
-      const { data: currentPat } = await admin.from("patients").select("*").eq("id", patientId).maybeSingle();
+      const { data: currentPat } = await admin.from("clients").select("*").eq("id", patientId).maybeSingle();
       const personalUpdate: Record<string, any> = {};
       for (const [k, v] of Object.entries(facts.personal_info)) {
         if (typeof v === "string" && v.trim() && !currentPat?.[k]) personalUpdate[k] = v.trim();
       }
-      if (Object.keys(personalUpdate).length) await admin.from("patients").update(personalUpdate).eq("id", patientId);
+      if (Object.keys(personalUpdate).length) await admin.from("clients").update(personalUpdate).eq("id", patientId);
     }
 
     return json({ ok: true, sections: keys.filter((k) => row[k]) });

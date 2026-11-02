@@ -104,10 +104,10 @@ const handler = async (req: Request): Promise<Response> => {
             full_name: partnerName || "",
             status: "pending",
           });
-          // Assign doctor role
+          // Assign broker (Wealth Manager) role
           await supabaseAdmin.from("user_roles").insert({
             user_id: newUser.user.id,
-            role: "doctor",
+            role: "broker",
           });
           console.log("Created pending partner user:", newUser.user.id);
         } else {
@@ -168,7 +168,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send email
     const appUrl = Deno.env.get("APP_URL") || "https://holarc.health";
     const senderName = senderProfile?.full_name || "A Holarc user";
-    const senderRole = senderProfile?.role === "doctor" ? "Wealth Manager" : "user";
+    const senderRole = senderProfile?.role === "broker" ? "Wealth Manager" : "user";
 
     const emailHtml = finalRecipientId && !isPracticePartner ? `
       <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>

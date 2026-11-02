@@ -8,19 +8,11 @@ const corsHeaders = {
 type Seed = {
   email: string;
   full_name: string;
-  role: "doctor" | "hospital_staff" | "ambulance_staff";
-  hospital_name?: string;
-  ambulance_company?: string;
-  as_member?: boolean;
-  member_role?: string;
+  role: "broker";
 };
 
 const SEEDS: Seed[] = [
-  { email: "xtina@smartify.co.za", full_name: "Xtina", role: "doctor" },
-  { email: "zano@smartify.co.za", full_name: "Zano", role: "hospital_staff", hospital_name: "Zano Hospital" },
-  { email: "renken@smartify.co.za", full_name: "Renken", role: "ambulance_staff", ambulance_company: "Renken Ambulance Service" },
-  { email: "hospital.test@holarchealth.com", full_name: "Holarc General Hospital Admin", role: "hospital_staff", hospital_name: "Holarc General Hospital" },
-  { email: "er.test@holarchealth.com", full_name: "Holarc General ER Staff", role: "hospital_staff", hospital_name: "Holarc General Hospital", as_member: true, member_role: "er_staff" },
+  { email: "xtina@smartify.co.za", full_name: "Xtina", role: "broker" },
 ];
 
 const FIXED_PASSWORD = "Password123";
@@ -30,8 +22,6 @@ const PASSWORD_TARGETS: Array<{ email: string; full_name: string; password?: str
   { email: "xtina@smartify.co.za", full_name: "Xtina" },
   { email: "renken@smartify.co.za", full_name: "Renken" },
   { email: "nonastasia@gmail.com", full_name: "Nonastasia" },
-  { email: "hospital.test@holarchealth.com", full_name: "Holarc General Hospital Admin", password: "Hospital@2026" },
-  { email: "er.test@holarchealth.com", full_name: "Holarc General ER Staff", password: "ER@2026" },
 ];
 
 function randomPassword() {
@@ -80,7 +70,7 @@ Deno.serve(async (req) => {
           email: seed.email,
           password: randomPassword(),
           email_confirm: true,
-          user_metadata: { full_name: seed.full_name, role: seed.role === "doctor" ? "doctor" : "patient" },
+          user_metadata: { full_name: seed.full_name, role: "broker" },
         });
         if (ce) {
           results.push({ email: seed.email, status: `create_failed: ${ce.message}` });
@@ -91,54 +81,13 @@ Deno.serve(async (req) => {
 
       // Ensure profile
       await sb.from("profiles").upsert(
-        { id: userId, full_name: seed.full_name, role: seed.role === "doctor" ? "doctor" : "patient" },
+        { id: userId, full_name: seed.full_name, role: "broker" },
         { onConflict: "id" },
       );
 
       // Set role
       await sb.from("user_roles").delete().eq("user_id", userId);
       await sb.from("user_roles").insert({ user_id: userId, role: seed.role });
-
-      // Provider rows
-      if (seed.role === "hospital_staff" && seed.hospital_name) {
-        if (seed.as_member) {
-          const { data: hosp } = await sb.from("holarchelp_hospitals").select("id").eq("name", seed.hospital_name).maybeSingle();
-          if (hosp) {
-            const { data: mem } = await sb.from("holarchelp_hospital_members").select("id").eq("hospital_id", hosp.id).eq("user_id", userId).maybeSingle();
-            if (!mem) {
-              await sb.from("holarchelp_hospital_members").insert({ hospital_id: hosp.id, user_id: userId, role: seed.member_role ?? "staff" });
-            }
-          }
-        } else {
-          const { data: existsH } = await sb.from("holarchelp_hospitals").select("id").eq("owner_id", userId).maybeSingle();
-          if (!existsH) {
-            await sb.from("holarchelp_hospitals").insert({
-              owner_id: userId,
-              name: seed.hospital_name,
-              contact_email: seed.email,
-              status: "approved",
-              approved_at: new Date().toISOString(),
-            });
-          } else {
-            await sb.from("holarchelp_hospitals").update({ status: "approved" }).eq("id", existsH.id);
-          }
-        }
-      }
-
-      if (seed.role === "ambulance_staff" && seed.ambulance_company) {
-        const { data: existsA } = await sb.from("holarchelp_ambulance_providers").select("id").eq("owner_id", userId).maybeSingle();
-        if (!existsA) {
-          await sb.from("holarchelp_ambulance_providers").insert({
-            owner_id: userId,
-            company_name: seed.ambulance_company,
-            contact_email: seed.email,
-            status: "approved",
-            approved_at: new Date().toISOString(),
-          });
-        } else {
-          await sb.from("holarchelp_ambulance_providers").update({ status: "approved" }).eq("id", existsA.id);
-        }
-      }
 
       results.push({ email: seed.email, status: existing ? "updated" : "created", user_id: userId });
     }
@@ -155,7 +104,7 @@ Deno.serve(async (req) => {
         if (!id) {
           const { data: created, error: ce } = await sb.auth.admin.createUser({
             email: t.email, password: pw, email_confirm: true,
-            user_metadata: { full_name: t.full_name, role: "patient" },
+            user_metadata: { full_name: t.full_name, role: "client" },
           });
           if (ce) throw ce;
           id = created.user!.id;

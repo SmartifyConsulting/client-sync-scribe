@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
     const { data: u } = await userClient.auth.getUser(auth.replace("Bearer ", ""));
     if (!u?.user) return json({ error: "Please sign in again." }, 401);
     // Access check via RLS: caller must be able to see this client record.
-    const { data: rec } = await userClient.from("patients").select("id, name").eq("id", patientId).maybeSingle();
+    const { data: rec } = await userClient.from("clients").select("id, name").eq("id", patientId).maybeSingle();
     if (!rec) return json({ error: "You don't have access to this client." }, 403);
 
     const admin = createClient(url, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);

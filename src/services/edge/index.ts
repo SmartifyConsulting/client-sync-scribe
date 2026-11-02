@@ -26,9 +26,6 @@ export const translateText = (payload: { text: string; targetLanguage: string })
 export const analyzeMedicalImage = (payload: { imageUrl: string; documentId?: string }) =>
   safeInvoke("analyze-medical-image", payload);
 
-export const compareMedicalImages = (payload: { imageUrls: string[]; comparisonType?: string }) =>
-  safeInvoke("compare-medical-images", payload);
-
 export const checkMedicationConflicts = (payload: { medications: string[] }) =>
   safeInvoke("check-medication-conflicts", payload);
 
@@ -37,9 +34,6 @@ export const lookupMedicalCodes = (payload: { query: string; codeType?: string }
 
 export const summarizePatientHistory = (payload: Record<string, unknown>) =>
   safeInvoke("summarize-patient-history", payload);
-
-export const validateMedicationVideo = (payload: Record<string, unknown>) =>
-  safeInvoke("validate-medication-video", payload);
 
 export const validateHealthPhoto = (payload: { imageUrl: string; category?: string }) =>
   safeInvoke("validate-health-photo", payload);

@@ -77,7 +77,7 @@ serve(async (req) => {
       const patientIds = [...new Set(expiringSessions.map(s => s.patient_id))];
       for (const patientId of patientIds) {
         const { data: patient } = await supabase
-          .from("patients")
+          .from("clients")
           .select("patient_user_id")
           .eq("id", patientId)
           .maybeSingle();

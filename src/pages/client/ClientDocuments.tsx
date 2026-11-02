@@ -30,7 +30,6 @@ import {
   Sparkles,
   X,
   RotateCw,
-  GitCompare,
   Eye,
   Search,
   FlaskConical,
@@ -60,7 +59,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ImageComparisonDialog } from "@/components/documents/ImageComparisonDialog";
 import { renderFormattedContent } from "@/utils/documentFormatting";
 import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
@@ -245,7 +243,6 @@ export default function ClientDocuments({ hideHeader = false }: { hideHeader?: b
   const [analyzingDocId, setAnalyzingDocId] = useState<string | null>(null);
   const [analysisDialog, setAnalysisDialog] = useState<UnifiedDocument | null>(null);
   const [sendingDocId, setSendingDocId] = useState<string | null>(null);
-  const [showCompareDialog, setShowCompareDialog] = useState(false);
   const [previewDoc, setPreviewDoc] = useState<UnifiedDocument | null>(null);
   const [docToDelete, setDocToDelete] = useState<UnifiedDocument | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -709,15 +706,6 @@ export default function ClientDocuments({ hideHeader = false }: { hideHeader?: b
           >
             <Video className="h-3.5 w-3.5" />
           </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8 rounded-full"
-            onClick={() => setShowCompareDialog(true)}
-            title="Compare Images"
-          >
-            <GitCompare className="h-3.5 w-3.5" />
-          </Button>
           <input
             ref={fileInputRef}
             type="file"
@@ -1152,12 +1140,6 @@ export default function ClientDocuments({ hideHeader = false }: { hideHeader?: b
       <DocumentPreviewDialog
         doc={previewDoc}
         onClose={() => setPreviewDoc(null)}
-      />
-
-      <ImageComparisonDialog
-        open={showCompareDialog}
-        onOpenChange={setShowCompareDialog}
-        clientId={patientIds[0]}
       />
 
       {/* Delete confirmation */}

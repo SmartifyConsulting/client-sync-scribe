@@ -502,7 +502,7 @@ serve(async (req) => {
                   if (referrerRole?.role === "patient") {
                     // Get referrer's patient record
                     const { data: referrerPatient } = await supabase
-                      .from("patients")
+                      .from("clients")
                       .select("id")
                       .eq("patient_user_id", referrerId)
                       .limit(1)

@@ -87,7 +87,7 @@ Deno.serve(async (req) => {
     if (!u?.user) return json({ error: "Please sign in again." }, 401);
 
     const admin = createClient(url, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-    const { data: pat } = await admin.from("patients").select("id,user_id,id_passport_number").eq("id", parsed.data.patientId).maybeSingle();
+    const { data: pat } = await admin.from("clients").select("id,user_id,id_passport_number").eq("id", parsed.data.patientId).maybeSingle();
     if (!pat) return json({ error: "Client not found." }, 404);
     const { data: isAdmin } = await admin.rpc("has_role", { _user_id: u.user.id, _role: "admin" });
     if (pat.user_id !== u.user.id && !isAdmin) return json({ error: "Only this client's Wealth Manager can pull from Astute." }, 403);

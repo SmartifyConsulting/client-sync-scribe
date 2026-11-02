@@ -9,10 +9,10 @@ const json = (b: unknown, s = 200) =>
 
 const PASSWORD = "Demo@2026";
 const USERS = [
-  { key: "client", email: "georgia.client@demo.holarcwealth.co.za", full_name: "Georgia Adams", role: "patient", extra: null },
-  { key: "wm", email: "jaco.steyn@demo.holarcwealth.co.za", full_name: "Jaco Steyn", role: "doctor", extra: null },
-  { key: "fsp", email: "sipho.nkosi@demo.holarcwealth.co.za", full_name: "Sipho Nkosi", role: "doctor", extra: null },
-  { key: "insurer", email: "underwriting@demo.momentum.co.za", full_name: "Momentum Underwriting", role: "doctor", extra: "insurer_staff" },
+  { key: "client", email: "georgia.client@demo.holarcwealth.co.za", full_name: "Georgia Adams", role: "client", extra: null },
+  { key: "wm", email: "jaco.steyn@demo.holarcwealth.co.za", full_name: "Jaco Steyn", role: "broker", extra: null },
+  { key: "fsp", email: "sipho.nkosi@demo.holarcwealth.co.za", full_name: "Sipho Nkosi", role: "broker", extra: null },
+  { key: "insurer", email: "underwriting@demo.momentum.co.za", full_name: "Momentum Underwriting", role: "broker", extra: "insurer_staff" },
 ] as const;
 
 // Clients owned by the Wealth Manager, each at a different point of the journey.
@@ -74,9 +74,9 @@ Deno.serve(async (req) => {
   const iso = (d: number) => new Date(now + d * 864e5).toISOString();
   for (const c of CLIENTS) {
     const name = `${c.first} ${c.last}`;
-    let { data: p } = await admin.from("patients").select("id").eq("user_id", ids.wm).eq("name", name).maybeSingle();
+    let { data: p } = await admin.from("clients").select("id").eq("user_id", ids.wm).eq("name", name).maybeSingle();
     if (p) continue; // already seeded
-    const ins = await admin.from("patients").insert({
+    const ins = await admin.from("clients").insert({
       user_id: ids.wm, name, first_name: c.first, last_name: c.last,
       email: (c as any).linkClient ? USERS[0].email : `${c.first.toLowerCase()}.${c.last.toLowerCase()}@example.co.za`,
       patient_user_id: (c as any).linkClient ? ids.client : null, is_sample: true,

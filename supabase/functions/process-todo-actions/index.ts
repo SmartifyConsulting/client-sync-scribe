@@ -38,7 +38,7 @@ serve(async (req) => {
 
     // Fetch doctor's patients, profile, and templates in parallel
     const [patientsRes, profileRes, templatesRes] = await Promise.all([
-      supabase.from("patients").select("id, name, email, phone, patient_user_id").eq("user_id", user.id),
+      supabase.from("clients").select("id, name, email, phone, patient_user_id").eq("user_id", user.id),
       supabase.from("profiles").select("full_name, practice_number, doctor_number, practice_address, specialty").eq("id", user.id).single(),
       supabase.from("templates").select("id, name, content, header_footer_template_id").eq("user_id", user.id),
     ]);

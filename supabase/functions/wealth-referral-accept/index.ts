@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
     if (ref.status === "accepted") return json({ ok: true, patientId: ref.patient_id });
     if (ref.status !== "pending") return json({ error: "This referral has already been responded to." }, 409);
 
-    const { data: pat, error: pErr } = await admin.from("patients").insert({
+    const { data: pat, error: pErr } = await admin.from("clients").insert({
       user_id: uid, name: ref.client_name, email: ref.client_email || null, phone: ref.client_phone || null,
       notes: ref.specific_need ? `Referred client need: ${ref.specific_need}` : null, referred_by: "Referral Agent",
     }).select("id").single();

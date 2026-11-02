@@ -350,7 +350,7 @@ serve(async (req) => {
     // Link the document to the user's own patient record when they have one,
     // so it surfaces in patient-scoped document views too.
     const { data: patientRow } = await supabase
-      .from("patients")
+      .from("clients")
       .select("id, name")
       .eq("patient_user_id", profile.id)
       .order("created_at", { ascending: true })

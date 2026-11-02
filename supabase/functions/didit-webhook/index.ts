@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
   // re-request them later.
   const { data: wf } = await admin.from("wealth_workflows").select("patient_id").eq("id", chk.workflow_id).maybeSingle();
   if (wf?.patient_id) {
-    const { data: pat } = await admin.from("patients").select("id_document_front_path, id_document_back_path").eq("id", wf.patient_id).maybeSingle();
+    const { data: pat } = await admin.from("clients").select("id_document_front_path, id_document_back_path").eq("id", wf.patient_id).maybeSingle();
     if (!pat?.id_document_front_path || !pat?.id_document_back_path) {
       const urls = findIdImageUrls(d);
       const [frontPath, backPath] = await Promise.all([
@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
         storeIdImage(admin, wf.patient_id, "back", urls.back),
       ]);
       if (frontPath || backPath) {
-        await admin.from("patients").update({
+        await admin.from("clients").update({
           id_document_front_path: frontPath ?? pat?.id_document_front_path ?? null,
           id_document_back_path: backPath ?? pat?.id_document_back_path ?? null,
           id_document_captured_at: new Date().toISOString(),
