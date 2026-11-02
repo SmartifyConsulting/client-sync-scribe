@@ -20,6 +20,10 @@ export async function buildDocumentPdfBase64(html: string): Promise<string | nul
 
   try {
     const target = (host.querySelector("#holarc-document") as HTMLElement) || host;
+    // Explicit tracking makes html2canvas render whitespace reliably, including
+    // older saved documents whose root still specifies normal tracking.
+    target.style.letterSpacing = "0.15px";
+    target.style.wordSpacing = "1px";
     // Give remote images (logo/letterhead) a chance to load before rasterising.
     await Promise.all(
       Array.from(target.querySelectorAll("img")).map(
@@ -40,8 +44,8 @@ export async function buildDocumentPdfBase64(html: string): Promise<string | nul
       useCORS: true,
       logging: false,
       onclone: (_doc, clonedTarget) => {
-        clonedTarget.style.letterSpacing = "normal";
-        clonedTarget.style.wordSpacing = "normal";
+        clonedTarget.style.letterSpacing = "0.15px";
+        clonedTarget.style.wordSpacing = "1px";
       },
     });
 
