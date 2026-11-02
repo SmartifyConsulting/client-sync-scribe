@@ -7,9 +7,7 @@ export const LANGUAGES = [
   { code: "de", name: "German" },
   { code: "el", name: "Greek" },
   { code: "he", name: "Hebrew" },
-  { code: "ha", name: "Hausa" },
   { code: "hi", name: "Hindi" },
-  { code: "ig", name: "Igbo" },
   { code: "id", name: "Indonesian" },
   { code: "it", name: "Italian" },
   { code: "ja", name: "Japanese" },
@@ -28,7 +26,6 @@ export const LANGUAGES = [
   { code: "uk", name: "Ukrainian" },
   { code: "vi", name: "Vietnamese" },
   { code: "xh", name: "Xhosa" },
-  { code: "yo", name: "Yoruba" },
   { code: "zu", name: "Zulu" },
 ];
 

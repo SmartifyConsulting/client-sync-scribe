@@ -7,9 +7,6 @@ import zu from "./locales/zu.json";
 import xh from "./locales/xh.json";
 import sn from "./locales/sn.json";
 import sw from "./locales/sw.json";
-import ha from "./locales/ha.json";
-import ig from "./locales/ig.json";
-import yo from "./locales/yo.json";
 import fr from "./locales/fr.json";
 import de from "./locales/de.json";
 import es from "./locales/es.json";
@@ -35,9 +32,6 @@ export const SUPPORTED_LANGUAGES = [
   { code: "xh", name: "isiXhosa", flag: "🇿🇦" },
   { code: "sn", name: "Shona", flag: "🇿🇼" },
   { code: "sw", name: "Kiswahili", flag: "🇰🇪" },
-  { code: "ha", name: "Hausa", flag: "🇳🇬" },
-  { code: "ig", name: "Igbo", flag: "🇳🇬" },
-  { code: "yo", name: "Yorùbá", flag: "🇳🇬" },
   { code: "ar", name: "العربية", flag: "🇸🇦" },
   { code: "he", name: "עברית", flag: "🇮🇱" },
   { code: "fr", name: "Français", flag: "🇫🇷" },
@@ -71,9 +65,6 @@ i18n
       xh: { translation: mergeTranslations(uiTranslations.en, xh) },
       sn: { translation: mergeTranslations(uiTranslations.en, sn) },
       sw: { translation: mergeTranslations(uiTranslations.en, sw) },
-      ha: { translation: mergeTranslations(uiTranslations.en, ha) },
-      ig: { translation: mergeTranslations(uiTranslations.en, ig) },
-      yo: { translation: mergeTranslations(uiTranslations.en, yo) },
       ar: { translation: mergeTranslations(uiTranslations.en, ar) },
       he: { translation: mergeTranslations(uiTranslations.en, he) },
       fr: { translation: mergeTranslations(mergeTranslations(uiTranslations.en, fr), uiTranslations.fr) },
@@ -104,7 +95,7 @@ i18n
 
 const LANG_SCALE: Record<string, number> = {
   de: 0.94, nl: 0.94, ru: 0.94, el: 0.94, pl: 0.94, tr: 0.94, fr: 0.94, pt: 0.94, it: 0.94,
-  ha: 0.96, ig: 0.96, yo: 0.96, sw: 0.96, sn: 0.96, zu: 0.96, xh: 0.96, af: 0.96,
+  sw: 0.96, sn: 0.96, zu: 0.96, xh: 0.96, af: 0.96,
   zh: 1.02, ja: 1.02, ko: 1.02,
 };
 

@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Calendar, Bell, Shield, Database, CheckCircle, Loader2, ShieldCheck, ShieldOff,
   CreditCard, Receipt, Download, Check, ExternalLink, XCircle, RotateCcw, Users,
-  Settings2,
+  Settings2, Camera, UserRound, Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
@@ -14,11 +15,13 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { TwoFactorSetup } from "@/components/auth/TwoFactorSetup";
+import { PhoneNumberInput } from "@/components/forms/PhoneNumberInput";
 import { format } from "date-fns";
 import { useSearchParams } from "react-router-dom";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
@@ -72,10 +75,23 @@ export function SettingsContent() {
   const [loadingPricing, setLoadingPricing] = useState(true);
   const [inactiveThreshold, setInactiveThreshold] = useState<number>(12);
   const [savingThreshold, setSavingThreshold] = useState(false);
+  const [detailsName, setDetailsName] = useState("");
+  const [detailsPhone, setDetailsPhone] = useState("");
+  const [savingDetails, setSavingDetails] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (user) { fetchMfaFactors(); fetchSubscription(); fetchPaymentHistory(); if (isAdvisor) fetchInactiveThreshold(); }
   }, [user, isAdvisor]);
+
+  useEffect(() => {
+    setDetailsName(profile?.full_name || "");
+    setDetailsPhone(profile?.mobile_number || "");
+  }, [profile?.full_name, profile?.mobile_number]);
 
   useEffect(() => { fetchPricing(); }, [role]);
 
@@ -185,6 +201,64 @@ export function SettingsContent() {
     } catch { toast({ title: "Error", description: "Failed to save setting", variant: "destructive" }); } finally { setSavingThreshold(false); }
   };
 
+  const getInitials = () => {
+    const n = (detailsName || profile?.full_name || "").trim();
+    if (!n) return "U";
+    return n.split(/\s+/).map((p) => p[0]).join("").toUpperCase().slice(0, 2);
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !user) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Unsupported file", description: "Please choose an image file (JPG, PNG or WebP).", variant: "destructive" });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Image too large", description: "Please choose a JPG or PNG under 5 MB.", variant: "destructive" });
+      return;
+    }
+    setUploadingAvatar(true);
+    try {
+      const fileExt = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const fileName = `${user.id}/avatar.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from("avatars").upload(fileName, file, { upsert: true, contentType: file.type });
+      if (uploadError) throw uploadError;
+      const { data } = supabase.storage.from("avatars").getPublicUrl(fileName);
+      const newUrl = `${data.publicUrl}?t=${Date.now()}`;
+      const { error } = await updateProfile({ avatar_url: newUrl } as any);
+      if (error) throw error;
+      toast({ title: "Photo updated" });
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err?.message || "Please try again.", variant: "destructive" });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const saveMyDetails = async () => {
+    if (!detailsName.trim()) { toast({ title: "Name required", variant: "destructive" }); return; }
+    setSavingDetails(true);
+    const { error } = await updateProfile({ full_name: detailsName.trim(), mobile_number: detailsPhone || null } as any);
+    setSavingDetails(false);
+    if (error) { toast({ title: "Couldn't save", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Details saved" });
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeletingAccount(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("self-delete-account", {});
+      if (error || data?.error) throw new Error(data?.error || error?.message || "Please try again.");
+      await supabase.auth.signOut();
+      window.location.href = "/auth";
+    } catch (e: any) {
+      toast({ title: "Couldn't delete account", description: e.message, variant: "destructive" });
+      setDeletingAccount(false);
+    }
+  };
+
   const disableMfa = async (factorId: string) => {
     setDisablingMfa(true);
     try { const { error } = await supabase.auth.mfa.unenroll({ factorId }); if (error) throw error; toast({ title: "2FA Disabled" }); fetchMfaFactors(); }
@@ -268,13 +342,130 @@ export function SettingsContent() {
 
   return (
     <div className="space-y-4 max-w-3xl">
-      <Tabs key={isPatientRole ? "client" : "staff"} defaultValue={isPatientRole ? "security" : "preferences"} className="w-full">
+      <Tabs key={isPatientRole ? "client" : "staff"} defaultValue="profile" className="w-full">
         <TabsList className="flex w-full flex-wrap bg-primary/80 justify-start rounded-lg">
+          <TabsTrigger value="profile" className="tab-brand text-xs">Profile</TabsTrigger>
           {!isPatientRole && <TabsTrigger value="preferences" className="tab-brand text-xs">Preferences</TabsTrigger>}
           {!isPatientRole && <TabsTrigger value="notifications" className="tab-brand text-xs">Notifications</TabsTrigger>}
-          <TabsTrigger value="security" className="tab-brand text-xs">Security</TabsTrigger>
           {!isPatientRole && <TabsTrigger value="billing" className="tab-brand text-xs">Fees</TabsTrigger>}
         </TabsList>
+
+        {/* PROFILE */}
+        <TabsContent value="profile" className="mt-4 space-y-4">
+          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
+            <div className="flex items-center gap-3">
+              <UserRound className="h-4 w-4 text-primary" />
+              <h2 className="text-sm font-semibold text-foreground">My details</h2>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <Avatar className="h-16 w-16">
+                  <AvatarImage key={profile?.avatar_url} src={profile?.avatar_url || undefined} alt={detailsName || "User"} />
+                  <AvatarFallback className="bg-muted text-foreground text-base">{getInitials()}</AvatarFallback>
+                </Avatar>
+                <button
+                  type="button"
+                  onClick={() => avatarInputRef.current?.click()}
+                  disabled={uploadingAvatar}
+                  className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow hover:bg-primary/90"
+                  aria-label="Change profile photo"
+                >
+                  {uploadingAvatar ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Camera className="h-3.5 w-3.5" />}
+                </button>
+                <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+              </div>
+              <p className="text-sm text-muted-foreground">JPG or PNG, up to 5 MB.</p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label>Full name</Label>
+                <Input value={detailsName} onChange={(e) => setDetailsName(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Email</Label>
+                <Input value={user?.email || ""} disabled />
+              </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label>Mobile number</Label>
+                <PhoneNumberInput value={detailsPhone} onChange={setDetailsPhone} />
+              </div>
+            </div>
+            <Button size="sm" onClick={saveMyDetails} disabled={savingDetails}>
+              {savingDetails ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving…</> : "Save details"}
+            </Button>
+          </div>
+
+          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <Shield className="h-4 w-4 text-primary" />
+              <h2 className="text-sm font-semibold text-foreground">Security</h2>
+            </div>
+            <p className="text-sm text-muted-foreground">Manage your authentication and account protection</p>
+            <div className="space-y-4">
+              {!MVP_MFA_DISABLED && (
+                <>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {loadingMfa ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /> : mfaFactors.length > 0 ? <ShieldCheck className="h-5 w-5 text-success" /> : <ShieldOff className="h-5 w-5 text-muted-foreground" />}
+                      <div>
+                        <p className="font-medium text-foreground">Two-Factor Authentication</p>
+                        <p className="text-sm text-muted-foreground">{loadingMfa ? "Checking status..." : mfaFactors.length > 0 ? "Enabled - Your account is protected" : "Add an extra layer of security"}</p>
+                      </div>
+                    </div>
+                    {loadingMfa ? null : mfaFactors.length > 0 ? (
+                      <Button
+                        variant="outline"
+                        disabled={disablingMfa}
+                        onClick={() => disableMfa(mfaFactors[0].id)}
+                      >
+                        {disablingMfa ? <Loader2 className="h-4 w-4 animate-spin" /> : "Disable"}
+                      </Button>
+                    ) : (
+                      <Button variant="outline" onClick={() => setShow2FASetup(true)}>Enable</Button>
+                    )}
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-foreground">Ask for a login code every time I sign in</p>
+                      <p className="text-sm text-muted-foreground">
+                        When off, you'll only enter your password. When on, you'll also enter a 6-digit code from your authenticator app at every sign-in.
+                      </p>
+                    </div>
+                    <Switch
+                      checked={mfaRequired}
+                      disabled={savingMfaRequired || loadingMfa}
+                      onCheckedChange={handleToggleMfaRequired}
+                    />
+                  </div>
+                  <Separator />
+                </>
+              )}
+              <div><Button variant="outline" onClick={() => (window.location.href = "/forgot-password")}>Change Password</Button></div>
+              <Separator />
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <Database className="h-4 w-4 text-primary" />
+              <h2 className="text-sm font-semibold text-foreground">Data Management</h2>
+            </div>
+            <div className="space-y-4">
+              <Button variant="outline">Export All Data</Button>
+              <p className="text-sm text-muted-foreground">Download all your client data, documents, and consultation records</p>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-destructive bg-card p-4 shadow-sm space-y-3">
+            <div className="flex items-center gap-3">
+              <Trash2 className="h-4 w-4 text-destructive" />
+              <h2 className="text-sm font-semibold text-destructive">Delete account</h2>
+            </div>
+            <p className="text-sm text-muted-foreground">Permanently deletes your account and profile. This cannot be undone.</p>
+            <Button variant="outline" className="text-destructive hover:text-destructive" onClick={() => setShowDeleteDialog(true)}>Delete my account</Button>
+          </div>
+        </TabsContent>
 
         {/* PREFERENCES */}
         <TabsContent value="preferences" className="mt-4">
@@ -471,71 +662,6 @@ export function SettingsContent() {
           </div>
         </TabsContent>
 
-        {/* SECURITY */}
-        <TabsContent value="security" className="mt-4 space-y-4">
-          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <Shield className="h-4 w-4 text-primary" />
-              <h2 className="text-sm font-semibold text-foreground">Security</h2>
-            </div>
-            <p className="text-sm text-muted-foreground">Manage your authentication and account protection</p>
-            <div className="space-y-4">
-              {!MVP_MFA_DISABLED && (
-                <>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      {loadingMfa ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /> : mfaFactors.length > 0 ? <ShieldCheck className="h-5 w-5 text-success" /> : <ShieldOff className="h-5 w-5 text-muted-foreground" />}
-                      <div>
-                        <p className="font-medium text-foreground">Two-Factor Authentication</p>
-                        <p className="text-sm text-muted-foreground">{loadingMfa ? "Checking status..." : mfaFactors.length > 0 ? "Enabled - Your account is protected" : "Add an extra layer of security"}</p>
-                      </div>
-                    </div>
-                    {loadingMfa ? null : mfaFactors.length > 0 ? (
-                      <Button
-                        variant="outline"
-                        disabled={disablingMfa}
-                        onClick={() => disableMfa(mfaFactors[0].id)}
-                      >
-                        {disablingMfa ? <Loader2 className="h-4 w-4 animate-spin" /> : "Disable"}
-                      </Button>
-                    ) : (
-                      <Button variant="outline" onClick={() => setShow2FASetup(true)}>Enable</Button>
-                    )}
-                  </div>
-                  <Separator />
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-foreground">Ask for a login code every time I sign in</p>
-                      <p className="text-sm text-muted-foreground">
-                        When off, you'll only enter your password. When on, you'll also enter a 6-digit code from your authenticator app at every sign-in.
-                      </p>
-                    </div>
-                    <Switch
-                      checked={mfaRequired}
-                      disabled={savingMfaRequired || loadingMfa}
-                      onCheckedChange={handleToggleMfaRequired}
-                    />
-                  </div>
-                  <Separator />
-                </>
-              )}
-              <div><Button variant="outline" onClick={() => (window.location.href = "/forgot-password")}>Change Password</Button></div>
-              <Separator />
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <Database className="h-4 w-4 text-primary" />
-              <h2 className="text-sm font-semibold text-foreground">Data Management</h2>
-            </div>
-            <div className="space-y-4">
-              <Button variant="outline">Export All Data</Button>
-              <p className="text-sm text-muted-foreground">Download all your client data, documents, and consultation records</p>
-            </div>
-          </div>
-        </TabsContent>
-
         {/* BILLING */}
         <TabsContent value="billing" className="mt-4 space-y-4">
           <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
@@ -653,6 +779,28 @@ export function SettingsContent() {
             <AlertDialogCancel>Keep Subscription</AlertDialogCancel>
             <AlertDialogAction onClick={handleCancelSubscription} disabled={cancellingSubscription} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               {cancellingSubscription ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Cancelling...</> : <><XCircle className="h-4 w-4 mr-2" />Cancel Subscription</>}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={(v) => { setShowDeleteDialog(v); if (!v) setDeleteConfirm(""); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently deletes your account, profile and sign-in — it cannot be undone. Type DELETE to confirm.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <Input value={deleteConfirm} onChange={(e) => setDeleteConfirm(e.target.value)} placeholder="DELETE" />
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteAccount}
+              disabled={deleteConfirm !== "DELETE" || deletingAccount}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deletingAccount ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Deleting...</> : <><Trash2 className="h-4 w-4 mr-2" />Delete my account</>}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

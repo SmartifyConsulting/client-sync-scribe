@@ -52,7 +52,7 @@ export function useProfile() {
     if (!user) return;
     
     setLoading(true);
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
@@ -74,6 +74,22 @@ export function useProfile() {
         }
       }
     } else {
+      // Belt-and-braces: if the signup trigger didn't pick up the auth
+      // metadata full_name (older accounts, or an invite accepted before
+      // that backfill existed), heal it here so the name/initials actually
+      // show instead of falling back to "User".
+      if (!data.full_name && user.user_metadata?.full_name) {
+        const fallbackName = String(user.user_metadata.full_name).trim();
+        if (fallbackName) {
+          const { data: healed } = await supabase
+            .from('profiles')
+            .update({ full_name: fallbackName })
+            .eq('id', user.id)
+            .select()
+            .maybeSingle();
+          if (healed) data = healed;
+        }
+      }
       setProfile(data as unknown as Profile);
     }
     setLoading(false);
