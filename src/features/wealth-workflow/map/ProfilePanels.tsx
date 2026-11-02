@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PhoneNumberInput } from "@/components/forms/PhoneNumberInput";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { safeInvoke } from "@/services/edge/safeInvoke";
@@ -57,7 +58,7 @@ export function PersonalInfoPanel({ clientId, personal }: { clientId?: string; p
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="ID or passport number *"><Input value={f.id_passport_number ?? ""} onChange={(e) => { const v = e.target.value; const dob = dobFromSaId(v); setF((x) => ({ ...x, id_passport_number: v, ...(dob ? { dob } : {}) })); }} /></Field>
         <Field label="Date of birth *"><Input type="date" value={f.dob ?? ""} onChange={(e) => set("dob")(e.target.value)} /></Field>
-        <Field label="Mobile number"><Input value={f.phone ?? ""} onChange={(e) => set("phone")(e.target.value)} /></Field>
+        <Field label="Mobile number"><PhoneNumberInput value={f.phone ?? ""} onChange={set("phone")} /></Field>
         <Field label="Marital status *">
           <Select value={f.marital_status ?? ""} onValueChange={set("marital_status")}>
             <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>

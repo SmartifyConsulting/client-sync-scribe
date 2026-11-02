@@ -3,6 +3,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { SECTION_TRIGGER_TEAL_CLASS } from "@/components/ui/section-accordion";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { PhoneNumberInput } from "@/components/forms/PhoneNumberInput";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -18,22 +19,22 @@ export const FSCA_CATEGORIES = [
   "1.23 Short-term Insurance Personal Lines A-1",
 ];
 
-type F = { k: string; label: string; long?: boolean; type?: string };
+type F = { k: string; label: string; long?: boolean; type?: string; phone?: boolean };
 const PLANNER: F[] = [
   { k: "title", label: "Title" }, { k: "planner_name", label: "Name of planner" }, { k: "id_number", label: "ID number" },
-  { k: "postal_address", label: "Postal address" }, { k: "phone", label: "Tel / Cell" },
+  { k: "postal_address", label: "Postal address" }, { k: "phone", label: "Tel / Cell", phone: true },
   { k: "email_primary", label: "Email (firm)" }, { k: "email_secondary", label: "Email (personal)" },
   { k: "planner_status", label: "Planner status" }, { k: "qualification", label: "Highest qualification" },
   { k: "experience_years", label: "Experience (years)", type: "number" },
 ];
 const FIRM: F[] = [
   { k: "fsp_name", label: "FSP name" }, { k: "fsb_licence", label: "FSP licence number" },
-  { k: "registration_number", label: "Registration number" }, { k: "firm_phone", label: "Firm telephone" },
+  { k: "registration_number", label: "Registration number" }, { k: "firm_phone", label: "Firm telephone", phone: true },
   { k: "firm_address", label: "Physical address" }, { k: "firm_website", label: "Website" },
   { k: "directors", label: "Directors", long: true }, { k: "fsp_legal_status", label: "FSP and legal status", long: true },
 ];
 const COMPLIANCE: F[] = [
-  { k: "compliance_officer", label: "Compliance officer" }, { k: "compliance_phone", label: "Telephone" },
+  { k: "compliance_officer", label: "Compliance officer" }, { k: "compliance_phone", label: "Telephone", phone: true },
   { k: "compliance_fax", label: "Fax" }, { k: "compliance_email", label: "Email" },
   { k: "complaints_address", label: "Complaints procedure", long: true },
   { k: "conflict_policy", label: "Conflict of interest policy and register", long: true },
@@ -67,6 +68,8 @@ function Fields({ fields, d, setD }: { fields: F[]; d: any; setD: (v: any) => vo
           <Label className={f.long ? "text-xs font-semibold" : "w-40 shrink-0 text-xs font-semibold"}>{f.label}</Label>
           {f.long ? (
             <Textarea rows={3} className="text-xs" value={d[f.k] ?? ""} onChange={(e) => setD({ ...d, [f.k]: e.target.value })} />
+          ) : f.phone ? (
+            <PhoneNumberInput value={d[f.k] ?? ""} onChange={(v) => setD({ ...d, [f.k]: v })} />
           ) : (
             <Input type={f.type} className="h-8 flex-1 text-xs" value={d[f.k] ?? ""}
               onChange={(e) => setD({ ...d, [f.k]: f.type === "number" ? (e.target.value === "" ? null : Number(e.target.value)) : e.target.value })} />

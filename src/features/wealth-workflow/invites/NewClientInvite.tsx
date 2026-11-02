@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { usePracticeInfo } from "../practice/usePracticeInfo";
 import { cn } from "@/lib/utils";
+import { PhoneNumberInput } from "@/components/forms/PhoneNumberInput";
 
 const REQUIRED = [
   ["planner_name", "Planner name"], ["phone", "Telephone"], ["email_primary", "Email"],
@@ -166,7 +167,7 @@ export function NewClientInvite({ compact = false }: { compact?: boolean }) {
                 <div className="space-y-1.5"><Label>Surname</Label><Input value={f.lastName} onChange={(e) => setF({ ...f, lastName: e.target.value })} /></div>
               </div>
               <div className="space-y-1.5"><Label>Email address</Label><Input type="email" required placeholder="client@example.com" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /></div>
-              <div className="space-y-1.5"><Label>Telephone</Label><Input type="tel" required placeholder="082 123 4567" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} /></div>
+              <div className="space-y-1.5"><Label>Telephone</Label><PhoneNumberInput value={f.phone} onChange={(v) => setF({ ...f, phone: v })} /></div>
               <Button className="w-full" disabled={busy} onClick={create}><Send className="h-4 w-4" />{busy ? "Creating…" : "Create client and send link"}</Button>
             </div>
           )}

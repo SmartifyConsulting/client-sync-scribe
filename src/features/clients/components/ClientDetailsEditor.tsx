@@ -226,8 +226,20 @@ const PhoneInput = ({
 
   return (
     <div className="flex gap-1">
+      <Select value={countryCode} onValueChange={(cc) => handleChange(cc, number)}>
+        <SelectTrigger className="w-[6.5rem] shrink-0 text-sm">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {COUNTRY_CODES.map((cc) => (
+            <SelectItem key={cc.code} value={cc.code}>{cc.label}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
       <Input
         className="text-sm w-full"
+        type="tel"
+        inputMode="tel"
         value={number}
         onChange={(e) => handleChange(countryCode, e.target.value)}
         placeholder={placeholder}
