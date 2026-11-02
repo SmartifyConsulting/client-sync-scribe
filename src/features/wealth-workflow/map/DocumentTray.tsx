@@ -26,7 +26,7 @@ export function useClientDocuments(clientId?: string) {
         // the authoritative signed copy is already listed from
         // wealth_signed_documents above — including both here doubled every
         // signed document in the tray.
-        db.from("documents").select("id,name,content,media_url,created_at,document_kind").eq("patient_id", clientId).not("document_kind", "in", "(loa_signed,disclosure_signed)").order("created_at", { ascending: false }).limit(50),
+        db.from("documents").select("id,name,content,media_url,created_at,document_kind").eq("patient_id", clientId).or("document_kind.is.null,document_kind.not.in.(loa_signed,disclosure_signed)").order("created_at", { ascending: false }).limit(50),
       ]);
       return [
         ...((signed.data ?? []) as any[]).map((d) => ({ id: d.id, kind: "signed" as const, title: `${d.title} (signed v${d.version})`, date: d.signed_at, html: sealedHtml(d) })),
@@ -103,11 +103,12 @@ export function DocPreviewDialog({ doc, onClose }: { doc: Doc | null; onClose: (
 
 const ICON = { signed: FileSignature, transcript: Mic, file: FileText };
 
-export function DocumentTray({ clientId, count }: { clientId?: string; count: number }) {
+export function DocumentTray({ clientId }: { clientId?: string }) {
   const [open, setOpen] = useState(false);
   const [preview, setPreview] = useState<Doc | null>(null);
   const ref = useRef<HTMLDivElement>(null);
-  const { data = [], isLoading } = useClientDocuments(open ? clientId : undefined);
+  const { data = [], isLoading } = useClientDocuments(clientId);
+  const count = data.length;
 
   useEffect(() => {
     if (!open) return;

@@ -192,16 +192,16 @@ export function DocCard({ workflowId, doc, signed, viewer, clientName, signable 
       setBusy(false);
       return toast({ title: "Not signed", description: "We couldn't generate your signature. Please try again.", variant: "destructive" });
     }
-    const { error } = await supabase.functions.invoke("sign-wealth-document", {
+    const { data: signResult, error } = await supabase.functions.invoke("sign-wealth-document", {
       body: { workflowId, docType: doc.type, title: doc.title, contentHtml: doc.html, signatureImage: sig, signerName: clientName },
     });
     setBusy(false);
     if (error) return toast({ title: "Not signed", description: await errMsg(error), variant: "destructive" });
     setLocalSig({ image: sig, at: new Date().toISOString() });
     flyToDocuments(cardRef.current);
-    qc.invalidateQueries({ queryKey: ["wealth-map-records"] });
+    ["wealth-map-records", "wealth-workflow", "wealth-doc-tray", "client-wealth", "wealth-blockers"].forEach(key => qc.invalidateQueries({ queryKey: [key] }));
     window.dispatchEvent(new CustomEvent("wealth-doc-signed"));
-    toast({ title: `${doc.title} signed` });
+    toast({ title: `${doc.title} signed`, description: signResult?.workflowRefreshPending ? "Your signature is saved, but workflow progress could not refresh. Please contact your Wealth Manager." : undefined });
   };
 
   return (

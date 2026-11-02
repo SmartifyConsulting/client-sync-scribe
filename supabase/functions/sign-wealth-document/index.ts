@@ -61,8 +61,9 @@ Deno.serve(async (req) => {
       content: `${p.contentHtml}<div style="padding:24px 60px"><img src="${p.signatureImage.startsWith("data:") ? p.signatureImage : `data:image/png;base64,${p.signatureImage}`}" style="height:60px"/><p><b>${p.signerName}</b> · Digitally signed ${at}${ip ? ` · IP ${ip}` : ""}</p><p style="font-family:monospace;font-size:10px">Seal ${sealHash}</p></div>`,
       document_kind: `${p.docType}_signed`, record_date: signedAt.slice(0, 10),
     });
-    await admin.rpc("wealth_onboarding_refresh", { _workflow_id: p.workflowId });
-    return json({ signed: data });
+    const { error: refreshError } = await admin.rpc("wealth_onboarding_refresh", { _workflow_id: p.workflowId });
+    if (refreshError) console.error("Signed document saved but onboarding refresh failed", refreshError.code, refreshError.message);
+    return json({ signed: data, workflowRefreshPending: !!refreshError });
   } catch (e) {
     console.error(e);
     return json({ error: "We couldn't save your signature. Please try again." }, 500);

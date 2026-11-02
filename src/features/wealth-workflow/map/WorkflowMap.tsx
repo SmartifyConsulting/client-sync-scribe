@@ -106,7 +106,7 @@ export function WorkflowMap({ clientId, clientName, onOpenDocuments, initialGrou
   const liveStep = liveGroup?.steps.find((s) => s.state === "next")?.label ?? null;
   const shownGroup = picked ? m.groups.find((g) => g.group.key === picked.group) ?? null : liveGroup;
   const shownStep = picked ? picked.step : liveStep;
-  const docCount = (m.records?.docs ?? []).length + (m.records?.signed ?? []).length;
+
   const managerFirst = avatars.advisor.name && avatars.advisor.name !== "Wealth Manager" ? avatars.advisor.name.split(" ")[0] : "your Wealth Manager";
   const renderWorking = (isLiveStep: boolean) => <WorkingWindow embedded managerName={managerFirst} group={shownGroup} stepLabel={shownStep} isLive={isLiveStep} viewer={viewer}
         clientName={clientName ?? "Client"} workflowId={wf.id} records={m.records}
@@ -154,7 +154,7 @@ export function WorkflowMap({ clientId, clientName, onOpenDocuments, initialGrou
               <span className="h-2 w-2 animate-pulse rounded-full bg-primary" /> Working window
               {shownStep && <span className="normal-case tracking-normal text-foreground">· {shownStep}</span>}
             </span>
-            <DocumentTray clientId={clientId} count={docCount} />
+            <DocumentTray clientId={clientId} />
           </div>
           {!isLive && <button onClick={() => setPicked(null)} className="mb-2 text-xs font-medium text-primary hover:underline">← Back to current step</button>}
           {renderWorking(isLive)}
