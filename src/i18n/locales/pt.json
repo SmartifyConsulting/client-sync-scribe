@@ -72,7 +72,11 @@
     "reportBug": "Reportar erro",
     "calendar": "Calendário",
     "recordTask": "Gravar tarefa",
-    "notifications": "Notificações"
+    "notifications": "Notificações",
+    "client": "Client",
+    "advisor": "Wealth Manager",
+    "er": "Emergency",
+    "hospital": "Hospital"
   },
   "userAdmin": {
     "title": "Admin de Usuários",
@@ -1917,5 +1921,13 @@
     "deleteError": "Failed to delete document",
     "invalidFileType": "Invalid file type",
     "fileTooLarge": "File is too large"
+  },
+  "client": {
+    "myDetails": {
+      "errorInitializeTitle": "Could not load your record",
+      "errorSaveTitle": "Could not save your details",
+      "detailsUpdated": "Your details have been updated",
+      "recordSetupMessage": "We are setting up your client record. Please check back in a moment."
+    }
   }
 }

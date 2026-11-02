@@ -139,7 +139,11 @@
     "reportBug": "Report Bug/Fix",
     "calendar": "Calendar",
     "recordTask": "Record an Action",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "client": "Client",
+    "advisor": "Wealth Manager",
+    "er": "Emergency",
+    "hospital": "Hospital"
   },
   "userAdmin": {
     "title": "User Admin",
@@ -2199,7 +2203,7 @@
       }
     }
   },
-  "patient": {
+  "client": {
     "myDetails": {
       "errorInitializeTitle": "Could not load your record",
       "errorSaveTitle": "Could not save your details",

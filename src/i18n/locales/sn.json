@@ -72,7 +72,11 @@
     "reportBug": "Shuma Dambudziko",
     "calendar": "Karenda",
     "recordTask": "Rekodha Basa",
-    "notifications": "Zviziviso"
+    "notifications": "Zviziviso",
+    "client": "Client",
+    "advisor": "Wealth Manager",
+    "er": "Emergency",
+    "hospital": "Hospital"
   },
   "userAdmin": {
     "title": "User Admin",
@@ -1915,5 +1919,13 @@
     "deleteError": "Failed to delete document",
     "invalidFileType": "Invalid file type",
     "fileTooLarge": "File is too large"
+  },
+  "client": {
+    "myDetails": {
+      "errorInitializeTitle": "Could not load your record",
+      "errorSaveTitle": "Could not save your details",
+      "detailsUpdated": "Your details have been updated",
+      "recordSetupMessage": "We are setting up your client record. Please check back in a moment."
+    }
   }
 }

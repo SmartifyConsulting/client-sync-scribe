@@ -123,6 +123,13 @@ Deno.serve(async (req) => {
       if (user.id === inv.owner_user_id) return json({ error: "You can't accept your own client invitation. Open the link signed in as the client." }, 400);
       const { error: pe } = await admin.from("clients").update({ patient_user_id: user.id, email: user.email }).eq("id", inv.patient_id);
       if (pe) return json({ error: "We couldn't link your account. Please try again." }, 500);
+      // Belt-and-braces: guarantee profiles.full_name is set even if the
+      // handle_new_user trigger didn't pick up the signUp() full_name metadata.
+      const { data: existingProfile } = await admin.from("profiles").select("full_name").eq("id", user.id).maybeSingle();
+      if (!existingProfile?.full_name) {
+        const fallbackName = [inv.first_name, inv.last_name].filter(Boolean).join(" ").trim();
+        if (fallbackName) await admin.from("profiles").update({ full_name: fallbackName }).eq("id", user.id);
+      }
       const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", user.id);
       if (!roles?.some((r) => r.role === "client")) await admin.from("user_roles").insert({ user_id: user.id, role: "client" });
       await admin.from("wealth_client_invites").update({ status: "accepted", accepted_by: user.id, accepted_at: new Date().toISOString() }).eq("id", inv.id);

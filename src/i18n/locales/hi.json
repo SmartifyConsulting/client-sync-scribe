@@ -72,7 +72,11 @@
     "reportBug": "बग रिपोर्ट करें",
     "calendar": "कैलेंडर",
     "recordTask": "कार्य रिकॉर्ड करें",
-    "notifications": "सूचनाएं"
+    "notifications": "सूचनाएं",
+    "client": "Client",
+    "advisor": "Wealth Manager",
+    "er": "Emergency",
+    "hospital": "Hospital"
   },
   "userAdmin": {
     "title": "User Admin",
@@ -1885,5 +1889,13 @@
     "deleteError": "Failed to delete document",
     "invalidFileType": "Invalid file type",
     "fileTooLarge": "File is too large"
+  },
+  "client": {
+    "myDetails": {
+      "errorInitializeTitle": "Could not load your record",
+      "errorSaveTitle": "Could not save your details",
+      "detailsUpdated": "Your details have been updated",
+      "recordSetupMessage": "We are setting up your client record. Please check back in a moment."
+    }
   }
 }
