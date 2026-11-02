@@ -1,4 +1,8 @@
 # Roadmap — Step 5 Indigro copy
+## Jean document signing — Nov 2
+- [x] Deployed sign-wealth-document using clients; live wealth_onboarding_refresh already uses clients and preserves all four completion requirements.
+- [x] Four isolated regression checks pass: LOA and Disclosure seal/file/refresh, plus unlinked and wrong-account rejection (Vitest 2.1.9 for Vite 5 compatibility).
+- [ ] Jean's own signing/readback — requires Jean to sign; no signature created or messages sent on her behalf.
 ## Preview repair — Oct 27
 - [x] Align remaining shared types, roles and client joins with the current generated schema; restore missing admissions hook; verify preview (build OK, signed-in dashboard without runtime errors, gold AI Summary heading).
 ## Numbered scenario submission — Oct 22
