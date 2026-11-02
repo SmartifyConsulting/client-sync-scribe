@@ -69,7 +69,7 @@ function InvitesSheet({ open, onOpenChange, manager }: { open: boolean; onOpenCh
   const [renewed, setRenewed] = useState<{ id: string; url: string } | null>(null);
   const { data = [] } = useQuery({
     queryKey: ["client-invites", user?.id], enabled: open && !!user,
-    queryFn: async () => (await (supabase as any).from("wealth_client_invites").select("*").eq("owner_user_id", user!.id).order("created_at", { ascending: false })).data ?? [],
+    queryFn: async () => (await (supabase as any).from("wealth_client_invites").select("*").eq("owner_user_id", user!.id).eq("status", "invited").order("created_at", { ascending: false })).data ?? [],
   });
   const status = (i: any) => i.status === "accepted" ? "Signed up" : i.status === "cancelled" ? "Cancelled" : new Date(i.expires_at) < new Date() ? "Expired" : "Invited";
   const renew = async (id: string) => {
@@ -86,7 +86,7 @@ function InvitesSheet({ open, onOpenChange, manager }: { open: boolean; onOpenCh
       <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader><SheetTitle>Client invitations</SheetTitle></SheetHeader>
         <div className="mt-4 space-y-3">
-          {data.length === 0 && <p className="empty-state">No invitations sent yet.</p>}
+          {data.length === 0 && <p className="empty-state">No pending invitations.</p>}
           {data.map((i: any) => {
             const s = status(i);
             return (
