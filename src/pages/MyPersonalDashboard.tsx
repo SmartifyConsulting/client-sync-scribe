@@ -163,7 +163,7 @@ export function DashboardGreeting() {
   );
 }
 
-/** Financial Protection, What's Happening, My Wealth and My Retirement panels. */
+/** My Financial Protection (left), My Wealth and My Retirement (stacked right). */
 export function DashboardPanels() {
   const navigate = useNavigate();
   const unlocked = true;
@@ -171,10 +171,10 @@ export function DashboardPanels() {
   const t = w?.totals;
 
   return (
-    <>
-      {/* Your Financial Protection */}
-      <div className="grid grid-cols-1 gap-4 items-start">
-        <Panel title="Your Financial Protection" icon={ShieldCheck} unlocked={unlocked} onClick={() => navigate("/my-future")}>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+      {/* My Financial Protection */}
+      <div>
+        <Panel title="My Financial Protection" icon={ShieldCheck} unlocked={unlocked} onClick={() => navigate("/my-future")}>
           <EmotionalHeadline
             emoji="🛡️"
             title={t?.lifeCover || w?.issued.length ? "You're protected" : "Let's build your protection"}
@@ -228,7 +228,7 @@ export function DashboardPanels() {
       </div>
 
       {/* My Wealth + My Retirement */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+      <div className="grid grid-cols-1 gap-4 items-start">
         <Panel title="My Wealth" icon={WalletIcon} unlocked={unlocked} onClick={() => navigate("/my-future")}>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {[
@@ -258,7 +258,7 @@ export function DashboardPanels() {
           ) : null}
         </Panel>
       </div>
-    </>
+    </div>
   );
 }
 
