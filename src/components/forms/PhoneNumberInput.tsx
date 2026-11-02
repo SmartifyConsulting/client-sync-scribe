@@ -17,6 +17,7 @@ import {
 interface Props {
   id?: string;
   compact?: boolean;
+  className?: string;
   /** Full E.164 string, e.g. "+27821234567" */
   value: string;
   onChange: (next: string) => void;
@@ -30,7 +31,7 @@ interface Props {
  * local number still persists (parent receives "" until a local exists, but
  * the chosen flag/code stays visible).
  */
-export function PhoneNumberInput({ id, compact = false, value, onChange, disabled, placeholder = "82 123 4567" }: Props) {
+export function PhoneNumberInput({ id, compact = false, className, value, onChange, disabled, placeholder = "82 123 4567" }: Props) {
   const parsed = splitE164(value);
   const [dial, setDial] = useState<string>(parsed.dial || DEFAULT_DIAL);
 
@@ -54,7 +55,7 @@ export function PhoneNumberInput({ id, compact = false, value, onChange, disable
   };
 
   return (
-    <div className="flex gap-2">
+    <div className={`flex min-w-0 flex-1 gap-2 ${className || ""}`}>
       <Select value={dial} onValueChange={onDialChange} disabled={disabled}>
         <SelectTrigger className={compact ? "w-[8rem] h-10 text-xs shrink-0 font-medium" : "w-[13rem] h-12 text-lg shrink-0 font-medium"}>
           <SelectValue />

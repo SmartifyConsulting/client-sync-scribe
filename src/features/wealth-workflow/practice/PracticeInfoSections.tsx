@@ -64,12 +64,12 @@ function Fields({ fields, d, setD }: { fields: F[]; d: any; setD: (v: any) => vo
   return (
     <div className="grid gap-x-6 gap-y-2.5 sm:grid-cols-2">
       {fields.map((f) => (
-        <div key={f.k} className={f.long ? "sm:col-span-2 space-y-1" : "flex items-center gap-3"}>
+        <div key={f.k} className={f.long ? "sm:col-span-2 space-y-1" : f.type === "tel" ? "sm:col-span-2 flex flex-col items-start gap-2 sm:flex-row sm:items-center" : "flex items-center gap-3"}>
           <Label className={f.long ? "text-xs font-semibold" : "w-40 shrink-0 text-xs font-semibold"}>{f.label}</Label>
           {f.long ? (
             <Textarea rows={3} className="text-xs" value={d[f.k] ?? ""} onChange={(e) => setD({ ...d, [f.k]: e.target.value })} />
           ) : f.phone ? (
-            <PhoneNumberInput value={d[f.k] ?? ""} onChange={(v) => setD({ ...d, [f.k]: v })} />
+            <PhoneNumberInput compact className="w-full [&_button]:h-8 [&_button]:py-1 [&_input]:h-8 [&_input]:py-1" value={d[f.k] ?? ""} onChange={(v) => setD({ ...d, [f.k]: v })} />
           ) : (
             <Input type={f.type} className="h-8 flex-1 text-xs" value={d[f.k] ?? ""}
               onChange={(e) => setD({ ...d, [f.k]: f.type === "number" ? (e.target.value === "" ? null : Number(e.target.value)) : e.target.value })} />
