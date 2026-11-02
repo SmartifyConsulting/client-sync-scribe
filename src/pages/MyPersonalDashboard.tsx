@@ -157,7 +157,7 @@ export function DashboardGreeting() {
 
   return (
     <>
-      <ClientHeroCard emotionalLine={GREETING_LINE[state]} />
+      <ClientHeroCard emotionalLine={GREETING_LINE[state]} topRight={<NextMeetingWithWM />} />
       {w?.clientId && <ClientAISummary clientId={w.clientId} />}
     </>
   );
@@ -172,8 +172,8 @@ export function DashboardPanels() {
 
   return (
     <>
-      {/* Your Financial Protection + What's Happening */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+      {/* Your Financial Protection */}
+      <div className="grid grid-cols-1 gap-4 items-start">
         <Panel title="Your Financial Protection" icon={ShieldCheck} unlocked={unlocked} onClick={() => navigate("/my-future")}>
           <EmotionalHeadline
             emoji="🛡️"
@@ -223,18 +223,6 @@ export function DashboardPanels() {
             ) : (
               <p className="text-xs text-muted-foreground">No existing policies captured yet.</p>
             )}
-          </div>
-        </Panel>
-
-        <Panel title="What's Happening" icon={CalendarDays} unlocked={unlocked}>
-          <EmotionalHeadline
-            emoji="📍"
-            title={w?.stageLabel || "Getting started"}
-            sub="Where your Live Workspace is right now"
-          />
-          <div className="mt-4 border-t border-border pt-3">
-            <p className="text-2xs uppercase tracking-wide text-muted-foreground font-semibold mb-2">Next meeting</p>
-            <NextMeetingWithWM />
           </div>
         </Panel>
       </div>

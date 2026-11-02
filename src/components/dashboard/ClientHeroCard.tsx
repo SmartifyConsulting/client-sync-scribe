@@ -59,10 +59,13 @@ function uploadErrorMessage(err: unknown): string {
 export function ClientHeroCard({
   action,
   emotionalLine,
+  topRight,
 }: {
   action?: React.ReactNode;
   /** Dynamic, data-derived sentence shown under the greeting. */
   emotionalLine?: string;
+  /** Compact content pinned to the top-right of the card, e.g. next meeting. */
+  topRight?: React.ReactNode;
 }) {
   const { user } = useAuth();
   const { profile, loading: profileLoading } = useProfile();
@@ -164,6 +167,12 @@ export function ClientHeroCard({
   return (
     <section className="rounded-xl border border-primary bg-gradient-to-br from-primary/5 via-card to-card p-4 md:p-5 shadow-sm">
       <div className="flex items-start gap-4">
+        {topRight && (
+          <div className="order-last ml-auto shrink-0 self-start rounded-xl border border-border bg-card/60 p-3 max-w-[16rem]">
+            <p className="text-2xs uppercase tracking-wide text-muted-foreground font-semibold mb-1.5">Next meeting</p>
+            {topRight}
+          </div>
+        )}
         <button
           type="button"
           className="flex flex-col items-center gap-1 shrink-0"
