@@ -641,3 +641,14 @@ textarea::placeholder {
 .animate-nav-badge-bump {
   animation: nav-badge-bump 0.5s ease-out;
 }
+
+/* Settings use the shared compact typography, including portalled dialogs. */
+@layer components {
+  .settings-scope { @apply text-xs; }
+  .settings-scope label,
+  .settings-scope input,
+  .settings-scope textarea,
+  .settings-scope select,
+  .settings-scope [role="combobox"],
+  .settings-scope [role="radiogroup"] { @apply text-xs; }
+}

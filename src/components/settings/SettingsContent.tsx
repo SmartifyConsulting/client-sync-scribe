@@ -350,7 +350,7 @@ export function SettingsContent() {
   };
 
   return (
-    <div className="space-y-4 max-w-3xl">
+    <div className="settings-scope space-y-4 max-w-3xl text-xs">
       <Tabs key={isPatientRole ? "client" : "staff"} defaultValue="profile" className="w-full">
         <TabsList className="flex w-full flex-wrap bg-primary/80 justify-start rounded-lg">
           <TabsTrigger value="profile" className="tab-brand text-xs">Profile</TabsTrigger>
@@ -363,7 +363,7 @@ export function SettingsContent() {
           <div className="frame p-4 space-y-4">
             <div className="frame-header -mx-4 -mt-4 mb-4 gap-3">
               <UserRound className="h-4 w-4 text-primary" />
-              <h2 className="text-sm font-semibold text-foreground">My details</h2>
+              <h2 className="text-xs font-semibold text-foreground">My details</h2>
             </div>
             <div className="flex items-center gap-4">
               <div className="relative">
@@ -382,7 +382,7 @@ export function SettingsContent() {
                 </button>
                 <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
               </div>
-              <p className="text-sm text-muted-foreground">JPG or PNG, up to 5 MB.</p>
+              <p className="text-xs text-muted-foreground">JPG or PNG, up to 5 MB.</p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
@@ -410,9 +410,9 @@ export function SettingsContent() {
           <div className="frame p-4">
             <div className="frame-header -mx-4 -mt-4 mb-4 gap-3">
               <Shield className="h-4 w-4 text-primary" />
-              <h2 className="text-sm font-semibold text-foreground">Security</h2>
+              <h2 className="text-xs font-semibold text-foreground">Security</h2>
             </div>
-            <p className="text-sm text-muted-foreground">Manage your authentication and account protection</p>
+            <p className="text-xs text-muted-foreground">Manage your authentication and account protection</p>
             <div className="space-y-4">
               {!MVP_MFA_DISABLED && (
                 <>
@@ -421,7 +421,7 @@ export function SettingsContent() {
                       {loadingMfa ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /> : mfaFactors.length > 0 ? <ShieldCheck className="h-5 w-5 text-success" /> : <ShieldOff className="h-5 w-5 text-muted-foreground" />}
                       <div>
                         <p className="font-medium text-foreground">Two-Factor Authentication</p>
-                        <p className="text-sm text-muted-foreground">{loadingMfa ? "Checking status..." : mfaFactors.length > 0 ? "Enabled - Your account is protected" : "Add an extra layer of security"}</p>
+                        <p className="text-xs text-muted-foreground">{loadingMfa ? "Checking status..." : mfaFactors.length > 0 ? "Enabled - Your account is protected" : "Add an extra layer of security"}</p>
                       </div>
                     </div>
                     {loadingMfa ? null : mfaFactors.length > 0 ? (
@@ -440,7 +440,7 @@ export function SettingsContent() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium text-foreground">Ask for a login code every time I sign in</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                         When off, you'll only enter your password. When on, you'll also enter a 6-digit code from your authenticator app at every sign-in.
                       </p>
                     </div>
@@ -461,20 +461,20 @@ export function SettingsContent() {
           <div className="frame p-4">
             <div className="frame-header -mx-4 -mt-4 mb-4 gap-3">
               <Database className="h-4 w-4 text-primary" />
-              <h2 className="text-sm font-semibold text-foreground">Data Management</h2>
+              <h2 className="text-xs font-semibold text-foreground">Data Management</h2>
             </div>
             <div className="space-y-4">
               <Button variant="outline">Export All Data</Button>
-              <p className="text-sm text-muted-foreground">Download all your client data, documents, and consultation records</p>
+              <p className="text-xs text-muted-foreground">Download all your client data, documents, and consultation records</p>
             </div>
           </div>
 
           <div className="rounded-xl border border-destructive bg-card p-4 shadow-sm space-y-3">
             <div className="flex items-center gap-3">
               <Trash2 className="h-4 w-4 text-destructive" />
-              <h2 className="text-sm font-semibold text-destructive">Delete account</h2>
+              <h2 className="text-xs font-semibold text-destructive">Delete account</h2>
             </div>
-            <p className="text-sm text-muted-foreground">Permanently deletes your account and profile. This cannot be undone.</p>
+            <p className="text-xs text-muted-foreground">Permanently deletes your account and profile. This cannot be undone.</p>
             <Button variant="outline" className="text-destructive hover:text-destructive" onClick={() => setShowDeleteDialog(true)}>Delete my account</Button>
           </div>
         </TabsContent>
@@ -485,13 +485,13 @@ export function SettingsContent() {
             <div className="frame p-4 space-y-4">
               <div className="frame-header -mx-4 -mt-4 mb-4 gap-3">
                 <Settings2 className="h-4 w-4 text-primary" />
-                <h2 className="text-sm font-semibold text-foreground">Preferences</h2>
+                <h2 className="text-xs font-semibold text-foreground">Preferences</h2>
               </div>
-              <p className="text-muted-foreground text-sm">Manage your application preferences and integrations</p>
+              <p className="text-muted-foreground text-xs">Manage your application preferences and integrations</p>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium text-foreground">Screen tips</p>
-                  <p className="text-sm text-muted-foreground">Show the first-visit orientation tip on every screen again.</p>
+                  <p className="text-xs text-muted-foreground">Show the first-visit orientation tip on every screen again.</p>
                 </div>
                 <Button
                   variant="outline"
@@ -513,12 +513,12 @@ export function SettingsContent() {
               <div className="frame p-4 space-y-4">
                 <div className="frame-header -mx-4 -mt-4 mb-4 gap-3">
                   <Users className="h-4 w-4 text-primary" />
-                  <h3 className="text-sm font-semibold text-foreground">Client Management</h3>
+                  <h3 className="text-xs font-semibold text-foreground">Client Management</h3>
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-foreground text-sm">Client Inactivity Threshold</p>
-                    <p className="text-sm text-muted-foreground">Automatically mark clients as inactive after this period without a visit</p>
+                    <p className="font-medium text-foreground text-xs">Client Inactivity Threshold</p>
+                    <p className="text-xs text-muted-foreground">Automatically mark clients as inactive after this period without a visit</p>
                   </div>
                   <Select value={inactiveThreshold.toString()} onValueChange={(value) => saveInactiveThreshold(parseInt(value))} disabled={savingThreshold}>
                     <SelectTrigger className="w-[180px]"><SelectValue placeholder="Select period" /></SelectTrigger>
@@ -538,15 +538,15 @@ export function SettingsContent() {
             <div className="frame p-4 space-y-3">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-primary" />
-                <h3 className="text-sm font-semibold text-foreground">Calendar Integration</h3>
+                <h3 className="text-xs font-semibold text-foreground">Calendar Integration</h3>
               </div>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     {googleRealConnected && <CheckCircle className="h-4 w-4 text-success" />}
                     <div>
-                      <p className="font-medium text-foreground text-sm">Google Calendar</p>
-                      <p className="text-sm text-muted-foreground">{googleRealConnected ? "Connected - Appointments syncing" : "Sync appointments with Google Calendar"}</p>
+                      <p className="font-medium text-foreground text-xs">Google Calendar</p>
+                      <p className="text-xs text-muted-foreground">{googleRealConnected ? "Connected - Appointments syncing" : "Sync appointments with Google Calendar"}</p>
                     </div>
                   </div>
                   {googleRealConnected ? (
@@ -560,8 +560,8 @@ export function SettingsContent() {
                   <div className="flex items-center gap-3">
                     {outlookConnected && <CheckCircle className="h-4 w-4 text-success" />}
                     <div>
-                      <p className="font-medium text-foreground text-sm">Outlook Calendar</p>
-                      <p className="text-sm text-muted-foreground">{outlookConnected ? "Connected - Appointments syncing" : "Sync appointments with Outlook"}</p>
+                      <p className="font-medium text-foreground text-xs">Outlook Calendar</p>
+                      <p className="text-xs text-muted-foreground">{outlookConnected ? "Connected - Appointments syncing" : "Sync appointments with Outlook"}</p>
                     </div>
                   </div>
                   {outlookConnected ? (
@@ -580,16 +580,16 @@ export function SettingsContent() {
           <div className="frame p-4">
             <div className="frame-header -mx-4 -mt-4 mb-4 gap-3">
               <CreditCard className="h-5 w-5 text-primary" />
-              <h2 className="text-sm font-semibold text-foreground">Subscription</h2>
+              <h2 className="text-xs font-semibold text-foreground">Subscription</h2>
             </div>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div><p className="font-medium text-foreground">Current Plan</p><p className="text-sm text-muted-foreground">{loadingSubscription ? "Loading..." : getCurrentPlanName()}</p></div>
+                <div><p className="font-medium text-foreground">Current Plan</p><p className="text-xs text-muted-foreground">{loadingSubscription ? "Loading..." : getCurrentPlanName()}</p></div>
                 {subscription?.status === "active" ? <Badge variant="default" className="bg-primary">Active</Badge> : subscription?.status === "cancelled" ? <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">Cancelled</Badge> : <Badge variant="secondary">Inactive</Badge>}
               </div>
               <Separator />
               <div className="flex items-center justify-between">
-                <div><p className="font-medium text-foreground">Subscription Status</p><p className="text-sm text-muted-foreground">{loadingSubscription ? "Loading..." : getSubscriptionStatus()}</p></div>
+                <div><p className="font-medium text-foreground">Subscription Status</p><p className="text-xs text-muted-foreground">{loadingSubscription ? "Loading..." : getSubscriptionStatus()}</p></div>
                 <div className="flex gap-2">
                   {subscription?.status === "active" && <Button variant="outline" onClick={() => setShowCancelDialog(true)} className="text-destructive hover:text-destructive">Cancel</Button>}
                   {subscription?.status === "cancelled" && (
@@ -606,7 +606,7 @@ export function SettingsContent() {
           <div className="frame p-4">
             <div className="frame-header -mx-4 -mt-4 mb-4 gap-3">
               <Receipt className="h-5 w-5 text-primary" />
-              <h2 className="text-sm font-semibold text-foreground">Payment History</h2>
+              <h2 className="text-xs font-semibold text-foreground">Payment History</h2>
             </div>
             {loadingPaymentHistory ? (
               <div className="flex items-center justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
@@ -641,7 +641,7 @@ export function SettingsContent() {
       <TwoFactorSetup open={show2FASetup} onOpenChange={setShow2FASetup} onSuccess={fetchMfaFactors} />
 
       <Dialog open={showManagePlan} onOpenChange={setShowManagePlan}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="settings-scope sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Choose Your Plan</DialogTitle>
             <DialogDescription>Select a billing cycle for your {planType} subscription. Payment is processed securely via PayPal.</DialogDescription>
@@ -651,7 +651,7 @@ export function SettingsContent() {
               <RadioGroupItem value="monthly" id="monthly" className="mt-1" />
               <div className="ml-3 flex-1">
                 <Label htmlFor="monthly" className="font-semibold text-foreground cursor-pointer">Monthly <span className="ml-2 text-primary">${plans.monthly.price}/{plans.monthly.period}</span></Label>
-                <ul className="mt-2 text-sm text-muted-foreground space-y-1">
+                <ul className="mt-2 text-xs text-muted-foreground space-y-1">
                   <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Full access to all features</li>
                   <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Cancel anytime</li>
                   <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Priority support</li>
@@ -662,7 +662,7 @@ export function SettingsContent() {
               <RadioGroupItem value="annual" id="annual" className="mt-1" />
               <div className="ml-3 flex-1">
                 <Label htmlFor="annual" className="font-semibold text-foreground cursor-pointer">Annual <span className="ml-2 text-primary">${plans.annual.price}/{plans.annual.period}</span> <Badge variant="secondary" className="ml-2 bg-sky-50 text-primary">Save ${plans.annual.savings}</Badge></Label>
-                <ul className="mt-2 text-sm text-muted-foreground space-y-1">
+                <ul className="mt-2 text-xs text-muted-foreground space-y-1">
                   <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Full access to all features</li>
                   <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />2 months free</li>
                   <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Priority support</li>
@@ -680,7 +680,7 @@ export function SettingsContent() {
       </Dialog>
 
       <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="settings-scope">
           <AlertDialogHeader>
             <AlertDialogTitle>Cancel Subscription?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -698,7 +698,7 @@ export function SettingsContent() {
       </AlertDialog>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={(v) => { setShowDeleteDialog(v); if (!v) setDeleteConfirm(""); }}>
-        <AlertDialogContent>
+        <AlertDialogContent className="settings-scope">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete your account?</AlertDialogTitle>
             <AlertDialogDescription>
