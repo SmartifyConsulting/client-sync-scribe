@@ -38,23 +38,44 @@ export async function buildDocumentPdfBase64(html: string): Promise<string | nul
     );
 
     await document.fonts.ready;
-    const canvas = await html2canvas(target, {
-      scale: 2,
-      backgroundColor: "#ffffff",
-      useCORS: true,
-      logging: false,
-      onclone: (_doc, clonedTarget) => {
+    const renderOptions = {
+      scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false,
+      onclone: (_doc: Document, clonedTarget: HTMLElement) => {
         clonedTarget.style.letterSpacing = "0.15px";
         clonedTarget.style.wordSpacing = "1px";
       },
-    });
+    };
+    // Only the temporary render DOM is changed; stored signed HTML is preserved.
+    const legacyFooter = target.lastElementChild as HTMLElement | null;
+    const footer = target.querySelector<HTMLElement>("[data-document-footer]")
+      ?? (legacyFooter?.style.fontSize === "9.5px" && legacyFooter.style.borderTop && legacyFooter.style.textAlign === "center" ? legacyFooter : null);
+    let footerCanvas: HTMLCanvasElement | null = null;
+    if (footer) {
+      const footerHost = document.createElement("div");
+      footerHost.style.cssText = "position:absolute;top:0;left:0;background:white";
+      footerHost.style.width = footer.getBoundingClientRect().width + "px";
+      footerHost.style.fontFamily = getComputedStyle(target).fontFamily;
+      const footerCopy = footer.cloneNode(true) as HTMLElement;
+      footerCopy.style.marginTop = "0";
+      footerCopy.style.paddingBottom = "8px";
+      footerHost.appendChild(footerCopy);
+      host.appendChild(footerHost);
+      try { footerCanvas = await html2canvas(footerCopy, renderOptions); }
+      finally { footerHost.remove(); }
+      footer.remove();
+    }
+    const canvas = await html2canvas(target, renderOptions);
 
     const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
     const margin = 20; // mm: reserved on every page, not only the outer HTML.
     const pixelsPerMm = canvas.width / pageWidth;
-    const pagePixels = Math.floor((pageHeight - margin * 2) * pixelsPerMm);
+    const footerWidth = footerCanvas ? footerCanvas.width / pixelsPerMm : 0;
+    const footerHeight = footerCanvas ? footerCanvas.height / pixelsPerMm : 0;
+    const bottomMargin = Math.max(margin, footerHeight + 14);
+    const footerImage = footerCanvas?.toDataURL("image/jpeg", 0.98);
+    const pagePixels = Math.floor((pageHeight - margin - bottomMargin) * pixelsPerMm);
     const context = canvas.getContext("2d", { willReadFrequently: true });
     if (!context) throw new Error("Could not read document image");
     let top = 0;
@@ -89,7 +110,10 @@ export async function buildDocumentPdfBase64(html: string): Promise<string | nul
       if (!sliceContext) throw new Error("Could not create document page");
       sliceContext.drawImage(canvas, 0, top, canvas.width, slice.height, 0, 0, canvas.width, slice.height);
       if (top > 0) pdf.addPage();
-      pdf.addImage(slice.toDataURL("image/png"), "PNG", 0, margin, pageWidth, slice.height / pixelsPerMm);
+      pdf.addImage(slice.toDataURL("image/jpeg", 0.98), "JPEG", 0, margin, pageWidth, slice.height / pixelsPerMm, `document-body-${top}`);
+      if (footerImage) {
+        pdf.addImage(footerImage, "JPEG", (pageWidth - footerWidth) / 2, pageHeight - 8 - footerHeight, footerWidth, footerHeight, "document-footer");
+      }
       top = bottom;
     }
 

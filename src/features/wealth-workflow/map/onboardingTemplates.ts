@@ -12,7 +12,7 @@ ${p?.__businessLogo || p?.__fspLogo ? `<div style="display:flex;justify-content:
 <h1 style="margin:6px 0 0;font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:26px;color:${NAVY};letter-spacing:.01em">${title}</h1></div>
 <p style="margin:0;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:${NAVY};font-weight:600">${esc(p?.business_name || p?.fsp_name || "")}</p></div>
 ${body}
-<div style="margin-top:36px;padding-top:12px;border-top:1px solid ${RULE};font-size:9.5px;color:${MUTED};text-align:center;line-height:1.5">${footer(p)}</div></div>`;
+<div data-document-footer="true" style="margin-top:36px;padding-top:12px;border-top:1px solid ${RULE};font-size:9.5px;color:${MUTED};text-align:center;line-height:1.5">${footer(p)}</div></div>`;
 const h2 = (t: string) => `<h2 style="margin:26px 0 10px;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:${NAVY};font-weight:600">${t}</h2>`;
 const table = (rows: [string, string][]) => `<table style="width:100%;border-collapse:collapse;font-size:12px">${rows.map(([k, v]) => `<tr><td style="width:36%;padding:8px 12px 8px 0;border-bottom:1px solid ${RULE};color:${MUTED};vertical-align:top">${k}</td><td style="padding:8px 0;border-bottom:1px solid ${RULE};vertical-align:top">${v}</td></tr>`).join("")}</table>`;
 
