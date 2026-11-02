@@ -652,3 +652,7 @@ textarea::placeholder {
   .settings-scope [role="combobox"],
   .settings-scope [role="radiogroup"] { @apply text-xs; }
 }
+
+@layer components {
+  .settings-scope .settings-frame-header { @apply justify-start; }
+}

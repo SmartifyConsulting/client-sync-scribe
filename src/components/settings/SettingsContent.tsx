@@ -361,7 +361,7 @@ export function SettingsContent() {
         {/* PROFILE */}
         <TabsContent value="profile" className="mt-4 space-y-4">
           <div className="frame p-4 space-y-4">
-            <div className="frame-header -mx-4 -mt-4 mb-4 gap-3">
+            <div className="frame-header settings-frame-header -mx-4 -mt-4 mb-4 gap-3">
               <UserRound className="h-4 w-4 text-primary" />
               <h2 className="text-xs font-semibold text-foreground">My details</h2>
             </div>
@@ -408,7 +408,7 @@ export function SettingsContent() {
           </div>
 
           <div className="frame p-4">
-            <div className="frame-header -mx-4 -mt-4 mb-4 gap-3">
+            <div className="frame-header settings-frame-header -mx-4 -mt-4 mb-4 gap-3">
               <Shield className="h-4 w-4 text-primary" />
               <h2 className="text-xs font-semibold text-foreground">Security</h2>
             </div>
@@ -459,7 +459,7 @@ export function SettingsContent() {
           </div>
 
           <div className="frame p-4">
-            <div className="frame-header -mx-4 -mt-4 mb-4 gap-3">
+            <div className="frame-header settings-frame-header -mx-4 -mt-4 mb-4 gap-3">
               <Database className="h-4 w-4 text-primary" />
               <h2 className="text-xs font-semibold text-foreground">Data Management</h2>
             </div>
@@ -483,7 +483,7 @@ export function SettingsContent() {
         <TabsContent value="preferences" className="mt-4">
           <div className="space-y-4">
             <div className="frame p-4 space-y-4">
-              <div className="frame-header -mx-4 -mt-4 mb-4 gap-3">
+              <div className="frame-header settings-frame-header -mx-4 -mt-4 mb-4 gap-3">
                 <Settings2 className="h-4 w-4 text-primary" />
                 <h2 className="text-xs font-semibold text-foreground">Preferences</h2>
               </div>
@@ -511,7 +511,7 @@ export function SettingsContent() {
 
             {isAdvisor && (
               <div className="frame p-4 space-y-4">
-                <div className="frame-header -mx-4 -mt-4 mb-4 gap-3">
+                <div className="frame-header settings-frame-header -mx-4 -mt-4 mb-4 gap-3">
                   <Users className="h-4 w-4 text-primary" />
                   <h3 className="text-xs font-semibold text-foreground">Client Management</h3>
                 </div>
@@ -578,7 +578,7 @@ export function SettingsContent() {
         {/* BILLING */}
         <TabsContent value="billing" className="mt-4 space-y-4">
           <div className="frame p-4">
-            <div className="frame-header -mx-4 -mt-4 mb-4 gap-3">
+            <div className="frame-header settings-frame-header -mx-4 -mt-4 mb-4 gap-3">
               <CreditCard className="h-5 w-5 text-primary" />
               <h2 className="text-xs font-semibold text-foreground">Subscription</h2>
             </div>
@@ -604,7 +604,7 @@ export function SettingsContent() {
           </div>
 
           <div className="frame p-4">
-            <div className="frame-header -mx-4 -mt-4 mb-4 gap-3">
+            <div className="frame-header settings-frame-header -mx-4 -mt-4 mb-4 gap-3">
               <Receipt className="h-5 w-5 text-primary" />
               <h2 className="text-xs font-semibold text-foreground">Payment History</h2>
             </div>
