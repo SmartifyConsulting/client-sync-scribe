@@ -12,6 +12,9 @@ export async function buildDocumentPdfBase64(html: string): Promise<string | nul
   host.style.top = "0";
   host.style.width = "794px"; // ~210mm at 96dpi
   host.style.background = "#ffffff";
+  // Document text must not inherit the application UI's negative tracking.
+  host.style.letterSpacing = "normal";
+  host.style.wordSpacing = "normal";
   host.innerHTML = html;
   document.body.appendChild(host);
 
@@ -30,28 +33,60 @@ export async function buildDocumentPdfBase64(html: string): Promise<string | nul
       ),
     );
 
+    await document.fonts.ready;
     const canvas = await html2canvas(target, {
       scale: 2,
       backgroundColor: "#ffffff",
       useCORS: true,
       logging: false,
+      onclone: (_doc, clonedTarget) => {
+        clonedTarget.style.letterSpacing = "normal";
+        clonedTarget.style.wordSpacing = "normal";
+      },
     });
 
     const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    const imgHeight = (canvas.height * pageWidth) / canvas.width;
-    const imgData = canvas.toDataURL("image/jpeg", 0.92);
-
-    let remaining = imgHeight;
-    let position = 0;
-    pdf.addImage(imgData, "JPEG", 0, position, pageWidth, imgHeight);
-    remaining -= pageHeight;
-    while (remaining > 0) {
-      position -= pageHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, "JPEG", 0, position, pageWidth, imgHeight);
-      remaining -= pageHeight;
+    const margin = 20; // mm: reserved on every page, not only the outer HTML.
+    const pixelsPerMm = canvas.width / pageWidth;
+    const pagePixels = Math.floor((pageHeight - margin * 2) * pixelsPerMm);
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (!context) throw new Error("Could not read document image");
+    let top = 0;
+    while (top < canvas.height) {
+      let bottom = Math.min(canvas.height, top + pagePixels);
+      if (bottom < canvas.height) {
+        // Prefer a blank scanline above the boundary so letters aren't bisected.
+        const searchStart = Math.max(top + Math.floor(pagePixels * 0.75), bottom - 160);
+        const strip = context.getImageData(0, searchStart, canvas.width, bottom - searchStart);
+        for (let row = strip.height - 1; row >= 0; row--) {
+          let blank = true;
+          for (let x = 0; x < strip.width; x++) {
+            const i = (row * strip.width + x) * 4;
+            if (strip.data[i] < 245 || strip.data[i + 1] < 245 || strip.data[i + 2] < 245) { blank = false; break; }
+          }
+          if (blank) { bottom = searchStart + row + 1; break; }
+        }
+      }
+      if (bottom < canvas.height) {
+        const bounds = target.getBoundingClientRect();
+        const scale = canvas.width / bounds.width;
+        for (const heading of target.querySelectorAll("h2, h3")) {
+          const rect = heading.getBoundingClientRect();
+          const y = Math.floor((rect.top - bounds.top) * scale);
+          if (y > top && y < bottom && y + (rect.height + 60) * scale > bottom) bottom = y;
+        }
+      }
+      const slice = document.createElement("canvas");
+      slice.width = canvas.width;
+      slice.height = bottom - top;
+      const sliceContext = slice.getContext("2d");
+      if (!sliceContext) throw new Error("Could not create document page");
+      sliceContext.drawImage(canvas, 0, top, canvas.width, slice.height, 0, 0, canvas.width, slice.height);
+      if (top > 0) pdf.addPage();
+      pdf.addImage(slice.toDataURL("image/png"), "PNG", 0, margin, pageWidth, slice.height / pixelsPerMm);
+      top = bottom;
     }
 
     const dataUri = pdf.output("datauristring");
