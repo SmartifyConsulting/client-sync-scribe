@@ -22,6 +22,10 @@ import type { Database } from "@/integrations/supabase/types";
 type Tables = Database["public"]["Tables"];
 type Enums = Database["public"]["Enums"];
 
+/** Tables removed from the live schema; kept loose for hidden legacy code. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type LegacyRow = Record<string, any>;
+
 export type Row<T extends keyof Tables> = Tables[T]["Row"];
 export type Insert<T extends keyof Tables> = Tables[T]["Insert"];
 export type Update<T extends keyof Tables> = Tables[T]["Update"];
@@ -38,9 +42,9 @@ export type DocumentRecord = Row<"documents">;
 export type DocumentInsert = Insert<"documents">;
 export type DocumentUpdate = Update<"documents">;
 
-export type Invoice = Row<"invoices">;
-export type InvoiceInsert = Insert<"invoices">;
-export type InvoiceUpdate = Update<"invoices">;
+export type Invoice = LegacyRow;
+export type InvoiceInsert = LegacyRow;
+export type InvoiceUpdate = LegacyRow;
 
 export type Prescription = Row<"prescriptions">;
 export type PrescriptionInsert = Insert<"prescriptions">;
@@ -56,13 +60,13 @@ export type AppointmentUpdate = Update<"appointments">;
 
 export type AppointmentRequest = Row<"appointment_requests">;
 
-export type MedicationAdherence = Row<"medication_adherence">;
+export type MedicationAdherence = LegacyRow;
 
-export type HospitalAdmission = Row<"hospital_admissions">;
-export type AdmissionVitals = Row<"admission_vitals">;
-export type AdmissionMedication = Row<"admission_medications">;
-export type AdmissionLabResult = Row<"admission_lab_results">;
-export type AdmissionImaging = Row<"admission_imaging">;
+export type HospitalAdmission = LegacyRow;
+export type AdmissionVitals = LegacyRow;
+export type AdmissionMedication = LegacyRow;
+export type AdmissionLabResult = LegacyRow;
+export type AdmissionImaging = LegacyRow;
 
 export type Notification = Row<"notifications">;
 export type Template = Row<"templates"> extends never ? never : Row<"templates">;

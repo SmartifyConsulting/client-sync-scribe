@@ -76,10 +76,10 @@ Deno.serve(async (req) => {
       }
       if (new Date(inv.expires_at) < new Date()) return json({ error: "This invitation has expired. Ask your Wealth Manager to resend it." }, 410);
       if (user.id === inv.owner_user_id) return json({ error: "You can't accept your own client invitation. Open the link signed in as the client." }, 400);
-      const { error: pe } = await admin.from("patients").update({ patient_user_id: user.id, email: user.email }).eq("id", inv.patient_id);
+      const { error: pe } = await admin.from("clients").update({ patient_user_id: user.id, email: user.email }).eq("id", inv.patient_id);
       if (pe) return json({ error: "We couldn't link your account. Please try again." }, 500);
       const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", user.id);
-      if (!roles?.some((r) => r.role === "patient")) await admin.from("user_roles").insert({ user_id: user.id, role: "patient" });
+      if (!roles?.some((r) => r.role === "client")) await admin.from("user_roles").insert({ user_id: user.id, role: "client" });
       await admin.from("wealth_client_invites").update({ status: "accepted", accepted_by: user.id, accepted_at: new Date().toISOString() }).eq("id", inv.id);
       if (inv.workflow_id) {
         await admin.from("wealth_workflow_transitions").insert({
@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
 
     if (!ALLOWED_ORIGIN.test(p.origin)) return json({ error: "Invalid app address." }, 400);
     const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", user.id);
-    if (!roles?.some((r) => r.role === "doctor" || r.role === "admin"))
+    if (!roles?.some((r) => r.role === "broker" || r.role === "admin"))
       return json({ error: "Only Wealth Managers can invite new clients. Ask an administrator to mark your account as a Wealth Manager." }, 403);
 
     if (p.action === "renew") {
@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
 
     // create
     const name = `${p.firstName} ${p.lastName}`;
-    const { data: pat, error: pErr } = await admin.from("patients").insert({
+    const { data: pat, error: pErr } = await admin.from("clients").insert({
       user_id: user.id, name, first_name: p.firstName, last_name: p.lastName, phone: p.phone || null, email: p.email || null,
     }).select("id").single();
     if (pErr || !pat) return json({ error: "We couldn't create the client record. Please try again." }, 500);
