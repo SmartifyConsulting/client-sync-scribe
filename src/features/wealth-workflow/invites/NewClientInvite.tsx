@@ -27,14 +27,35 @@ const message = (first: string, manager: string, url: string) =>
 function SendOptions({ first, phone, email, url, manager }: { first: string; phone?: string | null; email?: string | null; url: string; manager: string }) {
   const { toast } = useToast();
   const text = message(first, manager, url);
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+
+  const sendViaEmail = async () => {
+    if (!email) return;
+    setSendingEmail(true);
+    const { data, error } = await supabase.functions.invoke("wealth-client-invite", {
+      body: { action: "send_email", url, email, firstName: first },
+    });
+    setSendingEmail(false);
+    if (error || data?.error) {
+      return toast({ title: "Couldn't send email", description: data?.error ?? "Please try again, or use WhatsApp / copy the link.", variant: "destructive" });
+    }
+    setEmailSent(true);
+    toast({ title: "Email sent", description: `The onboarding link was emailed to ${email}.` });
+  };
+
   return (
     <div className="space-y-3">
       <div className="rounded-xl border border-border bg-muted/30 p-3 text-xs break-all text-muted-foreground">{url}</div>
       <div className="grid gap-2 sm:grid-cols-3">
-        <Button asChild variant="default"><a href={`https://wa.me/${waNumber(phone)}?text=${encodeURIComponent(text)}`} target="_blank" rel="noreferrer"><MessageCircle className="h-4 w-4" />WhatsApp</a></Button>
-        <Button asChild variant="outline"><a href={`mailto:${email ?? ""}?subject=${encodeURIComponent("Your Elysian onboarding link")}&body=${encodeURIComponent(text)}`}><Mail className="h-4 w-4" />Email</a></Button>
+        <Button asChild variant="outline"><a href={`https://wa.me/${waNumber(phone)}?text=${encodeURIComponent(text)}`} target="_blank" rel="noreferrer"><MessageCircle className="h-4 w-4" />WhatsApp</a></Button>
+        <Button variant={emailSent ? "outline" : "default"} disabled={!email || sendingEmail} onClick={sendViaEmail}>
+          <Mail className="h-4 w-4" />
+          {sendingEmail ? "Sending…" : emailSent ? "Sent — resend" : "Email"}
+        </Button>
         <Button variant="outline" onClick={() => { navigator.clipboard.writeText(url); toast({ title: "Link copied" }); }}><Copy className="h-4 w-4" />Copy link</Button>
       </div>
+      {emailSent && <p className="text-xs text-primary">✅ Emailed to {email}.</p>}
       <p className="text-xs text-muted-foreground">The link works once and expires in 14 days.</p>
     </div>
   );

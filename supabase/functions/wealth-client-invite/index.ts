@@ -1,6 +1,7 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from "npm:zod@3";
+import { sendEmail } from "../_shared/email.ts";
 
 // New Client invites: create (Wealth Manager), preview (public, by token), accept (signed-in client), renew (owner).
 const Body = z.discriminatedUnion("action", [
@@ -15,6 +16,12 @@ const Body = z.discriminatedUnion("action", [
   z.object({ action: z.literal("renew"), inviteId: z.string().uuid(), origin: z.string().url().max(200) }),
   z.object({ action: z.literal("preview"), token: z.string().min(20).max(100) }),
   z.object({ action: z.literal("accept"), token: z.string().min(20).max(100) }),
+  z.object({
+    action: z.literal("send_email"),
+    url: z.string().url().max(300),
+    email: z.string().trim().email().max(255),
+    firstName: z.string().trim().min(1).max(100),
+  }),
 ]);
 const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -26,6 +33,44 @@ const newToken = () => {
   return btoa(String.fromCharCode(...b)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 };
 const ALLOWED_ORIGIN = /^https:\/\/([a-z0-9-]+\.)*(holarc\.co\.za|lovable\.app|lovableproject\.com)$|^http:\/\/localhost(:\d+)?$/;
+
+/** Best-effort: emails the onboarding link to the client via Resend. Never
+ * throws — a failed send must not block invite creation, since the link is
+ * still shown/copyable in the app regardless. */
+async function emailInviteLink(
+  admin: ReturnType<typeof createClient>,
+  ownerUserId: string,
+  to: string,
+  firstName: string,
+  url: string,
+) {
+  try {
+    const [{ data: prof }, { data: info }] = await Promise.all([
+      admin.from("profiles").select("full_name").eq("id", ownerUserId).maybeSingle(),
+      admin.from("wealth_practice_info").select("planner_name, fsp_name").eq("user_id", ownerUserId).maybeSingle(),
+    ]);
+    const manager = (info as any)?.planner_name || (prof as any)?.full_name || "Your Wealth Manager";
+    const fspName = (info as any)?.fsp_name as string | undefined;
+    const html = `
+      <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#1a1a1a;">
+        <p>Hi ${firstName},</p>
+        <p>${manager}${fspName ? ` of ${fspName}` : ""} has invited you to set up your Holarc Wealth account.</p>
+        <p>Open this secure link to get started — it will walk you through a short onboarding step (KYC/AML/PEP screening):</p>
+        <p style="margin:24px 0;">
+          <a href="${url}" style="background:#000;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;display:inline-block;">Set up my account</a>
+        </p>
+        <p style="font-size:13px;color:#666;">Or copy this link: <br/>${url}</p>
+        <p style="font-size:13px;color:#666;">This link works once and expires in 14 days.</p>
+      </div>
+    `;
+    const res = await sendEmail({ to, subject: `${manager} invited you to Holarc Wealth`, html });
+    if (!res.ok) console.error("Invite email send failed", res.error);
+    return res.ok;
+  } catch (e) {
+    console.error("Invite email threw", e);
+    return false;
+  }
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -90,10 +135,17 @@ Deno.serve(async (req) => {
       return json({ ok: true, workflowId: inv.workflow_id });
     }
 
-    if (!ALLOWED_ORIGIN.test(p.origin)) return json({ error: "Invalid app address." }, 400);
     const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", user.id);
     if (!roles?.some((r) => r.role === "broker" || r.role === "admin"))
       return json({ error: "Only Wealth Managers can invite new clients. Ask an administrator to mark your account as a Wealth Manager." }, 403);
+
+    if (p.action === "send_email") {
+      const sent = await emailInviteLink(admin, user.id, p.email, p.firstName, p.url);
+      if (!sent) return json({ error: "Could not send the email. Please try again, or use WhatsApp / copy the link instead." }, 502);
+      return json({ ok: true });
+    }
+
+    if (!ALLOWED_ORIGIN.test(p.origin)) return json({ error: "Invalid app address." }, 400);
 
     if (p.action === "renew") {
       const { data: inv } = await admin.from("wealth_client_invites").select("id, owner_user_id, status").eq("id", p.inviteId).maybeSingle();
