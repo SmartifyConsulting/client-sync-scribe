@@ -7,6 +7,7 @@ import { ClientDetailsEditor } from "@/components/clients/ClientDetailsEditor";
 import { Client } from "@/hooks/useClients";
 import { useToast } from "@/hooks/use-toast";
 import { EmergencyContact } from "@/features/clients/components/EmergencyContactsSection";
+import MyPersonalDashboard from "@/pages/MyPersonalDashboard";
 
 
 
@@ -215,16 +216,24 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
       </div>}
 
       {client ? (
-        <ClientDetailsEditor
-          client={client}
-          onSave={handleSave}
-          isSelfService
-          userEmail={userEmail}
-          userId={userId}
-          emergencyContacts={emergencyContacts}
-          onEmergencyContactsChange={setEmergencyContacts}
-          section={section}
-        />
+        <>
+          <ClientDetailsEditor
+            client={client}
+            onSave={handleSave}
+            isSelfService
+            userEmail={userEmail}
+            userId={userId}
+            emergencyContacts={emergencyContacts}
+            onEmergencyContactsChange={setEmergencyContacts}
+            section={section}
+          />
+          {!embedded && section === "health" && (
+            <div className="pt-2">
+              <p className="mx-1 mb-2 text-2xs font-bold uppercase tracking-[0.14em] text-muted-foreground">My Dashboard</p>
+              <MyPersonalDashboard />
+            </div>
+          )}
+        </>
       ) : (
         <div className="p-6 text-center text-muted-foreground border border-dashed border-border rounded-lg">
           <p>{t("client.myDetails.recordSetupMessage")}</p>

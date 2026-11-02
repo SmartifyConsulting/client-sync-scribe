@@ -110,9 +110,8 @@ const doctorModeItems: (NavItem & { tour?: string })[] = [
 const CLIENT_BLOCKED_PATHS = ["/business", "/clients"];
 
 const patientNavItems: (NavItem & { tour?: string })[] = [
-  { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.myPersonalDashboard", to: "/my-dashboard" },
-  { icon: Activity, label: "Live Workspace", labelKey: "nav.liveWorkspace", to: "/my-workspace" },
   { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/client/details?section=health" },
+  { icon: Activity, label: "Live Workspace", labelKey: "nav.liveWorkspace", to: "/my-workspace" },
   { icon: ClientFolder, label: "Documents", labelKey: "nav.clientDocuments", to: "/client/documents" },
   { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
   { icon: BedDouble, label: "My Admissions", labelKey: "nav.myAdmissions", to: "/client/admissions" },
@@ -202,8 +201,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
    *  even if the sidebar remounts on navigation — local state was resetting
    *  to "broker" on every route change, leaving the pill stuck showing the
    *  wrong side as active. */
-  const isOnMyDashboardRoute = location.pathname.startsWith("/my-dashboard");
-  const profileMode: "broker" | "client" = (isOnPatientRoute || isOnMyDashboardRoute) ? "client" : "broker";
+  const profileMode: "broker" | "client" = isOnPatientRoute ? "client" : "broker";
 
   const doctorInPatientMode = isAdvisor && profileMode === "client";
 
@@ -283,15 +281,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     const itemPath = hasQuery ? item.to.split("?")[0] : item.to;
     const itemSearch = hasQuery ? item.to.split("?")[1] : "";
 
-    // "My Dashboard" is the universal post-login landing page (see
-    // RoleBasedRedirect in App.tsx) but isn't itself a nav item — treat it as
-    // the advisor Dashboard link's route too, so Dashboard highlights on landing
-    // instead of nothing being highlighted at all.
-    const isDashboardLandingAlias = itemPath === "/broker-dashboard" && location.pathname === "/my-dashboard";
-
-    const isItemActive = isDashboardLandingAlias
-      ? true
-      : hasQuery
+    const isItemActive = hasQuery
       ? location.pathname === itemPath &&
         (location.search === `?${itemSearch}` ||
           (!location.search && itemSearch === "section=health"))
@@ -424,7 +414,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             key={mode}
             type="button"
             onClick={() => {
-              navigate(isProfessional ? professionalHome : "/my-dashboard");
+              navigate(isProfessional ? professionalHome : "/client/details?section=health");
               onNavigate?.();
             }}
             className={cn(
