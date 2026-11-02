@@ -26,7 +26,6 @@ import {
   FileText,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useProfile } from "@/hooks/useProfile";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -96,11 +95,10 @@ const INSIGHTS = [
 ];
 
 
-export default function MyPersonalDashboard() {
+/** Photo, greeting and AI summary — the part of the dashboard that reads
+ *  best at the top of a page, above everything else. */
+export function DashboardGreeting() {
   const { user } = useAuth();
-  const { profile } = useProfile();
-  const navigate = useNavigate();
-  const unlocked = true;
 
   const { data: patientIds = [] } = useQuery({
     queryKey: ["dashboard-client-ids", user?.id],
@@ -108,20 +106,6 @@ export default function MyPersonalDashboard() {
     queryFn: async () => {
       const { data } = await supabase.from("clients").select("id").eq("patient_user_id", user!.id);
       return (data || []).map((p) => p.id);
-    },
-  });
-
-  const { data: careTeam = [] } = useQuery({
-    queryKey: ["dashboard-care-team", patientIds],
-    enabled: patientIds.length > 0,
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("clients")
-        .select("emergency_contacts")
-        .in("id", patientIds)
-        .limit(1)
-        .maybeSingle();
-      return ((data?.emergency_contacts as any[]) || []).slice(0, 5);
     },
   });
 
@@ -170,15 +154,24 @@ export default function MyPersonalDashboard() {
   );
 
   const { data: w } = useClientWealth();
+
+  return (
+    <>
+      <ClientHeroCard emotionalLine={GREETING_LINE[state]} />
+      {w?.clientId && <ClientAISummary clientId={w.clientId} />}
+    </>
+  );
+}
+
+/** Financial Protection, What's Happening, My Wealth and My Retirement panels. */
+export function DashboardPanels() {
+  const navigate = useNavigate();
+  const unlocked = true;
+  const { data: w } = useClientWealth();
   const t = w?.totals;
 
   return (
-    <div className="container mx-auto p-4 max-w-7xl space-y-4">
-      {/* Hero: photo, greeting, Vulas, appointments */}
-      <ClientHeroCard emotionalLine={GREETING_LINE[state]} />
-
-      {w?.clientId && <ClientAISummary clientId={w.clientId} />}
-
+    <>
       {/* Your Financial Protection + What's Happening */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
         <Panel title="Your Financial Protection" icon={ShieldCheck} unlocked={unlocked} onClick={() => navigate("/my-future")}>
@@ -277,7 +270,15 @@ export default function MyPersonalDashboard() {
           ) : null}
         </Panel>
       </div>
+    </>
+  );
+}
 
+export default function MyPersonalDashboard() {
+  return (
+    <div className="container mx-auto p-4 max-w-7xl space-y-4">
+      <DashboardGreeting />
+      <DashboardPanels />
     </div>
   );
 }

@@ -7,7 +7,7 @@ import { ClientDetailsEditor } from "@/components/clients/ClientDetailsEditor";
 import { Client } from "@/hooks/useClients";
 import { useToast } from "@/hooks/use-toast";
 import { EmergencyContact } from "@/features/clients/components/EmergencyContactsSection";
-import MyPersonalDashboard from "@/pages/MyPersonalDashboard";
+import { DashboardGreeting, DashboardPanels } from "@/pages/MyPersonalDashboard";
 
 
 
@@ -200,23 +200,28 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
   return (
     <div className={embedded ? "space-y-3" : "space-y-4 p-4 md:p-6"}>
       {embedded && <p className="text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">My Profile</p>}
-      {!embedded && <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="page-title">{heading.title}</h1>
-          <p className="text-muted-foreground text-xs">{heading.subtitle}</p>
+      {!embedded && (section !== "health" || returnTo) && (
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          {section !== "health" ? (
+            <div>
+              <h1 className="page-title">{heading.title}</h1>
+              <p className="text-muted-foreground text-xs">{heading.subtitle}</p>
+            </div>
+          ) : <div />}
+          {returnTo && (
+            <button
+              onClick={() => navigate(returnTo)}
+              className="rounded-full bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+            >
+              Saved — back to Live Workspace
+            </button>
+          )}
         </div>
-        {returnTo && (
-          <button
-            onClick={() => navigate(returnTo)}
-            className="rounded-full bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90"
-          >
-            Saved — back to Live Workspace
-          </button>
-        )}
-      </div>}
+      )}
 
       {client ? (
         <>
+          {!embedded && section === "health" && <DashboardGreeting />}
           <ClientDetailsEditor
             client={client}
             onSave={handleSave}
@@ -229,8 +234,7 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
           />
           {!embedded && section === "health" && (
             <div className="pt-2">
-              <p className="mx-1 mb-2 text-2xs font-bold uppercase tracking-[0.14em] text-muted-foreground">My Dashboard</p>
-              <MyPersonalDashboard />
+              <DashboardPanels />
             </div>
           )}
         </>
