@@ -50,6 +50,7 @@ export function PersonalInfoPanel({ clientId, personal }: { clientId?: string; p
     if (error) return toast({ title: "Couldn't save your details", description: "Please try again. If it keeps happening, contact your Wealth Manager.", variant: "destructive" });
     toast({ title: "Personal information saved" });
     refresh(qc);
+    qc.invalidateQueries({ queryKey: ["client-wealth"] });
   };
 
   return (

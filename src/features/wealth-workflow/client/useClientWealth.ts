@@ -14,6 +14,7 @@ const RETIREMENT = ["Retirement annuity", "Pension fund", "Provident fund", "Pre
 export interface ClientWealth {
   clientId: string | null;
   clientName: string;
+  clientPhone: string;
   profile: Record<string, any>;
   policies: any[];
   holdings: any[];
@@ -50,9 +51,9 @@ export function useClientWealth(explicitPatientId?: string) {
     queryFn: async (): Promise<ClientWealth> => {
       let client: any = null;
       if (explicitPatientId) {
-        client = (await sb.from("clients").select("id,name,next_of_kin_members,next_of_kin_name,next_of_kin_relationship").eq("id", explicitPatientId).maybeSingle()).data;
+        client = (await sb.from("clients").select("id,name,phone,next_of_kin_members,next_of_kin_name,next_of_kin_relationship").eq("id", explicitPatientId).maybeSingle()).data;
       } else {
-        client = (await sb.from("clients").select("id,name,next_of_kin_members,next_of_kin_name,next_of_kin_relationship").eq("patient_user_id", user!.id).order("created_at").limit(1).maybeSingle()).data;
+        client = (await sb.from("clients").select("id,name,phone,next_of_kin_members,next_of_kin_name,next_of_kin_relationship").eq("patient_user_id", user!.id).order("created_at").limit(1).maybeSingle()).data;
       }
       const pid = client?.id ?? null;
       if (!pid) {
@@ -94,6 +95,7 @@ export function useClientWealth(explicitPatientId?: string) {
       return {
         clientId: pid,
         clientName: client.name ?? "",
+        clientPhone: client.phone ?? "",
         profile,
         policies,
         holdings,
@@ -132,7 +134,7 @@ export function useClientWealth(explicitPatientId?: string) {
 
 function emptyWealth(): ClientWealth {
   return {
-    clientId: null, clientName: "", profile: {}, policies: [], holdings: [], issued: [], workflow: null, stageLabel: null,
+    clientId: null, clientName: "", clientPhone: "", profile: {}, policies: [], holdings: [], issued: [], workflow: null, stageLabel: null,
     todos: [], documents: [], claims: [], beneficiaries: [],
     totals: { lifeCover: 0, incomeProtection: 0, severeIllness: 0, disability: 0, monthlyPremiums: 0, monthlyExpenses: 0, investments: 0, retirement: 0, taxFree: 0, assets: 0, liabilities: 0, netWorth: 0 },
     goals: {},

@@ -1,3 +1,5 @@
+import { useClientWealth } from "@/features/wealth-workflow/client/useClientWealth";
+import { useQueryClient } from "@tanstack/react-query";
 import { ProfilePhotoEditor } from "./ProfilePhotoEditor";
 import { useState, useEffect, useRef } from "react";
 import {
@@ -53,6 +55,9 @@ export function SettingsContent() {
 
   const isAdvisor = role === "broker";
   const isPatientRole = role === "client";
+  const { data: clientWealth, isLoading: loadingClientWealth } = useClientWealth();
+  const queryClient = useQueryClient();
+  const phoneEdited = useRef(false);
 
   const [outlookConnected, setOutlookConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState<string | null>(null);
@@ -100,8 +105,15 @@ export function SettingsContent() {
     const useSignupParts = !profile?.full_name?.trim() || metadata.full_name?.trim() === fullName;
     setDetailsFirstName((useSignupParts ? metadata.first_name : undefined) ?? (parts.length > 1 ? parts.slice(0, -1).join(" ") : fullName));
     setDetailsLastName((useSignupParts ? metadata.last_name : undefined) ?? (parts.length > 1 ? parts.at(-1) : ""));
-    setDetailsPhone(profile?.mobile_number || "");
+
   }, [profile?.full_name, profile?.mobile_number, user?.id, user?.user_metadata?.first_name, user?.user_metadata?.last_name, user?.user_metadata?.full_name, user?.user_metadata?.name]);
+
+  useEffect(() => {
+    if (phoneEdited.current) return;
+    setDetailsPhone(isPatientRole && clientWealth?.clientId
+      ? clientWealth.clientPhone
+      : profile?.mobile_number || "");
+  }, [isPatientRole, clientWealth?.clientId, clientWealth?.clientPhone, profile?.mobile_number]);
 
   useEffect(() => { fetchPricing(); }, [role]);
 
@@ -259,9 +271,27 @@ export function SettingsContent() {
     setSavingDetails(true);
     const { error: nameError } = await supabase.auth.updateUser({ data: { first_name: detailsFirstName.trim(), last_name: detailsLastName.trim(), full_name: detailsName } });
     if (nameError) { setSavingDetails(false); toast({ title: "Error", description: nameError.message, variant: "destructive" }); return; }
+    if (isPatientRole && loadingClientWealth) {
+      setSavingDetails(false);
+      toast({ title: "Please wait", description: "Your personal information is still loading." });
+      return;
+    }
+    if (isPatientRole && clientWealth?.clientId) {
+      const { data: savedClient, error: phoneError } = await supabase.from("clients")
+        .update({ phone: detailsPhone || null })
+        .eq("id", clientWealth.clientId).eq("patient_user_id", user!.id).select("id").single();
+      if (phoneError || !savedClient) {
+        setSavingDetails(false);
+        toast({ title: "Couldn't save your mobile number", description: phoneError?.message || "Please try again.", variant: "destructive" });
+        return;
+      }
+      queryClient.invalidateQueries({ queryKey: ["client-wealth"] });
+      queryClient.invalidateQueries({ queryKey: ["wealth-map-records"] });
+    }
     const { error } = await updateProfile({ full_name: detailsName.trim(), mobile_number: detailsPhone || null } as any);
     setSavingDetails(false);
     if (error) { toast({ title: "Couldn't save", description: error.message, variant: "destructive" }); return; }
+    phoneEdited.current = false;
     toast({ title: "Details saved" });
   };
 
@@ -409,7 +439,7 @@ export function SettingsContent() {
               </div>
               <div className="space-y-1.5 sm:col-span-2">
                 <Label>Mobile number</Label>
-                <PhoneNumberInput compact value={detailsPhone} onChange={setDetailsPhone} />
+                <PhoneNumberInput compact value={detailsPhone} onChange={(value) => { phoneEdited.current = true; setDetailsPhone(value); }} />
               </div>
             </div>
             <Button size="sm" onClick={saveMyDetails} disabled={savingDetails}>
