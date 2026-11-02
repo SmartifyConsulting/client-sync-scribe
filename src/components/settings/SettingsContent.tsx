@@ -1,3 +1,4 @@
+import { ProfilePhotoEditor } from "./ProfilePhotoEditor";
 import { useState, useEffect, useRef } from "react";
 import {
   Calendar, Shield, Database, CheckCircle, Loader2, ShieldCheck, ShieldOff,
@@ -81,6 +82,8 @@ export function SettingsContent() {
   const [detailsPhone, setDetailsPhone] = useState("");
   const [savingDetails, setSavingDetails] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [photoToEdit, setPhotoToEdit] = useState<File | null>(null);
+  const [savedAvatarUrl, setSavedAvatarUrl] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -217,7 +220,7 @@ export function SettingsContent() {
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
-    if (!file || !user) return;
+    if (!file) return;
     if (!file.type.startsWith("image/")) {
       toast({ title: "Unsupported file", description: "Please choose an image file (JPG, PNG or WebP).", variant: "destructive" });
       return;
@@ -226,19 +229,26 @@ export function SettingsContent() {
       toast({ title: "Image too large", description: "Please choose a JPG or PNG under 5 MB.", variant: "destructive" });
       return;
     }
+    setPhotoToEdit(file);
+  };
+
+  const saveAvatar = async (file: File) => {
+    if (!user) throw new Error("Please sign in again.");
     setUploadingAvatar(true);
     try {
       const fileExt = (file.name.split(".").pop() || "jpg").toLowerCase();
-      const fileName = `${user.id}/avatar.${fileExt}`;
+      const fileName = `${user.id}/avatar-${crypto.randomUUID()}.${fileExt}`;
       const { error: uploadError } = await supabase.storage.from("avatars").upload(fileName, file, { upsert: true, contentType: file.type });
       if (uploadError) throw uploadError;
       const { data } = supabase.storage.from("avatars").getPublicUrl(fileName);
       const newUrl = `${data.publicUrl}?t=${Date.now()}`;
       const { error } = await updateProfile({ avatar_url: newUrl } as any);
       if (error) throw error;
+      setSavedAvatarUrl(newUrl);
+      setPhotoToEdit(null);
       toast({ title: "Photo updated" });
     } catch (err: any) {
-      toast({ title: "Upload failed", description: err?.message || "Please try again.", variant: "destructive" });
+      throw new Error(err?.message || "Please try again.");
     } finally {
       setUploadingAvatar(false);
     }
@@ -368,7 +378,7 @@ export function SettingsContent() {
             <div className="flex items-center gap-4">
               <div className="relative">
                 <Avatar className="h-16 w-16">
-                  <AvatarImage key={profile?.avatar_url} src={profile?.avatar_url || undefined} alt={detailsName || "User"} />
+                  <AvatarImage key={savedAvatarUrl || profile?.avatar_url} src={savedAvatarUrl || profile?.avatar_url || undefined} alt={detailsName || "User"} />
                   <AvatarFallback className="bg-muted text-foreground text-base">{getInitials()}</AvatarFallback>
                 </Avatar>
                 <button
@@ -637,6 +647,8 @@ export function SettingsContent() {
           </div>
         </TabsContent>
       </Tabs>
+
+      <ProfilePhotoEditor file={photoToEdit} busy={uploadingAvatar} onCancel={() => setPhotoToEdit(null)} onSave={saveAvatar} />
 
       <TwoFactorSetup open={show2FASetup} onOpenChange={setShow2FASetup} onSuccess={fetchMfaFactors} />
 
