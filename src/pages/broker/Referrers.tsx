@@ -199,22 +199,22 @@ export default function Referrers() {
       )}
 
       <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="settings-scope sm:max-w-md text-xs">
           <DialogHeader>
-            <DialogTitle>Invite a referrer</DialogTitle>
+            <DialogTitle className="text-sm font-semibold">Invite a referrer</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1.5">
-              <Label htmlFor="referrer-first-name">First Name</Label>
-              <Input id="referrer-first-name" autoComplete="given-name" value={inviteForm.firstName} onChange={(e) => setInviteForm((f) => ({ ...f, firstName: e.target.value }))} placeholder="Optional" />
+              <Label className="text-xs" htmlFor="referrer-first-name">First Name</Label>
+              <Input className="text-xs" id="referrer-first-name" autoComplete="given-name" value={inviteForm.firstName} onChange={(e) => setInviteForm((f) => ({ ...f, firstName: e.target.value }))} placeholder="Optional" />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="referrer-last-name">Last Name</Label>
-              <Input id="referrer-last-name" autoComplete="family-name" value={inviteForm.lastName} onChange={(e) => setInviteForm((f) => ({ ...f, lastName: e.target.value }))} placeholder="Optional" />
+              <Label className="text-xs" htmlFor="referrer-last-name">Last Name</Label>
+              <Input className="text-xs" id="referrer-last-name" autoComplete="family-name" value={inviteForm.lastName} onChange={(e) => setInviteForm((f) => ({ ...f, lastName: e.target.value }))} placeholder="Optional" />
             </div>
             <div className="space-y-1.5">
-              <Label>Email</Label>
-              <Input type="email" required value={inviteForm.email} onChange={(e) => setInviteForm((f) => ({ ...f, email: e.target.value }))} placeholder="referrer@email.com" />
+              <Label className="text-xs" htmlFor="referrer-email">Email</Label>
+              <Input id="referrer-email" className="text-xs" type="email" required value={inviteForm.email} onChange={(e) => setInviteForm((f) => ({ ...f, email: e.target.value }))} placeholder="referrer@email.com" />
             </div>
           </div>
           <DialogFooter>
