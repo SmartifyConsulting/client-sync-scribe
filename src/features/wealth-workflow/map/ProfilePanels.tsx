@@ -27,15 +27,19 @@ export function PersonalInfoPanel({ clientId, personal }: { clientId?: string; p
   const qc = useQueryClient();
   const [f, setF] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
+  const dirty = useRef(false);
+  const loadedClient = useRef(clientId);
   useEffect(() => {
+    if (loadedClient.current !== clientId) { dirty.current = false; loadedClient.current = clientId; }
+    if (dirty.current) return;
     setF({
       id_passport_number: personal?.id_passport_number ?? "", dob: personal?.dob ?? "",
       physical_address: personal?.physical_address ?? personal?.address ?? "", postal_address: personal?.postal_address ?? "",
       marital_status: personal?.marital_status ?? "", marital_regime: personal?.marital_regime ?? "",
       phone: personal?.phone ?? "",
     });
-  }, [personal]);
-  const set = (k: string) => (v: string) => setF((x) => ({ ...x, [k]: v }));
+  }, [personal, clientId]);
+  const set = (k: string) => (v: string) => { dirty.current = true; setF((x) => ({ ...x, [k]: v })); };
   const missing = [
     !f.id_passport_number && "ID or passport number", !f.dob && "date of birth",
     !f.physical_address && "residential address", !f.marital_status && "marital status",

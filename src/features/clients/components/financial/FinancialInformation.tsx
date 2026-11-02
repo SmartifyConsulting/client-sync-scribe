@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -91,10 +91,27 @@ export function FinancialInformation({ clientId }: { clientId: string }) {
   });
   const [data, setData] = useState<Record<string, any>>({});
   const [saving, setSaving] = useState<string | null>(null);
-  useEffect(() => { if (q.data !== undefined) setData(q.data ?? {}); }, [q.data]);
+  const dirtySections = useRef(new Map<string, number>());
+  const loadedClient = useRef(clientId);
+  useEffect(() => {
+    if (loadedClient.current !== clientId) {
+      loadedClient.current = clientId;
+      dirtySections.current.clear();
+      setData(q.data ?? {});
+      return;
+    }
+    if (q.data !== undefined) setData(current => {
+      const merged = { ...(q.data ?? {}) };
+      for (const key of dirtySections.current.keys()) merged[key] = current[key];
+      return merged;
+    });
+  }, [q.data, clientId]);
 
   const sec = (k: SectionKey) => data[k] ?? {};
-  const set = (k: SectionKey, v: any) => setData((d) => ({ ...d, [k]: v }));
+  const set = (k: string, v: any) => {
+    dirtySections.current.set(k, (dirtySections.current.get(k) ?? 0) + 1);
+    setData((d) => ({ ...d, [k]: v }));
+  };
 
   /** How much of a section is filled in — drives the progress pill in its header. */
   const progress = (s: SectionDef): { filled: number; total: number } => {
@@ -131,20 +148,25 @@ export function FinancialInformation({ clientId }: { clientId: string }) {
   };
 
   const save = async (k: SectionKey) => {
+    const version = dirtySections.current.get(k);
     setSaving(k);
     const { error } = await (supabase as any).from("client_financial_profiles").upsert({ patient_id: clientId, [k]: sec(k) }, { onConflict: "patient_id" });
     setSaving(null);
     if (error) return toast.error("Couldn't save. You may not have access to this client's record.");
+    if (dirtySections.current.get(k) === version) dirtySections.current.delete(k);
     toast.success("Saved");
     qc.invalidateQueries({ queryKey: ["client-financial-profile", clientId] });
     await logChange(SECTIONS.find((s) => s.key === k)?.label ?? k);
   };
 
   const saveNotes = async () => {
+    const k = GENERAL_NOTES_KEY;
+    const version = dirtySections.current.get(k);
     setSaving(GENERAL_NOTES_KEY);
     const { error } = await (supabase as any).from("client_financial_profiles").upsert({ patient_id: clientId, general_notes: data[GENERAL_NOTES_KEY] ?? null }, { onConflict: "patient_id" });
     setSaving(null);
     if (error) return toast.error("Couldn't save. You may not have access to this client's record.");
+    if (dirtySections.current.get(k) === version) dirtySections.current.delete(k);
     toast.success("Saved");
     qc.invalidateQueries({ queryKey: ["client-financial-profile", clientId] });
     await logChange("General Notes");
@@ -293,7 +315,7 @@ export function FinancialInformation({ clientId }: { clientId: string }) {
         <SectionHeader icon={StickyNote} label="General Notes" />
         <CollapsibleContent className="p-2 space-y-2">
           <p className="text-xs text-muted-foreground">Meeting commentary that doesn't belong under a specific field above.</p>
-          <Textarea value={data[GENERAL_NOTES_KEY] ?? ""} onChange={(e) => setData((d) => ({ ...d, [GENERAL_NOTES_KEY]: e.target.value }))} rows={5} />
+          <Textarea value={data[GENERAL_NOTES_KEY] ?? ""} onChange={(e) => set(GENERAL_NOTES_KEY, e.target.value)} rows={5} />
           <div className="flex justify-end">
             <Button size="sm" onClick={saveNotes} disabled={saving === GENERAL_NOTES_KEY}>{saving === GENERAL_NOTES_KEY ? "Saving…" : "Save"}</Button>
           </div>

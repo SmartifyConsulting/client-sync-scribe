@@ -384,7 +384,13 @@ export function ClientDetailsEditor({
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
   const [activeParentTab, setActiveParentTab] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
+  const [hasChanges, setHasChangesState] = useState(false);
+  const editVersion = useRef(0);
+  const hydratedClient = useRef<string | null>(null);
+  const setHasChanges = useCallback((changed: boolean) => {
+    if (changed) editVersion.current += 1;
+    setHasChangesState(changed);
+  }, []);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -625,6 +631,8 @@ export function ClientDetailsEditor({
 
   useEffect(() => {
     if (client) {
+      if (hydratedClient.current === client.id && (hasChanges || saving)) return;
+      hydratedClient.current = client.id;
       const fn = client.first_name || splitName(client.name).first;
       const ln = client.last_name || splitName(client.name).last;
       setFormData({
@@ -790,6 +798,7 @@ export function ClientDetailsEditor({
   const performSave = useCallback(
 
     async (data: typeof formData, surgeriesData: Surgery[]) => {
+      const savingVersion = editVersion.current;
       if (!data.first_name.trim() && !data.last_name.trim()) return;
       if (!client?.id) {
         toast({ title: "Cannot save without a client record", variant: "destructive" });
@@ -877,18 +886,18 @@ export function ClientDetailsEditor({
         } as any);
       }
       setSaving(false);
-      setHasChanges(false);
+      if (editVersion.current === savingVersion) setHasChanges(false);
       setLastSavedAt(Date.now());
     },
     [onSave, pharmacies, familyHistory, organDonorOrgans, nokMembers, currentMedications, conditionsDiagnoses, allergiesStructured, syncChronicMedsToPrescriptions, client?.id, toast, userId],
   );
 
   useEffect(() => {
-    if (!isEditing || !hasChanges) return;
+    if (!isEditing || !hasChanges || saving) return;
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = setTimeout(() => {
       performSave(formData, surgeries);
-    }, 600);
+    }, 1500);
     return () => {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     };
@@ -904,6 +913,7 @@ export function ClientDetailsEditor({
     conditionsDiagnoses,
     allergiesStructured,
     isEditing,
+    saving,
     hasChanges,
     performSave,
   ]);
