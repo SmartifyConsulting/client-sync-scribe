@@ -585,7 +585,7 @@ export function SettingsContent() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div><p className="font-medium text-foreground">Current Plan</p><p className="text-xs text-muted-foreground">{loadingSubscription ? "Loading..." : getCurrentPlanName()}</p></div>
-                {subscription?.status === "active" ? <Badge variant="default" className="bg-primary">Active</Badge> : subscription?.status === "cancelled" ? <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">Cancelled</Badge> : <Badge variant="secondary">Inactive</Badge>}
+                {subscription?.status === "active" ? <Badge variant="default" className="text-xs font-medium bg-primary">Active</Badge> : subscription?.status === "cancelled" ? <Badge variant="secondary" className="text-xs font-medium bg-yellow-100 text-yellow-700">Cancelled</Badge> : <Badge variant="secondary" className="text-xs font-medium">Inactive</Badge>}
               </div>
               <Separator />
               <div className="flex items-center justify-between">
@@ -626,7 +626,7 @@ export function SettingsContent() {
                         <TableCell className="font-medium">{format(new Date(payment.created_at), "MMM d, yyyy")}</TableCell>
                         <TableCell>{payment.description}</TableCell>
                         <TableCell>${payment.amount.toFixed(2)}</TableCell>
-                        <TableCell><Badge variant={payment.status === "completed" ? "default" : "destructive"} className="capitalize">{payment.status}</Badge></TableCell>
+                        <TableCell><Badge variant={payment.status === "completed" ? "default" : "destructive"} className="text-xs font-medium capitalize">{payment.status}</Badge></TableCell>
                         <TableCell className="text-right"><Button variant="ghost" size="sm" onClick={() => handleDownloadReceipt(payment)}><Download className="h-4 w-4 mr-1" />Download</Button></TableCell>
                       </TableRow>
                     ))}
@@ -661,7 +661,7 @@ export function SettingsContent() {
             <div className={`relative flex items-start rounded-xl border p-4 cursor-pointer transition-colors ${selectedBillingCycle === "annual" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"}`} onClick={() => setSelectedBillingCycle("annual")}>
               <RadioGroupItem value="annual" id="annual" className="mt-1" />
               <div className="ml-3 flex-1">
-                <Label htmlFor="annual" className="font-semibold text-foreground cursor-pointer">Annual <span className="ml-2 text-primary">${plans.annual.price}/{plans.annual.period}</span> <Badge variant="secondary" className="ml-2 bg-sky-50 text-primary">Save ${plans.annual.savings}</Badge></Label>
+                <Label htmlFor="annual" className="font-semibold text-foreground cursor-pointer">Annual <span className="ml-2 text-primary">${plans.annual.price}/{plans.annual.period}</span> <Badge variant="secondary" className="text-xs font-medium ml-2 bg-sky-50 text-primary">Save ${plans.annual.savings}</Badge></Label>
                 <ul className="mt-2 text-xs text-muted-foreground space-y-1">
                   <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Full access to all features</li>
                   <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />2 months free</li>
