@@ -1,3 +1,4 @@
+import { PauseWorkflowButton, PausedWorkflowNotice } from "../workspace/PauseWorkflow";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Loader2 } from "lucide-react";
 import { DocumentTray } from "./DocumentTray";
@@ -133,11 +134,11 @@ export function WorkflowMap({ clientId, clientName, onOpenDocuments, initialGrou
             <p className="flex items-center gap-2 text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
               <span className="h-2 w-2 animate-pulse rounded-full bg-primary" /> Steps
             </p>
-            {(wf.status === "active" || wf.status === "blocked") && <CancelWorkflowButton workflowId={wf.id} />}
+            {(wf.status === "active" || wf.status === "blocked") && <div className="flex items-center gap-2"><PauseWorkflowButton workflowId={wf.id} pausedAt={wf.paused_at} /><CancelWorkflowButton workflowId={wf.id} /></div>}
           </div>
           <LiveTray groups={m.groups} viewer={viewer} clientFirst={clientFirst}
             managerName={managerFirst} avatars={avatars} nextTitle={nextAction?.title}
-            history={(gk, step) => <WorkingWindow embedded managerName={managerFirst} group={m.groups.find((g) => g.group.key === gk) ?? null} stepLabel={step} isLive={false} viewer={viewer}
+            history={(gk, step) => wf.paused_at ? <PausedWorkflowNotice pausedAt={wf.paused_at} /> : <WorkingWindow embedded managerName={managerFirst} group={m.groups.find((g) => g.group.key === gk) ?? null} stepLabel={step} isLive={false} viewer={viewer}
               clientName={clientName ?? "Client"} workflowId={wf.id} records={m.records} blockers={[]}
               documents={(m.records?.docs ?? []) as any[]} onBackToCurrent={() => {}} onOpenDocuments={onOpenDocuments} />}
             legend={<>
@@ -157,13 +158,13 @@ export function WorkflowMap({ clientId, clientName, onOpenDocuments, initialGrou
             <DocumentTray clientId={clientId} />
           </div>
           {!isLive && <button onClick={() => setPicked(null)} className="mb-2 text-xs font-medium text-primary hover:underline">← Back to current step</button>}
-          {renderWorking(isLive)}
+          {wf.paused_at ? <PausedWorkflowNotice pausedAt={wf.paused_at} /> : renderWorking(isLive)}
         </div>
       </div>
 
 
 
-      <StageDetailSheet view={selected} onClose={() => setSelected(null)} workflow={wf} defs={m.defs} recs={m.recs} records={m.records} />
+      {!wf.paused_at && <StageDetailSheet view={selected} onClose={() => setSelected(null)} workflow={wf} defs={m.defs} recs={m.recs} records={m.records} />}
     </div>
   );
 }

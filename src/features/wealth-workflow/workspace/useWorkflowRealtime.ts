@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-const KEYS = ["wealth-client-question", "wealth-workflow", "wealth-recs", "wealth-audit", "wealth-blockers", "wealth-map-records", "wealth-doc-tray", "client-wealth"];
+const KEYS = ["wealth-client-question", "wealth-workflow", "wealth-recs", "wealth-audit", "wealth-blockers", "wealth-map-records", "wealth-doc-tray", "client-wealth", "wealth-audit-log"];
 
 /** Refreshes wealth queries when any underlying record changes. RLS scopes the events. */
 export function useWorkflowRealtime(clientId?: string, workflowId?: string) {
@@ -14,7 +14,7 @@ export function useWorkflowRealtime(clientId?: string, workflowId?: string) {
     ch.on("postgres_changes", { event: "*", schema: "public", table: "wealth_workflows", filter: `patient_id=eq.${clientId}` }, refresh);
     ch.on("postgres_changes", { event: "*", schema: "public", table: "todos", filter: `patient_id=eq.${clientId}` }, refresh);
     ch.on("postgres_changes", { event: "*", schema: "public", table: "messages", filter: `patient_id=eq.${clientId}` }, refresh);
-    ["documents", "sessions"].forEach((table) =>
+    ["documents", "sessions", "wealth_audit_log"].forEach((table) =>
       ch.on("postgres_changes", { event: "*", schema: "public", table, filter: `patient_id=eq.${clientId}` }, refresh),
     );
     if (workflowId) {

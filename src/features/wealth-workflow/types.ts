@@ -19,6 +19,9 @@ export interface WealthWorkflow {
   status: WorkflowStatus;
   blockers: string[];
   cycle_number: number;
+  paused_at?: string | null;
+  paused_by?: string | null;
+  total_paused_seconds?: number;
   previous_workflow_id: string | null;
   next_review_date: string | null;
   created_at: string;
