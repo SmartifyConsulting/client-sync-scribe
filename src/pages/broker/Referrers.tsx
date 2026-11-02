@@ -79,23 +79,24 @@ export default function Referrers() {
 
   // Create — invite a prospective referrer by email.
   const [inviteOpen, setInviteOpen] = useState(false);
-  const [inviteForm, setInviteForm] = useState({ name: "", email: "" });
+  const [inviteForm, setInviteForm] = useState({ firstName: "", lastName: "", email: "" });
   const [inviting, setInviting] = useState(false);
   const sendInvite = async () => {
     if (!inviteForm.email.trim()) return;
     setInviting(true);
     try {
+      const recipientName = [inviteForm.firstName.trim(), inviteForm.lastName.trim()].filter(Boolean).join(" ");
       const { error } = await supabase.functions.invoke("send-user-invitation", {
         body: {
           recipientEmail: inviteForm.email.trim(),
           isReferral: true,
-          message: `I'd like to invite you to refer clients to me on Holarc Wealth and earn commission on every policy that's issued.`,
+          message: `${recipientName ? `Hello ${recipientName},\n\n` : ""}I'd like to invite you to refer clients to me on Holarc Wealth and earn commission on every policy that's issued.`,
         },
       });
       if (error) throw error;
       toast.success(`Invitation sent to ${inviteForm.email.trim()}`);
       setInviteOpen(false);
-      setInviteForm({ name: "", email: "" });
+      setInviteForm({ firstName: "", lastName: "", email: "" });
     } catch (e: any) {
       toast.error(e.message || "Couldn't send the invitation.");
     } finally {
@@ -204,8 +205,12 @@ export default function Referrers() {
           </DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1.5">
-              <Label>Name</Label>
-              <Input value={inviteForm.name} onChange={(e) => setInviteForm((f) => ({ ...f, name: e.target.value }))} placeholder="Optional" />
+              <Label htmlFor="referrer-first-name">First Name</Label>
+              <Input id="referrer-first-name" autoComplete="given-name" value={inviteForm.firstName} onChange={(e) => setInviteForm((f) => ({ ...f, firstName: e.target.value }))} placeholder="Optional" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="referrer-last-name">Last Name</Label>
+              <Input id="referrer-last-name" autoComplete="family-name" value={inviteForm.lastName} onChange={(e) => setInviteForm((f) => ({ ...f, lastName: e.target.value }))} placeholder="Optional" />
             </div>
             <div className="space-y-1.5">
               <Label>Email</Label>
