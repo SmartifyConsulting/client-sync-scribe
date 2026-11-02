@@ -63,7 +63,7 @@ ${col("Investments", sup?.investments?.length ? sup.investments : ["Momentum Wea
 </tr></table>
 <p style="margin:14px 0 0;font-size:11.5px;color:${MUTED}">${v("remuneration_basis", "Representatives are remunerated by means of commission paid by the product suppliers.")} ${v("shareholding_statement", "The FSP does not hold more than 10% share in any of its product suppliers.")} ${(p?.top_suppliers?.length ? p.top_suppliers : [{ name: "Old Mutual", percent: 32 }]).length ? "Product suppliers from which the FSP received more than 30% of total remuneration during the preceding 12 months: " + (p?.top_suppliers?.length ? p.top_suppliers : [{ name: "Old Mutual", percent: 32 }]).map((t: any) => `${t.name} (${t.percent ?? "–"}%)`).join(", ") + "." : ""}</p>
 ${h2("Authority to view, obtain and share your information")}
-<div style="font-family:Georgia,serif;font-size:13px;line-height:1.8">
+<div style="font-family:inherit;font-size:12.5px;line-height:1.7">
 <p>I hereby acknowledge the following in my personal capacity:</p>
 <p>Sound and proper financial advice can only be provided with full disclosure of relevant information relating to appropriate personal, including private, information for the purposes of determining and advising on my/our financial situation and financial product experience and objectives, in the process of acquiring, servicing or maintaining any financial products, including but not limited to any information relating to or interest in any long-term insurance, unit trust or any other financial products or services, with any long-term insurer, unit trust manager or other financial institution.</p>
 <p>I accordingly confirm, for the purposes of providing the said sound and proper financial advice to me, that full permission and authority is granted to <b>${v("planner_name", "Marlin Moodley")}</b> of <b>${v("fsp_name", "Masthead Financial Planning")}</b> to obtain any and all such information via The Financial Services Exchange (Pty) Ltd, trading as Astute, or any other institution providing a mechanism for the transmission of such information.</p>
@@ -71,7 +71,7 @@ ${h2("Authority to view, obtain and share your information")}
 <p>I further acknowledge that this consent to obtain information on my behalf will remain effective until cancelled by me in writing.</p>
 <p>I further confirm that I have read and understood the contents of the above.</p></div>
 ${h2("Client declaration")}
-<p style="font-family:Georgia,serif;font-size:13px;line-height:1.8">I, <b>${client}</b>, hereby confirm that I have read and understood the contents of this document. I further confirm that all sections have been completed by me and reflect my intention.</p>`, p);
+<p style="font-family:inherit;font-size:12.5px;line-height:1.7">I, <b>${client}</b>, hereby confirm that I have read and understood the contents of this document. I further confirm that all sections have been completed by me and reflect my intention.</p>`, p);
 }
 
 export function sealedHtml(doc: { content_html: string; signature_image: string; signer_name: string; signed_at: string; signer_ip: string | null; seal_hash: string; title: string }) {
