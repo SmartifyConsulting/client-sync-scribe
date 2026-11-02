@@ -110,7 +110,7 @@ const doctorModeItems: (NavItem & { tour?: string })[] = [
 const CLIENT_BLOCKED_PATHS = ["/business", "/clients"];
 
 const patientNavItems: (NavItem & { tour?: string })[] = [
-  { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/client/details?section=health" },
+  { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/client/details?section=profile" },
   { icon: Activity, label: "Live Workspace", labelKey: "nav.liveWorkspace", to: "/my-workspace" },
   { icon: ClientFolder, label: "Documents", labelKey: "nav.clientDocuments", to: "/client/documents" },
   { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
@@ -284,7 +284,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     const isItemActive = hasQuery
       ? location.pathname === itemPath &&
         (location.search === `?${itemSearch}` ||
-          (!location.search && itemSearch === "section=health"))
+          (!location.search && itemSearch === "section=profile"))
       : location.pathname === itemPath &&
         (!location.search ||
           !navItems.some(
@@ -414,7 +414,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             key={mode}
             type="button"
             onClick={() => {
-              navigate(isProfessional ? professionalHome : "/client/details?section=health");
+              navigate(isProfessional ? professionalHome : "/client/details?section=profile");
               onNavigate?.();
             }}
             className={cn(

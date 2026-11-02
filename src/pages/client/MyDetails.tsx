@@ -19,7 +19,7 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
   const rawReturn = searchParams.get("returnTo");
   const returnTo = rawReturn && rawReturn.startsWith("/") && !rawReturn.startsWith("//") ? rawReturn : null;
   const rawSection = searchParams.get("section");
-  const section = embedded ? "workspace" : rawSection === "home" ? "health" : rawSection || "health";
+  const section = embedded ? "workspace" : rawSection === "home" ? "profile" : rawSection || "profile";
   const [client, setPatient] = useState<Client | null>(null);
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string>("");
@@ -186,23 +186,23 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
   }
 
   if (!embedded && rawSection === "home") {
-    return <Navigate to="/client/details?section=health" replace />;
+    return <Navigate to="/client/details?section=profile" replace />;
   }
 
 
   const sectionHeading: Record<string, { title: string; subtitle: string }> = {
-    health: { title: t("client.myDetails.myHolarchy", "My Profile"), subtitle: t("client.myDetails.holarchySubtitle", "Your personal and financial details, advisers and consultation history") },
+    profile: { title: t("client.myDetails.myHolarchy", "My Profile"), subtitle: t("client.myDetails.holarchySubtitle", "Your personal and financial details, advisers and consultation history") },
     admin: { title: t("client.myDetails.myDesk", "My Desk"), subtitle: t("client.myDetails.deskSubtitle", "Calendar, actions and documents") },
     rewards: { title: t("client.myDetails.myRewards", "My Rewards"), subtitle: t("client.myDetails.rewardsSubtitle", "Track your Vulas and rewards") },
   };
-  const heading = sectionHeading[section] || sectionHeading.health;
+  const heading = sectionHeading[section] || sectionHeading.profile;
 
   return (
     <div className={embedded ? "space-y-3" : "space-y-4 p-4 md:p-6"}>
       {embedded && <p className="text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">My Profile</p>}
-      {!embedded && (section !== "health" || returnTo) && (
+      {!embedded && (section !== "profile" || returnTo) && (
         <div className="flex flex-wrap items-start justify-between gap-3">
-          {section !== "health" ? (
+          {section !== "profile" ? (
             <div>
               <h1 className="page-title">{heading.title}</h1>
               <p className="text-muted-foreground text-xs">{heading.subtitle}</p>
@@ -221,7 +221,7 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
 
       {client ? (
         <>
-          {!embedded && section === "health" && <DashboardGreeting />}
+          {!embedded && section === "profile" && <DashboardGreeting />}
           <ClientDetailsEditor
             client={client}
             onSave={handleSave}
@@ -232,7 +232,7 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
             onEmergencyContactsChange={setEmergencyContacts}
             section={section}
           />
-          {!embedded && section === "health" && (
+          {!embedded && section === "profile" && (
             <div className="pt-2">
               <DashboardPanels />
             </div>

@@ -352,7 +352,7 @@ const formatSurgeryDate = (date: string, precision?: string) => {
 };
 
 const SECTION_TABS: Record<string, string[]> = {
-  health: ["personal", "medical", "healthrecords", "history", "documents", "logs"],
+  profile: ["personal", "medical", "healthrecords", "history", "documents", "logs"],
   admin: ["calendar", "tasks"],
   workspace: ["personal", "medical", "claims"],
   personal: ["personal"],
@@ -1683,7 +1683,7 @@ export function ClientDetailsEditor({
 
   // ==================== VIEW MODE ====================
   if (!isEditing) {
-    const showFullBanner = isSelfService && section === "health";
+    const showFullBanner = isSelfService && section === "profile";
     const showCompactBanner = false;
     const showTabs = true;
     return (

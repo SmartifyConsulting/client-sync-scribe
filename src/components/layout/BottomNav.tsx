@@ -22,7 +22,7 @@ import { isWealthHidden } from "@/lib/terminology";
 
 const doctorNavItems = [
   { icon: LayoutDashboard, labelKey: "nav.home", to: "/broker-dashboard" },
-  { icon: User, labelKey: "nav.myProfile", to: "/client/details?section=health" },
+  { icon: User, labelKey: "nav.myProfile", to: "/client/details?section=profile" },
   { icon: Briefcase, labelKey: "bottomNav.practice", to: "/business" },
   { icon: Sparkles, labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
 ].filter((i) => !isWealthHidden(i.to));
@@ -149,7 +149,7 @@ export function BottomNav() {
   }
 
   // Client nav - section-based
-  const currentSection = searchParams.get("section") || "health";
+  const currentSection = searchParams.get("section") || "profile";
   const isOnDetails = location.pathname === "/client/details";
 
   const items = patientSections.filter((i) => v2Demo || i.to !== "/ask-maeve");

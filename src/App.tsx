@@ -143,7 +143,7 @@ function RoleBasedRedirect() {
     return <Navigate to="/referrer-dashboard" replace />;
   }
 
-  return <Navigate to="/client/details?section=health" replace />;
+  return <Navigate to="/client/details?section=profile" replace />;
 
 }
 
@@ -155,7 +155,7 @@ function WealthRouteGuard() {
   // Clients never reach firm-facing screens (My Business, My Clients).
   const clientOnly = !roleLoading && !isLoading && !isAdmin && hasClientRole && !hasAdvisorRole;
   if (clientOnly && (loc.pathname === "/business" || loc.pathname.startsWith("/business/") || loc.pathname === "/clients")) {
-    return <Navigate to="/client/details?section=health" replace />;
+    return <Navigate to="/client/details?section=profile" replace />;
   }
   return null;
 }
@@ -229,7 +229,7 @@ const App = () => (
             <Route path="/todos" element={<TodoList />} />
             <Route path="/sessions" element={<Sessions />} />
             <Route path="/my-sessions" element={<MySessions />} />
-            <Route path="/my-dashboard" element={<Navigate to="/client/details?section=health" replace />} />
+            <Route path="/my-dashboard" element={<Navigate to="/client/details?section=profile" replace />} />
             <Route path="/my-future" element={<MyFuture />} />
             <Route path="/my-workspace" element={<MyWorkspace />} />
             <Route path="/messenger" element={<Messenger />} />
