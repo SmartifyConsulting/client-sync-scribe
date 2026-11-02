@@ -65,7 +65,6 @@ export function PhoneNumberInput({ id, compact = false, className, value, onChan
             <SelectItem key={`${c.code}-${c.dial}`} value={c.dial} className={compact ? "text-xs" : "text-lg"}>
               <span className={compact ? "mr-1 text-xs" : "mr-2 text-2xl"}>{c.flag}</span>
               <span className={compact ? "text-xs font-medium" : "text-lg font-semibold"}>{c.dial}</span>
-              <span className={compact ? "ml-1 text-xs text-muted-foreground" : "ml-2 text-sm text-muted-foreground"}>{c.code}</span>
             </SelectItem>
           ))}
         </SelectContent>
