@@ -32,8 +32,14 @@ Deno.serve(async (req) => {
     if (!wf) return json({ error: "You don't have access to this workflow." }, 403);
 
     const admin = createClient(url, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-    const { data: pat } = await admin.from("clients").select("user_id, patient_user_id").eq("id", wf.patient_id).maybeSingle();
-    if ((pat?.patient_user_id ?? pat?.user_id) !== u.user.id) return json({ error: "Only the client can sign this document." }, 403);
+    const { data: pat, error: clientError } = await admin.from("clients").select("user_id, patient_user_id").eq("id", wf.patient_id).maybeSingle();
+    if (clientError) {
+      console.error("Signing client lookup failed", clientError.code);
+      return json({ error: "We couldn't verify your client account. Please try again or contact support." }, 500);
+    }
+    if (!pat) return json({ error: "The client record for this workflow could not be found. Please contact your Wealth Manager." }, 404);
+    if (!pat.patient_user_id) return json({ error: "Your client account is not linked yet. Please open your Wealth Manager's invitation link." }, 403);
+    if (pat.patient_user_id !== u.user.id) return json({ error: "This workflow is linked to a different client account. Please contact your Wealth Manager to check your invitation." }, 403);
     const { data: existing } = await admin.from("wealth_signed_documents").select("id").eq("workflow_id", p.workflowId).eq("doc_type", p.docType).maybeSingle();
     if (existing) return json({ error: "This document is already signed." }, 409);
 

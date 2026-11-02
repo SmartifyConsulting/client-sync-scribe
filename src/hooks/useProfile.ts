@@ -98,10 +98,10 @@ export function useProfile() {
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user) return { error: new Error('Not authenticated') };
 
+    // Upsert also repairs accounts whose signup profile was never created.
     const { data, error } = await supabase
       .from('profiles')
-      .update(updates)
-      .eq('id', user.id)
+      .upsert({ id: user.id, ...updates }, { onConflict: 'id' })
       .select()
       .single();
 
