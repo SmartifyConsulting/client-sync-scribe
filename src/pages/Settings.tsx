@@ -9,7 +9,7 @@ export default function Settings() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="page-title">{t("settingsPage.title")}</h1>
-          <p className="text-muted-foreground text-xs">{t("settingsPage.subtitle")}</p>
+          <p className="page-subtitle">{t("settingsPage.subtitle")}</p>
         </div>
         <ShareAppDialog />
       </div>

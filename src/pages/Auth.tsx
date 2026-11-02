@@ -340,7 +340,7 @@ export default function Auth() {
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/dashboard`,
-            data: { full_name: fullName, role: userRole },
+            data: { first_name: firstName.trim(), last_name: lastName.trim(), full_name: fullName, role: userRole },
           },
         });
       } else {
@@ -367,7 +367,7 @@ export default function Auth() {
         result = await supabase.auth.signUp({
           email: syntheticEmail,
           password,
-          options: { data: { full_name: fullName, role: userRole, phone: e164 } },
+          options: { data: { first_name: firstName.trim(), last_name: lastName.trim(), full_name: fullName, role: userRole, phone: e164 } },
         });
       }
       const { data, error } = result;

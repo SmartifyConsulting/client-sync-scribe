@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  Calendar, Bell, Shield, Database, CheckCircle, Loader2, ShieldCheck, ShieldOff,
+  Calendar, Shield, Database, CheckCircle, Loader2, ShieldCheck, ShieldOff,
   CreditCard, Receipt, Download, Check, ExternalLink, XCircle, RotateCcw, Users,
   Settings2, Camera, UserRound, Trash2,
 } from "lucide-react";
@@ -75,7 +75,9 @@ export function SettingsContent() {
   const [loadingPricing, setLoadingPricing] = useState(true);
   const [inactiveThreshold, setInactiveThreshold] = useState<number>(12);
   const [savingThreshold, setSavingThreshold] = useState(false);
-  const [detailsName, setDetailsName] = useState("");
+  const [detailsFirstName, setDetailsFirstName] = useState("");
+  const [detailsLastName, setDetailsLastName] = useState("");
+  const detailsName = [detailsFirstName.trim(), detailsLastName.trim()].filter(Boolean).join(" ");
   const [detailsPhone, setDetailsPhone] = useState("");
   const [savingDetails, setSavingDetails] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -89,9 +91,14 @@ export function SettingsContent() {
   }, [user, isAdvisor]);
 
   useEffect(() => {
-    setDetailsName(profile?.full_name || "");
+    const metadata = user?.user_metadata ?? {};
+    const fullName = (profile?.full_name?.trim() || metadata.full_name || metadata.name || "").trim();
+    const parts = fullName.split(/\s+/);
+    const useSignupParts = !profile?.full_name?.trim() || metadata.full_name?.trim() === fullName;
+    setDetailsFirstName((useSignupParts ? metadata.first_name : undefined) ?? (parts.length > 1 ? parts.slice(0, -1).join(" ") : fullName));
+    setDetailsLastName((useSignupParts ? metadata.last_name : undefined) ?? (parts.length > 1 ? parts.at(-1) : ""));
     setDetailsPhone(profile?.mobile_number || "");
-  }, [profile?.full_name, profile?.mobile_number]);
+  }, [profile?.full_name, profile?.mobile_number, user?.id, user?.user_metadata?.first_name, user?.user_metadata?.last_name, user?.user_metadata?.full_name, user?.user_metadata?.name]);
 
   useEffect(() => { fetchPricing(); }, [role]);
 
@@ -238,8 +245,10 @@ export function SettingsContent() {
   };
 
   const saveMyDetails = async () => {
-    if (!detailsName.trim()) { toast({ title: "Name required", variant: "destructive" }); return; }
+    if (!detailsFirstName.trim() || !detailsLastName.trim()) { toast({ title: "First name and last name required", variant: "destructive" }); return; }
     setSavingDetails(true);
+    const { error: nameError } = await supabase.auth.updateUser({ data: { first_name: detailsFirstName.trim(), last_name: detailsLastName.trim(), full_name: detailsName } });
+    if (nameError) { setSavingDetails(false); toast({ title: "Error", description: nameError.message, variant: "destructive" }); return; }
     const { error } = await updateProfile({ full_name: detailsName.trim(), mobile_number: detailsPhone || null } as any);
     setSavingDetails(false);
     if (error) { toast({ title: "Couldn't save", description: error.message, variant: "destructive" }); return; }
@@ -345,15 +354,14 @@ export function SettingsContent() {
       <Tabs key={isPatientRole ? "client" : "staff"} defaultValue="profile" className="w-full">
         <TabsList className="flex w-full flex-wrap bg-primary/80 justify-start rounded-lg">
           <TabsTrigger value="profile" className="tab-brand text-xs">Profile</TabsTrigger>
-          {!isPatientRole && <TabsTrigger value="preferences" className="tab-brand text-xs">Preferences</TabsTrigger>}
-          {!isPatientRole && <TabsTrigger value="notifications" className="tab-brand text-xs">Notifications</TabsTrigger>}
-          {!isPatientRole && <TabsTrigger value="billing" className="tab-brand text-xs">Fees</TabsTrigger>}
+          <TabsTrigger value="preferences" className="tab-brand text-xs">Preferences</TabsTrigger>
+          {!isPatientRole && <TabsTrigger value="billing" className="tab-brand text-xs">Subscription</TabsTrigger>}
         </TabsList>
 
         {/* PROFILE */}
         <TabsContent value="profile" className="mt-4 space-y-4">
-          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
-            <div className="flex items-center gap-3">
+          <div className="frame p-4 space-y-4">
+            <div className="frame-header -mx-4 -mt-4 mb-4 gap-3">
               <UserRound className="h-4 w-4 text-primary" />
               <h2 className="text-sm font-semibold text-foreground">My details</h2>
             </div>
@@ -378,8 +386,12 @@ export function SettingsContent() {
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label>Full name</Label>
-                <Input value={detailsName} onChange={(e) => setDetailsName(e.target.value)} />
+                <Label htmlFor="settings-first-name">First name</Label>
+                <Input id="settings-first-name" value={detailsFirstName} onChange={(e) => setDetailsFirstName(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="settings-last-name">Last name</Label>
+                <Input id="settings-last-name" value={detailsLastName} onChange={(e) => setDetailsLastName(e.target.value)} />
               </div>
               <div className="space-y-1.5">
                 <Label>Email</Label>
@@ -395,8 +407,8 @@ export function SettingsContent() {
             </Button>
           </div>
 
-          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
+          <div className="frame p-4">
+            <div className="frame-header -mx-4 -mt-4 mb-4 gap-3">
               <Shield className="h-4 w-4 text-primary" />
               <h2 className="text-sm font-semibold text-foreground">Security</h2>
             </div>
@@ -446,8 +458,8 @@ export function SettingsContent() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
+          <div className="frame p-4">
+            <div className="frame-header -mx-4 -mt-4 mb-4 gap-3">
               <Database className="h-4 w-4 text-primary" />
               <h2 className="text-sm font-semibold text-foreground">Data Management</h2>
             </div>
@@ -470,35 +482,36 @@ export function SettingsContent() {
         {/* PREFERENCES */}
         <TabsContent value="preferences" className="mt-4">
           <div className="space-y-4">
-            <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
-              <div className="flex items-center gap-3">
+            <div className="frame p-4 space-y-4">
+              <div className="frame-header -mx-4 -mt-4 mb-4 gap-3">
                 <Settings2 className="h-4 w-4 text-primary" />
                 <h2 className="text-sm font-semibold text-foreground">Preferences</h2>
               </div>
               <p className="text-muted-foreground text-sm">Manage your application preferences and integrations</p>
-              {isPatientRole && (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/20">
-                    <div className="flex-1 mr-3">
-                      <p className="text-sm font-medium text-foreground">Auto-email prescription to pharmacy</p>
-                      <p className="text-sm text-muted-foreground mt-0.5">When your advisor saves a prescription, it will be sent to your primary pharmacy.</p>
-                    </div>
-                    <Switch checked={(profile as any)?.auto_email_prescription_to_pharmacy || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_prescription_to_pharmacy: c } as any); toast({ title: "Preference updated" }); }} />
-                  </div>
-                  <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/20">
-                    <div className="flex-1 mr-3">
-                      <p className="text-sm font-medium text-foreground">Auto-email certificate to employer</p>
-                      <p className="text-sm text-muted-foreground mt-0.5">When your wealth manager saves an advice letter, it will be sent to your employer.</p>
-                    </div>
-                    <Switch checked={(profile as any)?.auto_email_certificate_to_employer || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_certificate_to_employer: c } as any); toast({ title: "Preference updated" }); }} />
-                  </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-foreground">Screen tips</p>
+                  <p className="text-sm text-muted-foreground">Show the first-visit orientation tip on every screen again.</p>
                 </div>
-              )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    const { resetAllScreenTips } = await import("@/hooks/useScreenTip");
+                    const { error } = await resetAllScreenTips();
+                    toast({ title: error ? "Failed" : "Tips reset", description: error ?? "You'll see them again on each screen." });
+                  }}
+                >
+                  Reset tips
+                </Button>
+              </div>
+
+
             </div>
 
             {isAdvisor && (
-              <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
-                <div className="flex items-center gap-3">
+              <div className="frame p-4 space-y-4">
+                <div className="frame-header -mx-4 -mt-4 mb-4 gap-3">
                   <Users className="h-4 w-4 text-primary" />
                   <h3 className="text-sm font-semibold text-foreground">Client Management</h3>
                 </div>
@@ -522,7 +535,7 @@ export function SettingsContent() {
               </div>
             )}
 
-            <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-3">
+            <div className="frame p-4 space-y-3">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-primary" />
                 <h3 className="text-sm font-semibold text-foreground">Calendar Integration</h3>
@@ -562,112 +575,12 @@ export function SettingsContent() {
           </div>
         </TabsContent>
 
-        {/* NOTIFICATIONS */}
-        <TabsContent value="notifications" className="mt-4">
-          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <Bell className="h-4 w-4 text-primary" />
-              <h2 className="text-sm font-semibold text-foreground">Notifications</h2>
-            </div>
-            <p className="text-sm text-muted-foreground">Configure how you receive alerts and reminders</p>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div><p className="font-medium text-foreground">Email Notifications</p><p className="text-sm text-muted-foreground">Receive email reminders for appointments</p></div>
-                <Switch defaultChecked />
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div><p className="font-medium text-foreground">Consultation Reminders</p><p className="text-sm text-muted-foreground">Get notified 15 minutes before consultations</p></div>
-                <Switch defaultChecked />
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div><p className="font-medium text-foreground">Follow-up Alerts</p><p className="text-sm text-muted-foreground">Reminders for scheduled follow-ups</p></div>
-                <Switch defaultChecked />
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-foreground">Alert my Holarc Care Team if I miss medication</p>
-                  <p className="text-sm text-muted-foreground">Master switch — per-contact and per-medication opt-ins must also be on.</p>
-                </div>
-                <Switch
-                  checked={(profile as any)?.notify_contacts_on_missed_meds ?? true}
-                  onCheckedChange={async (v) => {
-                    await updateProfile({ notify_contacts_on_missed_meds: v } as any);
-                    toast({ title: "Saved" });
-                  }}
-                />
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-foreground">Alert my Holarc Care Team when I take medication</p>
-                  <p className="text-sm text-muted-foreground">Only contacts you've opted in for each medication will be notified.</p>
-                </div>
-                <Switch
-                  checked={(profile as any)?.notify_contacts_on_taken_meds ?? false}
-                  onCheckedChange={async (v) => {
-                    await updateProfile({ notify_contacts_on_taken_meds: v } as any);
-                    toast({ title: "Saved" });
-                  }}
-                />
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-foreground">Screen tips</p>
-                  <p className="text-sm text-muted-foreground">Show the first-visit orientation tip on every screen again.</p>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={async () => {
-                    const { resetAllScreenTips } = await import("@/hooks/useScreenTip");
-                    const { error } = await resetAllScreenTips();
-                    toast({ title: error ? "Failed" : "Tips reset", description: error ?? "You'll see them again on each screen." });
-                  }}
-                >
-                  Reset tips
-                </Button>
-              </div>
-              {isAdvisor && (
-                <>
-                  <Separator />
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-foreground">Chronic Medication Adherence Updates</p>
-                      <p className="text-sm text-muted-foreground">How often to receive notifications about chronic patients taking or missing their medications</p>
-                    </div>
-                    <Select
-                      defaultValue={profile?.chronic_med_notification_frequency as string || "daily"}
-                      onValueChange={async (value) => {
-                        await updateProfile({ chronic_med_notification_frequency: value } as any);
-                        toast({ title: "Setting saved", description: `Chronic med updates set to: ${value}` });
-                      }}
-                    >
-                      <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="every_dose">Every dose</SelectItem>
-                        <SelectItem value="daily">Daily summary</SelectItem>
-                        <SelectItem value="weekly">Weekly summary</SelectItem>
-                        <SelectItem value="monthly">Monthly summary</SelectItem>
-                        <SelectItem value="never">Never</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </TabsContent>
-
         {/* BILLING */}
         <TabsContent value="billing" className="mt-4 space-y-4">
-          <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
-            <div className="flex items-center gap-3 mb-6">
+          <div className="frame p-4">
+            <div className="frame-header -mx-4 -mt-4 mb-4 gap-3">
               <CreditCard className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">Subscription</h2>
+              <h2 className="text-sm font-semibold text-foreground">Subscription</h2>
             </div>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -690,18 +603,18 @@ export function SettingsContent() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
-            <div className="flex items-center gap-3 mb-6">
+          <div className="frame p-4">
+            <div className="frame-header -mx-4 -mt-4 mb-4 gap-3">
               <Receipt className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">Payment History</h2>
+              <h2 className="text-sm font-semibold text-foreground">Payment History</h2>
             </div>
             {loadingPaymentHistory ? (
               <div className="flex items-center justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
             ) : paymentHistory.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">No payment history yet</p>
+              <p className="empty-state">No payment history yet</p>
             ) : (
               <div className="rounded-xl border border-border overflow-hidden">
-                <Table>
+                <Table className="data-table">
                   <TableHeader>
                     <TableRow className="bg-muted/50">
                       <TableHead>Date</TableHead><TableHead>Description</TableHead><TableHead>Amount</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Receipt</TableHead>

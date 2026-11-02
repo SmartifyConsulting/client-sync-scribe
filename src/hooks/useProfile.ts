@@ -65,7 +65,7 @@ export function useProfile() {
         // Create profile for existing user
         const { data: newProfile, error: insertError } = await supabase
           .from('profiles')
-          .insert({ id: user.id })
+          .insert({ id: user.id, full_name: user.user_metadata?.full_name || user.user_metadata?.name || [user.user_metadata?.first_name, user.user_metadata?.last_name].filter(Boolean).join(" ") || null })
           .select()
           .single();
         
@@ -78,8 +78,8 @@ export function useProfile() {
       // metadata full_name (older accounts, or an invite accepted before
       // that backfill existed), heal it here so the name/initials actually
       // show instead of falling back to "User".
-      if (!data.full_name && user.user_metadata?.full_name) {
-        const fallbackName = String(user.user_metadata.full_name).trim();
+      if (!data.full_name?.trim()) {
+        const fallbackName = String(user.user_metadata?.full_name || user.user_metadata?.name || [user.user_metadata?.first_name, user.user_metadata?.last_name].filter(Boolean).join(" ")).trim();
         if (fallbackName) {
           const { data: healed } = await supabase
             .from('profiles')
@@ -87,7 +87,7 @@ export function useProfile() {
             .eq('id', user.id)
             .select()
             .maybeSingle();
-          if (healed) data = healed;
+          data = healed ?? { ...data, full_name: fallbackName };
         }
       }
       setProfile(data as unknown as Profile);
