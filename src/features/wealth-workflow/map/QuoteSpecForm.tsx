@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Plus, X } from "lucide-react";
+import { Loader2, Plus, X, Pencil } from "lucide-react";
 import { insurerColor } from "./insurerColors";
 import { insurerFields, insurerKey } from "./insurerDictionary";
 import { LoginRing, LOGIN_TEXT, OtpDialog, ProtectorDialog, addonInstalled, downloadAddon, type Challenge, type LoginState } from "./InsurerLogin";
@@ -294,38 +294,26 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
           <ProtectorDialog open={!!askFor} busy={unlocking} onClose={() => setAskFor(null)} onSubmit={unlock} />
           <CompanionSetup open={setupOpen} onClose={() => setSetupOpen(false)} />
           </div>
-          <aside aria-label="Portal tools" className="min-w-0 rounded-lg border border-border bg-muted/20 p-3 space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs font-semibold">Portal tools</p>
-            <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => {
-              const value = insurerRows.find((r) => r.name === activeTab)?.portal_url;
-              try { const url = new URL(value ?? ""); if (url.protocol !== "https:" || url.username || url.password) throw new Error(); window.open(url.href, "_blank", "noopener,noreferrer"); }
-              catch { toast({ title: "Set this insurer's portal URL first.", variant: "destructive" }); }
-            }}>Open portal</Button>
+          <div className="min-w-0 space-y-2">
+            <div className="flex items-center justify-end gap-2">
+              <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => {
+                const value = insurerRows.find(r => r.name === activeTab)?.portal_url;
+                try { const url = new URL(value ?? ""); if (url.protocol !== "https:" || url.username || url.password) throw new Error(); window.open(url.href, "_blank", "noopener,noreferrer"); }
+                catch { toast({ title: "Set this insurer's portal URL first.", variant: "destructive" }); }
+              }}>Open portal</Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Edit portal URL" title="Edit portal URL" onClick={() => {
+                setPortalEdit(portalEdit === activeTab ? null : activeTab);
+                setPortalUrl(insurerRows.find(r => r.name === activeTab)?.portal_url ?? "");
+              }}><Pencil className="h-3.5 w-3.5" /></Button>
             </div>
-            <details className="border-t border-border pt-2">
-            <summary className="cursor-pointer text-xs font-medium">Portal settings & saved login</summary>
-            <div className="mt-2 grid grid-cols-2 gap-2">
-            <Button variant="ghost" size="sm" className="col-span-2 h-8 justify-start text-xs" onClick={() => { setPortalEdit(activeTab); setPortalUrl(insurerRows.find((r) => r.name === activeTab)?.portal_url ?? ""); }}>Edit portal URL</Button>
-            {["username", "password"].map((field) => <Button key={field} variant="ghost" size="sm" className="h-8 justify-start text-xs" onClick={async () => {
-              const token = getToken();
-              if (!token) { setAskFor(activeTab); return; }
-              const row = insurerRows.find((r) => r.name === activeTab);
-              if (!row) return;
-              const { data, error } = await supabase.functions.invoke("manage-broker-credentials", { body: { action: "reveal", integrationId: row.id, token } });
-              const value = field === "username" ? data?.username : data?.fields?.password;
-              if (error || data?.error || !value) { toast({ title: "Could not unlock the saved login.", variant: "destructive" }); return; }
-              try { await navigator.clipboard.writeText(value); toast({ title: `${field === "username" ? "Username" : "Password"} copied. Clear your clipboard after use.` }); }
-              catch { toast({ title: "Your browser blocked copying.", variant: "destructive" }); }
-            }}>Copy {field}</Button>)}
-            </div>
-            <p className="mt-2 text-xs text-muted-foreground">Saved logins stay unlocked for 15 minutes.</p>
-          {portalEdit === activeTab && <div className="mt-3 space-y-2">
-            <Input type="url" aria-label={`${activeTab} portal URL`} className="h-7 text-xs" value={portalUrl} onChange={(e) => setPortalUrl(e.target.value)} />
-            <Button size="sm" className="h-7 text-xs" onClick={savePortal}>Save URL</Button>
-          </div>}
-            </details>
-          </aside>
+            {portalEdit === activeTab && <div className="space-y-2">
+              <Input type="url" aria-label={`${activeTab} portal URL`} className="h-8 text-xs" value={portalUrl} onChange={e => setPortalUrl(e.target.value)} />
+              <div className="flex justify-end gap-2">
+                <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => setPortalEdit(null)}>Cancel</Button>
+                <Button size="sm" className="h-8 text-xs" onClick={savePortal}>Save URL</Button>
+              </div>
+            </div>}
+          </div>
           </div>
           </section>
           <section className="frame p-3 space-y-3" aria-label="Review quote options">
