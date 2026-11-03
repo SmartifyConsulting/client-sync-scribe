@@ -281,6 +281,13 @@ function drive(username, password, submitted, origin, discoveryRedirects) {
     setVal(pw, password);
     return { state: submit(pw) ? "submitted" : "waiting" };
   }
+  // Bidvest's observed first screen says Adviser Portal, not Login, and can
+  // contain a browser-autofilled email. Advance it once using the test's login.
+  if (!pw && !submitted && u.hostname === "login.fmi.co.za" &&
+      user?.type === "email" && user.name === "email" && /Adviser Portal/i.test(text)) {
+    if (user.value !== username) setVal(user, username);
+    return { state: submit(user) ? "submitted" : "waiting" };
+  }
   if (user && !user.value && /log ?in|sign ?in|username/i.test(text)) { setVal(user, username); return { state: submit(user) ? "submitted" : "waiting" }; }
   if (!pw && /log ?out|sign ?out/i.test(text) && /quote|quotation|new business|adviser dashboard/i.test(text)) return { state: "in" };
   return { state: "waiting" };
