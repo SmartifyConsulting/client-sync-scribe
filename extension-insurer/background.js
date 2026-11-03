@@ -127,16 +127,16 @@ async function checkPortal(tabId) {
   if (job.step > 90) { job.done = true; job.checking = false; job.username = ""; job.password = ""; tell(job, { type: "insurer-login-result", ok: false, message: "The portal didn't finish logging in. Please finish in the insurer tab." }); return; }
   // Give single-page portals a moment to draw the form.
   await new Promise((r) => setTimeout(r, 1200));
-  const [res] = await chrome.scripting.executeScript({ target: { tabId }, func: drive, args: [job.username, job.password, job.submitted, job.origin, job.discoveryRedirects] }).catch(() => [{}]);
+  const [res] = await chrome.scripting.executeScript({ target: { tabId }, func: drive, args: [job.username, job.password, job.submitted, job.origin, job.discoveryRedirects, job.passwordSubmitted === true] }).catch(() => [{}]);
   const r = res?.result || {};
   job.checking = false;
   if (r.state === "otp" || r.state === "email") {
     if (job.challenge !== r.state) tell(job, { type: "insurer-challenge", method: r.state, hint: r.hint });
     job.challenge = r.state;
-  } else if (r.state === "submitted") { job.submitted = true; tell(job, { type: "insurer-login-progress", state: "connecting", phase: "credentials" }); }
+  } else if (r.state === "submitted") { job.submitted = true; if (r.credentialStep === "password") job.passwordSubmitted = true; tell(job, { type: "insurer-login-progress", state: "connecting", phase: "credentials" }); }
   else if (r.state === "waiting") tell(job, { type: "insurer-login-progress", state: "connecting", phase: job.submitted ? "waiting" : "loading" });
   else if (r.state === "in") { job.done = true; job.username = ""; job.password = ""; tell(job, { type: "insurer-login-result", ok: true }); if (/^discovery$/i.test(job.insurer)) await scanPortal(tabId, job); }
-  else if (r.state === "failed") { job.done = true; job.username = ""; job.password = ""; tell(job, { type: "insurer-login-result", ok: false, message: "Login failed. The provider rejected the login. Please recheck your username and password and try again." }); }
+  else if (r.state === "failed") { job.done = true; job.username = ""; job.password = ""; tell(job, { type: "insurer-login-result", ok: false, message: r.reason === "locked" ? "The provider has locked your profile. Unlock it in the provider portal before trying again. No further login attempts will be made in this session." : "Login failed. The provider rejected the login. Please recheck your username and password and try again." }); }
   if (!job.done) setTimeout(() => checkPortal(tabId), 2500);
 }
 
@@ -217,7 +217,7 @@ async function readPdf(url) {
 }
 
 // ---- injected into the insurer page ----
-function drive(username, password, submitted, origin, discoveryRedirects) {
+function drive(username, password, submitted, origin, discoveryRedirects, passwordSubmitted = false) {
   // Recheck inside the page: navigation may occur between tab inspection and injection.
   const u = new URL(location.href);
   if (u.protocol !== "https:" || u.username || u.password || !(u.origin === origin || (typeof discoveryRedirects === "string" && !u.port && (u.hostname === discoveryRedirects || u.hostname.endsWith("." + discoveryRedirects))))) return { state: "waiting" };
@@ -263,6 +263,7 @@ function drive(username, password, submitted, origin, discoveryRedirects) {
       [...(i.labels || [])].some(label => label.textContent.trim() === "Client search")) &&
     !inputs.some(i => i.type === "password");
   if (momentumHome) return { state: "in" };
+  if (/your (?:profile|account) has been locked/i.test(text)) return { state: "failed", reason: "locked" };
   if (/incorrect password|invalid (credentials|password|username)|login failed/i.test(text)) return { state: "failed" };
   const otp = inputs.find((i) => i.autocomplete === "one-time-code" || /otp|pin|token|code|verification/i.test(`${i.name} ${i.id} ${i.placeholder} ${i.getAttribute("aria-label") || ""}`));
   if (otp && !inputs.some((i) => i.type === "password")) {
@@ -276,10 +277,10 @@ function drive(username, password, submitted, origin, discoveryRedirects) {
   const pw = inputs.find((i) => i.type === "password");
   const user = inputs.find((i) => ["text", "email", "tel"].includes(i.type) && /user|email|login|id|name/i.test(`${i.name} ${i.id} ${i.placeholder} ${i.autocomplete}`)) ||
     inputs.find((i) => ["text", "email"].includes(i.type));
-  if (pw && (!submitted || !pw.value)) {
+  if (pw && !passwordSubmitted) {
     if (user && !user.value) setVal(user, username);
     setVal(pw, password);
-    return { state: submit(pw) ? "submitted" : "waiting" };
+    return submit(pw) ? { state: "submitted", credentialStep: "password" } : { state: "waiting" };
   }
   // Bidvest's observed first screen says Adviser Portal, not Login, and can
   // contain a browser-autofilled email. Advance it once using the test's login.
@@ -288,7 +289,7 @@ function drive(username, password, submitted, origin, discoveryRedirects) {
     if (user.value !== username) setVal(user, username);
     return { state: submit(user) ? "submitted" : "waiting" };
   }
-  if (user && !user.value && /log ?in|sign ?in|username/i.test(text)) { setVal(user, username); return { state: submit(user) ? "submitted" : "waiting" }; }
+  if (!pw && !submitted && user && !user.value && /log ?in|sign ?in|username/i.test(text)) { setVal(user, username); return { state: submit(user) ? "submitted" : "waiting" }; }
   if (!pw && /log ?out|sign ?out/i.test(text) && /quote|quotation|new business|adviser dashboard/i.test(text)) return { state: "in" };
   return { state: "waiting" };
 }

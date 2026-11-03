@@ -14,7 +14,7 @@ function inspect({ title = 'Home | AdviserConnect', password = false, welcome = 
   const context = vm.createContext({ URL, location: { href: 'https://adviserconnect.momentum.co.za/' },
     document: { title, body: { innerText: welcome ? 'Welcome to AdviserConnect\nQuotes & calculators' : '' }, querySelectorAll: () => inputs } });
   vm.runInContext(drive, context);
-  const result = vm.runInContext('drive("unused", "unused", true, "https://adviserconnect.momentum.co.za", false)', context);
+  const result = vm.runInContext('drive("unused", "unused", true, "https://adviserconnect.momentum.co.za", false, true)', context);
   return { state: result.state, writes };
 }
 
@@ -59,4 +59,23 @@ test('a loading page is not reported as a rejected password', () => {
   const context = vm.createContext({URL, location:{href:'https://iris.brightrock.co.za/login'}, document:{body:{innerText:'Loading…'},querySelectorAll:()=>[]}});
   vm.runInContext(drive,context);
   assert.equal(vm.runInContext("drive('unused','unused',false,'https://iris.brightrock.co.za',false)",context).state,'waiting');
+});
+
+test('recognises the observed profile lock and does not mistake conditional help text for a lock', () => {
+  for (const [text, expected] of [["Your profile has been locked as you've entered your password incorrectly 3 times.", 'failed'],["If you’ve forgotten your password or your account is locked, use the link below to access your profile.", 'waiting']]) {
+    const context=vm.createContext({URL,location:{href:'https://adviser-account.momentum.co.za/login'},document:{body:{innerText:text},querySelectorAll:()=>[]}});
+    vm.runInContext(drive,context);
+    const result=vm.runInContext("drive('unused','unused',true,'https://adviser-account.momentum.co.za',false,true)",context);
+    assert.equal(result.state,expected);
+    if(expected==='failed')assert.equal(result.reason,'locked');
+  }
+});
+test('does not refill or resubmit password after submission even if the portal clears all inputs', () => {
+  let writes=0,clicks=0;
+  class Input {constructor(type){this.type=type;this.name=type==='password'?'password':'username';}get value(){return '';}set value(v){writes++;}getClientRects(){return[1];}focus(){}blur(){}dispatchEvent(){}getAttribute(){return null;}closest(){return null;}getRootNode(){return{};}}
+  const inputs=[new Input('text'),new Input('password')];
+  const document={body:{innerText:'Log in Username Password'},querySelectorAll:s=>s==='input'?inputs:s==='*'?[]:[{textContent:'Log in',click:()=>clicks++,getClientRects:()=>[1]}]};
+  const context=vm.createContext({URL,location:{href:'https://adviser-account.momentum.co.za/login'},document,HTMLInputElement:Input,Event:class{}});vm.runInContext(drive,context);
+  assert.equal(vm.runInContext("drive('synthetic-user','synthetic-password',true,'https://adviser-account.momentum.co.za',false,true)",context).state,'waiting');
+  assert.equal(writes,0);assert.equal(clicks,0);
 });
