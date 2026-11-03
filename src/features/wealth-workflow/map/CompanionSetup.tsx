@@ -1,44 +1,38 @@
-import { useState } from "react";
-import { Download, ExternalLink, Loader2 } from "lucide-react";
-import { checkCompanion } from "./companionDetection";
+import { useEffect, useRef, useState } from "react";
+import { Download } from "lucide-react";
+import { LATEST_COMPANION_VERSION, useCompanionInstalled, useCompanionVersion } from "./companionDetection";
 import { companionStoreUrl } from "./companionStore";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { downloadAddon } from "./InsurerLogin";
 
 export function CompanionSetup({ open, onClose, onReady }: { open: boolean; onClose: () => void; onReady?: () => void }) {
-  const [checking, setChecking] = useState(false);
-  const [notDetected, setNotDetected] = useState(false);
+  const installed = useCompanionInstalled();
+  const version = useCompanionVersion();
   const storeUrl = companionStoreUrl();
+  const current = installed && version === LATEST_COMPANION_VERSION;
+  const [downloaded, setDownloaded] = useState(false);
+  const wasInstalled = useRef(installed);
+  useEffect(() => {
+    if (open && installed && !wasInstalled.current) { onClose(); onReady?.(); }
+    wasInstalled.current = installed;
+  }, [installed, open, onClose, onReady]);
+  useEffect(() => { if (!open) setDownloaded(false); }, [open]);
+  const action = installed ? "Update Companion" : "Install Companion";
   return <Dialog open={open} onOpenChange={(value) => !value && onClose()}>
     <DialogContent className="max-w-sm">
       <DialogHeader><DialogTitle>Holarc Wealth Companion</DialogTitle>
-        <DialogDescription>Already installed? Reconnect the Companion below. Installation is only needed once per browser profile.</DialogDescription></DialogHeader>
-      <Button size="sm" disabled={checking} onClick={async () => {
-        setChecking(true); setNotDetected(false);
-        const installed = await checkCompanion();
-        setChecking(false);
-        if (installed) { onClose(); onReady?.(); } else setNotDetected(true);
-      }}>{checking && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Already installed — check again</Button>
-      {notDetected && <p role="status" className="text-xs text-muted-foreground">Not detected on this page yet. You do not need to reinstall. Check that the Companion is enabled in this browser profile and has access to Holarc, then refresh this page and try again.</p>}
-      {storeUrl && <>
-        <Button asChild size="sm"><a href={storeUrl} target="_blank" rel="noopener noreferrer"><Download className="mr-2 h-4 w-4" />Install Companion</a></Button>
-        <p className="text-xs text-muted-foreground">Choose Add to Chrome in the store, then return here and click Already installed. Future updates are delivered through the store.</p>
+        <DialogDescription>Keep your insurer connection tools up to date.</DialogDescription></DialogHeader>
+      <dl className="space-y-3 text-xs">
+        <div className="flex justify-between gap-3"><dt className="font-semibold">Installed version</dt><dd>{installed ? version || "Older version · number unavailable" : "Not detected"}</dd></div>
+        <div className="flex justify-between gap-3"><dt className="font-semibold">Latest version</dt><dd>{LATEST_COMPANION_VERSION}</dd></div>
+      </dl>
+      {current ? <p role="status" className="text-xs text-success">You’re up to date.</p> : <>
+        {storeUrl ? <Button asChild size="sm"><a href={storeUrl} target="_blank" rel="noopener noreferrer"><Download className="mr-2 h-4 w-4" />{action}</a></Button>
+          : <Button size="sm" onClick={() => { downloadAddon(); setDownloaded(true); }}><Download className="mr-2 h-4 w-4" />{action}</Button>}
+        <p className="text-xs text-muted-foreground">{storeUrl ? "Chrome will guide you through installation. Refresh Holarc afterwards." : "Downloads the latest Companion package. Chrome setup is required."}</p>
+        {!storeUrl && downloaded && <p role="status" className="text-xs text-muted-foreground">{installed ? "Unzip into your existing Companion folder, replace the files, and click Reload in Chrome → Extensions. Then refresh Holarc." : "Unzip the download. In Chrome → Extensions, enable Developer mode, choose Load unpacked and select the unzipped folder. Then refresh Holarc."}</p>}
       </>}
-      {!storeUrl && <>
-      <details className="text-xs">
-      <summary className="cursor-pointer font-medium">Installing for the first time?</summary>
-      <ol className="list-decimal space-y-2 pl-4 text-xs">
-        <li>Download and unzip the Companion.</li>
-        <li>Open <span className="font-medium">chrome://extensions</span> and enable Developer mode.</li>
-        <li>Choose Load unpacked and select the unzipped folder.</li>
-        <li>Refresh Holarc Wealth.</li>
-      </ol>
-      <p className="text-xs text-muted-foreground">Only repeat setup for another browser or device, or if you remove the Companion. A store installation is not available yet.</p>
-      <Button size="sm" onClick={downloadAddon}><Download className="mr-2 h-4 w-4" />Download Companion</Button>
-      </details>
-      </>}
-      <Button size="sm" variant="ghost" onClick={onClose}><ExternalLink className="mr-2 h-4 w-4" />Continue without Companion</Button>
     </DialogContent>
   </Dialog>;
 }

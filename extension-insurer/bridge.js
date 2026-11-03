@@ -1,6 +1,7 @@
 // Runs inside Holarc Wealth. Passes messages between the page and the add-on.
 (function () {
   document.documentElement.dataset.holarcAddon = "1";
+  document.documentElement.dataset.holarcAddonVersion = chrome.runtime.getManifest().version;
   window.addEventListener("message", (e) => {
     if (e.source !== window || e.origin !== location.origin || e.data?.source !== "holarc") return;
     const d = e.data;
