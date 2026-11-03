@@ -1,15 +1,15 @@
 /** Draft Disclosure Agreement and LOA templates. Wording is a placeholder for the firm to replace. */
 const NAVY = "#0f2742", INK = "#1e293b", MUTED = "#64748b", RULE = "#d8dee8";
 const esc = (x: unknown) => String(x ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
-const logo = (u?: string | null) => (u ? `<img src="${esc(u)}" alt="" style="max-height:46px;max-width:170px;object-fit:contain"/>` : "");
+const logo = (u?: string | null) => (u ? `<img src="${esc(u)}" alt="" style="max-height:55px;max-width:204px;object-fit:contain"/>` : "");
 const footer = (p: any) => p?.fsp_name
   ? `${esc(p.fsp_name)} · Reg No ${esc(p.registration_number ?? "–")} · FSP ${esc(p.fsb_licence ?? "–")}<br/>${esc(p.firm_address ?? "")}${p.firm_website ? " · " + esc(p.firm_website) : ""}`
   : "Masthead Financial Planning (Proprietary) Limited · Reg No 2010/019601/07 · FSP 43435<br/>1st Floor Park Terraces, Golf Park, Mowbray 7700 · www.mastheadfp.co.za";
-const wrap = (title: string, subtitle: string, body: string, p: any = null) => `<div id="holarc-document" style="font-family:'Helvetica Neue',Arial,sans-serif;color:${INK};background:#fff;padding:17px 42px 39px;font-size:12.5px;line-height:1.7;letter-spacing:0.15px;word-spacing:1px;max-width:820px;margin:0 auto">
+const wrap = (title: string, subtitle: string, body: string, p: any = null) => `<div id="holarc-document" style="font-family:'Helvetica Neue',Arial,sans-serif;color:${INK};background:#fff;padding:11px 28px 26px;font-size:12.5px;line-height:1.7;letter-spacing:0.15px;word-spacing:1px;max-width:820px;margin:0 auto">
 ${p?.__businessLogo || p?.__fspLogo ? `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">${logo(p.__fspLogo) || "<span></span>"}${logo(p.__businessLogo) || "<span></span>"}</div>` : ""}
 <div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid ${NAVY};padding-bottom:10px;margin-bottom:20px">
 <div><p style="margin:0;font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:${MUTED}">${subtitle}</p>
-<h1 style="margin:4px 0 0;font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:19px;color:${NAVY};letter-spacing:.01em;white-space:nowrap">${title}</h1></div>
+<h1 style="margin:4px 0 0;font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:23px;color:${NAVY};letter-spacing:.01em;white-space:nowrap">${title}</h1></div>
 <p style="margin:0;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:${NAVY};font-weight:600">${esc(p?.business_name || p?.fsp_name || "")}</p></div>
 ${body}
 <div data-document-footer="true" style="margin-top:36px;padding-top:12px;border-top:1px solid ${RULE};font-size:9.5px;color:${MUTED};text-align:center;line-height:1.5">${footer(p)}</div></div>`;
