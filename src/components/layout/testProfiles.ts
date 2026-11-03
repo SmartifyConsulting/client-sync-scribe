@@ -24,6 +24,7 @@ export const WEALTH_DEMO_PROFILES: TestProfile[] = [
 export const REAL_ACCOUNT_PROFILES: TestProfile[] = [
   { email: "marlin@marlinmoodley.co.za", name: "Marlin Moodley", role: "as Wealth Manager", icon: Stethoscope },
   { email: "georgiaadams@holarchealth.com", name: "Georgia Adams", role: "as Client", icon: HeartPulse },
+  { email: "info@vulavault.com", name: "Jean Sirinidis", role: "as Client", icon: HeartPulse },
 ];
 
 export const TEST_PROFILES: TestProfile[] = [
