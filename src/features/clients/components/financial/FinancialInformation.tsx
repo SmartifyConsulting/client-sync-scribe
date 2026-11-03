@@ -123,7 +123,7 @@ export function FinancialInformation({ clientId }: { clientId: string }) {
     const fields = s.fields ?? [];
     return { filled: fields.filter((f) => v[f.key] !== undefined && v[f.key] !== null && v[f.key] !== "").length, total: fields.length };
   };
-  const completedSections = SECTIONS.filter((s) => { const p = progress(s); return p.filled > 0; }).length;
+  const completedSections = SECTIONS.filter((s) => { const p = progress(s); return p.total > 0 && p.filled === p.total; }).length;
 
   const summary = useMemo(() => {
     const cf = sec("cash_flow");
@@ -198,7 +198,7 @@ export function FinancialInformation({ clientId }: { clientId: string }) {
     <div className="space-y-2">
       <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm">
         <span className="font-medium text-foreground">Needs Analysis progress</span>
-        <span className="text-muted-foreground">{completedSections} of {SECTIONS.length} sections started</span>
+        <span className="text-muted-foreground">{completedSections} of {SECTIONS.length} sections completed</span>
       </div>
       <div className="client-section-frame rounded-xl border border-border bg-card overflow-hidden divide-y divide-white">
       {SECTIONS.map((s) => {

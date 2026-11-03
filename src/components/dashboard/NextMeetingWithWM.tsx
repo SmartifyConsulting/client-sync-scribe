@@ -28,8 +28,8 @@ export function NextMeetingWithWM() {
 
   if (!meeting) {
     return (
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <CalendarDays className="h-3.5 w-3.5" /> No upcoming meeting scheduled yet.
+      <div className="flex items-center gap-2 text-xs text-navy">
+        <CalendarDays className="h-3.5 w-3.5 text-navy" /> No upcoming meeting scheduled yet.
       </div>
     );
   }
@@ -39,12 +39,12 @@ export function NextMeetingWithWM() {
 
   return (
     <div className="flex items-start gap-2.5">
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-        <CalendarDays className="h-4 w-4 text-primary" />
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-navy/10">
+        <CalendarDays className="h-4 w-4 text-navy" />
       </span>
       <div className="min-w-0">
-        <p className="text-sm font-semibold text-foreground">{dayLabel(start)} · {format(start, "h:mm a")}</p>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm font-semibold text-navy">{dayLabel(start)} · {format(start, "h:mm a")}</p>
+        <p className="text-xs text-navy">
           With {meeting.wmName}
           <span className="mx-1">·</span>
           <span className="inline-flex items-center gap-1">

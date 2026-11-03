@@ -168,8 +168,8 @@ export function ClientHeroCard({
     <section className="rounded-xl border border-primary bg-gradient-to-br from-primary/5 via-card to-card p-4 md:p-5 shadow-sm">
       <div className="flex items-start gap-4">
         {topRight && (
-          <div className="order-last ml-auto shrink-0 self-start rounded-xl border border-border bg-card/60 p-3 max-w-[16rem]">
-            <p className="text-2xs uppercase tracking-wide text-muted-foreground font-semibold mb-1.5">Next meeting</p>
+          <div className="order-last ml-auto mt-9 md:mt-10 shrink-0 self-start rounded-xl border border-border bg-card/60 p-3 max-w-[16rem] text-navy [&_svg]:text-navy">
+            <p className="text-2xs uppercase tracking-wide text-navy font-semibold mb-1.5">Next meeting</p>
             {topRight}
           </div>
         )}
