@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ShieldCheck, X } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -12,7 +12,7 @@ interface ProfileCompletionBannerProps {
   title?: string;
   /** Override the default body copy */
   message?: string;
-  /** sessionStorage key so the banner stays dismissed for the rest of this session */
+  /** Key for the account-saved reminder preference. */
   storageKey?: string;
 }
 
@@ -28,23 +28,9 @@ export function ProfileCompletionBanner({
 }: ProfileCompletionBannerProps) {
   const { user } = useAuth();
   const [saving, setSaving] = useState(false);
-  const scopedKey = `${storageKey}:${user?.id ?? "guest"}`;
-  const [dismissed, setDismissed] = useState<boolean>(() => {
-    try {
-      return sessionStorage.getItem(scopedKey) === "1";
-    } catch {
-      return false;
-    }
-  });
+  const [dismissed, setDismissed] = useState(false);
 
   if (dismissed || user?.user_metadata?.profile_reminder_dismissals?.[storageKey]) return null;
-
-  const dismiss = () => {
-    try {
-      sessionStorage.setItem(scopedKey, "1");
-    } catch {}
-    setDismissed(true);
-  };
 
   const dismissPermanently = async () => {
     if (!user) return;
@@ -59,15 +45,7 @@ export function ProfileCompletionBanner({
 
   return (
     <div className="rounded-lg border-2 border-primary/40 bg-primary/5 p-4 relative">
-      <button
-        type="button"
-        onClick={dismiss}
-        aria-label="Ignore for now"
-        className="absolute right-2 top-2 text-muted-foreground hover:text-foreground"
-      >
-        <X className="h-4 w-4" />
-      </button>
-      <div className="flex gap-3 pr-6">
+      <div className="flex gap-3">
         <ShieldCheck className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
         <div className="space-y-2">
           <h3 className="text-sm font-semibold text-foreground">{title}</h3>
@@ -78,7 +56,6 @@ export function ProfileCompletionBanner({
               Complete my profile
             </Button>
           )}
-          <Button size="sm" variant="ghost" onClick={dismiss}>Ignore for now</Button>
           {user && <Button size="sm" variant="ghost" disabled={saving} onClick={dismissPermanently}>Do not remind me again</Button>}
           </div>
         </div>
