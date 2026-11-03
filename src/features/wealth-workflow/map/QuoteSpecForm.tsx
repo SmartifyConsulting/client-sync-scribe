@@ -1,4 +1,5 @@
 import { useCompanionInstalled } from "./companionDetection";
+import { useCompanionRelease } from "./companionRelease";
 import { recordPortalConnection } from "./portalLoginStatus";
 import { useEffect, useState, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -37,6 +38,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const { user } = useAuth();
   const qc = useQueryClient();
   const companionInstalled = useCompanionInstalled();
+  const companionRelease = useCompanionRelease();
   const { data: spec, isLoading } = useQuery({
     queryKey: ["wealth-quote-spec", workflowId],
     queryFn: async () => (await db.from("wealth_quote_specs").select("*").eq("workflow_id", workflowId).order("created_at", { ascending: false }).limit(1).maybeSingle()).data,
@@ -300,12 +302,12 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
           <div className="min-w-0 space-y-3">
           <div className="flex items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">1</span><h4 className="font-semibold">Connect to {activeTab}</h4></div>
           <InsurerActivity insurer={activeTab} activity={activity[activeTab]}
-            idleText={!(companionInstalled || addonInstalled()) ? "Companion not detected on this page yet" : getToken() ? "Connecting automatically…" : "Unlock your saved logins to connect in the background"}
-            idleAction={!(companionInstalled || addonInstalled()) ? "Already installed?" : getToken() ? "Connect" : "Unlock & connect"}
+            idleText={!(companionInstalled || addonInstalled()) ? `Update to the latest Companion v${companionRelease.version}` : getToken() ? "Connecting automatically…" : "Unlock your saved logins to connect in the background"}
+            idleAction={!(companionInstalled || addonInstalled()) ? "Update Companion" : getToken() ? "Connect" : "Unlock & connect"}
             onRetry={() => { if (!(companionInstalled || addonInstalled())) { setSetupOpen(true); return; } const token = getToken(); if (token) void startLogin(activeTab, token); else setAskFor(activeTab); }} />
           {login[activeTab] === "no-addon" && (
             <p className={label}>{LOGIN_TEXT[login[activeTab]]}
-              {login[activeTab] === "no-addon" && <Button variant="link" size="sm" className="h-auto px-1 text-xs" onClick={() => setSetupOpen(true)}>Already installed? Check again</Button>}
+              {login[activeTab] === "no-addon" && <Button variant="link" size="sm" className="h-auto px-1 text-xs" onClick={() => setSetupOpen(true)}>Update to Companion v{companionRelease.version}</Button>}
             </p>
           )}
           <OtpDialog challenge={challenge} onClose={() => setChallenge(null)} onSubmit={submitChallenge} />
