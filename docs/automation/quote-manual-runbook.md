@@ -1,5 +1,7 @@
 # Provider quote journeys - manual-backed RPA runbook
 
+For newer screens inspected directly in Chrome, see [Live quote navigation review](live-quote-navigation-2026-11-03.md). In particular, the current Momentum catalogue exposes a Myriad card rather than the older Life insurance entry. The live review distinguishes inspected screens from downstream steps that remain unverified.
+
 Reviewed 3 November 2026. This is the Companion's implementation and broker-review reference. It is not a claim that every portal can already be automated end to end.
 
 ## Evidence and coverage
