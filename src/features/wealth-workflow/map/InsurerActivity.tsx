@@ -17,7 +17,7 @@ export function InsurerActivity({ insurer, activity, onRetry, idleText = "Not co
   </section>;
   const stalled = activityWaiting(activity, now);
   const error = ["failed", "pdf-error", "no-fields"].includes(activity.phase);
-  const complete = ["fields", "saved"].includes(activity.phase);
+  const complete = ["connected", "fields", "saved"].includes(activity.phase);
   const paused = ["otp", "email"].includes(activity.phase);
   const elapsed = Math.max(0, Math.floor((now - activity.since) / 1000));
   return <section aria-label={`${insurer} background activity`} className="flex items-start gap-2 border-b border-border py-2 text-xs">
@@ -32,9 +32,12 @@ export function InsurerActivity({ insurer, activity, onRetry, idleText = "Not co
       <p role="status" className="font-medium text-foreground">{insurer} · {ACTIVITY_TEXT[activity.phase]}</p>
       {activity.detail && <p className="break-words text-destructive">{activity.detail}</p>}
       {(stalled || paused) && <p className="text-muted-foreground">{stalled ? `No advance for ${elapsed}s at this step. The portal may be slow or need attention.` : `Awaiting your verification · ${elapsed}s`}</p>}
-      <ol className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-muted-foreground" aria-label="Recent activity">
+      <details className="pt-1">
+      <summary className="cursor-pointer text-xs text-muted-foreground">Connection history</summary>
+      <ol className="mt-2 space-y-1 text-xs text-muted-foreground" aria-label="Recent activity">
         {activity.history.map((entry) => <li key={`${entry.at}-${entry.phase}`}>{new Date(entry.at).toLocaleTimeString("en-ZA", { hour: "2-digit", minute: "2-digit", second: "2-digit" })} · {ACTIVITY_TEXT[entry.phase]}</li>)}
       </ol>
+      </details>
     </div>
     {(stalled || activity.phase === "failed") && <Button variant="outline" size="sm" onClick={onRetry}><RotateCw className="mr-1 h-3 w-3" />Retry</Button>}
   </section>;

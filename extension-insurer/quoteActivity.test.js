@@ -13,7 +13,7 @@ describe("Truthful quote activity", () => {
     expect(activityWaiting(next, 31000)).toBe(false);
   });
   it("never calls required OTP or a saved PDF a stalled login", () => {
-    for (const phase of ["otp", "email", "saved", "fields"]) expect(activityWaiting(updateActivity(undefined, phase, 0), 60000)).toBe(false);
+    for (const phase of ["otp", "email", "saved", "fields", "connected"]) expect(activityWaiting(updateActivity(undefined, phase, 0), 60000)).toBe(false);
   });
   it("rejects unknown portal commentary", () => {
     expect(isActivityPhase("credentials")).toBe(true);

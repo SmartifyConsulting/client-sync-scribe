@@ -230,13 +230,18 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   if (isLoading) return <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />;
   if (!isWM) return null;
 
-  const label = "text-[10px] font-normal text-muted-foreground";
+  const label = "text-xs text-muted-foreground";
+  const incompleteOptions = products.flatMap(p => plan[p].flatMap((v, i) =>
+    variationComplete(PRODUCT_TYPES[p] ?? [], v) ? [] : [`${p} · Option ${String.fromCharCode(65 + i)}`]));
   return (
-    <div className="space-y-2.5 rounded-lg border border-border/60 p-2.5 text-[11px] leading-tight">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Quote plan</p>
-
+    <div className="space-y-4 text-xs leading-relaxed">
       <div>
-        <p className={cn(label, "mb-1")}>1 · Insurers to quote</p>
+        <h3 className="text-sm font-semibold">Prepare insurer quotes</h3>
+        <p className={label}>Choose your insurers, review the options, then request and collect your quotes.</p>
+      </div>
+
+      <section className="frame p-3 space-y-3" aria-label="Choose insurers">
+        <h4 className="text-xs font-semibold">Choose insurers</h4>
         {!insurers.length && <p className="text-[10px] text-muted-foreground">No saved insurer logins found.</p>}
         <div className="flex flex-wrap gap-1.5">
           {insurers.map((ins: string) => {
@@ -252,19 +257,19 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
             );
           })}
         </div>
-      </div>
+      </section>
 
       {chosen.length > 0 && (
         <div className="space-y-2">
-          <p className={label}>2 · Products from the needs analysis · 3 options each</p>
-          <div role="tablist" className="flex flex-wrap items-end gap-0.5 border-b-2" style={{ borderColor: activeTab ? `hsl(${insurerColor(activeTab)})` : undefined }}>
+          <p className={label}>Select an insurer to view its connection and quote options.</p>
+          <div role="tablist" aria-label="Insurer workspaces" className="flex flex-wrap items-center gap-2 border-b border-border pb-3" style={{ borderColor: activeTab ? `hsl(${insurerColor(activeTab)})` : undefined }}>
             {chosen.map((t) => {
               const c = insurerColor(t);
               const on = activeTab === t;
               return (
                 <button key={t} role="tab" aria-selected={on} onClick={() => openTab(t)}
-                  className={cn("flex items-center gap-1.5 rounded-t-md px-3 font-semibold transition-all",
-                    on ? "py-1.5 text-[11px] shadow-sm" : "py-1 text-[11px] opacity-75 hover:opacity-100")}
+                  className={cn("flex min-h-9 items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold transition-all",
+                    on ? "shadow-sm ring-2 ring-offset-2 ring-primary/30" : "opacity-75 hover:opacity-100")}
                   style={{ background: `hsl(${c})`, color: "hsl(var(--insurer-foreground))" }}>
                   {t}
                   <LoginRing state={login[t]} />
@@ -272,6 +277,8 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
               );
             })}
           </div>
+          <section className="frame p-3 space-y-3" aria-label="Connect insurer">
+          <div className="flex items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">1</span><h4 className="font-semibold">Connect to {activeTab}</h4></div>
           <InsurerActivity insurer={activeTab} activity={activity[activeTab]}
             idleText={!addonInstalled() ? "Companion not set up yet" : getToken() ? "Connecting automatically…" : "Unlock your saved logins to connect in the background"}
             idleAction={!addonInstalled() ? "One-time setup" : getToken() ? "Connect" : "Unlock & connect"}
@@ -290,7 +297,10 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
               try { const url = new URL(value ?? ""); if (url.protocol !== "https:" || url.username || url.password) throw new Error(); window.open(url.href, "_blank", "noopener,noreferrer"); }
               catch { toast({ title: "Set this insurer's portal URL first.", variant: "destructive" }); }
             }}>Open portal</Button>
-            <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => { setPortalEdit(activeTab); setPortalUrl(insurerRows.find((r) => r.name === activeTab)?.portal_url ?? ""); }}>Edit portal URL</Button>
+            <details className="w-full rounded-lg border border-border bg-muted/20 p-2">
+            <summary className="cursor-pointer text-xs font-medium">Portal settings & saved login</summary>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+            <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => { setPortalEdit(activeTab); setPortalUrl(insurerRows.find((r) => r.name === activeTab)?.portal_url ?? ""); }}>Edit portal URL</Button>
             {["username", "password"].map((field) => <Button key={field} variant="ghost" size="sm" className="h-7 text-xs" onClick={async () => {
               const token = getToken();
               if (!token) { setAskFor(activeTab); return; }
@@ -302,44 +312,43 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
               try { await navigator.clipboard.writeText(value); toast({ title: `${field === "username" ? "Username" : "Password"} copied. Clear your clipboard after use.` }); }
               catch { toast({ title: "Your browser blocked copying.", variant: "destructive" }); }
             }}>Copy {field}</Button>)}
-            <span className={label}>Password Protector · 15-minute quote session</span>
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">Saved logins stay unlocked for 15 minutes.</p>
+            </details>
           </div>
           {portalEdit === activeTab && <div className="flex gap-1.5">
             <Input type="url" aria-label={`${activeTab} portal URL`} className="h-7 text-xs" value={portalUrl} onChange={(e) => setPortalUrl(e.target.value)} />
             <Button size="sm" className="h-7 text-xs" onClick={savePortal}>Save URL</Button>
           </div>}
-          <div className="flex flex-wrap items-center gap-2">
-            <Button size="sm" className="h-7 rounded-full px-3 text-[11px]" disabled={login[activeTab] !== "connected" || !allComplete} onClick={() => submitScenarios(activeTab)}>
-              Submit {Math.max(...products.map((p) => plan[p].length), 0)} quotes to {activeTab}
-            </Button>
-            {login[activeTab] !== "connected" && <span className={label}>Connect {activeTab} first — insurers can run at the same time.</span>}
-          </div>
-          <QuoteJobsPanel jobs={jobs} onRetry={(ins, n) => submitScenarios(ins, [n])} />
-          {clientId && <QuotePdfCapture workflowId={workflowId} clientId={clientId} insurer={activeTab} onActivity={(ins, phase, detail) => { recordActivity(ins, phase, detail); if (phase === "saved" && !detail) setJobs((j) => markCaptured(j, ins, Date.now())); }} />}
-          {/^discovery$/i.test(activeTab) && <DiscoveryScreenScan workflowId={workflowId} connected={login[activeTab] === "connected"} />}
-
-
-          <div className="flex flex-wrap items-center gap-1.5 rounded border border-border/60 px-2 py-1">
+          </section>
+          <section className="frame p-3 space-y-3" aria-label="Review quote options">
+            <div className="flex items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">2</span><h4 className="font-semibold">Review quote options</h4></div>
+            <p className={label}>These options apply to the insurers you selected. Open a product to compare and edit Options A, B and C.</p>
+          <details className="rounded-lg border border-border p-2">
+            <summary className="cursor-pointer text-xs font-medium">Calculation assumptions</summary>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
             <span className={label}>Shortfall formula · income years</span>
-            <Input className="h-6 w-12 px-1.5 text-[11px] tabular-nums" inputMode="numeric" value={params.incomeYears}
+            <Input aria-label="Income years" className="h-8 w-14 px-2 text-xs tabular-nums" inputMode="numeric" value={params.incomeYears}
               onChange={(e) => applyParams({ ...params, incomeYears: Number(e.target.value.replace(/\D/g, "")) || 0 })} />
             <span className={label}>· income protection %</span>
-            <Input className="h-6 w-12 px-1.5 text-[11px] tabular-nums" inputMode="numeric" value={params.ipPercent}
+            <Input aria-label="Income protection percentage" className="h-8 w-14 px-2 text-xs tabular-nums" inputMode="numeric" value={params.ipPercent}
               onChange={(e) => applyParams({ ...params, ipPercent: Math.min(Number(e.target.value.replace(/\D/g, "")) || 0, 100) })} />
-          </div>
+            </div>
+          </details>
 
           {products.map((p) => {
             const extra = activeTab ? insurerFields(activeTab, p).map((f) => ({ ...f, key: insurerKey(activeTab, f.key) })) : [];
             const fields = [...(PRODUCT_TYPES[p] ?? []), ...extra];
             return (
-              <div key={p} className="overflow-x-auto rounded-lg border border-border/60">
-                <div className="flex items-center justify-between bg-foreground px-2 py-1 text-background">
-                  <span className="text-[10px] font-semibold uppercase tracking-wide">{p}</span>
+              <details key={p} open={p === products[0]} className="rounded-lg border border-border">
+                <summary className="flex cursor-pointer items-center justify-between gap-3 rounded-lg bg-muted/40 px-3 py-2">
+                  <span className="text-xs font-semibold">{p} <span className="font-normal text-muted-foreground">· {plan[p].length} options</span></span>
                   <button aria-label={`Remove ${p}`} className="text-background/70 hover:text-background"
-                    onClick={() => setPlan((pl) => { const { [p]: _, ...rest } = pl; return rest; })}><X className="h-3 w-3" /></button>
-                </div>
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPlan((pl) => { const { [p]: _, ...rest } = pl; return rest; }); }}><X className="h-3 w-3" /></button>
+                </summary>
+                <div className="overflow-x-auto">
                 {formulaFor(p) && <p className="border-t border-border/60 px-2 py-1 text-[10px] tabular-nums text-muted-foreground">{formulaFor(p)}</p>}
-                <table className="w-full min-w-[560px] table-fixed">
+                <table className="w-full min-w-[560px] table-fixed text-xs">
                   <colgroup><col className="w-44" />{plan[p].map((_, i) => <col key={i} />)}</colgroup>
                   <thead className="text-[10px] uppercase tracking-wide text-muted-foreground">
                     <tr><th className="px-2 py-1 text-left font-medium">Variable</th>{plan[p].map((_, i) => <th key={i} className="px-2 py-1 text-left font-medium">Option {String.fromCharCode(65 + i)}</th>)}</tr>
@@ -347,7 +356,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                   <tbody>
                     {fields.map((f) => (
                       <tr key={f.key} className={cn("border-t border-border/60", f.key.includes(":") && "bg-muted/30")}>
-                        <td className="truncate px-2 py-0.5 text-muted-foreground" title={f.label}>{f.label}</td>
+                        <td className="px-2 py-1 text-xs leading-relaxed text-muted-foreground" title={f.label}>{f.label}</td>
                         {plan[p].map((v, i) => (
                           <td key={i} className="px-2 py-0.5">
                             {f.kind === "select" ? (
@@ -371,7 +380,8 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                     ))}
                   </tbody>
                 </table>
-              </div>
+                </div>
+              </details>
             );
           })}
 
@@ -383,16 +393,29 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
             <Button size="sm" variant="ghost" className="h-6 px-2 text-[10px]" disabled={!adding}
               onClick={() => { setPlan((pl) => ({ ...pl, [adding]: defaultVariations(adding, 0) })); setAdding(""); }}><Plus className="mr-0.5 h-3 w-3" />Add</Button>
           </div>
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
+            <p className={label}>{total * chosen.length} quote options across {chosen.length} insurer{chosen.length === 1 ? "" : "s"}</p>
+            <Button size="sm" disabled={busy || !allComplete} onClick={save}>{busy && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}{spec ? "Update quote plan" : "Save quote plan"}</Button>
+          </div>
+          {!allComplete && <p className="text-xs text-destructive" role="status">{incompleteOptions.length ? `Complete missing values in: ${incompleteOptions.join(", ")}.` : "Add a product to prepare your quote plan."}</p>}
+          </section>
+          <section className="frame p-3 space-y-3" aria-label="Request and collect quotes">
+            <div className="flex items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">3</span><h4 className="font-semibold">Request & collect quotes</h4></div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button size="sm" className="h-7 rounded-full px-3 text-[11px]" disabled={login[activeTab] !== "connected" || !allComplete} onClick={() => submitScenarios(activeTab)}>
+              Submit {Math.max(...products.map((p) => plan[p].length), 0)} quotes to {activeTab}
+            </Button>
+            <p className={label}>{login[activeTab] !== "connected" ? `Connect ${activeTab} in step 1 before requesting quotes.` : !allComplete ? "Complete the missing values in step 2 to enable this button." : "Connected. Review your options before submitting to the insurer."}</p>
+          </div>
+          <QuoteJobsPanel jobs={jobs} onRetry={(ins, n) => submitScenarios(ins, [n])} />
+          {clientId && <QuotePdfCapture workflowId={workflowId} clientId={clientId} insurer={activeTab} onActivity={(ins, phase, detail) => { recordActivity(ins, phase, detail); if (phase === "saved" && !detail) setJobs((j) => markCaptured(j, ins, Date.now())); }} />}
+          {/^discovery$/i.test(activeTab) && <DiscoveryScreenScan workflowId={workflowId} connected={login[activeTab] === "connected"} />}
+
+
+          </section>
         </div>
       )}
 
-      <div className="flex items-center justify-between gap-2">
-        <p className={label}>{total} × {chosen.length} = <b>{total * chosen.length}</b> quotes to collect</p>
-        <Button size="sm" className="h-7 rounded-full px-3 text-[11px]" disabled={busy || !allComplete || !chosen.length} onClick={save}>
-          {busy && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}{spec ? "Update quote plan" : "Save quote plan"}
-        </Button>
-      </div>
-      {chosen.length > 0 && !allComplete && <p className={label}>Fill in every amount for each option to save.</p>}
     </div>
   );
 }
