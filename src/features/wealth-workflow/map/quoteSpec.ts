@@ -34,6 +34,6 @@ export const PRODUCT_TYPES: Record<string, FieldDef[]> = {
 export const defaultVariation = (fields: FieldDef[]): Record<string, any> =>
   Object.fromEntries(fields.map((f) => [f.key, f.kind === "select" ? f.options[0] : f.kind === "toggle" ? false : ""]));
 
-/** A variation is ready when every amount/number field has a value. */
+/** Disabled growth is not required when the option explicitly has no increase. */
 export const variationComplete = (fields: FieldDef[], v: Record<string, any>) =>
-  fields.every((f) => f.kind === "toggle" || f.kind === "select" || String(v[f.key] ?? "").trim() !== "");
+  fields.every((f) => (f.key === "growth" && v.increase_option === "No increase") || f.kind === "toggle" || f.kind === "select" || String(v[f.key] ?? "").trim() !== "");

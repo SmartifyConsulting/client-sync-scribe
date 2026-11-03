@@ -20,3 +20,8 @@ describe("approved portal payload", () => {
     expect(scenarios.map((s) => s.fields.find((f) => f.label === "Benefit amount")?.value)).toEqual(["1000000", "2000000", "3000000"]);
   });
 });
+it("omits retained growth when the option switches to No increase", () => {
+  const fields = buildPortalScenarios({ "Life cover": [{ benefit_amount: "1700000", increase_option: "No increase", growth: "6" }] }, "Momentum")[0].fields;
+  expect(fields.some(f => f.label === "Cover growth")).toBe(false);
+  expect(fields.find(f => f.label === "Increase option")?.value).toBe("No increase");
+});

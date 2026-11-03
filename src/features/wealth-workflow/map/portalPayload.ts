@@ -36,6 +36,7 @@ export function buildPortalScenarios(plan: Record<string, Record<string, unknown
       if (!option) return [];
       const fields = [...(PRODUCT_TYPES[product] || []), ...insurerFields(insurer, product).map((f) => ({ ...f, key: insurerKey(insurer, f.key) }))];
       return fields.flatMap((f): PortalField[] => {
+        if (f.key === "growth" && option.increase_option === "No increase") return [];
         const value = option[f.key] ?? (f.kind === "select" ? f.options[0] : f.kind === "toggle" ? false : "");
         return value === "" ? [] : [{ product, label: f.label, aliases: ALIASES[f.key] || [], kind: f.kind, value: String(value) }];
       });
