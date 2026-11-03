@@ -9,7 +9,7 @@ const wrap = (title: string, subtitle: string, body: string, p: any = null) => `
 ${p?.__businessLogo || p?.__fspLogo ? `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">${logo(p.__fspLogo) || "<span></span>"}${logo(p.__businessLogo) || "<span></span>"}</div>` : ""}
 <div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid ${NAVY};padding-bottom:10px;margin-bottom:20px">
 <div><p style="margin:0;font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:${MUTED}">${subtitle}</p>
-<h1 style="margin:4px 0 0;font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:26px;color:${NAVY};letter-spacing:.01em">${title}</h1></div>
+<h1 style="margin:4px 0 0;font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:19px;color:${NAVY};letter-spacing:.01em;white-space:nowrap">${title}</h1></div>
 <p style="margin:0;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:${NAVY};font-weight:600">${esc(p?.business_name || p?.fsp_name || "")}</p></div>
 ${body}
 <div data-document-footer="true" style="margin-top:36px;padding-top:12px;border-top:1px solid ${RULE};font-size:9.5px;color:${MUTED};text-align:center;line-height:1.5">${footer(p)}</div></div>`;
