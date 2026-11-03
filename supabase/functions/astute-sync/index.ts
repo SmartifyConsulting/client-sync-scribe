@@ -4,8 +4,9 @@ import { z } from "npm:zod@3";
 import { DOMParser, type Element } from "https://deno.land/x/deno_dom@v0.1.45/deno-dom-wasm.ts";
 
 // Reads (never creates) Astute policy summaries for a client and saves them as portfolio holdings.
-// Testing rule: only Georgia Adams' ID number is allowed until this restriction is lifted.
+// Restricted rollout: retain the existing test identity and allow Jean's exact client record.
 const ALLOWED_ID_NUMBERS = new Set(["7603080082088"]);
+const ALLOWED_CLIENT_IDS = new Set(["62f15a29-b344-4140-815c-1a89397d7308"]);
 const BASE = "https://aol.astutefse.com";
 const Body = z.object({ patientId: z.string().uuid() });
 const json = (b: unknown, status = 200) =>
@@ -93,7 +94,7 @@ Deno.serve(async (req) => {
     if (pat.user_id !== u.user.id && !isAdmin) return json({ error: "Only this client's Wealth Manager can pull from Astute." }, 403);
     const idNo = (pat.id_passport_number ?? "").replace(/\s/g, "");
     if (!idNo) return json({ error: "This client has no ID number saved. Add it to their profile, then try again." }, 400);
-    if (!ALLOWED_ID_NUMBERS.has(idNo)) return json({ error: "Astute pulls are only switched on for the test client (Georgia Adams) for now." }, 403);
+    if (!ALLOWED_ID_NUMBERS.has(idNo) && !ALLOWED_CLIENT_IDS.has(pat.id)) return json({ error: "Astute pulls are currently enabled only for the approved test records." }, 403);
 
     // Sign in
     const jar = new Jar();
