@@ -1,7 +1,7 @@
 // Executed in the portal. Only demonstrated quote actions; never application acceptance or email.
 function driveQuoteJourney(request, origin, discoveryRedirects) {
   const u = new URL(location.href);
-  if (u.protocol !== "https:" || u.username || u.password || !(u.origin === origin || (discoveryRedirects && !u.port && (u.hostname === "discovery.co.za" || u.hostname.endsWith(".discovery.co.za"))))) return { state: "blocked", detail: "Portal origin could not be verified." };
+  if (u.protocol !== "https:" || u.username || u.password || !(u.origin === origin || (typeof discoveryRedirects === "string" && !u.port && (u.hostname === discoveryRedirects || u.hostname.endsWith("." + discoveryRedirects))))) return { state: "blocked", detail: "Portal origin could not be verified." };
   const norm = (s) => String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
   const visible = (el) => el.getClientRects().length > 0 && !el.disabled && getComputedStyle(el).visibility !== "hidden";
   const controls = [...document.querySelectorAll("input, select, textarea")].filter((el) => visible(el) && !["hidden", "submit", "button", "file"].includes(el.type));

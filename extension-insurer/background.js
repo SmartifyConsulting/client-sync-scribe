@@ -1,12 +1,14 @@
 // Drives one insurer login per tab. Credentials live only in memory for the job.
 importScripts("portalJourney.js");
 const jobs = new Map(); // portalTabId -> job
-const discoveryHost = (host) => host === "discovery.co.za" || host.endsWith(".discovery.co.za");
+// Trusted redirect scope = the saved portal's own registrable domain (e.g. momentum.co.za), so SSO hops stay inside that insurer.
+const baseDomain = (host) => { const p = host.split("."); const n = /\.(co|org|gov|ac|net)\.za$/.test(host) ? 3 : 2; return p.length >= n ? p.slice(-n).join(".") : null; };
+const domainHost = (host, base) => !!base && (host === base || host.endsWith("." + base));
 function portalAllowed(url, job) {
   try {
     const u = new URL(url);
     if (u.protocol !== "https:" || u.username || u.password) return false;
-    return u.origin === job.origin || (job.discoveryRedirects && u.port === "" && discoveryHost(u.hostname));
+    return u.origin === job.origin || (u.port === "" && domainHost(u.hostname, job.discoveryRedirects));
   } catch { return false; }
 }
 const trustedApp = (url) => {
@@ -60,7 +62,7 @@ chrome.runtime.onMessage.addListener((d, sender) => {
     });
     openHidden((tab) => {
       if (!tab?.id) return;
-      const discoveryRedirects = /^discovery$/i.test(d.insurer) && discoveryHost(new URL(origin).hostname) && new URL(origin).port === "";
+      const discoveryRedirects = new URL(origin).port === "" ? (baseDomain(new URL(origin).hostname) || false) : false;
       const job = { ...d, appTabId, origin, discoveryRedirects, step: 0, done: false, submitted: false, expires: Date.now() + 15 * 60 * 1000 };
       jobs.set(tab.id, job);
       tell(job, { type: "insurer-login-progress", state: "connecting", phase: "opening" });
@@ -154,7 +156,7 @@ async function scanPortal(tabId, job) {
 // Read structural quote metadata only: never values, page text, URLs, IDs or screenshots.
 function scanQuoteScreen(origin, discoveryRedirects) {
   const u = new URL(location.href);
-  if (u.protocol !== "https:" || u.username || u.password || !(u.origin === origin || (discoveryRedirects && !u.port && (u.hostname === "discovery.co.za" || u.hostname.endsWith(".discovery.co.za"))))) throw new Error("Untrusted portal");
+  if (u.protocol !== "https:" || u.username || u.password || !(u.origin === origin || (typeof discoveryRedirects === "string" && !u.port && (u.hostname === discoveryRedirects || u.hostname.endsWith("." + discoveryRedirects))))) throw new Error("Untrusted portal");
   const visible = (el) => el.getClientRects().length > 0 && getComputedStyle(el).visibility !== "hidden";
   const inputs = [...document.querySelectorAll("input, select, textarea")].filter(visible);
   const sensitive = /password|passcode|otp|pin|token|verification|one.?time|username|user.?name|login|email|phone|identity|id.?number|passport|account/i;
@@ -220,7 +222,7 @@ async function readPdf(url) {
 function drive(username, password, submitted, origin, discoveryRedirects) {
   // Recheck inside the page: navigation may occur between tab inspection and injection.
   const u = new URL(location.href);
-  if (u.protocol !== "https:" || u.username || u.password || !(u.origin === origin || (discoveryRedirects && !u.port && (u.hostname === "discovery.co.za" || u.hostname.endsWith(".discovery.co.za"))))) return { state: "waiting" };
+  if (u.protocol !== "https:" || u.username || u.password || !(u.origin === origin || (typeof discoveryRedirects === "string" && !u.port && (u.hostname === discoveryRedirects || u.hostname.endsWith("." + discoveryRedirects))))) return { state: "waiting" };
   const vis = (el) => el && el.offsetParent !== null && !el.disabled;
   const setVal = (el, v) => {
     const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set;
@@ -272,7 +274,7 @@ function drive(username, password, submitted, origin, discoveryRedirects) {
 
 function fillOtp(code, origin, discoveryRedirects) {
   const u = new URL(location.href);
-  if (u.protocol !== "https:" || u.username || u.password || !(u.origin === origin || (discoveryRedirects && !u.port && (u.hostname === "discovery.co.za" || u.hostname.endsWith(".discovery.co.za"))))) return;
+  if (u.protocol !== "https:" || u.username || u.password || !(u.origin === origin || (typeof discoveryRedirects === "string" && !u.port && (u.hostname === discoveryRedirects || u.hostname.endsWith("." + discoveryRedirects))))) return;
   const vis = (el) => el && el.offsetParent !== null && !el.disabled;
   const inputs = [...document.querySelectorAll("input")].filter(vis).filter((i) => i.type !== "hidden" && i.type !== "checkbox");
   if (!inputs.length) return;
