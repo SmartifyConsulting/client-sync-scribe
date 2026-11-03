@@ -76,12 +76,18 @@ ${h2("Client declaration")}
 
 export function sealedHtml(doc: { content_html: string; signature_image: string; signer_name: string; signed_at: string; signer_ip: string | null; seal_hash: string; title: string }) {
   const at = new Date(doc.signed_at).toLocaleString("en-ZA");
-  return `${doc.content_html}<div style="font-family:Arial,sans-serif;padding:0 40px 40px;color:#1f2937">
+  const sealBlock = `<div style="font-family:Arial,sans-serif;padding:0 40px 40px;color:#1f2937">
 <div style="border-top:1px solid #cbd5e1;padding-top:16px;margin-top:8px"><img src="${doc.signature_image}" style="height:60px"/><p style="margin:4px 0;font-size:12px"><b>${doc.signer_name}</b> · Digitally signed ${at}</p></div>
 <div style="border:1.5px solid #334155;border-radius:12px;padding:16px;margin-top:20px;font-size:11px">
 <p style="text-align:center;letter-spacing:.2em;font-weight:bold;font-size:13px;margin:0 0 10px">SEAL CERTIFICATE</p>
 <p>Document: ${doc.title}<br/>Signed by: ${doc.signer_name}<br/>Sealed: ${doc.signed_at}<br/>IP address: ${doc.signer_ip ?? "not recorded"}</p>
 <p style="font-family:monospace;word-break:break-all;text-align:center">Seal ${doc.seal_hash}</p></div></div>`;
+  // content_html's root is a single #holarc-document container, and the PDF
+  // renderer only captures that container — appending after it put this
+  // block outside the captured area. Nest it inside instead.
+  return /<\/div>\s*$/.test(doc.content_html)
+    ? doc.content_html.replace(/<\/div>\s*$/, `${sealBlock}</div>`)
+    : `${doc.content_html}${sealBlock}`;
 }
 
 /** Record of Advice in the same executive, dual-logo layout as the Disclosure and LOA. Restyles stored ROA body HTML. */

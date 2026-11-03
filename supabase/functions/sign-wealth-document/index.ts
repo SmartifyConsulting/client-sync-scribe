@@ -55,10 +55,19 @@ Deno.serve(async (req) => {
     if (error) throw error;
     // Auto-file the signed copy in the client's Documents.
     const at = new Date(signedAt).toLocaleString("en-ZA");
+    const signatureBlock = `<div style="padding:24px 60px"><img src="${p.signatureImage.startsWith("data:") ? p.signatureImage : `data:image/png;base64,${p.signatureImage}`}" style="height:60px"/><p><b>${p.signerName}</b> · Digitally signed ${at}${ip ? ` · IP ${ip}` : ""}</p><p style="font-family:monospace;font-size:10px">Seal ${sealHash}</p></div>`;
+    // contentHtml's root is a single #holarc-document container (see
+    // onboardingTemplates.ts's wrap()), and the PDF renderer only captures
+    // that container — inserting the signature block *after* contentHtml
+    // put it outside the captured area, so it silently vanished from every
+    // preview and download. Nest it inside the container's closing tag instead.
+    const signedContentHtml = /<\/div>\s*$/.test(p.contentHtml)
+      ? p.contentHtml.replace(/<\/div>\s*$/, `${signatureBlock}</div>`)
+      : `${p.contentHtml}${signatureBlock}`;
     await admin.from("documents").insert({
       user_id: pat?.user_id ?? u.user.id, patient_id: wf.patient_id, patient_name: p.signerName,
       name: `${p.title} (signed) — ${p.signerName}`, template_name: p.title,
-      content: `${p.contentHtml}<div style="padding:24px 60px"><img src="${p.signatureImage.startsWith("data:") ? p.signatureImage : `data:image/png;base64,${p.signatureImage}`}" style="height:60px"/><p><b>${p.signerName}</b> · Digitally signed ${at}${ip ? ` · IP ${ip}` : ""}</p><p style="font-family:monospace;font-size:10px">Seal ${sealHash}</p></div>`,
+      content: signedContentHtml,
       document_kind: `${p.docType}_signed`, record_date: signedAt.slice(0, 10),
     });
     const { error: refreshError } = await admin.rpc("wealth_onboarding_refresh", { _workflow_id: p.workflowId });
