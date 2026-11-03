@@ -1,6 +1,6 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
     });
 
   try {
-    if (!LOVABLE_API_KEY) return json({ error: "AI is not configured." }, 500);
+    if (!OPENAI_API_KEY) return json({ error: "AI is not configured." }, 500);
 
     const body = await req.json().catch(() => null);
     if (!body?.audio || typeof body.audio !== "string") {
@@ -30,12 +30,12 @@ Deno.serve(async (req) => {
     if (binary.byteLength > 20 * 1024 * 1024) return json({ error: "That recording is too long." }, 400);
 
     const form = new FormData();
-    form.append("model", "openai/gpt-4o-mini-transcribe");
+    form.append("model", "gpt-4o-mini-transcribe");
     form.append("file", new Blob([binary], { type: "audio/wav" }), "recording.wav");
 
-    const sttRes = await fetch("https://ai.gateway.lovable.dev/v1/audio/transcriptions", {
+    const sttRes = await fetch("https://api.openai.com/v1/audio/transcriptions", {
       method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}` },
+      headers: { Authorization: `Bearer ${OPENAI_API_KEY}` },
       body: form,
     });
 
@@ -66,14 +66,14 @@ Rules:
 Return ONLY JSON with this shape:
 {"ratings":{},"meals":[{"slot":"","foods":[]}],"exercises":[{"name":"","duration":null,"performance":null}],"medications":[{"label":"","taken":true}],"note":""}`;
 
-    const chatRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const chatRes = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "gpt-4o-mini",
         response_format: { type: "json_object" },
         messages: [
           { role: "system", content: systemPrompt },

@@ -8,13 +8,13 @@ const corsHeaders = {
 type Kind = "doctor" | "hospital" | "ambulance";
 
 async function aiScore(profile: Record<string, unknown>): Promise<number> {
-  const key = Deno.env.get("LOVABLE_API_KEY");
+  const key = Deno.env.get("OPENAI_API_KEY");
   if (!key) return 3;
-  const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const resp = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
+      model: "gpt-4o-mini",
       messages: [
         { role: "system", content: "Score a healthcare provider's credentials from 1.0 to 5.0 based on completeness and credibility of fields. Consider presence of license/registration numbers, specialty, address, contact details, ownership type and bio. Return ONLY the numeric score." },
         { role: "user", content: JSON.stringify(profile) },

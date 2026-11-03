@@ -55,13 +55,13 @@ Deno.serve(async (req) => {
     }
     if (source.length < 40) return json({ error: "The consultation has no transcript or notes yet. Record or type notes first." }, 400);
 
-    const key = Deno.env.get("LOVABLE_API_KEY");
+    const key = Deno.env.get("OPENAI_API_KEY");
     if (!key) return json({ error: "AI is not configured." }, 500);
-    const r = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
+    const r = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "openai/gpt-6-astra",
+        model: "gpt-4o",
         input: [{ role: "system", content: PROMPT }, { role: "user", content: source.slice(0, 120_000) }],
         text: { format: { type: "json_object" } },
       }),

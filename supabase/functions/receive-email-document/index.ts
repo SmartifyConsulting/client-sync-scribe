@@ -135,17 +135,17 @@ const QUOTE_COVER_KINDS = ["Quote — Car", "Quote — Home", "Quote — Life", 
 async function classifyInsurerDocument(kind: "schedules_claims" | "quotes", filename: string, subject: string, bodyText: string): Promise<string> {
   const options = kind === "quotes" ? QUOTE_COVER_KINDS : SCHEDULES_CLAIMS_KINDS;
   const fallback = kind === "quotes" ? "Quote — Other" : "Claims History";
-  const apiKey = Deno.env.get("LOVABLE_API_KEY");
+  const apiKey = Deno.env.get("OPENAI_API_KEY");
   if (!apiKey) return fallback;
   try {
     const guidance = kind === "quotes"
       ? ` Use "Issued Policy" only when the document confirms the policy has actually been taken up / issued / a policy number assigned (e.g. "welcome letter", "policy schedule", "cover confirmed") — not a quotation, estimate or premium indication. Otherwise classify the quote by cover type.`
       : "";
-    const r = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
+    const r = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "openai/gpt-6-astra",
+        model: "gpt-4o",
         input: [
           { role: "system", content: `Classify an insurer document into exactly one of: ${options.join(", ")}. Reply with only that label, nothing else.${guidance}` },
           { role: "user", content: `Filename: ${filename}\nEmail subject: ${subject}\nEmail body: ${bodyText.slice(0, 2000)}` },

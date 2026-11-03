@@ -40,22 +40,22 @@ function processBase64Chunks(base64String: string, chunkSize = 32768): Uint8Arra
 // Format transcript with speaker labels using AI
 async function formatWithSpeakerLabels(rawText: string, patientName: string, doctorName: string): Promise<string> {
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      console.log("No LOVABLE_API_KEY, returning raw transcript");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    if (!OPENAI_API_KEY) {
+      console.log("No OPENAI_API_KEY, returning raw transcript");
       return rawText;
     }
 
     console.log("Formatting transcript with speaker labels...");
     
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
