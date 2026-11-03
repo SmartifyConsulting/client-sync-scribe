@@ -159,10 +159,20 @@ export async function resolveDocumentPreviewContent(
   {
     const { data } = await supabase
       .from("documents")
-      .select("name, media_url, media_type, source_file_url, ai_analysis, template_name")
+      .select("name, media_url, media_type, source_file_url, ai_analysis, template_name, document_kind")
       .eq("id", doc.id)
       .maybeSingle();
     row = data;
+
+    // Signed KYC documents (Disclosure/LOA) are sealed, already-resolved
+    // records with the client's own signature baked in — never run the
+    // Wealth-Manager-signature/placeholder resolver over them. Doing so can
+    // inject the advisor's signature into an unrelated blank line, and the
+    // auto-heal below would persist a tampered copy over a record that must
+    // stay insert-only.
+    if ((row as any)?.document_kind === "disclosure_signed" || (row as any)?.document_kind === "loa_signed") {
+      return { resolvedContent: original, templateName: doc.template_name ?? null, userId: doc.user_id ?? null, didChange: false };
+    }
     const hasFile = !!((row as any)?.media_url || (row as any)?.source_file_url);
     const isGeneratedDoc = /invoice|prescription|certificate|referral|letter|report|admission/i.test(
       String((row as any)?.template_name || doc.template_name || ""),

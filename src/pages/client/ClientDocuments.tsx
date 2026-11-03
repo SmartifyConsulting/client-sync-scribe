@@ -100,6 +100,7 @@ interface UnifiedDocument {
   clientId?: string | null;
   userId?: string | null;
   templateName?: string | null;
+  documentKind?: string | null;
   attachments?: DocumentAttachment[];
 }
 
@@ -284,7 +285,7 @@ export default function ClientDocuments({ hideHeader = false }: { hideHeader?: b
     const [docsRes, rxRes] = await Promise.all([
       supabase
         .from("documents")
-        .select("id, name, content, template_name, created_at, media_type, media_url, ai_analysis, ai_analyzed_at, email_sent_at, patient_id, user_id, attachments")
+        .select("id, name, content, template_name, created_at, media_type, media_url, ai_analysis, ai_analyzed_at, email_sent_at, patient_id, user_id, attachments, document_kind")
         .in("patient_id", ids)
         .order("created_at", { ascending: false }),
       supabase
@@ -313,6 +314,7 @@ export default function ClientDocuments({ hideHeader = false }: { hideHeader?: b
         clientId: (doc as any).patient_id,
         userId: (doc as any).user_id,
         templateName: doc.template_name,
+        documentKind: (doc as any).document_kind,
         attachments: Array.isArray((doc as any).attachments)
           ? ((doc as any).attachments as DocumentAttachment[])
           : [],
@@ -1238,7 +1240,12 @@ function DocumentPreviewDialog({
     }
     setResolvedContent(doc.content || "");
     // Only stored documents (template-based) have placeholders worth resolving.
-    if (doc.source !== "documents") return;
+    // Already-signed KYC documents (Disclosure/LOA) are sealed, fully-resolved
+    // records with the client's own signature baked in — running the
+    // Wealth-Manager-signature/placeholder resolver over them is wrong (it can
+    // inject the advisor's signature into an unrelated blank line) and risks
+    // persisting a tampered copy over a record that must stay insert-only.
+    if (doc.source !== "documents" || doc.documentKind === "disclosure_signed" || doc.documentKind === "loa_signed") return;
 
     let cancelled = false;
     (async () => {
