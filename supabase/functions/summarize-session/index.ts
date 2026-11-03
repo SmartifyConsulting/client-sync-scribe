@@ -61,7 +61,7 @@ serve(async (req) => {
         body: JSON.stringify({
           model: "gpt-4o-mini",
           messages: [
-            { role: "system", content: `You are a professional medical translator. Translate the following medical summary to ${targetLanguage}. Preserve all medical terminology accuracy. Return ONLY the translated text, no explanations.` },
+            { role: "system", content: `You are a professional translator. Translate the following consultation summary to ${targetLanguage}. Preserve financial terminology accuracy. Return ONLY the translated text, no explanations.` },
             { role: "user", content: text },
           ],
         }),
@@ -110,26 +110,21 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are a professional medical/clinical assistant that creates detailed session summaries and detects clinical documents discussed in the session.${language ? `\n\nIMPORTANT: Respond entirely in ${language}. All summaries, action points, and extracted document content must be written in ${language}.` : ''}
+            content: `You are a professional financial-planning assistant that creates detailed consultation summaries for a Wealth Manager and their client.${language ? `\n\nIMPORTANT: Respond entirely in ${language}. All summaries and action points must be written in ${language}.` : ''}
 
-Your task is to analyze the session transcript or notes and provide:
+Your task is to analyze the consultation transcript or notes and provide:
 1. A comprehensive professional summary (2-4 sentences)
 2. A list of specific, actionable action points/tasks
 3. Detect if any of the following were discussed and extract relevant data:
-   - **Medical Certificate / Sick Note / Leave of Absence**: If the doctor discusses issuing a medical certificate, sick leave, or leave of absence, extract the details.
-   - **Prescription**: If medications are prescribed or discussed for the patient, extract medication details.
    - **Invoice / Billing**: If billing, fees, or invoice amounts are discussed, extract the details.
-   - **Referral Letter**: If a referral to another specialist or doctor is discussed, extract the details.
-   - **Patient Tasks / Exercises**: If exercises, homework, lifestyle changes, or daily tasks are assigned to the patient, extract each task with title, description, frequency, and suggested vulas reward (1-5).
+   - **Client Tasks**: If homework, follow-up actions, or things the client should do are assigned, extract each task with title, description, frequency, and suggested vulas reward (1-5).
+   - **Follow-up meeting**: If the Wealth Manager and client agree on a next-meeting date, extract it.
 
 IMPORTANT GUIDELINES:
 - Actually read and analyze the transcript content thoroughly
 - Extract REAL action points mentioned in the conversation
-- For medical certificates: extract patient_name, start_date, end_date, reason/diagnosis. Leave end-date rules: "until <weekday>" or "until <date>" → end_date is THAT day inclusive (the last day the patient is absent). "for N days" starting today → end_date = today + (N-1) days. "back at work on Tuesday" → end_date = the Monday before. Never set end_date earlier than start_date.
-- For prescriptions: extract each medication with name, dosage, frequency, duration, instructions
 - For invoices: extract service descriptions and amounts
-- For referrals: extract specialist_type, doctor_name (if mentioned), reason, urgency
-- For follow-up appointment: if the doctor and patient agree on a next-visit date OR the patient says when they want to be seen again, extract the follow-up. ALWAYS return follow_up_date as an ISO calendar date (YYYY-MM-DD). If both an explicit calendar date (e.g. "the 23rd of July") AND a relative phrase ("in two weeks") appear, PREFER THE EXPLICIT CALENDAR DATE. If only a relative phrase is given ("in two weeks", "next Tuesday"), resolve it against today's local date below. Extract follow_up_time as HH:MM (24h) if a time is stated; otherwise omit.
+- For the follow-up meeting: if a next-visit date was agreed OR the client says when they want to meet again, extract it. ALWAYS return follow_up_date as an ISO calendar date (YYYY-MM-DD). If both an explicit calendar date (e.g. "the 23rd of July") AND a relative phrase ("in two weeks") appear, PREFER THE EXPLICIT CALENDAR DATE. If only a relative phrase is given ("in two weeks", "next Tuesday"), resolve it against today's local date below. Extract follow_up_time as HH:MM (24h) if a time is stated; otherwise omit.
 - Only include a document type if it was CLEARLY discussed in the session
 - Dates should be in YYYY-MM-DD format when possible
 - Today is ${localDow ? localDow + ", " : ""}${today}${clientTimezone ? ` (${clientTimezone})` : ""}. Resolve "today", "tomorrow", weekday names (e.g. "until Monday"), and partial dates like "3 July" against this local calendar date. NEVER shift the user's spoken date by a day to convert to UTC.
@@ -139,7 +134,7 @@ Respond using the provided tool/function schema.`,
           },
           {
             role: "user",
-            content: `Please analyze this session content thoroughly and provide a detailed summary with specific action points, and detect any clinical documents discussed:\n\n${content}`,
+            content: `Please analyze this session content thoroughly and provide a detailed summary with specific action points, and detect any follow-up actions discussed:\n\n${content}`,
           },
         ],
         tools: [
@@ -160,40 +155,6 @@ Respond using the provided tool/function schema.`,
                     items: { type: "string" },
                     description: "List of specific, actionable tasks extracted from the session",
                   },
-                  medical_certificate: {
-                    type: "object",
-                    description: "Medical certificate details if discussed. Null/omit if not discussed.",
-                    properties: {
-                      patient_name: { type: "string" },
-                      diagnosis: { type: "string", description: "Reason for leave / diagnosis" },
-                      start_date: { type: "string", description: "Start date of leave (YYYY-MM-DD)" },
-                      end_date: { type: "string", description: "End date of leave (YYYY-MM-DD)" },
-                      notes: { type: "string", description: "Additional notes" },
-                    },
-                    required: ["diagnosis", "start_date", "end_date"],
-                  },
-                  prescription: {
-                    type: "object",
-                    description: "Prescription details if medications were discussed. Null/omit if not discussed.",
-                    properties: {
-                      medications: {
-                        type: "array",
-                        items: {
-                          type: "object",
-                          properties: {
-                            medication: { type: "string" },
-                            dosage: { type: "string" },
-                            frequency: { type: "string" },
-                            duration: { type: "string" },
-                            instructions: { type: "string" },
-                            repeats: { type: "string", description: "Number of repeats or repeat instructions if mentioned, e.g. 'x3', 'Repeat x2'" },
-                          },
-                          required: ["medication", "dosage", "frequency"],
-                        },
-                      },
-                    },
-                    required: ["medications"],
-                  },
                   invoice: {
                     type: "object",
                     description: "Invoice details if billing was discussed. Null/omit if not discussed.",
@@ -212,29 +173,6 @@ Respond using the provided tool/function schema.`,
                       total: { type: "number" },
                     },
                     required: ["items"],
-                  },
-                  referral: {
-                    type: "object",
-                    description: "Referral details if a referral was discussed. Null/omit if not discussed.",
-                    properties: {
-                      specialist_type: { type: "string" },
-                      doctor_name: { type: "string" },
-                      reason: { type: "string" },
-                      urgency: { type: "string", description: "routine, urgent, or emergency" },
-                    },
-                    required: ["specialist_type", "reason"],
-                  },
-                  hospital_admission: {
-                    type: "object",
-                    description: "Hospital admission details if admission/hospitalization was discussed. Null/omit if not discussed.",
-                    properties: {
-                      diagnosis: { type: "string", description: "Primary diagnosis for admission" },
-                      procedure: { type: "string", description: "Planned procedure or surgery" },
-                      admission_date: { type: "string", description: "Planned admission date (YYYY-MM-DD)" },
-                      hospital_name: { type: "string", description: "Hospital name if mentioned" },
-                      special_instructions: { type: "string", description: "Pre-admission or special instructions" },
-                    },
-                    required: ["diagnosis"],
                   },
                   patient_tasks: {
                     type: "object",
@@ -351,11 +289,7 @@ Respond using the provided tool/function schema.`,
       }
       console.log("Summary generated:", result.summary?.substring(0, 100) + "...");
       console.log("Action points:", result.action_points?.length);
-      console.log("Medical certificate detected:", !!result.medical_certificate);
-      console.log("Prescription detected:", !!result.prescription);
       console.log("Invoice detected:", !!result.invoice);
-      console.log("Referral detected:", !!result.referral);
-      console.log("Hospital admission detected:", !!result.hospital_admission);
       console.log("Patient tasks detected:", !!result.patient_tasks);
       console.log("Follow-up detected:", !!result.follow_up_appointment, result.follow_up_appointment?.follow_up_date);
       return new Response(JSON.stringify(result), {

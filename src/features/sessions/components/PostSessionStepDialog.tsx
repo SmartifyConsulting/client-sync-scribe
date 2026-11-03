@@ -1,7 +1,5 @@
-import { useEffect, useState } from "react";
-import { FileText, Wallet as Pill, Users, Send, Pencil, Check, Save, Eye, Brain } from "lucide-react";
+import { Brain, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -10,252 +8,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { GeneratedDoc } from "./GeneratedDocumentsDialog";
 import { FollowUpAppointmentDialog } from "./FollowUpAppointmentDialog";
-import { ClinicianNotesColumns } from "./ClinicianNotesAccordion";
-import { DocumentPreview } from "./DocumentPreview";
-import { useProfile } from "@/hooks/useProfile";
-import { useHeaderFooterTemplates } from "@/hooks/useHeaderFooterTemplates";
 
-const DOC_ICONS: Record<string, typeof FileText> = {
-  medcert: FileText,
-  prescription: Pill,
-  referral: Users,
-};
+export type PostSessionStepType = "summary" | "schedule";
 
-export type DocStepType = "prescription" | "medcert" | "referral";
-export type PostSessionStepType = DocStepType | "summary" | "schedule";
-
-interface PostSessionStepDialogProps {
-  open: boolean;
-  stepType: DocStepType;
-  doc: GeneratedDoc | null;
-  onSend: (doc: GeneratedDoc) => Promise<void>;
-  onSaveEdit: (doc: GeneratedDoc, newContent: string) => Promise<void>;
-  /** Move on to the next step in the post-session queue. */
-  onAdvance: () => void;
-  /** Cleaned AI Clinician notes, reviewable from the prescription step. */
-  clinicianNotes?: string | null;
-}
-
-/**
- * Renders exactly one post-session step at a time (prescription / medcert /
- * referral). Send and Save each play a brief confirmation
- * animation before auto-advancing the queue.
- */
-function DocStepDialog({
-  open,
-  stepType,
-  doc,
-  onSend,
-  onSaveEdit,
-  onAdvance,
-  clinicianNotes,
-}: PostSessionStepDialogProps) {
-  const [editing, setEditing] = useState(false);
-  const [draftContent, setDraftContent] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [anim, setAnim] = useState<"idle" | "sending" | "sent" | "saving" | "saved">("idle");
-  const [showPreview, setShowPreview] = useState(false);
-  const [showNotes, setShowNotes] = useState(false);
-  const { profile } = useProfile();
-  const { templates: headerFooterTemplates } = useHeaderFooterTemplates();
-  // Preview the document exactly as it will be printed/emailed — with the
-  // practice letterhead and footer applied, not as bare content.
-  const headerFooter =
-    (headerFooterTemplates || []).find((t) => /header and footer|default/i.test(t.name || "")) ||
-    (headerFooterTemplates || [])[0] ||
-    null;
-
-  useEffect(() => {
-    if (!open) return;
-    setEditing(false);
-    setAnim("idle");
-    setShowPreview(false);
-    setShowNotes(false);
-    setDraftContent(doc?.content || "");
-  }, [open, doc?.key]);
-
-  if (!doc) return null;
-  const Icon = DOC_ICONS[stepType] || FileText;
-
-  const handleSend = async () => {
-    setBusy(true);
-    setAnim("sending");
-    try {
-      await onSend(doc);
-    } finally {
-      setBusy(false);
-    }
-    setTimeout(() => {
-      setAnim("sent");
-      setTimeout(() => onAdvance(), 900);
-    }, 1000);
-  };
-
-  const handleSave = async (content?: string) => {
-    setBusy(true);
-    setAnim("saving");
-    try {
-      await onSaveEdit(doc, content ?? doc.content);
-    } finally {
-      setBusy(false);
-    }
-    setTimeout(() => {
-      setAnim("saved");
-      setTimeout(() => onAdvance(), 900);
-    }, 1000);
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent
-        className="sm:max-w-[560px]"
-        onInteractOutside={(e) => e.preventDefault()}
-        onEscapeKeyDown={(e) => e.preventDefault()}
-      >
-        {anim === "sending" || anim === "saving" ? (
-          <div className="flex flex-col items-center justify-center py-14 gap-4">
-            {anim === "sending" ? (
-              <Send className="h-10 w-10 text-primary animate-plane-send" />
-            ) : (
-              <Save className="h-10 w-10 text-primary animate-disk-save" />
-            )}
-            <p className="text-sm text-muted-foreground">{anim === "sending" ? "Sending..." : "Saving..."}</p>
-          </div>
-        ) : anim === "sent" || anim === "saved" ? (
-          <div className="flex flex-col items-center justify-center py-14 gap-3 animate-scale-in">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-sky-50 dark:bg-primary/15">
-              <Check className="h-6 w-6 text-primary" />
-            </div>
-            <p className="text-sm font-medium text-foreground">
-              {anim === "sent" ? "Sent" : "Saved"}
-            </p>
-          </div>
-        ) : (
-          <>
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Icon className="h-5 w-5 text-primary" />
-                {doc.label}
-              </DialogTitle>
-              {doc.recipientName && <DialogDescription>For {doc.recipientName}</DialogDescription>}
-            </DialogHeader>
-
-            <div className="max-h-[360px] overflow-y-auto rounded-xl border border-border bg-card p-4">
-              {editing ? (
-                <Textarea
-                  value={draftContent}
-                  onChange={(e) => setDraftContent(e.target.value)}
-                  rows={12}
-                  className="text-sm font-mono"
-                />
-              ) : (
-                <div className="whitespace-pre-wrap text-sm" dangerouslySetInnerHTML={{ __html: doc.content }} />
-              )}
-            </div>
-
-            <DialogFooter className="flex-row gap-2 sm:justify-between flex-wrap">
-              {editing ? (
-                <div className="flex gap-2 w-full justify-end">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setEditing(false);
-                      setDraftContent(doc.content);
-                    }}
-                    disabled={busy}
-                  >
-                    Cancel
-                  </Button>
-                  <Button onClick={() => handleSave(draftContent)} disabled={busy} className="gap-1.5">
-                    <Save className="h-4 w-4" />
-                    Save
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex gap-2 w-full justify-end flex-wrap">
-                  <Button variant="outline" onClick={() => setShowPreview(true)} className="gap-1.5">
-                    <Eye className="h-4 w-4" />
-                    Preview
-                  </Button>
-                  {stepType === "prescription" && clinicianNotes && (
-                    <Button variant="outline" onClick={() => setShowNotes(true)} className="gap-1.5">
-                      <Brain className="h-4 w-4" />
-                      Review AI Clinician notes
-                    </Button>
-                  )}
-                  <Button variant="outline" onClick={() => setEditing(true)} className="gap-1.5">
-                    <Pencil className="h-4 w-4" />
-                    Edit
-                  </Button>
-                  {doc.recipientEmail && (
-                    <Button
-                      variant="outline"
-                      onClick={handleSend}
-                      disabled={busy || doc.sent}
-                      className="gap-1.5"
-                    >
-                      <Send className="h-4 w-4" />
-                      {doc.sent ? "Sent" : "Send"}
-                    </Button>
-                  )}
-                  <Button onClick={() => handleSave()} disabled={busy} className="gap-1.5">
-                    <Check className="h-4 w-4" />
-                    Save &amp; Continue
-                  </Button>
-                </div>
-              )}
-            </DialogFooter>
-          </>
-        )}
-      </DialogContent>
-
-      {showPreview && (
-        <DocumentPreview
-          title={doc.label}
-          content={doc.content}
-          logoUrl={profile?.logo_url || undefined}
-          fontFamily={headerFooter?.font_family || undefined}
-          headerFooter={headerFooter}
-          onClose={() => setShowPreview(false)}
-          closeLabel="Back"
-        />
-      )}
-
-      <Dialog open={showNotes} onOpenChange={setShowNotes}>
-        <DialogContent className="sm:max-w-[1152px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Brain className="h-5 w-5 text-primary" />
-              AI Clinician notes
-            </DialogTitle>
-            <DialogDescription>
-              Review before finalising the prescription. Decision support only.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="max-h-[75vh] overflow-y-auto">
-            <ClinicianNotesColumns notes={clinicianNotes} />
-          </div>
-        </DialogContent>
-      </Dialog>
-    </Dialog>
-  );
-}
-
-
-/** First step of the queue — the AI summary, action points and clinician notes. */
+/** First step of the queue — the AI summary and action points. */
 function SummaryStepDialog({
   summary,
   actionPoints,
   clientName,
-  clinicianNotes,
   onAdvance,
 }: {
   summary?: string | null;
   actionPoints?: string[];
   clientName?: string;
-  clinicianNotes?: string | null;
   onAdvance: () => void;
 }) {
   return (
@@ -282,12 +48,6 @@ function SummaryStepDialog({
               </ul>
             </div>
           )}
-          {clinicianNotes?.trim() && (
-            <div className="space-y-2">
-              <p className="font-semibold">AI Consultation Assistant notes</p>
-              <ClinicianNotesColumns notes={clinicianNotes} />
-            </div>
-          )}
         </div>
         <DialogFooter>
           <Button onClick={onAdvance}>
@@ -300,23 +60,10 @@ function SummaryStepDialog({
   );
 }
 
-
-/** Renders nothing and immediately advances the queue past a missing document step. */
-function MissingStepAdvancer({ onAdvance }: { onAdvance: () => void }) {
-  useEffect(() => {
-    onAdvance();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  return null;
-}
-
 interface PostSessionQueueDialogProps {
   /** Ordered post-session steps to run, one at a time. */
   queue: PostSessionStepType[];
   index: number;
-  documents: GeneratedDoc[];
-  onSend: (doc: GeneratedDoc) => Promise<void>;
-  onSaveEdit: (doc: GeneratedDoc, newContent: string) => Promise<void>;
   onAdvance: () => void;
   onFinish: () => void;
   currentPatient: { id: string; name: string; patient_user_id: string | null } | null;
@@ -324,24 +71,18 @@ interface PostSessionQueueDialogProps {
   advisorName?: string;
   extractedFollowUp?: { follow_up_date?: string; follow_up_time?: string; notes?: string } | null;
   clientName?: string;
-  transcript?: string;
-  /** AI Clinician notes surfaced on the prescription step. */
-  clinicianNotes?: string | null;
   /** AI summary + action points shown as the first step of the queue. */
   summary?: string | null;
   actionPoints?: string[];
 }
 
 /**
- * Drives the sequential post-session queue: document steps render the step
- * dialog above, while the schedule step delegates to its own dialog.
+ * Drives the sequential post-session queue: the AI summary step, then
+ * scheduling a follow-up.
  */
 export function PostSessionStepDialog({
   queue,
   index,
-  documents,
-  onSend,
-  onSaveEdit,
   onAdvance,
   onFinish,
   currentPatient,
@@ -349,8 +90,6 @@ export function PostSessionStepDialog({
   advisorName,
   extractedFollowUp,
   clientName,
-  transcript,
-  clinicianNotes,
   summary,
   actionPoints,
 }: PostSessionQueueDialogProps) {
@@ -363,7 +102,6 @@ export function PostSessionStepDialog({
         summary={summary}
         actionPoints={actionPoints}
         clientName={clientName || currentPatient?.name}
-        clinicianNotes={clinicianNotes}
         onAdvance={onAdvance}
       />
     );
@@ -391,19 +129,5 @@ export function PostSessionStepDialog({
     );
   }
 
-  const doc = documents.find((d) => d.key === step) || null;
-  // Safety net: a step whose document failed to generate must not stall the queue.
-  if (!doc) return <MissingStepAdvancer onAdvance={onAdvance} />;
-
-  return (
-    <DocStepDialog
-      open
-      stepType={step}
-      doc={doc}
-      onSend={onSend}
-      onSaveEdit={onSaveEdit}
-      onAdvance={onAdvance}
-      clinicianNotes={clinicianNotes}
-    />
-  );
+  return null;
 }

@@ -53,7 +53,6 @@ import { DocumentPreviewWithLetterhead } from "@/features/documents/components/D
 
 import { SessionResultPanels, AISummaryCard } from "@/features/sessions/components/SessionResultPanels";
 import { WealthClientOverview } from "@/features/sessions/components/WealthClientOverview";
-import { ClinicianNotesColumns } from "@/features/sessions/components/ClinicianNotesAccordion";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -101,7 +100,6 @@ export default function SessionDetail() {
   const [privateNotesDraft, setPrivateNotesDraft] = useState("");
   const [savingPrivateNotes, setSavingPrivateNotes] = useState(false);
   const [previewDoc, setPreviewDoc] = useState<any | null>(null);
-  const [currentMedications, setCurrentMedications] = useState<Array<{ medication: string; dosage: string; frequency: string }>>([]);
 
 
   // Fetch advisor name
@@ -122,16 +120,6 @@ export default function SessionDetail() {
     if (!session?.audio_url) { setSignedAudioUrl(null); return; }
     getSignedAudioUrl(session.audio_url).then(url => setSignedAudioUrl(url));
   }, [session?.audio_url]);
-
-  useEffect(() => {
-    if (!session?.patient_id) return;
-    supabase
-      .from("prescriptions")
-      .select("medication, dosage, frequency")
-      .eq("patient_id", session.patient_id)
-      .eq("status", "active")
-      .then(({ data }) => setCurrentMedications(data || []));
-  }, [session?.patient_id]);
 
   // Fetch session documents
   useEffect(() => {
@@ -450,20 +438,6 @@ export default function SessionDetail() {
           showRetentionNotice={!!session.audio_url}
         />
       </div>
-
-      {/* AI Clinician Notes — full-width band, in columns */}
-      <div className="rounded-xl border border-primary bg-primary/5 p-4">
-        <div className="flex items-center gap-1.5">
-          <Sparkles className="h-4 w-4 text-primary" />
-          <h2 className="text-sm font-semibold text-foreground">AI Wealth Manager Notes</h2>
-        </div>
-        <p className="mt-1 mb-3 text-xs text-muted-foreground">
-          <span className="font-semibold text-foreground">Private — Only visible to you. Not shared with the client or other wealth managers.</span>{" "}
-          AI-generated clinical notes are decision support only and must be reviewed by the treating clinician.
-        </p>
-        <ClinicianNotesColumns notes={session.ai_diagnosis || session.notes} />
-      </div>
-
 
       {/* Session results — Session transcript removed; the transcription is
           available for download from Session Documents below instead. */}

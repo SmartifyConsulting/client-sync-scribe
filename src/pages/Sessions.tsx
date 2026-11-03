@@ -51,13 +51,8 @@ import {
 } from "@/features/sessions/utils/pausedSession";
 
 
-import { ClinicianNotesColumns } from "@/features/sessions/components/ClinicianNotesAccordion";
 import { DrawingPad } from "@/components/drawings/DrawingPad";
-import type { MedCertData, PrescriptionData, ReferralData } from "@/components/sessions/TranscriptionReviewDialogs";
-import { GeneratedDocumentsDialog, type GeneratedDoc, type GeneratedDocKey } from "@/features/sessions/components/GeneratedDocumentsDialog";
 import { PostSessionStepDialog, type PostSessionStepType } from "@/features/sessions/components/PostSessionStepDialog";
-import { cleanClinicianNotes, fuzzyKey } from "@/features/sessions/utils/clinicianNotesSections";
-import { SessionGeneratedDocuments } from "@/features/sessions/components/SessionGeneratedDocuments";
 import { SessionResultPanels } from "@/features/sessions/components/SessionResultPanels";
 import { renderAdvisoryHighlights } from "@/features/sessions/lib/advisoryHighlights";
 import { Toggle } from "@/components/ui/toggle";
@@ -67,7 +62,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useAudioRecording } from "@/hooks/useAudioRecording";
-import { useLiveDiagnosticHint } from "@/hooks/useLiveDiagnosticHint";
 import { AudioWaveform } from "@/components/sessions/AudioWaveform";
 import { useSessions } from "@/hooks/useSessions";
 import { useClients } from "@/hooks/useClients";
@@ -135,7 +129,6 @@ export default function Sessions() {
   const [actionPoints, setActionPoints] = useState<string[]>([]);
   const [sessionDuration, setSessionDuration] = useState(0);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-  const [currentMedications, setCurrentMedications] = useState<{ medication: string; dosage: string; frequency: string }[]>([]);
   const [patientSelectorOpen, setPatientSelectorOpen] = useState(false);
   const [doctorLanguage, setDoctorLanguage] = useState<string>("English");
   const [pastPatientSessions, setPastPatientSessions] = useState<any[]>([]);
@@ -150,9 +143,7 @@ export default function Sessions() {
   const [isPreparingSession, setIsPreparingSession] = useState(false);
   const [preparingMessage, setPreparingMessage] = useState("");
   const [personalNotes, setPersonalNotes] = useState("");
-  const [aiConsultEnabled, setAiConsultEnabled] = useState(false);
   const [showAboutRecordingDialog, setShowAboutRecordingDialog] = useState(false);
-  const [showAiConsultPrompt, setShowAiConsultPrompt] = useState(false);
   const micPreWarmedRef = useRef(false);
   const [showGeneralLetterEditor, setShowGeneralLetterEditor] = useState(false);
   const [selectedDocType, setSelectedDocType] = useState<string>("");
@@ -169,14 +160,6 @@ export default function Sessions() {
   const resumedTranscriptRef = useRef<string>("");
   const pausedSessionIdRef = useRef<string | null>(null);
 
-  // AI-extracted document state
-  const [extractedMedCert, setExtractedMedCert] = useState<MedCertData | null>(null);
-  const [extractedPrescription, setExtractedPrescription] = useState<PrescriptionData | null>(null);
-  const [extractedReferral, setExtractedReferral] = useState<ReferralData | null>(null);
-  // Single summary dialog for all documents generated from this session
-  const [showGeneratedDocsDialog, setShowGeneratedDocsDialog] = useState(false);
-  const [generatedDocs, setGeneratedDocs] = useState<GeneratedDoc[]>([]);
-  const [previewDocKey, setPreviewDocKey] = useState<GeneratedDocKey | null>(null);
   const [extractedFollowUp, setExtractedFollowUp] = useState<{ follow_up_date?: string; follow_up_time?: string; notes?: string } | null>(null);
   // Sequential post-session flow: one step (document / schedule) at a time.
   const [postSessionQueue, setPostSessionQueue] = useState<PostSessionStepType[]>([]);
@@ -221,23 +204,6 @@ export default function Sessions() {
     setSearchParams({ client: value });
   };
 
-  // Fetch active prescriptions when client changes — refreshable on med updates
-  const fetchActivePrescriptions = useCallback(async () => {
-    if (!clientId) return;
-    const { data, error } = await supabase
-      .from('prescriptions')
-      .select('medication, dosage, frequency')
-      .eq('patient_id', clientId)
-      .eq('status', 'active');
-    if (!error && data) {
-      setCurrentMedications(data);
-    }
-  }, [clientId]);
-
-  useEffect(() => {
-    fetchActivePrescriptions();
-  }, [fetchActivePrescriptions]);
-
   // Pre-warm the mic permission as soon as a client is selected (idle screen), so the
   // browser has already granted access by the time the advisor clicks "Start Session" —
   // the permission prompt is usually what makes that click feel slow.
@@ -249,27 +215,7 @@ export default function Sessions() {
       .catch(() => { micPreWarmedRef.current = false; });
   }, [currentPatient, sessionState]);
 
-  // Listen for cross-component medication updates
-  useEffect(() => {
-    if (!clientId) return;
-    let cancelled = false;
-    let unsubscribe: (() => void) | null = null;
-    import("@/lib/utils").then(({ medicationSyncBus }) => {
-      if (cancelled) return;
-      const handler = (e: Event) => {
-        const detail = (e as CustomEvent).detail as { clientId?: string } | undefined;
-        if (!detail?.clientId || detail.clientId === clientId) fetchActivePrescriptions();
-      };
-      medicationSyncBus.addEventListener("medications-updated", handler);
-      unsubscribe = () => medicationSyncBus.removeEventListener("medications-updated", handler);
-    });
-    return () => {
-      cancelled = true;
-      unsubscribe?.();
-    };
-  }, [clientId, fetchActivePrescriptions]);
-
-  // Fetch past sessions for client (for AI clinician context)
+  // Fetch past sessions for client (for AI consultation context)
   useEffect(() => {
     const fetchPastSessions = async () => {
       if (!clientId) return;
@@ -337,211 +283,12 @@ export default function Sessions() {
     });
   }, [postSessionQueue.length]);
 
-  // --- Silent document creation (no per-document review dialog) ---
-  /**
-   * The session finaliser already writes a full letterhead document for this
-   * session. Reuse it instead of inserting a second, unlinked plain-text copy,
-   * so Session History and the review queue show the same document.
-   */
-  const findSessionDocument = async (
-    userId: string,
-    sessionIdForDoc: string | null | undefined,
-    templateNameLike: string,
-  ): Promise<{ id: string; content: string } | null> => {
-    if (!sessionIdForDoc || !clientId) return null;
-    const { data } = await supabase
-      .from('documents')
-      .select('id, content')
-      .eq('user_id', userId)
-      .eq('patient_id', clientId)
-      .eq('session_id', sessionIdForDoc)
-      .ilike('template_name', `%${templateNameLike}%`)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    return data ? { id: data.id, content: data.content || '' } : null;
-  };
-
-  const createMedCertDocument = async (
-    data: MedCertData,
-    sessionIdArg?: string | null,
-  ): Promise<GeneratedDoc | null> => {
-    if (!clientId) return null;
-    try {
-      const sessionIdForDoc = sessionIdArg ?? currentSessionIdRef.current;
-      const content = `<b>MEDICAL CERTIFICATE</b>\n\nPatient: ${data.patient_name || currentPatient?.name}\nDiagnosis: ${data.diagnosis}\nLeave Period: ${data.start_date} to ${data.end_date}${data.notes ? `\nNotes: ${data.notes}` : ''}`;
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
-      const existing = await findSessionDocument(user.id, sessionIdForDoc, 'certificate');
-      let doc: { id: string } | null = existing ? { id: existing.id } : null;
-      if (!doc) {
-        const { data: inserted } = await supabase.from('documents').insert({
-          user_id: user.id,
-          patient_id: clientId,
-          patient_name: currentPatient?.name || null,
-          session_id: sessionIdForDoc,
-          name: `Medical Certificate - ${new Date().toLocaleDateString()}`,
-          content,
-          template_name: 'Medical Certificate',
-        } as any).select('id').single();
-        doc = inserted ?? null;
-      }
-      return {
-        key: 'medcert',
-        label: 'Medical Certificate',
-        documentId: doc?.id || null,
-        content: existing?.content || content,
-        recipientEmail: (currentPatient as any)?.email || null,
-        recipientName: currentPatient?.name || null,
-      };
-    } catch (e) { console.error(e); return null; }
-  };
-
-  const createPrescriptionDocument = async (data: PrescriptionData, sessionIdArg?: string | null): Promise<GeneratedDoc | null> => {
-    const sessionIdForDoc = sessionIdArg ?? currentSessionIdRef.current;
-    if (!clientId || !sessionIdForDoc) return null;
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
-      for (const med of data.medications) {
-        await supabase.from('prescriptions').insert({
-          patient_id: clientId,
-          doctor_id: user.id,
-          session_id: sessionIdForDoc,
-          medication: med.medication,
-          dosage: med.dosage,
-          frequency: med.frequency,
-          instructions: [med.duration, med.instructions].filter(Boolean).join('. ') || null,
-        });
-      }
-      const content = `<b>PRESCRIPTION</b>\n\nPatient: ${currentPatient?.name || ''}\n\n${data.medications.map(m => `• ${m.medication} — ${m.dosage}, ${m.frequency}${m.duration ? ` (${m.duration})` : ''}${m.instructions ? `\n  ${m.instructions}` : ''}`).join('\n')}`;
-      const existing = await findSessionDocument(user.id, sessionIdForDoc, 'prescription');
-      let doc: { id: string } | null = existing ? { id: existing.id } : null;
-      if (!doc) {
-        const { data: inserted } = await supabase.from('documents').insert({
-          user_id: user.id,
-          patient_id: clientId,
-          patient_name: currentPatient?.name || null,
-          session_id: sessionIdForDoc,
-          name: `Prescription - ${new Date().toLocaleDateString()}`,
-          content,
-          template_name: 'Prescription',
-        } as any).select('id').single();
-        doc = inserted ?? null;
-      }
-      return {
-        key: 'prescription',
-        label: 'Prescription',
-        documentId: doc?.id || null,
-        content: existing?.content || content,
-        recipientEmail: (currentPatient as any)?.pharmacy_email || (currentPatient as any)?.email || null,
-        recipientName: currentPatient?.name || null,
-      };
-    } catch (e) { console.error(e); return null; }
-  };
-
-  const createReferralDocument = async (
-    data: ReferralData,
-    sessionIdArg?: string | null,
-  ): Promise<GeneratedDoc | null> => {
-    if (!clientId) return null;
-    try {
-      const sessionIdForDoc = sessionIdArg ?? currentSessionIdRef.current;
-      const content = `<b>REFERRAL LETTER</b>\n\nReferral To: ${data.specialist_type}${data.doctor_name ? ` - ${data.doctor_name}` : ''}\nReason: ${data.reason}\nUrgency: ${data.urgency || 'routine'}`;
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
-      const existing = await findSessionDocument(user.id, sessionIdForDoc, 'referral');
-      let doc: { id: string } | null = existing ? { id: existing.id } : null;
-      if (!doc) {
-        const { data: inserted } = await supabase.from('documents').insert({
-          user_id: user.id,
-          patient_id: clientId,
-          patient_name: currentPatient?.name || null,
-          session_id: sessionIdForDoc,
-          name: `Referral Letter - ${data.specialist_type} - ${new Date().toLocaleDateString()}`,
-          content,
-          template_name: 'Referral Letter',
-        } as any).select('id').single();
-        doc = inserted ?? null;
-      }
-      if (data.doctor_name) {
-        const { data: refDoc } = await supabase.from('referral_partners')
-          .select('id, referral_count')
-          .eq('user_id', user.id)
-          .ilike('last_name', `%${data.doctor_name.split(' ').pop()}%`)
-          .maybeSingle();
-        if (refDoc) {
-          await supabase.from('referral_partners')
-            .update({ referral_count: (refDoc.referral_count || 0) + 1 })
-            .eq('id', refDoc.id);
-        }
-      }
-      return {
-        key: 'referral',
-        label: 'Referral Letter',
-        documentId: doc?.id || null,
-        content: existing?.content || content,
-        recipientEmail: (currentPatient as any)?.email || null,
-        recipientName: currentPatient?.name || null,
-      };
-    } catch (e) { console.error(e); return null; }
-  };
-
-  // Silently generate every AI-detected document, then run the sequential
-  // post-session queue. The extracted payload is passed in explicitly so this
-  // never reads state that has not committed yet.
-  const generateAllDocuments = useCallback(async (payload?: {
-    medCert?: MedCertData | null;
-    prescription?: PrescriptionData | null;
-    referral?: ReferralData | null;
-    sessionId?: string | null;
-  }) => {
-    const medCert = payload?.medCert ?? extractedMedCert;
-    const prescriptionData = payload?.prescription ?? extractedPrescription;
-    const referralData = payload?.referral ?? extractedReferral;
-    // Never rely on currentSessionIdRef here — it is only synced by an effect
-    // on the next render, so it can still be null in this same tick.
-    const sessionIdForDocs = payload?.sessionId ?? currentSessionIdRef.current;
-
-    // Create documents in the review order: prescription → med cert → referral.
-    const results: GeneratedDoc[] = [];
-    if (prescriptionData) {
-      const d = await createPrescriptionDocument(prescriptionData, sessionIdForDocs);
-      if (d) results.push(d);
-    }
-    if (medCert) {
-      const d = await createMedCertDocument(medCert, sessionIdForDocs);
-      if (d) results.push(d);
-    }
-    if (referralData) {
-      const d = await createReferralDocument(referralData, sessionIdForDocs);
-      if (d) results.push(d);
-    }
-    setGeneratedDocs(results);
-
-    // Review order: AI scribed notes → prescription → referral → hospital
-    // admission → medical certificate → next appointment → vulas.
-    const steps: PostSessionStepType[] = ["summary"];
-    const ORDER: PostSessionStepType[] = ["prescription", "referral", "admission" as PostSessionStepType, "medcert"];
-    for (const key of ORDER) {
-      if (results.some((d) => d.key === key)) steps.push(key);
-    }
-    for (const d of results) {
-      const key = d.key as PostSessionStepType;
-      if (!steps.includes(key)) steps.push(key);
-    }
-    steps.push("schedule");
-
-    setPostSessionQueue(steps);
+  // Runs the sequential post-session queue: AI summary, then schedule a follow-up.
+  const startPostSessionFlow = useCallback(() => {
+    setPostSessionQueue(["summary", "schedule"]);
     setPostSessionIndex(0);
     setShowPostSessionFlow(true);
-
-  }, [extractedMedCert, extractedPrescription, extractedReferral, clientId, currentPatient]);
-
-  // Assigned once the live-hint hook is created below; lets the completion
-  // handler run one final whole-transcript analysis without a circular dep.
-  const analyzeLiveRef = useRef<((transcript?: string) => Promise<unknown>) | null>(null);
-
+  }, []);
 
 
 
@@ -560,30 +307,6 @@ export default function Sessions() {
     const fullTranscript = [resumedTranscriptRef.current, transcriptText || ""]
       .filter((part) => part && part.trim())
       .join("\n\n");
-
-    // Final whole-consultation AI pass so the four clinician sections are always
-    // populated once recording stops, even if the live passes missed the ending.
-    if (fullTranscript.trim().length > 25) {
-      try {
-        const finalHint = await analyzeLiveRef.current?.(fullTranscript);
-        console.log("Final AI clinician pass result:", finalHint ? "ok" : "empty");
-        if (!finalHint && !notesRef.current?.trim()) {
-          setNotes(
-            [
-              "WORKING IMPRESSION\nThe final AI analysis could not be completed for this consultation.",
-              "SAFETY CHECKS\n• none noted",
-              "DIFFERENTIALS\n• none noted",
-              "SUGGESTED CHECKS\n• none noted",
-            ].join("\n\n"),
-          );
-        }
-      } catch (e) {
-        console.warn("Final AI clinician pass failed:", e);
-      }
-    }
-
-
-    let hasDocs = false;
 
     try {
       const result = await completeSession(
@@ -613,28 +336,13 @@ export default function Sessions() {
         }
         setSummary(result.summary || "");
         setActionPoints(result.action_points || []);
-        // No automatic AI assessment — the advisor triggers it manually via "AI Consult".
 
         const docs = (result as any)._extractedDocuments;
         if (docs?.follow_up_appointment?.follow_up_date) {
           setExtractedFollowUp(docs.follow_up_appointment);
         }
-        const medCert = docs?.medical_certificate || null;
-        const prescriptionData = docs?.prescription || null;
-        const referralData = docs?.referral || null;
-        if (medCert) { setExtractedMedCert(medCert); hasDocs = true; }
-        if (prescriptionData) { setExtractedPrescription(prescriptionData); hasDocs = true; }
-        if (referralData) { setExtractedReferral(referralData); hasDocs = true; }
 
-        // Create every detected document from the freshly returned payload
-        // (state may not have committed yet), then run the review queue.
-        await generateAllDocuments({
-          medCert,
-          prescription: prescriptionData,
-          referral: referralData,
-          sessionId: result.id,
-        });
-
+        startPostSessionFlow();
       } else {
         setSummary("No content was recorded or noted.");
         setActionPoints([]);
@@ -645,14 +353,14 @@ export default function Sessions() {
       setActionPoints([]);
       toast({
         title: "Analysis didn't complete",
-        description: "The AI analysis failed or timed out, so no summary, action points or documents were produced. Your recording and notes are saved — tap the mic and use AI Consult to retry.",
+        description: "The AI analysis failed or timed out, so no summary or action points were produced. Your recording and notes are saved — tap the mic to retry.",
         variant: "destructive",
       });
     }
 
     setSessionState("completed");
     pendingCompletionRef.current = false;
-  }, [completeSession, clientId, generateAllDocuments]);
+  }, [completeSession, clientId, startPostSessionFlow]);
 
   const { 
     isRecording, 
@@ -718,98 +426,11 @@ export default function Sessions() {
     }
   });
 
-  // Live AI diagnostic hint while advisor is recording (before they conclude).
-  // Always on for a recording — no toggle gate; the AI Consult button just runs it now.
-  const { hint: liveHint, isLoading: liveHintLoading, error: liveHintError, lastRunAt: liveHintLastRunAt, analyze: analyzeLive } = useLiveDiagnosticHint({
-    enabled: isRecording && !isPaused,
-
-    transcript: liveTranscript || transcript,
-    patientAge: (currentPatient as any)?.dob
-      ? Math.max(0, Math.floor((Date.now() - new Date((currentPatient as any).dob).getTime()) / 31557600000))
-      : ((currentPatient as any)?.age ?? null),
-
-    patientSex: (currentPatient as any)?.gender ?? null,
-    currentMedications: currentMedications?.length ? currentMedications : ((currentPatient as any)?.current_medications ?? null),
-    chronicConditions: (currentPatient as any)?.chronic_conditions ?? null,
-    allergies: (currentPatient as any)?.allergies ?? null,
-    pastSessions: pastPatientSessions,
-
-    language: (typeof doctorLanguage === "string" ? doctorLanguage : undefined),
-  });
-  analyzeLiveRef.current = analyzeLive;
-
-
-
-  // The live hints ARE the AI Clinician Notes: each new hint is merged into a
-  // running, de-duplicated clinical note instead of being appended verbatim, so
-  // the note stays readable and free of repetition.
-  const hintImpressionRef = useRef<string>("");
-  const hintLinesRef = useRef<Map<string, { bucket: "alerts" | "differentials" | "investigations"; index: number }>>(new Map());
-  const hintSectionsRef = useRef<{ alerts: string[]; differentials: string[]; investigations: string[] }>({
-    alerts: [],
-    differentials: [],
-    investigations: [],
-  });
-  // Never carry clinical reasoning across consultations: switching client or
-  // starting a new session wipes the accumulated hint state and the notes body.
+  // Never carry notes across consultations: switching client or starting a
+  // new session clears the notes body.
   useEffect(() => {
-    hintImpressionRef.current = "";
-    hintLinesRef.current = new Map();
-    hintSectionsRef.current = { alerts: [], differentials: [], investigations: [] };
     setNotes("");
   }, [clientId]);
-
-  useEffect(() => {
-    if (!liveHint) return;
-    const s = hintSectionsRef.current;
-    const severityRank = (line: string) =>
-      /^\[CRITICAL\]/i.test(line) ? 2 : /^\[CAUTION\]/i.test(line) ? 1 : 0;
-    const addAll = (bucketName: "alerts" | "differentials" | "investigations", items?: string[]) => {
-      const bucket = s[bucketName];
-      (items || []).forEach((raw) => {
-        const item = String(raw).trim();
-        if (!item) return;
-        // Fuzzy key so reworded repeats ("Check vital signs immediately" vs
-        // "Check current vital signs") collapse into the first phrasing.
-        const key = fuzzyKey(item.replace(/^\[[A-Z]+\]\s*/i, ""));
-        if (!key) return;
-        const existing = hintLinesRef.current.get(key);
-        if (existing) {
-          // Keep the most severe marker when the same safety point recurs.
-          const prev = s[existing.bucket][existing.index];
-          if (prev && severityRank(item) > severityRank(prev)) {
-            s[existing.bucket][existing.index] = item;
-          }
-          return;
-        }
-        hintLinesRef.current.set(key, { bucket: bucketName, index: bucket.length });
-        bucket.push(item);
-      });
-    };
-
-    if (liveHint.suggestion?.trim()) hintImpressionRef.current = liveHint.suggestion.trim();
-    addAll(
-      "alerts",
-      (liveHint.alerts || []).map(
-        (a) => `[${a.severity === "critical" ? "CRITICAL" : a.severity === "caution" ? "CAUTION" : "NOTE"}] ${a.message}`,
-      ),
-    );
-    addAll("alerts", (liveHint.red_flags || []).map((r) => `[CAUTION] Rule out: ${r}`));
-    addAll("differentials", liveHint.differentials);
-    addAll("investigations", liveHint.suggested_investigations);
-
-    const composed = [
-      hintImpressionRef.current ? `WORKING IMPRESSION\n${hintImpressionRef.current}` : null,
-      s.alerts.length ? `SAFETY CHECKS\n${s.alerts.map((a) => `• ${a}`).join("\n")}` : null,
-      s.differentials.length ? `DIFFERENTIALS\n${s.differentials.map((d) => `• ${d}`).join("\n")}` : null,
-      s.investigations.length ? `SUGGESTED CHECKS\n${s.investigations.map((i) => `• ${i}`).join("\n")}` : null,
-    ]
-      .filter(Boolean)
-      .join("\n\n");
-
-    if (composed) setNotes(composed);
-  }, [liveHint]);
-
 
   // Recording has actually started — drop the "preparing" state so the UI stops guessing.
   useEffect(() => {
@@ -837,34 +458,6 @@ export default function Sessions() {
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Mark the matching "Review ..." to-do as done so sent/handled documents leave the list
-  const completeSessionTodo = async (match: string) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user || !currentSessionId) return;
-      await supabase
-        .from('todos')
-        .update({ status: 'completed', completed_at: new Date().toISOString() } as any)
-        .eq('user_id', user.id)
-        .eq('session_id', currentSessionId)
-        .ilike('title', `%${match}%`);
-    } catch (e) { console.error(e); }
-  };
-
-  const sendDeliveryDocument = async (target: { documentId: string | null; recipientEmail?: string | null }) => {
-    try {
-      const { error } = await supabase.functions.invoke('send-document-email', {
-        body: { documentId: target.documentId, recipientEmail: target.recipientEmail },
-      });
-      if (error) throw error;
-      return true;
-    } catch (e) {
-      console.error('Send failed:', e);
-      toast({ title: 'Send failed', description: 'The document was generated but could not be emailed.', variant: 'destructive' });
-      return false;
-    }
-  };
-
   // Auto-start when arriving from a client profile ("Start Session")
   const autoStartedRef = useRef(false);
   useEffect(() => {
@@ -880,8 +473,8 @@ export default function Sessions() {
 
   const startSession = async (resume?: PausedSessionSnapshot) => {
     // Guard against double-invocation (e.g. a stray duplicate click/effect)
-    // firing the About/AI-Consult prompts twice.
-    if (sessionState === "active" || showAboutRecordingDialog || showAiConsultPrompt) return;
+    // firing the About Recording prompt twice.
+    if (sessionState === "active" || showAboutRecordingDialog) return;
     setSessionState("active");
     setNotes(resume?.notes || "");
     setSummary("");
@@ -901,9 +494,6 @@ export default function Sessions() {
     }
     personalNotesHasLoaded.current = true;
     clearTranscript();
-    hintImpressionRef.current = "";
-    hintLinesRef.current.clear();
-    hintSectionsRef.current = { alerts: [], differentials: [], investigations: [] };
     sessionStartTimeRef.current = resume?.startedAt ? new Date(resume.startedAt) : new Date();
     savedAudioUrlRef.current = null;
     completionRanRef.current = false;
@@ -996,12 +586,6 @@ export default function Sessions() {
 
   const handleAboutRecordingAck = () => {
     setShowAboutRecordingDialog(false);
-    setShowAiConsultPrompt(true);
-  };
-
-  const handleAiConsultChoice = (enabled: boolean) => {
-    setAiConsultEnabled(enabled);
-    setShowAiConsultPrompt(false);
     startRecording();
   };
 
@@ -1034,102 +618,36 @@ export default function Sessions() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Session start prompts — a SINGLE Dialog root that swaps its content between the
-          two steps (Session Recordings notice, then AI Consult opt-in). Using one Dialog
-          instead of two separate ones avoids Radix briefly double-mounting a dialog while
-          one closes and the other opens, which read as "the AI Consult box popping up
-          twice". Dismissible only via the buttons shown, never Escape/outside-click. */}
-      <Dialog open={showAboutRecordingDialog || showAiConsultPrompt} onOpenChange={() => {}}>
+      {/* Session start prompt — dismissible only via the button shown, never Escape/outside-click. */}
+      <Dialog open={showAboutRecordingDialog} onOpenChange={() => {}}>
         <DialogContent
           className="max-w-md"
           onInteractOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
-          {showAboutRecordingDialog ? (
-            <>
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <Info className="h-5 w-5 text-success shrink-0" />
-                  Session Recordings
-                </DialogTitle>
-                <DialogDescription className="text-base">
-                  This session recording is only shared between you and your client. It's
-                  automatically deleted from our servers within 7 days — download it beforehand
-                  if either of you wants to keep a copy.
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <Button onClick={handleAboutRecordingAck}>Got it</Button>
-              </DialogFooter>
-            </>
-          ) : (
-            <>
-              <DialogHeader>
-                <DialogTitle>Run AI Consult in parallel?</DialogTitle>
-                <DialogDescription className="text-base">
-                  The AI Clinician can analyse the conversation as it happens and surface
-                  differentials, red flags, and suggestions while you record. Would you like to
-                  run it alongside this session?
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => handleAiConsultChoice(false)}>Not this time</Button>
-                <Button onClick={() => handleAiConsultChoice(true)}>Yes, run AI Consult</Button>
-              </DialogFooter>
-            </>
-          )}
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Info className="h-5 w-5 text-success shrink-0" />
+              Session Recordings
+            </DialogTitle>
+            <DialogDescription className="text-base">
+              This session recording is only shared between you and your client. It's
+              automatically deleted from our servers within 7 days — download it beforehand
+              if either of you wants to keep a copy.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={handleAboutRecordingAck}>Got it</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Documents Generated — single summary dialog with View → Edit/Send/Save per document */}
-      <GeneratedDocumentsDialog
-        open={showGeneratedDocsDialog}
-        openDocKey={previewDocKey}
-        onOpenChange={(next) => {
-          setShowGeneratedDocsDialog(next);
-          if (!next) setPreviewDocKey(null);
-        }}
-        documents={generatedDocs}
-        onSend={async (doc) => {
-          const ok = await sendDeliveryDocument({ documentId: doc.documentId, recipientEmail: doc.recipientEmail });
-          if (ok) {
-            await completeSessionTodo(doc.label);
-            setGeneratedDocs((prev) => prev.map((d) => (d.key === doc.key ? { ...d, sent: true } : d)));
-            toast({ title: 'Sent', description: `${doc.label} emailed to ${doc.recipientName || 'the client'}.` });
-          }
-        }}
-        onSaveEdit={async (doc, newContent) => {
-          if (doc.documentId) {
-            await supabase.from('documents').update({ content: newContent } as any).eq('id', doc.documentId);
-          }
-          setGeneratedDocs((prev) => prev.map((d) => (d.key === doc.key ? { ...d, content: newContent } : d)));
-          toast({ title: 'Saved' });
-        }}
-        onContinue={() => {
-          setShowGeneratedDocsDialog(false);
-        }}
-      />
-
-      {/* Sequential post-session flow — one step at a time: generated documents,
-          then schedule follow-up. */}
+      {/* Sequential post-session flow — one step at a time: AI summary, then
+          schedule follow-up. */}
       {showPostSessionFlow && postSessionQueue.length > 0 && (
         <PostSessionStepDialog
           queue={postSessionQueue}
           index={postSessionIndex}
-          documents={generatedDocs}
-          onSend={async (doc) => {
-            const ok = await sendDeliveryDocument({ documentId: doc.documentId, recipientEmail: doc.recipientEmail });
-            if (ok) {
-              await completeSessionTodo(doc.label);
-              setGeneratedDocs((prev) => prev.map((d) => (d.key === doc.key ? { ...d, sent: true } : d)));
-            }
-          }}
-          onSaveEdit={async (doc, newContent) => {
-            if (doc.documentId) {
-              await supabase.from('documents').update({ content: newContent } as any).eq('id', doc.documentId);
-            }
-            setGeneratedDocs((prev) => prev.map((d) => (d.key === doc.key ? { ...d, content: newContent } : d)));
-          }}
           onAdvance={advancePostSession}
           onFinish={() => setShowPostSessionFlow(false)}
           currentPatient={currentPatient ? { id: currentPatient.id, name: currentPatient.name, patient_user_id: (currentPatient as any).patient_user_id || null } : null}
@@ -1137,8 +655,6 @@ export default function Sessions() {
           advisorName={advisorName}
           extractedFollowUp={extractedFollowUp}
           clientName={currentPatient?.name}
-          transcript={pendingTranscript}
-          clinicianNotes={cleanClinicianNotes(notes)}
           summary={summary}
           actionPoints={actionPoints}
         />
@@ -1501,49 +1017,6 @@ export default function Sessions() {
           </div>
 
 
-          {/* Live AI Clinician — directly below the Session Recorder frame. */}
-          <div className="order-3 min-w-0 rounded-xl border border-primary bg-primary/5 p-3 lg:col-span-2 lg:col-start-1 lg:row-start-2">
-
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-1.5">
-                <Sparkles className="h-4 w-4 text-primary" />
-                <p className="text-sm font-semibold text-primary-dark">Live AI Consultation Assistant</p>
-              </div>
-              {liveHintLoading && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
-            </div>
-            {notes ? (
-              <ClinicianNotesColumns notes={notes} />
-            ) : liveHintError ? (
-              <p className="text-xs text-destructive">{liveHintError}</p>
-            ) : liveTranscribeError ? (
-              <p className="text-xs text-destructive">{liveTranscribeError}</p>
-            ) : isRecording ? (
-              <p className="text-xs text-muted-foreground">
-                {liveHintLoading
-                  ? "Analysing the consultation…"
-                  : (liveTranscript || transcript)
-                    ? "Listening — adviser notes appear as you talk."
-                    : "Listening — no speech captured yet."}
-              </p>
-            ) : (
-              <p className="text-xs text-muted-foreground">Live AI Consultation Assistant starts as soon as you record.</p>
-            )}
-            {(isRecording || liveHintLastRunAt) && (
-              <p className="mt-1 text-2xs text-muted-foreground">
-                {liveHintLastRunAt
-                  ? `Last analysed at ${liveHintLastRunAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
-                  : "Waiting for the first analysis…"}
-              </p>
-            )}
-
-
-            <p className="mt-2 text-xs text-muted-foreground leading-snug">
-              <span className="font-semibold text-foreground">
-                Private — only visible to you. Not shared with the client or other advisers.
-              </span>{" "}
-              AI notes support your advice and must be reviewed before you rely on them.
-            </p>
-          </div>
         </div>
 
         <div className="mt-4">
@@ -1588,29 +1061,6 @@ export default function Sessions() {
       {sessionState === "completed" && (
         <div className="space-y-6 mt-6">
 
-
-          {/* Documents from this session — inline preview cards (dialog still available). */}
-          <SessionGeneratedDocuments
-            documents={generatedDocs}
-            onPreview={(doc) => {
-              setPreviewDocKey(doc.key);
-              setShowGeneratedDocsDialog(true);
-            }}
-            onSend={async (doc) => {
-              const ok = await sendDeliveryDocument({ documentId: doc.documentId, recipientEmail: doc.recipientEmail });
-              if (ok) {
-                await completeSessionTodo(doc.label);
-                setGeneratedDocs((prev) => prev.map((d) => (d.key === doc.key ? { ...d, sent: true } : d)));
-                toast({ title: 'Sent', description: `${doc.label} emailed to ${doc.recipientName || 'the client'}.` });
-              }
-            }}
-            onSaveForReview={(doc) => {
-              toast({
-                title: 'Saved for review',
-                description: `${doc.label} is saved to the client's documents for later review.`,
-              });
-            }}
-          />
 
           {/* Shared results layout — identical to opening a past session */}
           <SessionResultPanels

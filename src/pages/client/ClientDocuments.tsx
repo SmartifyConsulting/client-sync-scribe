@@ -73,13 +73,7 @@ import { SectionHeader } from "@/features/clients/components/sectionStyles";
 const STORAGE_LIMIT_MB = 100;
 
 type DocType =
-  | "prescription"
-  | "medical_certificate"
-  | "referral_letter"
   | "general_letter"
-  | "hospital_admission"
-  | "lab_result"
-  | "radiology_report"
   | "audio"
   | "video"
   | "image"
@@ -91,7 +85,7 @@ interface UnifiedDocument {
   type: DocType;
   date: string;
   sizeBytes: number;
-  source: "documents" | "prescriptions";
+  source: "documents";
   content?: string;
   mediaUrl?: string;
   aiAnalysis?: string | null;
@@ -108,47 +102,11 @@ const DOC_TYPE_CONFIG: Record<
   DocType,
   { label: string; color: string; borderColor: string; icon: typeof FileText }
 > = {
-  prescription: {
-    label: "Prescription",
-    color: "bg-sky-50 text-primary dark:bg-primary/15 dark:text-primary",
-    borderColor: "border-primary/40",
-    icon: Pill,
-  },
-  medical_certificate: {
-    label: "Advice Letter",
-    color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-    borderColor: "border-blue-400",
-    icon: FileCheck,
-  },
-  referral_letter: {
-    label: "Referral Letter",
-    color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
-    borderColor: "border-purple-400",
-    icon: Send,
-  },
   general_letter: {
     label: "General Letter",
     color: "bg-slate-100 text-slate-700 dark:bg-slate-800/50 dark:text-slate-300",
     borderColor: "border-slate-400",
     icon: FileText,
-  },
-  hospital_admission: {
-    label: "Hospital Admission",
-    color: "bg-slate-100 text-slate-800 dark:bg-slate-900/30 dark:text-slate-400",
-    borderColor: "border-slate-400",
-    icon: FileText,
-  },
-  lab_result: {
-    label: "Lab Result",
-    color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-    borderColor: "border-red-400",
-    icon: FlaskConical,
-  },
-  radiology_report: {
-    label: "Radiology Report",
-    color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400",
-    borderColor: "border-indigo-400",
-    icon: Scan,
   },
   audio: {
     label: "Audio",
@@ -178,13 +136,7 @@ const DOC_TYPE_CONFIG: Record<
 
 const FILTER_OPTIONS: { value: DocType | "all"; label: string }[] = [
   { value: "all", label: "All" },
-  { value: "prescription", label: "Prescriptions" },
-  { value: "medical_certificate", label: "Certificates" },
-  { value: "referral_letter", label: "Referrals" },
   { value: "general_letter", label: "Letters" },
-  { value: "hospital_admission", label: "Admissions" },
-  { value: "lab_result", label: "Lab Results" },
-  { value: "radiology_report", label: "Radiology Reports" },
   { value: "image", label: "Images" },
   { value: "audio", label: "Audio" },
   { value: "video", label: "Video" },
@@ -197,17 +149,6 @@ function deriveDocType(
   if (mediaType === "audio") return "audio";
   if (mediaType === "video") return "video";
   if (mediaType === "image") return "image";
-  const lower = (templateName || "").toLowerCase();
-  if (lower.includes("prescription")) return "prescription";
-  if (lower.includes("hospital admission")) return "hospital_admission";
-  if (lower.includes("medical certificate") || lower.includes("certificate"))
-    return "medical_certificate";
-  if (lower.includes("lab") || lower.includes("blood") || lower.includes("pathology") || lower.includes("test result"))
-    return "lab_result";
-  if (lower.includes("radiology") || lower.includes("x-ray") || lower.includes("xray") || lower.includes("scan") || lower.includes("mri") || lower.includes("ct "))
-    return "radiology_report";
-  if (lower.includes("referral")) return "referral_letter";
-  if (lower.includes("letter")) return "general_letter";
   if (templateName) return "general_letter";
   return "file";
 }
@@ -282,18 +223,11 @@ export default function ClientDocuments({ hideHeader = false }: { hideHeader?: b
     setPatientIds(ids);
     setPatientName(patients[0]?.name || "");
 
-    const [docsRes, rxRes] = await Promise.all([
-      supabase
-        .from("documents")
-        .select("id, name, content, template_name, created_at, media_type, media_url, ai_analysis, ai_analyzed_at, email_sent_at, patient_id, user_id, attachments, document_kind")
-        .in("patient_id", ids)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("prescriptions")
-        .select("id, medication, dosage, frequency, created_at, status")
-        .in("patient_id", ids)
-        .order("created_at", { ascending: false }),
-    ]);
+    const docsRes = await supabase
+      .from("documents")
+      .select("id, name, content, template_name, created_at, media_type, media_url, ai_analysis, ai_analyzed_at, email_sent_at, patient_id, user_id, attachments, document_kind")
+      .in("patient_id", ids)
+      .order("created_at", { ascending: false });
 
     const unified: UnifiedDocument[] = [];
 
@@ -318,19 +252,6 @@ export default function ClientDocuments({ hideHeader = false }: { hideHeader?: b
         attachments: Array.isArray((doc as any).attachments)
           ? ((doc as any).attachments as DocumentAttachment[])
           : [],
-      });
-    }
-
-    for (const rx of rxRes.data || []) {
-      const desc = `${rx.medication} – ${rx.dosage} (${rx.frequency})`;
-      unified.push({
-        id: rx.id,
-        name: rx.medication,
-        type: "prescription",
-        date: rx.created_at,
-        sizeBytes: new Blob([desc]).size,
-        source: "prescriptions",
-        content: desc,
       });
     }
 
@@ -598,9 +519,7 @@ export default function ClientDocuments({ hideHeader = false }: { hideHeader?: b
         .maybeSingle();
       if (!docData) throw new Error("Document not found");
       const client = (docData as any).patients;
-      const recipientEmail = doc.type === "prescription"
-        ? client?.pharmacy_email || client?.email
-        : client?.email;
+      const recipientEmail = client?.email;
       if (recipientEmail) {
         await supabase.functions.invoke("send-document-email", {
           body: { documentId: doc.id, recipientEmail },
