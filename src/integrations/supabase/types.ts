@@ -456,6 +456,7 @@ export type Database = {
           ai_summary: string | null
           ai_summary_updated_at: string | null
           assets_liabilities: Json
+          car_insurance: Json | null
           cash_flow: Json
           created_at: string
           estate: Json
@@ -475,6 +476,7 @@ export type Database = {
           ai_summary?: string | null
           ai_summary_updated_at?: string | null
           assets_liabilities?: Json
+          car_insurance?: Json | null
           cash_flow?: Json
           created_at?: string
           estate?: Json
@@ -494,6 +496,7 @@ export type Database = {
           ai_summary?: string | null
           ai_summary_updated_at?: string | null
           assets_liabilities?: Json
+          car_insurance?: Json | null
           cash_flow?: Json
           created_at?: string
           estate?: Json
