@@ -131,7 +131,7 @@ function PhysicalOverview({ client, sessions, isSelfService = false }: ClientOve
 
       if (!force) {
         const { data: cached } = await supabase
-          .from("patient_history_timelines")
+          .from("client_history_timelines")
           .select("timeline, source_fingerprint")
           .eq("patient_id", client.id)
           .maybeSingle();
@@ -182,7 +182,7 @@ function PhysicalOverview({ client, sessions, isSelfService = false }: ClientOve
 
       setSummaryData(processedData);
       await supabase
-        .from("patient_history_timelines")
+        .from("client_history_timelines")
         .upsert(
           {
             patient_id: client.id,

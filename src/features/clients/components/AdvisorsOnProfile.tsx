@@ -42,7 +42,7 @@ const permissionLabels: Record<string, { label: string; icon: React.ComponentTyp
   patient_info: { label: "Client Info", icon: Eye },
   calendar: { label: "Calendar", icon: Calendar },
   session_summaries: { label: "Consultations", icon: FileText },
-  prescription_history: { label: "Prescriptions", icon: Pill },
+  prescription_history: { label: "Documentation", icon: Pill },
 };
 
 export function AdvisorsOnProfile({ clientId, clientName }: AdvisorsOnProfileProps) {

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { Clock, User, Volume2, VolumeX, Loader2, AlertCircle, Play, Pause, Wallet as Pill, Users, ChevronLeft, ChevronRight, ChevronDown, SkipBack, SkipForward } from "lucide-react";
+import { Clock, User, Volume2, VolumeX, Loader2, AlertCircle, Play, Pause, Users, ChevronLeft, ChevronRight, ChevronDown, SkipBack, SkipForward } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,7 +25,6 @@ interface AppointmentWithHistory {
   lastSessionSummary: string | null;
   allergies: string | null;
   conditions: string | null;
-  lastPrescription: string | null;
   linkedDoctors: LinkedDoctor[];
 }
 
@@ -115,10 +114,9 @@ export function TodaysBriefing() {
         // Translate appointment content
         const translated = await Promise.all(
           appointments.map(async (apt) => {
-            const [summary, allergies, prescription, ...doctorSpecs] = await Promise.all([
+            const [summary, allergies, ...doctorSpecs] = await Promise.all([
               apt.lastSessionSummary ? translateText(apt.lastSessionSummary) : Promise.resolve(null),
               apt.allergies ? translateText(apt.allergies) : Promise.resolve(null),
-              apt.lastPrescription ? translateText(apt.lastPrescription) : Promise.resolve(null),
               ...apt.linkedDoctors.map(d => d.specialty ? translateText(d.specialty) : Promise.resolve(null)),
             ]);
 
@@ -126,7 +124,6 @@ export function TodaysBriefing() {
               ...apt,
               lastSessionSummary: summary,
               allergies,
-              lastPrescription: prescription,
               linkedDoctors: apt.linkedDoctors.map((d, i) => ({
                 ...d,
                 specialty: doctorSpecs[i] || d.specialty,
@@ -182,7 +179,6 @@ export function TodaysBriefing() {
           let clientName = apt.title || "Unknown Client";
           let lastSessionSummary: string | null = null;
           let allergies: string | null = null;
-          let lastPrescription: string | null = null;
           let linkedDoctors: LinkedDoctor[] = [];
           let patientUserId: string | null = null;
 
@@ -212,19 +208,6 @@ export function TodaysBriefing() {
 
             if (lastSession) {
               lastSessionSummary = lastSession.summary;
-            }
-
-            // Get last prescription
-            const { data: prescription } = await supabase
-              .from('prescriptions')
-              .select('medication, dosage, frequency')
-              .eq('patient_id', apt.patient_id)
-              .order('created_at', { ascending: false })
-              .limit(1)
-              .maybeSingle();
-
-            if (prescription) {
-              lastPrescription = `${prescription.medication} ${prescription.dosage} ${prescription.frequency}`;
             }
 
             // Get linked doctors for this client
@@ -264,7 +247,6 @@ export function TodaysBriefing() {
             lastSessionSummary,
             allergies,
             conditions: null,
-            lastPrescription,
             linkedDoctors,
           };
         })
@@ -302,10 +284,6 @@ export function TodaysBriefing() {
         text += `From your last session: ${apt.lastSessionSummary} `;
       } else {
         text += `This appears to be a new client or their first recorded session. `;
-      }
-
-      if (apt.lastPrescription) {
-        text += `Their most recent prescription was ${apt.lastPrescription}. `;
       }
 
       if (apt.linkedDoctors.length > 0) {
@@ -685,13 +663,6 @@ export function TodaysBriefing() {
                     <p className="text-xs text-muted-foreground italic">
                       {translatedLabels['No previous session notes'] || 'No previous session notes'}
                     </p>
-                  )}
-
-                  {apt.lastPrescription && (
-                    <div className="flex items-center gap-1.5 text-xs">
-                      <Pill className="h-4 w-4 text-primary" />
-                      <span className="text-muted-foreground">{apt.lastPrescription}</span>
-                    </div>
                   )}
 
                   {apt.linkedDoctors.length > 0 && (

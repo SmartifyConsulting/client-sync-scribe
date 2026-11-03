@@ -7,7 +7,7 @@ import { LANGUAGES } from "@/lib/languages";
 import { ClientSessionRecorder } from "@/features/clients/components/ClientSessionRecorder";
 import { useV2Demo } from "@/hooks/useV2Demo";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { cn, emitMedicationsUpdated } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { AddressAutocomplete } from "@/components/clients/AddressAutocomplete";
 import { useNavigate } from "react-router-dom";
@@ -707,90 +707,6 @@ export function ClientDetailsEditor({
     }
   }, [client]);
 
-  const syncChronicMedsToPrescriptions = useCallback(
-    async (meds: CurrentMedication[]) => {
-      if (!client?.id) return;
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-        let advisorId: string | null = null;
-        if (isAdvisor) {
-          advisorId = user.id;
-        } else {
-          const { data: access } = await supabase
-            .from("broker_client_access")
-            .select("doctor_id, granted_at")
-            .eq("patient_user_id", user.id)
-            .eq("is_active", true)
-            .order("granted_at", { ascending: false })
-            .limit(1);
-          advisorId = access?.[0]?.doctor_id ?? null;
-        }
-        const chronicMeds = (meds || []).filter((m) => m.is_chronic && (m.name || "").trim());
-        if (chronicMeds.length > 0 && !advisorId) {
-          toast({
-            title: "Connect a wealth manager to track chronic meds",
-            description: "Add your wealth manager under My Wealth management so chronic meds appear under Rewards.",
-          });
-          return;
-        }
-        const { data: existingRx } = await supabase
-          .from("prescriptions")
-          .select("id, medication, status")
-          .eq("patient_id", client.id);
-        const norm = (s: string) => (s || "").trim().toLowerCase();
-        const existingByName = new Map<string, { id: string; status: string }>();
-        (existingRx || []).forEach((r: any) => existingByName.set(norm(r.medication), { id: r.id, status: r.status }));
-        const composeDosage = (m: CurrentMedication) => {
-          const qty = (m.quantity || "").trim();
-          const strength = (m.strength || "").trim();
-          const units = (m.units || "mg").trim();
-          if (qty && strength) return `${qty} \u00d7 ${strength}${units}`;
-          if (strength) return `${strength}${units}`;
-          return (m.dosage || "").trim();
-        };
-        const composeFrequency = (m: CurrentMedication) => {
-          const tpd = parseInt((m.times_per_day || "").trim(), 10);
-          if (Number.isFinite(tpd) && tpd > 0) return `${tpd}\u00d7 daily`;
-          return "once daily";
-        };
-        const chronicNames = new Set(chronicMeds.map((m) => norm(m.name)));
-        for (const m of chronicMeds) {
-          const key = norm(m.name);
-          const existing = existingByName.get(key);
-          const payload: any = {
-            medication: m.name.trim(),
-            dosage: composeDosage(m),
-            frequency: composeFrequency(m),
-            status: "active",
-            reminder_times: m.reminder_time ? [m.reminder_time] : null,
-            reminders_enabled: m.reminders_enabled ?? true,
-          };
-          if (existing) {
-            await supabase.from("prescriptions").update(payload).eq("id", existing.id);
-          } else {
-            await supabase.from("prescriptions").insert({
-              ...payload,
-              patient_id: client.id,
-              doctor_id: advisorId!,
-            });
-          }
-        }
-        for (const [name, rx] of existingByName.entries()) {
-          if (!chronicNames.has(name) && rx.status === "active") {
-            await supabase.from("prescriptions").update({ status: "cancelled" }).eq("id", rx.id);
-          }
-        }
-        emitMedicationsUpdated(client.id);
-        queryClient.invalidateQueries({ queryKey: ["chronic-prescriptions", client.id] });
-        queryClient.invalidateQueries({ queryKey: ["todays-medications", client.id] });
-      } catch (err) {
-        console.error("chronic to prescriptions sync failed", err);
-      }
-    },
-    [client?.id, isAdvisor, toast, queryClient],
-  );
-
   // Medical insurance makes employer details compulsory.
   const insuranceCaptured = Boolean(
     formData.medical_aid?.trim() || formData.medical_aid_number?.trim(),
@@ -875,8 +791,6 @@ export function ClientDetailsEditor({
         allergies_structured: allergiesStructured,
         is_chronic: isChronic,
       } as any);
-      // Sync chronic meds → prescriptions so they appear under Rewards
-      await syncChronicMedsToPrescriptions(currentMedications);
       if (userId) {
         await supabase.from("wealth_audit_log").insert({
           patient_id: client.id,
@@ -890,7 +804,7 @@ export function ClientDetailsEditor({
       if (editVersion.current === savingVersion) setHasChanges(false);
       setLastSavedAt(Date.now());
     },
-    [onSave, pharmacies, familyHistory, organDonorOrgans, nokMembers, currentMedications, conditionsDiagnoses, allergiesStructured, syncChronicMedsToPrescriptions, client?.id, toast, userId],
+    [onSave, pharmacies, familyHistory, organDonorOrgans, nokMembers, currentMedications, conditionsDiagnoses, allergiesStructured, client?.id, toast, userId],
   );
 
   useEffect(() => {
@@ -2533,7 +2447,7 @@ export function ClientDetailsEditor({
               <div className="mb-4">
                 <h2 className="text-lg font-semibold text-primary-dark">Documents</h2>
                 <p className="text-xs text-muted-foreground">
-                  All your prescriptions, certificates and uploaded files
+                  All your documents and uploaded files
                 </p>
               </div>
               <Suspense

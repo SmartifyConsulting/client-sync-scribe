@@ -44,9 +44,6 @@ export interface ResolvedDocumentPreview {
   didChange: boolean;
 }
 
-const isPrescriptionTemplate = (name?: string | null) =>
-  !!name && /prescription/i.test(name);
-
 const isCertificateTemplate = (name?: string | null) =>
   !!name && /(certificate|sick\s*note)/i.test(name);
 
@@ -236,43 +233,7 @@ export async function resolveDocumentPreviewContent(
   const client = patientRes?.data || null;
   const profile = profileRes?.data || null;
 
-  // Prescription context — prefer rows linked to the same session, fall back
-  // to the client's latest active prescriptions so legacy/standalone Rx docs
-  // still render with real meds.
-  let prescription: FillPrescription | null = null;
-  if (isPrescriptionTemplate(doc.template_name)) {
-    let rxRows: any[] | null = null;
-    if (doc.session_id) {
-      const { data } = await supabase
-        .from("prescriptions")
-        .select("*")
-        .eq("session_id", doc.session_id)
-        .order("created_at", { ascending: true });
-      rxRows = data || null;
-    }
-    if ((!rxRows || rxRows.length === 0) && clientId) {
-      const { data } = await supabase
-        .from("prescriptions")
-        .select("*")
-        .eq("patient_id", clientId)
-        .order("created_at", { ascending: false })
-        .limit(5);
-      rxRows = data || null;
-    }
-    if (rxRows && rxRows.length > 0) {
-      prescription = {
-        medications: rxRows.map((r) => ({
-          medication: r.medication,
-          dosage: r.dosage,
-          quantity: (r as any).quantity ?? null,
-          frequency: r.frequency,
-          instructions: r.instructions,
-        })),
-        repeats: rxRows[0]?.refills_remaining ?? null,
-        special_instructions: rxRows[0]?.instructions ?? null,
-      };
-    }
-  }
+  const prescription: FillPrescription | null = null;
 
   // Medical certificate context — consultation date/time come from the linked
   // session, the nature of illness from its summary/diagnosis.

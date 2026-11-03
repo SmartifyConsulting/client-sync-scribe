@@ -105,7 +105,6 @@ Rules:
 - Match patient names fuzzy (e.g. "Faith" matches "Faith Akeno")
 - For scheduling: extract date, time, and duration (default 30min)
 - For the "description" field: ALWAYS include the specific date, time, and patient name. Example: "Schedule appointment with Lisa Anderson on 2026-03-25 at 14:00 (30 min)". NEVER use a vague description like "Schedule appointment".
-- For prescriptions: extract medication, dosage, frequency, instructions
 - For invoices: extract service description, amount (default 0 if not specified)
 - For medical certificates: extract reason and leave period (start/end dates)
 - For referral letters: extract referring-to doctor name and reason
@@ -136,7 +135,6 @@ Rules:
                           type: "string",
                           enum: [
                             "schedule_appointment",
-                            "write_prescription",
                             "create_invoice",
                             "write_medical_certificate",
                             "write_referral_letter",
@@ -151,11 +149,6 @@ Rules:
                         date: { type: "string", description: "ISO date YYYY-MM-DD" },
                         time: { type: "string", description: "Time HH:MM in 24h" },
                         duration_minutes: { type: "number", description: "Duration in minutes, default 30" },
-                        // Prescription fields
-                        medication: { type: "string" },
-                        dosage: { type: "string" },
-                        frequency: { type: "string" },
-                        instructions: { type: "string" },
                         // Invoice fields
                         service_description: { type: "string" },
                         amount: { type: "number" },
@@ -226,7 +219,7 @@ Rules:
         const patientRecord = patientId ? patients.find((p) => p.id === patientId) : null;
 
         if (action.action_type === "manual_task" || (!patientId && action.action_type !== "manual_task")) {
-          // Create manual todo — skip medication instructions (covered by prescriptions)
+          // Create manual todo
           const manualOwner = classifyTask(action.description);
           if (manualOwner === "skip") {
             results.push({ action_type: action.action_type, description: action.description, auto_executed: false });
@@ -272,19 +265,6 @@ Rules:
               start_time: startTime,
               end_time: endDate.toISOString(),
               type: "session",
-            });
-            break;
-          }
-
-          case "write_prescription": {
-            await supabase.from("prescriptions").insert({
-              doctor_id: user.id,
-              patient_id: patientId,
-              medication: action.medication || "As discussed",
-              dosage: action.dosage || "As directed",
-              frequency: action.frequency || "As directed",
-              instructions: action.instructions || null,
-              status: "active",
             });
             break;
           }
