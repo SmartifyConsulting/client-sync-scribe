@@ -8,8 +8,8 @@ import { toast } from "sonner";
 /** Route-independent connection recording and structural-incident forwarding. Never stores credentials. */
 export function CompanionCoordinator() {
   const { user } = useAuth();
-  const { hasAdvisorRole, availableRoles } = useUserRole();
-  const authorised = hasAdvisorRole || availableRoles.includes("admin");
+  const { hasAdvisorRole, hasAdminRole } = useUserRole();
+  const authorised = hasAdvisorRole || hasAdminRole;
   useEffect(() => {
     if (!user || !authorised) return;
     const key = `holarc-connection-attempts:${user.id}`;
