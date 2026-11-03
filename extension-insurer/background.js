@@ -216,6 +216,15 @@ function drive(username, password, submitted, origin, discoveryRedirects) {
   };
   const inputs = [...document.querySelectorAll("input")].filter(vis);
   const text = document.body.innerText || "";
+  // AdviserConnect's signed-in home has no visible logout link. Recognise its
+  // dashboard before treating the client-search box as a login/OTP field.
+  const momentumHome = u.hostname === "adviserconnect.momentum.co.za" && u.pathname === "/" &&
+    document.title === "Home | AdviserConnect" &&
+    /Welcome to AdviserConnect/i.test(text) && /Quotes & calculators/i.test(text) &&
+    inputs.some(i => i.getAttribute("aria-label") === "Client search" ||
+      [...(i.labels || [])].some(label => label.textContent.trim() === "Client search")) &&
+    !inputs.some(i => i.type === "password");
+  if (momentumHome) return { state: "in" };
   if (/incorrect password|invalid (credentials|password|username)|login failed/i.test(text)) return { state: "failed" };
   const otp = inputs.find((i) => i.autocomplete === "one-time-code" || /otp|pin|token|code|verification/i.test(`${i.name} ${i.id} ${i.placeholder} ${i.getAttribute("aria-label") || ""}`));
   if (otp && !inputs.some((i) => i.type === "password")) {
