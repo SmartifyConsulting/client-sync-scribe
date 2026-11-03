@@ -1,3 +1,4 @@
+import { useRetirementInfo } from "./useRetirementInfo";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -84,14 +85,14 @@ export function estateDuty(netEstate: number) {
 }
 
 /** How much of a section is filled in, from a client_financial_profiles row. */
-export function sectionProgress(s: SectionDef, profile: Record<string, any> | null | undefined): { filled: number; total: number } {
+export function sectionProgress(s: SectionDef, profile: Record<string, any> | null | undefined, retired = false): { filled: number; total: number } {
   const v = (profile ?? {})[s.key] ?? {};
   if (s.key !== "cash_flow" && s.naField && v[s.naField.key]) return { filled: 1, total: 1 };
   if (s.list) {
     const rows: any[] = v[s.list.key] ?? [];
     return { filled: rows.length, total: Math.max(rows.length, 1) };
   }
-  const fields = (s.fields ?? []).filter(f => !(s.key === "goals_risk" && profile?.cash_flow?.retired && f.key === "retirement_age") && !(s.key === "cash_flow" && v.not_earning && ["gross_income", "net_salary"].includes(f.key)));
+  const fields = (s.fields ?? []).filter(f => !(s.key === "goals_risk" && retired && f.key === "retirement_age") && !(s.key === "cash_flow" && v.not_earning && ["gross_income", "net_salary"].includes(f.key)));
   return { filled: fields.filter((f) => v[f.key] !== undefined && v[f.key] !== null && v[f.key] !== "").length, total: fields.length };
 }
 
@@ -125,7 +126,7 @@ export function FinancialInformation({ clientId }: { clientId: string }) {
     });
   }, [q.data, clientId]);
 
-  const retired = !!data.cash_flow?.retired;
+  const { retired } = useRetirementInfo(clientId);
   const sec = (k: SectionKey) => data[k] ?? {};
   const set = (k: string, v: any) => {
     dirtySections.current.set(k, (dirtySections.current.get(k) ?? 0) + 1);
@@ -133,7 +134,7 @@ export function FinancialInformation({ clientId }: { clientId: string }) {
   };
 
   /** How much of a section is filled in — drives the progress pill in its header. */
-  const progress = (s: SectionDef): { filled: number; total: number } => sectionProgress(s, data);
+  const progress = (s: SectionDef): { filled: number; total: number } => sectionProgress(s, data, retired);
   const completedSections = SECTIONS.filter((s) => { const p = progress(s); return p.total > 0 && p.filled === p.total; }).length;
 
   const summary = useMemo(() => {
@@ -207,11 +208,7 @@ export function FinancialInformation({ clientId }: { clientId: string }) {
 
   return (
     <div className="space-y-2">
-      <label className="flex items-center gap-2 rounded-xl border border-border bg-card p-3 text-xs font-semibold">
-        <Checkbox checked={retired} onCheckedChange={checked => set("cash_flow", { ...sec("cash_flow"), retired: !!checked })} />
-        Client is retired
-      </label>
-      <Button size="sm" variant="outline" disabled={saving === "cash_flow"} onClick={() => save("cash_flow")}>Save retirement status</Button>
+      {retired && <p className="rounded-xl border border-border bg-muted/30 p-3 text-xs">Retirement income and expenses · Based on Personal Information</p>}
       <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm">
         <span className="font-medium text-foreground">Needs Analysis progress</span>
         <span className="text-muted-foreground">{completedSections} of {SECTIONS.length} sections completed</span>

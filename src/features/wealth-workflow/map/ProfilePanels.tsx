@@ -1,3 +1,4 @@
+import { useRetirementInfo } from "@/features/clients/components/financial/useRetirementInfo";
 import { dobFromSaId } from "@/lib/saId";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -124,13 +125,14 @@ export function ScheduleMeetingPanel({ appointments, viewer }: { appointments: a
  *  yet raised (outline) — which is exactly what should catch the broker's
  *  eye as something they haven't asked about yet. */
 function NeedsAnalysisChecklist({ clientId, liveTranscript }: { clientId: string; liveTranscript?: string }) {
+  const { retired } = useRetirementInfo(clientId);
   const { data: profile } = useQuery({
     queryKey: ["client-financial-profile", clientId],
     queryFn: async () => (await (supabase as any).from("client_financial_profiles").select("*").eq("patient_id", clientId).maybeSingle()).data,
   });
   const mentioned = liveTranscript ? detectMentionedTopics(liveTranscript) : new Set<SectionKey | "general_notes">();
   const items = [
-    ...SECTIONS.map((s) => ({ key: s.key, label: s.label, done: sectionProgress(s, profile).filled > 0 })),
+    ...SECTIONS.map((s) => ({ key: s.key, label: s.label, done: sectionProgress(s, profile, retired).filled > 0 })),
     { key: "general_notes" as const, label: "General Notes", done: !!(profile as any)?.[GENERAL_NOTES_KEY]?.trim() },
   ];
   return (
