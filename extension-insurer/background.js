@@ -55,15 +55,12 @@ chrome.runtime.onMessage.addListener((d, sender) => {
     catch { tell({ appTabId, ...d }, { type: "insurer-login-result", ok: false, message: "Set a valid HTTPS portal URL for this insurer." }); return; }
     const existing = [...jobs.entries()].find(([, j]) => j.appTabId === appTabId && j.insurer === d.insurer && j.workflowId === d.workflowId);
     if (existing) { chrome.tabs.remove(existing[0]).catch(() => {}); jobs.delete(existing[0]); }
-    // Every insurer opens in its own minimised window so portals never appear in the broker's tab strip.
-    const openHidden = (cb) => chrome.windows.create({ url: d.loginUrl, focused: false, state: "minimized" }, (win) => {
-      if (chrome.runtime.lastError || !win?.tabs?.[0]) return chrome.tabs.create({ url: d.loginUrl, active: false }, cb);
-      cb(win.tabs[0]);
-    });
-    openHidden((tab) => {
+    // Creating then minimising a native window can flash on Windows. Keep the
+    // broker's current tab in place and create an inactive portal tab instead.
+    chrome.tabs.create({ url: d.loginUrl, active: false, ...(sender.tab.windowId ? { windowId: sender.tab.windowId } : {}) }, (tab) => {
       if (!tab?.id) return;
       const discoveryRedirects = new URL(origin).port === "" ? (baseDomain(new URL(origin).hostname) || false) : false;
-      const job = { ...d, appTabId, origin, discoveryRedirects, step: 0, done: false, submitted: false, expires: Date.now() + 15 * 60 * 1000 };
+      const job = { ...d, appTabId, appWindowId: sender.tab.windowId, origin, discoveryRedirects, step: 0, done: false, submitted: false, expires: Date.now() + 15 * 60 * 1000 };
       jobs.set(tab.id, job);
       tell(job, { type: "insurer-login-progress", state: "connecting", phase: "opening" });
       // Persist only routing metadata, never passwords/PINs.
@@ -103,7 +100,8 @@ chrome.tabs.onCreated.addListener(async (tab) => {
     await chrome.storage.session.remove(oldKey);
   }
   await chrome.tabs.update(tab.id, { active: false }).catch(() => {});
-  if (tab.windowId) await chrome.windows.update(tab.windowId, { focused: false, state: "minimized" }).catch(() => {});
+  // Never minimise the broker's browser when a provider opens a quote tab.
+  if (tab.active && tab.windowId === job.appWindowId) await chrome.tabs.update(job.appTabId, { active: true }).catch(() => {});
 });
 
 chrome.tabs.onUpdated.addListener(async (tabId, info) => {

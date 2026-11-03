@@ -5,7 +5,7 @@ import vm from "node:vm";
 const source = readFileSync(new URL("./background.js", import.meta.url), "utf8");
 const journey = readFileSync(new URL("./portalJourney.js", import.meta.url), "utf8");
 function harness() {
-  const listeners = {}, stored = {}, tabs = new Map(), removed = [], sent = [], created = [], injected = [];
+  const listeners = {}, stored = {}, tabs = new Map(), removed = [], sent = [], created = [], injected = [], windowChanges = [], tabChanges = [];
   const chrome = {
     runtime: { onMessage: { addListener: (fn) => { listeners.message = fn; } } },
     tabs: {
@@ -17,7 +17,7 @@ function harness() {
       onRemoved: { addListener: (fn) => { listeners.removed = fn; } },
       onUpdated: { addListener: (fn) => { listeners.updated = fn; } },
       onCreated: { addListener: (fn) => { listeners.created = fn; } },
-      update: async () => {},
+      update: async (id, options) => { tabChanges.push({ id, ...options }); },
     },
     storage: { session: {
       get: async (key) => structuredClone(key ? { [key]: stored[key] } : stored),
@@ -26,22 +26,22 @@ function harness() {
     } },
     scripting: { executeScript: async (options) => { injected.push(options); return [{ result: options.func.name === "readPdf" ? { base64: "JVBERi0=" } : options.func.name === "driveQuoteJourney" ? { state: "blocked" } : { state: "otp" } }]; } },
     downloads: { onCreated: { addListener: (fn) => { listeners.download = fn; } } },
-    windows: { create: (options, cb) => { created.push(options); tabs.set(2, { id: 2, url: options.url }); cb({ id: 9, tabs: [{ id: 2 }] }); } },
+    windows: { update: async (id, options) => { windowChanges.push({ id, ...options }); }, create: (options, cb) => { windowChanges.push({ create: true }); created.push(options); tabs.set(2, { id: 2, url: options.url }); cb({ id: 9, tabs: [{ id: 2 }] }); } },
   };
   const context = vm.createContext({ chrome, URL, Date, Map, Object, Number, Promise, setTimeout: (fn, ms) => { if (ms === 1200) fn(); }, TextDecoder, Uint8Array });
   context.importScripts = () => vm.runInContext(journey, context);
   vm.runInContext(source, context);
-  const sender = { tab: { id: 1, url: "https://holarc.co.za/app-integrations" } };
+  const sender = { tab: { id: 1, windowId: 7, url: "https://holarc.co.za/app-integrations" } };
   tabs.set(1, sender.tab);
   const login = (overrides = {}) => listeners.message({ type: "insurer-login", insurer: "discovery", workflowId: "georgia-demo", loginUrl: "https://partner.discovery.co.za/partner/login", username: "test-only", password: "test-only", ...overrides }, sender);
-  return { context, listeners, stored, tabs, removed, sent, created, injected, sender, login };
+  return { context, listeners, stored, tabs, removed, sent, created, injected, sender, login, windowChanges, tabChanges };
 }
 const flush = async () => { for (let i = 0; i < 25; i++) await Promise.resolve(); };
 
 describe("Companion background portal rules", () => {
-  it("opens every insurer login in a hidden minimised window", () => {
-    const h = harness(); h.login(); expect(h.created[0].state).toBe("minimized"); expect(h.created[0].focused).toBe(false);
-    const m = harness(); m.login({ insurer: "Momentum", loginUrl: "https://adviser.momentum.co.za/login" }); expect(m.created[0].state).toBe("minimized");
+  it("opens insurer logins in inactive tabs without creating native windows", () => {
+    const h = harness(); h.login(); expect(h.created[0].active).toBe(false); expect(h.created[0].windowId).toBe(7); expect(h.windowChanges).toEqual([]);
+    const m = harness(); m.login({ insurer: "Momentum", loginUrl: "https://adviser.momentum.co.za/login" }); expect(m.created[0].active).toBe(false); expect(m.windowChanges).toEqual([]);
     expect(h.sent[0].phase).toBe("opening");
   });
   it("keeps OTP injection in the background", async () => {
@@ -149,5 +149,17 @@ describe("Discovery scan privacy", () => {
   });
   it("does not treat an empty dashboard as a confirmed quote form", () => {
     expect(scan([]).state).toBe("no-fields");
+  });
+});
+describe("Companion avoids window flicker", () => {
+  it("never minimises the broker's browser for a managed same-window popup", async () => {
+    const h = harness(); h.login(); vm.runInContext("jobs.get(2).running = true",h.context);
+    await h.listeners.created({ id: 3, openerTabId: 2, url: "https://partner.discovery.co.za/quote", windowId: 7, active: true });
+    expect(h.windowChanges).toEqual([]); expect(h.tabChanges).toContainEqual({ id: 1, active: true });
+  });
+  it("does not activate Holarc or minimise a separate insurer-created window", async () => {
+    const h = harness(); h.login(); vm.runInContext("jobs.get(2).running = true",h.context);
+    await h.listeners.created({ id: 3, openerTabId: 2, url: "https://partner.discovery.co.za/quote", windowId: 9, active: true });
+    expect(h.windowChanges).toEqual([]); expect(h.tabChanges.some(change => change.id === 1 && change.active)).toBe(false);
   });
 });
