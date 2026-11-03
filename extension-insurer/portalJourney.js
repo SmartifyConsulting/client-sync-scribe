@@ -17,11 +17,12 @@ function driveQuoteJourney(request, origin, discoveryRedirects) {
   if (!momentum && !brightrock) return { state: "blocked", detail: "This insurer's quote journey still needs a verified field map." };
   const step = request.step || "start";
   if (step === "start") {
-    const names = brightrock && request.copy ? ["Copy", "Copy quote", "Copy proposal"] : momentum ? ["New Quote"] : ["Create new proposal or quote", "Create new proposal", "Create new quote"];
+    // Part 2 p2 screenshot: "New cover proposal" (not "Create new quote").
+    const names = brightrock && request.copy ? ["Copy", "Copy quote", "Copy proposal"] : momentum ? ["New Quote"] : ["New cover proposal", "Create new proposal or quote", "Create new proposal", "Create new quote"];
     if (click(names)) return { state: "navigate", next: "capture", detail: request.copy ? "Copying the saved scenario" : "Opening a new quote" };
     if (momentum && click(["Content Calculators", "Quotes & calculators"])) return { state: "navigate", next: "type", detail: "Opening Momentum calculators" };
     if (brightrock && !request.copy && click(["Quotes"])) return { state: "navigate", next: "start", detail: "Opening BrightRock quotes" };
-    return { state: "blocked", detail: request.copy ? "Copy action not found. The original quote has not been changed." : "New quote action not found on this screen." };
+    return { state: "blocked", detail: request.copy ? "A unique Copy action was not found. The original quote has not been changed." : "A unique new-quote action was not found. Open the provider's quote area and select the intended new case." };
   }
   if (step === "type") {
     // This demonstrated Momentum adapter supports insurance, not investment journeys.
@@ -37,12 +38,16 @@ function driveQuoteJourney(request, origin, discoveryRedirects) {
     return { state: "blocked", detail: "Waiting for a trusted quote workspace with New Quote." };
   }
   if (step === "report") {
+    if (brightrock) return { state: "blocked", detail: "The BrightRock manual demonstrates email export only. Retrieve the report using the broker-approved process and upload its PDF; no email was sent." };
     if (momentum && click(["Generate Quote Report"])) return { state: "report", next: "download", detail: "Generating the Momentum quote report" };
     if (click(["Download PDF", "Download quote", "Download report"])) return { state: "download", detail: "Waiting for the quote PDF download" };
     return { state: "blocked", detail: "Report/download action not found. Review the calculated quote and upload its PDF; no email was sent." };
   }
   if (step === "download") {
-    if (click(["Download PDF", "Download quote", "Download report"])) return { state: "download", detail: "Waiting for the quote PDF download" };
+    if (brightrock) return { state: "blocked", detail: "BrightRock PDF download controls were not demonstrated. Upload the broker-retrieved quote PDF for this scenario." };
+    // Part 1 p6 screenshot: generic Download is permitted only after Momentum
+    // Generate Quote Report has advanced this job into its download state.
+    if (click(momentum ? ["Download", "Download PDF", "Download quote", "Download report"] : ["Download PDF", "Download quote", "Download report"])) return { state: "download", detail: "Waiting for the quote PDF download" };
     return { state: "blocked", detail: "Waiting for the generated report download. Upload manually if the portal uses an unsupported PDF source." };
   }
   let filled = 0;
@@ -51,7 +56,12 @@ function driveQuoteJourney(request, origin, discoveryRedirects) {
   const assigned = new Set();
   const readOnly = (el) => el.readOnly || el.getAttribute("aria-readonly") === "true";
   for (const el of controls) {
-    if (readOnly(el) || ["checkbox", "radio"].includes(el.type)) continue;
+    if (readOnly(el)) continue;
+    if (el.type === "radio") {
+      const group = controls.filter(other => other.type === "radio" && (el.name ? other.name === el.name : other === el));
+      if ((el.required || el.getAttribute("aria-required") === "true") && !group.some(other => other.checked)) missing.push("Required portal choice needs broker selection");
+      continue;
+    }
     const l = label(el);
     if (!l) { if (el.required && !el.value) missing.push("Unlabelled required field"); continue; }
     let candidates = fields.filter((f) => [f.label, ...(f.aliases || [])].map(norm).includes(l));
@@ -62,7 +72,14 @@ function driveQuoteJourney(request, origin, discoveryRedirects) {
     if (candidates.length > 1) { missing.push("Ambiguous product field"); continue; }
     const field = candidates[0];
     if (!field || field.value === "") { if (el.required || el.getAttribute("aria-required") === "true") missing.push("Required portal field needs broker input"); continue; }
-    if (el.tagName === "SELECT") {
+    if (el.type === "checkbox") {
+      // Only a supplied, explicitly selected benefit toggle may be changed.
+      // Consent/application checkboxes are never inferred or clicked.
+      if (field.kind !== "toggle" || !["true", "false"].includes(field.value)) { missing.push("Checkbox needs an approved benefit selection"); continue; }
+      const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "checked")?.set;
+      if (!setter) { missing.push("Unsupported checkbox control"); continue; }
+      setter.call(el, field.value === "true");
+    } else if (el.tagName === "SELECT") {
       const options = [...el.options].filter((o) => !o.disabled && norm(o.textContent) === norm(field.value));
       if (options.length !== 1) { missing.push("Selected option is not available"); continue; }
       const setter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, "value")?.set;
@@ -89,6 +106,8 @@ function driveQuoteJourney(request, origin, discoveryRedirects) {
     calculate[0].click();
     return { state: "calculated", next: "report", detail: "Calculation requested; waiting for the insurer result" };
   }
+  // Part 2 p3 screenshot: this opens the cover workspace; it is not Finalize.
+  if (brightrock && filled && click(["Finish - See the cover"])) return { state: "navigate", next: "capture", detail: "Opening BrightRock cover proposals from the approved policy details" };
   if (filled && click(["Save and Continue", "Save & Continue", "Continue", "Next"])) return { state: "navigate", next: "capture", detail: "Saving approved quote details" };
   if (momentum && click(["Benefits and Proposals"])) return { state: "navigate", next: "capture", detail: "Opening benefits and proposals" };
   return { state: "blocked", detail: "Quote page needs a verified control or broker input. No application accepted and no email sent." };

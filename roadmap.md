@@ -1,4 +1,10 @@
 # Roadmap — Step 5 Indigro copy
+## Supplied Phase 2 manuals - Nov 3
+- [x] Reconcile all 20 manual pages and screenshots with the existing Companion adapters; source-to-state runbook in docs/automation/quote-manual-runbook.md.
+- [x] Add the demonstrated BrightRock New cover proposal and Momentum post-report Download labels plus BrightRock Finish - See the cover; required radio/benefit-toggle validation; preserve stops for unknown providers, duplicate actions and missing inputs.
+- [x] Package Companion 1.6.2; 45 isolated regressions and simulated browser checks pass for documented navigation, approved field/toggle entry, required-data stops and report export.
+- [ ] Complete live portal control maps, required case/policy/role-player/occupation inputs, quote/report integrity review and BrightRock export mapping. Bidvest quote screens and other provider walkthroughs are not supplied.
+
 ## Documented insurer journeys — Nov 3
 - [x] Add bounded Momentum navigation/report and BrightRock new/copy scenario adapters from supplied PDFs; pause for missing approved data and unmapped controls. Partial adapters, not live-verified end-to-end automation.
 - [x] Send actual available client/rating and insurer-specific options; keep premium and benefit increases separate. Missing dates, role players, occupation-result selections, and underwriting inputs stop for broker review, not defaults.
