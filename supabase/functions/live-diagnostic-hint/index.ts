@@ -50,8 +50,8 @@ serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY not configured");
 
     const medLine = (m: any) =>
       typeof m === "string"
@@ -92,15 +92,14 @@ ${language ? `Respond in ${language}.` : ""}`;
 
     const userPrompt = `PATIENT CONTEXT:\n${patientContext}\n\nLIVE TRANSCRIPT SO FAR:\n${transcript.slice(-6000)}`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
+    const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Lovable-API-Key": LOVABLE_API_KEY,
         "X-Lovable-AIG-SDK": "fetch",
       },
       body: JSON.stringify({
-        model: "openai/gpt-6-astra",
+        model: "gpt-4o",
         stream: true,
         reasoning: { effort: "low" },
         instructions: systemPrompt,

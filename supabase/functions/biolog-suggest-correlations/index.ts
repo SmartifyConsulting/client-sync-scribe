@@ -1,6 +1,6 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
     });
 
   try {
-    if (!LOVABLE_API_KEY) return json({ error: "AI is not configured." }, 500);
+    if (!OPENAI_API_KEY) return json({ error: "AI is not configured." }, 500);
 
     const body = await req.json().catch(() => null);
     const entries = Array.isArray(body?.entries) ? body.entries.slice(0, 90) : [];
@@ -32,14 +32,14 @@ Do not repeat these already-tracked correlations: ${existing.join("; ") || "none
 Suggest at most 4, only where the data actually hints at a pattern. Never give medical advice or a diagnosis.
 Return ONLY JSON: {"suggestions":[{"title":"","input_variable":"","outcome_variables":[],"rationale":""}]}`;
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "gpt-4o-mini",
         response_format: { type: "json_object" },
         messages: [
           { role: "system", content: systemPrompt },

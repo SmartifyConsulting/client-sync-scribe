@@ -39,16 +39,15 @@ Deno.serve(async (req) => {
 
     let summary = "No consultations or life events have been recorded yet.";
     if (lines.length) {
-      const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
+      const res = await fetch("https://api.openai.com/v1/responses", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Lovable-API-Key": Deno.env.get("LOVABLE_API_KEY")!,
-          Authorization: `Bearer ${Deno.env.get("LOVABLE_API_KEY")}`,
+          Authorization: `Bearer ${Deno.env.get("OPENAI_API_KEY")}`,
           "X-Lovable-AIG-SDK": "fetch",
         },
         body: JSON.stringify({
-          model: "openai/gpt-6-astra",
+          model: "gpt-4o",
           stream: true,
           store: false,
           reasoning: { effort: "low" },
