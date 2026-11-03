@@ -1,5 +1,6 @@
 import { QUOTE_EMAIL_PRESETS, parseEmails } from "@/features/wealth-workflow/map/quoteEmails";
 import { CompanionStatus } from "@/features/wealth-workflow/map/CompanionStatus";
+import { CredentialLoginTest } from "@/features/wealth-workflow/map/CredentialLoginTest";
 import { useEffect, useMemo, useState, type ComponentProps } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Lock, ExternalLink, Settings2, Eye, EyeOff, KeyRound } from "lucide-react";
@@ -546,6 +547,9 @@ export default function AppIntegrations() {
                   </div>
                 </div>
               ))}
+              {manageEntry && <CredentialLoginTest key={manageEntry.id} integrationId={manageEntry.id} provider={manageEntry.name}
+                username={manageUsername} password={manageFields.password ?? ""}
+                portalUrl={manageFields.portal_url ?? manageEntry.portal_url} disabled={saving} />}
             </div>
           )}
           <DialogFooter>
