@@ -277,7 +277,9 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
               );
             })}
           </div>
-          <section className="frame p-3 space-y-3" aria-label="Connect insurer">
+          <section className="frame p-3" aria-label="Connect insurer">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] items-start gap-4">
+          <div className="min-w-0 space-y-3">
           <div className="flex items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">1</span><h4 className="font-semibold">Connect to {activeTab}</h4></div>
           <InsurerActivity insurer={activeTab} activity={activity[activeTab]}
             idleText={!addonInstalled() ? "Companion not set up yet" : getToken() ? "Connecting automatically…" : "Unlock your saved logins to connect in the background"}
@@ -291,17 +293,21 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
           <OtpDialog challenge={challenge} onClose={() => setChallenge(null)} onSubmit={submitChallenge} />
           <ProtectorDialog open={!!askFor} busy={unlocking} onClose={() => setAskFor(null)} onSubmit={unlock} />
           <CompanionSetup open={setupOpen} onClose={() => setSetupOpen(false)} />
-          <div className="flex flex-wrap items-center gap-2">
+          </div>
+          <aside aria-label="Portal tools" className="min-w-0 rounded-lg border border-border bg-muted/20 p-3 space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs font-semibold">Portal tools</p>
             <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => {
               const value = insurerRows.find((r) => r.name === activeTab)?.portal_url;
               try { const url = new URL(value ?? ""); if (url.protocol !== "https:" || url.username || url.password) throw new Error(); window.open(url.href, "_blank", "noopener,noreferrer"); }
               catch { toast({ title: "Set this insurer's portal URL first.", variant: "destructive" }); }
             }}>Open portal</Button>
-            <details className="w-full rounded-lg border border-border bg-muted/20 p-2">
+            </div>
+            <details className="border-t border-border pt-2">
             <summary className="cursor-pointer text-xs font-medium">Portal settings & saved login</summary>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-            <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => { setPortalEdit(activeTab); setPortalUrl(insurerRows.find((r) => r.name === activeTab)?.portal_url ?? ""); }}>Edit portal URL</Button>
-            {["username", "password"].map((field) => <Button key={field} variant="ghost" size="sm" className="h-7 text-xs" onClick={async () => {
+            <div className="mt-2 grid grid-cols-2 gap-2">
+            <Button variant="ghost" size="sm" className="col-span-2 h-8 justify-start text-xs" onClick={() => { setPortalEdit(activeTab); setPortalUrl(insurerRows.find((r) => r.name === activeTab)?.portal_url ?? ""); }}>Edit portal URL</Button>
+            {["username", "password"].map((field) => <Button key={field} variant="ghost" size="sm" className="h-8 justify-start text-xs" onClick={async () => {
               const token = getToken();
               if (!token) { setAskFor(activeTab); return; }
               const row = insurerRows.find((r) => r.name === activeTab);
@@ -314,12 +320,13 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
             }}>Copy {field}</Button>)}
             </div>
             <p className="mt-2 text-xs text-muted-foreground">Saved logins stay unlocked for 15 minutes.</p>
-            </details>
-          </div>
-          {portalEdit === activeTab && <div className="flex gap-1.5">
+          {portalEdit === activeTab && <div className="mt-3 space-y-2">
             <Input type="url" aria-label={`${activeTab} portal URL`} className="h-7 text-xs" value={portalUrl} onChange={(e) => setPortalUrl(e.target.value)} />
             <Button size="sm" className="h-7 text-xs" onClick={savePortal}>Save URL</Button>
           </div>}
+            </details>
+          </aside>
+          </div>
           </section>
           <section className="frame p-3 space-y-3" aria-label="Review quote options">
             <div className="flex items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">2</span><h4 className="font-semibold">Review quote options</h4></div>
