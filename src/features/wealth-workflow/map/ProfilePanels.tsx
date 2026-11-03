@@ -180,6 +180,7 @@ function RecordMeeting({ clientId, onDone, onStartLive, onStopLive }: { clientId
         const { data: sess } = await supabase.auth.getSession();
         const fd = new FormData();
         fd.append("clientId", clientId);
+        fd.append("patientId", clientId);
         fd.append("file", blob, "meeting.webm");
         try {
           const r = await fetch(`https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/transcribe-meeting`, {
@@ -235,7 +236,7 @@ export function CaptureFinancialsPanel({ clientId, sessions, financials, viewer,
   const run = async (sid?: string) => {
     if (!clientId) return;
     setBusy(true);
-    const { data, error } = await safeInvoke<any>("extract-financials", sid ? { clientId, sessionId: sid } : notes.trim() ? { clientId, text: notes } : { clientId, sessionId });
+    const { data, error } = await safeInvoke<any>("extract-financials", sid ? { clientId, patientId: clientId, sessionId: sid } : notes.trim() ? { clientId, patientId: clientId, text: notes } : { clientId, patientId: clientId, sessionId });
     setBusy(false);
     const msg = (data as any)?.error ?? error;
     if (msg || !data?.ok) return toast({ title: "Couldn't capture the financial information", description: msg ?? "Please try again.", variant: "destructive" });
