@@ -118,14 +118,14 @@ serve(async (req) => {
       ];
     }
 
-    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${Deno.env.get("LOVABLE_API_KEY")}`,
+        Authorization: `Bearer ${Deno.env.get("OPENAI_API_KEY")}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        model: "gpt-4o",
         stream: true,
         messages: [{ role: "user", content: contentBlock }],
       }),
@@ -170,14 +170,14 @@ serve(async (req) => {
     const clean = text.trim();
     if (clean.length > 40) {
       try {
-        const extractRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        const extractRes = await fetch("https://api.openai.com/v1/chat/completions", {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${Deno.env.get("LOVABLE_API_KEY")}`,
+            Authorization: `Bearer ${Deno.env.get("OPENAI_API_KEY")}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model: "google/gemini-2.5-flash",
+            model: "gpt-4o-mini",
             messages: [
               {
                 role: "system",

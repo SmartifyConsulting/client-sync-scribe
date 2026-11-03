@@ -34,14 +34,14 @@ Deno.serve(async (req) => {
     const { data: pat } = await admin.from("clients").select("id,user_id,name").eq("id", patientId).maybeSingle();
     if (!pat || pat.user_id !== uid) return json({ error: "Only this client's Wealth Manager can record the meeting." }, 403);
 
-    const key = Deno.env.get("LOVABLE_API_KEY");
+    const key = Deno.env.get("OPENAI_API_KEY");
     if (!key) return json({ error: "Transcription isn't set up yet." }, 500);
     const audio = new File([await file.arrayBuffer()], "meeting.webm", { type: "audio/webm" });
     const fd = new FormData();
-    fd.append("model", "google/gemini-3.5-transcribe");
+    fd.append("model", "gpt-4o-transcribe");
     fd.append("file", audio, audio.name);
     fd.append("response_format", "json");
-    const r = await fetch("https://ai.gateway.lovable.dev/v1/audio/transcriptions", {
+    const r = await fetch("https://api.openai.com/v1/audio/transcriptions", {
       method: "POST", headers: { Authorization: `Bearer ${key}` }, body: fd,
     });
     if (!r.ok) {
