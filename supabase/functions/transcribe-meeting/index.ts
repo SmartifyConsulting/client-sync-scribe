@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
     const uid = claims.claims.sub as string;
 
     const form = await req.formData();
-    const patientId = String(form.get("patientId") ?? "");
+    const patientId = String(form.get("clientId") ?? form.get("patientId") ?? "");
     const file = form.get("file");
     if (!UUID.test(patientId)) return json({ error: "Invalid client." }, 400);
     if (!(file instanceof File) || !file.size) return json({ error: "The recording is empty. Please record again." }, 400);

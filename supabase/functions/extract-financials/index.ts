@@ -6,10 +6,11 @@ const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
 const Body = z.object({
-  patientId: z.string().uuid(),
+  clientId: z.string().uuid().optional(),
+  patientId: z.string().uuid().optional(),
   sessionId: z.string().uuid().optional(),
   text: z.string().max(200_000).optional(),
-});
+}).refine((b) => !!(b.clientId || b.patientId), { message: "clientId required" });
 
 const PROMPT = `You extract a South African client's financial facts from a Wealth Manager consultation transcript or notes.
 Return ONLY a JSON object with these keys (omit anything not stated; never invent numbers; amounts are plain numbers in Rand):
@@ -39,7 +40,8 @@ Deno.serve(async (req) => {
 
     const parsed = Body.safeParse(await req.json());
     if (!parsed.success) return json({ error: "Invalid request" }, 400);
-    const { patientId, sessionId, text } = parsed.data;
+    const patientId = (parsed.data.clientId ?? parsed.data.patientId)!;
+    const { sessionId, text } = parsed.data;
 
     const admin = createClient(url, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
     const { data: pat } = await admin.from("clients").select("id,user_id").eq("id", patientId).maybeSingle();
