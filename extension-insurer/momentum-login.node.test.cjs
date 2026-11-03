@@ -28,3 +28,24 @@ test('requires the dashboard title and welcome/navigation signals', () => {
   assert.notEqual(inspect({ title: 'Log in' }).state, 'in');
   assert.notEqual(inspect({ welcome: false }).state, 'in');
 });
+
+test('submits the observed Momentum anchor control only on its exact trusted host', () => {
+  for (const hostname of ['adviser-account.momentum.co.za', 'other.momentum.co.za']) {
+    let clicks = 0;
+    class Input {
+      constructor(type) { this.type = type; this.name = type === 'password' ? 'password' : 'username'; this.value = ''; }
+      getClientRects() { return [1]; } focus() {} blur() {} dispatchEvent() {}
+      getAttribute() { return null; } closest() { return null; } getRootNode() { return {}; }
+    }
+    const values = new WeakMap();
+    Object.defineProperty(Input.prototype, 'value', {get() {return values.get(this) || '';}, set(v) {values.set(this, v);}});
+    const inputs = [new Input('text'), new Input('password')];
+    const anchor = {textContent:'Log in', getClientRects:()=>[1], click:()=>clicks++};
+    const document = {title:'Security | AdviserConnect', body:{innerText:'Log in Username Password'}, querySelectorAll:s=>s==='input'?inputs:s==='*'?[]:s.includes('a#btn-login')?[anchor]:[]};
+    const context = vm.createContext({URL, location:{href:`https://${hostname}/login`}, document, HTMLInputElement:Input, Event:class{}});
+    vm.runInContext(drive, context);
+    const result = vm.runInContext(`drive('synthetic-user','synthetic-password',false,'https://${hostname}',false)`,context);
+    assert.equal(result.state, hostname.startsWith('adviser-account.')?'submitted':'waiting');
+    assert.equal(clicks, hostname.startsWith('adviser-account.')?1:0);
+  }
+});

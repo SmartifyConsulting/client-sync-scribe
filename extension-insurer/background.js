@@ -241,7 +241,10 @@ function drive(username, password, submitted, origin, discoveryRedirects) {
     let form = from.closest("form"), host = from.getRootNode?.().host;
     while (!form && host) { form = host.closest("form"); host = host.getRootNode?.().host; }
     const scope = form || document;
-    const buttons = query(scope, "button, a[role=button], input[type=button], input[type=submit]").filter(vis);
+    // Observed Momentum login uses an anchor without href or role=button.
+    // Match only its exact login control on the verified account host.
+    const momentumLogin = u.hostname === "adviser-account.momentum.co.za" ? ", a#btn-login" : "";
+    const buttons = query(scope, "button, a[role=button], input[type=button], input[type=submit]" + momentumLogin).filter(vis);
     const named = buttons.filter(b => /^(log ?in|sign ?in|next|continue|submit|verify)$/i.test(buttonText(b)));
     const explicit = buttons.filter(b => b.type === "submit");
     const btn = named.length === 1 ? named[0] : named.length === 0 && explicit.length === 1 ? explicit[0] : null;
