@@ -14,6 +14,7 @@ export const ACTIVITY_TEXT = {
   saving: "Saving quote PDF to Working Window and Documents…",
   saved: "Quote PDF saved",
   failed: "Connection stopped",
+  stopped: "Stopped · no further attempts",
   "pdf-error": "PDF could not be saved · upload the downloaded file instead",
 } as const;
 export type ActivityPhase = keyof typeof ACTIVITY_TEXT;

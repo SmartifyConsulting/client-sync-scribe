@@ -1,9 +1,10 @@
 # Companion interface monitoring and repair worker
 
-Prepared 4 November 2026. Companion release: 1.7.0.
+Prepared 4 November 2026. Companion release: 1.7.1.
 
 ## What is implemented
 
+- Stop controls in the quote workspace, login tests and verification dialogs cancel the selected attempt and queued scenarios. Pending actions check cancellation before the next step. Existing portal tabs remain open; already submitted PDF saves can finish. Stop requires Companion 1.7.1 or later and is not recorded as a failed connection.
 - App-wide connection recording, including quoting and confirmed passive sessions in configured portals. Dates come from the existing authenticated database RPC; no password is transmitted to that RPC. Open App Integrations tabs refresh after records change in another Holarc tab.
 - Current release discovery from the public repository rather than a version frozen in the app build. Rechecks on focus and every minute. Downloads use the same repository package. A failed check shows last-known version and leaves downloading available.
 - All active, configured, enabled App Integrations entries register their HTTPS origins with the Companion. Verified same-provider redirects learned during an authorised login remain in that origin registry until the configured origin changes.
@@ -27,7 +28,7 @@ The reporting Edge Function could not be deployed from this machine: Supabase CL
 
 ## Activation steps for a project/repository owner
 
-1. Publish the updated app from GitHub through Lovable and update the installed Companion to 1.7.0. No Lovable AI chat credits are required for these code changes.
+1. Publish the updated app from GitHub through Lovable and update the installed Companion to 1.7.1. No Lovable AI chat credits are required for these code changes.
 2. Deploy the committed function with an authorised Supabase project account:
 
    supabase functions deploy companion-interface-incident --project-ref oroobhkkttqgyhaulnqc

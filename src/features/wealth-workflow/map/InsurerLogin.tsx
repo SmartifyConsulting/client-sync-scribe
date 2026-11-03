@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { COMPANION_DOWNLOAD_URL } from "./companionRelease";
 
-export type LoginState = "connecting" | "challenge" | "connected" | "failed" | "no-addon";
+export type LoginState = "connecting" | "challenge" | "connected" | "failed" | "no-addon" | "stopped";
 export type Challenge = { insurer: string; method: "otp" | "email"; hint?: string };
 
 export const LOGIN_TEXT: Record<LoginState, string> = {
@@ -13,6 +13,7 @@ export const LOGIN_TEXT: Record<LoginState, string> = {
   challenge: "Waiting for verification…",
   connected: "Connected",
   failed: "Login failed — click the tab to try again.",
+  stopped: "Stopped — connect when you are ready.",
   "no-addon": "Holarc Wealth Companion has not been detected on this page yet.",
 };
 
@@ -31,7 +32,7 @@ export function LoginRing({ state }: { state?: LoginState }) {
 }
 
 /** Pops up by itself when the insurer asks for a one-time PIN or an emailed verification. */
-export function OtpDialog({ challenge, onClose, onSubmit }: { challenge: Challenge | null; onClose: () => void; onSubmit: (v: string) => void }) {
+export function OtpDialog({ challenge, onClose, onSubmit, onStop }: { challenge: Challenge | null; onClose: () => void; onSubmit: (v: string) => void; onStop?: () => void }) {
   const [code, setCode] = useState("");
   useEffect(() => setCode(""), [challenge]);
   const isOtp = challenge?.method === "otp";
@@ -57,6 +58,7 @@ export function OtpDialog({ challenge, onClose, onSubmit }: { challenge: Challen
         ) : (
           <Button size="sm" className="h-8" onClick={() => onSubmit("")}>I've clicked the link</Button>
         )}
+        {onStop && <Button variant="outline" size="sm" onClick={onStop}>Stop</Button>}
       </DialogContent>
     </Dialog>
   );

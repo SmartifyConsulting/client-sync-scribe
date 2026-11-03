@@ -18,7 +18,7 @@ export function QuoteJobsPanel({ jobs, onRetry }: { jobs: QuoteJobs; onRetry: (i
           <span className="w-20 truncate rounded px-1.5 py-0.5 text-[10px] font-semibold" style={{ background: `hsl(${insurerColor(ins)})`, color: "hsl(var(--insurer-foreground))" }}>{ins}</span>
           {jobs[ins].map((j) => {
             const stalled = isStalled(j, now);
-            const Icon = j.status === "captured" ? CheckCircle2 : j.status === "queued" ? Clock : needsRetry(j, now) ? AlertCircle : Loader2;
+            const Icon = j.status === "captured" ? CheckCircle2 : j.status === "queued" || j.status === "stopped" ? Clock : needsRetry(j, now) ? AlertCircle : Loader2;
             return (
               <span key={j.n} title={j.detail} className="flex items-center gap-1 rounded-full border border-border/60 px-2 py-0.5 text-[10px]">
                 <Icon className={`h-3 w-3 ${Icon === Loader2 ? "animate-spin" : ""} ${needsRetry(j, now) ? "text-destructive" : j.status === "captured" ? "text-success" : "text-muted-foreground"}`} />

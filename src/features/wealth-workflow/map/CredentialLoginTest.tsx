@@ -5,15 +5,18 @@ import { addonInstalled, OtpDialog, type Challenge } from "./InsurerLogin";
 import { CompanionSetup } from "./CompanionSetup";
 import { recordPortalConnection } from "./portalLoginStatus";
 import { toast } from "sonner";
+import { useCompanionVersion } from "./companionDetection";
+import { companionVersionCurrent } from "./companionRelease";
 import { LOGIN_TEST_STAGES, loginProgressStage, loginTimeoutExplanation, type LoginTestStage, type LoginTestEvent } from "./loginTestDiagnostics";
 
-type Result = { state: "testing" | "verification" | "success" | "error" | "unknown"; message: string };
+type Result = { state: "testing" | "verification" | "success" | "error" | "unknown" | "stopped"; message: string };
 
 /** Tests the open credential editor's values, without saving or requesting quotes. */
 export function CredentialLoginTest({ integrationId, provider, username, password, portalUrl, disabled = false }: {
   integrationId: string; provider: string; username: string; password: string; portalUrl: string; disabled?: boolean;
 }) {
   const [result, setResult] = useState<Result | null>(null);
+  const installedVersion=useCompanionVersion();
   const [setup, setSetup] = useState(false);
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [history, setHistory] = useState<LoginTestEvent[]>([]);
@@ -75,6 +78,7 @@ export function CredentialLoginTest({ integrationId, provider, username, passwor
   const waitForResult = () => {
     stopTimer();
     timer.current = setTimeout(() => {
+      if(attempt.current&&companionVersionCurrent(installedVersion,"1.7.1"))window.postMessage({source:"holarc",type:"insurer-stop",connectionAttemptId:attempt.current,workflowId:attempt.current,insurer:provider},location.origin);
       attempt.current = null;
       setChallenge(null);
       const explanation = loginTimeoutExplanation(lastStage.current);
@@ -99,11 +103,18 @@ export function CredentialLoginTest({ integrationId, provider, username, passwor
       insurer: provider, loginUrl: portalUrl, username, password }, location.origin);
   };
   const verifying = result?.state === "verification";
+  const stop = () => {
+    if(!companionVersionCurrent(installedVersion,"1.7.1")){setSetup(true);toast.error("Update to Companion v1.7.1 to enable Stop. Close the insurer portal tab to stop an older version.");return;}
+    const request=attempt.current;attempt.current=null;stopTimer();setChallenge(null);record("stopped");
+    setResult({state:"stopped",message:"Stopped. No further attempts will be made. The portal remains open."});
+    if(request)window.postMessage({source:"holarc",type:"insurer-stop",connectionAttemptId:request,workflowId:request,insurer:provider},location.origin);
+  };
   return <div className="border-t border-border pt-3">
     <div role="group" aria-label="Credential login test" className="flex items-start gap-3">
     <Button variant="outline" size="sm" className="shrink-0" title="Test entered credentials without saving or requesting quotes. Sign out of the provider first to verify a changed password. Requires the Companion." disabled={disabled || !username.trim() || !password || result?.state === "testing" || verifying} onClick={test}>
       {result?.state === "testing" ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="mr-1.5 h-3.5 w-3.5" />}{result?.state === "testing" ? "Testing…" : "Test login"}
     </Button>
+    {(result?.state === "testing" || verifying) && <Button variant="outline" size="sm" onClick={stop}>Stop</Button>}
     <div className="min-w-0 flex-1 pt-1.5">
     {!result && (!username.trim() || !password) && <p className="text-xs text-muted-foreground">Enter a username and password to test.</p>}
     {result && <p role="status" className={`text-xs break-words ${result.state === "error" ? "text-destructive" : result.state === "success" ? "text-emerald-700" : "text-muted-foreground"}`}>{result.state === "testing" ? LOGIN_TEST_STAGES[lastStage.current] : result.message}</p>}
@@ -118,7 +129,7 @@ export function CredentialLoginTest({ integrationId, provider, username, passwor
       <p className="mt-2 text-muted-foreground">{lastResponse.current ? `Last Companion response: ${new Date(lastResponse.current).toLocaleTimeString("en-ZA")}` : "No Companion response received for this test."}</p>
     </details>}
     <CompanionSetup open={setup} onClose={() => setSetup(false)} onReady={test} />
-    <OtpDialog challenge={challenge} onClose={() => setChallenge(null)} onSubmit={value => {
+    <OtpDialog challenge={challenge} onClose={() => setChallenge(null)} onStop={stop} onSubmit={value => {
       if (!attempt.current || !challenge) return;
       window.postMessage({ source: "holarc", type: challenge.method === "otp" ? "insurer-otp" : "insurer-email-check",
         workflowId: attempt.current, insurer: provider, ...(challenge.method === "otp" ? { otp: value } : {}) }, location.origin);

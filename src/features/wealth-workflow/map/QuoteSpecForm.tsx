@@ -1,5 +1,5 @@
-import { useCompanionInstalled } from "./companionDetection";
-import { useCompanionRelease } from "./companionRelease";
+import { useCompanionInstalled, useCompanionVersion } from "./companionDetection";
+import { useCompanionRelease, companionVersionCurrent } from "./companionRelease";
 import { useEffect, useState, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus, X, Pencil } from "lucide-react";
@@ -37,6 +37,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const { user } = useAuth();
   const qc = useQueryClient();
   const companionInstalled = useCompanionInstalled();
+  const installedVersion = useCompanionVersion();
   const companionRelease = useCompanionRelease();
   const { data: spec, isLoading } = useQuery({
     queryKey: ["wealth-quote-spec", workflowId],
@@ -77,6 +78,8 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const [tab, setTab] = useState("");
   const [busy, setBusy] = useState(false);
   const pendingConnections = useRef(new Set<string>());
+  const stoppedConnections = useRef(new Set<string>());
+  const connectionAttempts = useRef<Record<string, string | null>>({});
   const [login, setLogin] = useState<Record<string, LoginState>>({});
   const [activity, setActivity] = useState<Record<string, QuoteActivity>>({});
   const recordActivity = (insurer: string, phase: ActivityPhase, detail?: string) => setActivity((s) => ({ ...s, [insurer]: updateActivity(s[insurer], phase, Date.now(), detail) }));
@@ -101,6 +104,9 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     const onMsg = (e: MessageEvent) => {
       const d = e.data;
       if (e.source !== window || e.origin !== window.location.origin || d?.source !== "holarc-extension" || d.workflowId !== workflowId || typeof d.insurer !== "string") return;
+      if(d.connectionAttemptId&&connectionAttempts.current[d.insurer]&&connectionAttempts.current[d.insurer]!==d.connectionAttemptId)return;
+      if (d.type === "insurer-stopped") { recordActivity(d.insurer,"stopped"); setLogin(s=>({...s,[d.insurer]:"stopped"})); return; }
+      if (stoppedConnections.current.has(d.insurer)) return;
       if (d.type === "insurer-login-progress" && isActivityPhase(d.phase)) recordActivity(d.insurer, d.phase);
       if (d.type === "insurer-scan-result" && d.ok && ["fields", "no-fields"].includes(d.scan?.state)) recordActivity(d.insurer, d.scan.state);
       if (d.type === "insurer-pdf") recordActivity(d.insurer, "saving");
@@ -141,9 +147,13 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const startLogin = async (ins: string, token: string) => {
     const row = (insurerRows as any[]).find((r) => r?.name === ins);
     if (!row?.id) return;
+    const attemptId=crypto.randomUUID();
+    connectionAttempts.current[ins]=attemptId;
+    stoppedConnections.current.delete(ins);
     setLogin((s) => ({ ...s, [ins]: "connecting" }));
     recordActivity(ins, "unlocking");
     const { data, error } = await supabase.functions.invoke("manage-broker-credentials", { body: { action: "reveal", integrationId: row.id, token } });
+    if(connectionAttempts.current[ins]!==attemptId)return;
     if (error || data?.error) {
       sessionStorage.removeItem(TOKEN_KEY);
       setLogin((s) => ({ ...s, [ins]: "failed" }));
@@ -152,12 +162,12 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     }
     const f = data.fields ?? {};
     pendingConnections.current.add(ins);
-    window.postMessage({ source: "holarc", type: "insurer-login", connectionAttemptId: crypto.randomUUID(), integrationId: row.id, insurer: ins, workflowId, loginUrl: f.portal_url || row.portal_url,
+    window.postMessage({ source: "holarc", type: "insurer-login", connectionAttemptId: attemptId, integrationId: row.id, insurer: ins, workflowId, loginUrl: f.portal_url || row.portal_url,
       username: f.username ?? data.username, password: f.password }, window.location.origin);
   };
   const openTab = (ins: string) => {
     setTab(ins);
-    if (login[ins] === "connected" || login[ins] === "connecting" || login[ins] === "challenge") return;
+    if (login[ins] === "connected" || login[ins] === "connecting" || login[ins] === "challenge" || login[ins] === "stopped") return;
     if (!(companionInstalled || addonInstalled())) { setSetupOpen(true); return setLogin((s) => ({ ...s, [ins]: "no-addon" })); }
     const token = getToken();
     if (token) startLogin(ins, token); else setAskFor(ins);
@@ -202,10 +212,21 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   };
 
   const submitChallenge = (value: string) => {
-    if (!challenge) return;
+    if (!challenge || stoppedConnections.current.has(challenge.insurer)) return;
     window.postMessage({ source: "holarc", type: challenge.method === "otp" ? "insurer-otp" : "insurer-email-check", insurer: challenge.insurer, workflowId, otp: value }, window.location.origin);
     setLogin((s) => ({ ...s, [challenge.insurer]: "connecting" }));
     recordActivity(challenge.insurer, "verifying");
+  };
+  const stopConnection = (ins:string) => {
+    if(!companionVersionCurrent(installedVersion,"1.7.1")){setSetupOpen(true);toast({title:"Update Companion to enable Stop",description:"Install v1.7.1 or later. For the older version, close its insurer portal tab to stop it."});return;}
+    const connectionAttemptId=connectionAttempts.current[ins];
+    connectionAttempts.current[ins]=null;
+    stoppedConnections.current.add(ins); pendingConnections.current.delete(ins);
+    setChallenge(c=>c?.insurer===ins?null:c);
+    setAskFor(current=>current===ins?null:current);
+    setLogin(s=>({...s,[ins]:"stopped"}));recordActivity(ins,"stopped");
+    setJobs(current=>({...current,[ins]:(current[ins]||[]).map(j=>j.status==='captured'?j:{...j,status:"stopped",since:Date.now()})}));
+    window.postMessage({source:"holarc",type:"insurer-stop",insurer:ins,workflowId,...(connectionAttemptId?{connectionAttemptId}:{})},location.origin);
   };
 
   /** Changing a formula input recalculates the suggested amount on all three options. */
@@ -301,6 +322,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
           <div className="min-w-0 space-y-3">
           <div className="flex items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">1</span><h4 className="font-semibold">Connect to {activeTab}</h4></div>
           <InsurerActivity insurer={activeTab} activity={activity[activeTab]}
+            onStop={()=>stopConnection(activeTab)} canStop={["connecting","challenge","connected"].includes(login[activeTab])||(jobs[activeTab]||[]).some(j=>["queued","submitting","generating"].includes(j.status))}
             idleText={!(companionInstalled || addonInstalled()) ? `Update to the latest Companion v${companionRelease.version}` : getToken() ? "Connecting automatically…" : "Unlock your saved logins to connect in the background"}
             idleAction={!(companionInstalled || addonInstalled()) ? "Update Companion" : getToken() ? "Connect" : "Unlock & connect"}
             onRetry={() => { if (!(companionInstalled || addonInstalled())) { setSetupOpen(true); return; } const token = getToken(); if (token) void startLogin(activeTab, token); else setAskFor(activeTab); }} />
@@ -309,7 +331,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
               {login[activeTab] === "no-addon" && <Button variant="link" size="sm" className="h-auto px-1 text-xs" onClick={() => setSetupOpen(true)}>Update to Companion v{companionRelease.version}</Button>}
             </p>
           )}
-          <OtpDialog challenge={challenge} onClose={() => setChallenge(null)} onSubmit={submitChallenge} />
+          <OtpDialog challenge={challenge} onClose={() => setChallenge(null)} onStop={()=>{if(challenge)stopConnection(challenge.insurer);}} onSubmit={submitChallenge} />
           <ProtectorDialog open={!!askFor} busy={unlocking} onClose={() => setAskFor(null)} onSubmit={unlock} />
           <CompanionSetup open={setupOpen} onClose={() => setSetupOpen(false)} onReady={() => openTab(activeTab)} />
           </div>

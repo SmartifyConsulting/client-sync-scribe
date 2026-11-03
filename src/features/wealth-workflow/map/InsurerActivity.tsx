@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { CheckCircle2, AlertCircle, RotateCw } from "lucide-react";
+import { CheckCircle2, AlertCircle, RotateCw, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { insurerColor } from "./insurerColors";
 import { ACTIVITY_TEXT, activityWaiting, type QuoteActivity } from "./quoteActivity";
 
-export function InsurerActivity({ insurer, activity, onRetry, idleText = "Not connected yet", idleAction = "Connect" }: { insurer: string; activity?: QuoteActivity; onRetry: () => void; idleText?: string; idleAction?: string }) {
+export function InsurerActivity({ insurer, activity, onRetry, onStop, canStop, idleText = "Not connected yet", idleAction = "Connect" }: { insurer: string; activity?: QuoteActivity; onRetry: () => void; onStop?: () => void; canStop?: boolean; idleText?: string; idleAction?: string }) {
   const [now, setNow] = useState(Date.now());
   useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(timer); }, []);
   if (!insurer) return null;
@@ -14,15 +14,16 @@ export function InsurerActivity({ insurer, activity, onRetry, idleText = "Not co
     </svg>
     <p role="status" className="flex-1 font-medium text-foreground">{insurer} · {idleText}</p>
     <Button variant="outline" size="sm" className="h-7 text-xs" onClick={onRetry}>{idleAction}</Button>
+    {onStop && canStop && <Button variant="outline" size="sm" onClick={onStop}>Stop</Button>}
   </section>;
   const stalled = activityWaiting(activity, now);
   const error = ["failed", "pdf-error", "no-fields"].includes(activity.phase);
-  const complete = ["connected", "fields", "saved"].includes(activity.phase);
+  const complete = ["connected", "fields", "saved", "stopped"].includes(activity.phase);
   const paused = ["otp", "email"].includes(activity.phase);
   const elapsed = Math.max(0, Math.floor((now - activity.since) / 1000));
   return <section aria-label={`${insurer} background activity`} className="flex items-start gap-2 border-b border-border py-2 text-xs">
     <div className="shrink-0" style={{ color: `hsl(${insurerColor(insurer)})` }}>
-      {complete ? <CheckCircle2 className="h-8 w-8" /> : error || stalled ? <AlertCircle className="h-8 w-8" /> :
+      {activity.phase === "stopped" ? <Square className="h-8 w-8" /> : complete ? <CheckCircle2 className="h-8 w-8" /> : error || stalled ? <AlertCircle className="h-8 w-8" /> :
         <svg viewBox="0 0 32 32" className={`h-8 w-8 ${paused ? "" : "animate-spin motion-reduce:animate-none"}`} aria-label={paused ? "Waiting for verification" : "Background activity"}>
           <circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" strokeWidth="3" opacity="0.2" />
           <circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeDasharray="25 57" />
@@ -40,5 +41,7 @@ export function InsurerActivity({ insurer, activity, onRetry, idleText = "Not co
       </details>
     </div>
     {(stalled || activity.phase === "failed") && <Button variant="outline" size="sm" onClick={onRetry}><RotateCw className="mr-1 h-3 w-3" />Retry</Button>}
+    {activity.phase === "stopped" && <Button variant="outline" size="sm" onClick={onRetry}>Connect</Button>}
+    {onStop && canStop && <Button variant="outline" size="sm" onClick={onStop}>Stop</Button>}
   </section>;
 }

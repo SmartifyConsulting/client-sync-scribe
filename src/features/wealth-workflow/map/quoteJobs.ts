@@ -1,7 +1,7 @@
 /** Numbered quote jobs: one per option (Quote 1 = Option A …) per insurer, each tracked on its own
  *  so a slow or failed scenario never holds back the others. Status only advances on Companion
  *  reports or a successfully saved PDF. */
-export type ScenarioStatus = "queued" | "submitting" | "generating" | "captured" | "no-fields" | "failed";
+export type ScenarioStatus = "queued" | "submitting" | "generating" | "captured" | "no-fields" | "failed" | "stopped";
 export type ScenarioJob = { n: number; status: ScenarioStatus; since: number; detail?: string };
 export type QuoteJobs = Record<string, ScenarioJob[]>;
 
@@ -13,6 +13,7 @@ export const SCENARIO_TEXT: Record<ScenarioStatus, string> = {
   captured: "PDF saved",
   "no-fields": "Quote fields not found — enter in portal or upload",
   failed: "Failed",
+  stopped: "Stopped",
 };
 
 export const startJobs = (jobs: QuoteJobs, insurer: string, count: number, now: number, only?: number[]): QuoteJobs => {

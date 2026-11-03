@@ -11,6 +11,7 @@ export const LOGIN_TEST_STAGES = {
   connected: "Companion recognised a signed-in portal",
   failed: "Companion reported that the login could not finish",
   timeout: "Test timed out without a final result",
+  stopped: "Stopped by you — no further attempts",
 } as const;
 export type LoginTestStage = keyof typeof LOGIN_TEST_STAGES;
 export type LoginTestEvent = { stage: LoginTestStage; at: number };

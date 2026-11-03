@@ -4,13 +4,14 @@ import vm from "node:vm";
 
 const source = readFileSync(new URL("./background.js", import.meta.url), "utf8");
 const journey = readFileSync(new URL("./portalJourney.js", import.meta.url), "utf8");
-function harness() {
+function harness({ holdDelay = false, holdCreation = false } = {}) {
+  const delays = [], creations = [];
   const listeners = {}, stored = {}, tabs = new Map(), removed = [], sent = [], created = [], injected = [], windowChanges = [], tabChanges = [];
   const chrome = {
     runtime: { onMessage: { addListener: (fn) => { listeners.message = fn; } } },
     tabs: {
       sendMessage: async (id, message) => { sent.push(message); },
-      create: (options, cb) => { created.push(options); tabs.set(2, { id: 2, url: options.url }); cb({ id: 2 }); },
+      create: (options, cb) => { created.push(options); tabs.set(2, { id: 2, url: options.url }); if (holdCreation) creations.push(cb); else cb({ id: 2 }); },
       get: async (id) => tabs.get(id),
       remove: async (id) => { removed.push(id); listeners.removed(id); },
       reload: async () => {},
@@ -28,13 +29,13 @@ function harness() {
     downloads: { onCreated: { addListener: (fn) => { listeners.download = fn; } } },
     windows: { update: async (id, options) => { windowChanges.push({ id, ...options }); }, create: (options, cb) => { windowChanges.push({ create: true }); created.push(options); tabs.set(2, { id: 2, url: options.url }); cb({ id: 9, tabs: [{ id: 2 }] }); } },
   };
-  const context = vm.createContext({ chrome, URL, Date, Map, Object, Number, Promise, setTimeout: (fn, ms) => { if (ms === 1200) fn(); }, TextDecoder, Uint8Array });
+  const context = vm.createContext({ chrome, URL, Date, Map, Object, Number, Promise, setTimeout: (fn, ms) => { if (ms === 1200) { if (holdDelay) delays.push(fn); else fn(); } }, TextDecoder, Uint8Array });
   context.importScripts = () => vm.runInContext(journey, context);
   vm.runInContext(source, context);
   const sender = { tab: { id: 1, windowId: 7, url: "https://holarc.co.za/app-integrations" } };
   tabs.set(1, sender.tab);
   const login = (overrides = {}) => listeners.message({ type: "insurer-login", insurer: "discovery", workflowId: "georgia-demo", loginUrl: "https://partner.discovery.co.za/partner/login", username: "test-only", password: "test-only", ...overrides }, sender);
-  return { context, listeners, stored, tabs, removed, sent, created, injected, sender, login, windowChanges, tabChanges };
+  return { context, listeners, stored, tabs, delays, creations, removed, sent, created, injected, sender, login, windowChanges, tabChanges };
 }
 const flush = async () => { for (let i = 0; i < 25; i++) await Promise.resolve(); };
 
@@ -161,5 +162,45 @@ describe("Companion avoids window flicker", () => {
     const h = harness(); h.login(); vm.runInContext("jobs.get(2).running = true",h.context);
     await h.listeners.created({ id: 3, openerTabId: 2, url: "https://partner.discovery.co.za/quote", windowId: 9, active: true });
     expect(h.windowChanges).toEqual([]); expect(h.tabChanges.some(change => change.id === 1 && change.active)).toBe(false);
+  });
+});
+
+describe("Stop Companion attempts", () => {
+  it("clears the selected job and credentials, stops later polling and leaves the portal open", async () => {
+    const h=harness();h.login({connectionAttemptId:"current"});
+    const job=vm.runInContext("jobs.get(2)",h.context);
+    h.listeners.message({type:"insurer-stop",insurer:"discovery",workflowId:"georgia-demo",connectionAttemptId:"current"},h.sender);
+    await flush();await vm.runInContext("checkPortal(2)",h.context);
+    expect(vm.runInContext("jobs.size",h.context)).toBe(0);expect(job.username).toBe("");expect(job.password).toBe("");
+    expect(h.injected).toEqual([]);expect(h.removed).toEqual([]);expect(h.stored["portal-2"]).toBeUndefined();
+    expect(h.sent.at(-1).type).toBe("insurer-stopped");expect(h.sent.some(m=>m.type==="insurer-login-result"&&m.ok===false)).toBe(false);
+  });
+  it("cannot stop another app tab or a different attempt", async () => {
+    const h=harness();h.login({connectionAttemptId:"current"});
+    const request={type:"insurer-stop",insurer:"discovery",workflowId:"georgia-demo",connectionAttemptId:"current"};
+    h.listeners.message(request,{tab:{id:8,url:"https://holarc.co.za/app-integrations"}});
+    h.listeners.message({...request,connectionAttemptId:"old"},h.sender);await flush();
+    expect(vm.runInContext("jobs.size",h.context)).toBe(1);
+  });
+  it("stops before injection when Stop arrives during the page-load wait", async () => {
+    const h=harness({holdDelay:true});h.login();const checking=vm.runInContext("checkPortal(2)",h.context);await flush();
+    expect(h.delays).toHaveLength(1);h.listeners.message({type:"insurer-stop",insurer:"discovery",workflowId:"georgia-demo"},h.sender);await flush();h.delays[0]();await checking;
+    expect(h.injected).toEqual([]);
+  });
+  it("does not start a job if Stop arrives before Chrome creates its tab", async () => {
+    const h=harness({holdCreation:true});h.login();h.listeners.message({type:"insurer-stop",insurer:"discovery",workflowId:"georgia-demo"},h.sender);h.creations[0]({id:2});await flush();
+    expect(vm.runInContext("jobs.size",h.context)).toBe(0);expect(h.stored["portal-2"]).toBeUndefined();expect(h.removed).toEqual([]);
+  });
+  it("preserves an already submitted PDF save acknowledgement without closing the stopped portal", async () => {
+    const h=harness();h.login();await h.listeners.download({id:9,filename:"quote.pdf",url:"https://partner.discovery.co.za/quote.pdf"});
+    h.listeners.message({type:"insurer-stop",insurer:"discovery",workflowId:"georgia-demo"},h.sender);await flush();expect(h.stored["portal-2"].cancelled).toBe(true);
+    h.listeners.message({type:"insurer-pdf-ack",workflowId:"georgia-demo",captureId:"2-9",ok:true},h.sender);await flush();expect(h.removed).toEqual([]);expect(h.stored["portal-2"]).toBeUndefined();
+  });
+  it("stops a scenario batch after an in-flight action returns", async () => {
+    const h=harness();h.login();let resolve;
+    h.context.chrome.scripting.executeScript=options=>{h.injected.push(options);return new Promise(done=>resolve=done);};
+    h.listeners.message({type:"insurer-quote-submit",insurer:"discovery",workflowId:"georgia-demo",scenarios:[{n:1,fields:[]},{n:2,fields:[]}]},h.sender);await flush();
+    const stoppedAt=h.sent.length;h.listeners.message({type:"insurer-stop",insurer:"discovery",workflowId:"georgia-demo"},h.sender);await flush();resolve([{result:{state:"navigate",next:"capture"}}]);await flush();
+    expect(h.injected).toHaveLength(1);expect(h.sent.slice(stoppedAt).some(m=>m.type==="insurer-quote-status")).toBe(false);expect(h.removed).toEqual([]);
   });
 });

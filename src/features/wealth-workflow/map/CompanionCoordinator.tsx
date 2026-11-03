@@ -50,6 +50,10 @@ export function CompanionCoordinator() {
     const receive = (event: MessageEvent) => {
       if (event.source !== window || event.origin !== location.origin) return;
       const data = event.data;
+      if(data?.source==='holarc'&&data.type==='insurer-stop'){
+        const request=pending[`${data.workflowId}|${data.insurer}`];
+        if(!data.connectionAttemptId||request?.attemptId===data.connectionAttemptId){delete pending[`${data.workflowId}|${data.insurer}`];if(request?.attemptId)delete pending[request.attemptId];persist();}
+      }
       if (data?.source === "holarc" && data.type === "insurer-login" && typeof data.integrationId === "string" && typeof data.workflowId === "string") {
         const request={ integrationId: data.integrationId, provider: data.insurer, expires: Date.now() + 20 * 60_000,attemptId:typeof data.connectionAttemptId==='string'?data.connectionAttemptId:undefined };
         pending[`${data.workflowId}|${data.insurer}`] = request;

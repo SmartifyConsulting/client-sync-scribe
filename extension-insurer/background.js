@@ -1,6 +1,7 @@
 // Drives one insurer login per tab. Credentials live only in memory for the job.
 importScripts("portalJourney.js", "interfaceMonitor.js");
 const jobs = new Map(); // portalTabId -> job
+const pendingLogins = new Map();
 // Trusted redirect scope = the saved portal's own registrable domain (e.g. momentum.co.za), so SSO hops stay inside that insurer.
 const baseDomain = (host) => { const p = host.split("."); const n = /\.(co|org|gov|ac|net)\.za$/.test(host) ? 3 : 2; return p.length >= n ? p.slice(-n).join(".") : null; };
 const domainHost = (host, base) => !!base && (host === base || host.endsWith("." + base));
@@ -27,6 +28,24 @@ function tell(job, msg) {
 chrome.runtime.onMessage.addListener((d, sender) => {
   const appTabId = sender.tab?.id;
   if (!appTabId || !trustedApp(sender.tab?.url)) return;
+  if (d.type === "insurer-stop") {
+    for (const [key, pending] of pendingLogins) if (pending.appTabId === appTabId && pending.insurer === d.insurer && pending.workflowId === d.workflowId && (!d.connectionAttemptId || pending.connectionAttemptId === d.connectionAttemptId)) {
+      pending.cancelled = true; pendingLogins.delete(key);
+    }
+    for (const [id, job] of jobs) {
+      if (job.appTabId !== appTabId || job.insurer !== d.insurer || job.workflowId !== d.workflowId ||
+          (d.connectionAttemptId && job.connectionAttemptId !== d.connectionAttemptId)) continue;
+      job.cancelled = true; job.done = true; job.username = ""; job.password = "";
+      jobs.delete(id);
+      void chrome.storage.session.get(`portal-${id}`).then(async stored => {
+        const route = stored[`portal-${id}`];
+        if (route?.pendingCaptures?.length) await chrome.storage.session.set({ [`portal-${id}`]: { ...route, cancelled: true, batchOpen: false } });
+        else await chrome.storage.session.remove(`portal-${id}`);
+      });
+    }
+    tell({ appTabId, ...d }, { type: "insurer-stopped" });
+    return;
+  }
   if (d.type === "insurer-pdf-ack") {
     if (d.ok !== true || typeof d.captureId !== "string") return;
     // The app acknowledges only after the authenticated document save succeeds.
@@ -36,6 +55,11 @@ chrome.runtime.onMessage.addListener((d, sender) => {
       const [key, job] = entry;
       job.pendingCaptures = job.pendingCaptures.filter((id) => id !== d.captureId);
       const live = jobs.get(Number(key.slice(7)));
+      if (job.cancelled) {
+        if (job.pendingCaptures.length) await chrome.storage.session.set({ [key]: job });
+        else await chrome.storage.session.remove(key);
+        return;
+      }
       if (live?.currentCaptureId === d.captureId) live.pdfSaved = true;
       if (job.pendingCaptures.length || live?.running || job.batchOpen) { await chrome.storage.session.set({ [key]: job }); return; }
       const tabId = Number(key.slice(7));
@@ -58,7 +82,12 @@ chrome.runtime.onMessage.addListener((d, sender) => {
     if (existing) { chrome.tabs.remove(existing[0]).catch(() => {}); jobs.delete(existing[0]); }
     // Creating then minimising a native window can flash on Windows. Keep the
     // broker's current tab in place and create an inactive portal tab instead.
+    const pendingKey=JSON.stringify([appTabId,d.insurer,d.workflowId]);
+    const pending={appTabId,insurer:d.insurer,workflowId:d.workflowId,connectionAttemptId:d.connectionAttemptId,cancelled:false};
+    pendingLogins.set(pendingKey,pending);
     chrome.tabs.create({ url: d.loginUrl, active: false, ...(sender.tab.windowId ? { windowId: sender.tab.windowId } : {}) }, (tab) => {
+      if(pending.cancelled||pendingLogins.get(pendingKey)!==pending){d.username="";d.password="";return;}
+      pendingLogins.delete(pendingKey);
       if (!tab?.id) return;
       const discoveryRedirects = new URL(origin).port === "" ? (baseDomain(new URL(origin).hostname) || false) : false;
       const job = { ...d, appTabId, appWindowId: sender.tab.windowId, origin, discoveryRedirects, step: 0, done: false, submitted: false, expires: Date.now() + 15 * 60 * 1000 };
@@ -77,6 +106,7 @@ chrome.runtime.onMessage.addListener((d, sender) => {
   if (d.type === "insurer-otp") {
     if (!/^\d{4,8}$/.test(d.otp)) return;
     chrome.scripting.executeScript({ target: { tabId }, func: fillOtp, args: [d.otp, job.origin, job.discoveryRedirects] }).then(() => {
+      if (job.cancelled) return;
       job.done = false;
       job.challenge = null;
       setTimeout(() => checkPortal(tabId), 1500);
@@ -96,6 +126,7 @@ chrome.tabs.onCreated.addListener(async (tab) => {
   jobs.set(tab.id, job);
   const oldKey = `portal-${parent}`;
   const route = (await chrome.storage.session.get(oldKey))[oldKey];
+  if (job.cancelled) return;
   if (route) {
     await chrome.storage.session.set({ [`portal-${tab.id}`]: { ...route, origin: new URL(tab.url || tab.pendingUrl).origin } });
     await chrome.storage.session.remove(oldKey);
@@ -129,8 +160,10 @@ async function checkPortal(tabId) {
   if (job.step > 90) { job.done = true; job.checking = false; job.username = ""; job.password = ""; tell(job, { type: "insurer-login-result", ok: false, message: "The portal didn't finish logging in. Please finish in the insurer tab." }); return; }
   // Give single-page portals a moment to draw the form.
   await new Promise((r) => setTimeout(r, 1200));
+  if (job.cancelled || jobs.get(tabId) !== job) { job.checking = false; return; }
   const [res] = await chrome.scripting.executeScript({ target: { tabId }, func: drive, args: [job.username, job.password, job.submitted, job.origin, job.discoveryRedirects, job.passwordSubmitted === true] }).catch(() => [{}]);
   const r = res?.result || {};
+  if (job.cancelled || jobs.get(tabId) !== job) { job.checking = false; return; }
   job.checking = false;
   if (r.state === "otp" || r.state === "email") {
     if (job.challenge !== r.state) tell(job, { type: "insurer-challenge", method: r.state, hint: r.hint });
@@ -192,6 +225,7 @@ chrome.downloads.onCreated.addListener(async (item) => {
   const stored = await chrome.storage.session.get(null);
   const entries = Object.entries(stored).filter(([key, j]) => key.startsWith("portal-") && Date.now() < j.expires);
   const matches = entries.filter(([, j]) => {
+    if (j.cancelled) return false;
     try { return new URL(item.referrer || item.url).origin === j.origin && new URL(item.url).origin === j.origin; } catch { return false; }
   });
   if (matches.length !== 1) return;
@@ -204,7 +238,7 @@ chrome.downloads.onCreated.addListener(async (item) => {
     if (!result?.result?.base64) throw new Error();
     const captureId = `${tabId}-${item.id}`;
     const latest = (await chrome.storage.session.get(key))[key];
-    if (!latest || Date.now() >= latest.expires) return;
+    if (!latest || latest.cancelled || Date.now() >= latest.expires) return;
     await chrome.storage.session.set({ [key]: { ...latest, pendingCaptures: [...(latest.pendingCaptures || []), captureId] } });
     const live = jobs.get(tabId);
     if (live) { live.pdfSeen = true; live.currentCaptureId = captureId; }
@@ -329,14 +363,16 @@ function fillOtp(code, origin, discoveryRedirects) {
 
 // ---- scenario submission: one option at a time per insurer; insurers run in parallel tabs ----
 async function runScenarios(tabId, job, scenarios) {
-  if (!Array.isArray(scenarios) || job.running) return;
+  if (!Array.isArray(scenarios) || job.running || job.cancelled) return;
   job.running = true;
   const initialKey = `portal-${tabId}`;
   const route = (await chrome.storage.session.get(initialKey))[initialKey];
+  if(job.cancelled){job.running=false;return;}
   if (route) await chrome.storage.session.set({ [initialKey]: { ...route, batchOpen: true } });
   let allSaved = true;
   try {
     for (const sc of scenarios.slice(0, 6)) {
+      if (job.cancelled) { allSaved = false; break; }
       const n = Number(sc?.n);
       const fields = (Array.isArray(sc?.fields) ? sc.fields : []).slice(0, 100).filter((f) => typeof f?.label === "string" && typeof f?.value === "string" && f.value.length <= 160);
       if (!Number.isInteger(n) || n < 1 || n > 6) continue;
@@ -344,13 +380,16 @@ async function runScenarios(tabId, job, scenarios) {
       tell(job, { type: "insurer-quote-status", n, status: "submitting" });
       let step = "start", stopped = false;
       for (let attempt = 0; attempt < 25 && !job.pdfSeen; attempt++) {
+        if (job.cancelled) { stopped = true; break; }
         const currentTabId = job.portalTabId || tabId;
         const tab = await chrome.tabs.get(currentTabId).catch(() => null);
+        if (job.cancelled) { stopped = true; break; }
         if (Date.now() >= job.expires || !tab || !portalAllowed(tab.url, job)) {
           tell(job, { type: "insurer-quote-status", n, status: "failed", detail: "Quote session expired or portal left its trusted origin. Reconnect and retry." }); stopped = true; break;
         }
         const [res] = await chrome.scripting.executeScript({ target: { tabId: currentTabId }, func: driveQuoteJourney, args: [{ insurer: job.insurer, step, fields, copy: /^brightrock/i.test(job.insurer) && !!job.savedScenario }, job.origin, job.discoveryRedirects] }).catch(() => [{}]);
         const r = res?.result;
+        if (job.cancelled) { stopped = true; break; }
         if (!r || !["navigate", "calculated", "report", "download"].includes(r.state)) {
           if (!r || /unique.*action|control not found|trusted quote workspace|unexpected portal dialog/i.test(r.detail || "")) void interfaceMonitor?.scan("quote-blocked", currentTabId).catch(() => {});
           tell(job, { type: "insurer-quote-status", n, status: "no-fields", detail: r?.detail || "Could not verify the quote screen." }); stopped = true; break;
@@ -361,7 +400,8 @@ async function runScenarios(tabId, job, scenarios) {
         await new Promise((ok) => setTimeout(ok, 1800));
       }
       if (stopped) { allSaved = false; break; }
-      for (let t = 0; t < 60 && !job.pdfSaved; t++) await new Promise((ok) => setTimeout(ok, 2000));
+      for (let t = 0; t < 60 && !job.pdfSaved && !job.cancelled; t++) await new Promise((ok) => setTimeout(ok, 2000));
+      if (job.cancelled) { allSaved = false; break; }
       if (!job.pdfSaved) {
         tell(job, { type: "insurer-quote-status", n, status: "failed", detail: "No saved PDF acknowledgement. Paused to avoid assigning a late PDF to the next quote." }); allSaved = false; break;
       }
@@ -369,6 +409,7 @@ async function runScenarios(tabId, job, scenarios) {
     }
   } finally {
     job.running = false;
+    if (job.cancelled) return;
     const current = job.portalTabId || tabId;
     const key = `portal-${current}`;
     const route = (await chrome.storage.session.get(key))[key];
