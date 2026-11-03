@@ -221,21 +221,35 @@ function drive(username, password, submitted, origin, discoveryRedirects) {
   // Recheck inside the page: navigation may occur between tab inspection and injection.
   const u = new URL(location.href);
   if (u.protocol !== "https:" || u.username || u.password || !(u.origin === origin || (typeof discoveryRedirects === "string" && !u.port && (u.hostname === discoveryRedirects || u.hostname.endsWith("." + discoveryRedirects))))) return { state: "waiting" };
-  const vis = (el) => el && el.offsetParent !== null && !el.disabled;
+  // Old Mutual's Material inputs/buttons live in nested open shadow roots.
+  // These roots are part of the same already-verified portal, not new origins.
+  const query = (root, selector) => {
+    const found = [...root.querySelectorAll(selector)];
+    for (const el of root.querySelectorAll("*")) if (el.shadowRoot) found.push(...query(el.shadowRoot, selector));
+    return found;
+  };
+  const vis = (el) => el && !el.disabled && (el.getClientRects ? el.getClientRects().length > 0 : el.offsetParent !== null);
+  const buttonText = (el) => (el.value || el.textContent?.trim() || el.getAttribute("aria-label") || el.getRootNode?.().host?.textContent || "").trim();
   const setVal = (el, v) => {
     const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set;
     el.focus(); setter.call(el, v);
-    el.dispatchEvent(new Event("input", { bubbles: true }));
-    el.dispatchEvent(new Event("change", { bubbles: true }));
+    el.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+    el.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
     el.blur();
   };
   const submit = (from) => {
-    const form = from.closest("form");
-    const btn = (form || document).querySelector('button[type=submit], input[type=submit]') ||
-      [...document.querySelectorAll("button, a[role=button], input[type=button]")].find((b) => vis(b) && /log ?in|sign ?in|next|continue|submit|verify/i.test(b.value || b.textContent || ""));
-    if (btn) btn.click(); else if (form) form.requestSubmit ? form.requestSubmit() : form.submit();
+    let form = from.closest("form"), host = from.getRootNode?.().host;
+    while (!form && host) { form = host.closest("form"); host = host.getRootNode?.().host; }
+    const scope = form || document;
+    const buttons = query(scope, "button, a[role=button], input[type=button], input[type=submit]").filter(vis);
+    const named = buttons.filter(b => /^(log ?in|sign ?in|next|continue|submit|verify)$/i.test(buttonText(b)));
+    const explicit = buttons.filter(b => b.type === "submit");
+    const btn = named.length === 1 ? named[0] : named.length === 0 && explicit.length === 1 ? explicit[0] : null;
+    if (btn) { btn.click(); return true; }
+    // Ambiguous or unrecognised actions need a user, not a fabricated submit.
+    return false;
   };
-  const inputs = [...document.querySelectorAll("input")].filter(vis);
+  const inputs = query(document, "input").filter(i => i.type !== "hidden" && vis(i));
   const text = document.body.innerText || "";
   // AdviserConnect's signed-in home has no visible logout link. Recognise its
   // dashboard before treating the client-search box as a login/OTP field.
@@ -262,10 +276,9 @@ function drive(username, password, submitted, origin, discoveryRedirects) {
   if (pw && (!submitted || !pw.value)) {
     if (user && !user.value) setVal(user, username);
     setVal(pw, password);
-    submit(pw);
-    return { state: "submitted" };
+    return { state: submit(pw) ? "submitted" : "waiting" };
   }
-  if (user && !user.value && /log ?in|sign ?in|username/i.test(text)) { setVal(user, username); submit(user); return { state: "submitted" }; }
+  if (user && !user.value && /log ?in|sign ?in|username/i.test(text)) { setVal(user, username); return { state: submit(user) ? "submitted" : "waiting" }; }
   if (!pw && /log ?out|sign ?out/i.test(text) && /quote|quotation|new business|adviser dashboard/i.test(text)) return { state: "in" };
   return { state: "waiting" };
 }
@@ -273,16 +286,25 @@ function drive(username, password, submitted, origin, discoveryRedirects) {
 function fillOtp(code, origin, discoveryRedirects) {
   const u = new URL(location.href);
   if (u.protocol !== "https:" || u.username || u.password || !(u.origin === origin || (typeof discoveryRedirects === "string" && !u.port && (u.hostname === discoveryRedirects || u.hostname.endsWith("." + discoveryRedirects))))) return;
-  const vis = (el) => el && el.offsetParent !== null && !el.disabled;
-  const inputs = [...document.querySelectorAll("input")].filter(vis).filter((i) => i.type !== "hidden" && i.type !== "checkbox");
-  if (!inputs.length) return;
+  const query = (root, selector) => {
+    const found = [...root.querySelectorAll(selector)];
+    for (const el of root.querySelectorAll("*")) if (el.shadowRoot) found.push(...query(el.shadowRoot, selector));
+    return found;
+  };
+  const vis = (el) => el && !el.disabled && (el.getClientRects ? el.getClientRects().length > 0 : el.offsetParent !== null);
+  const inputs = query(document, "input").filter(vis).filter((i) => i.type !== "hidden" && i.type !== "checkbox");
+  if (!inputs.length || inputs.some(i => i.type === "password")) return;
   const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set;
-  const put = (el, v) => { el.focus(); setter.call(el, v); el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); };
+  const put = (el, v) => { el.focus(); setter.call(el, v); el.dispatchEvent(new Event("input", { bubbles: true, composed: true })); el.dispatchEvent(new Event("change", { bubbles: true, composed: true })); };
   const boxes = inputs.filter((i) => i.maxLength === 1);
   if (boxes.length >= code.length) code.split("").forEach((c, i) => put(boxes[i], c));
-  else put(inputs.find((i) => i.autocomplete === "one-time-code" || /otp|pin|token|code/i.test(`${i.name} ${i.id} ${i.placeholder}`)) || inputs[0], code);
-  const btn = [...document.querySelectorAll("button, input[type=submit]")].find((b) => vis(b) && /verify|continue|submit|next|confirm|log ?in/i.test(b.value || b.textContent || ""));
-  if (btn) btn.click();
+  else {
+    const field = inputs.find(i => i.autocomplete === "one-time-code" || /otp|pin|token|code|verification/i.test(`${i.name} ${i.id} ${i.placeholder} ${i.getAttribute("aria-label") || ""}`));
+    if (!field) return;
+    put(field, code);
+  }
+  const buttons = query(document, "button, input[type=submit]").filter(b => vis(b) && /^(verify|continue|submit|next|confirm|log ?in)$/i.test((b.value || b.textContent?.trim() || b.getAttribute("aria-label") || b.getRootNode?.().host?.textContent || "").trim()));
+  if (buttons.length === 1) buttons[0].click();
 }
 
 // ---- scenario submission: one option at a time per insurer; insurers run in parallel tabs ----
