@@ -128,7 +128,7 @@ export function parseClinicianNotes(notes?: string | null): ClinicianNoteSection
 
     // De-duplicate per section (not per dated group) so a point repeated by a
     // later live hint collapses into the first occurrence.
-    const contextKey = current?.title || "Clinical Notes";
+    const contextKey = current?.title || "Consultation Notes";
     const kept = keptByContext.get(contextKey) || [];
     for (const entry of kept) {
       if (similarity(entry.tokens, tokens) >= 0.6 || isSubset(entry.tokens, tokens)) {
@@ -142,7 +142,7 @@ export function parseClinicianNotes(notes?: string | null): ClinicianNoteSection
     }
 
     if (!current) {
-      current = { title: "Clinical Notes", items: [] };
+      current = { title: "Consultation Notes", items: [] };
       sections.push(current);
     }
     const target = currentGroup ? currentGroup.items : current.items;

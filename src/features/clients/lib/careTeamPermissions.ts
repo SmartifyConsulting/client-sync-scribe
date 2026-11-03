@@ -13,13 +13,8 @@ export interface CareTeamPermission {
 export const CARE_TEAM_PERMISSIONS: CareTeamPermission[] = [
   { id: "sos_alerts", label: "SOS Alerts" },
   { id: "sos_live_tracking", label: "SOS Live Tracking" },
-  { id: "medical_information", label: "Medical Information" },
-  { id: "all_medication", label: "All Medication" },
-  { id: "chronic_medication", label: "Chronic Medication" },
-  { id: "hospital_admissions_basic", label: "Hospital Admissions (Without Medical Information)" },
-  { id: "hospital_admissions_medical", label: "Hospital Admissions (With Medical Information)" },
-  { id: "lab_results", label: "My Lab Results" },
-  { id: "sessions", label: "My Sessions" },
+  { id: "medical_information", label: "Personal Information" },
+  { id: "sessions", label: "My Consultations" },
   { id: "documents", label: "My Documents" },
   { id: "calendar", label: "My Calendar" },
   { id: "tasks", label: "My Tasks" },
@@ -45,21 +40,12 @@ export function resolvePermissions(contact: {
   return legacy;
 }
 
-/**
- * Keeps the two hospital-admission levels consistent: the detailed level
- * always implies the basic one.
- */
 export function togglePermission(current: string[], id: string, checked: boolean): string[] {
   const set = new Set(current);
-  if (checked) {
-    set.add(id);
-    if (id === "hospital_admissions_medical") set.add("hospital_admissions_basic");
-  } else {
-    set.delete(id);
-    if (id === "hospital_admissions_basic") set.delete("hospital_admissions_medical");
-  }
+  if (checked) set.add(id);
+  else set.delete(id);
   return CARE_TEAM_PERMISSIONS.filter((p) => set.has(p.id)).map((p) => p.id);
 }
 
 export const CARE_TEAM_BLURB =
-  "Your Holarc Care Team is the friends and family you choose to share parts of your profile with. They are also the people notified when you trigger an SOS. Your medical practitioners live in My Holarc Medical Team.";
+  "Your Care Team is the friends and family you choose to share parts of your profile with. They are also the people notified when you trigger an SOS.";
