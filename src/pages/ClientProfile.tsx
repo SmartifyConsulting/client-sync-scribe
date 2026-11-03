@@ -43,6 +43,8 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Copy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { logProfileView } from "@/lib/logProfileView";
 import { useSessions } from "@/hooks/useSessions";
 import { format } from "date-fns";
@@ -80,6 +82,15 @@ export default function ClientProfile() {
   const { templates, loading: templatesLoading } = useTemplates();
   const { documents, loading: documentsLoading, fetchDocuments, updateDocument } = useDocuments(id);
   const { user } = useAuth();
+  const patientUserId = (client as any)?.patient_user_id as string | null | undefined;
+  const { data: clientAvatarUrl } = useQuery({
+    queryKey: ["client-avatar", patientUserId],
+    enabled: !!patientUserId,
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("avatar_url").eq("id", patientUserId!).maybeSingle();
+      return (data as any)?.avatar_url as string | null;
+    },
+  });
   const [mailboxAlias, setMailboxAlias] = useState<string | null>(null);
   const [mailboxId, setMailboxId] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -280,9 +291,12 @@ export default function ClientProfile() {
       <div className="rounded-2xl bg-card p-5 shadow-card">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 text-xl font-bold text-primary">
-              {initials}
-            </div>
+            <Avatar className="h-14 w-14 rounded-xl">
+              <AvatarImage src={clientAvatarUrl ?? undefined} alt={client.name} className="rounded-xl" />
+              <AvatarFallback className="rounded-xl bg-primary/10 text-xl font-bold text-primary">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
             <div>
               <h1 className="page-title flex items-center gap-2">
                 {client.name}

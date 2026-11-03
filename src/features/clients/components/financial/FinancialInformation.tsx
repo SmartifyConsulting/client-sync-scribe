@@ -64,7 +64,8 @@ export const SECTIONS: SectionDef[] = [
   { key: "estate", label: "Estate & Succession Planning", icon: ScrollText, fields: [
     { key: "will_status", label: "Will status", options: ["No will", "Will in place", "Will outdated"] },
     { key: "will_date", label: "Date of latest will", type: "date" },
-    { key: "executor", label: "Nominated executor", placeholder: "Full name" },
+    { key: "executor_first_name", label: "Nominated executor — first name", placeholder: "First name" },
+    { key: "executor_last_name", label: "Nominated executor — last name", placeholder: "Last name" },
     { key: "trusts", label: "Trusts", type: "textarea" },
   ] },
 ];

@@ -20,7 +20,7 @@ Return ONLY a JSON object with these keys (omit anything not stated; never inven
  "risk_portfolio": {"policies":[{"kind" (one of "Life cover","Disability","Income protection","Severe illness","Short Term Insurance","Funeral"),"insurer","cover","premium"}]},
  "investments": {"holdings":[{"kind" (one of "Retirement annuity","Pension fund","Provident fund","Preservation fund","Tax-free savings","Unit trusts","Endowment","Other"),"provider","value","contribution"}]},
  "goals_risk": {"retirement_age","retirement_income","risk_profile" (one of "Conservative","Moderately conservative","Moderate","Moderately aggressive","Aggressive"),"goals"},
- "estate": {"will_status" (one of "No will","Will in place","Will outdated"),"will_date","executor","trusts"},
+ "estate": {"will_status" (one of "No will","Will in place","Will outdated"),"will_date","executor_first_name","executor_last_name","trusts"},
  "car_insurance": {"current_insurer","monthly_premium","years_continuous_cover","vehicle_colour","has_claims" (one of "Yes","No"),"claim_date","claim_reason","wants_quote" (one of "Yes","No")},
  "personal_info": {"title","maiden_name","religion","highest_education","self_employed" (one of "Yes","No"),"business_name","employer_years","tax_reference_number","smoker" (one of "Yes","No"),"smoker_quantity","marital_status","marital_regime","id_passport_number","dob" (YYYY-MM-DD),"physical_address","postal_address","next_of_kin_name","next_of_kin_phone","next_of_kin_email"},
  "general_notes": "Any other comment, context or remark from the meeting that doesn't fit one of the fields above — omit this key entirely if there's nothing like that."
