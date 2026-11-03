@@ -68,15 +68,17 @@ export function CredentialLoginTest({ integrationId, provider, username, passwor
       insurer: provider, loginUrl: portalUrl, username, password }, location.origin);
   };
   const verifying = result?.state === "verification";
-  return <div className="space-y-2 border-t border-border pt-3">
-    <Button variant="outline" size="sm" disabled={disabled || !username.trim() || !password || result?.state === "testing" || verifying} onClick={test}>
-      {result?.state === "testing" ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="mr-1.5 h-3.5 w-3.5" />}Test login
+  return <div className="border-t border-border pt-3">
+    <div role="group" aria-label="Credential login test" className="flex items-start gap-3">
+    <Button variant="outline" size="sm" className="shrink-0" title="Test entered credentials without saving or requesting quotes. Sign out of the provider first to verify a changed password. Requires the Companion." disabled={disabled || !username.trim() || !password || result?.state === "testing" || verifying} onClick={test}>
+      {result?.state === "testing" ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="mr-1.5 h-3.5 w-3.5" />}{result?.state === "testing" ? "Testing…" : "Test login"}
     </Button>
-    <p className="text-xs text-muted-foreground">Tests the username and password entered above. Does not save changes or request quotes. Requires the Companion.</p>
-    <p className="text-xs text-muted-foreground">To verify a changed password, sign out of the provider's portal before testing.</p>
-    {(!username.trim() || !password) && <p className="text-xs text-muted-foreground">Enter a username and password to test this provider.</p>}
-    {result && <p role="status" className={`text-xs ${result.state === "error" ? "text-destructive" : result.state === "success" ? "text-emerald-700" : "text-muted-foreground"}`}>{result.message}</p>}
-    {verifying && !challenge && <Button variant="link" size="sm" onClick={() => { attempt.current = null; setResult(null); }}>Start a new test</Button>}
+    <div className="min-w-0 flex-1 pt-1.5">
+    {!result && (!username.trim() || !password) && <p className="text-xs text-muted-foreground">Enter a username and password to test.</p>}
+    {result && result.state !== "testing" && <p role="status" className={`text-xs break-words ${result.state === "error" ? "text-destructive" : result.state === "success" ? "text-emerald-700" : "text-muted-foreground"}`}>{result.message}</p>}
+    {verifying && !challenge && <Button variant="link" size="sm" className="h-auto p-0 text-xs" onClick={() => { attempt.current = null; setResult(null); }}>Start a new test</Button>}
+    </div>
+    </div>
     <CompanionSetup open={setup} onClose={() => setSetup(false)} onReady={test} />
     <OtpDialog challenge={challenge} onClose={() => setChallenge(null)} onSubmit={value => {
       if (!attempt.current || !challenge) return;
