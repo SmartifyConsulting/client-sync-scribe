@@ -1,7 +1,7 @@
 import { dobFromSaId } from "@/lib/saId";
 import { useEffect, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { CalendarPlus, CheckCircle2, Loader2, Mic, Sparkles, Square } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { CalendarPlus, CheckCircle2, Circle, Loader2, Mic, Sparkles, Square } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,9 @@ import { PhoneNumberInput } from "@/components/forms/PhoneNumberInput";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { safeInvoke } from "@/services/edge/safeInvoke";
-import { FinancialInformation } from "@/features/clients/components/financial/FinancialInformation";
+import { FinancialInformation, SECTIONS, sectionProgress, GENERAL_NOTES_KEY } from "@/features/clients/components/financial/FinancialInformation";
 import { TranscriptButton } from "./DocumentTray";
+import { cn } from "@/lib/utils";
 
 type Viewer = "manager" | "client";
 const db = supabase as any;
@@ -113,6 +114,35 @@ export function ScheduleMeetingPanel({ appointments, viewer }: { appointments: a
   );
 }
 
+/** Compact talking-points guide shown alongside the recorder so the Wealth
+ *  Manager doesn't have to leave this screen mid-meeting. A tick marks a
+ *  topic that's already been captured — from this recording or an earlier
+ *  one — so ticks fill in as information is captured, not as a manual
+ *  checkbox the user has to tick themselves. */
+function NeedsAnalysisChecklist({ clientId }: { clientId: string }) {
+  const { data: profile } = useQuery({
+    queryKey: ["client-financial-profile", clientId],
+    queryFn: async () => (await (supabase as any).from("client_financial_profiles").select("*").eq("patient_id", clientId).maybeSingle()).data,
+  });
+  const items = [
+    ...SECTIONS.map((s) => ({ label: s.label, done: sectionProgress(s, profile).filled > 0 })),
+    { label: "General Notes", done: !!(profile as any)?.[GENERAL_NOTES_KEY]?.trim() },
+  ];
+  return (
+    <div className="rounded-lg border border-border/70 p-2.5">
+      <p className="mb-1.5 text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Talk through</p>
+      <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+        {items.map((it) => (
+          <span key={it.label} className={cn("flex items-center gap-1.5 text-2xs leading-tight", it.done ? "text-foreground" : "text-muted-foreground")}>
+            {it.done ? <CheckCircle2 className="h-3 w-3 shrink-0 text-primary" /> : <Circle className="h-3 w-3 shrink-0" />}
+            {it.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ---------------- Record meeting (Wealth Manager) ---------------- */
 function RecordMeeting({ clientId, onDone }: { clientId: string; onDone: (sessionId: string) => void }) {
   const [rec, setRec] = useState<MediaRecorder | null>(null);
@@ -200,6 +230,7 @@ export function CaptureFinancialsPanel({ clientId, sessions, financials, viewer,
     <div className="space-y-3 text-sm">
       <p className="text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Record the meeting</p>
       {clientId && <RecordMeeting clientId={clientId} onDone={(sid) => { setSessionId(sid); refresh(qc); run(sid); }} />}
+      {clientId && <NeedsAnalysisChecklist clientId={clientId} />}
       <p className="text-2xs text-muted-foreground">Elysian AI transcribes the meeting and fills in the financial information automatically.</p>
       <p className="pt-2 text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Or capture from an earlier consultation</p>
       {usable.length > 0 && (

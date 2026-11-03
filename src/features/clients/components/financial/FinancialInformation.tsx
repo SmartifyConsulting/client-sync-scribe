@@ -16,11 +16,11 @@ import { DocumentUploadList } from "./DocumentUploadList";
 
 type Field = { key: string; label: string; type?: "number" | "text" | "date" | "textarea"; options?: string[]; placeholder?: string };
 type Col = { key: string; label: string; type?: "number" | "text"; options?: string[]; placeholder?: string };
-type SectionKey = "cash_flow" | "assets_liabilities" | "risk_portfolio" | "investments" | "goals_risk" | "estate" | "car_insurance";
-type SectionDef = { key: SectionKey; label: string; icon: any; fields?: Field[]; list?: { key: string; label: string; cols: Col[] } };
-const GENERAL_NOTES_KEY = "general_notes";
+export type SectionKey = "cash_flow" | "assets_liabilities" | "risk_portfolio" | "investments" | "goals_risk" | "estate" | "car_insurance";
+export type SectionDef = { key: SectionKey; label: string; icon: any; fields?: Field[]; list?: { key: string; label: string; cols: Col[] } };
+export const GENERAL_NOTES_KEY = "general_notes";
 
-const SECTIONS: SectionDef[] = [
+export const SECTIONS: SectionDef[] = [
   { key: "cash_flow", label: "General & Cash Flow", icon: Wallet, fields: [
     { key: "gross_income", label: "Gross monthly income (R)", type: "number", placeholder: "e.g. 45000" },
     { key: "net_salary", label: "Net monthly salary (R)", type: "number", placeholder: "e.g. 34000" },
@@ -78,6 +78,17 @@ export function estateDuty(netEstate: number) {
   return dutiable <= 30_000_000 ? dutiable * 0.2 : 6_000_000 + (dutiable - 30_000_000) * 0.25;
 }
 
+/** How much of a section is filled in, from a client_financial_profiles row. */
+export function sectionProgress(s: SectionDef, profile: Record<string, any> | null | undefined): { filled: number; total: number } {
+  const v = (profile ?? {})[s.key] ?? {};
+  if (s.list) {
+    const rows: any[] = v[s.list.key] ?? [];
+    return { filled: rows.length, total: Math.max(rows.length, 1) };
+  }
+  const fields = s.fields ?? [];
+  return { filled: fields.filter((f) => v[f.key] !== undefined && v[f.key] !== null && v[f.key] !== "").length, total: fields.length };
+}
+
 export function FinancialInformation({ clientId }: { clientId: string }) {
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -114,15 +125,7 @@ export function FinancialInformation({ clientId }: { clientId: string }) {
   };
 
   /** How much of a section is filled in — drives the progress pill in its header. */
-  const progress = (s: SectionDef): { filled: number; total: number } => {
-    const v = sec(s.key);
-    if (s.list) {
-      const rows: any[] = v[s.list.key] ?? [];
-      return { filled: rows.length, total: Math.max(rows.length, 1) };
-    }
-    const fields = s.fields ?? [];
-    return { filled: fields.filter((f) => v[f.key] !== undefined && v[f.key] !== null && v[f.key] !== "").length, total: fields.length };
-  };
+  const progress = (s: SectionDef): { filled: number; total: number } => sectionProgress(s, data);
   const completedSections = SECTIONS.filter((s) => { const p = progress(s); return p.total > 0 && p.filled === p.total; }).length;
 
   const summary = useMemo(() => {
