@@ -1,4 +1,9 @@
 # Roadmap — Step 5 Indigro copy
+## Documented insurer journeys — Nov 3
+- [ ] Add bounded Momentum navigation/report and BrightRock new/copy scenario adapters from supplied PDFs; pause for missing approved data and unmapped controls.
+- [ ] Send actual client/rating and insurer-specific options; keep premium and benefit increases separate.
+- [ ] Associate saved PDFs with exact numbered scenarios and keep portals open until all scenario saves finish; package and run isolated regressions.
+- [ ] Broker-run live verification — requires updated Companion, approved portal URLs and legitimate verification; Bidvest quote screens and other insurer journeys not supplied. No fabricated quotes or real-client communications.
 ## Recording compatibility — Nov 3
 - [x] Deployed clientId/patientId-compatible transcription and financial extraction; UI sends both identifiers. Ten isolated processing regressions pass (14 including signing regressions).
 - [ ] Confirm a real recorded meeting and financial readback with Georgia only — requires an authenticated Wealth Manager session.
