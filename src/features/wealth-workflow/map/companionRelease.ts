@@ -20,7 +20,10 @@ export function useCompanionRelease() {
         if (!response.ok) throw new Error("Release unavailable");
         const data = await response.json();
         if (typeof data.version !== "string" || !/^\d+\.\d+\.\d+(?:\.\d+)?$/.test(data.version)) throw new Error("Invalid release");
-        if (alive && controller === request) setRelease({ version: data.version, verified: true, checking: false });
+        // GitHub's CDN can briefly serve an older manifest after a release.
+        // Never downgrade a version already shipped with this app build.
+        const version = companionVersionCurrent(LATEST_COMPANION_VERSION, data.version) ? LATEST_COMPANION_VERSION : data.version;
+        if (alive && controller === request) setRelease({ version, verified: true, checking: false });
       } catch {
         if (alive && controller === request) setRelease(previous => ({ ...previous, verified: false, checking: false }));
       } finally { clearTimeout(timeout); }
