@@ -1,6 +1,6 @@
 import { useCompanionInstalled } from "./companionDetection";
-import { recordPortalLogin } from "./portalLoginStatus";
-import { useEffect, useState } from "react";
+import { recordPortalConnection } from "./portalLoginStatus";
+import { useEffect, useState, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus, X, Pencil } from "lucide-react";
 import { insurerColor } from "./insurerColors";
@@ -75,6 +75,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const [chosen, setChosen] = useState<string[]>([]);
   const [tab, setTab] = useState("");
   const [busy, setBusy] = useState(false);
+  const pendingConnections = useRef(new Set<string>());
   const [login, setLogin] = useState<Record<string, LoginState>>({});
   const [activity, setActivity] = useState<Record<string, QuoteActivity>>({});
   const recordActivity = (insurer: string, phase: ActivityPhase, detail?: string) => setActivity((s) => ({ ...s, [insurer]: updateActivity(s[insurer], phase, Date.now(), detail) }));
@@ -112,9 +113,9 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
         setChallenge({ insurer: d.insurer, method: d.method === "email" ? "email" : "otp", hint: d.hint });
       }
       if (d.type === "insurer-otp-result" || d.type === "insurer-login-result") {
-        if (d.type === "insurer-login-result" && d.ok === true) {
+        if (d.type === "insurer-login-result" && pendingConnections.current.delete(d.insurer)) {
           const provider = insurerRows.find(row => row.name === d.insurer);
-          if (provider) void recordPortalLogin(provider.id).catch(() => toast({ title: "Signed in, but the last-login date could not be saved." }));
+          if (provider) void recordPortalConnection(provider.id, d.ok === true ? "success" : "failed").catch(() => toast({ title: "The connection result could not be saved." }));
         }
         recordActivity(d.insurer, d.ok ? "connected" : "failed", d.ok ? undefined : d.message);
         setLogin((s) => ({ ...s, [d.insurer]: d.ok ? "connected" : "failed" }));
@@ -149,6 +150,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
       return toast({ title: `Couldn't unlock the ${ins} login`, description: data?.error ?? "Please try again.", variant: "destructive" });
     }
     const f = data.fields ?? {};
+    pendingConnections.current.add(ins);
     window.postMessage({ source: "holarc", type: "insurer-login", insurer: ins, workflowId, loginUrl: f.portal_url || row.portal_url,
       username: f.username ?? data.username, password: f.password }, window.location.origin);
   };

@@ -124,8 +124,8 @@ export default function AppIntegrations() {
   });
   const portalLogins = useQuery({
     queryKey: ["broker-portal-login-status", user?.id], enabled: !!user && !!reauthToken,
-    queryFn: async (): Promise<{ integration_id: string; last_successful_login_at: string }[]> => {
-      const { data, error } = await db.from("broker_portal_login_status").select("integration_id,last_successful_login_at").eq("broker_user_id", user!.id);
+    queryFn: async (): Promise<{ integration_id: string; last_connect_at: string | null; last_connect_outcome: "success" | "failed" | "unconfirmed" | null }[]> => {
+      const { data, error } = await db.from("broker_portal_login_status").select("integration_id,last_connect_at,last_connect_outcome").eq("broker_user_id", user!.id);
       if (error) throw error;
       return data ?? [];
     },
@@ -437,7 +437,7 @@ export default function AppIntegrations() {
                               ? `Configured${status?.updated_at ? ` · ${new Date(status.updated_at).toLocaleDateString()}` : ""}`
                               : "Not Set Up"}
                           </Badge>
-                          <PortalLoginChip at={portalLogins.data?.find(row => row.integration_id === entry.id)?.last_successful_login_at} />
+                          <PortalLoginChip at={portalLogins.data?.find(row => row.integration_id === entry.id)?.last_connect_at} outcome={portalLogins.data?.find(row => row.integration_id === entry.id)?.last_connect_outcome} />
                           </div>
                         </div>
                         {entry.category === "insurance" && (
