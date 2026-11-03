@@ -1,0 +1,1 @@
+ALTER TABLE public.client_financial_profiles ADD COLUMN IF NOT EXISTS car_insurance jsonb;
