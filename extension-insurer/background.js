@@ -309,7 +309,7 @@ async function runScenarios(tabId, job, scenarios) {
         }
         const [res] = await chrome.scripting.executeScript({ target: { tabId: currentTabId }, func: driveQuoteJourney, args: [{ insurer: job.insurer, step, fields, copy: /^brightrock/i.test(job.insurer) && !!job.savedScenario }, job.origin, job.discoveryRedirects] }).catch(() => [{}]);
         const r = res?.result;
-        if (!r || r.state === "blocked") { tell(job, { type: "insurer-quote-status", n, status: "no-fields", detail: r?.detail || "Could not verify the quote screen." }); stopped = true; break; }
+        if (!r || !["navigate", "calculated", "report", "download"].includes(r.state)) { tell(job, { type: "insurer-quote-status", n, status: "no-fields", detail: r?.detail || "Could not verify the quote screen." }); stopped = true; break; }
         tell(job, { type: "insurer-quote-status", n, status: r.state === "navigate" ? "submitting" : "generating", detail: r.detail });
         if (r.state === "download") break;
         step = r.next || step;
@@ -334,31 +334,4 @@ async function runScenarios(tabId, job, scenarios) {
       }
     }
   }
-}
-
-function fillScenario(fields, origin, discoveryRedirects) {
-  const u = new URL(location.href);
-  if (u.protocol !== "https:" || u.username || u.password || !(u.origin === origin || (discoveryRedirects && !u.port && (u.hostname === "discovery.co.za" || u.hostname.endsWith(".discovery.co.za"))))) return { filled: 0 };
-  const norm = (t) => (t || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
-  const vis = (el) => el.getClientRects().length > 0 && !el.disabled;
-  const controls = [...document.querySelectorAll("input, select")].filter((el) => vis(el) && !["hidden", "password", "submit", "button", "file"].includes(el.type));
-  const labelOf = (el) => norm(el.labels?.[0]?.textContent || el.getAttribute("aria-label") || el.placeholder || el.name);
-  const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set;
-  let filled = 0;
-  for (const f of fields) {
-    const want = norm(f.label);
-    const el = controls.find((c) => labelOf(c) === want) || controls.find((c) => labelOf(c).includes(want));
-    if (!el) continue;
-    if (el.tagName === "SELECT") {
-      const opt = [...el.options].find((o) => norm(o.textContent) === norm(f.value)) || [...el.options].find((o) => norm(o.textContent).includes(norm(f.value)));
-      if (!opt) continue;
-      el.value = opt.value;
-    } else if (el.type === "checkbox") { if (el.checked !== (f.value === "true")) el.click(); }
-    else { el.focus(); setter.call(el, f.value.replace(/[^\d.]/g, "") || f.value); el.dispatchEvent(new Event("input", { bubbles: true })); }
-    el.dispatchEvent(new Event("change", { bubbles: true })); el.blur();
-    filled++;
-  }
-  const btn = filled && [...document.querySelectorAll("button, input[type=submit], input[type=button], a[role=button]")].find((b) => vis(b) && /calculate|get quote|generate|quote|illustrat/i.test(b.value || b.textContent || ""));
-  if (btn) btn.click();
-  return { filled, clicked: !!btn };
 }

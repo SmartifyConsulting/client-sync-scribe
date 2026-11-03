@@ -24,7 +24,7 @@ function harness() {
       set: async (value) => { Object.assign(stored, structuredClone(value)); },
       remove: async (key) => { delete stored[key]; },
     } },
-    scripting: { executeScript: async (options) => { injected.push(options); return [{ result: options.func.name === "readPdf" ? { base64: "JVBERi0=" } : { state: "otp" } }]; } },
+    scripting: { executeScript: async (options) => { injected.push(options); return [{ result: options.func.name === "readPdf" ? { base64: "JVBERi0=" } : options.func.name === "driveQuoteJourney" ? { state: "blocked" } : { state: "otp" } }]; } },
     downloads: { onCreated: { addListener: (fn) => { listeners.download = fn; } } },
     windows: { create: (options, cb) => { created.push(options); tabs.set(2, { id: 2, url: options.url }); cb({ id: 9, tabs: [{ id: 2 }] }); } },
   };
@@ -79,6 +79,19 @@ describe("Companion background portal rules", () => {
     await flush(); expect(h.removed).toEqual([]);
     h.listeners.message({ type: "insurer-pdf-ack", workflowId: "georgia-demo", captureId: "2-10", ok: true }, h.sender);
     await flush(); expect(h.removed).toEqual([2]);
+  });
+  it("does not close after Quote 1 acknowledgement while other scenarios are running", async () => {
+    const h = harness(); h.login();
+    vm.runInContext("jobs.get(2).running = true; jobs.get(2).currentScenario = 1", h.context);
+    await h.listeners.download({ id: 9, filename: "quote.pdf", url: "https://partner.discovery.co.za/quote.pdf" });
+    expect(h.sent.find((m) => m.type === "insurer-pdf").n).toBe(1);
+    h.listeners.message({ type: "insurer-pdf-ack", workflowId: "georgia-demo", captureId: "2-9", ok: true }, h.sender);
+    await flush(); expect(h.removed).toEqual([]); expect(vm.runInContext("jobs.get(2).pdfSaved", h.context)).toBe(true);
+  });
+  it("ignores quote popups on another origin", async () => {
+    const h = harness(); h.login(); vm.runInContext("jobs.get(2).running = true", h.context);
+    await h.listeners.created({ id: 3, openerTabId: 2, url: "https://evil.example/quote" });
+    expect(h.stored["portal-3"]).toBeUndefined(); expect(h.injected).toEqual([]);
   });
   it("reports a numbered scenario as no-fields when the portal screen has no matching fields", async () => {
     const h = harness(); h.login();
