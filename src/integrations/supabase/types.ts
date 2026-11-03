@@ -3554,9 +3554,12 @@ export type Database = {
           next_review_date: string | null
           owner_user_id: string
           patient_id: string
+          paused_at: string | null
+          paused_by: string | null
           practice_id: string | null
           previous_workflow_id: string | null
           status: string
+          total_paused_seconds: number
           updated_at: string
         }
         Insert: {
@@ -3573,9 +3576,12 @@ export type Database = {
           next_review_date?: string | null
           owner_user_id?: string
           patient_id: string
+          paused_at?: string | null
+          paused_by?: string | null
           practice_id?: string | null
           previous_workflow_id?: string | null
           status?: string
+          total_paused_seconds?: number
           updated_at?: string
         }
         Update: {
@@ -3592,9 +3598,12 @@ export type Database = {
           next_review_date?: string | null
           owner_user_id?: string
           patient_id?: string
+          paused_at?: string | null
+          paused_by?: string | null
           practice_id?: string | null
           previous_workflow_id?: string | null
           status?: string
+          total_paused_seconds?: number
           updated_at?: string
         }
         Relationships: [
@@ -4511,6 +4520,10 @@ export type Database = {
         Returns: Json
       }
       wealth_send_reminder: { Args: { _todo_id: string }; Returns: boolean }
+      wealth_set_workflow_paused: {
+        Args: { _paused: boolean; _workflow_id: string }
+        Returns: Json
+      }
       wealth_start_annual_review: {
         Args: {
           _appointment_id?: string

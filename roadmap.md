@@ -1,4 +1,7 @@
 # Roadmap — Step 5 Indigro copy
+## Recording compatibility — Nov 3
+- [x] Deployed clientId/patientId-compatible transcription and financial extraction; UI sends both identifiers. Ten isolated processing regressions pass (14 including signing regressions).
+- [ ] Confirm a real recorded meeting and financial readback with Georgia only — requires an authenticated Wealth Manager session.
 ## Jean document signing — Nov 2
 - [x] Deployed sign-wealth-document using clients; live wealth_onboarding_refresh already uses clients and preserves all four completion requirements.
 - [x] Four isolated regression checks pass: LOA and Disclosure seal/file/refresh, plus unlinked and wrong-account rejection (Vitest 2.1.9 for Vite 5 compatibility).
