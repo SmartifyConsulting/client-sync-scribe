@@ -1,8 +1,12 @@
+export const RETIRED_EMPLOYER = "Retired — not employed";
+export const isRetiredEmployer = (employer?: string | null) => /^(retired(?:\s*[-—]\s*not employed)?|pensioner|retiree)$/i.test(employer?.trim() ?? "");
+
 export type RetirementInfo = { dob?: string | null; employer?: string | null; occupation?: string | null };
 
 /** Display inference only: never clears or replaces saved financial amounts. */
 export function inferRetired(info?: RetirementInfo | null, today = new Date()): boolean {
   if (!info) return false;
+  if (isRetiredEmployer(info.employer)) return true;
   const employment = [info.employer, info.occupation].filter(Boolean).join(" ").toLowerCase();
   if (/\b(not retired|not yet retired|semi[- ]?retired)\b/.test(employment)) return false;
   if (/\b(retired|pensioner|retiree)\b/.test(employment)) return true;

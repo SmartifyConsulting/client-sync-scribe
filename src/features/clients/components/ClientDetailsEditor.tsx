@@ -1,3 +1,4 @@
+import { RETIRED_EMPLOYER, isRetiredEmployer } from "./financial/retirement";
 import { dobFromSaId } from "@/lib/saId";
 import { LifeEventsPanel } from "@/features/wealth-workflow/client/LifeEventsPanel";
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
@@ -2163,7 +2164,12 @@ export function ClientDetailsEditor({
             {/* Beneficiaries */}
             <Collapsible defaultOpen={false} className="bg-card overflow-hidden">
               <SectionHeader icon={Briefcase} label="Employer" />
-              <CollapsibleContent className="p-2">
+              <CollapsibleContent className="p-2 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Checkbox id="retired-not-employed" checked={isRetiredEmployer(formData.employer)}
+                    onCheckedChange={checked => updateFormData({ employer: checked === true ? RETIRED_EMPLOYER : "" })} />
+                  <Label htmlFor="retired-not-employed" className="text-xs font-bold">Retired — not employed</Label>
+                </div>
                 <div className={FIELD_GRID_2_CLASS}>
                   <div className="space-y-1.5">
                     <Label htmlFor="employer">
@@ -2171,6 +2177,7 @@ export function ClientDetailsEditor({
                     </Label>
                     <Input
                       id="employer"
+                      disabled={isRetiredEmployer(formData.employer)}
                       className="text-sm"
                       value={formData.employer}
                       onChange={(e) => updateFormData({ employer: e.target.value })}
