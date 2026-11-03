@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
 const source = readFileSync(new URL("./background.js", import.meta.url), "utf8");
+const journey = readFileSync(new URL("./portalJourney.js", import.meta.url), "utf8");
 function harness() {
   const listeners = {}, stored = {}, tabs = new Map(), removed = [], sent = [], created = [], injected = [];
   const chrome = {
@@ -15,6 +16,8 @@ function harness() {
       reload: async () => {},
       onRemoved: { addListener: (fn) => { listeners.removed = fn; } },
       onUpdated: { addListener: (fn) => { listeners.updated = fn; } },
+      onCreated: { addListener: (fn) => { listeners.created = fn; } },
+      update: async () => {},
     },
     storage: { session: {
       get: async (key) => structuredClone(key ? { [key]: stored[key] } : stored),
@@ -26,6 +29,7 @@ function harness() {
     windows: { create: (options, cb) => { created.push(options); tabs.set(2, { id: 2, url: options.url }); cb({ id: 9, tabs: [{ id: 2 }] }); } },
   };
   const context = vm.createContext({ chrome, URL, Date, Map, Object, Number, Promise, setTimeout: (fn, ms) => { if (ms === 1200) fn(); }, TextDecoder, Uint8Array });
+  context.importScripts = () => vm.runInContext(journey, context);
   vm.runInContext(source, context);
   const sender = { tab: { id: 1, url: "https://holarc.co.za/app-integrations" } };
   tabs.set(1, sender.tab);
@@ -80,14 +84,14 @@ describe("Companion background portal rules", () => {
     const h = harness(); h.login();
     h.listeners.message({ type: "insurer-quote-submit", insurer: "discovery", workflowId: "georgia-demo", scenarios: [{ n: 1, fields: [{ label: "Benefit amount", value: "1000000" }] }] }, h.sender);
     await flush();
-    expect(h.injected.at(-1).func.name).toBe("fillScenario");
+    expect(h.injected.at(-1).func.name).toBe("driveQuoteJourney");
     expect(h.sent.filter((m) => m.type === "insurer-quote-status").map((m) => [m.n, m.status])).toEqual([[1, "submitting"], [1, "no-fields"]]);
   });
   it("never submits a scenario into an untrusted page", async () => {
     const h = harness(); h.login(); h.tabs.set(2, { id: 2, url: "https://unrelated.example/quote" });
     h.listeners.message({ type: "insurer-quote-submit", insurer: "discovery", workflowId: "georgia-demo", scenarios: [{ n: 2, fields: [] }] }, h.sender);
     await flush();
-    expect(h.injected.some((i) => i.func.name === "fillScenario")).toBe(false);
+    expect(h.injected.some((i) => i.func.name === "driveQuoteJourney")).toBe(false);
     expect(h.sent.at(-1)).toMatchObject({ n: 2, status: "failed" });
   });
   it("ignores unrelated PDF origins", async () => {

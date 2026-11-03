@@ -24,3 +24,5 @@
 - Step 4 activity uses allowlisted Companion phases and phase-change timestamps; PDF completion follows successful authenticated saves, not login or scenario counts. Why: progress exposes actual waiting points without claiming unimplemented quoting or inventing document totals.
 
 - Step 4 quote scenarios are numbered per insurer (Quote n = Option n) and advance only on Companion status messages or a successful authenticated PDF save; the Companion fills portal fields by label only on the trusted portal origin. Why: partial returns and retries stay truthful per scenario.
+- Documented portal journeys live in extension-insurer/portalJourney.js; only uniquely matched demonstrated quote actions run, missing inputs block calculation, and application acceptance/email actions are excluded. Why: walkthroughs are incomplete and must not become fabricated data or client commitments.
+- Scenario batches wait for the exact PDF-save acknowledgement before moving on; managed same-origin popups inherit routing, while unfamiliar popup origins require broker verification. Why: prevents early closure and late PDFs being assigned to the wrong option.
