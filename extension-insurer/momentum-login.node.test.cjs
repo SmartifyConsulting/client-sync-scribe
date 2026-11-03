@@ -49,3 +49,14 @@ test('submits the observed Momentum anchor control only on its exact trusted hos
     assert.equal(clicks, hostname.startsWith('adviser-account.')?1:0);
   }
 });
+
+test('reports the supplied BrightRock rejection without writing credentials or claiming success', () => {
+  const context = vm.createContext({URL, location:{href:'https://iris.brightrock.co.za/login'}, document:{body:{innerText:'Login failed! Please recheck the username and password and try again.'},querySelectorAll:()=>[]}});
+  vm.runInContext(drive,context);
+  assert.equal(vm.runInContext("drive('unused','unused',true,'https://iris.brightrock.co.za',false)",context).state,'failed');
+});
+test('a loading page is not reported as a rejected password', () => {
+  const context = vm.createContext({URL, location:{href:'https://iris.brightrock.co.za/login'}, document:{body:{innerText:'Loading…'},querySelectorAll:()=>[]}});
+  vm.runInContext(drive,context);
+  assert.equal(vm.runInContext("drive('unused','unused',false,'https://iris.brightrock.co.za',false)",context).state,'waiting');
+});

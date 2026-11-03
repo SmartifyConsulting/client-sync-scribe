@@ -136,7 +136,7 @@ async function checkPortal(tabId) {
   } else if (r.state === "submitted") { job.submitted = true; tell(job, { type: "insurer-login-progress", state: "connecting", phase: "credentials" }); }
   else if (r.state === "waiting") tell(job, { type: "insurer-login-progress", state: "connecting", phase: job.submitted ? "waiting" : "loading" });
   else if (r.state === "in") { job.done = true; job.username = ""; job.password = ""; tell(job, { type: "insurer-login-result", ok: true }); if (/^discovery$/i.test(job.insurer)) await scanPortal(tabId, job); }
-  else if (r.state === "failed") { job.done = true; job.username = ""; job.password = ""; tell(job, { type: "insurer-login-result", ok: false, message: "The insurer rejected the login. Check it in the portal." }); }
+  else if (r.state === "failed") { job.done = true; job.username = ""; job.password = ""; tell(job, { type: "insurer-login-result", ok: false, message: "Login failed. The provider rejected the login. Please recheck your username and password and try again." }); }
   if (!job.done) setTimeout(() => checkPortal(tabId), 2500);
 }
 
