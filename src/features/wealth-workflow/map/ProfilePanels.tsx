@@ -14,7 +14,9 @@ import { PhoneNumberInput } from "@/components/forms/PhoneNumberInput";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { safeInvoke } from "@/services/edge/safeInvoke";
-import { FinancialInformation, SECTIONS, sectionProgress, GENERAL_NOTES_KEY } from "@/features/clients/components/financial/FinancialInformation";
+import { FinancialInformation, SECTIONS, sectionProgress, GENERAL_NOTES_KEY, type SectionKey } from "@/features/clients/components/financial/FinancialInformation";
+import { useLiveSpeechTranscript } from "@/hooks/useLiveSpeechTranscript";
+import { detectMentionedTopics } from "@/lib/needsAnalysisTopics";
 import { TranscriptButton } from "./DocumentTray";
 import { cn } from "@/lib/utils";
 
@@ -115,36 +117,48 @@ export function ScheduleMeetingPanel({ appointments, viewer }: { appointments: a
 }
 
 /** Compact talking-points guide shown alongside the recorder so the Wealth
- *  Manager doesn't have to leave this screen mid-meeting. A tick marks a
- *  topic that's already been captured — from this recording or an earlier
- *  one — so ticks fill in as information is captured, not as a manual
- *  checkbox the user has to tick themselves. */
-function NeedsAnalysisChecklist({ clientId }: { clientId: string }) {
+ *  Manager doesn't have to leave this screen mid-meeting. Three states per
+ *  topic: captured (data already on file — solid tick), mentioned (picked
+ *  up from the live, in-browser transcript while recording — amber dot, a
+ *  nudge that it still needs to make it into the actual figures), or not
+ *  yet raised (outline) — which is exactly what should catch the broker's
+ *  eye as something they haven't asked about yet. */
+function NeedsAnalysisChecklist({ clientId, liveTranscript }: { clientId: string; liveTranscript?: string }) {
   const { data: profile } = useQuery({
     queryKey: ["client-financial-profile", clientId],
     queryFn: async () => (await (supabase as any).from("client_financial_profiles").select("*").eq("patient_id", clientId).maybeSingle()).data,
   });
+  const mentioned = liveTranscript ? detectMentionedTopics(liveTranscript) : new Set<SectionKey | "general_notes">();
   const items = [
-    ...SECTIONS.map((s) => ({ label: s.label, done: sectionProgress(s, profile).filled > 0 })),
-    { label: "General Notes", done: !!(profile as any)?.[GENERAL_NOTES_KEY]?.trim() },
+    ...SECTIONS.map((s) => ({ key: s.key, label: s.label, done: sectionProgress(s, profile).filled > 0 })),
+    { key: "general_notes" as const, label: "General Notes", done: !!(profile as any)?.[GENERAL_NOTES_KEY]?.trim() },
   ];
   return (
     <div className="rounded-lg border border-border/70 p-2.5">
       <p className="mb-1.5 text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Talk through</p>
       <div className="grid grid-cols-2 gap-x-3 gap-y-1">
-        {items.map((it) => (
-          <span key={it.label} className={cn("flex items-center gap-1.5 text-2xs leading-tight", it.done ? "text-foreground" : "text-muted-foreground")}>
-            {it.done ? <CheckCircle2 className="h-3 w-3 shrink-0 text-primary" /> : <Circle className="h-3 w-3 shrink-0" />}
-            {it.label}
-          </span>
-        ))}
+        {items.map((it) => {
+          const state = it.done ? "done" : mentioned.has(it.key) ? "mentioned" : "pending";
+          return (
+            <span key={it.label} className={cn("flex items-center gap-1.5 text-2xs leading-tight", state === "pending" ? "text-muted-foreground" : "text-foreground")}>
+              {state === "done" ? (
+                <CheckCircle2 className="h-3 w-3 shrink-0 text-primary" />
+              ) : state === "mentioned" ? (
+                <Circle className="h-3 w-3 shrink-0 fill-amber-400 text-amber-500" />
+              ) : (
+                <Circle className="h-3 w-3 shrink-0" />
+              )}
+              {it.label}
+            </span>
+          );
+        })}
       </div>
     </div>
   );
 }
 
 /* ---------------- Record meeting (Wealth Manager) ---------------- */
-function RecordMeeting({ clientId, onDone }: { clientId: string; onDone: (sessionId: string) => void }) {
+function RecordMeeting({ clientId, onDone, onStartLive, onStopLive }: { clientId: string; onDone: (sessionId: string) => void; onStartLive?: () => void; onStopLive?: () => void }) {
   const [rec, setRec] = useState<MediaRecorder | null>(null);
   const [secs, setSecs] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -160,6 +174,7 @@ function RecordMeeting({ clientId, onDone }: { clientId: string; onDone: (sessio
       mr.onstop = async () => {
         stream.getTracks().forEach((t) => t.stop());
         window.clearInterval(timer.current);
+        onStopLive?.();
         const blob = new Blob(chunks.current, { type: "audio/webm" });
         setBusy(true);
         const { data: sess } = await supabase.auth.getSession();
@@ -181,6 +196,7 @@ function RecordMeeting({ clientId, onDone }: { clientId: string; onDone: (sessio
       };
       mr.start(1000);
       setRec(mr); setSecs(0);
+      onStartLive?.();
       timer.current = window.setInterval(() => setSecs((x) => x + 1), 1000);
     } catch {
       toast({ title: "Microphone not available", description: "Allow microphone access in your browser, then try again.", variant: "destructive" });
@@ -205,6 +221,7 @@ export function CaptureFinancialsPanel({ clientId, sessions, financials, viewer,
   const [sessionId, setSessionId] = useState<string>("");
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
+  const live = useLiveSpeechTranscript();
   useEffect(() => { if (!sessionId && usable[0]) setSessionId(usable[0].id); }, [usable.length]);
 
   if (viewer === "client") {
@@ -229,8 +246,15 @@ export function CaptureFinancialsPanel({ clientId, sessions, financials, viewer,
   return (
     <div className="space-y-3 text-sm">
       <p className="text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Record the meeting</p>
-      {clientId && <RecordMeeting clientId={clientId} onDone={(sid) => { setSessionId(sid); refresh(qc); run(sid); }} />}
-      {clientId && <NeedsAnalysisChecklist clientId={clientId} />}
+      {clientId && (
+        <RecordMeeting
+          clientId={clientId}
+          onDone={(sid) => { setSessionId(sid); refresh(qc); run(sid); }}
+          onStartLive={live.supported ? live.start : undefined}
+          onStopLive={live.supported ? live.stop : undefined}
+        />
+      )}
+      {clientId && <NeedsAnalysisChecklist clientId={clientId} liveTranscript={live.transcript} />}
       <p className="text-2xs text-muted-foreground">Elysian AI transcribes the meeting and fills in the financial information automatically.</p>
       <p className="pt-2 text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Or capture from an earlier consultation</p>
       {usable.length > 0 && (
