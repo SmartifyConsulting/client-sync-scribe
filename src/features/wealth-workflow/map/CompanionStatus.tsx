@@ -2,11 +2,13 @@ import { useState } from "react";
 import { CheckCircle2, Download, Puzzle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CompanionSetup } from "./CompanionSetup";
-import { LATEST_COMPANION_VERSION, useCompanionInstalled, useCompanionVersion } from "./companionDetection";
+import { useCompanionInstalled, useCompanionVersion } from "./companionDetection";
+import { companionVersionCurrent, useCompanionRelease } from "./companionRelease";
 
 export function CompanionStatus() {
   const installed = useCompanionInstalled();
   const version = useCompanionVersion();
+  const release = useCompanionRelease();
   const [setupOpen, setSetupOpen] = useState(false);
 
   return (
@@ -19,12 +21,12 @@ export function CompanionStatus() {
             <p role="status" className={`text-xs font-medium ${installed ? "text-success" : "text-muted-foreground"}`}>
               {installed ? "Companion active in this browser" : "Companion not detected on this page yet"}
             </p>
-            <p className="text-xs text-muted-foreground">Installed: {installed ? version || "number unavailable" : "not detected"} · Latest: {LATEST_COMPANION_VERSION}</p>
+            <p className="text-xs text-muted-foreground">Installed: {installed ? version || "number unavailable" : "not detected"} · {release.verified || release.checking ? "Latest" : "Last known"}: {release.checking ? "checking…" : release.version}</p>
           </div>
         </div>
         <Button variant={installed ? "outline" : "default"} size="sm" className="h-11 shrink-0 sm:w-auto" onClick={() => setSetupOpen(true)}>
           {installed ? <Puzzle className="h-4 w-4" /> : <Download className="h-4 w-4" />}
-          {installed && version === LATEST_COMPANION_VERSION ? "Version details" : installed ? "Update Companion" : "Install Companion"}
+          {installed && release.verified && companionVersionCurrent(version, release.version) ? "Version details" : installed ? "Update Companion" : "Install Companion"}
         </Button>
       </section>
       <CompanionSetup open={setupOpen} onClose={() => setSetupOpen(false)} />

@@ -3,6 +3,7 @@ import { Check, Mail, KeyRound, Eye, EyeOff } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { COMPANION_DOWNLOAD_URL } from "./companionRelease";
 
 export type LoginState = "connecting" | "challenge" | "connected" | "failed" | "no-addon";
 export type Challenge = { insurer: string; method: "otp" | "email"; hint?: string };
@@ -89,8 +90,7 @@ export function ProtectorDialog({ open, onClose, onSubmit, busy }: { open: boole
 export const addonInstalled = () => document.documentElement.dataset.holarcAddon === "1";
 
 export function downloadAddon() {
-  fetch("/holarc-insurer-addon.zip")
+  return fetch(COMPANION_DOWNLOAD_URL, { cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer" })
     .then((r) => { if (!r.ok) throw new Error(`Download failed: ${r.status}`); return r.blob(); })
     .then((b) => { const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "holarc-insurer-addon.zip"; a.click(); URL.revokeObjectURL(a.href); })
-    .catch((e) => alert(e.message));
 }
