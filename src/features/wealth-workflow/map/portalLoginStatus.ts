@@ -5,4 +5,5 @@ export async function recordPortalConnection(integrationId: string, outcome: "su
   const { error } = await (supabase as any).rpc("record_broker_portal_connection", { _integration_id: integrationId, _outcome: outcome });
   if (error) throw error;
   window.dispatchEvent(new Event("holarc-portal-login-recorded"));
+  try { localStorage.setItem("holarc-portal-status-refresh", String(Date.now())); } catch { /* same-tab refresh still works */ }
 }

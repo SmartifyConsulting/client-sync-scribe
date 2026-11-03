@@ -90,7 +90,7 @@ export function ProtectorDialog({ open, onClose, onSubmit, busy }: { open: boole
 export const addonInstalled = () => document.documentElement.dataset.holarcAddon === "1";
 
 export function downloadAddon() {
-  return fetch(COMPANION_DOWNLOAD_URL, { cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer" })
+  return fetch(`${COMPANION_DOWNLOAD_URL}?checked=${Date.now()}`, { cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer" })
     .then((r) => { if (!r.ok) throw new Error(`Download failed: ${r.status}`); return r.blob(); })
     .then((b) => { const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "holarc-insurer-addon.zip"; a.click(); URL.revokeObjectURL(a.href); })
 }

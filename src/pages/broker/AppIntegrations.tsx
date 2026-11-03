@@ -132,8 +132,10 @@ export default function AppIntegrations() {
   });
   useEffect(() => {
     const refresh = () => { void qc.invalidateQueries({ queryKey: ["broker-portal-login-status", user?.id] }); };
+    const storage = (event: StorageEvent) => { if (event.key === "holarc-portal-status-refresh") refresh(); };
     window.addEventListener("holarc-portal-login-recorded", refresh);
-    return () => window.removeEventListener("holarc-portal-login-recorded", refresh);
+    window.addEventListener("storage", storage);
+    return () => { window.removeEventListener("holarc-portal-login-recorded", refresh); window.removeEventListener("storage", storage); };
   }, [qc, user?.id]);
 
   const statusFor = (integrationId: string) => (credentials.data ?? []).find((c) => c.integration_id === integrationId);

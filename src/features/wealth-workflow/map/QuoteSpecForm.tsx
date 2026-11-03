@@ -1,6 +1,5 @@
 import { useCompanionInstalled } from "./companionDetection";
 import { useCompanionRelease } from "./companionRelease";
-import { recordPortalConnection } from "./portalLoginStatus";
 import { useEffect, useState, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus, X, Pencil } from "lucide-react";
@@ -117,7 +116,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
       if (d.type === "insurer-otp-result" || d.type === "insurer-login-result") {
         if (d.type === "insurer-login-result" && pendingConnections.current.delete(d.insurer)) {
           const provider = insurerRows.find(row => row.name === d.insurer);
-          if (provider) void recordPortalConnection(provider.id, d.ok === true ? "success" : "failed").catch(() => toast({ title: "The connection result could not be saved." }));
+          // Connection metadata is recorded by the app-wide CompanionCoordinator.
         }
         recordActivity(d.insurer, d.ok ? "connected" : "failed", d.ok ? undefined : d.message);
         setLogin((s) => ({ ...s, [d.insurer]: d.ok ? "connected" : "failed" }));
@@ -153,7 +152,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     }
     const f = data.fields ?? {};
     pendingConnections.current.add(ins);
-    window.postMessage({ source: "holarc", type: "insurer-login", insurer: ins, workflowId, loginUrl: f.portal_url || row.portal_url,
+    window.postMessage({ source: "holarc", type: "insurer-login", connectionAttemptId: crypto.randomUUID(), integrationId: row.id, insurer: ins, workflowId, loginUrl: f.portal_url || row.portal_url,
       username: f.username ?? data.username, password: f.password }, window.location.origin);
   };
   const openTab = (ins: string) => {

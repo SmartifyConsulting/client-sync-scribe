@@ -1,6 +1,6 @@
 # Companion store distribution
 
-Prepared 3 November 2026 for Companion 1.6.4. No listing has been uploaded or published by this work.
+Prepared 4 November 2026 for Companion 1.7.0. No listing has been uploaded or published by this work.
 
 ## Broker experience
 
@@ -17,7 +17,7 @@ Use the organisation's existing Chrome Web Store developer account. First check 
 
 An Unlisted listing is an option if the organisation wants link-based distribution rather than store search discovery. Unlisted is not an authentication boundary; app/portal sign-in still controls access.
 
-The package contains manifest.json, background.js, bridge.js, portalJourney.js and icon.png at its root. It contains no tests, client records, passwords, OTPs, environment files, developer tokens or recording manuals. It preserves the existing permissions; it does not enable new access silently.
+The package contains manifest.json, background.js, bridge.js, portalJourney.js, interfaceMonitor.js and icon.png at its root. It contains no tests, client records, passwords, OTPs, environment files, developer tokens or recording manuals. It preserves the existing permissions; it does not enable new access silently.
 
 ## Listing draft
 
@@ -41,6 +41,7 @@ The publisher must supply its verified support contact, ownership details, appro
 - scripting: run the bundled sign-in and quote adapters on the configured, trusted portal.
 - storage: retain temporary routing/scenario metadata; never persistent plaintext passwords or OTPs.
 - downloads: match supported quote PDFs to their provider session.
+- alarms: schedule daily, read-only structural checks of configured app portals. No unattended login or password retry is performed by these checks.
 - HTTPS host permissions: required by the current support for broker-configured provider origins and their trusted redirects. These permissions are broad and must be disclosed accurately in the store review; they are not a reason to claim that all websites are monitored.
 - All extension logic is bundled locally. No remote-code loader was added.
 

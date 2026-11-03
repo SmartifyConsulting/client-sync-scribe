@@ -2,6 +2,7 @@ import { useState } from "react";
 import { CheckCircle2, Download, Puzzle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CompanionSetup } from "./CompanionSetup";
+import { CompanionInterfaceChecks } from "./CompanionInterfaceChecks";
 import { useCompanionInstalled, useCompanionVersion } from "./companionDetection";
 import { companionVersionCurrent, useCompanionRelease } from "./companionRelease";
 
@@ -29,6 +30,7 @@ export function CompanionStatus() {
           {installed && release.verified && companionVersionCurrent(version, release.version) ? "Version details" : installed ? "Update Companion" : "Install Companion"}
         </Button>
       </section>
+      <CompanionInterfaceChecks />
       <CompanionSetup open={setupOpen} onClose={() => setSetupOpen(false)} />
     </>
   );

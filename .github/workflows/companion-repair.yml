@@ -1,0 +1,144 @@
+name: Companion interface repair
+on:
+  workflow_dispatch:
+    inputs:
+      incident_id:
+        description: Optional queued incident UUID
+        required: false
+        type: string
+  schedule:
+    - cron: '0 4 * * *'
+permissions:
+  contents: read
+concurrency:
+  group: companion-interface-repair
+  cancel-in-progress: false
+jobs:
+  prepare:
+    if: vars.COMPANION_REPAIR_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.queue.outputs.has_incident }}
+      id: ${{ steps.queue.outputs.id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - id: queue
+        run: node scripts/companion-repair-queue.mjs fetch
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          INCIDENT_ID: ${{ inputs.incident_id }}
+      - uses: actions/upload-artifact@v4
+        if: steps.queue.outputs.has_incident == 'true'
+        with:
+          name: companion-incident
+          path: companion-incident.json
+          retention-days: 3
+  repair:
+    needs: prepare
+    if: needs.prepare.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      patch: ${{ steps.codex.outputs.final-message }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: companion-incident
+      - id: codex
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          prompt-file: .github/codex/prompts/companion-repair.md
+          sandbox: workspace-write
+          safety-strategy: drop-sudo
+          codex-args: '["--ephemeral"]'
+  validate:
+    needs: repair
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test the trusted patch guard
+        run: node --test scripts/companion-repair-guard.node.test.cjs
+      - name: Apply restricted patch
+        run: node scripts/apply-companion-repair.mjs
+        env:
+          COMPANION_PATCH: ${{ needs.repair.outputs.patch }}
+      - name: Check JavaScript and run independent regression tests
+        run: |
+          node --check extension-insurer/background.js
+          node --check extension-insurer/bridge.js
+          node --check extension-insurer/portalJourney.js
+          node --check extension-insurer/interfaceMonitor.js
+          node --test extension-insurer/*.node.test.cjs
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.4'
+      - run: bun test extension-insurer/background.test.js extension-insurer/portalJourney.test.js extension-insurer/quoteActivity.test.js
+  publish_patch:
+    needs: [prepare, repair, validate]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      url: ${{ steps.pr.outputs.url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/apply-companion-repair.mjs
+        env:
+          COMPANION_PATCH: ${{ needs.repair.outputs.patch }}
+      - id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INCIDENT_ID: ${{ needs.prepare.outputs.id }}
+        run: |
+          branch="companion-repair/$INCIDENT_ID"
+          git config user.name 'Companion repair worker'
+          git config user.email 'companion-repair@users.noreply.github.com'
+          git switch -c "$branch"
+          git add extension-insurer
+          git commit -m "Repair reported Companion interface change"
+          gh auth setup-git
+          git push origin "$branch"
+          printf '%s\n' 'A structural interface change triggered this tested repair.' '' "Incident: $INCIDENT_ID" '' 'Validation: syntax checks and the independent Companion regression suite passed. This draft has not been merged, released or tested against a live provider.' > /tmp/repair-body.md
+          url=$(gh pr create --draft --title 'Companion interface repair' --body-file /tmp/repair-body.md --base main --head "$branch")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+  record_result:
+    needs: [prepare, repair, validate, publish_patch]
+    if: always() && needs.prepare.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/companion-repair-queue.mjs finish
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          INCIDENT_ID: ${{ needs.prepare.outputs.id }}
+          REPAIR_PR_URL: ${{ needs.publish_patch.outputs.url }}

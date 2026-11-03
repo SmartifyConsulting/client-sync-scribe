@@ -10,7 +10,7 @@ export function PortalLoginChip({ at, outcome }: { at?: string | null; outcome?:
   const Icon = recorded && outcome === "success" ? Plug : Unplug;
   return <Badge variant="outline" className={`gap-1 text-2xs px-1.5 py-0 font-normal whitespace-normal text-right ${color}`}
     aria-label={recorded ? `${status}, ${date.toLocaleString()}` : "No connection recorded"}
-    title={recorded ? `${status}: ${date.toLocaleString("en-ZA")}${outcome === "unconfirmed" ? ". Timed out; this does not mean the password is incorrect." : ""}` : "No Companion connection recorded yet. Manual portal logins are not tracked."}>
-    <Icon className="h-3 w-3 shrink-0" aria-hidden="true" />{recorded ? date.toLocaleDateString() : "—"}
+    title={recorded ? `${status}: ${date.toLocaleString("en-ZA")}${outcome === "unconfirmed" ? ". Timed out; this does not mean the password is incorrect." : ""}` : "No confirmed connection recorded yet. Open the configured portal with the Companion active."}>
+    <Icon className="h-3 w-3 shrink-0" aria-hidden="true" />{recorded ? `${date.toLocaleDateString()} · ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "—"}
   </Badge>;
 }

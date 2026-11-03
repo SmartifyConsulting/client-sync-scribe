@@ -7,6 +7,7 @@ function driveQuoteJourney(request, origin, discoveryRedirects) {
   const controls = [...document.querySelectorAll("input, select, textarea")].filter((el) => visible(el) && !["hidden", "submit", "button", "file"].includes(el.type));
   if (controls.some((el) => el.type === "password" || el.autocomplete === "one-time-code")) return { state: "blocked", detail: "Portal verification is required. Reconnect to complete verification." };
   const actions = [...document.querySelectorAll('button, a, input[type=submit], input[type=button], [role=tab], [role=button]')].filter(visible);
+  if ([...document.querySelectorAll('dialog[open], [role="dialog"], [role="alertdialog"]')].some(visible)) return { state: "blocked", detail: "An unexpected portal dialog needs review. No quote action was taken." };
   const label = (el) => norm(el.labels?.[0]?.textContent || el.getAttribute("aria-label") || el.placeholder);
   const matches = (el, names) => names.map(norm).includes(norm(el.value && el.tagName === "INPUT" ? el.value : el.textContent || el.getAttribute("aria-label")));
   const click = (names) => { const found = actions.filter((el) => matches(el, names)); if (found.length !== 1) return false; found[0].click(); return true; };

@@ -16,7 +16,7 @@ export function useCompanionRelease() {
       controller = request;
       const timeout = setTimeout(() => request.abort(), 10_000);
       try {
-        const response = await fetch(COMPANION_RELEASE_URL, { cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer", signal: request.signal });
+        const response = await fetch(`${COMPANION_RELEASE_URL}?checked=${Date.now()}`, { cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer", signal: request.signal });
         if (!response.ok) throw new Error("Release unavailable");
         const data = await response.json();
         if (typeof data.version !== "string" || !/^\d+\.\d+\.\d+(?:\.\d+)?$/.test(data.version)) throw new Error("Invalid release");

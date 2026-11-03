@@ -7,7 +7,7 @@ function page({ insurer = "Momentum", step = "capture", fields = [], inputs = []
   class Input { constructor(label, extra = {}) { Object.assign(this, { tagName: "INPUT", type: "text", labels: [{ textContent: label }], required: false, disabled: false, _value: "", ...extra }); } get value() { return this._value; } set value(v) { this._value = v; } get checked() { return this._checked || false; } set checked(v) { this._checked = v; } getClientRects() { return [1]; } getAttribute() { return null; } closest() { return null; } dispatchEvent() {} checkValidity() { return true; } }
   const elements = inputs.map((i) => new Input(i.label, i));
   const actions = buttons.map((textContent) => ({ textContent, getClientRects: () => [1], getAttribute: () => null, click: () => clicked.push(textContent) }));
-  const context = vm.createContext({ URL, Set, location: { href: url }, HTMLInputElement: Input, Event: class {}, getComputedStyle: () => ({ visibility: "visible" }), document: { querySelectorAll: (s) => s === "input, select, textarea" ? elements : actions } });
+  const context = vm.createContext({ URL, Set, location: { href: url }, HTMLInputElement: Input, Event: class {}, getComputedStyle: () => ({ visibility: "visible" }), document: { querySelectorAll: (s) => s.includes("dialog") ? [] : s === "input, select, textarea" ? elements : actions } });
   vm.runInContext(source, context);
   context.request = { insurer, step, fields, copy };
   const result = vm.runInContext('driveQuoteJourney(request, "https://portal.example", false)', context);

@@ -58,7 +58,7 @@ export function CredentialLoginTest({ integrationId, provider, username, passwor
       }
       if (d.type === "insurer-login-result") {
         attempt.current = null;
-        void recordPortalConnection(integrationId, d.ok === true ? "success" : "failed").catch(() => toast.error("The connection result could not be saved."));
+        // The app-wide recorder also handles results after this editor closes.
         lastResponse.current = Date.now();
         record(d.ok === true ? "connected" : "failed");
         stopTimer();
@@ -95,7 +95,7 @@ export function CredentialLoginTest({ integrationId, provider, username, passwor
     record("requested");
     setResult({ state: "testing", message: "Testing these credentials in the provider's portal…" });
     waitForResult();
-    window.postMessage({ source: "holarc", type: "insurer-login", workflowId: attempt.current,
+    window.postMessage({ source: "holarc", type: "insurer-login", connectionAttemptId: attempt.current, integrationId, workflowId: attempt.current,
       insurer: provider, loginUrl: portalUrl, username, password }, location.origin);
   };
   const verifying = result?.state === "verification";
