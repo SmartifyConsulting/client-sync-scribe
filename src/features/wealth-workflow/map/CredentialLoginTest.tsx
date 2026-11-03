@@ -77,7 +77,7 @@ export function CredentialLoginTest({ integrationId, provider, username, passwor
     {(!username.trim() || !password) && <p className="text-xs text-muted-foreground">Enter a username and password to test this provider.</p>}
     {result && <p role="status" className={`text-xs ${result.state === "error" ? "text-destructive" : result.state === "success" ? "text-emerald-700" : "text-muted-foreground"}`}>{result.message}</p>}
     {verifying && !challenge && <Button variant="link" size="sm" onClick={() => { attempt.current = null; setResult(null); }}>Start a new test</Button>}
-    <CompanionSetup open={setup} onClose={() => setSetup(false)} />
+    <CompanionSetup open={setup} onClose={() => setSetup(false)} onReady={test} />
     <OtpDialog challenge={challenge} onClose={() => setChallenge(null)} onSubmit={value => {
       if (!attempt.current || !challenge) return;
       window.postMessage({ source: "holarc", type: challenge.method === "otp" ? "insurer-otp" : "insurer-email-check",

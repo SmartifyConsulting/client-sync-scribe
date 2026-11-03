@@ -12,7 +12,7 @@ export const LOGIN_TEXT: Record<LoginState, string> = {
   challenge: "Waiting for verification…",
   connected: "Connected",
   failed: "Login failed — click the tab to try again.",
-  "no-addon": "Holarc Wealth Companion is not set up in this browser.",
+  "no-addon": "Holarc Wealth Companion has not been detected on this page yet.",
 };
 
 /** Small circular progress ring shown on an insurer tab while the add-on logs in. */

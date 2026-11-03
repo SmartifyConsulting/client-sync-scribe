@@ -1,3 +1,4 @@
+import { useCompanionInstalled } from "./companionDetection";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus, X, Pencil } from "lucide-react";
@@ -34,6 +35,7 @@ const toPlan = (spec: any): Plan =>
 export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: string; isWM: boolean; clientId?: string }) {
   const { user } = useAuth();
   const qc = useQueryClient();
+  const companionInstalled = useCompanionInstalled();
   const { data: spec, isLoading } = useQuery({
     queryKey: ["wealth-quote-spec", workflowId],
     queryFn: async () => (await db.from("wealth_quote_specs").select("*").eq("workflow_id", workflowId).order("created_at", { ascending: false }).limit(1).maybeSingle()).data,
@@ -148,7 +150,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const openTab = (ins: string) => {
     setTab(ins);
     if (login[ins] === "connected" || login[ins] === "connecting" || login[ins] === "challenge") return;
-    if (!addonInstalled()) { setSetupOpen(true); return setLogin((s) => ({ ...s, [ins]: "no-addon" })); }
+    if (!(companionInstalled || addonInstalled())) { setSetupOpen(true); return setLogin((s) => ({ ...s, [ins]: "no-addon" })); }
     const token = getToken();
     if (token) startLogin(ins, token); else setAskFor(ins);
   };
@@ -213,11 +215,13 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const activeTab = chosen.includes(tab) ? tab : chosen[0] ?? "";
   // Auto-connect the visible insurer (any insurer) when the 15-minute unlock is already active.
   useEffect(() => {
-    if (!activeTab || !insurerRows.length || login[activeTab] || !addonInstalled()) return;
+    if (!activeTab || !insurerRows.length || (login[activeTab] && login[activeTab] !== "no-addon") || !companionInstalled) return;
+    setSetupOpen(false);
     const token = getToken();
     if (token) void startLogin(activeTab, token);
+    else setLogin(s => { if (s[activeTab] !== "no-addon") return s; const next = { ...s }; delete next[activeTab]; return next; });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, insurerRows.length]);
+  }, [activeTab, insurerRows.length, companionInstalled]);
   const setVal = (p: string, i: number, k: string, val: any) =>
     setPlan((pl) => ({ ...pl, [p]: pl[p].map((x, j) => (j === i ? { ...x, [k]: val } : x)) }));
   const total = products.reduce((a, p) => a + plan[p].length, 0);
@@ -289,17 +293,17 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
           <div className="min-w-0 space-y-3">
           <div className="flex items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">1</span><h4 className="font-semibold">Connect to {activeTab}</h4></div>
           <InsurerActivity insurer={activeTab} activity={activity[activeTab]}
-            idleText={!addonInstalled() ? "Companion not set up yet" : getToken() ? "Connecting automatically…" : "Unlock your saved logins to connect in the background"}
-            idleAction={!addonInstalled() ? "One-time setup" : getToken() ? "Connect" : "Unlock & connect"}
-            onRetry={() => { if (!addonInstalled()) { setSetupOpen(true); return; } const token = getToken(); if (token) void startLogin(activeTab, token); else setAskFor(activeTab); }} />
+            idleText={!(companionInstalled || addonInstalled()) ? "Companion not detected on this page yet" : getToken() ? "Connecting automatically…" : "Unlock your saved logins to connect in the background"}
+            idleAction={!(companionInstalled || addonInstalled()) ? "Already installed?" : getToken() ? "Connect" : "Unlock & connect"}
+            onRetry={() => { if (!(companionInstalled || addonInstalled())) { setSetupOpen(true); return; } const token = getToken(); if (token) void startLogin(activeTab, token); else setAskFor(activeTab); }} />
           {login[activeTab] === "no-addon" && (
             <p className={label}>{LOGIN_TEXT[login[activeTab]]}
-              {login[activeTab] === "no-addon" && <Button variant="link" size="sm" className="h-auto px-1 text-xs" onClick={() => setSetupOpen(true)}>One-time setup</Button>}
+              {login[activeTab] === "no-addon" && <Button variant="link" size="sm" className="h-auto px-1 text-xs" onClick={() => setSetupOpen(true)}>Already installed? Check again</Button>}
             </p>
           )}
           <OtpDialog challenge={challenge} onClose={() => setChallenge(null)} onSubmit={submitChallenge} />
           <ProtectorDialog open={!!askFor} busy={unlocking} onClose={() => setAskFor(null)} onSubmit={unlock} />
-          <CompanionSetup open={setupOpen} onClose={() => setSetupOpen(false)} />
+          <CompanionSetup open={setupOpen} onClose={() => setSetupOpen(false)} onReady={() => openTab(activeTab)} />
           </div>
           <div className="min-w-0 space-y-2">
             <div className="flex items-center justify-end gap-2">

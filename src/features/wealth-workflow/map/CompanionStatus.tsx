@@ -1,27 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CheckCircle2, Download, Puzzle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CompanionSetup } from "./CompanionSetup";
-import { addonInstalled } from "./InsurerLogin";
+import { useCompanionInstalled } from "./companionDetection";
 
 export function CompanionStatus() {
-  const [installed, setInstalled] = useState(addonInstalled);
+  const installed = useCompanionInstalled();
   const [setupOpen, setSetupOpen] = useState(false);
-
-  useEffect(() => {
-    const updateStatus = () => setInstalled(addonInstalled());
-    const observer = new MutationObserver(updateStatus);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["data-holarc-addon"],
-    });
-    updateStatus();
-    window.addEventListener("focus", updateStatus);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("focus", updateStatus);
-    };
-  }, []);
 
   return (
     <>
@@ -31,7 +16,7 @@ export function CompanionStatus() {
           <div className="min-w-0 space-y-1">
             <h2 className="text-sm font-semibold text-foreground">Holarc Wealth Companion</h2>
             <p role="status" className={`text-xs font-medium ${installed ? "text-success" : "text-muted-foreground"}`}>
-              {installed ? "Companion active in this browser" : "Companion not installed in this browser"}
+              {installed ? "Companion active in this browser" : "Companion not detected on this page yet"}
             </p>
             <p className="text-xs text-muted-foreground">One-time setup per Chrome, Edge or Brave browser profile. Refresh Holarc Wealth after installation.</p>
           </div>
