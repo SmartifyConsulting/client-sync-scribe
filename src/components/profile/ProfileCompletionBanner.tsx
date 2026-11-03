@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { ShieldCheck, X } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 interface ProfileCompletionBannerProps {
@@ -23,20 +26,34 @@ export function ProfileCompletionBanner({
   message = DEFAULT_MESSAGE,
   storageKey = "holarc_profile_banner_dismissed",
 }: ProfileCompletionBannerProps) {
+  const { user } = useAuth();
+  const [saving, setSaving] = useState(false);
+  const scopedKey = `${storageKey}:${user?.id ?? "guest"}`;
   const [dismissed, setDismissed] = useState<boolean>(() => {
     try {
-      return sessionStorage.getItem(storageKey) === "1";
+      return sessionStorage.getItem(scopedKey) === "1";
     } catch {
       return false;
     }
   });
 
-  if (dismissed) return null;
+  if (dismissed || user?.user_metadata?.profile_reminder_dismissals?.[storageKey]) return null;
 
   const dismiss = () => {
     try {
-      sessionStorage.setItem(storageKey, "1");
+      sessionStorage.setItem(scopedKey, "1");
     } catch {}
+    setDismissed(true);
+  };
+
+  const dismissPermanently = async () => {
+    if (!user) return;
+    setSaving(true);
+    const { error } = await supabase.auth.updateUser({ data: {
+      profile_reminder_dismissals: { ...user.user_metadata?.profile_reminder_dismissals, [storageKey]: true },
+    } });
+    setSaving(false);
+    if (error) { toast.error("Couldn't save your preference. Please try again."); return; }
     setDismissed(true);
   };
 
@@ -45,7 +62,7 @@ export function ProfileCompletionBanner({
       <button
         type="button"
         onClick={dismiss}
-        aria-label="Dismiss for this consultation"
+        aria-label="Ignore for now"
         className="absolute right-2 top-2 text-muted-foreground hover:text-foreground"
       >
         <X className="h-4 w-4" />
@@ -55,11 +72,15 @@ export function ProfileCompletionBanner({
         <div className="space-y-2">
           <h3 className="text-sm font-semibold text-foreground">{title}</h3>
           <p className="text-xs text-muted-foreground leading-relaxed">{message}</p>
+          <div className="flex flex-wrap gap-2 items-center">
           {onComplete && (
             <Button size="sm" onClick={onComplete} className="mt-1">
               Complete my profile
             </Button>
           )}
+          <Button size="sm" variant="ghost" onClick={dismiss}>Ignore for now</Button>
+          {user && <Button size="sm" variant="ghost" disabled={saving} onClick={dismissPermanently}>Do not remind me again</Button>}
+          </div>
         </div>
       </div>
     </div>

@@ -639,7 +639,7 @@ export function TodaysBriefing() {
                       <div className="flex items-center gap-2">
                         {apt.clientId ? (
                           <Link
-                            to={`/clients/${apt.clientId}`}
+                            to={`/clients/${apt.clientId}?tab=workflow`}
                             className="font-medium text-primary hover:text-primary/80 hover:underline truncate text-sm"
                             onClick={(e) => e.stopPropagation()}
                           >

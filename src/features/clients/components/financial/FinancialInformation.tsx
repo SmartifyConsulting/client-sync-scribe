@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SectionHeader, FIELD_GRID_2_CLASS } from "../sectionStyles";
 import { Input } from "@/components/ui/input";
@@ -24,7 +25,7 @@ export type SectionDef = { key: SectionKey; label: string; icon: any; fields?: F
 export const GENERAL_NOTES_KEY = "general_notes";
 
 export const SECTIONS: SectionDef[] = [
-  { key: "cash_flow", label: "General & Cash Flow", icon: Wallet, naField: { key: "not_earning", label: "Client is retired / not earning an income" }, fields: [
+  { key: "cash_flow", label: "General & Cash Flow", icon: Wallet, naField: { key: "not_earning", label: "Client is not earning an income" }, fields: [
     { key: "gross_income", label: "Gross monthly income (R)", type: "number", placeholder: "e.g. 45000" },
     { key: "net_salary", label: "Net monthly salary (R)", type: "number", placeholder: "e.g. 34000" },
     { key: "fixed_expenses", label: "Fixed monthly expenses (R)", type: "number", placeholder: "Rent, loans, school fees…" },
@@ -85,12 +86,12 @@ export function estateDuty(netEstate: number) {
 /** How much of a section is filled in, from a client_financial_profiles row. */
 export function sectionProgress(s: SectionDef, profile: Record<string, any> | null | undefined): { filled: number; total: number } {
   const v = (profile ?? {})[s.key] ?? {};
-  if (s.naField && v[s.naField.key]) return { filled: 1, total: 1 };
+  if (s.key !== "cash_flow" && s.naField && v[s.naField.key]) return { filled: 1, total: 1 };
   if (s.list) {
     const rows: any[] = v[s.list.key] ?? [];
     return { filled: rows.length, total: Math.max(rows.length, 1) };
   }
-  const fields = s.fields ?? [];
+  const fields = (s.fields ?? []).filter(f => !(s.key === "goals_risk" && profile?.cash_flow?.retired && f.key === "retirement_age") && !(s.key === "cash_flow" && v.not_earning && ["gross_income", "net_salary"].includes(f.key)));
   return { filled: fields.filter((f) => v[f.key] !== undefined && v[f.key] !== null && v[f.key] !== "").length, total: fields.length };
 }
 
@@ -106,6 +107,7 @@ export function FinancialInformation({ clientId }: { clientId: string }) {
     queryFn: async () => (await (supabase as any).from("wealth_applications").select("id,product,provider,monthly_premium,status,wealth_workflows!inner(patient_id)").eq("wealth_workflows.patient_id", clientId).eq("status", "issued")).data ?? [],
   });
   const [data, setData] = useState<Record<string, any>>({});
+  const [openInvestment, setOpenInvestment] = useState("");
   const [saving, setSaving] = useState<string | null>(null);
   const dirtySections = useRef(new Map<string, number>());
   const loadedClient = useRef(clientId);
@@ -123,6 +125,7 @@ export function FinancialInformation({ clientId }: { clientId: string }) {
     });
   }, [q.data, clientId]);
 
+  const retired = !!data.cash_flow?.retired;
   const sec = (k: SectionKey) => data[k] ?? {};
   const set = (k: string, v: any) => {
     dirtySections.current.set(k, (dirtySections.current.get(k) ?? 0) + 1);
@@ -135,7 +138,7 @@ export function FinancialInformation({ clientId }: { clientId: string }) {
 
   const summary = useMemo(() => {
     const cf = sec("cash_flow");
-    const surplus = num(cf.net_salary) - num(cf.fixed_expenses) - num(cf.discretionary_expenses);
+    const surplus = (cf.not_earning ? 0 : num(cf.net_salary)) - num(cf.fixed_expenses) - num(cf.discretionary_expenses);
     const items: any[] = sec("assets_liabilities").items ?? [];
     const assets = items.filter((i) => !LIAB.includes(i.kind)).reduce((s, i) => s + num(i.value), 0);
     const liabs = items.filter((i) => LIAB.includes(i.kind)).reduce((s, i) => s + num(i.value), 0);
@@ -204,6 +207,11 @@ export function FinancialInformation({ clientId }: { clientId: string }) {
 
   return (
     <div className="space-y-2">
+      <label className="flex items-center gap-2 rounded-xl border border-border bg-card p-3 text-xs font-semibold">
+        <Checkbox checked={retired} onCheckedChange={checked => set("cash_flow", { ...sec("cash_flow"), retired: !!checked })} />
+        Client is retired
+      </label>
+      <Button size="sm" variant="outline" disabled={saving === "cash_flow"} onClick={() => save("cash_flow")}>Save retirement status</Button>
       <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm">
         <span className="font-medium text-foreground">Needs Analysis progress</span>
         <span className="text-muted-foreground">{completedSections} of {SECTIONS.length} sections completed</span>
@@ -225,7 +233,7 @@ export function FinancialInformation({ clientId }: { clientId: string }) {
                   {s.naField.label}
                 </label>
               )}
-              {s.naField && v[s.naField.key] ? (
+              {s.key !== "cash_flow" && s.naField && v[s.naField.key] ? (
                 <div className="flex justify-end">
                   <Button size="sm" onClick={() => save(s.key)} disabled={saving === s.key}>{saving === s.key ? "Saving…" : "Save"}</Button>
                 </div>
@@ -233,15 +241,15 @@ export function FinancialInformation({ clientId }: { clientId: string }) {
               <>
               {s.fields && (
                 <div className={FIELD_GRID_2_CLASS}>
-                  {s.fields.map((f) => (
+                  {s.fields.filter(f => !(retired && s.key === "goals_risk" && f.key === "retirement_age") && !(s.key === "cash_flow" && v.not_earning && ["gross_income", "net_salary"].includes(f.key))).map((f) => (
                     <div key={f.key} className={f.type === "textarea" ? "space-y-1.5 sm:col-span-2" : "space-y-1.5"}>
-                      <Label className="text-xs">{f.label}</Label>
+                      <Label className="text-xs">{retired && f.key === "net_salary" ? "Net monthly retirement income (R)" : retired && f.key === "gross_income" ? "Gross monthly retirement income (R)" : retired && f.key === "retirement_income" ? "Required retirement income (R / month)" : f.label}</Label>
                       {renderInput(v[f.key], (nv) => set(s.key, { ...v, [f.key]: nv }), f)}
                     </div>
                   ))}
                 </div>
               )}
-              {s.list && s.key !== "assets_liabilities" && (
+              {s.list && s.key !== "assets_liabilities" && s.key !== "investments" && (
                 <div className="space-y-2">
                   {(v[s.list.key] ?? []).map((row: any, i: number) => (
                     <div key={i} className="grid gap-2 sm:grid-cols-[repeat(auto-fit,minmax(140px,1fr))_auto] items-end rounded-xl border border-border p-2">
@@ -262,6 +270,37 @@ export function FinancialInformation({ clientId }: { clientId: string }) {
                   <Button variant="outline" size="sm" onClick={() => set(s.key, { ...v, [s.list!.key]: [...(v[s.list!.key] ?? []), {}] })}>
                     <Plus className="h-4 w-4 mr-1" />Add {s.list.label.toLowerCase()}
                   </Button>
+                </div>
+              )}
+
+              {s.list && s.key === "investments" && (
+                <div className="space-y-2">
+                  <Accordion type="single" collapsible value={openInvestment} onValueChange={setOpenInvestment}>
+                    {(v.holdings ?? []).map((row: any, i: number) => (
+                      <AccordionItem key={i} value={String(i)}>
+                        <AccordionTrigger>Investment {i + 1}: {row.provider || row.kind || "New investment"}</AccordionTrigger>
+                        <AccordionContent className="p-2 space-y-2">
+                          <div className={FIELD_GRID_2_CLASS}>
+                            {s.list!.cols.map(c => <div key={c.key} className="space-y-1">
+                              <Label className="text-xs">{c.label}</Label>
+                              {renderInput(row[c.key], nv => {
+                                const rows = [...v.holdings]; rows[i] = { ...row, [c.key]: nv };
+                                set("investments", { ...v, holdings: rows });
+                              }, c)}
+                            </div>)}
+                          </div>
+                          <Button variant="ghost" size="sm" onClick={() => {
+                            set("investments", { ...v, holdings: v.holdings.filter((_: any, index: number) => index !== i) });
+                            setOpenInvestment("");
+                          }}><Trash2 className="h-4 w-4 mr-1" />Remove investment</Button>
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                  <Button variant="outline" size="sm" onClick={() => {
+                    const rows = [...(v.holdings ?? []), {}];
+                    set("investments", { ...v, holdings: rows }); setOpenInvestment(String(rows.length - 1));
+                  }}><Plus className="h-4 w-4 mr-1" />Add investment</Button>
                 </div>
               )}
 
