@@ -7,7 +7,8 @@ export function PortalLoginChip({ at, outcome }: { at?: string | null; outcome?:
   const status = outcome === "success" ? "Connected" : outcome === "failed" ? "Failed" : "Timed out";
   const color = !recorded ? "text-muted-foreground" : outcome === "success" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-red-200 bg-red-50 text-red-800";
   return <Badge variant="outline" className={`text-2xs px-1.5 py-0 font-normal whitespace-normal text-right ${color}`}
+    aria-label={recorded ? `Connection Status: ${status}, ${date.toLocaleString("en-ZA")}` : "Connection Status: no connection recorded"}
     title={recorded ? `${status}: ${date.toLocaleString("en-ZA")}${outcome === "unconfirmed" ? ". Timed out; this does not mean the password is incorrect." : ""}` : "No Companion connection recorded yet. Manual portal logins are not tracked."}>
-    Connection Status · {recorded ? `${date.toLocaleDateString("en-ZA", { day: "2-digit", month: "short", year: "numeric" })} · ${status}` : "Not tested yet"}
+    Connection Status · {recorded ? date.toLocaleDateString("en-ZA", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
   </Badge>;
 }
