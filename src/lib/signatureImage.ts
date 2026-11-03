@@ -36,8 +36,11 @@ export async function renderSignaturePngBase64(
   profile?: SignatureProfileLike | null,
 ): Promise<string | null> {
   if (!profile) return null;
-  const name = (profile.full_name || "").trim();
-  if (!name) return null;
+  const rawName = (profile.full_name || "").trim();
+  if (!rawName) return null;
+  // Script/cursive fonts render a single space almost invisibly, so "First
+  // Last" can read as one run-together word — widen the gap between names.
+  const name = rawName.replace(/\s+/g, "  ");
 
   const fontFamily = getSignatureFontFamily(profile.signature_font);
   const color = getSignatureColor(profile.signature_color);

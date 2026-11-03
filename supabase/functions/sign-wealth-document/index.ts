@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
     if (error) throw error;
     // Auto-file the signed copy in the client's Documents.
     const at = new Date(signedAt).toLocaleString("en-ZA");
-    const signatureBlock = `<div style="padding:24px 60px"><img src="${p.signatureImage.startsWith("data:") ? p.signatureImage : `data:image/png;base64,${p.signatureImage}`}" style="height:60px"/><p><b>${p.signerName}</b> · Digitally signed ${at}${ip ? ` · IP ${ip}` : ""}</p><p style="font-family:monospace;font-size:10px">Seal ${sealHash}</p></div>`;
+    const signatureBlock = `<div style="padding:10px 60px 0;margin-top:8px"><img src="${p.signatureImage.startsWith("data:") ? p.signatureImage : `data:image/png;base64,${p.signatureImage}`}" style="height:42px;display:block"/><p style="margin:2px 0"><b>${p.signerName}</b> · Digitally signed ${at}${ip ? ` · IP ${ip}` : ""}</p><p style="font-family:monospace;font-size:9px;margin:2px 0">Seal ${sealHash}</p></div>`;
     // contentHtml's root is a single #holarc-document container (see
     // onboardingTemplates.ts's wrap()), and the PDF renderer only captures
     // that container — inserting the signature block *after* contentHtml
