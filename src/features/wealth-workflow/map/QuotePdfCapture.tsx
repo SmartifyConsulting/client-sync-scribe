@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { DocPreviewDialog } from "./DocumentTray";
 
-export function QuotePdfCapture({ workflowId, clientId, insurer, onActivity }: { workflowId: string; clientId: string; insurer: string; onActivity?: (insurer: string, phase: "saving" | "saved" | "pdf-error", detail?: string) => void }) {
+export function QuotePdfCapture({ workflowId, clientId, insurer, onActivity, onScenarioSaved }: { workflowId: string; clientId: string; insurer: string; onActivity?: (insurer: string, phase: "saving" | "saved" | "pdf-error", detail?: string) => void; onScenarioSaved?: (insurer: string, n: number) => void }) {
   const qc = useQueryClient();
   const input = useRef<HTMLInputElement>(null);
   const processing = useRef(new Set<string>());
@@ -27,6 +27,7 @@ export function QuotePdfCapture({ workflowId, clientId, insurer, onActivity }: {
         if (error || data?.error) throw new Error(data?.error ?? "Could not attach PDF.");
         toast.success(data.duplicate ? "Quote PDF is already filed." : "Quote PDF attached to Working Window and Documents.");
         onActivity?.(d.insurer, "saved", data.duplicate ? "Already filed, so the document count does not increase." : undefined);
+        if (Number.isInteger(d.n) && d.n >= 1 && d.n <= 6) onScenarioSaved?.(d.insurer, d.n);
         await Promise.all(["quote-pdfs", "wealth-map-records", "wealth-doc-tray", "client-documents", "documents"].map((key) => qc.invalidateQueries({ queryKey: [key] })));
         window.postMessage({ source: "holarc", type: "insurer-pdf-ack", workflowId, captureId: d.captureId, ok: true }, location.origin);
       } catch (e) {
