@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
 const source = readFileSync(new URL("./background.js", import.meta.url), "utf8");
+const journey = readFileSync(new URL("./portalJourney.js", import.meta.url), "utf8");
 function harness() {
   const listeners = {}, stored = {}, tabs = new Map(), removed = [], sent = [], created = [], injected = [];
   const chrome = {
@@ -15,17 +16,20 @@ function harness() {
       reload: async () => {},
       onRemoved: { addListener: (fn) => { listeners.removed = fn; } },
       onUpdated: { addListener: (fn) => { listeners.updated = fn; } },
+      onCreated: { addListener: (fn) => { listeners.created = fn; } },
+      update: async () => {},
     },
     storage: { session: {
       get: async (key) => structuredClone(key ? { [key]: stored[key] } : stored),
       set: async (value) => { Object.assign(stored, structuredClone(value)); },
       remove: async (key) => { delete stored[key]; },
     } },
-    scripting: { executeScript: async (options) => { injected.push(options); return [{ result: options.func.name === "readPdf" ? { base64: "JVBERi0=" } : { state: "otp" } }]; } },
+    scripting: { executeScript: async (options) => { injected.push(options); return [{ result: options.func.name === "readPdf" ? { base64: "JVBERi0=" } : options.func.name === "driveQuoteJourney" ? { state: "blocked" } : { state: "otp" } }]; } },
     downloads: { onCreated: { addListener: (fn) => { listeners.download = fn; } } },
     windows: { create: (options, cb) => { created.push(options); tabs.set(2, { id: 2, url: options.url }); cb({ id: 9, tabs: [{ id: 2 }] }); } },
   };
   const context = vm.createContext({ chrome, URL, Date, Map, Object, Number, Promise, setTimeout: (fn, ms) => { if (ms === 1200) fn(); }, TextDecoder, Uint8Array });
+  context.importScripts = () => vm.runInContext(journey, context);
   vm.runInContext(source, context);
   const sender = { tab: { id: 1, url: "https://holarc.co.za/app-integrations" } };
   tabs.set(1, sender.tab);
@@ -76,18 +80,31 @@ describe("Companion background portal rules", () => {
     h.listeners.message({ type: "insurer-pdf-ack", workflowId: "georgia-demo", captureId: "2-10", ok: true }, h.sender);
     await flush(); expect(h.removed).toEqual([2]);
   });
+  it("does not close after Quote 1 acknowledgement while other scenarios are running", async () => {
+    const h = harness(); h.login();
+    vm.runInContext("jobs.get(2).running = true; jobs.get(2).currentScenario = 1", h.context);
+    await h.listeners.download({ id: 9, filename: "quote.pdf", url: "https://partner.discovery.co.za/quote.pdf" });
+    expect(h.sent.find((m) => m.type === "insurer-pdf").n).toBe(1);
+    h.listeners.message({ type: "insurer-pdf-ack", workflowId: "georgia-demo", captureId: "2-9", ok: true }, h.sender);
+    await flush(); expect(h.removed).toEqual([]); expect(vm.runInContext("jobs.get(2).pdfSaved", h.context)).toBe(true);
+  });
+  it("ignores quote popups on another origin", async () => {
+    const h = harness(); h.login(); vm.runInContext("jobs.get(2).running = true", h.context);
+    await h.listeners.created({ id: 3, openerTabId: 2, url: "https://evil.example/quote" });
+    expect(h.stored["portal-3"]).toBeUndefined(); expect(h.injected).toEqual([]);
+  });
   it("reports a numbered scenario as no-fields when the portal screen has no matching fields", async () => {
     const h = harness(); h.login();
     h.listeners.message({ type: "insurer-quote-submit", insurer: "discovery", workflowId: "georgia-demo", scenarios: [{ n: 1, fields: [{ label: "Benefit amount", value: "1000000" }] }] }, h.sender);
     await flush();
-    expect(h.injected.at(-1).func.name).toBe("fillScenario");
+    expect(h.injected.at(-1).func.name).toBe("driveQuoteJourney");
     expect(h.sent.filter((m) => m.type === "insurer-quote-status").map((m) => [m.n, m.status])).toEqual([[1, "submitting"], [1, "no-fields"]]);
   });
   it("never submits a scenario into an untrusted page", async () => {
     const h = harness(); h.login(); h.tabs.set(2, { id: 2, url: "https://unrelated.example/quote" });
     h.listeners.message({ type: "insurer-quote-submit", insurer: "discovery", workflowId: "georgia-demo", scenarios: [{ n: 2, fields: [] }] }, h.sender);
     await flush();
-    expect(h.injected.some((i) => i.func.name === "fillScenario")).toBe(false);
+    expect(h.injected.some((i) => i.func.name === "driveQuoteJourney")).toBe(false);
     expect(h.sent.at(-1)).toMatchObject({ n: 2, status: "failed" });
   });
   it("ignores unrelated PDF origins", async () => {

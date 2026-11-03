@@ -10,7 +10,7 @@ function inspect({ title = 'Home | AdviserConnect', password = false, welcome = 
   const search = { type: 'text', name: 'clientSearch', id: 'mat-input-0', placeholder: 'Search using name or ID',
     offsetParent: {}, disabled: false, labels: [{ textContent: 'Client search' }],
     getAttribute: () => null, focus: () => { writes++; } };
-  const inputs = [search, ...(password ? [{ ...search, type: 'password' }] : [])];
+  const inputs = [search, ...(password ? [{ ...search, type: 'password', value: 'already-submitted' }] : [])];
   const context = vm.createContext({ URL, location: { href: 'https://adviserconnect.momentum.co.za/' },
     document: { title, body: { innerText: welcome ? 'Welcome to AdviserConnect\nQuotes & calculators' : '' }, querySelectorAll: () => inputs } });
   vm.runInContext(drive, context);

@@ -1,4 +1,9 @@
 # Roadmap — Step 5 Indigro copy
+## Documented insurer journeys — Nov 3
+- [x] Add bounded Momentum navigation/report and BrightRock new/copy scenario adapters from supplied PDFs; pause for missing approved data and unmapped controls. Partial adapters, not live-verified end-to-end automation.
+- [x] Send actual available client/rating and insurer-specific options; keep premium and benefit increases separate. Missing dates, role players, occupation-result selections, and underwriting inputs stop for broker review, not defaults.
+- [x] Associate saved PDFs with exact numbered scenarios and keep portals open until all scenario saves finish; Companion v1.6.0 packaged. 45 isolated checks pass plus simulated browser navigation/input/copy/required-data stops; preview build OK.
+- [ ] Broker-run live verification — requires updated Companion, approved portal URLs and legitimate verification; Bidvest quote screens and other insurer journeys not supplied. No fabricated quotes or real-client communications.
 ## Recording compatibility — Nov 3
 - [x] Deployed clientId/patientId-compatible transcription and financial extraction; UI sends both identifiers. Ten isolated processing regressions pass (14 including signing regressions).
 - [ ] Confirm a real recorded meeting and financial readback with Georgia only — requires an authenticated Wealth Manager session.
@@ -17,7 +22,7 @@
 - [x] Add insurer-coloured activity ring, actual stage commentary and 30-second waiting warning with Retry
 - [x] Show actual workflow quote-PDF count; await document count refresh after successful save; no promised nine-document total
 - [x] Test Companion progress and authenticated Georgia Demo UI with simulated activity, OTP, waiting and failure; 22 isolated tests pass; Companion v1.4.0 packaged
-- [ ] Live quote generation remains blocked: insurer-specific scenario submission is not implemented or verified; broker-installed Companion and legitimate insurer verification required
+- [ ] Live quote generation remains blocked: partial documented Momentum/BrightRock adapters added Nov 3, but live multi-step fields/report integrity are unverified; broker-installed Companion and legitimate insurer verification required.
 
 - [x] Glossary + hide healthcare modules (nav, mobile nav, route guard)
 - [x] Nav labels, en.json + uiTranslations (en) rewrite

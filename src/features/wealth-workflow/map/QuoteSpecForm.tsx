@@ -9,7 +9,8 @@ import { QuotePdfCapture } from "./QuotePdfCapture";
 import { DiscoveryScreenScan } from "./DiscoveryScreenScan";
 import { InsurerActivity } from "./InsurerActivity";
 import { isActivityPhase, updateActivity, type QuoteActivity, type ActivityPhase } from "./quoteActivity";
-import { startJobs, setStatus, markCaptured, type QuoteJobs } from "./quoteJobs";
+import { startJobs, setStatus, type QuoteJobs } from "./quoteJobs";
+import { buildPortalScenarios } from "./portalPayload";
 import { QuoteJobsPanel } from "./QuoteJobsPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -40,6 +41,15 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const { data: fin, isFetched: finReady } = useQuery({
     queryKey: ["fin-needs", clientId], enabled: !!clientId,
     queryFn: async () => (await db.from("client_financial_profiles").select("cash_flow,assets_liabilities,risk_portfolio").eq("patient_id", clientId).maybeSingle()).data,
+  });
+  const { data: quoteClient } = useQuery({
+    queryKey: ["quote-client-inputs", clientId], enabled: !!clientId && isWM,
+    queryFn: async () => {
+      if (!clientId) return null;
+      const { data, error } = await supabase.from("clients").select("title,first_name,last_name,id_passport_number,email,dob,smoker,highest_education,occupation,marital_status").eq("id", clientId).maybeSingle();
+      if (error) throw error;
+      return data;
+    },
   });
   const { data: insurerRows = [] } = useQuery({
     queryKey: ["quote-insurer-rows", user?.id], enabled: !!user && isWM,
@@ -176,10 +186,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     if (login[ins] !== "connected") { toast({ title: `Connect ${ins} first.` }); return; }
     const prods = Object.keys(plan);
     const count = Math.max(...prods.map((p) => plan[p].length), 0);
-    const scenarios = Array.from({ length: count }, (_, i) => ({
-      n: i + 1,
-      fields: prods.flatMap((p) => (PRODUCT_TYPES[p] ?? []).map((f) => ({ product: p, label: f.label, kind: f.kind, value: String(plan[p][i]?.[f.key] ?? "") }))).filter((f) => f.value !== ""),
-    })).filter((s) => (!only || only.includes(s.n)) && jobs[ins]?.find((j) => j.n === s.n)?.status !== "captured");
+    const scenarios = buildPortalScenarios(plan, ins, quoteClient).filter((s) => (!only || only.includes(s.n)) && jobs[ins]?.find((j) => j.n === s.n)?.status !== "captured");
     setJobs((j) => startJobs(j, ins, count, Date.now(), only));
     window.postMessage({ source: "holarc", type: "insurer-quote-submit", insurer: ins, workflowId, scenarios }, window.location.origin);
   };
@@ -403,7 +410,9 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
             <p className={label}>{login[activeTab] !== "connected" ? `Connect ${activeTab} in step 1 before requesting quotes.` : !allComplete ? "Complete the missing values in step 2 to enable this button." : "Connected. Review your options before submitting to the insurer."}</p>
           </div>
           <QuoteJobsPanel jobs={jobs} onRetry={(ins, n) => submitScenarios(ins, [n])} />
-          {clientId && <QuotePdfCapture workflowId={workflowId} clientId={clientId} insurer={activeTab} onActivity={(ins, phase, detail) => { recordActivity(ins, phase, detail); if (phase === "saved" && !detail) setJobs((j) => markCaptured(j, ins, Date.now())); }} />}
+          {clientId && <QuotePdfCapture workflowId={workflowId} clientId={clientId} insurer={activeTab}
+            onActivity={(ins, phase, detail) => recordActivity(ins, phase, detail)}
+            onScenarioSaved={(ins, n) => setJobs((j) => setStatus(j, ins, n, "captured", Date.now()))} />}
           {/^discovery$/i.test(activeTab) && <DiscoveryScreenScan workflowId={workflowId} connected={login[activeTab] === "connected"} />}
 
 

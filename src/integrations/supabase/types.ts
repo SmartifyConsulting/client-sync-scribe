@@ -543,6 +543,44 @@ export type Database = {
         }
         Relationships: []
       }
+      client_history_timelines: {
+        Row: {
+          created_at: string
+          generated_at: string
+          id: string
+          patient_id: string
+          source_fingerprint: string
+          timeline: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          generated_at?: string
+          id?: string
+          patient_id: string
+          source_fingerprint: string
+          timeline?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          generated_at?: string
+          id?: string
+          patient_id?: string
+          source_fingerprint?: string
+          timeline?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_history_timelines_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_invitations: {
         Row: {
           created_at: string
@@ -1297,44 +1335,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
-      }
-      patient_history_timelines: {
-        Row: {
-          created_at: string
-          generated_at: string
-          id: string
-          patient_id: string
-          source_fingerprint: string
-          timeline: Json
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          generated_at?: string
-          id?: string
-          patient_id: string
-          source_fingerprint: string
-          timeline?: Json
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          generated_at?: string
-          id?: string
-          patient_id?: string
-          source_fingerprint?: string
-          timeline?: Json
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "patient_history_timelines_patient_id_fkey"
-            columns: ["patient_id"]
-            isOneToOne: true
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       payment_history: {
         Row: {
