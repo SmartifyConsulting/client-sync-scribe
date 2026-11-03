@@ -349,6 +349,38 @@ export type Database = {
           },
         ]
       }
+      broker_portal_login_status: {
+        Row: {
+          broker_user_id: string
+          integration_id: string
+          last_connect_at: string | null
+          last_connect_outcome: string | null
+          last_successful_login_at: string | null
+        }
+        Insert: {
+          broker_user_id: string
+          integration_id: string
+          last_connect_at?: string | null
+          last_connect_outcome?: string | null
+          last_successful_login_at?: string | null
+        }
+        Update: {
+          broker_user_id?: string
+          integration_id?: string
+          last_connect_at?: string | null
+          last_connect_outcome?: string | null
+          last_successful_login_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broker_portal_login_status_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "app_integrations_catalog"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       broker_security_settings: {
         Row: {
           broker_user_id: string
@@ -950,6 +982,79 @@ export type Database = {
           weight_kg?: number | null
         }
         Relationships: []
+      }
+      companion_interface_incidents: {
+        Row: {
+          companion_version: string
+          dispatched_at: string | null
+          evidence: Json
+          fingerprint: string
+          first_seen_at: string
+          id: string
+          integration_id: string
+          last_seen_at: string
+          repair_pr_url: string | null
+          status: string
+        }
+        Insert: {
+          companion_version: string
+          dispatched_at?: string | null
+          evidence: Json
+          fingerprint: string
+          first_seen_at?: string
+          id?: string
+          integration_id: string
+          last_seen_at?: string
+          repair_pr_url?: string | null
+          status?: string
+        }
+        Update: {
+          companion_version?: string
+          dispatched_at?: string | null
+          evidence?: Json
+          fingerprint?: string
+          first_seen_at?: string
+          id?: string
+          integration_id?: string
+          last_seen_at?: string
+          repair_pr_url?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "companion_interface_incidents_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "app_integrations_catalog"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      companion_interface_reporters: {
+        Row: {
+          broker_user_id: string
+          incident_id: string
+          reported_at: string
+        }
+        Insert: {
+          broker_user_id: string
+          incident_id: string
+          reported_at?: string
+        }
+        Update: {
+          broker_user_id?: string
+          incident_id?: string
+          reported_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "companion_interface_reporters_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "companion_interface_incidents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cpd_certificates: {
         Row: {
@@ -4345,6 +4450,14 @@ export type Database = {
       provider_has_offer_on_incident: {
         Args: { _incident_id: string; _user_id: string }
         Returns: boolean
+      }
+      record_broker_portal_connection: {
+        Args: { _integration_id: string; _outcome: string }
+        Returns: string
+      }
+      record_broker_portal_login: {
+        Args: { _integration_id: string }
+        Returns: string
       }
       record_login_event: {
         Args: { _session_key: string; _user_agent?: string }
