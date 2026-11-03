@@ -3,6 +3,8 @@ import { Loader2, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { addonInstalled, OtpDialog, type Challenge } from "./InsurerLogin";
 import { CompanionSetup } from "./CompanionSetup";
+import { recordPortalLogin } from "./portalLoginStatus";
+import { toast } from "sonner";
 import { LOGIN_TEST_STAGES, loginProgressStage, loginTimeoutExplanation, type LoginTestStage, type LoginTestEvent } from "./loginTestDiagnostics";
 
 type Result = { state: "testing" | "verification" | "success" | "error" | "unknown"; message: string };
@@ -55,6 +57,8 @@ export function CredentialLoginTest({ integrationId, provider, username, passwor
         setChallenge({ insurer: provider, method: d.method, hint: d.hint });
       }
       if (d.type === "insurer-login-result") {
+        attempt.current = null;
+        if (d.ok === true) void recordPortalLogin(integrationId).catch(() => toast.error("Signed in, but the last-login date could not be saved."));
         lastResponse.current = Date.now();
         record(d.ok === true ? "connected" : "failed");
         stopTimer();
@@ -66,7 +70,7 @@ export function CredentialLoginTest({ integrationId, provider, username, passwor
     };
     window.addEventListener("message", receive);
     return () => window.removeEventListener("message", receive);
-  }, [provider]);
+  }, [provider, integrationId]);
 
   const waitForResult = () => {
     stopTimer();

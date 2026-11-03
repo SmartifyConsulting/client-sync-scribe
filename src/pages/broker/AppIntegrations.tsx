@@ -1,5 +1,6 @@
 import { QUOTE_EMAIL_PRESETS, parseEmails } from "@/features/wealth-workflow/map/quoteEmails";
 import { CompanionStatus } from "@/features/wealth-workflow/map/CompanionStatus";
+import { PortalLoginChip } from "@/features/wealth-workflow/map/PortalLoginChip";
 import { CredentialLoginTest } from "@/features/wealth-workflow/map/CredentialLoginTest";
 import { useEffect, useMemo, useState, type ComponentProps } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -121,6 +122,19 @@ export default function AppIntegrations() {
     enabled: !!user && !!reauthToken,
     queryFn: async (): Promise<CredentialStatus[]> => (await invoke({ action: "list" })).credentials ?? [],
   });
+  const portalLogins = useQuery({
+    queryKey: ["broker-portal-login-status", user?.id], enabled: !!user && !!reauthToken,
+    queryFn: async (): Promise<{ integration_id: string; last_successful_login_at: string }[]> => {
+      const { data, error } = await db.from("broker_portal_login_status").select("integration_id,last_successful_login_at").eq("broker_user_id", user!.id);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  useEffect(() => {
+    const refresh = () => { void qc.invalidateQueries({ queryKey: ["broker-portal-login-status", user?.id] }); };
+    window.addEventListener("holarc-portal-login-recorded", refresh);
+    return () => window.removeEventListener("holarc-portal-login-recorded", refresh);
+  }, [qc, user?.id]);
 
   const statusFor = (integrationId: string) => (credentials.data ?? []).find((c) => c.integration_id === integrationId);
 
@@ -417,11 +431,14 @@ export default function AppIntegrations() {
                           >
                             {entry.name} <ExternalLink className="h-3 w-3 shrink-0" />
                           </a>
+                          <div className="flex max-w-[65%] shrink-0 flex-col items-end gap-1">
                           <Badge variant={configured ? "default" : "secondary"} className="shrink-0 text-2xs px-1.5 py-0 font-normal">
                             {configured
                               ? `Configured${status?.updated_at ? ` · ${new Date(status.updated_at).toLocaleDateString()}` : ""}`
                               : "Not Set Up"}
                           </Badge>
+                          <PortalLoginChip at={portalLogins.data?.find(row => row.integration_id === entry.id)?.last_successful_login_at} />
+                          </div>
                         </div>
                         {entry.category === "insurance" && (
                           <p className="truncate text-xs text-muted-foreground">

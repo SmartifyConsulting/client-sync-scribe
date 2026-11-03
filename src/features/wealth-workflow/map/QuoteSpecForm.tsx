@@ -1,4 +1,5 @@
 import { useCompanionInstalled } from "./companionDetection";
+import { recordPortalLogin } from "./portalLoginStatus";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus, X, Pencil } from "lucide-react";
@@ -111,6 +112,10 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
         setChallenge({ insurer: d.insurer, method: d.method === "email" ? "email" : "otp", hint: d.hint });
       }
       if (d.type === "insurer-otp-result" || d.type === "insurer-login-result") {
+        if (d.type === "insurer-login-result" && d.ok === true) {
+          const provider = insurerRows.find(row => row.name === d.insurer);
+          if (provider) void recordPortalLogin(provider.id).catch(() => toast({ title: "Signed in, but the last-login date could not be saved." }));
+        }
         recordActivity(d.insurer, d.ok ? "connected" : "failed", d.ok ? undefined : d.message);
         setLogin((s) => ({ ...s, [d.insurer]: d.ok ? "connected" : "failed" }));
         if (d.ok) setChallenge((c) => (c?.insurer === d.insurer ? null : c));
@@ -119,7 +124,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     };
     window.addEventListener("message", onMsg);
     return () => window.removeEventListener("message", onMsg);
-  }, [workflowId]);
+  }, [workflowId, insurerRows]);
 
   /** Opening a tab unlocks the saved login and asks the add-on to open and log into the insurer portal. */
   const TOKEN_KEY = "holarc-cred-token";
