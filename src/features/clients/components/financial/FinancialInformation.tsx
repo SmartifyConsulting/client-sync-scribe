@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import { Checkbox } from "@/components/ui/checkbox";
 import { SectionHeader, FIELD_GRID_2_CLASS } from "../sectionStyles";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,11 +18,13 @@ import { DocumentUploadList } from "./DocumentUploadList";
 type Field = { key: string; label: string; type?: "number" | "text" | "date" | "textarea"; options?: string[]; placeholder?: string };
 type Col = { key: string; label: string; type?: "number" | "text"; options?: string[]; placeholder?: string };
 export type SectionKey = "cash_flow" | "assets_liabilities" | "risk_portfolio" | "investments" | "goals_risk" | "estate" | "car_insurance";
-export type SectionDef = { key: SectionKey; label: string; icon: any; fields?: Field[]; list?: { key: string; label: string; cols: Col[] } };
+/** A section can offer a "not applicable" toggle (e.g. no car, retired with
+ *  no income) that marks it done without requiring its fields to be filled. */
+export type SectionDef = { key: SectionKey; label: string; icon: any; fields?: Field[]; list?: { key: string; label: string; cols: Col[] }; naField?: { key: string; label: string } };
 export const GENERAL_NOTES_KEY = "general_notes";
 
 export const SECTIONS: SectionDef[] = [
-  { key: "cash_flow", label: "General & Cash Flow", icon: Wallet, fields: [
+  { key: "cash_flow", label: "General & Cash Flow", icon: Wallet, naField: { key: "not_earning", label: "Client is retired / not earning an income" }, fields: [
     { key: "gross_income", label: "Gross monthly income (R)", type: "number", placeholder: "e.g. 45000" },
     { key: "net_salary", label: "Net monthly salary (R)", type: "number", placeholder: "e.g. 34000" },
     { key: "fixed_expenses", label: "Fixed monthly expenses (R)", type: "number", placeholder: "Rent, loans, school fees…" },
@@ -39,7 +42,7 @@ export const SECTIONS: SectionDef[] = [
     { key: "cover", label: "Cover amount (R)", type: "number" },
     { key: "premium", label: "Monthly premium (R)", type: "number" },
   ] } },
-  { key: "car_insurance", label: "Car / Short-Term Insurance", icon: Car, fields: [
+  { key: "car_insurance", label: "Car / Short-Term Insurance", icon: Car, naField: { key: "no_car", label: "Client doesn't have a car or car insurance" }, fields: [
     { key: "current_insurer", label: "Current insurer", placeholder: "e.g. Outsurance" },
     { key: "monthly_premium", label: "Monthly premium (R)", type: "number" },
     { key: "years_continuous_cover", label: "Years of continuous, uninterrupted cover", type: "number", placeholder: "e.g. 5" },
@@ -82,6 +85,7 @@ export function estateDuty(netEstate: number) {
 /** How much of a section is filled in, from a client_financial_profiles row. */
 export function sectionProgress(s: SectionDef, profile: Record<string, any> | null | undefined): { filled: number; total: number } {
   const v = (profile ?? {})[s.key] ?? {};
+  if (s.naField && v[s.naField.key]) return { filled: 1, total: 1 };
   if (s.list) {
     const rows: any[] = v[s.list.key] ?? [];
     return { filled: rows.length, total: Math.max(rows.length, 1) };
@@ -212,6 +216,21 @@ export function FinancialInformation({ clientId }: { clientId: string }) {
           <Collapsible key={s.key} defaultOpen={false} className="bg-card overflow-hidden">
             <SectionHeader icon={s.icon} label={s.label} extra={<ProgressPill filled={p.filled} total={p.total} />} />
             <CollapsibleContent className="p-2 space-y-2">
+              {s.naField && (
+                <label className="flex items-center gap-2 text-xs font-medium text-foreground rounded-lg border border-border bg-muted/30 px-2.5 py-2">
+                  <Checkbox
+                    checked={!!v[s.naField.key]}
+                    onCheckedChange={(checked) => set(s.key, { ...v, [s.naField!.key]: !!checked })}
+                  />
+                  {s.naField.label}
+                </label>
+              )}
+              {s.naField && v[s.naField.key] ? (
+                <div className="flex justify-end">
+                  <Button size="sm" onClick={() => save(s.key)} disabled={saving === s.key}>{saving === s.key ? "Saving…" : "Save"}</Button>
+                </div>
+              ) : (
+              <>
               {s.fields && (
                 <div className={FIELD_GRID_2_CLASS}>
                   {s.fields.map((f) => (
@@ -311,6 +330,8 @@ export function FinancialInformation({ clientId }: { clientId: string }) {
               <div className="flex justify-end">
                 <Button size="sm" onClick={() => save(s.key)} disabled={saving === s.key}>{saving === s.key ? "Saving…" : "Save"}</Button>
               </div>
+              </>
+              )}
             </CollapsibleContent>
           </Collapsible>
         );
