@@ -5,7 +5,7 @@ const logo = (u?: string | null) => (u ? `<img src="${esc(u)}" alt="" style="max
 const footer = (p: any) => p?.fsp_name
   ? `${esc(p.fsp_name)} · Reg No ${esc(p.registration_number ?? "–")} · FSP ${esc(p.fsb_licence ?? "–")}<br/>${esc(p.firm_address ?? "")}${p.firm_website ? " · " + esc(p.firm_website) : ""}`
   : "Masthead Financial Planning (Proprietary) Limited · Reg No 2010/019601/07 · FSP 43435<br/>1st Floor Park Terraces, Golf Park, Mowbray 7700 · www.mastheadfp.co.za";
-const wrap = (title: string, subtitle: string, body: string, p: any = null) => `<div id="holarc-document" style="font-family:'Helvetica Neue',Arial,sans-serif;color:${INK};background:#fff;padding:24px 60px 56px;font-size:12.5px;line-height:1.7;letter-spacing:0.15px;word-spacing:1px;max-width:820px;margin:0 auto">
+const wrap = (title: string, subtitle: string, body: string, p: any = null) => `<div id="holarc-document" style="font-family:'Helvetica Neue',Arial,sans-serif;color:${INK};background:#fff;padding:17px 42px 39px;font-size:12.5px;line-height:1.7;letter-spacing:0.15px;word-spacing:1px;max-width:820px;margin:0 auto">
 ${p?.__businessLogo || p?.__fspLogo ? `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">${logo(p.__fspLogo) || "<span></span>"}${logo(p.__businessLogo) || "<span></span>"}</div>` : ""}
 <div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid ${NAVY};padding-bottom:10px;margin-bottom:20px">
 <div><p style="margin:0;font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:${MUTED}">${subtitle}</p>
@@ -24,7 +24,7 @@ export function disclosureHtml(client: string, date: string, p: any = null) {
 <h3 style="margin:20px 0 6px;font-size:13px;color:#0f2742;font-weight:600">3. How We Are Paid</h3><p>We may earn commission set by legislation, an advice fee agreed with you in writing, or both. All costs will be shown in your Record of Advice before you decide.</p>
 <h3 style="margin:20px 0 6px;font-size:13px;color:#0f2742;font-weight:600">4. Conflicts of Interest</h3><p>Our conflict of interest management policy is available on request. We do not accept gifts or incentives that could influence our advice.</p>
 <h3 style="margin:20px 0 6px;font-size:13px;color:#0f2742;font-weight:600">5. Complaints</h3><p>Complaints can be sent to the FSP's compliance officer. If unresolved, you may contact the FAIS Ombud.</p>
-<h3 style="margin:20px 0 6px;font-size:13px;color:#0f2742;font-weight:600">6. Privacy</h3><p>Your personal information is processed in line with the Protection of Personal Information Act (POPIA) and only for the purpose of providing financial services to you.</p>
+<h3 style="margin:20px 0 6px;font-size:13px;color:#0f2742;font-weight:600">6. Privacy</h3><p>Your personal information is processed in line with the Protection of Personal Information Act (POPIA) and only for the purpose of providing financial services to you.<br/><br/></p>
 <p>By signing, I confirm that I have read and understood this disclosure.</p>`, p);
 }
 
@@ -75,8 +75,8 @@ ${h2("Client Declaration")}
 
 export function sealedHtml(doc: { content_html: string; signature_image: string; signer_name: string; signed_at: string; signer_ip: string | null; seal_hash: string; title: string }) {
   const at = new Date(doc.signed_at).toLocaleString("en-ZA");
-  const sealBlock = `<div style="font-family:Arial,sans-serif;padding:0 40px 16px;color:#1f2937">
-<div style="border-top:1px solid #cbd5e1;padding-top:10px;margin-top:6px"><img src="${doc.signature_image}" style="height:42px;display:block"/><p style="margin:2px 0;font-size:11px"><b>${doc.signer_name}</b> · Digitally signed ${at}</p></div>
+  const sealBlock = `<div style="font-family:Arial,sans-serif;padding:0 28px 16px;color:#1f2937">
+<div style="padding-top:10px;margin-top:6px"><img src="${doc.signature_image}" style="height:84px;display:block"/><p style="margin:2px 0;font-size:11px"><b>${doc.signer_name}</b> · Digitally signed ${at}</p></div>
 <div style="border:1.5px solid #334155;border-radius:10px;padding:10px 12px;margin-top:10px;font-size:10px">
 <p style="text-align:center;letter-spacing:.2em;font-weight:bold;font-size:11px;margin:0 0 6px">SEAL CERTIFICATE</p>
 <p style="margin:0">Document: ${doc.title}<br/>Signed by: ${doc.signer_name}<br/>Sealed: ${doc.signed_at}<br/>IP address: ${doc.signer_ip ?? "not recorded"}</p>
