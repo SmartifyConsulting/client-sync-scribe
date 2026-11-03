@@ -24,6 +24,14 @@ export async function safeInvoke<T = unknown>(
       body: payload as any,
     });
     if (error) {
+      // Non-2xx function responses carry the actionable backend error here.
+      const response = error.context;
+      if (response instanceof Response) {
+        const body = await response.clone().json().catch(() => null);
+        if (typeof body?.error === "string" && body.error.trim()) {
+          return { data: null, error: body.error };
+        }
+      }
       return { data: null, error: error.message || `Edge function "${functionName}" failed` };
     }
     return { data: (data as T) ?? null, error: null };

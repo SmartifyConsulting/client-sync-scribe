@@ -18,7 +18,7 @@ export function AstutePanel({ clientId, holdings, viewer }: { clientId?: string;
   const pull = async () => {
     if (!clientId) return;
     setBusy(true);
-    const { data, error } = await safeInvoke<any>("astute-sync", { clientId });
+    const { data, error } = await safeInvoke<any>("astute-sync", { patientId: clientId });
     setBusy(false);
     const msg = (data as any)?.error ?? error;
     if (msg || !data?.ok) { toast({ title: "Astute pull didn't finish", description: msg ?? "Please try again.", variant: "destructive" }); return; }

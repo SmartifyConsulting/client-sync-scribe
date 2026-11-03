@@ -147,10 +147,10 @@ export function NewClientInvite({ compact = false }: { compact?: boolean }) {
         <Button variant="outline" className={compact ? "h-8 md:h-9 text-xs" : ""} onClick={() => setListOpen(true)}>Invitations</Button>
       </div>
       <Dialog open={open} onOpenChange={close}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="settings-scope max-w-md text-xs">
           <DialogHeader>
-            <DialogTitle>{result ? "Send the onboarding link" : "New Client"}</DialogTitle>
-            <DialogDescription>{result ? `Send ${f.firstName} this link. They sign up and land on Step 1 to complete KYC, AML and PEP screening.` : "Creates a Client ID and a secure sign-up link for your client."}</DialogDescription>
+            <DialogTitle className="text-sm font-semibold">{result ? "Send the onboarding link" : "New Client"}</DialogTitle>
+            <DialogDescription className="text-xs">{result ? `Send ${f.firstName} this link. They sign up and land on Step 1 to complete KYC, AML and PEP screening.` : "Creates a Client ID and a secure sign-up link for your client."}</DialogDescription>
           </DialogHeader>
           {result ? (
             <SendOptions first={f.firstName} phone={f.phone} email={f.email} url={result} manager={manager} />
@@ -163,11 +163,11 @@ export function NewClientInvite({ compact = false }: { compact?: boolean }) {
                 </div>
               )}
               <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5"><Label>First name</Label><Input value={f.firstName} onChange={(e) => setF({ ...f, firstName: e.target.value })} /></div>
-                <div className="space-y-1.5"><Label>Surname</Label><Input value={f.lastName} onChange={(e) => setF({ ...f, lastName: e.target.value })} /></div>
+                <div className="space-y-1.5"><Label className="text-xs font-bold">First name</Label><Input value={f.firstName} onChange={(e) => setF({ ...f, firstName: e.target.value })} /></div>
+                <div className="space-y-1.5"><Label className="text-xs font-bold">Last name</Label><Input value={f.lastName} onChange={(e) => setF({ ...f, lastName: e.target.value })} /></div>
               </div>
-              <div className="space-y-1.5"><Label>Email address</Label><Input type="email" required placeholder="client@example.com" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /></div>
-              <div className="space-y-1.5"><Label>Telephone</Label><PhoneNumberInput value={f.phone} onChange={(v) => setF({ ...f, phone: v })} /></div>
+              <div className="space-y-1.5"><Label className="text-xs font-bold">Email address</Label><Input type="email" required placeholder="client@example.com" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /></div>
+              <div className="space-y-1.5"><Label className="text-xs font-bold">Telephone</Label><PhoneNumberInput value={f.phone} onChange={(v) => setF({ ...f, phone: v })} /></div>
               <Button className="w-full" disabled={busy} onClick={create}><Send className="h-4 w-4" />{busy ? "Creating…" : "Create client and send link"}</Button>
             </div>
           )}

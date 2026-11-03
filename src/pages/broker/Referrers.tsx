@@ -205,15 +205,15 @@ export default function Referrers() {
           </DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1.5">
-              <Label className="text-xs" htmlFor="referrer-first-name">First Name</Label>
+              <Label className="text-xs font-bold" htmlFor="referrer-first-name">First Name</Label>
               <Input className="text-xs" id="referrer-first-name" autoComplete="given-name" value={inviteForm.firstName} onChange={(e) => setInviteForm((f) => ({ ...f, firstName: e.target.value }))} placeholder="Optional" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs" htmlFor="referrer-last-name">Last Name</Label>
+              <Label className="text-xs font-bold" htmlFor="referrer-last-name">Last Name</Label>
               <Input className="text-xs" id="referrer-last-name" autoComplete="family-name" value={inviteForm.lastName} onChange={(e) => setInviteForm((f) => ({ ...f, lastName: e.target.value }))} placeholder="Optional" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs" htmlFor="referrer-email">Email</Label>
+              <Label className="text-xs font-bold" htmlFor="referrer-email">Email</Label>
               <Input id="referrer-email" className="text-xs" type="email" required value={inviteForm.email} onChange={(e) => setInviteForm((f) => ({ ...f, email: e.target.value }))} placeholder="referrer@email.com" />
             </div>
           </div>
