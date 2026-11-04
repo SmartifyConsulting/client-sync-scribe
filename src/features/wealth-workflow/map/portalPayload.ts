@@ -1,3 +1,4 @@
+import { providerQuoteFields, isOmpLife } from "./providerQuoteFields";
 import { PRODUCT_TYPES } from "./quoteSpec";
 import { insurerFields, insurerKey } from "./insurerDictionary";
 
@@ -34,12 +35,14 @@ export function buildPortalScenarios(plan: Record<string, Record<string, unknown
     fields: [...clientPortalFields(client), ...products.flatMap((product) => {
       const option = plan[product][i];
       if (!option) return [];
-      const fields = [...(PRODUCT_TYPES[product] || []), ...insurerFields(insurer, product).map((f) => ({ ...f, key: insurerKey(insurer, f.key) }))];
+      const fields = providerQuoteFields(insurer, product);
       return fields.flatMap((f): PortalField[] => {
         if (f.key === "growth" && option.increase_option === "No increase") return [];
-        const value = option[f.key] ?? (f.kind === "select" ? f.options[0] : f.kind === "toggle" ? false : "");
+        if (f.key.endsWith(":omp_inflation") && option[insurerKey(insurer, "omp_cover")] !== "Inflation-linked") return [];
+        const value = option[f.key] ?? (isOmpLife(insurer, product) ? "" : f.kind === "select" ? f.options[0] : f.kind === "toggle" ? false : "");
         return value === "" ? [] : [{ product, label: f.label, aliases: ALIASES[f.key] || [], kind: f.kind, value: String(value) }];
       });
     })],
   }));
 }
+

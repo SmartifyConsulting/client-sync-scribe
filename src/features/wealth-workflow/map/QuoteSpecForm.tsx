@@ -1,3 +1,4 @@
+import { providerQuoteFields, isOmpLife, ompSettingsComplete } from "./providerQuoteFields";
 import { useCompanionInstalled, useCompanionVersion } from "./companionDetection";
 import { useCompanionRelease, companionVersionCurrent } from "./companionRelease";
 import { useEffect, useState, useRef } from "react";
@@ -238,6 +239,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   /** Send each option (Quote 1 = Option A …) to the connected portal; values only, labelled by field name. */
   const submitScenarios = (ins: string, only?: number[]) => {
     if (!canStartPortal(source)) return;
+    if (Object.entries(plan).some(([p, options]) => options.some(v => !ompSettingsComplete(ins, p, v)))) { toast({ title: "Select the supported OMP Life settings first." }); return; }
     if (login[ins] !== "connected") { toast({ title: `Connect ${ins} first.` }); return; }
     const prods = Object.keys(plan);
     const count = Math.max(...prods.map((p) => plan[p].length), 0);
@@ -455,7 +457,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
           </div>
           </section>}
           <section ref={reviewSection} tabIndex={-1} className={cn("frame scroll-mt-6 p-3 space-y-3", connected && "quote-step-active")} aria-label="Review quote options" aria-current={connected ? "step" : undefined}>
-            <div className="flex flex-wrap items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">2</span><h4 className="font-semibold">Review quote options</h4>{source === "companion" && connected && <span role="status" className="quote-progress-badge">In Progress</span>}{source === "companion" && connected && <Button className="ml-auto font-semibold" disabled={!allComplete || quotesRunning} title={!allComplete ? "Complete the option values first" : quotesRunning ? "Quote requests are already in progress" : undefined} onClick={() => submitScenarios(activeTab)}>Get quotes</Button>}</div>
+            <div className="flex flex-wrap items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">2</span><h4 className="font-semibold">Review quote options</h4>{source === "companion" && connected && <span role="status" className="quote-progress-badge">In Progress</span>}{source === "companion" && connected && <Button className="ml-auto font-semibold" disabled={!allComplete || quotesRunning || products.some(p => plan[p].some(v => !ompSettingsComplete(activeTab, p, v)))} title={!allComplete ? "Complete the option values first" : quotesRunning ? "Quote requests are already in progress" : undefined} onClick={() => submitScenarios(activeTab)}>Get quotes</Button>}</div>
             <p className="font-medium text-foreground">Review your options, then request quotes.</p>
             <p className={label}>{quotesRunning ? "Quote requests are in progress. Follow the bars above each option." : "Waiting for your review. Open a product to compare and edit Options A, B and C."}</p>
           <details className="rounded-lg border border-border p-2">
@@ -472,7 +474,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
 
           {products.map((p) => {
             const extra = activeTab ? insurerFields(activeTab, p).map((f) => ({ ...f, key: insurerKey(activeTab, f.key) })) : [];
-            const fields = [...(PRODUCT_TYPES[p] ?? []), ...extra];
+            const fields = providerQuoteFields(activeTab, p);
             return (
               <details key={p} open={p === products[0]} className="rounded-lg border border-border">
                 <summary className="flex cursor-pointer items-center justify-between gap-3 rounded-lg bg-muted/40 px-3 py-2">
@@ -481,6 +483,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPlan((pl) => { const { [p]: _, ...rest } = pl; return rest; }); }}><X className="h-3 w-3" /></button>
                 </summary>
                 <div className="overflow-x-auto">
+                {isOmpLife(activeTab, p) && <p className="px-2 py-2 text-xs text-muted-foreground">OMP Life offers fixed cover growth of 0%, 5% or 10%, or inflation-linked growth. Previous generic settings are retained but are not automatically substituted. Select each insurer setting before requesting quotes. Currency-linked cover requires portal review. Automatic OMP quoting is still being mapped.</p>}
                 {formulaFor(p) && <p className="border-t border-border/60 px-2 py-1 text-[10px] tabular-nums text-muted-foreground">{formulaFor(p)}</p>}
                 <table className="w-full min-w-[560px] table-fixed text-xs">
                   <colgroup><col className="w-44" />{plan[p].map((_, i) => <col key={i} />)}</colgroup>
@@ -506,7 +509,8 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                         {plan[p].map((v, i) => (
                           <td key={i} className="px-2 py-0.5">
                             {f.kind === "select" ? (
-                              <select className="h-6 w-full rounded border border-input bg-background px-1 text-[11px]" value={v[f.key] ?? f.options[0]} onChange={(e) => setVal(p, i, f.key, e.target.value)}>
+                              <select className="h-6 w-full rounded border border-input bg-background px-1 text-[11px]" value={v[f.key] ?? (isOmpLife(activeTab, p) ? "" : f.options[0])} onChange={(e) => setVal(p, i, f.key, e.target.value)}>
+                                {isOmpLife(activeTab, p) && <option value="" disabled>Select an insurer option</option>}
                                 {f.options.map((o) => <option key={o}>{o}</option>)}
                               </select>
                             ) : f.kind === "toggle" ? (
@@ -563,4 +567,5 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     </div>
   );
 }
+
 
