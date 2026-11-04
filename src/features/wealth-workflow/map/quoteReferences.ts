@@ -1,12 +1,14 @@
-import { insurerFields, insurerKey } from "./insurerDictionary";
-import { PRODUCT_TYPES } from "./quoteSpec";
+import { insurerKey } from "./insurerDictionary";
+import { isOmpLife, providerQuoteFields } from "./providerQuoteFields";
 
 /** Only the selected insurer's effective quote settings identify a reference.
  * Other insurers' edits and the reference metadata itself do not invalidate it. */
 export function quoteSettingsKey(product: string, option: Record<string, any>, insurer: string) {
-  const fields = [...(PRODUCT_TYPES[product] ?? []), ...insurerFields(insurer, product).map(f => ({ ...f, key: insurerKey(insurer, f.key) }))];
+  const omp = isOmpLife(insurer, product);
+  const fields = providerQuoteFields(insurer, product).filter(f =>
+    !omp || !f.key.endsWith(":omp_inflation") || option[insurerKey(insurer, "omp_cover")] === "Inflation-linked");
   return JSON.stringify(fields.map(f => [f.key, f.key === "growth" && option.increase_option === "No increase" ? "" :
-    String(option[f.key] ?? (f.kind === "select" ? f.options[0] : f.kind === "toggle" ? false : ""))]));
+    String(option[f.key] ?? (omp ? "" : f.kind === "select" ? f.options[0] : f.kind === "toggle" ? false : ""))]));
 }
 
 export function quoteReference(product: string, option: Record<string, any>, insurer: string): string {

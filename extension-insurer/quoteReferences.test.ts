@@ -1,6 +1,13 @@
 import { describe, it, expect } from 'bun:test';
 import { quoteReference, withQuoteReference } from '../src/features/wealth-workflow/map/quoteReferences';
 describe('quote reference ownership',()=>{
+ it('invalidates an OMP reference when actual insurer terms change',()=>{
+  const option={benefit_amount:'1700000','Old Mutual:omp_premium':'0% Annual Increase','Old Mutual:omp_cover':'5% fixed rate'};
+  const saved=withQuoteReference('Life cover',option,'Old Mutual','verified-reference');
+  expect(quoteReference('Life cover',{...saved,'Old Mutual:omp_premium':'5% Annual Increase'},'Old Mutual')).toBe('');
+  expect(quoteReference('Life cover',{...saved,'Old Mutual:omp_cover':'10% fixed rate'},'Old Mutual')).toBe('');
+  expect(quoteReference('Life cover',{...saved,'Old Mutual:omp_inflation':'Inflation +3%',growth:'6'},'Old Mutual')).toBe('verified-reference');
+ });
  it('keeps real references separate by insurer, product and option',()=>{
   const base={benefit_amount:'1700000',premium_pattern:'Level'};
   const a=withQuoteReference('Life cover',base,'Old Mutual','117387802');
