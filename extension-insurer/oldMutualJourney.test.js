@@ -2,6 +2,8 @@ import {test,expect} from 'bun:test';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 const source=readFileSync(new URL('./oldMutualJourney.js',import.meta.url),'utf8');
+class Input { constructor(){this.events=[];this._value='';} get value(){return this._value;} set value(v){this._value=v;} focus(){this.focused=true;} dispatchEvent(e){this.events.push(e.type);} getClientRects(){return [1];} }
+class Select extends Input { constructor(options){super();this.tagName='SELECT';this.options=options.map(text=>({text,value:text}));} get value(){return this._value;} set value(v){this._value=v;} get selectedOptions(){return this.options.filter(o=>o.value===this.value);} }
 const approved={
  'Date of birth':'1976-03-08','Gender':'Female','Marital status':'Married','Smoking status':'Non-Smoker',
  'Education':'NQF 9 (Masters Degree)','Professional membership':'None','Occupation':'Programmer and Analyst','Industry':'General','Employment type':'Self-employed',
@@ -10,7 +12,7 @@ const approved={
  'Underwriting method':'Medical tests, questions or both','Guarantee term':'5 years','Premium term':'Benefit term','Cashback':'Included'
 };
 function run({values=approved,path='/dashboard/sales-dashboard',step='start',context={},selectors={},host='secure.adviserweb.oldmutual.co.za',extra=[],body=''}={}){
- const c=vm.createContext({URL,location:{href:`https://${host}${path}`},getComputedStyle:()=>({visibility:'visible'}),document:{querySelectorAll:s=>selectors[s]||[],body:{innerText:body}}});
+ const c=vm.createContext({URL,HTMLInputElement:Input,HTMLSelectElement:Select,Event:class{constructor(type){this.type=type;}},location:{href:`https://${host}${path}`,assign:target=>{c.destination=target;}},getComputedStyle:()=>({visibility:'visible'}),document:{querySelectorAll:s=>selectors[s]||[],body:{innerText:body}}});
  vm.runInContext(source,c);
  c.request={step,context,fields:[...Object.entries(values).map(([label,value])=>({label,value})),...extra]};
  return vm.runInContext('driveOldMutualQuote(request,"https://secure.adviserweb.oldmutual.co.za")',c);
@@ -25,6 +27,12 @@ test('rejects a portal quote identity change mid-run',()=>expect(run({step:'veri
 test('blocks mixed products before starting the supported life route',()=>expect(run({extra:[{label:'Benefit amount',value:'2000',product:'Severe illness'}]}).state).toBe('blocked'));
 test('clicks only the unique demonstrated fresh-quote control',()=>{let clicks=0; const button=el('Create new quote',()=>clicks++);expect(run({selectors:{'#CreateNewQuote':[button]}}).next).toBe('type');expect(clicks).toBe(1);expect(run({selectors:{'#CreateNewQuote':[button,button]}}).state).toBe('blocked');expect(clicks).toBe(1);});
 test('does not permit an unrelated dialog during the growth step',()=>{const dialog={...el('Consent'),querySelector:()=>null};expect(run({step:'growth-save',selectors:{'dialog[open],[role="dialog"],[role="alertdialog"]':[dialog]}}).detail).toContain('unexpected');});
+test('keeps occupation autocomplete focused without blurring away its suggestions',()=>{
+ const occupation=new Input(), membership=new Input();
+ const selectors={'#form-select-0':[new Select(['Married'])],'#form-select-1':[new Select(['NQF 9 (Masters Degree)'])],'input[name="identifier"]':[membership],'.x-option':[el('Non-Smoker')],'#identifier':[occupation]};
+ expect(run({step:'rating',path:'/protection/quote/123/risk-factor/GUEST97',selectors}).next).toBe('occupation');
+ expect(occupation.focused).toBe(true);expect(occupation.value).toBe('Program');expect(occupation.events).toEqual(['input']);
+});
 test('quote-stage Next is never used for application progression',()=>{let clicks=0;expect(run({step:'verify',path:'/protection/quote/123/your-quote-tableview',context:{reference:'123'},selectors:{'button,a':[el('NEXT',()=>clicks++)]}}).state).toBe('blocked');expect(clicks).toBe(0);});
 test('returns the insurer result only when every selected term and the premium sum match',()=>{
  const input=(value,extra={})=>({...el(''),value,...extra});

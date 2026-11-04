@@ -83,6 +83,8 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
 
   const [plan, setPlan] = useState<Plan>({});
   const submittedOptions = useRef<Record<string, {product:string; settings:string}>>({});
+  const specRevision = useRef<string>();
+  useEffect(()=>{specRevision.current=spec?.updated_at;},[spec?.id,spec?.updated_at]);
   const [source, setSource] = useState<QuoteSource>("companion");
   const [chosen, setChosen] = useState<string[]>([]);
   usePublishQuoteInsurers(workflowId, chosen);
@@ -150,8 +152,9 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
         const updated=withQuoteReference(submitted.product,option,d.insurer,result.number);
         updated._quoteResults={...option._quoteResults,[d.insurer]:{...result,settings:submitted.settings,source:'companion-verified',verifiedAt:new Date().toISOString()}};
         const variations={...current,[submitted.product]:current[submitted.product].map((v,i)=>i===d.n-1?updated:v)};
-        const {data:saved,error}=await db.from('wealth_quote_specs').update({variations,updated_at:new Date().toISOString()}).eq('id',latest.id).eq('updated_at',latest.updated_at).select('id');
+        const {data:saved,error}=await db.from('wealth_quote_specs').update({variations,updated_at:new Date().toISOString()}).eq('id',latest.id).eq('updated_at',latest.updated_at).select('id,updated_at');
         if(error || !saved?.length){toast({title:'Quote calculated but could not be saved. Keep the insurer tab open.',variant:'destructive'});return;}
+        specRevision.current=saved[0].updated_at;
         setPlan(previous=>({...previous,[submitted.product]:previous[submitted.product].map((v,i)=>i===d.n-1&&quoteSettingsKey(submitted.product,v,d.insurer)===submitted.settings?updated:v)}));
         toast({title:`Quote ${result.number} saved to Option ${String.fromCharCode(64+d.n)}`,description:'Calculation recorded. PDF not yet filed.'});
         return;
@@ -268,8 +271,9 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     if(ins==='Old Mutual' && !companionVersionCurrent(installedVersion,'1.7.6')) {setSetupOpen(true);return;}
     if(ins==='Old Mutual') {
       if(!spec?.id){toast({title:'Save the quote plan before requesting the quote.'});return;}
-      const {data:saved,error}=await db.from('wealth_quote_specs').update({variations:plan,updated_at:new Date().toISOString()}).eq('id',spec.id).eq('updated_at',spec.updated_at).select('id');
+      const {data:saved,error}=await db.from('wealth_quote_specs').update({variations:plan,updated_at:new Date().toISOString()}).eq('id',spec.id).eq('updated_at',specRevision.current ?? spec.updated_at).select('id,updated_at');
       if(error || !saved?.length){toast({title:'The quote plan changed. Refresh it before requesting a quote.',variant:'destructive'});return;}
+      specRevision.current=saved[0].updated_at;
     }
     const prods = Object.keys(plan);
     const count = Math.max(...prods.map((p) => plan[p].length), 0);

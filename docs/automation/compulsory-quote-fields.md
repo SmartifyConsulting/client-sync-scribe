@@ -1,6 +1,6 @@
 # Compulsory insurer quote inputs — evidence checklist
 
-Updated: 4 November 2026 (South Africa). Purpose: collect compulsory rating information before the broker requests quotes, without inventing answers or making optional fields mandatory.
+Updated: 5 November 2026 (South Africa). Purpose: collect compulsory rating information before the broker requests quotes, without inventing answers or making optional fields mandatory.
 
 ## Confirmed: Old Mutual life cover
 
@@ -9,7 +9,7 @@ Evidence: the live OM Adviser → Standalone Quote → Protection → Anonymous/
 | Compulsory field | Condition / validation observed | Holarc today | Work needed for needs analysis / quoting |
 | --- | --- | --- | --- |
 | Date of birth | Required on guest personal-details screen | Exists: clients.dob | Require a saved value for this quote route; already in the client payload. |
-| Gender | Required on guest personal-details screen | Exists: clients.gender | Include the saved value in the quote payload; current clientPortalFields omits it. |
+| Gender | Required on guest personal-details screen | Exists: clients.gender | Included in the quote payload; require a saved value. |
 | Smoker status | Required: Smoker / Non-Smoker | Exists: Personal Information → Smoker; clients.smoker | Require an explicit answer, not a blank; map Holarc Yes/No to the insurer's choices and exact field label. |
 | Marital status | Required on insured-person details | Exists: clients.marital_status | Validate and map the insurer's allowed choices. |
 | Education | Required: insurer NQF choices | Exists: Highest Level of Education; clients.highest_education, free text | Map the existing answer to an insurer education code; ask the broker if the match is ambiguous. |
@@ -31,11 +31,19 @@ Existing inputs needing completeness checks or mappings: birth date, gender, smo
 
 The demo's blank smoker, education and occupation fields caused additional questions even though those fields already exist in the app. Answers entered into the insurer during the walkthrough have not automatically updated the Holarc client profile.
 
+## Confirmed: Momentum Myriad life cover
+
+Live successful quote on 5 November 2026 established rating requirements for smoking status, education, occupation selection, gross monthly income and marital status. Married reveals spouse gross monthly income (minimum 1; zero rejected) and spouse education. The latter lacks an HTML required marker but the Benefits page explicitly blocks adding cover until it is supplied. Treat both spouse fields as conditional, not compulsory for everyone. The occupation must be selected from the insurer's autocomplete results, not merely typed.
+
+Applicant setup also requires insurer package/tax-status and identity choices. Keep product/policy selections in quote setup. Contact details showed missing-item badges, but calculation and report generation succeeded without completing them; do not make them compulsory for this quotation route. See momentum-myriad-mapping.md for exact controls and approved demo choices.
+
+New gaps identified here: spouse gross monthly income and spouse education, conditional on the married route. Insurer-specific education and occupation mappings remain necessary even where Holarc already stores a value.
+
 ## Other insurers — required-only evidence still to collect
 
 | Insurer | Current evidence / next check |
 | --- | --- |
-| Momentum | Myriad's new-quote and applicant screens were inspected, but required-field validation was not completed. Confirm the compulsory fields for life cover and each additional benefit in the live quote route before adding them to this checklist. |
+| Momentum | Life-cover route verified above. Additional benefits and alternative rating branches remain unverified. |
 | BrightRock | Manuals show proposal navigation and example capture. Mandatory vs optional rating fields still need live validation for each selected product. |
 | Discovery | Quote-field structural checks exist; a complete successful life-cover capture has not established the compulsory field set. |
 | Bidvest Life / FMI | Login route inspected; quote capture and its compulsory fields remain unverified. |

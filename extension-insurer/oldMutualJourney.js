@@ -23,16 +23,19 @@ function driveOldMutualQuote(request, origin, redirectDomain) {
   const next = (s, detail) => ({ state: 'navigate', next: s, context, detail });
   const wait = detail => next(step, detail);
   const numeric = value => Number(String(value).replace(/[R ,]/g, ''));
-  const set = (e, value) => {
+  const set = (e, value, commit = true) => {
     if (!e || e.disabled || e.readOnly) return false;
+    if (!commit) e.focus();
     if (e.tagName === 'SELECT') {
       const option = unique([...e.options].filter(o => !o.disabled && norm(o.text) === value));
       if (!option) return false;
       Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(e, option.value);
     } else Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(e, value);
     e.dispatchEvent(new Event('input', { bubbles: true }));
-    e.dispatchEvent(new Event('change', { bubbles: true }));
-    e.dispatchEvent(new Event('blur', { bubbles: true }));
+    if (commit) {
+      e.dispatchEvent(new Event('change', { bubbles: true }));
+      e.dispatchEvent(new Event('blur', { bubbles: true }));
+    }
     return true;
   };
   const selectWith = value => unique(all('select').filter(e => [...e.options].some(o => norm(o.text) === value)));
@@ -77,7 +80,7 @@ function driveOldMutualQuote(request, origin, redirectDomain) {
   const on = suffix => url.pathname.endsWith(suffix);
   if (step === 'start') {
     if(url.hostname==='secure.adviserweb.oldmutual.co.za' && on('/adviser-workbench/landing'))return wait('Waiting for the OM Adviser dashboard');
-    if(url.hostname === 'secure.oldmutual.co.za' && /^\/home\/?$/i.test(url.pathname)) {
+    if(url.hostname === 'secure.oldmutual.co.za' && /^\/(?:home\/?)?$/i.test(url.pathname)) {
       const link=unique(all('a').filter(e=>e.href==='https://secure.adviserweb.oldmutual.co.za/adviser-workbench/landing'));
       if(!link)return stop('The authenticated OM Adviser link is not available.');
       location.assign(link.href); return next('start','Opening OM Adviser');
@@ -125,7 +128,7 @@ function driveOldMutualQuote(request, origin, redirectDomain) {
   if(step==='rating') {
     if(!url.pathname.includes('/risk-factor/'))return wait('Waiting for rating fields');
     if(!set(one('#form-select-0'),values.marital)||!set(one('#form-select-1'),values.education)||!set(one('input[name="identifier"]'),values.membership)||!click(exact('.x-option',values.smoker)))return stop('An approved rating choice is unavailable.');
-    if(!set(one('#identifier'),'Program'))return stop('Occupation search unavailable.');
+    if(!set(one('#identifier'),'Program',false))return stop('Occupation search unavailable.');
     return next('occupation','Waiting for the exact occupation match');
   }
   if(step==='occupation') {
