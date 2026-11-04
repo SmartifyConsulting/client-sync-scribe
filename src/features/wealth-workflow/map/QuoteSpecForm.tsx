@@ -59,7 +59,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     queryKey: ["quote-client-inputs", clientId], enabled: !!clientId && isWM,
     queryFn: async () => {
       if (!clientId) return null;
-      const { data, error } = await supabase.from("clients").select("title,first_name,last_name,id_passport_number,email,dob,smoker,highest_education,occupation,marital_status").eq("id", clientId).maybeSingle();
+      const { data, error } = await supabase.from("clients").select("title,first_name,last_name,id_passport_number,email,dob,gender,smoker,highest_education,occupation,marital_status").eq("id", clientId).maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -567,5 +567,6 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     </div>
   );
 }
+
 
 

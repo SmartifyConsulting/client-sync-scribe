@@ -17,7 +17,7 @@ export function clientPortalFields(client: Record<string, unknown> | null | unde
   const definitions: [string, string, string[]][] = [
     ["title", "Title", []], ["first_name", "First name", ["First Name", "Name"]],
     ["last_name", "Surname", ["Last name"]], ["id_passport_number", "ID number", ["Identification number", "Legal reference"]],
-    ["email", "Email", ["Email address"]], ["dob", "Date of birth", []],
+    ["email", "Email", ["Email address"]], ["dob", "Date of birth", []], ["gender", "Gender", []],
     ["smoker", "Smoking status", ["Smoker"]], ["highest_education", "Education", ["Highest education"]],
     ["occupation", "Occupation", []], ["marital_status", "Marital status", []],
   ];

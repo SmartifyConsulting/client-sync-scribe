@@ -1,6 +1,10 @@
 import { expect, test } from "bun:test";
 import { providerQuoteFields, ompSettingsComplete } from "../src/features/wealth-workflow/map/providerQuoteFields";
-import { buildPortalScenarios } from "../src/features/wealth-workflow/map/portalPayload";
+import { buildPortalScenarios, clientPortalFields } from "../src/features/wealth-workflow/map/portalPayload";
+test("required gender comes from saved client data without inference", () => {
+  expect(clientPortalFields({ gender: "Female" })).toEqual([{ label: "Gender", aliases: [], value: "Female", kind: "text" }]);
+  expect(clientPortalFields({ gender: null })).toEqual([]);
+});
 test("OMP does not silently translate legacy settings or send them", () => {
   const old = { benefit_amount: "1700000", growth: "6", premium_pattern: "Level", "Old Mutual:plan": "Greenlight Life Cover" };
   expect(ompSettingsComplete("Old Mutual", "Life cover", old)).toBe(false);
