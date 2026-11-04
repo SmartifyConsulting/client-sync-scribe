@@ -1,4 +1,7 @@
 # Roadmap — Step 5 Indigro copy
+## Quote sourcing — Nov 4
+- [ ] Distinguish Companion, email desk and indicative planning in Step 4; keep estimates separate from insurer quotes and require official confirmation.
+- [ ] Verify method switching, planning persistence and quote safeguards without contacting clients or insurers.
 ## Supplied Phase 2 manuals - Nov 3
 - [x] Reconcile all 20 manual pages and screenshots with the existing Companion adapters; source-to-state runbook in docs/automation/quote-manual-runbook.md.
 - [x] Add the demonstrated BrightRock New cover proposal and Momentum post-report Download labels plus BrightRock Finish - See the cover; required radio/benefit-toggle validation; preserve stops for unknown providers, duplicate actions and missing inputs.
