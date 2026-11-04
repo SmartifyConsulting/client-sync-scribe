@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 
+const INTEGRATION_LOGOS: Record<string, string> = { Discovery: "discovery.png", Momentum: "momentum.png", "Old Mutual": "old-mutual.png", BrightRock: "brightrock.ico", "Bidvest Life / FMI": "bidvest.jpg", Xplan: "xplan.png", "Astute FSE": "astute.png", Hampshire: "hampshire.png", Masthead: "masthead.png", "PSG Wealth": "psg.png" };
 const db = supabase as any;
 
 function PasswordInput(props: ComponentProps<typeof Input>) {
@@ -431,8 +432,8 @@ export default function AppIntegrations() {
                             rel="noopener noreferrer"
                             className="text-sm font-medium truncate min-w-0 hover:underline hover:text-primary inline-flex items-center gap-1"
                           >
-                            {({ Discovery: "discovery.png", Momentum: "momentum.png", "Old Mutual": "old-mutual.png", BrightRock: "brightrock.ico", "Bidvest Life / FMI": "bidvest.jpg" } as Record<string, string>)[entry.name] && (
-                              <img src={`/insurer-logos/${({ Discovery: "discovery.png", Momentum: "momentum.png", "Old Mutual": "old-mutual.png", BrightRock: "brightrock.ico", "Bidvest Life / FMI": "bidvest.jpg" } as Record<string, string>)[entry.name]}`} alt="" width={32} height={32} className="mr-1 h-8 w-8 shrink-0 rounded object-contain" />
+                            {INTEGRATION_LOGOS[entry.name] && (
+                              <img src={`/insurer-logos/${INTEGRATION_LOGOS[entry.name]}`} alt="" width={35.2} height={35.2} className="mr-1 h-[35.2px] w-[35.2px] shrink-0 rounded object-contain" />
                             )}
                             <span className="truncate">{entry.name}</span> <ExternalLink className="h-3 w-3 shrink-0" />
                           </a>
@@ -585,3 +586,4 @@ export default function AppIntegrations() {
     </div>
   );
 }
+
