@@ -32,3 +32,9 @@ Verified combined configuration: OMP Life, 0% Annual Increase, 5% fixed cover gr
 ## Document boundary
 
 Generate PDF → Documents and Forms → expand insured-person section → Summary quote. Report generation can leave a stale working banner after the document exists. This mapping does not establish automatic PDF capture or successful Holarc filing. Never advance into an application or send email as part of quote calculation.
+
+## Companion 1.7.8 live verification — 5 November 2026
+
+Demo Georgia Option A completed from the Holarc Get quote button without manual portal edits. Provider quote 117391836: R1,700,000 cover, total R768/month including R85 cashback, with the approved 0% annual premium increase, 5% fixed cover growth, medical tests/questions, 5-year guarantee and benefit-term premiums. The authenticated frontend persisted source companion-verified in the quote spec; database readback confirmed the exact reference, settings and premium. No PDF was filed by this run; no application was submitted. B/C and other products remain unverified.
+
+The previous run showed income visually but left Angular's currency form control pristine. Keyboard-based currency-mask entry in 1.7.8 committed the value and passed provider validation. Occupation autocomplete focus and secure-home root navigation fixes from 1.7.7 also passed in this unattended run.
