@@ -35,7 +35,7 @@ export function CompanionSetup({ open, onClose, onReady }: { open: boolean; onCl
         {storeUrl ? <Button asChild size="sm"><a href={storeUrl} target="_blank" rel="noopener noreferrer"><Download className="mr-2 h-4 w-4" />{action}</a></Button>
           : <Button size="sm" disabled={downloading} onClick={async () => {
             setDownloading(true); setDownloadError(false); setDownloaded(false);
-            try { await downloadAddon(); setDownloaded(true); } catch { setDownloadError(true); }
+            try { await downloadAddon(); setDownloaded(true); onClose(); } catch { setDownloadError(true); }
             finally { setDownloading(false); }
           }}><Download className="mr-2 h-4 w-4" />{downloading ? "Downloading…" : action}</Button>}
         {!release.checking && !release.verified && <p role="status" className="text-xs text-muted-foreground">Couldn’t check the latest version. You can still download the latest package.</p>}
