@@ -655,4 +655,6 @@ textarea::placeholder {
 
 @layer components {
   .settings-scope .settings-frame-header { @apply justify-start; }
+  .quote-step-done { @apply border-success/30 bg-success/10; }
+  .quote-step-active { @apply border-primary/50 ring-1 ring-primary/20; }
 }

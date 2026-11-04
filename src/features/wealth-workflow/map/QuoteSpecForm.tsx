@@ -2,7 +2,9 @@ import { useCompanionInstalled, useCompanionVersion } from "./companionDetection
 import { useCompanionRelease, companionVersionCurrent } from "./companionRelease";
 import { useEffect, useState, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Plus, X, Pencil } from "lucide-react";
+import { Loader2, Plus, X, Pencil, Check } from "lucide-react";
+import { QuoteOptionReference } from "./QuoteOptionReference";
+import { quoteReference, withQuoteReference } from "./quoteReferences";
 import { insurerColor } from "./insurerColors";
 import { insurerFields, insurerKey } from "./insurerDictionary";
 import { LoginRing, LOGIN_TEXT, OtpDialog, ProtectorDialog, addonInstalled, downloadAddon, type Challenge, type LoginState } from "./InsurerLogin";
@@ -80,6 +82,9 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const pendingConnections = useRef(new Set<string>());
   const stoppedConnections = useRef(new Set<string>());
   const connectionAttempts = useRef<Record<string, string | null>>({});
+  const reviewSection = useRef<HTMLElement>(null);
+  const pendingReview = useRef<string | null>(null);
+  const visibleInsurer = useRef("");
   const [login, setLogin] = useState<Record<string, LoginState>>({});
   const [activity, setActivity] = useState<Record<string, QuoteActivity>>({});
   const recordActivity = (insurer: string, phase: ActivityPhase, detail?: string) => setActivity((s) => ({ ...s, [insurer]: updateActivity(s[insurer], phase, Date.now(), detail) }));
@@ -126,7 +131,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
         }
         recordActivity(d.insurer, d.ok ? "connected" : "failed", d.ok ? undefined : d.message);
         setLogin((s) => ({ ...s, [d.insurer]: d.ok ? "connected" : "failed" }));
-        if (d.ok) setChallenge((c) => (c?.insurer === d.insurer ? null : c));
+        if (d.ok) { if (visibleInsurer.current === d.insurer) pendingReview.current = d.insurer; setChallenge((c) => (c?.insurer === d.insurer ? null : c)); }
         else toast({ title: `${d.insurer} login failed`, description: d.message, variant: "destructive" });
       }
     };
@@ -242,6 +247,16 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
 
   const products = Object.keys(plan);
   const activeTab = chosen.includes(tab) ? tab : chosen[0] ?? "";
+  visibleInsurer.current = activeTab;
+  const connected = login[activeTab] === "connected";
+  useEffect(() => {
+    if (!connected || pendingReview.current !== activeTab) return;
+    pendingReview.current = null;
+    // Scroll only for a new confirmed connection in the visible insurer tab.
+    // Routine tab switches, field edits and background insurer results do not steal focus.
+    reviewSection.current?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+    reviewSection.current?.focus({ preventScroll: true });
+  }, [activeTab, connected]);
   // Auto-connect the visible insurer (any insurer) when the 15-minute unlock is already active.
   useEffect(() => {
     if (!activeTab || !insurerRows.length || (login[activeTab] && login[activeTab] !== "no-addon") || !companionInstalled) return;
@@ -317,10 +332,10 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
               );
             })}
           </div>
-          <section className="frame p-3" aria-label="Connect insurer">
+          <section className={cn("frame p-3", connected && "quote-step-done")} aria-label="Connect insurer">
           <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] items-start gap-4">
           <div className="min-w-0 space-y-3">
-          <div className="flex items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">1</span><h4 className="font-semibold">Connect to {activeTab}</h4></div>
+          <div className="flex items-center gap-2"><span className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-full font-semibold", connected ? "bg-success text-success-foreground" : "bg-primary/10 text-primary")}>{connected ? <Check className="h-3.5 w-3.5" aria-hidden="true" /> : "1"}</span><h4 className="font-semibold">Connect to {activeTab}</h4>{connected && <span className="rounded-full bg-success px-2 py-0.5 text-[10px] font-semibold text-success-foreground">Done</span>}</div>
           <InsurerActivity insurer={activeTab} activity={activity[activeTab]}
             onStop={()=>stopConnection(activeTab)} canStop={["connecting","challenge","connected"].includes(login[activeTab])||(jobs[activeTab]||[]).some(j=>["queued","submitting","generating"].includes(j.status))}
             idleText={!(companionInstalled || addonInstalled()) ? `Update to the latest Companion v${companionRelease.version}` : getToken() ? "Connecting automatically…" : "Unlock your saved logins to connect in the background"}
@@ -357,8 +372,8 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
           </div>
           </div>
           </section>
-          <section className="frame p-3 space-y-3" aria-label="Review quote options">
-            <div className="flex items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">2</span><h4 className="font-semibold">Review quote options</h4></div>
+          <section ref={reviewSection} tabIndex={-1} className={cn("frame scroll-mt-6 p-3 space-y-3", connected && "quote-step-active")} aria-label="Review quote options" aria-current={connected ? "step" : undefined}>
+            <div className="flex items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">2</span><h4 className="font-semibold">Review quote options</h4>{connected && <span role="status" className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">In Progress</span>}</div>
             <p className={label}>These options apply to the insurers you selected. Open a product to compare and edit Options A, B and C.</p>
           <details className="rounded-lg border border-border p-2">
             <summary className="cursor-pointer text-xs font-medium">Calculation assumptions</summary>
@@ -387,7 +402,10 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                 <table className="w-full min-w-[560px] table-fixed text-xs">
                   <colgroup><col className="w-44" />{plan[p].map((_, i) => <col key={i} />)}</colgroup>
                   <thead className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                    <tr><th className="px-2 py-1 text-left font-medium">Variable</th>{plan[p].map((_, i) => <th key={i} className="px-2 py-1 text-left font-medium">Option {String.fromCharCode(65 + i)}</th>)}</tr>
+                    <tr><th className="px-2 py-1 text-left font-medium">Variable</th>{plan[p].map((option, i) => <th key={i} className="px-2 py-2 text-left align-top font-medium">Option {String.fromCharCode(65 + i)}
+                      <QuoteOptionReference key={`${activeTab}:${p}:${i}`} value={quoteReference(p, option, activeTab)} label={`${activeTab} ${p} Option ${String.fromCharCode(65 + i)} quote number`}
+                        onChange={number => setPlan(pl => ({ ...pl, [p]: pl[p].map((value, n) => n === i ? withQuoteReference(p, value, activeTab, number) : value) }))} />
+                    </th>)}</tr>
                   </thead>
                   <tbody>
                     {fields.map((f) => (
