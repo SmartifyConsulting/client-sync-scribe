@@ -99,12 +99,14 @@ chrome.runtime.onMessage.addListener((d, sender) => {
         const tabId = Number(key.slice(7));
         const tab = await chrome.tabs.get(tabId).catch(() => null);
         if (!portalAllowed(tab?.url, route)) continue;
+        if (route.expires && Date.now() >= route.expires) { state = "expired"; break; }
         const [probe] = await chrome.scripting.executeScript({ target: { tabId }, func: drive,
           args: ["", "", true, route.origin, route.discoveryRedirects, true, true] }).catch(() => []);
         const latest = (await chrome.storage.session.get(key))[key];
         if (!latest || latest.cancelled) continue;
         connectionAttemptId = route.connectionAttemptId;
         state = probe?.result?.state === "in" ? "connected" : probe?.result?.state === "login" ? "expired" : "unknown";
+        if (state === "connected" && !jobs.has(tabId)) jobs.set(tabId, { ...latest, connected: true, done: true, username: "", password: "" });
         break;
       }
       chrome.tabs.sendMessage(appTabId, { type: "insurer-session-status-result", insurer: d.insurer,
