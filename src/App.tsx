@@ -189,6 +189,7 @@ const App = () => (
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
           <Route path="/intellectual-property" element={<Navigate to="/terms-and-conditions#intellectual-property" replace />} />
           <Route path="/client-consent" element={<ClientConsent />} />
+          <Route path="/privacy-policy" element={<ClientConsent />} />
           <Route path="/wealth-manager-agreement" element={<WealthManagerAgreement />} />
           <Route path="/legal" element={<Legal />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

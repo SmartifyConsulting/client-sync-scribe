@@ -15,7 +15,7 @@ export function TrialSignupSection({
   onAcceptedTermsChange,
 }: TrialSignupSectionProps) {
   const primaryConsentDocument = userRole === "client"
-    ? { name: "Client Consent and Privacy Notice", path: "/client-consent" }
+    ? { name: "Privacy Policy", path: "/privacy-policy" }
     : { name: "Wealth Manager Operator Agreement", path: "/wealth-manager-agreement" };
 
   return (

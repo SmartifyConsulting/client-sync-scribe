@@ -6,7 +6,7 @@ export default function Legal() {
   const docs = [
     { to: "/terms-and-conditions", title: "Terms and Conditions", description: "The terms governing your use of Holarc Wealth" },
     { to: "/wealth-manager-agreement", title: "Wealth Manager Operator Agreement", description: "Data processing terms for Wealth Managers using the Platform" },
-    { to: "/client-consent", title: "Client Consent and Privacy Notice", description: "What you are agreeing to as a client of the Platform" },
+    { to: "/privacy-policy", title: "Privacy Policy", description: "Privacy, client consent and Companion data practices" },
   ];
 
   return (

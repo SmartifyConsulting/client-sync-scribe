@@ -3,8 +3,8 @@ import { LegalDocLayout } from "@/components/legal/LegalDocLayout";
 export default function ClientConsent() {
   return (
     <LegalDocLayout
-      title="Client Consent and Privacy Notice"
-      subtitle="What you are agreeing to when you use the Holarc Wealth platform"
+      title="Privacy Policy"
+      subtitle="Privacy, client consent and Holarc Wealth Companion data practices"
     >
       <>
         <h2>ACCEPTANCE BY USE</h2>
