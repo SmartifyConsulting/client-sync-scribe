@@ -71,7 +71,7 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
               <td className="px-2 py-1.5 text-right">{R(q.cover_amount)}</td>
               <td className="px-2 py-1.5 text-right font-medium">{R(q.monthly_premium)}</td>
               {selectable && isWM ? (
-                <td className="px-2"><input type="checkbox" aria-label={`Select ${q.insurer}`} checked={q.selected} disabled={busy}
+                <td className="px-2"><input type="checkbox" aria-label={`Select ${q.insurer}`} checked={q.selected}
                   disabled={busy || (!q.selected && !mayUseForAdvice(q))} title={!mayUseForAdvice(q) ? "Unconfirmed estimate — obtain an official insurer quote first" : undefined}
                   onChange={() => { if (!q.selected && !mayUseForAdvice(q)) return; run(() => db.from("wealth_quotes").update({ selected: !q.selected }).eq("id", q.id), q.selected ? "Removed from recommendation" : "Added to recommendation"); }} /></td>
               ) : isWM && !selectable ? (

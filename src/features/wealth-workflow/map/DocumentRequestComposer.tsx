@@ -22,7 +22,7 @@ const DEFAULT_BODY: Record<Kind, (client: string) => string> = {
 
 type Kind = "schedules_claims" | "quotes";
 
-export function DocumentRequestComposer({ kind, workflowId, clientId, clientName }: { kind: Kind; workflowId: string; clientId: string; clientName: string }) {
+export function DocumentRequestComposer({ kind, workflowId, clientId, clientName, unframed = false }: { kind: Kind; workflowId: string; clientId: string; clientName: string; unframed?: boolean }) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [checkedInsurers, setCheckedInsurers] = useState<Set<string>>(new Set());
@@ -35,7 +35,8 @@ export function DocumentRequestComposer({ kind, workflowId, clientId, clientName
     queryKey: ["wealth-insurer-contacts", user?.id, kind],
     enabled: !!user,
     queryFn: async () => {
-      if (kind !== "quotes") return (await db.from("wealth_insurer_contacts").select("*").eq("broker_user_id", user!.id).order("sort_order")).data ?? [];
+      if (!user) return [];
+      if (kind !== "quotes") return (await db.from("wealth_insurer_contacts").select("*").eq("broker_user_id", user.id).order("sort_order")).data ?? [];
       // Quotes: one row per saved quote inbox on the insurer's App Integrations card.
       const [cat, creds] = await Promise.all([
         db.from("app_integrations_catalog").select("id,name").eq("category", "insurance").eq("is_active", true).order("display_order"),
@@ -96,7 +97,7 @@ export function DocumentRequestComposer({ kind, workflowId, clientId, clientName
   };
 
   return (
-    <div className="space-y-3 rounded-lg border border-border/60 p-3">
+    <div className={unframed ? "space-y-3" : "space-y-3 rounded-lg border border-border/60 p-3"}>
       <p className="flex items-center gap-1.5 text-xs font-semibold"><Mail className="h-3.5 w-3.5" /> Request by email</p>
 
       {(

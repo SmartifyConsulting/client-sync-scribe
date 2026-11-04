@@ -548,7 +548,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
           <section className="frame p-3 space-y-3" aria-label="Request and collect quotes">
             <div className="flex items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">3</span><h4 className="font-semibold">Request & collect quotes</h4></div>
           {source === "planning" && <p className="text-xs text-muted-foreground">Save estimates with the quote plan. They stay separate from insurer quotes, do not increase the document count and do not unlock recommendations. Replace them with confirmed insurer figures before proceeding.</p>}
-          {source === "email" && clientId && <DocumentRequestComposer kind="quotes" workflowId={workflowId} clientId={clientId} clientName={[quoteClient?.first_name, quoteClient?.last_name].filter(Boolean).join(" ") || "the client"} />}
+          {source === "email" && clientId && <DocumentRequestComposer unframed kind="quotes" workflowId={workflowId} clientId={clientId} clientName={[quoteClient?.first_name, quoteClient?.last_name].filter(Boolean).join(" ") || "the client"} />}
           {source === "companion" && <QuoteJobsPanel jobs={Object.fromEntries(chosen.map(ins => [ins, jobs[ins] ?? []]))} onStop={stopConnection} onRetry={(ins, n) => submitScenarios(ins, [n])} />}
           {clientId && <QuotePdfCapture workflowId={workflowId} clientId={clientId} insurer={activeTab}
             onActivity={(ins, phase, detail) => recordActivity(ins, phase, detail)}
