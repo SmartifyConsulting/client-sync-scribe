@@ -431,7 +431,10 @@ export default function AppIntegrations() {
                             rel="noopener noreferrer"
                             className="text-sm font-medium truncate min-w-0 hover:underline hover:text-primary inline-flex items-center gap-1"
                           >
-                            {entry.name} <ExternalLink className="h-3 w-3 shrink-0" />
+                            {({ Discovery: "discovery.png", Momentum: "momentum.png", "Old Mutual": "old-mutual.png", BrightRock: "brightrock.ico", "Bidvest Life / FMI": "bidvest.jpg" } as Record<string, string>)[entry.name] && (
+                              <img src={`/insurer-logos/${({ Discovery: "discovery.png", Momentum: "momentum.png", "Old Mutual": "old-mutual.png", BrightRock: "brightrock.ico", "Bidvest Life / FMI": "bidvest.jpg" } as Record<string, string>)[entry.name]}`} alt="" width={32} height={32} className="mr-1 h-8 w-8 shrink-0 rounded object-contain" />
+                            )}
+                            <span className="truncate">{entry.name}</span> <ExternalLink className="h-3 w-3 shrink-0" />
                           </a>
                           <div className="flex max-w-[65%] shrink-0 flex-col items-end gap-1">
                           <Badge variant={configured ? "default" : "secondary"} className="shrink-0 text-2xs px-1.5 py-0 font-normal">
