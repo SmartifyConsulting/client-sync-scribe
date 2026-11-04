@@ -6,6 +6,7 @@ import { Loader2, Plus, X, Pencil, Check } from "lucide-react";
 import { QuoteOptionReference } from "./QuoteOptionReference";
 import { quoteReference, withQuoteReference } from "./quoteReferences";
 import { usePublishQuoteInsurers } from "./QuoteInsurerSelection";
+import { SegmentedProgress } from "./SegmentedProgress";
 import { insurerColor } from "./insurerColors";
 import { insurerFields, insurerKey } from "./insurerDictionary";
 import { LoginRing, LOGIN_TEXT, OtpDialog, ProtectorDialog, addonInstalled, downloadAddon, type Challenge, type LoginState } from "./InsurerLogin";
@@ -14,7 +15,7 @@ import { QuotePdfCapture } from "./QuotePdfCapture";
 import { DiscoveryScreenScan } from "./DiscoveryScreenScan";
 import { InsurerActivity } from "./InsurerActivity";
 import { isActivityPhase, updateActivity, type QuoteActivity, type ActivityPhase } from "./quoteActivity";
-import { startJobs, setStatus, type QuoteJobs } from "./quoteJobs";
+import { startJobs, setStatus, quoteCheckpoints, isStalled, SCENARIO_TEXT, type QuoteJobs } from "./quoteJobs";
 import { buildPortalScenarios } from "./portalPayload";
 import { QuoteJobsPanel } from "./QuoteJobsPanel";
 import { supabase } from "@/integrations/supabase/client";
@@ -254,6 +255,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const activeTab = chosen.includes(tab) ? tab : chosen[0] ?? "";
   visibleInsurer.current = activeTab;
   const connected = login[activeTab] === "connected";
+  const quotesRunning = (jobs[activeTab] ?? []).some(job => ["queued", "submitting", "generating"].includes(job.status));
   useEffect(() => {
     if (!connected || pendingReview.current !== activeTab) return;
     pendingReview.current = null;
@@ -356,6 +358,9 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
           <CompanionSetup open={setupOpen} onClose={() => setSetupOpen(false)} onReady={() => openTab(activeTab)} />
           </div>
           <div className="min-w-0 space-y-2">
+            {connected && <Button className="w-full font-semibold" disabled={!allComplete || quotesRunning} onClick={() => submitScenarios(activeTab)}>Get quotes</Button>}
+            {connected && !allComplete && <p className="text-xs text-destructive">Complete the required option values below before getting quotes.</p>}
+            {connected && !/^momentum$|^brightrock$/i.test(activeTab) && <p className="text-xs text-muted-foreground">Automatic quotes are not available for {activeTab} yet. Use Open portal to prepare the quote, then upload the PDF.</p>}
             <div className="flex items-center justify-end gap-2">
               <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => {
                 const value = insurerRows.find(r => r.name === activeTab)?.portal_url;
@@ -380,7 +385,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
           <section ref={reviewSection} tabIndex={-1} className={cn("frame scroll-mt-6 p-3 space-y-3", connected && "quote-step-active")} aria-label="Review quote options" aria-current={connected ? "step" : undefined}>
             <div className="flex items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">2</span><h4 className="font-semibold">Review quote options</h4>{connected && <span role="status" className="quote-progress-badge">In Progress</span>}</div>
             <p className="font-medium text-foreground">Review your options, then request quotes.</p>
-            <p className={label}>Waiting for your review. Open a product to compare and edit Options A, B and C.</p>
+            <p className={label}>{quotesRunning ? "Quote requests are in progress. Follow the bars above each option." : "Waiting for your review. Open a product to compare and edit Options A, B and C."}</p>
           <details className="rounded-lg border border-border p-2">
             <summary className="cursor-pointer text-xs font-medium">Calculation assumptions</summary>
             <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -408,7 +413,12 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                 <table className="w-full min-w-[560px] table-fixed text-xs">
                   <colgroup><col className="w-44" />{plan[p].map((_, i) => <col key={i} />)}</colgroup>
                   <thead className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                    <tr><th className="px-2 py-1 text-left font-medium">Variable</th>{plan[p].map((option, i) => <th key={i} className="px-2 py-2 text-left align-top font-medium">Option {String.fromCharCode(65 + i)}
+                    <tr><th className="px-2 py-1 text-left font-medium">Variable</th>{plan[p].map((option, i) => <th key={i} className="px-2 py-2 text-left align-top font-medium">
+                      {(() => { const job = jobs[activeTab]?.find(j => j.n === i + 1); return job ? <div className="mb-1 font-normal normal-case tracking-normal" title="This option's request includes the selected products">
+                        <SegmentedProgress label={`${activeTab} ${p} Option ${String.fromCharCode(65 + i)} progress`} completed={quoteCheckpoints(job).filter(point => point.done).length} active={["submitting", "generating"].includes(job.status) && !isStalled(job, Date.now())} activeUntil={job.since + 90_000} />
+                        <span className="text-[10px]">{job.pdfReceived && job.status === "generating" ? "Saving quote PDF…" : SCENARIO_TEXT[job.status]}</span>
+                      </div> : null; })()}
+                      Option {String.fromCharCode(65 + i)}
                       <QuoteOptionReference key={`${activeTab}:${p}:${i}`} value={quoteReference(p, option, activeTab)} label={`${activeTab} ${p} Option ${String.fromCharCode(65 + i)} quote number`}
                         onChange={number => setPlan(pl => ({ ...pl, [p]: pl[p].map((value, n) => n === i ? withQuoteReference(p, value, activeTab, number) : value) }))} />
                     </th>)}</tr>
@@ -462,10 +472,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
           <section className="frame p-3 space-y-3" aria-label="Request and collect quotes">
             <div className="flex items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">3</span><h4 className="font-semibold">Request & collect quotes</h4></div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button size="sm" className="h-7 rounded-full px-3 text-[11px]" disabled={login[activeTab] !== "connected" || !allComplete} onClick={() => submitScenarios(activeTab)}>
-              Submit {Math.max(...products.map((p) => plan[p].length), 0)} quotes to {activeTab}
-            </Button>
-            <p className={label}>{login[activeTab] !== "connected" ? `Connect ${activeTab} in step 1 before requesting quotes.` : !allComplete ? "Complete the missing values in step 2 to enable this button." : "Connected. Review your options before submitting to the insurer."}</p>
+            <p className={label}>{login[activeTab] !== "connected" ? `Connect ${activeTab} in step 1 before requesting quotes.` : "Use Get quotes above to start the selected options. Progress appears above each option."}</p>
           </div>
           <QuoteJobsPanel jobs={Object.fromEntries(chosen.map(ins => [ins, jobs[ins] ?? []]))} onStop={stopConnection} onRetry={(ins, n) => submitScenarios(ins, [n])} />
           {clientId && <QuotePdfCapture workflowId={workflowId} clientId={clientId} insurer={activeTab}

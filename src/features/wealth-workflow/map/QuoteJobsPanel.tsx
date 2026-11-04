@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { CheckCircle2, AlertCircle, Hourglass, Clock, RotateCcw, Square } from "lucide-react";
+import { CheckCircle2, AlertCircle, Clock, RotateCcw, Square } from "lucide-react";
+import { SegmentedProgress } from "./SegmentedProgress";
 import { Button } from "@/components/ui/button";
 import { SCENARIO_TEXT, isStalled, needsRetry, quoteCheckpoints, type QuoteJobs } from "./quoteJobs";
 import { insurerColor } from "./insurerColors";
@@ -17,12 +18,13 @@ export function QuoteJobsPanel({ jobs, onRetry, onStop }: { jobs: QuoteJobs; onR
       {jobs[ins].map(j => {
         const stalled = isStalled(j, now), retry = needsRetry(j, now);
         const active = ["submitting", "generating"].includes(j.status) && !stalled;
-        const Icon = j.status === "captured" ? CheckCircle2 : retry ? AlertCircle : j.status === "stopped" ? Square : active ? Hourglass : Clock;
+        const Icon = j.status === "captured" ? CheckCircle2 : retry ? AlertCircle : j.status === "stopped" ? Square : Clock;
         return <section key={j.n} aria-label={`${ins} Option ${String.fromCharCode(64 + j.n)} activity`} className="rounded-lg bg-muted/40 p-3">
           <div className="flex items-start gap-3">
-            <Icon aria-label={active ? "Quote request running" : undefined} className={`${active ? "h-12 w-12 animate-pulse motion-reduce:animate-none text-primary" : "h-8 w-8"} shrink-0 ${retry ? "text-destructive" : j.status === "captured" ? "text-success" : ""}`} />
+            <Icon className={`h-5 w-5 shrink-0 ${retry ? "text-destructive" : j.status === "captured" ? "text-success" : ""}`} />
             <div className="min-w-0 flex-1 space-y-1">
               <p className="text-xs font-semibold">Quote {j.n} · Option {String.fromCharCode(64 + j.n)}</p>
+              <SegmentedProgress label={`${ins} Option ${String.fromCharCode(64 + j.n)} progress`} completed={quoteCheckpoints(j).filter(p => p.done).length} active={active} />
               <p role="status" className="text-xs">{j.pdfReceived && j.status === "generating" ? "Saving quote PDF…" : stalled ? "Waiting for the insurer · no recent response" : SCENARIO_TEXT[j.status]}</p>
               {active && <p className="text-xs text-muted-foreground">Waiting for {j.pdfReceived ? "Holarc" : ins} · {Math.max(0, Math.floor((now - j.since) / 1000))}s</p>}
               {j.status === "queued" && <p className="text-xs text-muted-foreground">Waiting for this option to start.</p>}
@@ -31,15 +33,9 @@ export function QuoteJobsPanel({ jobs, onRetry, onStop }: { jobs: QuoteJobs; onR
             {retry && <Button variant="outline" size="sm" onClick={() => onRetry(ins, j.n)}><RotateCcw className="mr-1 h-3 w-3" />Retry</Button>}
             {onStop && ["queued", "submitting", "generating"].includes(j.status) && <Button variant="outline" size="sm" aria-label={`Stop ${ins} quote requests`} onClick={() => onStop(ins)}>Stop</Button>}
           </div>
-          <ol aria-label="Confirmed quote milestones" className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {quoteCheckpoints(j).map(point => <li key={point.label} className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-              <span aria-hidden="true" style={{ borderRadius: 2 }} className={`h-3 w-3 shrink-0 border ${point.done ? "border-success bg-success" : "border-border bg-background"}`} />
-              <span>{point.label}<span className="sr-only"> · {point.done ? "confirmed" : "pending"}</span></span>
-            </li>)}
-          </ol>
         </section>;
       })}
     </div>)}
-    <p className="text-[10px] text-muted-foreground">Squares fill when a checkpoint is confirmed. Keep this Holarc tab open; you can work in other tabs.</p>
+    <p className="text-[10px] text-muted-foreground">Squares fill at confirmed checkpoints: connected, request started, PDF received, saved. Keep this Holarc tab open.</p>
   </div>;
 }
