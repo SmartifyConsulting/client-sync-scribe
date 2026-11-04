@@ -12,6 +12,7 @@ import { useRecommendationHistory } from "../hooks";
 import { DocumentRequestComposer } from "./DocumentRequestComposer";
 import { QuoteSpecForm } from "./QuoteSpecForm";
 import { fmtR } from "./money";
+import { mayUseForAdvice, PLANNING_WARNING } from "./quoteSourcing";
 
 type Viewer = "manager" | "client";
 const db = supabase as any;
@@ -53,7 +54,7 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
   const cf = fin?.cash_flow ?? {};
   const net = Number(cf.net_salary ?? 0);
   const surplus = net - Number(cf.fixed_expenses ?? 0) - Number(cf.discretionary_expenses ?? 0);
-  const selected = quotes.filter((q) => q.selected);
+  const selected = quotes.filter((q) => q.selected && mayUseForAdvice(q));
   const selPremium = selected.reduce((a, q) => a + Number(q.monthly_premium || 0), 0);
 
   const QuoteTable = ({ selectable }: { selectable?: boolean }) => (
@@ -70,8 +71,9 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
               <td className="px-2 py-1.5 text-right">{R(q.cover_amount)}</td>
               <td className="px-2 py-1.5 text-right font-medium">{R(q.monthly_premium)}</td>
               {selectable && isWM ? (
-                <td className="px-2"><input type="checkbox" aria-label={`Select ${q.insurer}`} checked={q.selected} disabled={busy}
-                  onChange={() => run(() => db.from("wealth_quotes").update({ selected: !q.selected }).eq("id", q.id), q.selected ? "Removed from recommendation" : "Added to recommendation")} /></td>
+                <td className="px-2"><input type="checkbox" aria-label={`Select ${q.insurer}`} checked={q.selected}
+                  disabled={busy || (!q.selected && !mayUseForAdvice(q))} title={!mayUseForAdvice(q) ? "Unconfirmed estimate — obtain an official insurer quote first" : undefined}
+                  onChange={() => { if (!q.selected && !mayUseForAdvice(q)) return; run(() => db.from("wealth_quotes").update({ selected: !q.selected }).eq("id", q.id), q.selected ? "Removed from recommendation" : "Added to recommendation"); }} /></td>
               ) : isWM && !selectable ? (
                 <td className="px-2"><button aria-label="Remove" className="text-muted-foreground hover:text-destructive" onClick={() => run(() => db.from("wealth_quotes").delete().eq("id", q.id), "Quote removed")}><Trash2 className="h-3.5 w-3.5" /></button></td>
               ) : selectable ? <td className="px-2">{q.selected && <CheckCircle2 className="h-4 w-4 text-[hsl(var(--owner-advisor))]" />}</td> : null}
@@ -125,9 +127,6 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
         return isWM ? (
           <div className="space-y-3">
             <QuoteSpecForm workflowId={workflowId} isWM={isWM} clientId={records?.clientId} />
-            {records?.clientId && (
-              <DocumentRequestComposer kind="quotes" workflowId={workflowId} clientId={records.clientId} clientName={clientFirst} />
-            )}
           </div>
         ) : <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">Quotes are being gathered from insurers.</p>;
       }
@@ -149,6 +148,7 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
           </div>
           {active === FINAL ? (
             <div className="space-y-2">
+              {quotes.some(q => !mayUseForAdvice(q)) && <p role="alert" className="text-xs text-destructive">{PLANNING_WARNING}</p>}
               <QuoteTable selectable />
               {selected.map((q) => (
                 <div key={q.id} className="space-y-1">
