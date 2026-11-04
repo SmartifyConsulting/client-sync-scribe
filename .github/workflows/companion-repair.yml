@@ -17,6 +17,9 @@ jobs:
   prepare:
     if: vars.COMPANION_REPAIR_ENABLED == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     outputs:
       ready: ${{ steps.queue.outputs.has_incident }}
       id: ${{ steps.queue.outputs.id }}
@@ -30,8 +33,6 @@ jobs:
       - id: queue
         run: node scripts/companion-repair-queue.mjs fetch
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           INCIDENT_ID: ${{ inputs.incident_id }}
       - uses: actions/upload-artifact@v4
         if: steps.queue.outputs.has_incident == 'true'
@@ -129,6 +130,9 @@ jobs:
     needs: [prepare, repair, validate, publish_patch]
     if: always() && needs.prepare.outputs.ready == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -138,7 +142,5 @@ jobs:
           node-version: '22'
       - run: node scripts/companion-repair-queue.mjs finish
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           INCIDENT_ID: ${{ needs.prepare.outputs.id }}
           REPAIR_PR_URL: ${{ needs.publish_patch.outputs.url }}
