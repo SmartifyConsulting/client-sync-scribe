@@ -419,6 +419,18 @@ function drive(username, password, submitted, origin, discoveryRedirects, passwo
   const pw = inputs.find((i) => i.type === "password");
   if (query(document, 'iframe[src*="recaptcha"], iframe[src*="hcaptcha"], .g-recaptcha, .h-captcha, [id*="captcha-challenge"]').some(vis)) return { state: "captcha" };
   if (query(document, 'dialog[open], [role="dialog"], [role="alertdialog"]').some(vis)) return { state: "blocked" };
+  // The observed MyOldMutual home hides Logout inside its account menu.
+  // Recognise its authenticated navigation without opening that menu, reading
+  // account values, or treating a failed portfolio-data load as a login failure.
+  const oldMutualHome = u.hostname === "my.oldmutual.co.za" && /^\/app\/secure(?:\/|$)/.test(u.pathname) &&
+    document.title === "MyOldMutual" && !pw &&
+    query(document, "a").some(a => vis(a) && /^https:\/\/secure\.oldmutual\.co\.za\/?$/.test(a.getAttribute("href") || "")) &&
+    query(document, "nav").some(nav => {
+      if (!vis(nav)) return false;
+      const labels = query(nav, "p, a, button").filter(vis).map(el => buttonText(el));
+      return labels.includes("Home") && labels.includes("Manage");
+    });
+  if (oldMutualHome) return { state: "in" };
   const user = inputs.find((i) => ["text", "email", "tel"].includes(i.type) && /user|email|login|id|name/i.test(`${i.name} ${i.id} ${i.placeholder} ${i.autocomplete}`)) ||
     inputs.find((i) => ["text", "email"].includes(i.type));
   if (probeOnly) {
