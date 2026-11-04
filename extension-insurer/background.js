@@ -1,5 +1,5 @@
 // Drives one insurer login per tab. Credentials live only in memory for the job.
-importScripts("portalJourney.js", "interfaceMonitor.js");
+importScripts("portalJourney.js", "oldMutualJourney.js", "interfaceMonitor.js");
 const jobs = new Map(); // portalTabId -> job
 const pendingLogins = new Map();
 const RECOVERY_ALARM = "holarc-session-recovery";
@@ -527,8 +527,9 @@ async function runScenarios(tabId, job, scenarios) {
       if (!Number.isInteger(n) || n < 1 || n > 6) continue;
       job.currentScenario = n; job.pdfSeen = false; job.pdfSaved = false; job.currentCaptureId = undefined;
       tell(job, { type: "insurer-quote-status", n, status: "submitting" });
-      let step = "start", stopped = false;
-      for (let attempt = 0; attempt < 25 && !job.pdfSeen; attempt++) {
+      let step = "start", stopped = false, context = {};
+      const omp = job.insurer === "Old Mutual";
+      for (let attempt = 0; attempt < (omp ? 120 : 25) && !job.pdfSeen; attempt++) {
         if (job.cancelled) { stopped = true; break; }
         const currentTabId = job.portalTabId || tabId;
         const tab = await chrome.tabs.get(currentTabId).catch(() => null);
@@ -536,9 +537,14 @@ async function runScenarios(tabId, job, scenarios) {
         if (Date.now() >= job.expires || !tab || !portalAllowed(tab.url, job)) {
           tell(job, { type: "insurer-quote-status", n, status: "failed", detail: "Quote session expired or portal left its trusted origin. Reconnect and retry." }); stopped = true; break;
         }
-        const [res] = await chrome.scripting.executeScript({ target: { tabId: currentTabId }, func: driveQuoteJourney, args: [{ insurer: job.insurer, step, fields, copy: /^brightrock/i.test(job.insurer) && !!job.savedScenario }, job.origin, job.discoveryRedirects] }).catch(() => [{}]);
+        const [res] = await chrome.scripting.executeScript({ target: { tabId: currentTabId }, func: omp ? driveOldMutualQuote : driveQuoteJourney, args: [{ insurer: job.insurer, step, context, fields, copy: /^brightrock/i.test(job.insurer) && !!job.savedScenario }, job.origin, job.discoveryRedirects] }).catch(() => [{}]);
         const r = res?.result;
         if (job.cancelled) { stopped = true; break; }
+        if (omp && r?.state === "verified") {
+          tell(job, { type: "insurer-quote-calculated", n, result: r.result });
+          tell(job, { type: "insurer-quote-status", n, status: "calculated", detail: "Calculation verified. PDF still needs to be filed; no application was submitted." });
+          stopped = true; break;
+        }
         if (!r || !["navigate", "calculated", "report", "download"].includes(r.state)) {
           if (!r || /unique.*action|control not found|trusted quote workspace|unexpected portal dialog/i.test(r.detail || "")) void interfaceMonitor?.scan("quote-blocked", currentTabId).catch(() => {});
           tell(job, { type: "insurer-quote-status", n, status: "no-fields", detail: r?.detail || "Could not verify the quote screen." }); stopped = true; break;
@@ -546,6 +552,7 @@ async function runScenarios(tabId, job, scenarios) {
         tell(job, { type: "insurer-quote-status", n, status: r.state === "navigate" ? "submitting" : "generating", detail: r.detail });
         if (r.state === "download") break;
         step = r.next || step;
+        if (omp && r.context && typeof r.context === "object") context = r.context;
         await new Promise((ok) => setTimeout(ok, 1800));
       }
       if (stopped) { allSaved = false; break; }

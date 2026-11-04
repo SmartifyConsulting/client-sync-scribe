@@ -4,6 +4,7 @@ import vm from "node:vm";
 
 const source = readFileSync(new URL("./background.js", import.meta.url), "utf8");
 const journey = readFileSync(new URL("./portalJourney.js", import.meta.url), "utf8");
+const ompJourney = readFileSync(new URL("./oldMutualJourney.js", import.meta.url), "utf8");
 function harness({ holdDelay = false, holdCreation = false } = {}) {
   const delays = [], creations = [];
   const listeners = {}, stored = {}, tabs = new Map(), removed = [], sent = [], created = [], injected = [], windowChanges = [], tabChanges = [];
@@ -32,7 +33,7 @@ function harness({ holdDelay = false, holdCreation = false } = {}) {
   };
   const context = vm.createContext({ chrome, URL, Date, Map, Object, Number, Promise, setTimeout: (fn, ms) => { if (ms === 1200) { if (holdDelay) delays.push(fn); else fn(); } }, TextDecoder, Uint8Array });
   context.crypto = { randomUUID: () => "test-recovery-id" };
-  context.importScripts = () => vm.runInContext(journey, context);
+  context.importScripts = () => vm.runInContext(journey + '\n' + ompJourney, context);
   vm.runInContext(source, context);
   const sender = { tab: { id: 1, windowId: 7, url: "https://holarc.co.za/app-integrations" } };
   tabs.set(1, sender.tab);
@@ -42,6 +43,17 @@ function harness({ holdDelay = false, holdCreation = false } = {}) {
 const flush = async () => { for (let i = 0; i < 25; i++) await Promise.resolve(); };
 
 describe("Companion background portal rules", () => {
+  it("returns an OMP calculation without claiming a saved PDF or starting the next option", async () => {
+    const h=harness();h.login({insurer:'Old Mutual',loginUrl:'https://secure.adviserweb.oldmutual.co.za/dashboard/sales-dashboard'});
+    h.context.chrome.scripting.executeScript=async options=>{h.injected.push(options);return [{result:{state:'verified',result:{product:'Life cover',number:'12345',monthlyPremium:768,cashbackPremium:85}}}];};
+    await vm.runInContext('runScenarios(2,jobs.get(2),[{n:1,fields:[]},{n:2,fields:[]}])',h.context);
+    expect(h.injected).toHaveLength(1);
+    expect(h.injected[0].func.name).toBe('driveOldMutualQuote');
+    expect(h.sent.some(m=>m.type==='insurer-quote-calculated'&&m.n===1&&m.result.number==='12345')).toBe(true);
+    expect(h.sent.some(m=>m.status==='captured')).toBe(false);
+    expect(h.sent.some(m=>m.n===2)).toBe(false);
+    expect(h.removed).toHaveLength(0);
+  });
   it("verifies a refreshed session without opening tabs or passing credentials", async () => {
     const h = harness();
     h.stored["portal-2"] = { appTabId: 1, insurer: "Old Mutual", workflowId: "demo", ownerId: "broker", integrationId: "om", origin: "https://secure.adviserweb.oldmutual.co.za", discoveryRedirects: "oldmutual.co.za", connected: true };

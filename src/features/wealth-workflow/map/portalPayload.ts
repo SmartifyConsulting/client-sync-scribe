@@ -3,6 +3,7 @@ import { PRODUCT_TYPES } from "./quoteSpec";
 import { insurerFields, insurerKey } from "./insurerDictionary";
 
 type PortalField = { label: string; value: string; kind: string; product?: string; aliases?: string[] };
+export const OMP_RATING_LABELS = ['Date of birth','Gender','Marital status','Smoking status','Education','Professional membership','Occupation','Industry','Employment type','Admin (%)','Physical (%)','Travelling (%)','Gross taxable monthly income','Passive taxable monthly income','Salary Payment Day'];
 const ALIASES: Record<string, string[]> = {
   benefit_amount: ["Cover amount", "Life cover amount"],
   monthly_benefit: ["Monthly benefit amount", "Income benefit amount"],
@@ -32,7 +33,9 @@ export function buildPortalScenarios(plan: Record<string, Record<string, unknown
   const count = Math.max(0, ...products.map((p) => plan[p].length));
   return Array.from({ length: count }, (_, i) => ({
     n: i + 1,
-    fields: [...clientPortalFields(client), ...products.flatMap((product) => {
+    fields: [...(insurer === 'Old Mutual' && plan['Life cover']?.[i]?._ompInputs
+      ? OMP_RATING_LABELS.flatMap((label): PortalField[] => { const value = (plan['Life cover'][i]._ompInputs as Record<string, unknown>)[label]; return typeof value === 'string' && value.trim() ? [{label,value:value.trim(),kind:'text'}] : []; })
+      : clientPortalFields(client)), ...products.flatMap((product) => {
       const option = plan[product][i];
       if (!option) return [];
       const fields = providerQuoteFields(insurer, product);

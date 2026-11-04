@@ -7,8 +7,9 @@ export function quoteSettingsKey(product: string, option: Record<string, any>, i
   const omp = isOmpLife(insurer, product);
   const fields = providerQuoteFields(insurer, product).filter(f =>
     !omp || !f.key.endsWith(":omp_inflation") || option[insurerKey(insurer, "omp_cover")] === "Inflation-linked");
-  return JSON.stringify(fields.map(f => [f.key, f.key === "growth" && option.increase_option === "No increase" ? "" :
-    String(option[f.key] ?? (omp ? "" : f.kind === "select" ? f.options[0] : f.kind === "toggle" ? false : ""))]));
+  return JSON.stringify([...fields.map(f => [f.key, f.key === "growth" && option.increase_option === "No increase" ? "" :
+    String(option[f.key] ?? (omp ? "" : f.kind === "select" ? f.options[0] : f.kind === "toggle" ? false : ""))]),
+    ...(omp && option._ompInputs ? [["rating",Object.entries(option._ompInputs).sort(([a],[b])=>a.localeCompare(b))]] : [])]);
 }
 
 export function quoteReference(product: string, option: Record<string, any>, insurer: string): string {
@@ -16,7 +17,7 @@ export function quoteReference(product: string, option: Record<string, any>, ins
   return typeof saved?.number === "string" && saved.settings === quoteSettingsKey(product, option, insurer) ? saved.number : "";
 }
 
-export function withQuoteReference(product: string, option: Record<string, any>, insurer: string, number: string) {
+export function withQuoteReference(product: string, option: Record<string, any>, insurer: string, number: string): Record<string, any> {
   const references = { ...option._quoteReferences };
   const value = number.trim().slice(0, 80);
   if (value) references[insurer] = { number: value, settings: quoteSettingsKey(product, option, insurer) };

@@ -1,16 +1,16 @@
 /** Numbered quote jobs: one per option (Quote 1 = Option A …) per insurer, each tracked on its own
  *  so a slow or failed scenario never holds back the others. Status only advances on Companion
  *  reports or a successfully saved PDF. */
-export type ScenarioStatus = "queued" | "submitting" | "generating" | "captured" | "no-fields" | "failed" | "stopped";
+export type ScenarioStatus = "queued" | "submitting" | "generating" | "captured" | "calculated" | "no-fields" | "failed" | "stopped";
 export type ScenarioJob = { n: number; status: ScenarioStatus; since: number; detail?: string; pdfReceived?: boolean };
 export type QuoteJobs = Record<string, ScenarioJob[]>;
 
 /** A blocked batch cannot advance its queued options. Also repairs saved older batches. */
 export function releaseBlockedQueues(jobs: QuoteJobs): QuoteJobs {
   return Object.fromEntries(Object.entries(jobs).map(([insurer, list]) => [insurer,
-    list.some(j => j.status === "no-fields" || j.status === "failed") &&
+    list.some(j => j.status === "no-fields" || j.status === "failed" || j.status === "calculated") &&
     !list.some(j => j.status === "submitting" || j.status === "generating")
-      ? list.map(j => j.status === "queued" ? { ...j, status: "stopped" as const, detail: "Not started: an earlier option blocked this batch." } : j)
+      ? list.map(j => j.status === "queued" ? { ...j, status: "stopped" as const, detail: list.some(previous => previous.status === "calculated") ? "Not started: the previous option's PDF still needs to be filed." : "Not started: an earlier option blocked this batch." } : j)
       : list
   ]));
 }
@@ -21,6 +21,7 @@ export const SCENARIO_TEXT: Record<ScenarioStatus, string> = {
   submitting: "Entering options in the portal",
   generating: "Waiting for the insurer's PDF",
   captured: "PDF saved",
+  calculated: "Quote calculated · PDF not filed",
   "no-fields": "Quote fields not found — enter in portal or upload",
   failed: "Failed",
   stopped: "Stopped",
@@ -45,7 +46,7 @@ export const setStatus = (jobs: QuoteJobs, insurer: string, n: number, status: S
 
 /** Checkpoints reflect acknowledgements, never a timer or assumed insurer calculation. */
 export function quoteCheckpoints(job: ScenarioJob) {
-  const started = ["submitting", "generating", "no-fields", "failed", "captured"].includes(job.status);
+  const started = ["submitting", "generating", "calculated", "no-fields", "failed", "captured"].includes(job.status);
   return [
     { label: "Connected", done: started || job.status === "queued" },
     { label: "Request started", done: started },

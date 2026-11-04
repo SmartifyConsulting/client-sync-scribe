@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus, X, Pencil, Check } from "lucide-react";
 import { QuoteOptionReference } from "./QuoteOptionReference";
-import { quoteReference, quoteResult, withQuoteReference } from "./quoteReferences";
+import { quoteReference, quoteResult, quoteSettingsKey, withQuoteReference } from "./quoteReferences";
 import { usePublishQuoteInsurers } from "./QuoteInsurerSelection";
 import { SegmentedProgress } from "./SegmentedProgress";
 import { insurerColor } from "./insurerColors";
@@ -17,7 +17,7 @@ import { DiscoveryScreenScan } from "./DiscoveryScreenScan";
 import { InsurerActivity } from "./InsurerActivity";
 import { isActivityPhase, updateActivity, type QuoteActivity, type ActivityPhase } from "./quoteActivity";
 import { releaseBlockedQueues, startJobs, setStatus, quoteCheckpoints, isStalled, SCENARIO_TEXT, type QuoteJobs } from "./quoteJobs";
-import { buildPortalScenarios } from "./portalPayload";
+import { buildPortalScenarios, OMP_RATING_LABELS } from "./portalPayload";
 import { QuoteJobsPanel } from "./QuoteJobsPanel";
 import { QuoteSourceSelector } from "./QuoteSourceSelector";
 import { DocumentRequestComposer } from "./DocumentRequestComposer";
@@ -82,6 +82,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const insurers: string[] = (insurerRows as any[]).map((r) => (typeof r === "string" ? r : r?.name)).filter(Boolean);
 
   const [plan, setPlan] = useState<Plan>({});
+  const submittedOptions = useRef<Record<string, {product:string; settings:string}>>({});
   const [source, setSource] = useState<QuoteSource>("companion");
   const [chosen, setChosen] = useState<string[]>([]);
   usePublishQuoteInsurers(workflowId, chosen);
@@ -128,12 +129,33 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
 
   // Messages from the broker-side add-on driving the insurer login.
   useEffect(() => {
-    const onMsg = (e: MessageEvent) => {
+    const onMsg = async (e: MessageEvent) => {
       const d = e.data;
       if (e.source !== window || e.origin !== window.location.origin || d?.source !== "holarc-extension" || d.workflowId !== workflowId || typeof d.insurer !== "string") return;
       if(d.connectionAttemptId&&connectionAttempts.current[d.insurer]&&connectionAttempts.current[d.insurer]!==d.connectionAttemptId)return;
       if (d.type === "insurer-stopped") { recordActivity(d.insurer,"stopped"); setLogin(s=>({...s,[d.insurer]:"stopped"})); return; }
       if (stoppedConnections.current.has(d.insurer)) return;
+      if (d.type === "insurer-quote-calculated") {
+        const submitted = submittedOptions.current[`${d.insurer}:${d.n}`];
+        const result = d.result;
+        if (!submitted || result?.product !== submitted.product || !/^\d{1,30}$/.test(result?.number ?? '') ||
+            typeof result.monthlyPremium !== 'number' || !Number.isFinite(result.monthlyPremium) || result.monthlyPremium <= 0 ||
+            typeof result.cashbackPremium !== 'number' || !Number.isFinite(result.cashbackPremium) || result.cashbackPremium < 0 || result.cashbackPremium > result.monthlyPremium) return;
+        delete submittedOptions.current[`${d.insurer}:${d.n}`];
+        const {data:latest,error:readError}=await db.from('wealth_quote_specs').select('*').eq('workflow_id',workflowId).order('created_at',{ascending:false}).limit(1).maybeSingle();
+        const current=toPlan(latest), option=current[submitted.product]?.[d.n-1];
+        if(readError || !option || quoteSettingsKey(submitted.product,option,d.insurer)!==submitted.settings) {
+          toast({title:'Quote calculated, but its settings have changed. Review the portal result before saving it.',variant:'destructive'}); return;
+        }
+        const updated=withQuoteReference(submitted.product,option,d.insurer,result.number);
+        updated._quoteResults={...option._quoteResults,[d.insurer]:{...result,settings:submitted.settings,source:'companion-verified',verifiedAt:new Date().toISOString()}};
+        const variations={...current,[submitted.product]:current[submitted.product].map((v,i)=>i===d.n-1?updated:v)};
+        const {data:saved,error}=await db.from('wealth_quote_specs').update({variations,updated_at:new Date().toISOString()}).eq('id',latest.id).eq('updated_at',latest.updated_at).select('id');
+        if(error || !saved?.length){toast({title:'Quote calculated but could not be saved. Keep the insurer tab open.',variant:'destructive'});return;}
+        setPlan(previous=>({...previous,[submitted.product]:previous[submitted.product].map((v,i)=>i===d.n-1&&quoteSettingsKey(submitted.product,v,d.insurer)===submitted.settings?updated:v)}));
+        toast({title:`Quote ${result.number} saved to Option ${String.fromCharCode(64+d.n)}`,description:'Calculation recorded. PDF not yet filed.'});
+        return;
+      }
       if (d.type === "insurer-login-progress" && isActivityPhase(d.phase)) recordActivity(d.insurer, d.phase);
       if (d.type === "insurer-scan-result" && d.ok && ["fields", "no-fields"].includes(d.scan?.state)) recordActivity(d.insurer, d.scan.state);
       if (d.type === "insurer-pdf") {
@@ -141,7 +163,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
         if (Number.isInteger(d.n)) setJobs(previous => ({ ...previous, [d.insurer]: (previous[d.insurer] ?? []).map(job => job.n === d.n ? { ...job, pdfReceived: true } : job) }));
       }
       if (d.type === "insurer-pdf-error") recordActivity(d.insurer, "pdf-error");
-      if (d.type === "insurer-quote-status" && Number.isInteger(d.n) && ["submitting", "generating", "no-fields", "failed"].includes(d.status))
+      if (d.type === "insurer-quote-status" && Number.isInteger(d.n) && ["submitting", "generating", "calculated", "no-fields", "failed"].includes(d.status))
         setJobs((j) => setStatus(j, d.insurer, d.n, d.status, Date.now(), typeof d.detail === "string" ? d.detail.slice(0, 160) : undefined));
       if (d.type === "insurer-login-progress") setLogin((s) => ({ ...s, [d.insurer]: d.state }));
       if (d.type === "insurer-challenge") {
@@ -237,13 +259,22 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   };
 
   /** Send each option (Quote 1 = Option A …) to the connected portal; values only, labelled by field name. */
-  const submitScenarios = (ins: string, only?: number[]) => {
+  const submitScenarios = async (ins: string, only?: number[], product?: string) => {
     if (!canStartPortal(source)) return;
-    if (Object.entries(plan).some(([p, options]) => options.some(v => !ompSettingsComplete(ins, p, v)))) { toast({ title: "Select the supported OMP Life settings first." }); return; }
+    const requestedPlan = product ? {[product]:plan[product]} : plan;
+    if(ins==='Old Mutual' && Object.keys(requestedPlan).some(p=>p!=='Life cover')) {toast({title:'Use Get quote under a Life cover option. Other Old Mutual products are not yet mapped.'});return;}
+    if (Object.entries(requestedPlan).some(([p, options]) => options.some((v,i) => (!only || only.includes(i+1)) && !ompSettingsComplete(ins, p, v)))) { toast({ title: "Select the supported OMP Life settings first." }); return; }
     if (login[ins] !== "connected") { toast({ title: `Connect ${ins} first.` }); return; }
+    if(ins==='Old Mutual' && !companionVersionCurrent(installedVersion,'1.7.6')) {setSetupOpen(true);return;}
+    if(ins==='Old Mutual') {
+      if(!spec?.id){toast({title:'Save the quote plan before requesting the quote.'});return;}
+      const {data:saved,error}=await db.from('wealth_quote_specs').update({variations:plan,updated_at:new Date().toISOString()}).eq('id',spec.id).eq('updated_at',spec.updated_at).select('id');
+      if(error || !saved?.length){toast({title:'The quote plan changed. Refresh it before requesting a quote.',variant:'destructive'});return;}
+    }
     const prods = Object.keys(plan);
     const count = Math.max(...prods.map((p) => plan[p].length), 0);
-    const scenarios = buildPortalScenarios(plan, ins, quoteClient).filter((s) => (!only || only.includes(s.n)) && jobs[ins]?.find((j) => j.n === s.n)?.status !== "captured");
+    const scenarios = buildPortalScenarios(requestedPlan, ins, quoteClient).filter((s) => (!only || only.includes(s.n)) && jobs[ins]?.find((j) => j.n === s.n)?.status !== "captured");
+    if(ins==='Old Mutual') for(const s of scenarios) submittedOptions.current[`${ins}:${s.n}`]={product:'Life cover',settings:quoteSettingsKey('Life cover',plan['Life cover'][s.n-1],ins)};
     setJobs((j) => startJobs(j, ins, count, Date.now(), only));
     window.postMessage({ source: "holarc", type: "insurer-quote-submit", insurer: ins, workflowId, scenarios }, window.location.origin);
   };
@@ -483,7 +514,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPlan((pl) => { const { [p]: _, ...rest } = pl; return rest; }); }}><X className="h-3 w-3" /></button>
                 </summary>
                 <div className="overflow-x-auto">
-                {isOmpLife(activeTab, p) && <p className="px-2 py-2 text-xs text-muted-foreground">OMP Life offers fixed cover growth of 0%, 5% or 10%, or inflation-linked growth. Previous generic settings are retained but are not automatically substituted. Select each insurer setting before requesting quotes. Currency-linked cover requires portal review. Automatic OMP quoting is still being mapped.</p>}
+                {isOmpLife(activeTab, p) && <p className="px-2 py-2 text-xs text-muted-foreground">Select the insurer settings and check Rating details before requesting an option. The current test supports fixed cover growth for self-employed programmers with no professional membership. Other rating combinations and inflation-linked growth still require portal review. A calculated premium is shown separately from PDF filing.</p>}
                 {formulaFor(p) && <p className="border-t border-border/60 px-2 py-1 text-[10px] tabular-nums text-muted-foreground">{formulaFor(p)}</p>}
                 <table className="w-full min-w-[560px] table-fixed text-xs">
                   <colgroup><col className="w-44" />{plan[p].map((_, i) => <col key={i} />)}</colgroup>
@@ -494,6 +525,12 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                         <p className="quote-option-status">{job.pdfReceived && job.status === "generating" ? "Saving quote PDF…" : SCENARIO_TEXT[job.status]}</p>
                       </div> : null; })()}
                       <span className="block">Option {String.fromCharCode(65 + i)}</span>
+                      {isWM && isOmpLife(activeTab,p) && <>
+                        <details className="my-2 normal-case tracking-normal font-normal"><summary className="cursor-pointer">Rating details</summary>
+                          <div className="space-y-2 pt-2">{OMP_RATING_LABELS.map(label=><label key={label} className="block text-[10px] font-semibold">{label}<Input className="mt-1 h-7 text-xs font-normal" value={option._ompInputs?.[label] ?? ''} onChange={e=>setVal(p,i,'_ompInputs',{...option._ompInputs,[label]:e.target.value})} /></label>)}</div>
+                        </details>
+                        <Button className="my-1 h-7 text-xs normal-case tracking-normal" size="sm" disabled={!connected || quotesRunning || !ompSettingsComplete(activeTab,p,option)} onClick={()=>void submitScenarios(activeTab,[i+1],p)}>Get quote</Button>
+                      </>}
                       <QuoteOptionReference key={`${activeTab}:${p}:${i}`} value={quoteReference(p, option, activeTab)} label={`${activeTab} ${p} Option ${String.fromCharCode(65 + i)} quote number`}
                         onChange={number => setPlan(pl => ({ ...pl, [p]: pl[p].map((value, n) => n === i ? withQuoteReference(p, value, activeTab, number) : value) }))} />
                       {(() => { const result = quoteResult(p, option, activeTab); return result ? <div className="mt-2 space-y-1 normal-case tracking-normal">
