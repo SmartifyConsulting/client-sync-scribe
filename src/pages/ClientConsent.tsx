@@ -102,6 +102,33 @@ export default function ClientConsent() {
         </ul>
         <p>To exercise these rights, contact our Information Officer.</p>
 
+        <h2 id="companion-privacy">Holarc Wealth Companion Privacy Policy</h2>
+        <p>Effective date: 4 November 2026. This section applies to the Holarc Wealth Companion Chrome extension, operated by Holarc Wealth (Pty) Ltd, and supplements this Privacy and Consent notice.</p>
+        <h3>Purpose and information processed</h3>
+        <p>Companion helps authorised wealth managers connect to insurer portals, prepare quotes and save quote documents to the correct Holarc client record. Depending on the requested workflow, it processes insurer usernames and passwords, verification codes supplied by the user, client identity and contact details, financial and insurance information, and quote documents. Quote inputs and documents may include health-related information such as smoking status or underwriting details.</p>
+        <p>Companion also processes the URLs and identifiers of managed portal tabs, connection outcomes, workflow and user identifiers, and document-save acknowledgements. It inspects relevant portal page content to identify login, verification and quote controls. It does not collect general browsing history for advertising or profiling.</p>
+        <h3>How information is used and shared</h3>
+        <p>Credentials and quote inputs are supplied by Holarc for the selected insurer workflow. Credentials are unlocked through Holarc’s Password Protector and entered into the intended insurer portal. Relevant client details are sent to that insurer to obtain quotes. Captured quote PDFs and progress information are returned to Holarc for storage and access by the authorised wealth manager and users permitted to access the client record.</p>
+        <p>Information may be processed by the hosting and infrastructure providers used to operate Holarc. Insurers handle information submitted to their portals under their own privacy notices. Companion data is not sold or used for advertising, creditworthiness assessment or lending decisions. Processing is limited to the extension’s stated functionality, supporting its security and operation, and applicable legal obligations.</p>
+        <h3>Browser permissions</h3>
+        <ul>
+          <li><strong>Tabs and HTTPS website access:</strong> identify and manage insurer tabs and permitted sign-in redirects associated with a Holarc workflow. Runtime checks restrict portal actions to the configured insurer origin or permitted insurer-domain redirects.</li>
+          <li><strong>Scripting:</strong> run code included in the extension to fill supported fields, identify portal states, navigate supported quote journeys and capture quote PDFs.</li>
+          <li><strong>Storage:</strong> retain routing metadata, pending document acknowledgements and interface-monitoring records so activity can resume after a background-worker restart.</li>
+          <li><strong>Downloads:</strong> identify quote PDF downloads associated with managed portals and transfer supported documents to Holarc. Unrelated downloads are not imported.</li>
+          <li><strong>Alarms:</strong> check existing managed sessions periodically and check portal interfaces daily for changes that could interrupt automation.</li>
+        </ul>
+        <h3>Interface diagnostics</h3>
+        <p>Interface monitoring records structural information such as field types, counts, required-field indicators, recognised control labels and the presence of dialogs. These diagnostics exclude input values, screenshots, raw page HTML and arbitrary page text. Diagnostic reports can be shared with Holarc to investigate changes and maintain supported portal workflows.</p>
+        <h3>Storage, retention and security</h3>
+        <p>Insurer passwords are used temporarily in the extension’s memory and are not saved in extension storage. Saved credentials are managed separately by Holarc. Session routing is stored in Chrome session storage; interface-monitoring settings and records use Chrome local extension storage. Local quote position and progress may also be retained by the Holarc website in browser storage.</p>
+        <p>Removing the extension removes its extension storage. Clearing Holarc website data removes locally saved website state. Neither action deletes documents already saved to Holarc or records held by an insurer. A downloaded PDF may remain in the browser’s download folder until you delete it. Holarc records are retained as needed for the service and applicable record-keeping obligations; deletion requests are assessed against those obligations.</p>
+        <p>Companion uses HTTPS connections, portal-origin checks and workflow routing checks to limit where information is sent. Access to stored client documents is governed by Holarc’s account permissions. No system can guarantee absolute security.</p>
+        <h3>Your controls and requests</h3>
+        <p>You can stop automated activity using Stop, close managed portal tabs, or disable or uninstall Companion. Verification prompts and unsupported steps may require your input. Wealth managers must have authority to submit client information to the selected insurer. Installing Companion does not replace any consent or authorisation required for that disclosure.</p>
+        <p>For access, correction, deletion or privacy questions about Companion data, contact <a href="mailto:legal@holarchealth.com">legal@holarchealth.com</a>. Identify Holarc Wealth Companion and the relevant account, but do not email passwords or verification codes. Requests concerning an insurer’s independent records should also be directed to that insurer.</p>
+        <p>We will update this notice when Companion’s data practices change and identify the updated effective date. Material changes will be communicated through Holarc or the extension’s published information.</p>
+
         <h2>5. Sharing Information With Your Wealth Manager</h2>
         <p>By adding or accepting an invitation from a Wealth Manager, you authorise:</p>
         <ul>
