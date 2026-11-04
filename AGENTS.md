@@ -1,4 +1,5 @@
 # Agent rules
+- Quote sourcing uses one Step 4 selector; planning premiums stay namespaced inside existing quote-spec variations, never become wealth_quotes or workflow completion evidence. Why: estimates must not masquerade as insurer calculations or unlock advice.
 - Wealth workflow state is derived and changed only by DB functions (wealth_*); UI never writes stage directly. Why: keeps stage truthful to records and every change audited.
 - Healthcare-only modules are hidden via `WEALTH_HIDDEN_MODULES` in src/lib/terminology.ts (nav filter + App route guard; admins bypass). Why: code retained, wealth users never reach it.
 - User-facing wealth terminology comes from src/lib/terminology.ts; database queries, joins and role types follow the current generated schema (clients and broker/client), while route/component names stay unchanged. Why: display copy cannot redefine live database identifiers.
