@@ -1,11 +1,18 @@
 {
   "manifest_version": 3,
   "name": "Holarc Wealth Companion",
-  "version": "1.7.4",
+  "version": "1.7.5",
   "description": "Connects insurer portals in background tabs using saved Holarc Wealth logins, relays verification and captures quote PDFs.",
   "icons": { "48": "icon.png", "128": "icon.png" },
   "permissions": ["tabs", "scripting", "storage", "downloads", "alarms"],
-  "host_permissions": ["https://*/*"],
+  "host_permissions": [
+    "https://*.advisorfmi.co.za/*",
+    "https://*.fmi.co.za/*",
+    "https://*.discovery.co.za/*",
+    "https://*.oldmutual.co.za/*",
+    "https://*.momentum.co.za/*",
+    "https://*.brightrock.co.za/*"
+  ],
   "background": { "service_worker": "background.js" },
   "content_scripts": [
     {
