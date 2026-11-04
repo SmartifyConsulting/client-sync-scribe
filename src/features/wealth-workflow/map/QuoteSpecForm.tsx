@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus, X, Pencil, Check } from "lucide-react";
 import { QuoteOptionReference } from "./QuoteOptionReference";
 import { quoteReference, withQuoteReference } from "./quoteReferences";
+import { usePublishQuoteInsurers } from "./QuoteInsurerSelection";
 import { insurerColor } from "./insurerColors";
 import { insurerFields, insurerKey } from "./insurerDictionary";
 import { LoginRing, LOGIN_TEXT, OtpDialog, ProtectorDialog, addonInstalled, downloadAddon, type Challenge, type LoginState } from "./InsurerLogin";
@@ -77,6 +78,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
 
   const [plan, setPlan] = useState<Plan>({});
   const [chosen, setChosen] = useState<string[]>([]);
+  usePublishQuoteInsurers(workflowId, chosen);
   const [tab, setTab] = useState("");
   const [busy, setBusy] = useState(false);
   const pendingConnections = useRef(new Set<string>());

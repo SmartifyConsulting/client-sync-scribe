@@ -18,6 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { MapAvatars } from "./StepAvatar";
 import { CancelWorkflowButton, CancelledNotice } from "../workspace/CancelWorkflow";
+import { QuoteInsurerSelectionProvider, useSelectedQuoteInsurers } from "./QuoteInsurerSelection";
 
 interface Props {
   clientId: string;
@@ -31,7 +32,11 @@ interface Props {
 }
 
 /** Live Workspace: step list on the left, working window for the active step on the right. */
-export function WorkflowMap({ clientId, clientName, onOpenDocuments, initialGroup, onBackToLive, viewer = "manager" }: Props) {
+export function WorkflowMap(props: Props) {
+  return <QuoteInsurerSelectionProvider key={props.clientId}><WorkflowMapContent {...props} /></QuoteInsurerSelectionProvider>;
+}
+
+function WorkflowMapContent({ clientId, clientName, onOpenDocuments, initialGroup, onBackToLive, viewer = "manager" }: Props) {
   const m = useWorkflowMap(clientId, viewer);
   useWorkflowRealtime(clientId, m.workflow?.id);
   const [picked, setPicked] = useState<{ group: string; step: string } | null>(null);
@@ -39,6 +44,11 @@ export function WorkflowMap({ clientId, clientName, onOpenDocuments, initialGrou
   const { toast } = useToast();
   const [selected, setSelected] = useState<GroupView | null>(null);
   const [openedInitial, setOpenedInitial] = useState<string | undefined>();
+  const { data: quoteSpec } = useQuery({
+    queryKey: ["wealth-quote-spec", m.workflow?.id], enabled: !!m.workflow?.id,
+    queryFn: async () => (await (supabase as any).from("wealth_quote_specs").select("*").eq("workflow_id", m.workflow!.id).order("created_at", { ascending: false }).limit(1).maybeSingle()).data,
+  });
+  const quoteInsurers = useSelectedQuoteInsurers(m.workflow?.id, quoteSpec?.insurers);
   const clientFirst = (clientName ?? "Client").split(" ")[0] || "Client";
   const clientUid = m.records?.personal?.patient_user_id as string | undefined;
   const advisorUid = m.records?.personal?.user_id as string | undefined;
@@ -146,7 +156,9 @@ export function WorkflowMap({ clientId, clientName, onOpenDocuments, initialGrou
               <SolidBadge className="bg-emerald-600">{clientFirst}</SolidBadge>
               <SolidBadge className="bg-blue-600">{avatars.advisor.name && avatars.advisor.name !== "Wealth Manager" ? avatars.advisor.name.split(" ")[0] : "Wealth Manager"}</SolidBadge>
               <SolidBadge className="bg-slate-600">System</SolidBadge>
-              {Array.from(new Set((m.records?.holdings ?? []).map((h: any) => h.provider as string))).map((p) => <InsurerBadge key={p} provider={p} legend />)}
+              {(shownGroup?.group.key === "quotes" || shownStep === "Quote 6 insurers, rank top 3"
+                ? quoteInsurers
+                : Array.from(new Set((m.records?.holdings ?? []).map((h: any) => h.provider as string)))).map((p) => <InsurerBadge key={p} provider={p} legend />)}
             </>} />
         </div>
         <div className="min-w-0 rounded-xl border border-border bg-card p-4 lg:sticky lg:top-4">
