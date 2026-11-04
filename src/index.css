@@ -657,4 +657,5 @@ textarea::placeholder {
   .settings-scope .settings-frame-header { @apply justify-start; }
   .quote-step-done { @apply border-success/30 bg-success/10; }
   .quote-step-active { @apply border-primary/50 ring-1 ring-primary/20; }
+  .quote-progress-badge { @apply inline-flex rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground shadow-sm; }
 }

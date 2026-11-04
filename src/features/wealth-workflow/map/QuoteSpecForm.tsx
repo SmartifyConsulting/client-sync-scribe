@@ -116,7 +116,10 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
       if (stoppedConnections.current.has(d.insurer)) return;
       if (d.type === "insurer-login-progress" && isActivityPhase(d.phase)) recordActivity(d.insurer, d.phase);
       if (d.type === "insurer-scan-result" && d.ok && ["fields", "no-fields"].includes(d.scan?.state)) recordActivity(d.insurer, d.scan.state);
-      if (d.type === "insurer-pdf") recordActivity(d.insurer, "saving");
+      if (d.type === "insurer-pdf") {
+        recordActivity(d.insurer, "saving");
+        if (Number.isInteger(d.n)) setJobs(previous => ({ ...previous, [d.insurer]: (previous[d.insurer] ?? []).map(job => job.n === d.n ? { ...job, pdfReceived: true } : job) }));
+      }
       if (d.type === "insurer-pdf-error") recordActivity(d.insurer, "pdf-error");
       if (d.type === "insurer-quote-status" && Number.isInteger(d.n) && ["submitting", "generating", "no-fields", "failed"].includes(d.status))
         setJobs((j) => setStatus(j, d.insurer, d.n, d.status, Date.now(), typeof d.detail === "string" ? d.detail.slice(0, 160) : undefined));
@@ -375,8 +378,9 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
           </div>
           </section>
           <section ref={reviewSection} tabIndex={-1} className={cn("frame scroll-mt-6 p-3 space-y-3", connected && "quote-step-active")} aria-label="Review quote options" aria-current={connected ? "step" : undefined}>
-            <div className="flex items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">2</span><h4 className="font-semibold">Review quote options</h4>{connected && <span role="status" className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">In Progress</span>}</div>
-            <p className={label}>These options apply to the insurers you selected. Open a product to compare and edit Options A, B and C.</p>
+            <div className="flex items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">2</span><h4 className="font-semibold">Review quote options</h4>{connected && <span role="status" className="quote-progress-badge">In Progress</span>}</div>
+            <p className="font-medium text-foreground">Review your options, then request quotes.</p>
+            <p className={label}>Waiting for your review. Open a product to compare and edit Options A, B and C.</p>
           <details className="rounded-lg border border-border p-2">
             <summary className="cursor-pointer text-xs font-medium">Calculation assumptions</summary>
             <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -463,7 +467,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
             </Button>
             <p className={label}>{login[activeTab] !== "connected" ? `Connect ${activeTab} in step 1 before requesting quotes.` : !allComplete ? "Complete the missing values in step 2 to enable this button." : "Connected. Review your options before submitting to the insurer."}</p>
           </div>
-          <QuoteJobsPanel jobs={jobs} onRetry={(ins, n) => submitScenarios(ins, [n])} />
+          <QuoteJobsPanel jobs={Object.fromEntries(chosen.map(ins => [ins, jobs[ins] ?? []]))} onStop={stopConnection} onRetry={(ins, n) => submitScenarios(ins, [n])} />
           {clientId && <QuotePdfCapture workflowId={workflowId} clientId={clientId} insurer={activeTab}
             onActivity={(ins, phase, detail) => recordActivity(ins, phase, detail)}
             onScenarioSaved={(ins, n) => setJobs((j) => setStatus(j, ins, n, "captured", Date.now()))} />}

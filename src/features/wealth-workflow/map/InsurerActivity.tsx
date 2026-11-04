@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CheckCircle2, AlertCircle, RotateCw, Square } from "lucide-react";
+import { CheckCircle2, AlertCircle, RotateCw, Square, Hourglass } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { insurerColor } from "./insurerColors";
 import { ACTIVITY_TEXT, activityWaiting, type QuoteActivity } from "./quoteActivity";
@@ -8,7 +8,7 @@ export function InsurerActivity({ insurer, activity, onRetry, onStop, canStop, i
   const [now, setNow] = useState(Date.now());
   useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(timer); }, []);
   if (!insurer) return null;
-  if (!activity) return <section aria-label={`${insurer} background activity`} className="flex items-center gap-2 border-b border-border py-2 text-xs">
+  if (!activity) return <section aria-label={`${insurer} background activity`} className="flex items-center gap-2 py-2 text-xs">
     <svg viewBox="0 0 32 32" className="h-8 w-8 shrink-0" style={{ color: `hsl(${insurerColor(insurer)})` }} aria-hidden="true">
       <circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" strokeWidth="3" opacity="0.25" />
     </svg>
@@ -21,18 +21,16 @@ export function InsurerActivity({ insurer, activity, onRetry, onStop, canStop, i
   const complete = ["connected", "reconnected", "fields", "saved", "stopped"].includes(activity.phase);
   const paused = ["otp", "email", "unlock-required"].includes(activity.phase);
   const elapsed = Math.max(0, Math.floor((now - activity.since) / 1000));
-  return <section aria-label={`${insurer} background activity`} className="flex items-start gap-2 border-b border-border py-2 text-xs">
+  return <section aria-label={`${insurer} background activity`} className="flex items-start gap-3 py-2 text-xs">
     <div className="shrink-0" style={{ color: `hsl(${insurerColor(insurer)})` }}>
       {activity.phase === "stopped" ? <Square className="h-8 w-8" /> : complete ? <CheckCircle2 className="h-8 w-8" /> : error || stalled ? <AlertCircle className="h-8 w-8" /> :
-        <svg viewBox="0 0 32 32" className={`h-8 w-8 ${paused ? "" : "animate-spin motion-reduce:animate-none"}`} aria-label={paused ? "Waiting for verification" : "Background activity"}>
-          <circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" strokeWidth="3" opacity="0.2" />
-          <circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeDasharray="25 57" />
-        </svg>}
+        <Hourglass className={`h-12 w-12 ${paused ? "" : "animate-pulse motion-reduce:animate-none"}`} aria-label={paused ? "Waiting for your input" : "Background activity"} />}
     </div>
     <div className="min-w-0 flex-1 space-y-1">
       <p role="status" className="font-medium text-foreground">{insurer} · {ACTIVITY_TEXT[activity.phase]}</p>
       {activity.detail && <p className="break-words text-destructive">{activity.detail}</p>}
-      {(stalled || paused) && <p className="text-muted-foreground">{stalled ? `No advance for ${elapsed}s at this step. The portal may be slow or need attention.` : `Awaiting your verification · ${elapsed}s`}</p>}
+      {!complete && !error && <p className="text-muted-foreground">{paused ? "Waiting for your input" : ["unlocking", "opening"].includes(activity.phase) ? "Waiting for Holarc" : `Waiting for ${insurer}`} · {elapsed}s</p>}
+      {stalled && <p className="text-muted-foreground">No advance at this step. The portal may be slow or need attention.</p>}
       <details className="pt-1">
       <summary className="cursor-pointer text-xs text-muted-foreground">Connection history</summary>
       <ol className="mt-2 space-y-1 text-xs text-muted-foreground" aria-label="Recent activity">

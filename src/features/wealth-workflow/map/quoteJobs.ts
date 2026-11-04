@@ -2,7 +2,7 @@
  *  so a slow or failed scenario never holds back the others. Status only advances on Companion
  *  reports or a successfully saved PDF. */
 export type ScenarioStatus = "queued" | "submitting" | "generating" | "captured" | "no-fields" | "failed" | "stopped";
-export type ScenarioJob = { n: number; status: ScenarioStatus; since: number; detail?: string };
+export type ScenarioJob = { n: number; status: ScenarioStatus; since: number; detail?: string; pdfReceived?: boolean };
 export type QuoteJobs = Record<string, ScenarioJob[]>;
 
 export const STALL_MS = 90_000;
@@ -30,8 +30,19 @@ export const startJobs = (jobs: QuoteJobs, insurer: string, count: number, now: 
 export const setStatus = (jobs: QuoteJobs, insurer: string, n: number, status: ScenarioStatus, now: number, detail?: string): QuoteJobs => {
   const list = jobs[insurer];
   if (!list) return jobs;
-  return { ...jobs, [insurer]: list.map((j) => (j.n !== n || j.status === "captured" ? j : { n, status, since: j.status === status ? j.since : now, detail })) };
+  return { ...jobs, [insurer]: list.map((j) => (j.n !== n || j.status === "captured" ? j : { ...j, n, status, since: j.status === status ? j.since : now, detail })) };
 };
+
+/** Checkpoints reflect acknowledgements, never a timer or assumed insurer calculation. */
+export function quoteCheckpoints(job: ScenarioJob) {
+  const started = ["submitting", "generating", "no-fields", "failed", "captured"].includes(job.status);
+  return [
+    { label: "Connected", done: started || job.status === "queued" },
+    { label: "Request started", done: started },
+    { label: "PDF received", done: job.pdfReceived === true || job.status === "captured" },
+    { label: "Saved", done: job.status === "captured" },
+  ];
+}
 
 /** A saved PDF completes the earliest scenario still in progress for that insurer. */
 export const markCaptured = (jobs: QuoteJobs, insurer: string, now: number): QuoteJobs => {

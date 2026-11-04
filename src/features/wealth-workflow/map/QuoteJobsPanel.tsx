@@ -1,35 +1,45 @@
 import { useEffect, useState } from "react";
-import { CheckCircle2, AlertCircle, Loader2, Clock, RotateCcw } from "lucide-react";
+import { CheckCircle2, AlertCircle, Hourglass, Clock, RotateCcw, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SCENARIO_TEXT, isStalled, needsRetry, type QuoteJobs } from "./quoteJobs";
+import { SCENARIO_TEXT, isStalled, needsRetry, quoteCheckpoints, type QuoteJobs } from "./quoteJobs";
 import { insurerColor } from "./insurerColors";
 
-/** Quote 1-3 for every insurer, side by side, with per-quote retry. */
-export function QuoteJobsPanel({ jobs, onRetry }: { jobs: QuoteJobs; onRetry: (insurer: string, n: number) => void }) {
+/** Shows confirmed milestones, rather than an invented percentage or a simulated clock-based fill. */
+export function QuoteJobsPanel({ jobs, onRetry, onStop }: { jobs: QuoteJobs; onRetry: (insurer: string, n: number) => void; onStop?: (insurer: string) => void }) {
   const [now, setNow] = useState(Date.now());
-  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 5000); return () => clearInterval(t); }, []);
-  const insurers = Object.keys(jobs);
+  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
+  const insurers = Object.keys(jobs).filter(ins => Array.isArray(jobs[ins]) && jobs[ins].length);
   if (!insurers.length) return null;
-  return (
-    <div className="space-y-1 rounded border border-border/60 p-2">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Quotes in progress</p>
-      {insurers.map((ins) => (
-        <div key={ins} className="flex flex-wrap items-center gap-1.5">
-          <span className="w-20 truncate rounded px-1.5 py-0.5 text-[10px] font-semibold" style={{ background: `hsl(${insurerColor(ins)})`, color: "hsl(var(--insurer-foreground))" }}>{ins}</span>
-          {jobs[ins].map((j) => {
-            const stalled = isStalled(j, now);
-            const Icon = j.status === "captured" ? CheckCircle2 : j.status === "queued" || j.status === "stopped" ? Clock : needsRetry(j, now) ? AlertCircle : Loader2;
-            return (
-              <span key={j.n} title={j.detail} className="flex items-center gap-1 rounded-full border border-border/60 px-2 py-0.5 text-[10px]">
-                <Icon className={`h-3 w-3 ${Icon === Loader2 ? "animate-spin" : ""} ${needsRetry(j, now) ? "text-destructive" : j.status === "captured" ? "text-success" : "text-muted-foreground"}`} />
-                <b>Quote {j.n}</b> · Option {String.fromCharCode(64 + j.n)} · {stalled ? `No reply for ${Math.round((now - j.since) / 1000)}s` : SCENARIO_TEXT[j.status]}
-                {needsRetry(j, now) && <Button variant="link" size="sm" className="h-auto px-0.5 text-[10px]" onClick={() => onRetry(ins, j.n)}><RotateCcw className="mr-0.5 h-2.5 w-2.5" />Retry</Button>}
-              </span>
-            );
-          })}
-        </div>
-      ))}
-      <p className="text-[10px] text-muted-foreground">Insurers run at the same time in background tabs. Keep this Holarc Wealth tab open — you can work in other browser tabs meanwhile.</p>
-    </div>
-  );
+  return <div className="space-y-3 rounded-lg border border-border p-3" aria-label="Quote activity">
+    <p className="text-xs font-semibold">Quote activity</p>
+    {insurers.map(ins => <div key={ins} className="space-y-2">
+      <span className="inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: `hsl(${insurerColor(ins)})`, color: "hsl(var(--insurer-foreground))" }}>{ins}</span>
+      {jobs[ins].map(j => {
+        const stalled = isStalled(j, now), retry = needsRetry(j, now);
+        const active = ["submitting", "generating"].includes(j.status) && !stalled;
+        const Icon = j.status === "captured" ? CheckCircle2 : retry ? AlertCircle : j.status === "stopped" ? Square : active ? Hourglass : Clock;
+        return <section key={j.n} aria-label={`${ins} Option ${String.fromCharCode(64 + j.n)} activity`} className="rounded-lg bg-muted/40 p-3">
+          <div className="flex items-start gap-3">
+            <Icon aria-label={active ? "Quote request running" : undefined} className={`${active ? "h-12 w-12 animate-pulse motion-reduce:animate-none text-primary" : "h-8 w-8"} shrink-0 ${retry ? "text-destructive" : j.status === "captured" ? "text-success" : ""}`} />
+            <div className="min-w-0 flex-1 space-y-1">
+              <p className="text-xs font-semibold">Quote {j.n} · Option {String.fromCharCode(64 + j.n)}</p>
+              <p role="status" className="text-xs">{j.pdfReceived && j.status === "generating" ? "Saving quote PDF…" : stalled ? "Waiting for the insurer · no recent response" : SCENARIO_TEXT[j.status]}</p>
+              {active && <p className="text-xs text-muted-foreground">Waiting for {j.pdfReceived ? "Holarc" : ins} · {Math.max(0, Math.floor((now - j.since) / 1000))}s</p>}
+              {j.status === "queued" && <p className="text-xs text-muted-foreground">Waiting for this option to start.</p>}
+              {j.detail && !j.pdfReceived && j.detail !== SCENARIO_TEXT[j.status] && <p className="break-words text-xs text-muted-foreground">{j.detail}</p>}
+            </div>
+            {retry && <Button variant="outline" size="sm" onClick={() => onRetry(ins, j.n)}><RotateCcw className="mr-1 h-3 w-3" />Retry</Button>}
+            {onStop && ["queued", "submitting", "generating"].includes(j.status) && <Button variant="outline" size="sm" aria-label={`Stop ${ins} quote requests`} onClick={() => onStop(ins)}>Stop</Button>}
+          </div>
+          <ol aria-label="Confirmed quote milestones" className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {quoteCheckpoints(j).map(point => <li key={point.label} className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+              <span aria-hidden="true" style={{ borderRadius: 2 }} className={`h-3 w-3 shrink-0 border ${point.done ? "border-success bg-success" : "border-border bg-background"}`} />
+              <span>{point.label}<span className="sr-only"> · {point.done ? "confirmed" : "pending"}</span></span>
+            </li>)}
+          </ol>
+        </section>;
+      })}
+    </div>)}
+    <p className="text-[10px] text-muted-foreground">Squares fill when a checkpoint is confirmed. Keep this Holarc tab open; you can work in other tabs.</p>
+  </div>;
 }
