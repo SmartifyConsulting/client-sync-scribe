@@ -102,7 +102,11 @@ export default function AppIntegrations() {
   const protectorStatus = useQuery({
     queryKey: ["password-protector-status", user?.id],
     enabled: !!user,
-    queryFn: async (): Promise<boolean> => (await invoke({ action: "protector_status" })).isSet ?? false,
+    queryFn: async (): Promise<boolean> => {
+      const result = await invoke({ action: "protector_status" });
+      if (typeof result?.isSet !== "boolean") throw new Error("Could not check Password Protector.");
+      return result.isSet;
+    },
   });
 
   const [manageEntry, setManageEntry] = useState<CatalogEntry | null>(null);
@@ -281,16 +285,26 @@ export default function AppIntegrations() {
 
   // ---- Locked states: nothing about the integrations is shown until unlocked ----
 
-  if (protectorStatus.isLoading) {
+  if (!user || protectorStatus.isPending) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 aria-label="Checking Password Protector" className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
+  if (protectorStatus.isError) {
+    return <div className="space-y-4">
+      <PageHeader title="App Integrations" />
+      <div className="max-w-sm mx-auto mt-16 space-y-4 text-center" role="alert">
+        <p>Could not check your Password Protector. Please try again.</p>
+        <Button onClick={() => void protectorStatus.refetch()} disabled={protectorStatus.isFetching}>Try again</Button>
+      </div>
+    </div>;
+  }
+
   if (!reauthToken) {
-    const firstTime = !protectorStatus.data;
+    const firstTime = protectorStatus.data === false;
     return (
       <div className="space-y-4">
         <PageHeader title="App Integrations" />
