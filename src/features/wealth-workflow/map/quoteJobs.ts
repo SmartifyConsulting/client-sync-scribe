@@ -5,6 +5,16 @@ export type ScenarioStatus = "queued" | "submitting" | "generating" | "captured"
 export type ScenarioJob = { n: number; status: ScenarioStatus; since: number; detail?: string; pdfReceived?: boolean };
 export type QuoteJobs = Record<string, ScenarioJob[]>;
 
+/** A blocked batch cannot advance its queued options. Also repairs saved older batches. */
+export function releaseBlockedQueues(jobs: QuoteJobs): QuoteJobs {
+  return Object.fromEntries(Object.entries(jobs).map(([insurer, list]) => [insurer,
+    list.some(j => j.status === "no-fields" || j.status === "failed") &&
+    !list.some(j => j.status === "submitting" || j.status === "generating")
+      ? list.map(j => j.status === "queued" ? { ...j, status: "stopped" as const, detail: "Not started: an earlier option blocked this batch." } : j)
+      : list
+  ]));
+}
+
 export const STALL_MS = 90_000;
 export const SCENARIO_TEXT: Record<ScenarioStatus, string> = {
   queued: "Queued",
@@ -30,7 +40,7 @@ export const startJobs = (jobs: QuoteJobs, insurer: string, count: number, now: 
 export const setStatus = (jobs: QuoteJobs, insurer: string, n: number, status: ScenarioStatus, now: number, detail?: string): QuoteJobs => {
   const list = jobs[insurer];
   if (!list) return jobs;
-  return { ...jobs, [insurer]: list.map((j) => (j.n !== n || j.status === "captured" ? j : { ...j, n, status, since: j.status === status ? j.since : now, detail })) };
+  return releaseBlockedQueues({ ...jobs, [insurer]: list.map((j) => (j.n !== n || j.status === "captured" ? j : { ...j, n, status, since: j.status === status ? j.since : now, detail })) });
 };
 
 /** Checkpoints reflect acknowledgements, never a timer or assumed insurer calculation. */
