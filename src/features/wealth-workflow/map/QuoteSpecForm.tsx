@@ -83,6 +83,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const [tab, setTab] = useState("");
   const resumeKey = `holarc-quote-position-${user?.id}-${workflowId}`;
   const resumeChecked = useRef(new Set<string>());
+  const resumeRequests = useRef(new Set<string>());
   const [resumePending, setResumePending] = useState(false);
   useEffect(() => {
     try { const saved = JSON.parse(localStorage.getItem(resumeKey) || "null"); if (typeof saved?.tab === "string") setTab(saved.tab); } catch { /* No saved position. */ }
@@ -278,11 +279,13 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     if (!activeTab || !user?.id || !insurerRows.length || !companionInstalled || resumeChecked.current.has(activeTab)) return;
     let saved: any;
     try { saved = JSON.parse(localStorage.getItem(resumeKey) || "{}"); } catch { saved = {}; }
-    if (!saved.connected?.[activeTab]) { resumeChecked.current.add(activeTab); return; }
+    const hadSession = !!saved.connected?.[activeTab];
+    if (!hadSession && !companionVersionCurrent(installedVersion, "1.7.4")) { resumeChecked.current.add(activeTab); return; }
     const ins = activeTab;
     const row = insurerRows.find(r => r.name === ins);
     if (!row) return;
     resumeChecked.current.add(ins);
+    resumeRequests.current.add(ins);
     setResumePending(true);
     setLogin(s => ({ ...s, [ins]: "connecting" }));
     recordActivity(ins, "waiting", "Checking your existing portal session…");
@@ -290,11 +293,19 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     let finished = false;
     const finish = (state: string, attempt?: string) => {
       finished = true;
+      resumeRequests.current.delete(ins);
       setResumePending(false);
       if (stoppedConnections.current.has(ins)) return;
       if (attempt) connectionAttempts.current[ins] = attempt;
       if (state === "connected") {
+        try {
+          const previous = JSON.parse(localStorage.getItem(resumeKey) || "{}");
+          localStorage.setItem(resumeKey, JSON.stringify({ ...previous, connected: { ...previous.connected, [ins]: true } }));
+        } catch { /* Storage can be disabled. */ }
         setLogin(s => ({ ...s, [ins]: "connected" })); recordActivity(ins, "connected");
+      } else if (state === "missing" && !hadSession) {
+        setLogin(s => { const next = { ...s }; delete next[ins]; return next; });
+        setActivity(s => { const next = { ...s }; delete next[ins]; return next; });
       } else {
         setLogin(s => ({ ...s, [ins]: "failed" }));
         recordActivity(ins, "failed", state === "expired" || state === "missing" ? "Session expired—reconnect to continue. Saved quote progress has been kept." : "Could not verify the existing portal session. Update Companion to v1.7.4 or reconnect. Saved quote progress has been kept.");
@@ -308,8 +319,8 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     const timer = window.setTimeout(() => { window.removeEventListener("message", onResume); finish("unknown"); }, 10000);
     window.addEventListener("message", onResume);
     window.postMessage({ source: "holarc", type: "insurer-session-status", requestId, workflowId, insurer: ins, integrationId: row.id, ownerId: user.id }, location.origin);
-    return () => { clearTimeout(timer); window.removeEventListener("message", onResume); if (!finished) resumeChecked.current.delete(ins); };
-  }, [activeTab, user?.id, insurerRows.length, companionInstalled, resumeKey]);
+    return () => { clearTimeout(timer); window.removeEventListener("message", onResume); resumeRequests.current.delete(ins); if (!finished) resumeChecked.current.delete(ins); };
+  }, [activeTab, user?.id, insurerRows.length, companionInstalled, installedVersion, resumeKey]);
   const quotesRunning = (jobs[activeTab] ?? []).some(job => ["queued", "submitting", "generating"].includes(job.status));
   useEffect(() => {
     if (!connected || pendingReview.current !== activeTab) return;
@@ -321,14 +332,14 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   }, [activeTab, connected]);
   // Auto-connect the visible insurer (any insurer) when the 15-minute unlock is already active.
   useEffect(() => {
-    if (!activeTab || !insurerRows.length || (login[activeTab] && login[activeTab] !== "no-addon") || !companionInstalled || resumePending) return;
+    if (!activeTab || !insurerRows.length || (login[activeTab] && login[activeTab] !== "no-addon") || !companionInstalled || resumePending || resumeRequests.current.has(activeTab)) return;
     try { if (JSON.parse(localStorage.getItem(resumeKey) || "{}").connected?.[activeTab]) return; } catch { /* No saved session. */ }
     setSetupOpen(false);
     const token = getToken();
     if (token) void startLogin(activeTab, token);
     else setLogin(s => { if (s[activeTab] !== "no-addon") return s; const next = { ...s }; delete next[activeTab]; return next; });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, insurerRows.length, companionInstalled]);
+  }, [activeTab, insurerRows.length, companionInstalled, resumePending]);
   const setVal = (p: string, i: number, k: string, val: any) =>
     setPlan((pl) => ({ ...pl, [p]: pl[p].map((x, j) => (j === i ? { ...x, [k]: val } : x)) }));
   const total = products.reduce((a, p) => a + plan[p].length, 0);
