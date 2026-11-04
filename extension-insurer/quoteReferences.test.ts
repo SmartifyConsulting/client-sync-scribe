@@ -1,6 +1,16 @@
 import { describe, it, expect } from 'bun:test';
-import { quoteReference, withQuoteReference } from '../src/features/wealth-workflow/map/quoteReferences';
+import { quoteReference, quoteResult, quoteSettingsKey, withQuoteReference } from '../src/features/wealth-workflow/map/quoteReferences';
 describe('quote reference ownership',()=>{
+ it('shows only a finite insurer result for the exact current option settings',()=>{
+  const base={benefit_amount:'1700000','Old Mutual:omp_cashback':'Included'};
+  const result={number:'provider-ref',monthlyPremium:768,source:'portal-verified',settings:quoteSettingsKey('Life cover',base,'Old Mutual')};
+  const saved={...base,_quoteResults:{'Old Mutual':result}};
+  expect(quoteResult('Life cover',saved,'Old Mutual')?.monthlyPremium).toBe(768);
+  expect(quoteResult('Life cover',{...saved,benefit_amount:'1800000'},'Old Mutual')).toBeNull();
+  expect(quoteResult('Life cover',saved,'Momentum')).toBeNull();
+  expect(quoteResult('Life cover',{...base,_quoteResults:{'Old Mutual':{...result,monthlyPremium:Infinity}}},'Old Mutual')).toBeNull();
+  expect(quoteResult('Life cover',{...base,_quoteResults:{'Old Mutual':{...result,source:'planning'}}},'Old Mutual')).toBeNull();
+ });
  it('invalidates an OMP reference when actual insurer terms change',()=>{
   const option={benefit_amount:'1700000','Old Mutual:omp_premium':'0% Annual Increase','Old Mutual:omp_cover':'5% fixed rate'};
   const saved=withQuoteReference('Life cover',option,'Old Mutual','verified-reference');

@@ -23,3 +23,13 @@ export function withQuoteReference(product: string, option: Record<string, any>,
   else delete references[insurer];
   return { ...option, _quoteReferences: references };
 }
+
+/** A calculated result is not a filed PDF and must never complete the workflow. */
+export function quoteResult(product: string, option: Record<string, any>, insurer: string) {
+  const result = option._quoteResults?.[insurer];
+  if (!result || result.settings !== quoteSettingsKey(product, option, insurer) ||
+      typeof result.number !== "string" || !result.number.trim() ||
+      typeof result.monthlyPremium !== "number" || !Number.isFinite(result.monthlyPremium) || result.monthlyPremium <= 0 ||
+      !["portal-verified", "companion-verified"].includes(result.source)) return null;
+  return result as { number: string; monthlyPremium: number; cashbackPremium?: number; source: string; verifiedAt: string };
+}

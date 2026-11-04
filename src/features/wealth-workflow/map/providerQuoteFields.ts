@@ -16,6 +16,7 @@ export function providerQuoteFields(insurer: string, product: string): FieldDef[
       select("omp_underwriting", "Underwriting method", ["No medical tests - only questions", "Medical tests, questions or both"]),
       select("omp_guarantee", "Guarantee term", ["5 years", "10 years", "15 years"]),
       select("omp_term", "Premium term", ["Retirement", "Benefit term"]),
+      select("omp_cashback", "Cashback", ["Included"]),
     ];
   }
   return [...(PRODUCT_TYPES[product] || []), ...insurerFields(insurer, product).map(f => ({ ...f, key: insurerKey(insurer, f.key) }))];

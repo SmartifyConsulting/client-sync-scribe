@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus, X, Pencil, Check } from "lucide-react";
 import { QuoteOptionReference } from "./QuoteOptionReference";
-import { quoteReference, withQuoteReference } from "./quoteReferences";
+import { quoteReference, quoteResult, withQuoteReference } from "./quoteReferences";
 import { usePublishQuoteInsurers } from "./QuoteInsurerSelection";
 import { SegmentedProgress } from "./SegmentedProgress";
 import { insurerColor } from "./insurerColors";
@@ -496,6 +496,12 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                       <span className="block">Option {String.fromCharCode(65 + i)}</span>
                       <QuoteOptionReference key={`${activeTab}:${p}:${i}`} value={quoteReference(p, option, activeTab)} label={`${activeTab} ${p} Option ${String.fromCharCode(65 + i)} quote number`}
                         onChange={number => setPlan(pl => ({ ...pl, [p]: pl[p].map((value, n) => n === i ? withQuoteReference(p, value, activeTab, number) : value) }))} />
+                      {(() => { const result = quoteResult(p, option, activeTab); return result ? <div className="mt-2 space-y-1 normal-case tracking-normal">
+                        <p className="text-xs font-semibold text-foreground">{new Intl.NumberFormat("en-ZA", { style: "currency", currency: "ZAR", maximumFractionDigits: 2 }).format(result.monthlyPremium)} / month</p>
+                        {typeof result.cashbackPremium === "number" && <p className="text-[10px] font-normal">Includes R{result.cashbackPremium} cashback premium</p>}
+                        <p className="text-[10px] font-normal">{result.source === "portal-verified" ? "Verified in insurer portal" : "Verified by Companion"}</p>
+                        <p className="text-[10px] font-normal">Calculation recorded · PDF filing tracked in Documents</p>
+                      </div> : null; })()}
                     </th>)}</tr>
                   </thead>
                   <tbody>
