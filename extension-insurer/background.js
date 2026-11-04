@@ -88,6 +88,30 @@ function tell(job, msg) {
 chrome.runtime.onMessage.addListener((d, sender) => {
   const appTabId = sender.tab?.id;
   if (!appTabId || !trustedApp(sender.tab?.url)) return;
+  if (d.type === "insurer-session-status") {
+    void (async () => {
+      let state = "missing", connectionAttemptId;
+      const stored = await chrome.storage.session.get(null);
+      for (const [key, route] of Object.entries(stored)) {
+        if (!key.startsWith("portal-") || route.cancelled || route.appTabId !== appTabId ||
+            !d.ownerId || route.ownerId !== d.ownerId || route.workflowId !== d.workflowId ||
+            route.insurer !== d.insurer || route.integrationId !== d.integrationId) continue;
+        const tabId = Number(key.slice(7));
+        const tab = await chrome.tabs.get(tabId).catch(() => null);
+        if (!portalAllowed(tab?.url, route)) continue;
+        const [probe] = await chrome.scripting.executeScript({ target: { tabId }, func: drive,
+          args: ["", "", true, route.origin, route.discoveryRedirects, true, true] }).catch(() => []);
+        const latest = (await chrome.storage.session.get(key))[key];
+        if (!latest || latest.cancelled) continue;
+        connectionAttemptId = route.connectionAttemptId;
+        state = probe?.result?.state === "in" ? "connected" : probe?.result?.state === "login" ? "expired" : "unknown";
+        break;
+      }
+      chrome.tabs.sendMessage(appTabId, { type: "insurer-session-status-result", insurer: d.insurer,
+        workflowId: d.workflowId, ownerId: d.ownerId, requestId: d.requestId, state, connectionAttemptId }).catch(() => {});
+    })();
+    return;
+  }
   if (d.type === "insurer-reconnect-credentials") {
     const entry = [...jobs.entries()].find(([, j]) => j.appTabId === appTabId && j.insurer === d.insurer &&
       j.workflowId === d.workflowId && j.connectionAttemptId === d.connectionAttemptId && j.recoveryId === d.recoveryId);
@@ -433,6 +457,8 @@ function drive(username, password, submitted, origin, discoveryRedirects, passwo
   if (oldMutualHome) return { state: "in" };
   const user = inputs.find((i) => ["text", "email", "tel"].includes(i.type) && /user|email|login|id|name/i.test(`${i.name} ${i.id} ${i.placeholder} ${i.autocomplete}`)) ||
     inputs.find((i) => ["text", "email"].includes(i.type));
+  if (!pw && /log ?out|sign ?out/i.test(text) && /quote|quotation|new business|adviser dashboard/i.test(text)) return { state: "in" };
+  if (!pw && domainHostForPage(u.hostname, "oldmutual.co.za") && query(document, "button").some(b => vis(b) && /^Logged In as\b/i.test(buttonText(b)))) return { state: "in" };
   if (probeOnly) {
     const actions = query(document, "button, a[role=button], input[type=submit]" + (u.hostname === "adviser-account.momentum.co.za" ? ", a#btn-login" : "")).filter(vis);
     const loginActions = actions.filter(b => /^(log ?in|sign ?in)$/i.test(buttonText(b)));

@@ -81,6 +81,19 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const [chosen, setChosen] = useState<string[]>([]);
   usePublishQuoteInsurers(workflowId, chosen);
   const [tab, setTab] = useState("");
+  const resumeKey = `holarc-quote-position-${user?.id}-${workflowId}`;
+  const resumeChecked = useRef(new Set<string>());
+  const [resumePending, setResumePending] = useState(false);
+  useEffect(() => {
+    try { const saved = JSON.parse(localStorage.getItem(resumeKey) || "null"); if (typeof saved?.tab === "string") setTab(saved.tab); } catch { /* No saved position. */ }
+  }, [resumeKey]);
+  useEffect(() => {
+    if (!tab) return;
+    try {
+      const saved = JSON.parse(localStorage.getItem(resumeKey) || "{}");
+      localStorage.setItem(resumeKey, JSON.stringify({ ...saved, tab }));
+    } catch { /* Storage can be disabled. */ }
+  }, [tab, resumeKey]);
   const [busy, setBusy] = useState(false);
   const pendingConnections = useRef(new Set<string>());
   const stoppedConnections = useRef(new Set<string>());
@@ -131,6 +144,10 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
         setChallenge({ insurer: d.insurer, method: d.method === "email" ? "email" : "otp", hint: d.hint });
       }
       if (d.type === "insurer-otp-result" || d.type === "insurer-login-result") {
+        if (d.ok) try {
+          const saved = JSON.parse(localStorage.getItem(resumeKey) || "{}");
+          localStorage.setItem(resumeKey, JSON.stringify({ ...saved, connected: { ...saved.connected, [d.insurer]: true } }));
+        } catch { /* Storage can be disabled. */ }
         if (d.type === "insurer-login-result" && pendingConnections.current.delete(d.insurer)) {
           const provider = insurerRows.find(row => row.name === d.insurer);
           // Connection metadata is recorded by the app-wide CompanionCoordinator.
@@ -143,7 +160,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     };
     window.addEventListener("message", onMsg);
     return () => window.removeEventListener("message", onMsg);
-  }, [workflowId, insurerRows]);
+  }, [workflowId, insurerRows, resumeKey]);
 
   /** Opening a tab unlocks the saved login and asks the add-on to open and log into the insurer portal. */
   const TOKEN_KEY = "holarc-cred-token";
@@ -255,6 +272,44 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const activeTab = chosen.includes(tab) ? tab : chosen[0] ?? "";
   visibleInsurer.current = activeTab;
   const connected = login[activeTab] === "connected";
+  // Saved position is a hint only: Companion must verify the existing portal.
+  // A refresh must never replay login or quote submission for a saved session.
+  useEffect(() => {
+    if (!activeTab || !user?.id || !insurerRows.length || !companionInstalled || resumeChecked.current.has(activeTab)) return;
+    let saved: any;
+    try { saved = JSON.parse(localStorage.getItem(resumeKey) || "{}"); } catch { saved = {}; }
+    if (!saved.connected?.[activeTab]) { resumeChecked.current.add(activeTab); return; }
+    const ins = activeTab;
+    const row = insurerRows.find(r => r.name === ins);
+    if (!row) return;
+    resumeChecked.current.add(ins);
+    setResumePending(true);
+    setLogin(s => ({ ...s, [ins]: "connecting" }));
+    recordActivity(ins, "waiting", "Checking your existing portal session…");
+    const requestId = crypto.randomUUID();
+    let finished = false;
+    const finish = (state: string, attempt?: string) => {
+      finished = true;
+      setResumePending(false);
+      if (stoppedConnections.current.has(ins)) return;
+      if (attempt) connectionAttempts.current[ins] = attempt;
+      if (state === "connected") {
+        setLogin(s => ({ ...s, [ins]: "connected" })); recordActivity(ins, "connected");
+      } else {
+        setLogin(s => ({ ...s, [ins]: "failed" }));
+        recordActivity(ins, "failed", state === "expired" || state === "missing" ? "Session expired—reconnect to continue. Saved quote progress has been kept." : "Could not verify the existing portal session. Update Companion to v1.7.4 or reconnect. Saved quote progress has been kept.");
+      }
+    };
+    const onResume = (e: MessageEvent) => {
+      const d = e.data;
+      if (e.source !== window || e.origin !== location.origin || d?.source !== "holarc-extension" || d.type !== "insurer-session-status-result" || d.requestId !== requestId || d.ownerId !== user.id || d.workflowId !== workflowId || d.insurer !== ins) return;
+      clearTimeout(timer); window.removeEventListener("message", onResume); finish(d.state, d.connectionAttemptId);
+    };
+    const timer = window.setTimeout(() => { window.removeEventListener("message", onResume); finish("unknown"); }, 10000);
+    window.addEventListener("message", onResume);
+    window.postMessage({ source: "holarc", type: "insurer-session-status", requestId, workflowId, insurer: ins, integrationId: row.id, ownerId: user.id }, location.origin);
+    return () => { clearTimeout(timer); window.removeEventListener("message", onResume); if (!finished) resumeChecked.current.delete(ins); };
+  }, [activeTab, user?.id, insurerRows.length, companionInstalled, resumeKey]);
   const quotesRunning = (jobs[activeTab] ?? []).some(job => ["queued", "submitting", "generating"].includes(job.status));
   useEffect(() => {
     if (!connected || pendingReview.current !== activeTab) return;
@@ -266,7 +321,8 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   }, [activeTab, connected]);
   // Auto-connect the visible insurer (any insurer) when the 15-minute unlock is already active.
   useEffect(() => {
-    if (!activeTab || !insurerRows.length || (login[activeTab] && login[activeTab] !== "no-addon") || !companionInstalled) return;
+    if (!activeTab || !insurerRows.length || (login[activeTab] && login[activeTab] !== "no-addon") || !companionInstalled || resumePending) return;
+    try { if (JSON.parse(localStorage.getItem(resumeKey) || "{}").connected?.[activeTab]) return; } catch { /* No saved session. */ }
     setSetupOpen(false);
     const token = getToken();
     if (token) void startLogin(activeTab, token);
@@ -358,9 +414,6 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
           <CompanionSetup open={setupOpen} onClose={() => setSetupOpen(false)} onReady={() => openTab(activeTab)} />
           </div>
           <div className="min-w-0 space-y-2">
-            {connected && <Button className="w-full font-semibold" disabled={!allComplete || quotesRunning} onClick={() => submitScenarios(activeTab)}>Get quotes</Button>}
-            {connected && !allComplete && <p className="text-xs text-destructive">Complete the required option values below before getting quotes.</p>}
-            {connected && !/^momentum$|^brightrock$/i.test(activeTab) && <p className="text-xs text-muted-foreground">Automatic quotes are not available for {activeTab} yet. Use Open portal to prepare the quote, then upload the PDF.</p>}
             <div className="flex items-center justify-end gap-2">
               <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => {
                 const value = insurerRows.find(r => r.name === activeTab)?.portal_url;
@@ -383,7 +436,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
           </div>
           </section>
           <section ref={reviewSection} tabIndex={-1} className={cn("frame scroll-mt-6 p-3 space-y-3", connected && "quote-step-active")} aria-label="Review quote options" aria-current={connected ? "step" : undefined}>
-            <div className="flex items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">2</span><h4 className="font-semibold">Review quote options</h4>{connected && <span role="status" className="quote-progress-badge">In Progress</span>}</div>
+            <div className="flex flex-wrap items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">2</span><h4 className="font-semibold">Review quote options</h4>{connected && <span role="status" className="quote-progress-badge">In Progress</span>}{connected && <Button className="ml-auto font-semibold" disabled={!allComplete || quotesRunning} title={!allComplete ? "Complete the option values first" : quotesRunning ? "Quote requests are already in progress" : undefined} onClick={() => submitScenarios(activeTab)}>Get quotes</Button>}</div>
             <p className="font-medium text-foreground">Review your options, then request quotes.</p>
             <p className={label}>{quotesRunning ? "Quote requests are in progress. Follow the bars above each option." : "Waiting for your review. Open a product to compare and edit Options A, B and C."}</p>
           <details className="rounded-lg border border-border p-2">
@@ -414,11 +467,11 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                   <colgroup><col className="w-44" />{plan[p].map((_, i) => <col key={i} />)}</colgroup>
                   <thead className="text-[10px] uppercase tracking-wide text-muted-foreground">
                     <tr><th className="px-2 py-1 text-left font-medium">Variable</th>{plan[p].map((option, i) => <th key={i} className="px-2 py-2 text-left align-top font-medium">
-                      {(() => { const job = jobs[activeTab]?.find(j => j.n === i + 1); return job ? <div className="mb-1 font-normal normal-case tracking-normal" title="This option's request includes the selected products">
+                      {(() => { const job = jobs[activeTab]?.find(j => j.n === i + 1); return job ? <div className="mb-2 min-w-0 space-y-1 font-normal normal-case tracking-normal" title="This option's request includes the selected products">
                         <SegmentedProgress label={`${activeTab} ${p} Option ${String.fromCharCode(65 + i)} progress`} completed={quoteCheckpoints(job).filter(point => point.done).length} active={["submitting", "generating"].includes(job.status) && !isStalled(job, Date.now())} activeUntil={job.since + 90_000} />
-                        <span className="text-[10px]">{job.pdfReceived && job.status === "generating" ? "Saving quote PDF…" : SCENARIO_TEXT[job.status]}</span>
+                        <p className="quote-option-status">{job.pdfReceived && job.status === "generating" ? "Saving quote PDF…" : SCENARIO_TEXT[job.status]}</p>
                       </div> : null; })()}
-                      Option {String.fromCharCode(65 + i)}
+                      <span className="block">Option {String.fromCharCode(65 + i)}</span>
                       <QuoteOptionReference key={`${activeTab}:${p}:${i}`} value={quoteReference(p, option, activeTab)} label={`${activeTab} ${p} Option ${String.fromCharCode(65 + i)} quote number`}
                         onChange={number => setPlan(pl => ({ ...pl, [p]: pl[p].map((value, n) => n === i ? withQuoteReference(p, value, activeTab, number) : value) }))} />
                     </th>)}</tr>
@@ -471,9 +524,6 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
           </section>
           <section className="frame p-3 space-y-3" aria-label="Request and collect quotes">
             <div className="flex items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">3</span><h4 className="font-semibold">Request & collect quotes</h4></div>
-          <div className="flex flex-wrap items-center gap-2">
-            <p className={label}>{login[activeTab] !== "connected" ? `Connect ${activeTab} in step 1 before requesting quotes.` : "Use Get quotes above to start the selected options. Progress appears above each option."}</p>
-          </div>
           <QuoteJobsPanel jobs={Object.fromEntries(chosen.map(ins => [ins, jobs[ins] ?? []]))} onStop={stopConnection} onRetry={(ins, n) => submitScenarios(ins, [n])} />
           {clientId && <QuotePdfCapture workflowId={workflowId} clientId={clientId} insurer={activeTab}
             onActivity={(ins, phase, detail) => recordActivity(ins, phase, detail)}

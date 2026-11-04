@@ -42,6 +42,21 @@ function harness({ holdDelay = false, holdCreation = false } = {}) {
 const flush = async () => { for (let i = 0; i < 25; i++) await Promise.resolve(); };
 
 describe("Companion background portal rules", () => {
+  it("verifies a refreshed session without opening tabs or passing credentials", async () => {
+    const h = harness();
+    h.stored["portal-2"] = { appTabId: 1, insurer: "Old Mutual", workflowId: "demo", ownerId: "broker", integrationId: "om", origin: "https://secure.adviserweb.oldmutual.co.za", discoveryRedirects: "oldmutual.co.za", connected: true };
+    h.tabs.set(2, { id: 2, url: "https://secure.adviserweb.oldmutual.co.za/protection/quote" });
+    h.context.chrome.scripting.executeScript = async options => { h.injected.push(options); return [{ result: { state: "in" } }]; };
+    h.listeners.message({ type: "insurer-session-status", insurer: "Old Mutual", workflowId: "demo", ownerId: "broker", integrationId: "om", requestId: "refresh" }, h.sender);
+    await flush();
+    expect(h.sent.at(-1).state).toBe("connected");
+    expect(h.sent.at(-1).requestId).toBe("refresh");
+    expect(h.injected[0].args.slice(0, 2)).toEqual(["", ""]);
+    expect(h.injected[0].args[6]).toBe(true);
+    expect(h.created).toHaveLength(0);
+    h.listeners.message({ type: "insurer-session-status", insurer: "Old Mutual", workflowId: "demo", ownerId: "other", integrationId: "om", requestId: "wrong-owner" }, h.sender);
+    await flush(); expect(h.sent.at(-1).state).toBe("missing"); expect(h.injected).toHaveLength(1);
+  });
   it("opens insurer logins in inactive tabs without creating native windows", () => {
     const h = harness(); h.login(); expect(h.created[0].active).toBe(false); expect(h.created[0].windowId).toBe(7); expect(h.windowChanges).toEqual([]);
     const m = harness(); m.login({ insurer: "Momentum", loginUrl: "https://adviser.momentum.co.za/login" }); expect(m.created[0].active).toBe(false); expect(m.windowChanges).toEqual([]);

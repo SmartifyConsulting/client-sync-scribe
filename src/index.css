@@ -658,4 +658,14 @@ textarea::placeholder {
   .quote-step-done { @apply border-success/30 bg-success/10; }
   .quote-step-active { @apply border-primary/50 ring-1 ring-primary/20; }
   .quote-progress-badge { @apply inline-flex rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground shadow-sm; }
+  .quote-option-status { @apply block min-w-0 min-h-10 whitespace-normal break-words text-[10px] leading-4; overflow-wrap: anywhere; }
+  .quote-segment-working { animation: quote-segment-wave 1.6s ease-in-out infinite; }
+}
+
+@keyframes quote-segment-wave {
+  0%, 75%, 100% { background-color: hsl(var(--background)); }
+  35% { background-color: hsl(var(--foreground) / 0.45); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .quote-segment-working { animation: none; }
 }
