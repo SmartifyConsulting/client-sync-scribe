@@ -25,6 +25,25 @@ function driveOldMutualQuote(request, origin, redirectDomain) {
   const numeric = value => Number(String(value).replace(/[R ,]/g, ''));
   const set = (e, value, commit = true) => {
     if (!e || e.disabled || e.readOnly) return false;
+    // The insurer's currency mask updates its form model on keyboard events,
+    // not a bare value/input assignment. A displayed number alone is insufficient.
+    if (e.hasAttribute?.('currencymask')) {
+      const digits = String(value);
+      if (!/^\d+(\.\d+)?$/.test(digits)) return false;
+      e.focus();
+      e.setSelectionRange(0, e.value.length);
+      const key = (type, character, code) => e.dispatchEvent(new KeyboardEvent(type, { key: character, code: character === 'Backspace' ? 'Backspace' : character === '.' ? 'Period' : `Digit${character}`, keyCode: code, which: code, charCode: type === 'keypress' ? code : 0, bubbles: true, cancelable: true }));
+      key('keydown', 'Backspace', 8);
+      key('keyup', 'Backspace', 8);
+      for (const character of digits) {
+        const code = character.charCodeAt(0);
+        key('keydown', character, code);
+        key('keypress', character, code);
+        key('keyup', character, code);
+      }
+      e.blur();
+      return numeric(e.value) === Number(value) && e.classList.contains('ng-dirty');
+    }
     if (!commit) e.focus();
     if (e.tagName === 'SELECT') {
       const option = unique([...e.options].filter(o => !o.disabled && norm(o.text) === value));

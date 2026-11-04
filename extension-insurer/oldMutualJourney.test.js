@@ -12,12 +12,26 @@ const approved={
  'Underwriting method':'Medical tests, questions or both','Guarantee term':'5 years','Premium term':'Benefit term','Cashback':'Included'
 };
 function run({values=approved,path='/dashboard/sales-dashboard',step='start',context={},selectors={},host='secure.adviserweb.oldmutual.co.za',extra=[],body=''}={}){
- const c=vm.createContext({URL,HTMLInputElement:Input,HTMLSelectElement:Select,Event:class{constructor(type){this.type=type;}},location:{href:`https://${host}${path}`,assign:target=>{c.destination=target;}},getComputedStyle:()=>({visibility:'visible'}),document:{querySelectorAll:s=>selectors[s]||[],body:{innerText:body}}});
+ const c=vm.createContext({KeyboardEvent:class{constructor(type,options){this.type=type;Object.assign(this,options);}},URL,HTMLInputElement:Input,HTMLSelectElement:Select,Event:class{constructor(type){this.type=type;}},location:{href:`https://${host}${path}`,assign:target=>{c.destination=target;}},getComputedStyle:()=>({visibility:'visible'}),document:{querySelectorAll:s=>selectors[s]||[],body:{innerText:body}}});
  vm.runInContext(source,c);
  c.request={step,context,fields:[...Object.entries(values).map(([label,value])=>({label,value})),...extra]};
  return vm.runInContext('driveOldMutualQuote(request,"https://secure.adviserweb.oldmutual.co.za")',c);
 }
 const el=(textContent,click=()=>{})=>({textContent,click,getClientRects:()=>[1],getAttribute:()=>null});
+test('currency entry requires the mask to commit digits rather than displaying an unbound value',()=>{
+ class Currency extends Input {
+  constructor(accept){super();this.accept=accept;this.dirty=false;this.classList={contains:()=>this.dirty};}
+  hasAttribute(name){return name==='currencymask';}
+  setSelectionRange(){} blur(){}
+  dispatchEvent(e){super.dispatchEvent(e);if(!this.accept)return;if(e.type==='keydown'&&e.key==='Backspace')this.value='';if(e.type==='keypress'){this.value+=e.key;this.dirty=true;}}
+ }
+ for(const accept of [true,false]){
+  const money=new Currency(accept);
+  const result=run({step:'summary',path:'/protection/quote/123/quick-summary',selectors:{'input[name="premiumCollectionDay_name_ind"]':[new Input()],'input[currencymask]':[money],'input[type="checkbox"]':[{checked:true}]}});
+  expect(result.state).toBe(accept?'navigate':'blocked');
+  if(accept){expect(result.next).toBe('summary-check');expect(money.value).toBe('1700000');}
+ }
+});
 test('refuses unrelated origins before any portal interaction',()=>expect(run({host:'evil.example'}).state).toBe('blocked'));
 test('lists missing inputs before creating any draft',()=>{const values={...approved};delete values['Salary Payment Day'];expect(run({values}).detail).toContain('day');});
 test('never substitutes unsupported six percent growth',()=>expect(run({values:{...approved,'Scheduled yearly cover increase':'6% fixed rate'}}).state).toBe('blocked'));
@@ -48,3 +62,4 @@ test('returns the insurer result only when every selected term and the premium s
  selectors['h2']=[el('R 999')];expect(run(args).state).toBe('blocked');
  selectors['h2']=[el('R 768')];selectors['input[title]'][0].value='Inflation-linked Inflation +0%';expect(run(args).state).toBe('blocked');
 });
+
