@@ -1,7 +1,7 @@
 # Roadmap — Step 5 Indigro copy
 ## Quote sourcing — Nov 4
-- [ ] Distinguish Companion, email desk and indicative planning in Step 4; keep estimates separate from insurer quotes and require official confirmation.
-- [ ] Verify method switching, planning persistence and quote safeguards without contacting clients or insurers.
+- [x] Distinguish Companion, email desk and broker-entered indicative planning in Step 4; estimates stay in quote specs, never become insurer quote rows or unlock advice; prominent official-confirmation warning.
+- [x] Nine isolated tests pass; authenticated Georgia Demo desktop/mobile method switching and estimate save/reload verified; original demo value restored, no client/insurer communications. Live insurer calculations remain unverified.
 ## Supplied Phase 2 manuals - Nov 3
 - [x] Reconcile all 20 manual pages and screenshots with the existing Companion adapters; source-to-state runbook in docs/automation/quote-manual-runbook.md.
 - [x] Add the demonstrated BrightRock New cover proposal and Momentum post-report Download labels plus BrightRock Finish - See the cover; required radio/benefit-toggle validation; preserve stops for unknown providers, duplicate actions and missing inputs.
