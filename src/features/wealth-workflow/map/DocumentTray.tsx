@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import folderAsset from "@/assets/documents-folder-3d.png.asset.json";
 import { PdfFromHtml } from "@/features/documents/components/PdfFromHtml";
+import { StoredPdfPreview } from "@/features/documents/components/StoredPdfPreview";
 import { downloadHtmlAsPdf } from "@/features/documents/utils/documentPdf";
 import { sealedHtml } from "./onboardingTemplates";
 
@@ -94,7 +95,7 @@ export function DocPreviewDialog({ doc, onClose }: { doc: Doc | null; onClose: (
         ) : doc && html ? (
           <PdfFromHtml html={html} title={doc.title} />
         ) : doc?.url ? (
-          <iframe title={doc.title} src={doc.url} className="h-[70vh] w-full rounded-lg border border-border" />
+          <StoredPdfPreview source={doc.url} title={doc.title} />
         ) : <p className="text-sm text-muted-foreground">No preview available.</p>}
       </DialogContent>
     </Dialog>
