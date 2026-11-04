@@ -8,6 +8,7 @@ function harness({ holdDelay = false, holdCreation = false } = {}) {
   const delays = [], creations = [];
   const listeners = {}, stored = {}, tabs = new Map(), removed = [], sent = [], created = [], injected = [], windowChanges = [], tabChanges = [];
   const chrome = {
+    alarms: { create: () => {}, onAlarm: { addListener: fn => { listeners.alarm = fn; } } },
     runtime: { onMessage: { addListener: (fn) => { listeners.message = fn; } } },
     tabs: {
       sendMessage: async (id, message) => { sent.push(message); },
@@ -30,6 +31,7 @@ function harness({ holdDelay = false, holdCreation = false } = {}) {
     windows: { update: async (id, options) => { windowChanges.push({ id, ...options }); }, create: (options, cb) => { windowChanges.push({ create: true }); created.push(options); tabs.set(2, { id: 2, url: options.url }); cb({ id: 9, tabs: [{ id: 2 }] }); } },
   };
   const context = vm.createContext({ chrome, URL, Date, Map, Object, Number, Promise, setTimeout: (fn, ms) => { if (ms === 1200) { if (holdDelay) delays.push(fn); else fn(); } }, TextDecoder, Uint8Array });
+  context.crypto = { randomUUID: () => "test-recovery-id" };
   context.importScripts = () => vm.runInContext(journey, context);
   vm.runInContext(source, context);
   const sender = { tab: { id: 1, windowId: 7, url: "https://holarc.co.za/app-integrations" } };
@@ -202,5 +204,67 @@ describe("Stop Companion attempts", () => {
     h.listeners.message({type:"insurer-quote-submit",insurer:"discovery",workflowId:"georgia-demo",scenarios:[{n:1,fields:[]},{n:2,fields:[]}]},h.sender);await flush();
     const stoppedAt=h.sent.length;h.listeners.message({type:"insurer-stop",insurer:"discovery",workflowId:"georgia-demo"},h.sender);await flush();resolve([{result:{state:"navigate",next:"capture"}}]);await flush();
     expect(h.injected).toHaveLength(1);expect(h.sent.slice(stoppedAt).some(m=>m.type==="insurer-quote-status")).toBe(false);expect(h.removed).toEqual([]);
+  });
+});
+
+describe("Expired portal sessions", () => {
+  function connected(h) {
+    h.login({ autoReconnect:true, integrationId:"discovery-id", ownerId:"broker", connectionAttemptId:"attempt" });
+    vm.runInContext("Object.assign(jobs.get(2), {done:true,connected:true,username:'',password:''})", h.context);
+    h.context.chrome.scripting.executeScript=async options=>{h.injected.push(options);return[{result:{state:options.args?.[6]?'login':'submitted',credentialStep:'password'}}];};
+  }
+  const response={type:'insurer-reconnect-credentials',insurer:'discovery',workflowId:'georgia-demo',connectionAttemptId:'attempt',recoveryId:'test-recovery-id',username:'renewed-user',password:'renewed-password'};
+  it("restores only routing metadata after a worker restart and keeps the actual PDF origin",async()=>{
+    const h=harness();connected(h);h.stored['portal-2'].origin='https://login.discovery.co.za';
+    await vm.runInContext('saveRoute(2,jobs.get(2))',h.context);
+    expect(h.stored['portal-2'].origin).toBe('https://login.discovery.co.za');
+    vm.runInContext('jobs.clear()',h.context);await h.listeners.alarm({name:'holarc-session-recovery'});
+    expect(h.sent.at(-1).type).toBe('insurer-session-expired');expect(vm.runInContext('jobs.get(2).username',h.context)).toBe('');
+    expect(JSON.stringify(h.stored)).not.toContain('test-only');
+  });
+  it("tracks only trusted broker-opened adviser tabs without changing their focus",async()=>{
+    const h=harness();connected(h);await h.listeners.created({id:3,openerTabId:2,url:'https://partner.discovery.co.za/quotes'});
+    expect(h.stored['portal-3'].connected).toBe(true);expect(h.stored['portal-3'].origin).toBe('https://partner.discovery.co.za');
+    await h.listeners.created({id:4,openerTabId:2,url:'https://unrelated.example/quotes'});
+    expect(h.stored['portal-4']).toBeUndefined();expect(h.tabChanges).toEqual([]);
+  });
+  it("probes without credentials and renews in the same tab, consuming a reply only once",async()=>{
+    const h=harness();connected(h);await vm.runInContext('checkPortal(2)',h.context);
+    expect(h.injected[0].args.slice(0,2)).toEqual(['','']);expect(h.injected[0].args[6]).toBe(true);
+    expect(h.sent.at(-1).type).toBe('insurer-session-expired');expect(h.sent.at(-1).ownerId).toBe('broker');
+    expect(JSON.stringify(h.stored)).not.toContain('renewed-password');
+    h.listeners.message(response,h.sender);h.listeners.message(response,h.sender);await flush();
+    expect(h.injected.filter(x=>x.args?.[0]==='renewed-user')).toHaveLength(1);
+    expect(h.created).toHaveLength(1);expect(h.tabChanges).toEqual([]);expect(h.removed).toEqual([]);
+    expect(JSON.stringify(h.stored)).not.toContain('renewed-password');
+  });
+  it("ignores a response from another app, another request, and a late response after Stop",async()=>{
+    const h=harness();connected(h);await vm.runInContext('checkPortal(2)',h.context);const n=h.injected.length;
+    h.listeners.message(response,{tab:{id:8,url:'https://holarc.co.za'}});
+    h.listeners.message({...response,recoveryId:'unrelated'},h.sender);
+    h.listeners.message({type:'insurer-stop',insurer:'discovery',workflowId:'georgia-demo'},h.sender);
+    h.listeners.message(response,h.sender);await flush();expect(h.injected).toHaveLength(n);expect(h.removed).toEqual([]);
+  });
+  it("leaves locked credentials unsubmitted and rejects untrusted portal redirects",async()=>{
+    const h=harness();connected(h);await vm.runInContext('checkPortal(2)',h.context);
+    h.listeners.message({...response,username:undefined,password:undefined},h.sender);await flush();
+    expect(h.sent.at(-1).phase).toBe('unlock-required');expect(h.injected).toHaveLength(1);
+    h.tabs.set(2,{url:'https://discovery.co.za.evil.example/login'});await vm.runInContext('checkPortal(2)',h.context);expect(h.injected).toHaveLength(1);
+  });
+  it("does not recover login tests or jobs after a provider rejects renewal",async()=>{
+    const h=harness();h.login();vm.runInContext('Object.assign(jobs.get(2),{done:true,connected:true})',h.context);
+    await vm.runInContext('checkPortal(2)',h.context);expect(h.injected).toEqual([]);
+    const r=harness();connected(r);await vm.runInContext('checkPortal(2)',r.context);
+    r.context.chrome.scripting.executeScript=async options=>{r.injected.push(options);return[{result:{state:'failed',reason:'locked'}}];};
+    r.listeners.message(response,r.sender);await flush();const n=r.injected.length;await vm.runInContext('checkPortal(2)',r.context);
+    expect(r.injected).toHaveLength(n);expect(r.stored['portal-2'].autoReconnect).toBe(false);
+    expect(vm.runInContext('jobs.get(2).password',r.context)).toBe('');
+  });
+  it("clears renewed credentials on success and does not replay quote scenarios",async()=>{
+    const h=harness();connected(h);await vm.runInContext('checkPortal(2)',h.context);
+    h.context.chrome.scripting.executeScript=async options=>{h.injected.push(options);return[{result:{state:'in'}}];};
+    h.listeners.message(response,h.sender);await flush();await flush();
+    expect(h.sent.some(x=>x.phase==='reconnected')).toBe(true);expect(h.stored['portal-2'].connected).toBe(true);
+    expect(vm.runInContext('jobs.get(2).password',h.context)).toBe('');expect(h.injected.some(x=>x.func.name==='driveQuoteJourney')).toBe(false);
   });
 });

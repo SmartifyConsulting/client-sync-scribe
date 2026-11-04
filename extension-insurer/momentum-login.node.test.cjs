@@ -41,7 +41,7 @@ test('submits the observed Momentum anchor control only on its exact trusted hos
     Object.defineProperty(Input.prototype, 'value', {get() {return values.get(this) || '';}, set(v) {values.set(this, v);}});
     const inputs = [new Input('text'), new Input('password')]; inputs[0].value='browser-autofill-different';
     const anchor = {textContent:'Log in', getClientRects:()=>[1], click:()=>clicks++};
-    const document = {title:'Security | AdviserConnect', body:{innerText:'Log in Username Password'}, querySelectorAll:s=>s.includes('dialog')?[]:s==='input'?inputs:s==='*'?[]:s.includes('a#btn-login')?[anchor]:[]};
+    const document = {title:'Security | AdviserConnect', body:{innerText:'Log in Username Password'}, querySelectorAll:s=>(s.includes('dialog')||s.includes('captcha'))?[]:s==='input'?inputs:s==='*'?[]:s.includes('a#btn-login')?[anchor]:[]};
     const context = vm.createContext({URL, location:{href:`https://${hostname}/login`}, document, HTMLInputElement:Input, Event:class{}});
     vm.runInContext(drive, context);
     const result = vm.runInContext(`drive('synthetic-user','synthetic-password',false,'https://${hostname}',false)`,context);
@@ -74,7 +74,7 @@ test('does not refill or resubmit password after submission even if the portal c
   let writes=0,clicks=0;
   class Input {constructor(type){this.type=type;this.name=type==='password'?'password':'username';}get value(){return '';}set value(v){writes++;}getClientRects(){return[1];}focus(){}blur(){}dispatchEvent(){}getAttribute(){return null;}closest(){return null;}getRootNode(){return{};}}
   const inputs=[new Input('text'),new Input('password')];
-  const document={body:{innerText:'Log in Username Password'},querySelectorAll:s=>s.includes('dialog')?[]:s==='input'?inputs:s==='*'?[]:[{textContent:'Log in',click:()=>clicks++,getClientRects:()=>[1]}]};
+  const document={body:{innerText:'Log in Username Password'},querySelectorAll:s=>(s.includes('dialog')||s.includes('captcha'))?[]:s==='input'?inputs:s==='*'?[]:[{textContent:'Log in',click:()=>clicks++,getClientRects:()=>[1]}]};
   const context=vm.createContext({URL,location:{href:'https://adviser-account.momentum.co.za/login'},document,HTMLInputElement:Input,Event:class{}});vm.runInContext(drive,context);
   assert.equal(vm.runInContext("drive('synthetic-user','synthetic-password',true,'https://adviser-account.momentum.co.za',false,true)",context).state,'waiting');
   assert.equal(writes,0);assert.equal(clicks,0);

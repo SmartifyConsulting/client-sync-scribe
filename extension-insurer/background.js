@@ -2,6 +2,66 @@
 importScripts("portalJourney.js", "interfaceMonitor.js");
 const jobs = new Map(); // portalTabId -> job
 const pendingLogins = new Map();
+const RECOVERY_ALARM = "holarc-session-recovery";
+// Session storage contains routing only. A renewed password is fetched by Holarc
+// under its existing, still-valid Password Protector token and discarded on login.
+function routeFor(job, previous = {}) {
+  return { ...previous, appTabId: job.appTabId, insurer: job.insurer, integrationId: job.integrationId,
+    workflowId: job.workflowId, ownerId: job.ownerId, connectionAttemptId: job.connectionAttemptId, origin: previous.origin || job.origin,
+    discoveryRedirects: job.discoveryRedirects, expires: job.expires, pendingCaptures: previous.pendingCaptures || [],
+    connected: !!job.connected, recoverySpent: !!job.recoverySpent, recoveryId: job.recoveryId,
+    autoReconnect: job.autoReconnect === true };
+}
+async function saveRoute(tabId, job) {
+  if (job.cancelled || jobs.get(tabId) !== job) return;
+  const key = `portal-${tabId}`, stored = await chrome.storage.session.get(key);
+  if (!job.cancelled && jobs.get(tabId) === job) await chrome.storage.session.set({ [key]: routeFor(job, stored[key]) });
+}
+async function inspectSession(tabId, job) {
+  if (!job.connected || !job.autoReconnect || job.cancelled || job.recoveryChecking) return;
+  job.recoveryChecking = true;
+  try {
+    const tab = await chrome.tabs.get(tabId).catch(() => null);
+    const app = await chrome.tabs.get(job.appTabId).catch(() => null);
+    if (!portalAllowed(tab?.url, job) || !trustedApp(app?.url)) return;
+    const [probe] = await chrome.scripting.executeScript({ target: { tabId }, func: drive,
+      args: ["", "", true, job.origin, job.discoveryRedirects, true, true] }).catch(() => []);
+    if (job.cancelled || jobs.get(tabId) !== job) return;
+    const state = probe?.result?.state;
+    if (["otp", "email"].includes(state)) {
+      if (job.challenge !== state) tell(job, { type: "insurer-challenge", method: state, hint: probe.result.hint });
+      job.challenge = state;
+      return;
+    }
+    if (state === "captcha" || state === "blocked") {
+      job.autoReconnect = false;
+      await saveRoute(tabId, job);
+      tell(job, { type: "insurer-login-result", ok: false, message: state === "captcha" ? "Complete the CAPTCHA in the insurer tab, then reconnect." : "An unexpected portal message is blocking this connection. Automation has paused for review." });
+      return;
+    }
+    if (state !== "login") return;
+    if (job.recoverySpent && !job.recoveryId) return;
+    if (!job.recoveryId) {
+      job.recoverySpent = true;
+      job.recoveryId = crypto.randomUUID();
+      await saveRoute(tabId, job);
+    }
+    if (!job.cancelled && jobs.get(tabId) === job) tell(job, { type: "insurer-session-expired", ownerId: job.ownerId, integrationId: job.integrationId, recoveryId: job.recoveryId });
+  } finally { job.recoveryChecking = false; }
+}
+if (chrome.alarms) {
+  chrome.alarms.create(RECOVERY_ALARM, { periodInMinutes: 1 });
+  chrome.alarms.onAlarm.addListener(async alarm => {
+    if (alarm.name !== RECOVERY_ALARM) return;
+    const stored = await chrome.storage.session.get(null);
+    for (const [key, route] of Object.entries(stored)) {
+      if (!key.startsWith("portal-") || route.cancelled || !route.connected || !route.autoReconnect) continue;
+      const tabId = Number(key.slice(7));
+      if (!jobs.has(tabId)) jobs.set(tabId, { ...route, done: true, username: "", password: "" });
+      await inspectSession(tabId, jobs.get(tabId));
+    }
+  });
+}
 // Trusted redirect scope = the saved portal's own registrable domain (e.g. momentum.co.za), so SSO hops stay inside that insurer.
 const baseDomain = (host) => { const p = host.split("."); const n = /\.(co|org|gov|ac|net)\.za$/.test(host) ? 3 : 2; return p.length >= n ? p.slice(-n).join(".") : null; };
 const domainHost = (host, base) => !!base && (host === base || host.endsWith("." + base));
@@ -28,6 +88,24 @@ function tell(job, msg) {
 chrome.runtime.onMessage.addListener((d, sender) => {
   const appTabId = sender.tab?.id;
   if (!appTabId || !trustedApp(sender.tab?.url)) return;
+  if (d.type === "insurer-reconnect-credentials") {
+    const entry = [...jobs.entries()].find(([, j]) => j.appTabId === appTabId && j.insurer === d.insurer &&
+      j.workflowId === d.workflowId && j.connectionAttemptId === d.connectionAttemptId && j.recoveryId === d.recoveryId);
+    if (!entry) return;
+    const [tabId, job] = entry;
+    if (job.cancelled || !job.autoReconnect) return;
+    if (!d.username || !d.password) {
+      tell(job, { type: "insurer-login-progress", state: "challenge", phase: "unlock-required" });
+      return;
+    }
+    job.recoveryId = null; // consume once, including duplicate/in-flight replies
+    job.reconnecting = true; job.done = false; job.checking = false;
+    job.submitted = false; job.passwordSubmitted = false; job.challenge = null; job.step = 0;
+    job.username = d.username; job.password = d.password; job.expires = Date.now() + 15 * 60 * 1000;
+    tell(job, { type: "insurer-login-progress", state: "connecting", phase: "reconnecting" });
+    void saveRoute(tabId, job).then(() => checkPortal(tabId));
+    return;
+  }
   if (d.type === "insurer-stop") {
     for (const [key, pending] of pendingLogins) if (pending.appTabId === appTabId && pending.insurer === d.insurer && pending.workflowId === d.workflowId && (!d.connectionAttemptId || pending.connectionAttemptId === d.connectionAttemptId)) {
       pending.cancelled = true; pendingLogins.delete(key);
@@ -94,7 +172,7 @@ chrome.runtime.onMessage.addListener((d, sender) => {
       jobs.set(tab.id, job);
       tell(job, { type: "insurer-login-progress", state: "connecting", phase: "opening" });
       // Persist only routing metadata, never passwords/PINs.
-      chrome.storage.session.set({ [`portal-${tab.id}`]: { appTabId, insurer: d.insurer, workflowId: d.workflowId, origin, expires: job.expires, pendingCaptures: [] } });
+      chrome.storage.session.set({ [`portal-${tab.id}`]: routeFor(job) });
     });
     return;
   }
@@ -118,9 +196,15 @@ chrome.runtime.onMessage.addListener((d, sender) => {
 chrome.tabs.onRemoved.addListener((id) => { const job = jobs.get(id); if (job) tell(job, { type: "insurer-login-result", ok: false, message: "Insurer portal tab closed." }); jobs.delete(id); chrome.storage.session.remove(`portal-${id}`); });
 
 // Follow only a popup opened by this managed portal and already on its trusted origin.
-chrome.tabs.onCreated.addListener(async (tab) => {
+async function trackPortalTab(tab) {
   const job = jobs.get(tab.openerTabId);
-  if (!job || !job.running || !portalAllowed(tab.url || tab.pendingUrl, job)) return;
+  if (!job || (!job.running && !(job.connected && job.autoReconnect)) || !portalAllowed(tab.url || tab.pendingUrl, job)) return;
+  if (!job.running) {
+    const child = { ...job, origin: new URL(tab.url || tab.pendingUrl).origin, username: "", password: "", done: true, checking: false, recoveryChecking: false, recoveryId: null, recoverySpent: false };
+    jobs.set(tab.id, child);
+    await saveRoute(tab.id, child);
+    return; // Follow broker-opened adviser tabs without moving focus or navigating.
+  }
   const parent = job.portalTabId || tab.openerTabId;
   job.portalTabId = tab.id;
   jobs.set(tab.id, job);
@@ -134,20 +218,30 @@ chrome.tabs.onCreated.addListener(async (tab) => {
   await chrome.tabs.update(tab.id, { active: false }).catch(() => {});
   // Never minimise the broker's browser when a provider opens a quote tab.
   if (tab.active && tab.windowId === job.appWindowId) await chrome.tabs.update(job.appTabId, { active: true }).catch(() => {});
-});
+}
+chrome.tabs.onCreated.addListener(trackPortalTab);
 
 chrome.tabs.onUpdated.addListener(async (tabId, info) => {
-  if (info.status === "complete") checkPortal(tabId);
+  if (info.status === "complete") {
+    // target=_blank tabs may be reported as about:blank before their trusted
+    // destination appears. Only an existing managed opener can adopt them.
+    if (!jobs.has(tabId)) {
+      const tab = await chrome.tabs.get(tabId).catch(() => null);
+      if (tab) await trackPortalTab(tab);
+    }
+    checkPortal(tabId);
+  }
   else if (info.status === "loading") { const job = jobs.get(tabId); if (job && !job.done) tell(job, { type: "insurer-login-progress", state: job.challenge ? "challenge" : "connecting", phase: job.challenge ? job.challenge : job.submitted ? "waiting" : "loading" }); }
 });
 
 async function checkPortal(tabId) {
   const job = jobs.get(tabId);
-  if (!job || job.done || job.checking) return;
-  if (Date.now() >= job.expires) { job.username = ""; job.password = ""; job.done = true; tell(job, { type: "insurer-login-result", ok: false, message: "The 15-minute quote session expired. Unlock again." }); return; }
+  if (!job || job.checking) return;
+  if (job.done) { await inspectSession(tabId, job); return; }
+  if (Date.now() >= job.expires) { job.autoReconnect = false; job.username = ""; job.password = ""; job.done = true; await saveRoute(tabId, job); tell(job, { type: "insurer-login-result", ok: false, message: "The 15-minute quote session expired. Unlock again." }); return; }
   const tab = await chrome.tabs.get(tabId).catch(() => null);
   if (!portalAllowed(tab?.url, job)) {
-    job.done = true; job.username = ""; job.password = "";
+    job.done = true; job.autoReconnect = false; job.username = ""; job.password = ""; await saveRoute(tabId, job);
     tell(job, { type: "insurer-login-result", ok: false, message: "The portal redirected to another login site. Finish there, or update the portal URL in Holarc Wealth." }); return;
   }
   // Downloads must match the actual current portal origin, even after a safe redirect.
@@ -157,7 +251,7 @@ async function checkPortal(tabId) {
   if (stored[key]) await chrome.storage.session.set({ [key]: { ...stored[key], origin: new URL(tab.url).origin } });
   job.checking = true;
   job.step += 1;
-  if (job.step > 90) { job.done = true; job.checking = false; job.username = ""; job.password = ""; tell(job, { type: "insurer-login-result", ok: false, message: "The portal didn't finish logging in. Please finish in the insurer tab." }); return; }
+  if (job.step > 90) { job.done = true; job.autoReconnect = false; job.checking = false; job.username = ""; job.password = ""; await saveRoute(tabId, job); tell(job, { type: "insurer-login-result", ok: false, message: "The portal didn't finish logging in. Please finish in the insurer tab." }); return; }
   // Give single-page portals a moment to draw the form.
   await new Promise((r) => setTimeout(r, 1200));
   if (job.cancelled || jobs.get(tabId) !== job) { job.checking = false; return; }
@@ -170,12 +264,18 @@ async function checkPortal(tabId) {
     job.challenge = r.state;
   } else if (r.state === "submitted") { job.submitted = true; if (r.credentialStep === "password") job.passwordSubmitted = true; tell(job, { type: "insurer-login-progress", state: "connecting", phase: "credentials" }); }
   else if (r.state === "waiting") tell(job, { type: "insurer-login-progress", state: "connecting", phase: job.submitted ? "waiting" : "loading" });
-  else if (r.state === "in") { job.done = true; job.username = ""; job.password = ""; tell(job, { type: "insurer-login-result", ok: true }); if (/^discovery$/i.test(job.insurer)) await scanPortal(tabId, job); }
-  else if (r.state === "failed") { job.done = true; job.username = ""; job.password = ""; tell(job, { type: "insurer-login-result", ok: false, message: r.reason === "locked" ? "The provider has locked your profile. Unlock it in the provider portal before trying again. No further login attempts will be made in this session." : "Login failed. The provider rejected the login. Please recheck your username and password and try again." }); }
-  else if (r.state === "blocked") {
-    job.done = true; job.username = ""; job.password = "";
+  else if (r.state === "in") {
+    job.done = true; job.connected = true; job.recoverySpent = false; job.recoveryId = null;
+    job.username = ""; job.password = ""; await saveRoute(tabId, job);
+    if (job.reconnecting) tell(job, { type: "insurer-login-progress", state: "connected", phase: "reconnected" });
+    tell(job, { type: "insurer-login-result", ok: true }); job.reconnecting = false;
+    if (/^discovery$/i.test(job.insurer)) await scanPortal(tabId, job);
+  }
+  else if (r.state === "failed") { job.autoReconnect = false; job.done = true; job.username = ""; job.password = ""; await saveRoute(tabId, job); tell(job, { type: "insurer-login-result", ok: false, message: r.reason === "locked" ? "The provider has locked your profile. Unlock it in the provider portal before trying again. No further login attempts will be made in this session." : "Login failed. The provider rejected the login. Please recheck your username and password and try again." }); }
+  else if (r.state === "blocked" || r.state === "captcha") {
+    job.autoReconnect = false; job.done = true; job.username = ""; job.password = ""; await saveRoute(tabId, job);
     void interfaceMonitor?.scan("unexpected-dialog", tabId).catch(() => {});
-    tell(job, { type: "insurer-login-result", ok: false, message: "An unexpected portal message is blocking this connection. Automation has paused for review. No login was submitted." });
+    tell(job, { type: "insurer-login-result", ok: false, message: r.state === "captcha" ? "Complete the CAPTCHA in the insurer tab, then reconnect." : "An unexpected portal message is blocking this connection. Automation has paused for review. No further login was submitted." });
   }
   if (r.state === "waiting" && !job.submitted && job.step === 5) void interfaceMonitor?.scan("login-stalled", tabId).catch(() => {});
   if (!job.done) setTimeout(() => checkPortal(tabId), 2500);
@@ -259,7 +359,7 @@ async function readPdf(url) {
 }
 
 // ---- injected into the insurer page ----
-function drive(username, password, submitted, origin, discoveryRedirects, passwordSubmitted = false) {
+function drive(username, password, submitted, origin, discoveryRedirects, passwordSubmitted = false, probeOnly = false) {
   // Recheck inside the page: navigation may occur between tab inspection and injection.
   const u = new URL(location.href);
   if (u.protocol !== "https:" || u.username || u.password || !(u.origin === origin || (typeof discoveryRedirects === "string" && !u.port && (u.hostname === discoveryRedirects || u.hostname.endsWith("." + discoveryRedirects))))) return { state: "waiting" };
@@ -317,10 +417,17 @@ function drive(username, password, submitted, origin, discoveryRedirects, passwo
     return { state: "email", hint: m ? m[0] : "" };
   }
   const pw = inputs.find((i) => i.type === "password");
+  if (query(document, 'iframe[src*="recaptcha"], iframe[src*="hcaptcha"], .g-recaptcha, .h-captcha, [id*="captcha-challenge"]').some(vis)) return { state: "captcha" };
   if (query(document, 'dialog[open], [role="dialog"], [role="alertdialog"]').some(vis)) return { state: "blocked" };
   const user = inputs.find((i) => ["text", "email", "tel"].includes(i.type) && /user|email|login|id|name/i.test(`${i.name} ${i.id} ${i.placeholder} ${i.autocomplete}`)) ||
     inputs.find((i) => ["text", "email"].includes(i.type));
-  if (pw && !passwordSubmitted) {
+  if (probeOnly) {
+    const actions = query(document, "button, a[role=button], input[type=submit]" + (u.hostname === "adviser-account.momentum.co.za" ? ", a#btn-login" : "")).filter(vis);
+    const loginActions = actions.filter(b => /^(log ?in|sign ?in)$/i.test(buttonText(b)));
+    const emailFirst = u.hostname === "login.fmi.co.za" && user?.type === "email" && user.name === "email" && /Adviser Portal/i.test(text);
+    return { state: (pw && inputs.filter(i => i.type === "password").length === 1 && loginActions.length === 1) || emailFirst ? "login" : "waiting" };
+  }
+  if (pw && !passwordSubmitted && username && password) {
     if (user && user.value !== username) setVal(user, username);
     setVal(pw, password);
     return submit(pw) ? { state: "submitted", credentialStep: "password" } : { state: "waiting" };
@@ -334,7 +441,9 @@ function drive(username, password, submitted, origin, discoveryRedirects, passwo
   }
   if (!pw && !submitted && user && !user.value && /log ?in|sign ?in|username/i.test(text)) { setVal(user, username); return { state: submit(user) ? "submitted" : "waiting" }; }
   if (!pw && /log ?out|sign ?out/i.test(text) && /quote|quotation|new business|adviser dashboard/i.test(text)) return { state: "in" };
+  if (!pw && domainHostForPage(u.hostname, "oldmutual.co.za") && query(document, "button").some(b => vis(b) && /^Logged In as\b/i.test(buttonText(b)))) return { state: "in" };
   return { state: "waiting" };
+  function domainHostForPage(host, base) { return host === base || host.endsWith("." + base); }
 }
 
 function fillOtp(code, origin, discoveryRedirects) {

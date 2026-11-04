@@ -163,7 +163,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     const f = data.fields ?? {};
     pendingConnections.current.add(ins);
     window.postMessage({ source: "holarc", type: "insurer-login", connectionAttemptId: attemptId, integrationId: row.id, insurer: ins, workflowId, loginUrl: f.portal_url || row.portal_url,
-      username: f.username ?? data.username, password: f.password }, window.location.origin);
+      username: f.username ?? data.username, password: f.password, autoReconnect: true, ownerId: user?.id }, window.location.origin);
   };
   const openTab = (ins: string) => {
     setTab(ins);

@@ -18,8 +18,8 @@ export function InsurerActivity({ insurer, activity, onRetry, onStop, canStop, i
   </section>;
   const stalled = activityWaiting(activity, now);
   const error = ["failed", "pdf-error", "no-fields"].includes(activity.phase);
-  const complete = ["connected", "fields", "saved", "stopped"].includes(activity.phase);
-  const paused = ["otp", "email"].includes(activity.phase);
+  const complete = ["connected", "reconnected", "fields", "saved", "stopped"].includes(activity.phase);
+  const paused = ["otp", "email", "unlock-required"].includes(activity.phase);
   const elapsed = Math.max(0, Math.floor((now - activity.since) / 1000));
   return <section aria-label={`${insurer} background activity`} className="flex items-start gap-2 border-b border-border py-2 text-xs">
     <div className="shrink-0" style={{ color: `hsl(${insurerColor(insurer)})` }}>

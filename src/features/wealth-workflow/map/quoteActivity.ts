@@ -8,6 +8,9 @@ export const ACTIVITY_TEXT = {
   verifying: "Verification submitted · waiting for the insurer…",
   waiting: "Waiting for the portal to finish signing in…",
   connected: "Signed in · portal ready",
+  reconnecting: "Session expired · signing in again…",
+  reconnected: "Reconnected",
+  "unlock-required": "Unlock Password Protector to reconnect",
   fields: "Quote fields detected · scenario submission is not automated yet",
   "no-fields": "Signed in · quote form not found on this screen",
   capturing: "Reading downloaded quote PDF…",
@@ -25,7 +28,7 @@ export function updateActivity(previous: QuoteActivity | undefined, phase: Activ
     history: changed ? [...(previous?.history ?? []), { phase, at: now }].slice(-4) : previous.history };
 }
 export function activityWaiting(activity: QuoteActivity, now: number) {
-  return ["unlocking", "opening", "loading", "credentials", "verifying", "waiting", "capturing", "saving"].includes(activity.phase) && now - activity.since >= 30000;
+  return ["unlocking", "opening", "loading", "credentials", "verifying", "waiting", "capturing", "saving", "reconnecting"].includes(activity.phase) && now - activity.since >= 30000;
 }
 export function isActivityPhase(value: unknown): value is ActivityPhase {
   return typeof value === "string" && Object.prototype.hasOwnProperty.call(ACTIVITY_TEXT, value);

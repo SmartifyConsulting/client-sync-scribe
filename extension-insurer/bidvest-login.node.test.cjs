@@ -5,8 +5,8 @@ function run({prefilled='',submitted=false,host='login.fmi.co.za',password=false
   class Input {constructor(type,name){this.type=type;this.name=name;this.value='';}get value(){return values.get(this)||'';}set value(v){values.set(this,v);}getClientRects(){return[1];}focus(){}blur(){}dispatchEvent(){}getAttribute(){return null;}closest(){return form;}getRootNode(){return{};}}
   const email=new Input('email','email');email.value=prefilled;const pw=new Input('password','password');
   const button={type:'button',textContent:password?'Login':'Continue',getClientRects:()=>[1],click:()=>clicks++};
-  const form={querySelectorAll:s=>s.includes('dialog')?[]:s==='*'?[]:[button]};
-  const document={body:{innerText:'Adviser Portal'},querySelectorAll:s=>s.includes('dialog')?[]:s==='input'?[email,...(password?[pw]:[])]:s==='*'?[]:[button]};
+  const form={querySelectorAll:s=>(s.includes('dialog')||s.includes('captcha'))?[]:s==='*'?[]:[button]};
+  const document={body:{innerText:'Adviser Portal'},querySelectorAll:s=>(s.includes('dialog')||s.includes('captcha'))?[]:s==='input'?[email,...(password?[pw]:[])]:s==='*'?[]:[button]};
   const context=vm.createContext({URL,location:{href:`https://${host}/`},document,HTMLInputElement:Input,Event:class{}});vm.runInContext(drive,context);
   const result=vm.runInContext(`drive('synthetic@example.invalid','synthetic-password',${submitted},'https://${host}',false)`,context);
   return {state:result.state,clicks,email:email.value,password:pw.value};
