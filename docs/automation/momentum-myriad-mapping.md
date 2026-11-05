@@ -54,3 +54,16 @@ The visible Download button successfully saved the report, although the browser 
 ## Still to verify
 
 Other product benefit choices and conditional fields, Options B/C, unattended Companion execution, and authenticated Holarc document filing. Initial navigation or this manually operated successful quote is not complete quote automation.
+
+## Product controls inspected 5 November 2026
+
+Used a separate duplicate, `Holarc Demo Georgia - Product mapping test`; the original life Option A was not edited. Cancelled temporary benefit edits without saving. These are observed controls, not newly calculated quotes.
+
+- Life WDLS: patterns Level / Compulsory / LifeStage / Aggressive LifeStage; guarantees Standard / Extended / Ten-year capped.
+- Complete Critical Illness Benefit: Whole Life (HMWF): patterns Level / Compulsory / LifeStage; guarantees Standard / Extended. No Aggressive LifeStage or Ten-year capped on this product.
+- Complete Income Protector: retirement ages 55 / 60 / 65 / 70 / Whole life; waiting periods 1 Month / 3 Months / 6 Months / 7 Days / 12 Months / 14 Days / 24 Months; patterns Level / Compulsory / LifeStage. Actual net income(monthly) is a required input; Calculated net income is a separate portal value and must not be substituted. No guarantee selector is shown.
+- Exact life/critical increase labels: `- None -`, `Cover Increase: fixed percentage`, `Cover increase: Rand Depreciation Index`, `Cover increase: CPI rate`, `Premium Increase: fixed percentage`, `Premium increase: CPI rate`.
+- Income increase labels: `- None -`, `Cover Increase: fixed percentage`, `Cover increase: CPI rate`.
+- Fixed cover reveals Cover growth; fixed premium reveals Total growth. Inactive growth answers must not be sent or affect quote identity.
+
+Frontend fields and payloads share these product definitions. They are namespaced to Momentum; no automatic translation from generic Age-rated or 2-year benefit-term values. Other critical illness and income variants exist in the catalogue but their forms have not been verified. These dropdown mappings do not establish unattended automation.

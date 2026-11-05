@@ -1,4 +1,4 @@
-import { providerQuoteFields, isOmpProduct, providerFieldApplies } from "./providerQuoteFields";
+import { providerQuoteFields, hasVerifiedProviderFields, isOmpProduct, providerFieldApplies } from "./providerQuoteFields";
 import { PRODUCT_TYPES } from "./quoteSpec";
 import { insurerFields, insurerKey } from "./insurerDictionary";
 import { OMP_RATING_LABELS } from "./providerRatingFields";
@@ -43,7 +43,7 @@ export function buildPortalScenarios(plan: Record<string, Record<string, unknown
       return fields.flatMap((f): PortalField[] => {
         if (f.key === "growth" && option.increase_option === "No increase") return [];
         if (!providerFieldApplies(f, option)) return [];
-        const value = option[f.key] ?? (isOmpProduct(insurer, product) ? "" : f.kind === "select" ? f.options[0] : f.kind === "toggle" ? false : "");
+        const value = option[f.key] ?? (hasVerifiedProviderFields(insurer, product) ? "" : f.kind === "select" ? f.options[0] : f.kind === "toggle" ? false : "");
         return value === "" ? [] : [{ product, label: f.label, aliases: ALIASES[f.key] || [], kind: f.kind, value: String(value) }];
       });
     })],

@@ -1,5 +1,5 @@
 import { insurerKey } from "./insurerDictionary";
-import { isOmpProduct, providerQuoteFields, providerFieldApplies } from "./providerQuoteFields";
+import { isOmpProduct, hasVerifiedProviderFields, providerQuoteFields, providerFieldApplies } from "./providerQuoteFields";
 
 /** Only the selected insurer's effective quote settings identify a reference.
  * Other insurers' edits and the reference metadata itself do not invalidate it. */
@@ -7,7 +7,7 @@ export function quoteSettingsKey(product: string, option: Record<string, any>, i
   const omp = isOmpProduct(insurer, product);
   const fields = providerQuoteFields(insurer, product).filter(f => providerFieldApplies(f, option));
   return JSON.stringify([...fields.map(f => [f.key, f.key === "growth" && option.increase_option === "No increase" ? "" :
-    String(option[f.key] ?? (omp ? "" : f.kind === "select" ? f.options[0] : f.kind === "toggle" ? false : ""))]),
+    String(option[f.key] ?? (hasVerifiedProviderFields(insurer, product) ? "" : f.kind === "select" ? f.options[0] : f.kind === "toggle" ? false : ""))]),
     ...(omp && option._ompInputs ? [["rating",Object.entries(option._ompInputs).sort(([a],[b])=>a.localeCompare(b))]] : [])]);
 }
 

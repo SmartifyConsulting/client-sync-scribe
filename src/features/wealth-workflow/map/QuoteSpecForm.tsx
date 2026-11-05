@@ -1,4 +1,4 @@
-import { providerQuoteFields, isOmpLife, isOmpProduct, providerFieldApplies, ompSettingsComplete } from "./providerQuoteFields";
+import { providerQuoteFields, hasVerifiedProviderFields, isOmpLife, isOmpProduct, providerFieldApplies, ompSettingsComplete } from "./providerQuoteFields";
 import { OMP_RATING_OPTIONS, ompRatingIssues } from "./providerRatingFields";
 import { useCompanionInstalled, useCompanionVersion } from "./companionDetection";
 import { useCompanionRelease, companionVersionCurrent } from "./companionRelease";
@@ -269,7 +269,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     const missingRating = Object.entries(requestedPlan).flatMap(([p, options]) => options.flatMap((v,i) => isOmpProduct(ins,p) && (!only || only.includes(i+1)) ? ompRatingIssues(v._ompInputs).map(label=>`${p} ${String.fromCharCode(65+i)}: ${label}`) : []));
     if(missingRating.length) {toast({title:'Complete the required insurer details first.',description:missingRating.slice(0,5).join('; '),variant:'destructive'});return;}
     if(ins==='Old Mutual' && Object.keys(requestedPlan).some(p=>p!=='Life cover')) {toast({title:'Use Get quote under a Life cover option. Other Old Mutual products are not yet mapped.'});return;}
-    if (Object.entries(requestedPlan).some(([p, options]) => options.some((v,i) => (!only || only.includes(i+1)) && !ompSettingsComplete(ins, p, v)))) { toast({ title: "Select the supported OMP Life settings first." }); return; }
+    if (Object.entries(requestedPlan).some(([p, options]) => options.some((v,i) => (!only || only.includes(i+1)) && !ompSettingsComplete(ins, p, v)))) { toast({ title: "Complete the insurer’s required product settings first." }); return; }
     if (login[ins] !== "connected") { toast({ title: `Connect ${ins} first.` }); return; }
     if(ins==='Old Mutual' && !companionVersionCurrent(installedVersion,'1.7.6')) {setSetupOpen(true);return;}
     if(ins==='Old Mutual') {
@@ -521,6 +521,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPlan((pl) => { const { [p]: _, ...rest } = pl; return rest; }); }}><X className="h-3 w-3" /></button>
                 </summary>
                 <div className="overflow-x-auto">
+                {activeTab === "Momentum" && hasVerifiedProviderFields(activeTab,p) && <p className="px-2 py-2 text-xs text-muted-foreground">Select the Momentum product terms for each option. These choices match the named product shown below; other product variants still need verification. Saved generic choices are retained separately. Automated quoting is still being verified.</p>}
                 {isOmpProduct(activeTab, p) && <p className="px-2 py-2 text-xs text-muted-foreground">Choose Old Mutual’s product terms for each option. Saved generic settings are retained separately and are not automatically translated. {p === "Income protection" ? "The benefit term is determined in the insurer quote; the previous generic 2-year term does not apply automatically. " : ""}{isOmpLife(activeTab,p) ? "Companion currently supports fixed cover growth; linked increases require portal review. " : "These product choices are verified; automated submission still requires a completed product mapping. "}A calculated premium is shown separately from PDF filing.</p>}
                 {formulaFor(p) && <p className="border-t border-border/60 px-2 py-1 text-[10px] tabular-nums text-muted-foreground">{formulaFor(p)}</p>}
                 <table className="w-full min-w-[560px] table-fixed text-xs">
@@ -559,8 +560,8 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                         {plan[p].map((v, i) => (
                           <td key={i} className="px-2 py-0.5">
                             {f.kind === "select" ? (
-                              <select disabled={!providerFieldApplies(f,v)} className="h-6 w-full rounded border border-input bg-background px-1 text-[11px] disabled:opacity-50" value={providerFieldApplies(f,v) ? v[f.key] ?? (isOmpProduct(activeTab, p) ? "" : f.options[0]) : ""} onChange={(e) => setVal(p, i, f.key, e.target.value)}>
-                                {isOmpProduct(activeTab, p) && <option value="" disabled>{providerFieldApplies(f,v) ? "Select an insurer option" : "Not applicable"}</option>}
+                              <select disabled={!providerFieldApplies(f,v)} className="h-6 w-full rounded border border-input bg-background px-1 text-[11px] disabled:opacity-50" value={providerFieldApplies(f,v) ? v[f.key] ?? (hasVerifiedProviderFields(activeTab, p) ? "" : f.options[0]) : ""} onChange={(e) => setVal(p, i, f.key, e.target.value)}>
+                                {hasVerifiedProviderFields(activeTab, p) && <option value="" disabled>{providerFieldApplies(f,v) ? "Select an insurer option" : "Not applicable"}</option>}
                                 {f.options.map((o) => <option key={o}>{o}</option>)}
                               </select>
                             ) : f.kind === "toggle" ? (
@@ -569,7 +570,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                               <div className="flex h-6 items-center gap-1">
                                 <span className="w-3 shrink-0 text-muted-foreground">{f.kind === "amount" ? "R" : ""}</span>
                                 <Input className="h-6 w-full px-1.5 text-[11px] tabular-nums" inputMode="decimal" value={f.kind === "amount" ? groupDigits(v[f.key]) : v[f.key]}
-                                  disabled={f.key === "growth" && String(v.increase_option).includes("No increase")}
+                                  disabled={!providerFieldApplies(f,v) || (f.key === "growth" && String(v.increase_option).includes("No increase"))}
                                   onChange={(e) => setVal(p, i, f.key, e.target.value.replace(/[^\d.]/g, ""))} />
                                 <span className="w-3 shrink-0 text-muted-foreground">{f.kind === "percent" ? "%" : ""}</span>
                               </div>

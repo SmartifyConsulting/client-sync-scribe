@@ -3,8 +3,12 @@ import { insurerFields, insurerKey } from "./insurerDictionary";
 
 export const isOmpLife = (insurer: string, product: string) => insurer === "Old Mutual" && product === "Life cover";
 export const isOmpProduct = (insurer: string, product: string) => insurer === "Old Mutual" && ["Life cover", "Severe illness", "Income protection"].includes(product);
+export const isMyriadProduct = (insurer: string, product: string) => insurer === "Momentum" && ["Life cover", "Severe illness", "Income protection"].includes(product);
+export const hasVerifiedProviderFields = (insurer: string, product: string) => isOmpProduct(insurer, product) || isMyriadProduct(insurer, product);
 
 export function providerFieldApplies(field: FieldDef, option: Record<string, any>) {
+  if (field.key === "Momentum:myriad_cover_growth") return option["Momentum:myriad_increase"] === "Cover Increase: fixed percentage";
+  if (field.key === "Momentum:myriad_total_growth") return option["Momentum:myriad_increase"] === "Premium Increase: fixed percentage";
   if (field.key === "Old Mutual:omp_inflation") return option["Old Mutual:omp_cover"] === "Inflation-linked";
   if (field.key === "Old Mutual:omp_currency") return option["Old Mutual:omp_cover"] === "Currency-linked";
   return true;
@@ -12,6 +16,20 @@ export function providerFieldApplies(field: FieldDef, option: Record<string, any
 
 // Verified in the OM Adviser OMP Life quote screen. No inferred Greenlight mappings.
 export function providerQuoteFields(insurer: string, product: string): FieldDef[] {
+  if (isMyriadProduct(insurer, product)) {
+    const life = product === "Life cover", income = product === "Income protection";
+    const select = (key: string, label: string, options: string[]): FieldDef => ({ key: insurerKey(insurer, key), label, kind: "select", options });
+    return [
+      { key: income ? "monthly_benefit" : "benefit_amount", label: income ? "Monthly benefit amount" : "Benefit amount", kind: "amount" },
+      select("myriad_product", "Momentum product", [life ? "Death Benefit : Whole life" : income ? "Complete Income Protector" : "Complete Critical Illness Benefit: Whole Life"]),
+      ...(income ? [select("myriad_retirement", "Retirement Age", ["55", "60", "65", "70", "Whole life"]), select("myriad_waiting", "Waiting period", ["1 Month", "3 Months", "6 Months", "7 Days", "12 Months", "14 Days", "24 Months"]), {key: "Momentum:myriad_net_income", label: "Actual net income(monthly)", kind: "amount" as const}] : []),
+      select("myriad_pattern", "Premium pattern", life ? ["Level", "Compulsory", "LifeStage", "Aggressive LifeStage"] : ["Level", "Compulsory", "LifeStage"]),
+      ...(!income ? [select("myriad_guarantee", "Premium guarantee option", life ? ["Standard", "Extended", "Ten-year capped"] : ["Standard", "Extended"])] : []),
+      select("myriad_increase", "Increase option", income ? ["- None -", "Cover Increase: fixed percentage", "Cover increase: CPI rate"] : ["- None -", "Cover Increase: fixed percentage", "Cover increase: Rand Depreciation Index", "Cover increase: CPI rate", "Premium Increase: fixed percentage", "Premium increase: CPI rate"]),
+      {key: "Momentum:myriad_cover_growth", label: "Cover growth", kind: "percent"},
+      ...(!income ? [{key: "Momentum:myriad_total_growth", label: "Total growth", kind: "percent" as const}] : []),
+    ];
+  }
   if (isOmpProduct(insurer, product)) {
     const life = product === "Life cover", income = product === "Income protection";
     const select = (key: string, label: string, options: string[]): FieldDef => ({ key: insurerKey(insurer, key), label, kind: "select", options });
@@ -34,9 +52,9 @@ export function providerQuoteFields(insurer: string, product: string): FieldDef[
 }
 
 export function ompSettingsComplete(insurer: string, product: string, option: Record<string, any>) {
-  if (!isOmpProduct(insurer, product)) return true;
+  if (!hasVerifiedProviderFields(insurer, product)) return true;
   return providerQuoteFields(insurer, product).every(f => {
     if (!providerFieldApplies(f, option)) return true;
-    return f.kind === "toggle" || (f.kind === "select" ? f.options.includes(option[f.key]) : Number(option[f.key]) > 0);
+    return f.kind === "toggle" || (f.kind === "select" ? f.options.includes(option[f.key]) : String(option[f.key] ?? "").trim() !== "" && Number.isFinite(Number(option[f.key])) && (f.kind === "percent" ? Number(option[f.key]) >= 0 : Number(option[f.key]) > 0));
   });
 }

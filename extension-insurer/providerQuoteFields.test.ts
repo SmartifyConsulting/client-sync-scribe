@@ -40,3 +40,28 @@ test("generic severe-illness terms never become insurer instructions", () => {
   expect(ompSettingsComplete("Old Mutual", "Severe illness", old)).toBe(false);
   expect(buildPortalScenarios({ "Severe illness": [old] }, "Old Mutual")[0].fields.map(f=>f.value)).toEqual(["2050000"]);
 });
+
+test("Momentum uses the observed product-specific choices without generic fallback", () => {
+  const choices = (product: string, suffix: string) => {
+    const field = providerQuoteFields("Momentum", product).find(f => f.key === `Momentum:${suffix}`);
+    return field?.kind === "select" ? field.options : [];
+  };
+  expect(choices("Life cover", "myriad_pattern")).toContain("Aggressive LifeStage");
+  expect(choices("Severe illness", "myriad_pattern")).not.toContain("Aggressive LifeStage");
+  expect(choices("Severe illness", "myriad_guarantee")).toEqual(["Standard", "Extended"]);
+  expect(choices("Income protection", "myriad_waiting")).toContain("14 Days");
+  expect(providerQuoteFields("Momentum", "Income protection").some(f=>f.key === "benefit_term")).toBe(false);
+  expect(buildPortalScenarios({"Life cover":[{benefit_amount:"1700000",premium_pattern:"Age-rated"}]}, "Momentum")[0].fields.map(f=>f.value)).toEqual(["1700000"]);
+});
+
+test("Momentum requires actual net income and only the active growth answer", () => {
+  const v: Record<string, any> = {monthly_benefit:"19000"};
+  for (const f of providerQuoteFields("Momentum", "Income protection")) if (f.kind === "select") v[f.key]=f.options[0];
+  expect(ompSettingsComplete("Momentum","Income protection",v)).toBe(false);
+  v["Momentum:myriad_net_income"]="25000";
+  expect(ompSettingsComplete("Momentum","Income protection",v)).toBe(true);
+  v["Momentum:myriad_increase"]="Cover Increase: fixed percentage";
+  expect(ompSettingsComplete("Momentum","Income protection",v)).toBe(false);
+  v["Momentum:myriad_cover_growth"]="0";
+  expect(ompSettingsComplete("Momentum","Income protection",v)).toBe(true);
+});
