@@ -1,4 +1,5 @@
 import { insurerKey } from "./insurerDictionary";
+import { bidvestQuestions } from './BidvestClientFields';
 import { isOmpProduct, hasVerifiedProviderFields, providerQuoteFields, providerFieldApplies } from "./providerQuoteFields";
 
 /** Only the selected insurer's effective quote settings identify a reference.
@@ -8,7 +9,8 @@ export function quoteSettingsKey(product: string, option: Record<string, any>, i
   const fields = providerQuoteFields(insurer, product).filter(f => providerFieldApplies(f, option));
   return JSON.stringify([...fields.map(f => [f.key, f.key === "growth" && option.increase_option === "No increase" ? "" :
     String(option[f.key] ?? (hasVerifiedProviderFields(insurer, product) ? "" : f.kind === "select" ? f.options[0] : f.kind === "toggle" ? false : ""))]),
-    ...(omp && option._ompInputs ? [["rating",Object.entries(option._ompInputs).sort(([a],[b])=>a.localeCompare(b))]] : [])]);
+    ...(omp && option._ompInputs ? [["rating",Object.entries(option._ompInputs).sort(([a],[b])=>a.localeCompare(b))]] : []),
+    ...(insurer==='Bidvest Life / FMI' && option._bidvestInputs ? [['bidvestRating',[...bidvestQuestions(option._bidvestInputs).map(([label])=>label),'Before-tax monthly income','After-tax monthly income'].sort().map(label=>[label,option._bidvestInputs[label]??''])]]:[])]);
 }
 
 export function quoteReference(product: string, option: Record<string, any>, insurer: string): string {

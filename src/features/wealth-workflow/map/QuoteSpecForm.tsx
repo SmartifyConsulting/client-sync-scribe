@@ -1,5 +1,6 @@
 import { providerQuoteFields, hasVerifiedProviderFields, isOmpLife, isOmpProduct, providerFieldApplies, ompSettingsComplete } from "./providerQuoteFields";
 import { OMP_RATING_OPTIONS, ompRatingIssues } from "./providerRatingFields";
+import { BidvestClientFields, bidvestIssues } from './BidvestClientFields';
 import { useCompanionInstalled, useCompanionVersion } from "./companionDetection";
 import { useCompanionRelease, companionVersionCurrent } from "./companionRelease";
 import { useEffect, useState, useRef } from "react";
@@ -266,6 +267,10 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const submitScenarios = async (ins: string, only?: number[], product?: string) => {
     if (!canStartPortal(source)) return;
     const requestedPlan = product ? {[product]:plan[product]} : plan;
+    if(ins==='Bidvest Life / FMI') {
+      const issues=bidvestIssues(Object.values(requestedPlan)[0]?.[0]?._bidvestInputs);
+      if(issues.length){toast({title:'Complete the Bidvest client questions first.',description:issues.join('; '),variant:'destructive'});return;}
+    }
     const missingRating = Object.entries(requestedPlan).flatMap(([p, options]) => options.flatMap((v,i) => isOmpProduct(ins,p) && (!only || only.includes(i+1)) ? ompRatingIssues(v._ompInputs).map(label=>`${p} ${String.fromCharCode(65+i)}: ${label}`) : []));
     if(missingRating.length) {toast({title:'Complete the required insurer details first.',description:missingRating.slice(0,5).join('; '),variant:'destructive'});return;}
     if(ins==='Old Mutual' && Object.keys(requestedPlan).some(p=>p!=='Life cover')) {toast({title:'Use Get quote under a Life cover option. Other Old Mutual products are not yet mapped.'});return;}
@@ -511,6 +516,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
             </div>
           </details>
 
+          {activeTab==='Bidvest Life / FMI' && products.length>0 && <BidvestClientFields answers={plan[products[0]]?.[0]?._bidvestInputs??{}} onChange={answers=>setPlan(pl=>Object.fromEntries(Object.entries(pl).map(([product,options])=>[product,options.map(option=>({...option,_bidvestInputs:answers}))])))} />}
           {products.map((p) => {
             const extra = activeTab ? insurerFields(activeTab, p).map((f) => ({ ...f, key: insurerKey(activeTab, f.key) })) : [];
             const fields = providerQuoteFields(activeTab, p);
