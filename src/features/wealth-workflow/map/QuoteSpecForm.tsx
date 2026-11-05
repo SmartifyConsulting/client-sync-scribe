@@ -389,7 +389,8 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const setVal = (p: string, i: number, k: string, val: any) =>
     setPlan((pl) => ({ ...pl, [p]: pl[p].map((x, j) => (j === i ? { ...x, [k]: val } : x)) }));
   const total = products.reduce((a, p) => a + plan[p].length, 0);
-  const allComplete = products.length > 0 && products.every((p) => plan[p].every((v) => variationComplete(PRODUCT_TYPES[p] ?? [], v)));
+  const optionComplete = (p: string, v: Record<string, any>) => hasVerifiedProviderFields(activeTab,p) ? ompSettingsComplete(activeTab,p,v) : variationComplete(PRODUCT_TYPES[p] ?? [],v);
+  const allComplete = products.length > 0 && products.every((p) => plan[p].every((v) => optionComplete(p,v)));
 
   const save = async () => {
     setBusy(true);
@@ -407,7 +408,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
 
   const label = "text-xs text-muted-foreground";
   const incompleteOptions = products.flatMap(p => plan[p].flatMap((v, i) =>
-    variationComplete(PRODUCT_TYPES[p] ?? [], v) ? [] : [`${p} · Option ${String.fromCharCode(65 + i)}`]));
+    optionComplete(p,v) ? [] : [`${p} · Option ${String.fromCharCode(65 + i)}`]));
   return (
     <div className="space-y-4 text-xs leading-relaxed">
       <div>
@@ -596,7 +597,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
             <p className={label}>{total * chosen.length} quote options across {chosen.length} insurer{chosen.length === 1 ? "" : "s"}</p>
-            <Button size="sm" disabled={busy || !allComplete} onClick={save}>{busy && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}{spec ? "Update quote plan" : "Save quote plan"}</Button>
+            <Button size="sm" disabled={busy || products.length === 0} onClick={save}>{busy && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}{spec ? "Update quote plan" : "Save quote plan"}</Button>
           </div>
           {!allComplete && <p className="text-xs text-destructive" role="status">{incompleteOptions.length ? `Complete missing values in: ${incompleteOptions.join(", ")}.` : "Add a product to prepare your quote plan."}</p>}
           </section>
