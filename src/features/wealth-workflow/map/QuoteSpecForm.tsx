@@ -1,4 +1,5 @@
 import { providerQuoteFields, isOmpLife, isOmpProduct, providerFieldApplies, ompSettingsComplete } from "./providerQuoteFields";
+import { OMP_RATING_OPTIONS, ompRatingIssues } from "./providerRatingFields";
 import { useCompanionInstalled, useCompanionVersion } from "./companionDetection";
 import { useCompanionRelease, companionVersionCurrent } from "./companionRelease";
 import { useEffect, useState, useRef } from "react";
@@ -265,6 +266,8 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const submitScenarios = async (ins: string, only?: number[], product?: string) => {
     if (!canStartPortal(source)) return;
     const requestedPlan = product ? {[product]:plan[product]} : plan;
+    const missingRating = Object.entries(requestedPlan).flatMap(([p, options]) => options.flatMap((v,i) => isOmpProduct(ins,p) && (!only || only.includes(i+1)) ? ompRatingIssues(v._ompInputs).map(label=>`${p} ${String.fromCharCode(65+i)}: ${label}`) : []));
+    if(missingRating.length) {toast({title:'Complete the required insurer details first.',description:missingRating.slice(0,5).join('; '),variant:'destructive'});return;}
     if(ins==='Old Mutual' && Object.keys(requestedPlan).some(p=>p!=='Life cover')) {toast({title:'Use Get quote under a Life cover option. Other Old Mutual products are not yet mapped.'});return;}
     if (Object.entries(requestedPlan).some(([p, options]) => options.some((v,i) => (!only || only.includes(i+1)) && !ompSettingsComplete(ins, p, v)))) { toast({ title: "Select the supported OMP Life settings first." }); return; }
     if (login[ins] !== "connected") { toast({ title: `Connect ${ins} first.` }); return; }
@@ -529,11 +532,11 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                         <p className="quote-option-status">{job.pdfReceived && job.status === "generating" ? "Saving quote PDF…" : SCENARIO_TEXT[job.status]}</p>
                       </div> : null; })()}
                       <span className="block">Option {String.fromCharCode(65 + i)}</span>
-                      {isWM && isOmpLife(activeTab,p) && <>
-                        <details className="my-2 normal-case tracking-normal font-normal"><summary className="cursor-pointer">Rating details</summary>
-                          <div className="space-y-2 pt-2">{OMP_RATING_LABELS.map(label=><label key={label} className="block text-[10px] font-semibold">{label}<Input className="mt-1 h-7 text-xs font-normal" value={option._ompInputs?.[label] ?? ''} onChange={e=>setVal(p,i,'_ompInputs',{...option._ompInputs,[label]:e.target.value})} /></label>)}</div>
+                      {isWM && isOmpProduct(activeTab,p) && <>
+                        <details className="my-2 normal-case tracking-normal font-normal"><summary className="cursor-pointer">Required rating details{ompRatingIssues(option._ompInputs).length ? ` · ${ompRatingIssues(option._ompInputs).length} to complete` : ' · Complete'}</summary>
+                          <div className="space-y-2 pt-2">{OMP_RATING_LABELS.map(label=><label key={label} className="block text-[10px] font-semibold">{label} *{OMP_RATING_OPTIONS[label] ? <select required aria-label={label} className="mt-1 h-7 w-full rounded border border-input bg-background px-1 text-xs font-normal" value={option._ompInputs?.[label]??''} onChange={e=>setVal(p,i,'_ompInputs',{...option._ompInputs,[label]:e.target.value})}><option value="" disabled>Select an insurer option</option>{OMP_RATING_OPTIONS[label].map(value=><option key={value}>{value}</option>)}</select> : <Input required type={label==='Date of birth'?'date':'text'} className="mt-1 h-7 text-xs font-normal" value={option._ompInputs?.[label] ?? ''} onChange={e=>setVal(p,i,'_ompInputs',{...option._ompInputs,[label]:e.target.value})} />}</label>)}{ompRatingIssues(option._ompInputs).length>0 && <p className="text-destructive" role="status">Complete or correct: {ompRatingIssues(option._ompInputs).join(', ')}.</p>}</div>
                         </details>
-                        <Button className="my-1 h-7 text-xs normal-case tracking-normal" size="sm" disabled={!connected || quotesRunning || !ompSettingsComplete(activeTab,p,option)} onClick={()=>void submitScenarios(activeTab,[i+1],p)}>Get quote</Button>
+                        {isOmpLife(activeTab,p) && <Button className="my-1 h-7 text-xs normal-case tracking-normal" size="sm" disabled={!connected || quotesRunning || !ompSettingsComplete(activeTab,p,option) || ompRatingIssues(option._ompInputs).length>0} onClick={()=>void submitScenarios(activeTab,[i+1],p)}>Get quote</Button>}
                       </>}
                       <QuoteOptionReference key={`${activeTab}:${p}:${i}`} value={quoteReference(p, option, activeTab)} label={`${activeTab} ${p} Option ${String.fromCharCode(65 + i)} quote number`}
                         onChange={number => setPlan(pl => ({ ...pl, [p]: pl[p].map((value, n) => n === i ? withQuoteReference(p, value, activeTab, number) : value) }))} />

@@ -1,9 +1,10 @@
 import { providerQuoteFields, isOmpProduct, providerFieldApplies } from "./providerQuoteFields";
 import { PRODUCT_TYPES } from "./quoteSpec";
 import { insurerFields, insurerKey } from "./insurerDictionary";
+import { OMP_RATING_LABELS } from "./providerRatingFields";
+export { OMP_RATING_LABELS } from "./providerRatingFields";
 
 type PortalField = { label: string; value: string; kind: string; product?: string; aliases?: string[] };
-export const OMP_RATING_LABELS = ['Date of birth','Gender','Marital status','Smoking status','Education','Professional membership','Occupation','Industry','Employment type','Admin (%)','Physical (%)','Travelling (%)','Gross taxable monthly income','Passive taxable monthly income','Salary Payment Day'];
 const ALIASES: Record<string, string[]> = {
   benefit_amount: ["Cover amount", "Life cover amount"],
   monthly_benefit: ["Monthly benefit amount", "Income benefit amount"],
