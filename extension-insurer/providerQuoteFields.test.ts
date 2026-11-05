@@ -22,3 +22,21 @@ test("OMP validates exact offered choices and conditional inflation adjustment",
   delete v["Old Mutual:omp_inflation"];
   expect(ompSettingsComplete("Old Mutual", "Life cover", v)).toBe(false);
 });
+
+test("Old Mutual product choices keep insurer-specific guarantees and waiting periods", () => {
+  const choices = (product: string, suffix: string) => {
+    const f = providerQuoteFields("Old Mutual", product).find(f => f.key === `Old Mutual:${suffix}`);
+    return f?.kind === "select" ? f.options : [];
+  };
+  expect(choices("Severe illness", "omp_guarantee")).toEqual(["5 years", "10 years"]);
+  expect(choices("Income protection", "omp_guarantee")).toEqual(["1 year", "5 years"]);
+  expect(choices("Income protection", "omp_waiting")).toEqual(["7 days", "1 month", "3 months", "6 months", "12 months", "24 months"]);
+  expect(choices("Income protection", "omp_cover")).toEqual(["0% fixed rate", "5% fixed rate", "Inflation-linked"]);
+  expect(providerQuoteFields("Old Mutual", "Income protection").some(f => f.key === "benefit_term")).toBe(false);
+});
+
+test("generic severe-illness terms never become insurer instructions", () => {
+  const old = { benefit_amount: "2050000", premium_pattern: "Compulsory", premium_guarantee: "Standard" };
+  expect(ompSettingsComplete("Old Mutual", "Severe illness", old)).toBe(false);
+  expect(buildPortalScenarios({ "Severe illness": [old] }, "Old Mutual")[0].fields.map(f=>f.value)).toEqual(["2050000"]);
+});
