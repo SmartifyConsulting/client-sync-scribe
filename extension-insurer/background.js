@@ -179,6 +179,16 @@ chrome.runtime.onMessage.addListener((d, sender) => {
       chrome.tabs.sendMessage(appTabId, { type: "insurer-login-result", insurer: d.insurer, workflowId: d.workflowId, ok: false, message: "No saved login address or password." });
       return;
     }
+    // Bidvest's public home page has no login form. Its Financial Advisers
+    // menu links to this observed adviser entry; start there without granting
+    // access to the public website or sending credentials to its contact form.
+    try {
+      const entry = new URL(d.loginUrl);
+      if (/^Bidvest Life(?: \/ FMI)?$/i.test(d.insurer) && entry.protocol === "https:" && !entry.port && !entry.username && !entry.password &&
+          ["www.bidvestlife.co.za", "bidvestlife.co.za"].includes(entry.hostname) && entry.pathname === "/" && !entry.search && !entry.hash) {
+        d.loginUrl = "https://adviser.fmi.co.za/";
+      }
+    } catch { /* The normal URL validation below reports invalid entries. */ }
     let origin;
     try { const u = new URL(d.loginUrl); if (u.protocol !== "https:" || u.username || u.password) throw new Error(); origin = u.origin; }
     catch { tell({ appTabId, ...d }, { type: "insurer-login-result", ok: false, message: "Set a valid HTTPS portal URL for this insurer." }); return; }
