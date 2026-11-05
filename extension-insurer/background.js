@@ -453,6 +453,10 @@ function drive(username, password, submitted, origin, discoveryRedirects, passwo
     return { state: "email", hint: m ? m[0] : "" };
   }
   const pw = inputs.find((i) => i.type === "password");
+  // Observed authenticated Bidvest adviser dashboard keeps sign-out in a menu.
+  if (u.hostname === "adviser.fmi.co.za" && !pw &&
+      ["Clients", "Documents", "Commission"].every(label => query(document, "button").some(b => vis(b) && buttonText(b) === label)) &&
+      query(document, "a").some(a => vis(a) && buttonText(a) === "Quotes" && /^https:\/\/secure\.fmi\.co\.za\/quotes\//.test(a.getAttribute("href") || ""))) return { state: "in" };
   if (query(document, 'iframe[src*="recaptcha"], iframe[src*="hcaptcha"], .g-recaptcha, .h-captcha, [id*="captcha-challenge"]').some(vis)) return { state: "captcha" };
   if (query(document, 'dialog[open], [role="dialog"], [role="alertdialog"]').some(vis)) return { state: "blocked" };
   // The observed MyOldMutual home hides Logout inside its account menu.
