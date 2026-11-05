@@ -4,9 +4,12 @@ import { insurerFields, insurerKey } from "./insurerDictionary";
 export const isOmpLife = (insurer: string, product: string) => insurer === "Old Mutual" && product === "Life cover";
 export const isOmpProduct = (insurer: string, product: string) => insurer === "Old Mutual" && ["Life cover", "Severe illness", "Income protection"].includes(product);
 export const isMyriadProduct = (insurer: string, product: string) => insurer === "Momentum" && ["Life cover", "Severe illness", "Income protection"].includes(product);
-export const hasVerifiedProviderFields = (insurer: string, product: string) => isOmpProduct(insurer, product) || isMyriadProduct(insurer, product);
+export const isBidvestProduct = (insurer: string, product: string) => insurer === "Bidvest Life / FMI" && ["Life cover", "Severe illness", "Income protection", "Lump sum disability"].includes(product);
+export const hasVerifiedProviderFields = (insurer: string, product: string) => isOmpProduct(insurer, product) || isMyriadProduct(insurer, product) || isBidvestProduct(insurer, product);
 
 export function providerFieldApplies(field: FieldDef, option: Record<string, any>) {
+  if (field.key === "Bidvest Life / FMI:benefit_term") return option["Bidvest Life / FMI:product"] === "Temporary Income Protector (TIP)";
+  if (field.key === "Bidvest Life / FMI:cease_age" && option["Bidvest Life / FMI:product"] === "Whole of Life Cover") return false;
   if (field.key === "Momentum:myriad_cover_growth") return option["Momentum:myriad_increase"] === "Cover Increase: fixed percentage";
   if (field.key === "Momentum:myriad_total_growth") return option["Momentum:myriad_increase"] === "Premium Increase: fixed percentage";
   if (field.key === "Old Mutual:omp_inflation") return option["Old Mutual:omp_cover"] === "Inflation-linked";
@@ -16,6 +19,21 @@ export function providerFieldApplies(field: FieldDef, option: Record<string, any
 
 // Verified in the OM Adviser OMP Life quote screen. No inferred Greenlight mappings.
 export function providerQuoteFields(insurer: string, product: string): FieldDef[] {
+  if (isBidvestProduct(insurer, product)) {
+    const life=product==='Life cover', income=product==='Income protection', illness=product==='Severe illness';
+    const select=(key:string,label:string,options:string[]):FieldDef=>({key:insurerKey(insurer,key),label,kind:'select',options});
+    return [
+      {key:income?'monthly_benefit':'benefit_amount',label:income?'Monthly cover':'Lump sum cover',kind:'amount'},
+      select('product','Bidvest product',life?['Term Life Cover','Whole of Life Cover']:income?['Temporary Income Protector (TIP)']:illness?['Critical Illness Lump Sum (CILS)']:['Disability Lump Sum (DLS)']),
+      ...(!life&&!income?[select('structure','Structure',['Standalone','Accelerated'])]:[]),
+      select('annual_increase','Annual benefit increase',['0%','3%','5%','7.5%','10%','CPI']),
+      select('premium_pattern','Premium pattern',life||(!income&&!illness)?['5% Compulsory Increase','Age Rated','Level Premium','Age Rated Plus']:['5% Compulsory Increase','Age Rated','Level Premium']),
+      select('cease_age','Cease age',illness?['65','70','Whole of Life']:income?['55','60','65','70','75']:life?['55','60','65','70']:['55','60','65','70','Whole of Life']),
+      ...(income?[select('waiting','Waiting period',['7 days','14 days','30 days','90 days']),select('benefit_term','Benefit term',['3 months','6 months','12 months','24 months']),select('claim_escalation','Add claim escalation',['No','Yes'])]:[]),
+      ...(illness?[select('top_up','Include Top-Up Option',['Yes','No']),select('extender','Include Extender Option',['Yes','No'])]:[]),
+      ...(!income&&!life&&!illness?[select('definition','Comprehensive/Occupational',['Comprehensive','Occupational'])]:[]),
+    ];
+  }
   if (isMyriadProduct(insurer, product)) {
     const life = product === "Life cover", income = product === "Income protection";
     const select = (key: string, label: string, options: string[]): FieldDef => ({ key: insurerKey(insurer, key), label, kind: "select", options });

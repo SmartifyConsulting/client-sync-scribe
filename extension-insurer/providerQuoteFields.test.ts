@@ -65,3 +65,12 @@ test("Momentum requires actual net income and only the active growth answer", ()
   v["Momentum:myriad_cover_growth"]="0";
   expect(ompSettingsComplete("Momentum","Income protection",v)).toBe(true);
 });
+
+test("Bidvest retains product-specific patterns and does not invent EIP waiting rules", () => {
+  const choices=(product:string,key:string)=>{const f=providerQuoteFields('Bidvest Life / FMI',product).find(f=>f.key===`Bidvest Life / FMI:${key}`);return f?.kind==='select'?f.options:[];};
+  expect(choices('Life cover','premium_pattern')).toContain('Age Rated Plus');
+  expect(choices('Severe illness','premium_pattern')).not.toContain('Age Rated Plus');
+  expect(choices('Income protection','product')).toEqual(['Temporary Income Protector (TIP)']);
+  expect(choices('Income protection','benefit_term')).toEqual(['3 months','6 months','12 months','24 months']);
+  expect(buildPortalScenarios({'Life cover':[{benefit_amount:'1700000',premium_pattern:'Level'}]},'Bidvest Life / FMI')[0].fields.map(f=>f.value)).toEqual(['1700000']);
+});
