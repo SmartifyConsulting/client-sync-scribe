@@ -60,7 +60,8 @@ export function productsFromNeeds(fin: any, params: NeedsParams = DEFAULT_PARAMS
 export function defaultVariations(product: string, amount: number) {
   const fields = PRODUCT_TYPES[product] ?? [];
   const amountKey = fields.find((f) => f.kind === "amount")?.key;
-  return GRADES.map((g) => {
+  return GRADES.map(() => {
+    const g = GRADES[0];
     const v: Record<string, any> = { ...defaultVariation(fields) };
     for (const [k, val] of Object.entries(g)) if (k in v) v[k] = val;
     if (amountKey && amount) v[amountKey] = String(amount);

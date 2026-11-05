@@ -1,6 +1,7 @@
 import { providerQuoteFields, hasVerifiedProviderFields, isOmpLife, isOmpProduct, providerFieldApplies, ompSettingsComplete } from "./providerQuoteFields";
 import { OMP_RATING_OPTIONS, ompRatingIssues } from "./providerRatingFields";
 import { BidvestClientFields, bidvestIssues } from './BidvestClientFields';
+import {editQuoteOption} from './optionInheritance';
 import { useCompanionInstalled, useCompanionVersion } from "./companionDetection";
 import { useCompanionRelease, companionVersionCurrent } from "./companionRelease";
 import { useEffect, useState, useRef } from "react";
@@ -228,11 +229,6 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   };
   const openTab = (ins: string) => {
     setTab(ins);
-    if (!canStartPortal(source)) return;
-    if (login[ins] === "connected" || login[ins] === "connecting" || login[ins] === "challenge" || login[ins] === "stopped") return;
-    if (!(companionInstalled || addonInstalled())) { setSetupOpen(true); return setLogin((s) => ({ ...s, [ins]: "no-addon" })); }
-    const token = getToken();
-    if (token) startLogin(ins, token); else setAskFor(ins);
   };
   const unlock = async (passcode: string) => {
     setUnlocking(true);
@@ -381,18 +377,16 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     reviewSection.current?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
     reviewSection.current?.focus({ preventScroll: true });
   }, [activeTab, connected]);
-  // Auto-connect the visible insurer (any insurer) when the 15-minute unlock is already active.
+  // Changing insurer tabs only inspects saved progress; Connect explicitly starts login.
   useEffect(() => {
     if (!canStartPortal(source) || !activeTab || !insurerRows.length || (login[activeTab] && login[activeTab] !== "no-addon") || !companionInstalled || resumePending || resumeRequests.current.has(activeTab)) return;
     try { if (JSON.parse(localStorage.getItem(resumeKey) || "{}").connected?.[activeTab]) return; } catch { /* No saved session. */ }
     setSetupOpen(false);
-    const token = getToken();
-    if (token) void startLogin(activeTab, token);
-    else setLogin(s => { if (s[activeTab] !== "no-addon") return s; const next = { ...s }; delete next[activeTab]; return next; });
+    setLogin(s => { if (s[activeTab] !== "no-addon") return s; const next = { ...s }; delete next[activeTab]; return next; });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source, activeTab, insurerRows.length, companionInstalled, resumePending]);
   const setVal = (p: string, i: number, k: string, val: any) =>
-    setPlan((pl) => ({ ...pl, [p]: pl[p].map((x, j) => (j === i ? { ...x, [k]: val } : x)) }));
+    setPlan((pl) => ({ ...pl, [p]: editQuoteOption(pl[p],i,k,val) }));
   const total = products.reduce((a, p) => a + plan[p].length, 0);
   const optionComplete = (p: string, v: Record<string, any>) => hasVerifiedProviderFields(activeTab,p) ? ompSettingsComplete(activeTab,p,v) : variationComplete(PRODUCT_TYPES[p] ?? [],v);
   const allComplete = products.length > 0 && products.every((p) => plan[p].every((v) => optionComplete(p,v)));
@@ -466,7 +460,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
           <div className="flex items-center gap-2"><span className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-full font-semibold", connected ? "bg-success text-success-foreground" : "bg-primary/10 text-primary")}>{connected ? <Check className="h-3.5 w-3.5" aria-hidden="true" /> : "1"}</span><h4 className="font-semibold">Connect to {activeTab}</h4>{connected && <span className="rounded-full bg-success px-2 py-0.5 text-[10px] font-semibold text-success-foreground">Done</span>}</div>
           <InsurerActivity insurer={activeTab} activity={activity[activeTab]}
             onStop={()=>stopConnection(activeTab)} canStop={["connecting","challenge","connected"].includes(login[activeTab])||(jobs[activeTab]||[]).some(j=>["queued","submitting","generating"].includes(j.status))}
-            idleText={!(companionInstalled || addonInstalled()) ? `Update to the latest Companion v${companionRelease.version}` : getToken() ? "Connecting automatically…" : "Unlock your saved logins to connect in the background"}
+            idleText={!(companionInstalled || addonInstalled()) ? `Update to the latest Companion v${companionRelease.version}` : "Saved quote progress is available. Connect when you are ready to request more quotes."}
             idleAction={!(companionInstalled || addonInstalled()) ? "Update Companion" : getToken() ? "Connect" : "Unlock & connect"}
             onRetry={() => { if (!(companionInstalled || addonInstalled())) { setSetupOpen(true); return; } const token = getToken(); if (token) void startLogin(activeTab, token); else setAskFor(activeTab); }} />
           {login[activeTab] === "no-addon" && (
@@ -540,6 +534,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                         <p className="quote-option-status">{job.pdfReceived && job.status === "generating" ? "Saving quote PDF…" : SCENARIO_TEXT[job.status]}</p>
                       </div> : null; })()}
                       <span className="block">Option {String.fromCharCode(65 + i)}</span>
+                      {option._quoteReferences?.[activeTab]?.number && !quoteReference(p,option,activeTab) && <div className="my-2 rounded border border-border p-2 font-normal normal-case tracking-normal"><p className="font-semibold">Previous quote: {option._quoteReferences[activeTab].number}</p><p className="text-muted-foreground">Saved for earlier settings. Current draft requires a new calculation.</p>{option._quoteResults?.[activeTab]?.monthlyPremium>0&&<p>R {Number(option._quoteResults[activeTab].monthlyPremium).toFixed(2)} / month</p>}</div>}
                       {isWM && isOmpProduct(activeTab,p) && <>
                         <details className="my-2 normal-case tracking-normal font-normal"><summary className="cursor-pointer">Required rating details{ompRatingIssues(option._ompInputs).length ? ` · ${ompRatingIssues(option._ompInputs).length} to complete` : ' · Complete'}</summary>
                           <div className="space-y-2 pt-2">{OMP_RATING_LABELS.map(label=><label key={label} className="block text-[10px] font-semibold">{label} *{OMP_RATING_OPTIONS[label] ? <select required aria-label={label} className="mt-1 h-7 w-full rounded border border-input bg-background px-1 text-xs font-normal" value={option._ompInputs?.[label]??''} onChange={e=>setVal(p,i,'_ompInputs',{...option._ompInputs,[label]:e.target.value})}><option value="" disabled>Select an insurer option</option>{OMP_RATING_OPTIONS[label].map(value=><option key={value}>{value}</option>)}</select> : <Input required type={label==='Date of birth'?'date':'text'} className="mt-1 h-7 text-xs font-normal" value={option._ompInputs?.[label] ?? ''} onChange={e=>setVal(p,i,'_ompInputs',{...option._ompInputs,[label]:e.target.value})} />}</label>)}{ompRatingIssues(option._ompInputs).length>0 && <p className="text-destructive" role="status">Complete or correct: {ompRatingIssues(option._ompInputs).join(', ')}.</p>}</div>
