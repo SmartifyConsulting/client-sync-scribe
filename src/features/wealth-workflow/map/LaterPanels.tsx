@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { DocCard, useWorkflowPractice } from "./OnboardingPanels";
 import { roaHtml } from "./onboardingTemplates";
 import { RoaNegotiation } from "./RoaNegotiation";
+import { AuthorisationPanel } from "./AuthorisationPanel";
 import { usePresentRecommendation, useRecordDecision, useRecommendationHistory, useStartAnnualReview } from "../hooks";
 
 type Viewer = "manager" | "client";
@@ -253,7 +254,7 @@ export function LaterStepPanel({ label, viewer, workflowId, records, clientFirst
   const { data: roaDoc } = useQuery({
     queryKey: ["roa-doc", current?.roa_document_id],
     enabled: showRoa && !!current?.roa_document_id,
-    queryFn: async () => (await (supabase as any).from("documents").select("content, created_at").eq("id", current!.roa_document_id).maybeSingle()).data,
+    queryFn: async () => current?.roa_document_id ? (await (supabase as any).from("documents").select("content, created_at").eq("id", current.roa_document_id).maybeSingle()).data : null,
   });
   const clientName = clientFullName || clientFirst;
   const RoaCard = current?.roa_document_id && roaDoc ? (
@@ -354,18 +355,7 @@ export function LaterStepPanel({ label, viewer, workflowId, records, clientFirst
         </div>
       );
     case "Authorise debit order and sign life declaration":
-      return (
-        <div className="space-y-3">
-          <ul className="space-y-1.5">
-            <StatusRow label="Debit order mandate" done={docKinds.has("debit_order") || comp?.declarations_status === "completed"} />
-            <StatusRow label="Life assured declaration" done={comp?.declarations_status === "completed"} />
-          </ul>
-          <p className="text-xs text-muted-foreground">
-            {viewer === "client" ? "Check the debit order amount and date, then sign the declarations in your application pack." : `${clientFirst} signs the debit order and declarations.`}
-          </p>
-          <DocsLink viewer={viewer} onOpenDocuments={onOpenDocuments} label="Open application pack" />
-        </div>
-      );
+      return <AuthorisationPanel key={current?.id ?? workflowId} viewer={viewer} workflowId={workflowId} records={records} recommendation={current} clientName={clientName} />;
     case "Complete health disclosure (encrypted)":
       return <HealthDisclosureChoice viewer={viewer} workflowId={workflowId} status={comp?.health_disclosure_status ?? "pending"} clientFirst={clientFirst} />;
     case "Accept, decline or issue":

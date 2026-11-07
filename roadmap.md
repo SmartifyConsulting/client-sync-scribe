@@ -1,4 +1,8 @@
 # Roadmap — Step 5 Indigro copy
+## Inline client authorisation — Nov 8
+- [ ] Replace the Documents detour with banking details, premium review and two explicit client consents.
+- [ ] Atomically seal/file both signed documents and refresh the workflow; prohibit Wealth Manager signing on behalf of the client.
+- [ ] Verify validation, client permissions and compact desktop/mobile display; real signing waits for the client.
 ## Record of Advice signing — Nov 7
 - [x] Applied the live notification/reminder client-lookup fix; both functions now use public.clients and retain existing security settings. Verified both live definitions and four existing document-signing checks; preview build OK.
 - [ ] Client signing and Step 6 readback — requires the client to retry signing; no signatures or client notifications created on their behalf during testing.

@@ -1,4 +1,5 @@
 # Agent rules
+- Client debit/life authorisations use sign-wealth-authorisations and a service-only atomic wealth_sign_authorisations RPC, bound to the accepted ROA and selected quote snapshot. Why: client consent, sealed documents and compliance cannot diverge or be signed by a broker.
 - Quote sourcing uses one Step 4 selector; planning premiums stay namespaced inside existing quote-spec variations, never become wealth_quotes or workflow completion evidence. Why: estimates must not masquerade as insurer calculations or unlock advice.
 - Wealth workflow state is derived and changed only by DB functions (wealth_*); UI never writes stage directly. Why: keeps stage truthful to records and every change audited.
 - Healthcare-only modules are hidden via `WEALTH_HIDDEN_MODULES` in src/lib/terminology.ts (nav filter + App route guard; admins bypass). Why: code retained, wealth users never reach it.
