@@ -51,7 +51,6 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCard } from "@/components/clients/SessionCard";
 import { SessionHistoryTable } from "@/components/clients/SessionHistoryTable";
-import { ClientOverview } from "@/components/clients/ClientOverview";
 import { InviteClientDialog } from "@/components/clients/InviteClientDialog";
 import { EmoticonSender } from "@/components/clients/EmoticonSender";
 import { AdvisorsOnProfile } from "@/components/clients/AdvisorsOnProfile";
@@ -95,7 +94,7 @@ export default function ClientProfile() {
   const [mailboxId, setMailboxId] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const rawTab = searchParams.get("tab") || "details";
-  const activeTab = rawTab === "live" ? "workflow" : rawTab;
+  const activeTab = rawTab === "live" || rawTab === "overview" ? "workflow" : rawTab;
   const handleTabChange = (value: string, group?: string) => {
     const next = new URLSearchParams(searchParams);
     next.set("tab", value);
@@ -365,12 +364,6 @@ export default function ClientProfile() {
             {t("patientProfile.tabDetails")}
           </TabsTrigger>
           <TabsTrigger
-            value="overview"
-            className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
-          >
-            {t("patientProfile.tabOverview")}
-          </TabsTrigger>
-          <TabsTrigger
             value="workflow"
             className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
@@ -400,11 +393,6 @@ export default function ClientProfile() {
         </TabsList>
         <TabsContent value="logs">
           <TransactionLogs clientId={client.id} />
-        </TabsContent>
-
-        {/* Overview Tab - AI Summary */}
-        <TabsContent value="overview">
-          <ClientOverview client={client} sessions={sessions} />
         </TabsContent>
 
         <TabsContent value="workflow">

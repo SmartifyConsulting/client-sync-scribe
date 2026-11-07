@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { DocCard, useWorkflowPractice } from "./OnboardingPanels";
 import { roaHtml } from "./onboardingTemplates";
 import { RoaNegotiation } from "./RoaNegotiation";
-import { usePresentRecommendation, useRecommendationHistory, useStartAnnualReview } from "../hooks";
+import { usePresentRecommendation, useRecordDecision, useRecommendationHistory, useStartAnnualReview } from "../hooks";
 
 type Viewer = "manager" | "client";
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" }) : "—");
@@ -198,6 +198,7 @@ export function LaterStepPanel({ label, viewer, workflowId, records, clientFirst
 }) {
   const { data: recs = [] } = useRecommendationHistory(workflowId);
   const present = usePresentRecommendation();
+  const decision = useRecordDecision();
   const qc = useQueryClient();
   const [signing, setSigning] = useState(false);
   const review = useStartAnnualReview();
@@ -282,7 +283,8 @@ export function LaterStepPanel({ label, viewer, workflowId, records, clientFirst
             <p className="text-xs text-muted-foreground">Accepted {fmt(current.decided_at)}.</p>
           ) : current && (current.status === "presented" || current.status === "changes_requested" || current.status === "draft") ? (
             <RoaNegotiation key={current.id} viewer={viewer} clientId={records?.clientId} workflowId={workflowId} recs={recs} current={current}
-              clientFirst={clientFirst} onSign={roaDoc?.content ? sign : undefined} signing={signing} />
+              clientFirst={clientFirst} onSign={roaDoc?.content ? sign : undefined} signing={signing || decision.isPending}
+              onDecline={() => void run(decision.mutateAsync({ recommendationId: current.id, decision: "declined" }), "Your decision was recorded")} />
           ) : (
             <p className="text-xs text-muted-foreground">
               {viewer === "manager" ? `Waiting for ${clientFirst} to review the advice.` : "You'll be able to respond once the advice is presented to you."}

@@ -14,9 +14,10 @@ import type { WealthRecommendation } from "../types";
  * The client requests changes, the Wealth Manager counters, until the client agrees.
  * Agreement locks the current version (changes_requested) and the Wealth Manager redrafts a new version.
  */
-export function RoaNegotiation({ viewer, clientId, workflowId, recs, current, clientFirst, onSign, signing }: {
+export function RoaNegotiation({ viewer, clientId, workflowId, recs, current, clientFirst, onSign, signing, onDecline }: {
   viewer: "manager" | "client"; clientId?: string; workflowId: string; recs: WealthRecommendation[];
   current: WealthRecommendation; clientFirst: string; onSign?: (name: string) => void; signing: boolean;
+  onDecline: () => void;
 }) {
   const qc = useQueryClient();
   const [busy, setBusy] = useState(false);
@@ -107,8 +108,12 @@ export function RoaNegotiation({ viewer, clientId, workflowId, recs, current, cl
               {signing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}Sign Record of Advice
             </Button>
           </div>}
-          <Button variant="outline" className="rounded-full" disabled={busy || !hasRequest} onClick={agree} title={hasRequest ? undefined : "Send your requested changes first"}>
+          <Button variant="outline" className="rounded-full" disabled={signing || busy || !hasRequest} onClick={agree} title={hasRequest ? undefined : "Send your requested changes first"}>
             {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Repeat className="mr-2 h-4 w-4" />}Agree changes and redraft
+          </Button>
+          <Button variant="outline" className="ml-2 rounded-full text-destructive" disabled={signing || busy}
+            onClick={() => { if (window.confirm("Decline this recommendation and close this advice workflow?")) onDecline(); }}>
+            Decline recommendation
           </Button>
         </div>
       )}
