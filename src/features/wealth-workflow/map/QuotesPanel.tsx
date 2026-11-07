@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { useRecommendationHistory } from "../hooks";
+import { usePresentRecommendation, useRecommendationHistory } from "../hooks";
 import { DocumentRequestComposer } from "./DocumentRequestComposer";
 import { QuoteSpecForm } from "./QuoteSpecForm";
 import { fmtR } from "./money";
@@ -39,6 +39,7 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
   const [tab, setTab] = useState("Comparison");
   const [form, setForm] = useState({ insurer: "", product: "Life cover", premium: "", cover: "" });
   const { data: recs = [] } = useRecommendationHistory(workflowId);
+  const present = usePresentRecommendation();
   const { data: fin } = useQuery({
     queryKey: ["fin-cashflow", records?.clientId], enabled: !!records?.clientId,
     queryFn: async () => (await db.from("client_financial_profiles").select("cash_flow").eq("patient_id", records.clientId).maybeSingle()).data,
@@ -46,7 +47,15 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
   const refresh = () => qc.invalidateQueries({ queryKey: ["wealth-map-records"] });
   const run = async (fn: () => Promise<any>, ok: string) => {
     setBusy(true);
-    try { const r = await fn(); if (r?.error) throw r.error; toast({ title: ok }); refresh(); }
+    try {
+      const result = await fn();
+      if (result?.error) throw result.error;
+      await Promise.all([
+        refresh(),
+        qc.invalidateQueries({ queryKey: ["wealth-recs", workflowId] }),
+      ]);
+      toast({ title: ok });
+    }
     catch (e: any) { toast({ title: "That didn't go through", description: e?.message ?? "Please try again.", variant: "destructive" }); }
     finally { setBusy(false); }
   };
@@ -235,7 +244,17 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
             {isWM ? "Elysian AI drafts the Record of Advice from the selected options and your commentary. You review and approve it before presenting." : `Your Wealth Manager prepares the Record of Advice.`}
           </p>
           {cur ? (
-            <p className="flex items-center gap-2 rounded-lg border border-border/60 p-3"><CheckCircle2 className="h-4 w-4 text-[hsl(var(--owner-system))]" />Record of Advice v{cur.version} · <span className="capitalize">{cur.status.replace("_", " ")}</span>{cur.roa_document_id ? " · filed in Documents" : ""}</p>
+            <div className="space-y-2">
+              <p className="flex items-center gap-2 rounded-lg border border-border/60 p-3"><CheckCircle2 className="h-4 w-4 text-[hsl(var(--owner-system))]" />Record of Advice v{cur.version} · <span className="capitalize">{cur.status.replace("_", " ")}</span>{cur.roa_document_id ? " · filed in Documents" : ""}</p>
+              {isWM && cur.status === "draft" && cur.roa_document_id && (
+                <>
+                  <p className="text-muted-foreground">Review the filed draft in Documents before presenting it to {clientFirst}.</p>
+                  <Button disabled={busy || present.isPending} onClick={() => run(() => present.mutateAsync(cur.id), `Presented to ${clientFirst}`)}>
+                    Present to {clientFirst}
+                  </Button>
+                </>
+              )}
+            </div>
           ) : isWM && selected.length ? (
             <Button className="w-full rounded-full" disabled={busy} onClick={() => run(() => db.from("wealth_recommendations").insert({
               workflow_id: workflowId, version: 1, status: "draft", title: "Risk cover recommendation",
