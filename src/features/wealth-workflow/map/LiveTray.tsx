@@ -66,10 +66,26 @@ export function LiveTray({ groups, viewer, clientFirst, managerName, avatars, wo
         const title = `Step ${g.group.n} · ${g.group.title}`;
 
         if (!done && !active) {
+          const isOpen = !!openDone[g.group.key];
           return (
-            <div key={g.group.key} className="flex items-center justify-between rounded-xl border border-border px-4 py-2.5 opacity-70">
-              <span className="text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">{title}</span>
-              <Lock className="h-3.5 w-3.5 text-muted-foreground" aria-label="Locked" />
+            <div key={g.group.key} className="rounded-xl border border-border p-1.5 opacity-70">
+              <button type="button" onClick={() => setOpenDone((o) => ({ ...o, [g.group.key]: !isOpen }))} aria-expanded={isOpen}
+                className="flex w-full items-center justify-between rounded-lg px-3 py-1 text-left">
+                <span className="text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">{title}</span>
+                <span className="flex items-center gap-2 text-muted-foreground">
+                  <Lock className="h-3.5 w-3.5" aria-label="Locked" />
+                  {isOpen ? <MinusCircle className="h-4 w-4" /> : <PlusCircle className="h-4 w-4" />}
+                </span>
+              </button>
+              {isOpen && (
+                <ul className="mt-1.5 space-y-1 px-1.5 pb-1" aria-label="Upcoming steps (preview only)">
+                  {g.steps.map((s) => (
+                    <li key={s.label} aria-disabled className="flex cursor-default items-center gap-2 rounded-full border border-border bg-muted/40 px-3 py-1.5 text-xs text-muted-foreground">
+                      {s.label}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           );
         }
