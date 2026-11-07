@@ -2946,6 +2946,30 @@ export type Database = {
           },
         ]
       }
+      wealth_form_templates: {
+        Row: {
+          archived: boolean
+          content: string
+          template_key: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          archived?: boolean
+          content: string
+          template_key: string
+          title: string
+          user_id?: string
+        }
+        Update: {
+          archived?: boolean
+          content?: string
+          template_key?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       wealth_kyc_checks: {
         Row: {
           aml_result: string | null
@@ -4622,6 +4646,11 @@ export type Database = {
         Args: { _reason: string; _workflow_id: string }
         Returns: undefined
       }
+      wealth_confirm_financial_information: {
+        Args: { _client_id: string; _waiver_scope: string }
+        Returns: boolean
+      }
+      wealth_current_broker: { Args: { _client_id: string }; Returns: Json }
       wealth_derive_stage: { Args: { _workflow_id: string }; Returns: Json }
       wealth_file_roa: {
         Args: {
@@ -4672,6 +4701,17 @@ export type Database = {
       wealth_refresh: {
         Args: { _rid?: string; _rtype?: string; _workflow_id: string }
         Returns: Json
+      }
+      wealth_request_broker_change: {
+        Args: {
+          _client_id: string
+          _new_broker: string
+          _new_firm: string
+          _policies: string
+          _request_id: string
+          _signature: string
+        }
+        Returns: string
       }
       wealth_send_reminder: { Args: { _todo_id: string }; Returns: boolean }
       wealth_set_workflow_paused: {
