@@ -1546,18 +1546,18 @@ export default function MyPractice() {
 
         {/* === TEMPLATES TAB === */}
         <TabsContent value="templates" className="mt-4 my-practice-tab-body">
-          <Tabs defaultValue="logos" className="w-full">
+          <Tabs defaultValue="forms" className="w-full">
             <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
-              <TabsTrigger value="logos" className="tab-brand whitespace-nowrap text-xs px-3 py-1.5">Logos</TabsTrigger>
               <TabsTrigger value="forms" className="tab-brand whitespace-nowrap text-xs px-3 py-1.5">Forms</TabsTrigger>
+              <TabsTrigger value="logos" className="tab-brand whitespace-nowrap text-xs px-3 py-1.5">Logos</TabsTrigger>
             </TabsList>
+            <TabsContent value="forms" className="mt-4">
+              <ComplianceForms />
+            </TabsContent>
             <TabsContent value="logos" className="mt-4">
               <div className="rounded-xl border border-border bg-card p-4">
                 <PracticeLogos />
               </div>
-            </TabsContent>
-            <TabsContent value="forms" className="mt-4">
-              <ComplianceForms />
             </TabsContent>
           </Tabs>
         </TabsContent>
