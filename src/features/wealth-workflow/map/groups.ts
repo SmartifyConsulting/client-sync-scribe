@@ -84,7 +84,8 @@ export const WORKFLOW_GROUPS: WorkflowGroup[] = [
       { owner: "system", label: "Astute pull: life, disability, investments", done: (c) => past(3)(c) || c.holdingsCount > 0 },
       { owner: "advisor", label: "Insurer schedules and claims history", done: (c) => past(3)(c) || !!c.schedulesRequested },
       { owner: "system", label: "Cross-alert check" },
-      { owner: "system", label: "Push profile to CRM" },
+      // Advancing to Quotes does not confirm a profile export to Xplan.
+      { owner: "system", label: "Push profile to CRM", done: () => false },
     ],
     clientSteps: [{ owner: "advisor", label: "Marlin is accessing your current portfolios", done: () => undefined }],
     footer: "Locked until the mandate is re-signed if another brokerage queries",

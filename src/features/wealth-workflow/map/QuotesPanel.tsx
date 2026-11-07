@@ -129,7 +129,7 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
       );
     }
     case "Push profile to CRM":
-      return <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">The CRM (Iress XPLAN) isn't connected yet. The client profile is kept here until the connection is set up.</p>;
+      return <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">Profile push pending. Holarc keeps the client profile here. Xplan profile export is unavailable, and quoting can continue while it is pending.</p>;
 
     case "Quote 6 insurers, rank top 3":
       if (!quotes.length) {
