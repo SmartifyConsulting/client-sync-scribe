@@ -12,7 +12,7 @@ import { Panel } from "@/components/ui/Panel";
 const LIFE_EVENTS = ["Marriage", "Divorce", "Birth or adoption", "New job", "Retirement", "Property purchase", "Inheritance", "Death in family", "Beneficiary change", "Policy issued", "Other"];
 
 export async function refreshClientSummary(clientId: string) {
-  const { data, error } = await supabase.functions.invoke("client-ai-summary", { body: { clientId } });
+  const { data, error } = await supabase.functions.invoke("client-ai-summary", { body: { clientId, patientId: clientId } });
   if (error || (data as any)?.error) throw new Error((data as any)?.error || "The summary couldn't be updated.");
   return data as { summary: string; updatedAt: string };
 }
