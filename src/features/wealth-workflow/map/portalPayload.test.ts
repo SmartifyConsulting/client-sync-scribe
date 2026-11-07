@@ -5,8 +5,8 @@ describe("approved portal payload", () => {
     const scenarios = buildPortalScenarios({ "Life cover": [{ benefit_amount: "1700000", premium_pattern: "Level", growth: "6", "Momentum:plan": "Myriad Lite" }] }, "Momentum", { first_name: "Georgia", occupation: "Engineer level 2", smoker: "No" });
     expect(scenarios[0].n).toBe(1);
     expect(scenarios[0].fields.find((f) => f.label === "Myriad plan")?.value).toBe("Myriad Lite");
-    expect(scenarios[0].fields.find((f) => f.label === "Cover growth")?.aliases).toContain("Yearly base increase");
-    expect(scenarios[0].fields.find((f) => f.label === "Cover growth")?.aliases).not.toContain("Premium increase");
+    expect((scenarios[0].fields.find((f) => f.label === "Cover growth") as { aliases?: string[] } | undefined)?.aliases).toContain("Yearly base increase");
+    expect((scenarios[0].fields.find((f) => f.label === "Cover growth") as { aliases?: string[] } | undefined)?.aliases).not.toContain("Premium increase");
     expect(scenarios[0].fields.find((f) => f.label === "Occupation")?.value).toBe("Engineer level 2");
   });
   it("does not invent missing identity, dates, screening, or premium increase", () => {
