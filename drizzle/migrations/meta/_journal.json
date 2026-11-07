@@ -92,6 +92,13 @@
       "when": 1793706997142,
       "tag": "0012_add_car_insurance_to_financial_profiles",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1794092398930,
+      "tag": "0013_fix_roa_signed_and_reminder_client_lookups",
+      "breakpoints": true
     }
   ]
 }

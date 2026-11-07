@@ -1,4 +1,7 @@
 # Roadmap — Step 5 Indigro copy
+## Record of Advice signing — Nov 7
+- [x] Applied the live notification/reminder client-lookup fix; both functions now use public.clients and retain existing security settings. Verified both live definitions and four existing document-signing checks; preview build OK.
+- [ ] Client signing and Step 6 readback — requires the client to retry signing; no signatures or client notifications created on their behalf during testing.
 ## Quote sourcing — Nov 4
 - [x] Distinguish Companion, email desk and broker-entered indicative planning in Step 4; estimates stay in quote specs, never become insurer quote rows or unlock advice; prominent official-confirmation warning.
 - [x] Nine isolated tests pass; authenticated Georgia Demo desktop/mobile method switching and estimate save/reload verified; original demo value restored, no client/insurer communications. Live insurer calculations remain unverified.
