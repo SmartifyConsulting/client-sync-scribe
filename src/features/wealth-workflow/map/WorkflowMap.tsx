@@ -20,6 +20,9 @@ import type { MapAvatars } from "./StepAvatar";
 import { CancelWorkflowButton, CancelledNotice } from "../workspace/CancelWorkflow";
 import { QuoteInsurerSelectionProvider, useSelectedQuoteInsurers } from "./QuoteInsurerSelection";
 
+/** Normal FICA collection tasks — shown as uploads in the step, never as red errors. */
+const FICA_TASKS = new Set(["Proof of residence", "Client ID document", "Client mandate (Form 1) not signed"]);
+
 interface Props {
   clientId: string;
   clientName?: string;
@@ -131,9 +134,9 @@ function WorkflowMapContent({ clientId, clientName, onOpenDocuments, initialGrou
       {onBackToLive && (
         <button onClick={onBackToLive} className="text-xs font-medium text-primary hover:underline">← Back to Live workspace</button>
       )}
-      {viewer === "manager" && wf.status === "blocked" && wf.blockers.length > 0 && (
+      {viewer === "manager" && wf.status === "blocked" && wf.blockers.filter((b) => !FICA_TASKS.has(b)).length > 0 && (
         <div className="rounded-xl border border-destructive/40 bg-card px-4 py-2.5 text-xs text-destructive">
-          <span className="font-semibold">Blocked: </span>{wf.blockers.join(" · ")}
+          <span className="font-semibold">Blocked: </span>{wf.blockers.filter((b) => !FICA_TASKS.has(b)).join(" · ")}
         </div>
       )}
 

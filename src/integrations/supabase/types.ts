@@ -4743,6 +4743,16 @@ export type Database = {
         Args: { _reason?: string; _to_stage: string; _workflow_id: string }
         Returns: Json
       }
+      wealth_upload_fica_document: {
+        Args: {
+          _data_url: string
+          _kind: string
+          _mime: string
+          _name: string
+          _workflow_id: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       access_permission:

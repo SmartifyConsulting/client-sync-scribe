@@ -185,6 +185,47 @@ function IssuedPolicyDocs({ clientId }: { clientId?: string }) {
   );
 }
 
+/** In-place FICA upload: saves privately to the client's documents and ticks the step via wealth_upload_fica_document. */
+function FicaUpload({ workflowId, kind, title, hint, done }: { workflowId: string; kind: "proof_of_residence" | "bank_letter"; title: string; hint: string; done: boolean }) {
+  const qc = useQueryClient();
+  const [busy, setBusy] = useState(false);
+  const [savedName, setSavedName] = useState<string | null>(null);
+  const onFile = async (file?: File | null) => {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast({ title: "File too large", description: "Please choose a file under 5MB.", variant: "destructive" }); return; }
+    setBusy(true);
+    try {
+      const dataUrl = await new Promise<string>((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result)); r.onerror = rej; r.readAsDataURL(file); });
+      const { error } = await (supabase as any).rpc("wealth_upload_fica_document", { _workflow_id: workflowId, _kind: kind, _name: file.name, _data_url: dataUrl, _mime: file.type || "application/octet-stream" });
+      if (error) throw error;
+      setSavedName(file.name);
+      toast({ title: "Uploaded", description: `${title} saved to Documents.` });
+      ["wealth-map-records", "wealth-workflow", "wealth-doc-tray", "client-wealth", "wealth-blockers"].forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
+    } catch (e: any) {
+      toast({ title: "Upload failed", description: e?.message ?? "Please try again.", variant: "destructive" });
+    } finally { setBusy(false); }
+  };
+  const isDone = done || !!savedName;
+  return (
+    <div className={cn("rounded-xl border p-3", isDone ? "border-[hsl(var(--owner-client))]/50 bg-[hsl(var(--owner-client))]/5" : "border-border bg-card")}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="flex items-center gap-1.5 text-xs font-semibold">
+            {isDone ? <CheckCircle2 className="h-4 w-4 text-[hsl(var(--owner-client))]" /> : <span className="h-4 w-4 rounded-full border border-border" />}{title}
+          </p>
+          <p className="mt-1 text-2xs text-muted-foreground">{hint}</p>
+          {savedName && <p className="mt-1 text-2xs text-foreground">Saved: {savedName}</p>}
+        </div>
+        <label className={cn("inline-flex min-h-[36px] shrink-0 cursor-pointer items-center gap-1.5 rounded-full border border-border px-3 text-xs font-medium hover:bg-muted", busy && "pointer-events-none opacity-60")}>
+          {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+          {isDone ? "Replace" : "Upload"}
+          <input type="file" accept="application/pdf,image/*" className="sr-only" onChange={(e) => { void onFile(e.target.files?.[0]); e.target.value = ""; }} />
+        </label>
+      </div>
+    </div>
+  );
+}
+
 function DocsLink({ viewer, onOpenDocuments, label = "Open documents" }: { viewer: Viewer; onOpenDocuments?: () => void; label?: string }) {
   return viewer === "client" ? (
     <Button asChild variant="outline" className="w-full rounded-full"><Link to="/client/documents"><Upload className="mr-2 h-4 w-4" />{label}</Link></Button>
@@ -295,15 +336,21 @@ export function LaterStepPanel({ label, viewer, workflowId, records, clientFirst
     case "Upload FICA documents and confirm bank details":
       return (
         <div className="space-y-3">
-          <ul className="space-y-1.5">
-            <StatusRow label="Identity and regulatory verification (FICA)" done={comp?.kyc_fica_status === "completed"} />
-            <StatusRow label="Bank details confirmed" done={!comp?.bank_validation_required || comp?.bank_validation_status === "completed"} hint={!comp?.bank_validation_required ? "Not needed" : undefined} />
-          </ul>
           <p className="text-xs text-muted-foreground">
-            {viewer === "client" ? "Your ID is already on file from your identity check — just upload a Bank Account Verification Letter and a Proof of Residential Address no older than 3 months." : `${clientFirst} uploads a Bank Account Verification Letter and Proof of Address (ID already on file from their identity check).`}
+            {viewer === "client" ? "Your ID is already on file from your identity check. Please upload the two documents below." : `${clientFirst}'s ID is on file from the identity check. ${clientFirst} uploads the two documents below, or you can upload them on their behalf.`}
           </p>
+          <ul className="space-y-1.5">
+            <StatusRow label="ID document" done hint="On file" />
+          </ul>
+          <FicaUpload workflowId={workflowId} kind="proof_of_residence" title="Proof of residential address"
+            hint="Not older than 3 months, e.g. Rates and Taxes account, lease agreement, utility bill, bank or retail statement, or cellphone/landline account."
+            done={docKinds.has("proof_of_residence")} />
+          {comp?.bank_validation_required !== false && (
+            <FicaUpload workflowId={workflowId} kind="bank_letter" title="Bank account confirmation"
+              hint="Bank-stamped confirmation letter or a recent bank statement showing your name and account number (for the debit order)."
+              done={docKinds.has("bank_letter") || comp?.bank_validation_status === "completed"} />
+          )}
           {viewer === "manager" && <IdOnFile clientId={records?.clientId} />}
-          <DocsLink viewer={viewer} onOpenDocuments={onOpenDocuments} label={viewer === "client" ? "Upload my documents" : "Open documents"} />
         </div>
       );
     case "Authorise debit order and sign life declaration":

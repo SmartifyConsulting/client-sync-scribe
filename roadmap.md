@@ -205,3 +205,7 @@
 - [x] Auto-connect the visible insurer tab when the 15-minute unlock is active
 - [x] Always-visible status ring per insurer (setup / unlock / connecting / connected)
 - [ ] Live check in broker browser — requires reinstalling Companion v1.5.1
+
+## FICA as a normal step — Nov 8
+- [x] Upload proof of address and bank letter inside the step (no Documents detour); upload ticks the step
+- [x] No red "On hold" for normal FICA items; signed Disclosure+LOA count as mandate, Didit KYC counts as ID
