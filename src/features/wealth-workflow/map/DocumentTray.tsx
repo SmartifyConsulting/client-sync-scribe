@@ -8,6 +8,7 @@ import { PdfFromHtml } from "@/features/documents/components/PdfFromHtml";
 import { StoredPdfPreview } from "@/features/documents/components/StoredPdfPreview";
 import { downloadHtmlAsPdf } from "@/features/documents/utils/documentPdf";
 import { sealedHtml } from "./onboardingTemplates";
+import { toast } from "@/hooks/use-toast";
 
 const db = supabase as any;
 type Doc = { id: string; kind: "signed" | "transcript" | "file"; title: string; date: string; html?: string; text?: string; url?: string };
@@ -18,29 +19,38 @@ export function useClientDocuments(clientId?: string) {
   return useQuery({
     queryKey: ["wealth-doc-tray", clientId],
     enabled: !!clientId,
+    staleTime: 60_000,
     queryFn: async (): Promise<Doc[]> => {
       const [signed, sessions, files] = await Promise.all([
-        db.from("wealth_signed_documents").select("*").eq("patient_id", clientId).order("signed_at", { ascending: false }),
-        db.from("sessions").select("id,title,transcript,created_at").eq("patient_id", clientId).not("transcript", "is", null).order("created_at", { ascending: false }),
+        db.from("wealth_signed_documents").select("id,title,version,signed_at").eq("patient_id", clientId).order("signed_at", { ascending: false }),
+        db.from("sessions").select("id,title,created_at").eq("patient_id", clientId).not("transcript", "is", null).order("created_at", { ascending: false }),
         // Exclude *_signed rows: sign-wealth-document auto-files a copy of every
         // signed Disclosure/LOA into `documents` for the firm's records, but
         // the authoritative signed copy is already listed from
         // wealth_signed_documents above — including both here doubled every
         // signed document in the tray.
-        db.from("documents").select("id,name,content,media_url,created_at,document_kind").eq("patient_id", clientId).or("document_kind.is.null,document_kind.not.in.(loa_signed,disclosure_signed)").order("created_at", { ascending: false }).limit(50),
+        db.from("documents").select("id,name,created_at").eq("patient_id", clientId).or("document_kind.is.null,document_kind.not.in.(loa_signed,disclosure_signed)").order("created_at", { ascending: false }).limit(50),
       ]);
+      for (const result of [signed, sessions, files]) if (result.error) throw result.error;
       return [
-        ...((signed.data ?? []) as any[]).map((d) => ({ id: d.id, kind: "signed" as const, title: `${d.title} (signed v${d.version})`, date: d.signed_at, html: sealedHtml(d) })),
-        ...((sessions.data ?? []) as any[]).map((s) => ({ id: s.id, kind: "transcript" as const, title: `${s.title || "Meeting"} transcript`, date: s.created_at, text: s.transcript })),
-        ...((files.data ?? []) as any[]).map((f) => {
-          const c: string | undefined = f.content || undefined;
-          const isPdf = f.media_url?.startsWith("data:application/pdf;");
-          const isHtml = !isPdf && !!c && /<[a-z][\s\S]*>/i.test(c);
-          return { id: f.id, kind: "file" as const, title: f.name || "Document", date: f.created_at, html: isHtml ? c : undefined, text: isHtml || isPdf ? undefined : c, url: f.media_url || undefined };
-        }),
+        ...((signed.data ?? []) as any[]).map((d) => ({ id: d.id, kind: "signed" as const, title: `${d.title} (signed v${d.version})`, date: d.signed_at })),
+        ...((sessions.data ?? []) as any[]).map((s) => ({ id: s.id, kind: "transcript" as const, title: `${s.title || "Meeting"} transcript`, date: s.created_at })),
+        ...((files.data ?? []) as any[]).map((f) => ({ id: f.id, kind: "file" as const, title: f.name || "Document", date: f.created_at })),
       ].sort((a, b) => +new Date(b.date) - +new Date(a.date));
     },
   });
+}
+
+async function loadDocument(doc: Doc): Promise<Doc> {
+  const table = doc.kind === "signed" ? "wealth_signed_documents" : doc.kind === "transcript" ? "sessions" : "documents";
+  const columns = doc.kind === "signed" ? "*" : doc.kind === "transcript" ? "transcript" : "content,media_url";
+  const { data, error } = await db.from(table).select(columns).eq("id", doc.id).single();
+  if (error) throw error;
+  if (doc.kind === "signed") return { ...doc, html: sealedHtml(data) };
+  if (doc.kind === "transcript") return { ...doc, text: data.transcript };
+  const pdf = data.media_url?.startsWith("data:application/pdf;");
+  const html = !pdf && /<[a-z][\s\S]*>/i.test(data.content ?? "");
+  return { ...doc, html: html ? data.content : undefined, text: html || pdf ? undefined : data.content, url: data.media_url };
 }
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -108,8 +118,21 @@ export function DocumentTray({ clientId }: { clientId?: string }) {
   const [open, setOpen] = useState(false);
   const [preview, setPreview] = useState<Doc | null>(null);
   const ref = useRef<HTMLDivElement>(null);
-  const { data = [], isLoading } = useClientDocuments(clientId);
+  const { data = [], isLoading, isError, refetch } = useClientDocuments(clientId);
+  const [loadingDoc, setLoadingDoc] = useState<string>();
   const count = data.length;
+  const openDoc = async (doc: Doc, download: boolean) => {
+    setLoadingDoc(doc.id);
+    try {
+      const full = await loadDocument(doc);
+      if (download) await downloadDoc(full);
+      else setPreview(full);
+    } catch {
+      toast({ title: "Could not load this document", description: "Please try again.", variant: "destructive" });
+    } finally {
+      setLoadingDoc(undefined);
+    }
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -131,7 +154,7 @@ export function DocumentTray({ clientId }: { clientId?: string }) {
       <button type="button" id="wealth-docs-tile" onClick={() => setOpen((o) => !o)} aria-label="Documents" aria-expanded={open} title="Documents"
         className={`relative -my-2 rounded-lg p-0.5 transition-transform hover:scale-105 ${filed ? "animate-bounce" : ""}`}>
         <img src={folderAsset.url} alt="" className="h-10 w-10 object-contain" />
-        <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-2xs font-semibold text-primary-foreground ring-2 ring-card">{count}</span>
+        <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-2xs font-semibold text-primary-foreground ring-2 ring-card">{isLoading ? "…" : isError && !count ? "!" : count}</span>
         {filed && <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[hsl(var(--owner-client))] px-2 py-0.5 text-2xs font-semibold text-primary-foreground">Filed!</span>}
       </button>
       {open && (
@@ -139,6 +162,7 @@ export function DocumentTray({ clientId }: { clientId?: string }) {
           <p className="px-2 pb-1.5 pt-1 text-2xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Documents</p>
           <div className="max-h-80 overflow-y-auto">
             {isLoading ? <p className="px-2 py-3 text-xs text-muted-foreground">Loading…</p>
+              : isError && !count ? <button className="px-2 py-3 text-xs underline" onClick={() => void refetch()}>Could not load documents · Retry</button>
               : data.length === 0 ? <p className="px-2 py-3 text-xs text-muted-foreground">No documents yet.</p>
               : data.map((d) => {
                 const Icon = ICON[d.kind];
@@ -149,8 +173,9 @@ export function DocumentTray({ clientId }: { clientId?: string }) {
                       <p className="truncate text-xs font-medium text-foreground">{d.title}</p>
                       <p className="text-2xs text-muted-foreground">{fmt(d.date)}</p>
                     </div>
-                    <button onClick={() => setPreview(d)} aria-label={`Preview ${d.title}`} className="rounded p-1 text-muted-foreground hover:text-primary"><Eye className="h-4 w-4" /></button>
-                    <button onClick={() => downloadDoc(d)} aria-label={`Download ${d.title}`} className="rounded p-1 text-muted-foreground hover:text-primary"><Download className="h-4 w-4" /></button>
+                    {loadingDoc === d.id && <span className="text-2xs text-muted-foreground">Loading…</span>}
+                    <button disabled={!!loadingDoc} onClick={() => void openDoc(d, false)} aria-label={`Preview ${d.title}`} className="rounded p-1 text-muted-foreground hover:text-primary"><Eye className="h-4 w-4" /></button>
+                    <button disabled={!!loadingDoc} onClick={() => void openDoc(d, true)} aria-label={`Download ${d.title}`} className="rounded p-1 text-muted-foreground hover:text-primary"><Download className="h-4 w-4" /></button>
                   </div>
                 );
               })}

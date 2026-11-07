@@ -129,9 +129,10 @@ function AutoStartKyc({ status, sessionUrl, busy, onStart, children }: { status:
 
 /* ---------------- Disclosure + LOA ---------------- */
 /** Wealth Manager's saved firm profile (with logos embedded as data URLs) for branding client documents. */
-export function useWorkflowPractice(workflowId: string) {
+export function useWorkflowPractice(workflowId: string, enabled = true) {
   return useQuery({
     queryKey: ["workflow-practice-info", workflowId],
+    enabled,
     queryFn: async () => {
       const sbx = supabase as any;
       const { data: wf } = await sbx.from("wealth_workflows").select("owner_user_id").eq("id", workflowId).maybeSingle();

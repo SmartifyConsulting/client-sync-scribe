@@ -13,6 +13,9 @@ import { DocumentRequestComposer } from "./DocumentRequestComposer";
 import { QuoteSpecForm } from "./QuoteSpecForm";
 import { fmtR } from "./money";
 import { mayUseForAdvice, PLANNING_WARNING } from "./quoteSourcing";
+import { RoaDraftForm } from "./RoaDraftForm";
+import { roaHtml } from "./onboardingTemplates";
+import { useWorkflowPractice } from "./OnboardingPanels";
 
 type Viewer = "manager" | "client";
 const db = supabase as any;
@@ -40,6 +43,7 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
   const [form, setForm] = useState({ insurer: "", product: "Life cover", premium: "", cover: "" });
   const { data: recs = [] } = useRecommendationHistory(workflowId);
   const present = usePresentRecommendation();
+  const { data: practice, isPending: practicePending } = useWorkflowPractice(workflowId, label === "Generate ROA (versioned)" && viewer === "manager");
   const { data: fin } = useQuery({
     queryKey: ["fin-cashflow", records?.clientId], enabled: !!records?.clientId,
     queryFn: async () => (await db.from("client_financial_profiles").select("cash_flow").eq("patient_id", records.clientId).maybeSingle()).data,
@@ -238,10 +242,11 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
 
     case "Generate ROA (versioned)": {
       const cur = recs.find((r) => r.status !== "superseded");
+      const version = cur?.status === "draft" && !cur.roa_document_id ? cur.version : Math.max(0, ...recs.map(r => r.version)) + 1;
       return (
         <div className="space-y-2 text-xs">
           <p className="rounded-lg bg-muted/50 p-3 text-muted-foreground">
-            {isWM ? "Elysian AI drafts the Record of Advice from the selected options and your commentary. You review and approve it before presenting." : `Your Wealth Manager prepares the Record of Advice.`}
+            {isWM ? "Record the advice in your own words. Holarc includes the confirmed quotes and files the version for review before you present it." : "Your Wealth Manager prepares the Record of Advice."}
           </p>
           {cur ? (
             <div className="space-y-2">
@@ -255,12 +260,23 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
                 </>
               )}
             </div>
-          ) : isWM && selected.length ? (
-            <Button className="w-full rounded-full" disabled={busy} onClick={() => run(() => db.from("wealth_recommendations").insert({
-              workflow_id: workflowId, version: 1, status: "draft", title: "Risk cover recommendation",
-              summary: selected.map((q) => `${q.insurer} ${q.product}: ${R(q.monthly_premium)}/month${q.commentary ? ` — ${q.commentary}` : ""}`).join("\n"),
-            }), "Draft Record of Advice created")}>Draft Record of Advice</Button>
-          ) : <p className="text-muted-foreground">Select options first.</p>}
+          ) : null}
+          {isWM && (!cur || cur.status === "draft" || cur.status === "changes_requested") && (
+            selected.length ? (
+              <RoaDraftForm quotes={quotes.filter(mayUseForAdvice)} busy={busy || practicePending} onFile={(body, summary, adviceDate, adviser) => {
+                const personal = records?.personal;
+                const recordDate = new Date().toLocaleDateString("en-ZA", { timeZone: "Africa/Johannesburg", day: "numeric", month: "long", year: "numeric" });
+                const content = roaHtml(body, personal?.name || clientFirst, recordDate, version, practice, {
+                  adviceDate, adviser, contact: [personal?.email, personal?.phone].filter(Boolean).join(" · "),
+                });
+                void run(async () => {
+                  const result = await db.rpc("wealth_file_roa", { _workflow_id: workflowId, _version: version, _content: content, _summary: summary });
+                  if (!result.error) await qc.invalidateQueries({ queryKey: ["wealth-doc-tray", records?.clientId] });
+                  return result;
+                }, "Record of Advice draft filed");
+              }} />
+            ) : <p className="text-muted-foreground">Select at least one confirmed quote first.</p>
+          )}
         </div>
       );
     }

@@ -1,5 +1,6 @@
 import { SignaturePad } from "./SignaturePad";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -30,7 +31,7 @@ export function ComplianceForms() {
               <p className="text-xs text-muted-foreground mt-1">{f.when}</p>
               <span className="inline-block mt-2 text-2xs uppercase font-semibold px-2 py-0.5 rounded-full bg-accent text-accent-foreground">{f.stage}</span>
             </div>
-            <Button size="sm" variant="outline" className="text-xs shrink-0" onClick={() => setOpen(f)}>Complete</Button>
+            <Button size="sm" variant="outline" className="text-xs shrink-0" onClick={() => setOpen(f)}>{f.id === "roa" ? "Open workspace" : "Complete"}</Button>
           </Card>
         ))}
       </div>
@@ -60,6 +61,22 @@ function FormDialog({ form, onClose }: { form: ComplianceForm; onClose: () => vo
   const client = clients.find((c: any) => c.id === clientId) as any;
   const adviser = (profile as any)?.full_name || "Wealth Manager";
   const single = form.id === "fna" && v.singleNeed;
+
+  if (form.id === "roa") return (
+    <Dialog open onOpenChange={open => !open && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Form 6 · Record of Advice</DialogTitle>
+          <DialogDescription>Prepare the advice in Step 4 of the client’s Live Workspace. The client reviews and signs the presented version in Step 5.</DialogDescription>
+        </DialogHeader>
+        <Select value={clientId} onValueChange={setPatientId}>
+          <SelectTrigger aria-label="Client"><SelectValue placeholder="Select a client" /></SelectTrigger>
+          <SelectContent>{clients.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
+        </Select>
+        <DialogFooter>{client && <Button asChild><Link to={`/clients/${client.id}?tab=live`} onClick={onClose}>Open Live Workspace</Link></Button>}</DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 
   const submit = async () => {
     if (!client) return toast({ title: "Choose a client", description: "Select the client this form is for.", variant: "destructive" });

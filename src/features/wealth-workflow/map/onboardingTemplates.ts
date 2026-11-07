@@ -90,7 +90,7 @@ export function sealedHtml(doc: { content_html: string; signature_image: string;
 }
 
 /** Record of Advice in the same executive, dual-logo layout as the Disclosure and LOA. Restyles stored ROA body HTML. */
-export function roaHtml(body: string, client: string, date: string, version: number | string, p: any = null) {
+export function roaHtml(body: string, client: string, date: string, version: number | string, p: any = null, details?: { adviceDate: string; adviser: string; contact: string }) {
   const inner = body.match(/<!--roa-body-->([\s\S]*?)<!--\/roa-body-->/);
   if (inner) body = inner[1];
   const th = `padding:9px 10px;text-align:left;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:${MUTED};font-weight:600;border-bottom:1.5px solid ${NAVY}`;
@@ -109,10 +109,13 @@ export function roaHtml(body: string, client: string, date: string, version: num
   const planner = p?.planner_name ? `${p.title ? p.title + " " : ""}${p.planner_name}` : "Your Wealth Manager";
   const intro = table([
     ["Client", esc(client)],
-    ["Prepared by", `${esc(planner)}${p?.fsp_name ? ", representative of " + esc(p.fsp_name) : ""}`],
-    ["Date", esc(date)],
+    ...(details?.contact ? [["Client contact", esc(details.contact)] as [string, string]] : []),
+    ["Adviser", esc(details?.adviser || planner)],
+    ...(p?.fsp_name ? [["Financial services provider", `${esc(p.fsp_name)}${p.fsb_licence ? " · FSP " + esc(p.fsb_licence) : ""}`] as [string, string]] : []),
+    ...(details ? [["Date of advice", esc(details.adviceDate)] as [string, string]] : []),
+    ["Date of record", esc(date)],
     ["Version", `v${esc(version)} · any change creates a new version that must be re-signed`],
   ]);
-  return wrap("Record of Advice", `Prepared for ${esc(client)} · ${esc(date)}`, `${intro}<!--roa-body-->${styled}<!--/roa-body-->
+  return wrap("Record of Advice", `Prepared for ${esc(client)} · ${esc(date)}`, `${details ? h2("A · Client and adviser") : ""}${intro}<!--roa-body-->${styled}<!--/roa-body-->
 <p style="margin:28px 0 0;font-size:11px;color:${MUTED}">This Record of Advice is issued in terms of the FAIS General Code of Conduct. Please read it carefully before accepting. Premiums and costs are as quoted by the product supplier and may change before issue.</p>`, p);
 }

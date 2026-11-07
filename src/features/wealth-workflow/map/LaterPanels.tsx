@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { DocCard, useWorkflowPractice } from "./OnboardingPanels";
 import { roaHtml } from "./onboardingTemplates";
 import { RoaNegotiation } from "./RoaNegotiation";
-import { usePresentRecommendation, useRecordDecision, useRecommendationHistory, useStartAnnualReview } from "../hooks";
+import { usePresentRecommendation, useRecommendationHistory, useStartAnnualReview } from "../hooks";
 
 type Viewer = "manager" | "client";
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" }) : "—");
@@ -198,17 +198,19 @@ export function LaterStepPanel({ label, viewer, workflowId, records, clientFirst
 }) {
   const { data: recs = [] } = useRecommendationHistory(workflowId);
   const present = usePresentRecommendation();
-  const decide = useRecordDecision();
+  const qc = useQueryClient();
+  const [signing, setSigning] = useState(false);
   const review = useStartAnnualReview();
   const current = recs.find((r) => r.status !== "superseded") ?? null;
   const comp = records?.compliance;
   const apps: any[] = records?.apps ?? [];
   const docKinds = new Set<string>((records?.docs ?? []).map((d: any) => d.document_kind));
 
-  const { data: practice } = useWorkflowPractice(workflowId);
+  const showRoa = label === "Present ROA and comparison" || label === "Sign ROA";
+  const { data: practice } = useWorkflowPractice(workflowId, showRoa);
   const { data: roaDoc } = useQuery({
     queryKey: ["roa-doc", current?.roa_document_id],
-    enabled: !!current?.roa_document_id,
+    enabled: showRoa && !!current?.roa_document_id,
     queryFn: async () => (await (supabase as any).from("documents").select("content, created_at").eq("id", current!.roa_document_id).maybeSingle()).data,
   });
   const clientName = clientFullName || clientFirst;
@@ -216,12 +218,32 @@ export function LaterStepPanel({ label, viewer, workflowId, records, clientFirst
     <DocCard workflowId={workflowId} viewer={viewer} clientName={clientName} signable={false}
       status={current.status === "accepted" ? `Accepted ${fmt(current.decided_at)} · filed in Documents` : `Version ${current.version} · filed in Documents`}
       doc={{ type: "roa", title: `Record of Advice v${current.version}`, blurb: current.summary ?? undefined,
-        html: roaHtml(roaDoc.content || "", clientName, new Date(roaDoc.created_at).toLocaleDateString("en-ZA", { day: "numeric", month: "long", year: "numeric" }), current.version, practice) }} />
+        html: roaDoc.content?.includes('id="holarc-document"') ? roaDoc.content : roaHtml(roaDoc.content || "", clientName, new Date(roaDoc.created_at).toLocaleDateString("en-ZA", { day: "numeric", month: "long", year: "numeric" }), current.version, practice) }} />
   ) : null;
 
   const run = async (p: Promise<unknown>, ok: string) => {
     try { await p; toast({ title: ok }); }
     catch (e: any) { toast({ title: "That didn't go through", description: e?.message ?? "Please try again.", variant: "destructive" }); }
+  };
+
+  const sign = async (name: string) => {
+    if (!current?.roa_document_id || !roaDoc?.content || signing) return;
+    setSigning(true);
+    try {
+      const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(roaDoc.content));
+      const hash = Array.from(new Uint8Array(bytes), byte => byte.toString(16).padStart(2, "0")).join("");
+      const { error } = await (supabase as any).rpc("wealth_sign_roa", {
+        _recommendation_id: current.id, _document_id: current.roa_document_id, _name: name, _content_hash: hash,
+      });
+      if (error) throw error;
+      await Promise.all(["wealth-recs", "wealth-map-records", "wealth-workflow", "wealth-doc-tray", "wealth-blockers", "client-wealth"]
+        .map(key => qc.invalidateQueries({ queryKey: [key] })));
+      toast({ title: "Signed Record of Advice filed in Documents" });
+    } catch (e: any) {
+      toast({ title: "Record of Advice not signed", description: e.message, variant: "destructive" });
+    } finally {
+      setSigning(false);
+    }
   };
 
   const RecCard = current ? (
@@ -244,7 +266,7 @@ export function LaterStepPanel({ label, viewer, workflowId, records, clientFirst
         <div className="space-y-3">
           {RecCard}
           {RoaCard}
-          {viewer === "manager" && current?.status === "draft" && (
+          {viewer === "manager" && current?.status === "draft" && current.roa_document_id && (
             <Button className="w-full rounded-full" disabled={present.isPending} onClick={() => run(present.mutateAsync(current.id), `Presented to ${clientFirst}`)}>
               {present.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Present to {clientFirst}
             </Button>
@@ -259,9 +281,8 @@ export function LaterStepPanel({ label, viewer, workflowId, records, clientFirst
           {current?.status === "accepted" ? (
             <p className="text-xs text-muted-foreground">Accepted {fmt(current.decided_at)}.</p>
           ) : current && (current.status === "presented" || current.status === "changes_requested" || current.status === "draft") ? (
-            <RoaNegotiation viewer={viewer} clientId={records?.clientId} workflowId={workflowId} recs={recs} current={current}
-              clientFirst={clientFirst} onAccept={() => run(decide.mutateAsync({ recommendationId: current.id, decision: "accepted" }), "Thank you. Your acceptance is recorded.")}
-              accepting={decide.isPending} />
+            <RoaNegotiation key={current.id} viewer={viewer} clientId={records?.clientId} workflowId={workflowId} recs={recs} current={current}
+              clientFirst={clientFirst} onSign={roaDoc?.content ? sign : undefined} signing={signing} />
           ) : (
             <p className="text-xs text-muted-foreground">
               {viewer === "manager" ? `Waiting for ${clientFirst} to review the advice.` : "You'll be able to respond once the advice is presented to you."}

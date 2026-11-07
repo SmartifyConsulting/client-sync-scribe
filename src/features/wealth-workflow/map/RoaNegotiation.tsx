@@ -3,6 +3,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Loader2, Repeat } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { MessageThread, sendMessage, useMessages } from "@/features/messenger/MessageThread";
 import type { WealthRecommendation } from "../types";
@@ -12,12 +14,14 @@ import type { WealthRecommendation } from "../types";
  * The client requests changes, the Wealth Manager counters, until the client agrees.
  * Agreement locks the current version (changes_requested) and the Wealth Manager redrafts a new version.
  */
-export function RoaNegotiation({ viewer, clientId, workflowId, recs, current, clientFirst, onAccept, accepting }: {
+export function RoaNegotiation({ viewer, clientId, workflowId, recs, current, clientFirst, onSign, signing }: {
   viewer: "manager" | "client"; clientId?: string; workflowId: string; recs: WealthRecommendation[];
-  current: WealthRecommendation; clientFirst: string; onAccept: () => void; accepting: boolean;
+  current: WealthRecommendation; clientFirst: string; onSign?: (name: string) => void; signing: boolean;
 }) {
   const qc = useQueryClient();
   const [busy, setBusy] = useState(false);
+  const [signature, setSignature] = useState("");
+  const [confirmed, setConfirmed] = useState(false);
   const { data: pt } = useQuery({
     queryKey: ["client-parties", clientId], enabled: !!clientId,
     queryFn: async () => (await (supabase as any).from("clients").select("user_id").eq("id", clientId).maybeSingle()).data,
@@ -60,7 +64,7 @@ export function RoaNegotiation({ viewer, clientId, workflowId, recs, current, cl
           const { id, created_at, updated_at, ...rest } = doc;
           const note = `<h2>Changes agreed with ${clientFirst}</h2><ul>${msgs.filter((m) => m.kind !== "accept").map((m) => `<li>${m.body.replace(/</g, "&lt;")}</li>`).join("")}</ul>`;
           const content = String(rest.content ?? "").replace("<!--/roa-body-->", `${note}<!--/roa-body-->`);
-          const ins = await (supabase as any).from("documents").insert({ ...rest, title: `Record of Advice v${nextVersion}`, content: content.includes(note) ? content : content + note }).select("id").single();
+          const ins = await (supabase as any).from("documents").insert({ ...rest, name: `Record of Advice v${nextVersion}`, content: content.includes(note) ? content : content + note }).select("id").single();
           if (ins.error) throw ins.error;
           roaId = ins.data.id;
         }
@@ -91,8 +95,18 @@ export function RoaNegotiation({ viewer, clientId, workflowId, recs, current, cl
       <MessageThread clientId={clientId} advisorUserId={advisorId} recommendationId={current.id} compact
         names={{ advisor: wmFirst, client: clientFirst }} hideComposer={agreed || current.status === "draft"} />
       {viewer === "client" && canAct && (
-        <div className="grid gap-2 sm:grid-cols-2">
-          <Button className="rounded-full" disabled={accepting || busy} onClick={onAccept}><Check className="mr-2 h-4 w-4" />I accept this advice</Button>
+        <div className="space-y-2">
+          {onSign && <div className="space-y-2 rounded-lg border border-border p-3 text-xs">
+            <label className="block font-medium">Full name for your signature
+              <Input className="mt-1" value={signature} maxLength={200} onChange={e => setSignature(e.target.value)} />
+            </label>
+            <label className="flex items-start gap-2"><Checkbox checked={confirmed} onCheckedChange={v => setConfirmed(v === true)} />
+              <span>I received and reviewed version {current.version} of this Record of Advice and accept its recommendation.</span>
+            </label>
+            <Button className="rounded-full" disabled={signing || busy || !confirmed || !signature.trim()} onClick={() => onSign(signature.trim())}>
+              {signing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}Sign Record of Advice
+            </Button>
+          </div>}
           <Button variant="outline" className="rounded-full" disabled={busy || !hasRequest} onClick={agree} title={hasRequest ? undefined : "Send your requested changes first"}>
             {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Repeat className="mr-2 h-4 w-4" />}Agree changes and redraft
           </Button>
