@@ -1,8 +1,9 @@
 # Roadmap — Step 5 Indigro copy
 ## Inline client authorisation — Nov 8
-- [ ] Replace the Documents detour with banking details, premium review and two explicit client consents.
-- [ ] Atomically seal/file both signed documents and refresh the workflow; prohibit Wealth Manager signing on behalf of the client.
-- [ ] Verify validation, client permissions and compact desktop/mobile display; real signing waits for the client.
+- [x] Replace the Documents detour with banking details, premium review and two explicit client consents; normal declarations no longer show as a red blocker.
+- [x] Deploy atomic sealed-document filing and workflow refresh, tied to accepted ROA and selected premiums; live broker signing rejected (403), service-only RPC grants verified, 11 isolated signing tests pass.
+- [x] Authenticated Georgia Demo manager step checked on desktop/mobile with no runtime errors or horizontal overflow; preview build OK.
+- [ ] Client form and successful signing/readback — requires the linked client's session and their own consent; no signatures or notifications created on their behalf. Isolated client-layout capture was unsuccessful.
 ## Record of Advice signing — Nov 7
 - [x] Applied the live notification/reminder client-lookup fix; both functions now use public.clients and retain existing security settings. Verified both live definitions and four existing document-signing checks; preview build OK.
 - [ ] Client signing and Step 6 readback — requires the client to retry signing; no signatures or client notifications created on their behalf during testing.
