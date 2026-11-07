@@ -68,6 +68,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FinancialInformation } from "./financial/FinancialInformation";
+import { MyBroker } from "./MyBroker";
 import { DocumentUploadList } from "./financial/DocumentUploadList";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -353,11 +354,11 @@ const formatSurgeryDate = (date: string, precision?: string) => {
 };
 
 const SECTION_TABS: Record<string, string[]> = {
-  profile: ["personal", "medical", "healthrecords", "history", "documents", "logs"],
+  profile: ["personal", "medical", "myBroker", "healthrecords", "history", "documents", "logs"],
   admin: ["calendar", "tasks"],
-  workspace: ["personal", "medical", "claims"],
+  workspace: ["personal", "medical", "myBroker", "claims"],
   personal: ["personal"],
-  financial: ["medical"],
+  financial: ["medical", "myBroker"],
 };
 
 export function ClientDetailsEditor({
@@ -1438,7 +1439,7 @@ export function ClientDetailsEditor({
   };
 
   // Parent tab groups for desktop/tablet
-  const PROFILE_TABS = ["personal", "medical", "overview"];
+  const PROFILE_TABS = ["personal", "medical", "myBroker", "overview"];
   const CARE_TABS = ["history"];
   const ADMIN_TABS = ["calendar", "tasks", "documents"];
 
@@ -1481,6 +1482,7 @@ export function ClientDetailsEditor({
               {t("patientProfile.toggleMedical")}
             </TabsTrigger>
           )}
+          {show("myBroker") && <TabsTrigger value="myBroker" className={triggerClass}>My Broker</TabsTrigger>}
           {show("healthrecords") && (
             <TabsTrigger value="healthrecords" className={triggerClass}>
               My Health Records
@@ -1540,6 +1542,7 @@ export function ClientDetailsEditor({
         >
           {t("patientProfile.toggleMedical")}
         </TabsTrigger>
+        {isSelfService && <TabsTrigger value="myBroker" className={triggerClass}>My Broker</TabsTrigger>}
         <TabsTrigger
           value="healthrecords"
           className="whitespace-nowrap text-white data-[state=active]:bg-background data-[state=active]:text-foreground text-xs px-3 py-1.5"
@@ -1747,6 +1750,7 @@ export function ClientDetailsEditor({
               <div><h2 className="text-lg font-semibold text-primary-dark">Financial Information</h2><p className="text-xs text-muted-foreground">The facts behind the Financial Needs Analysis.</p></div>
               <FinancialInformation clientId={client.id} />
             </TabsContent>
+            {isSelfService && <TabsContent value="myBroker" className="mt-4"><MyBroker key={client.id} clientId={client.id} /></TabsContent>}
 
             {/* === MY HEALTH RECORDS TAB === */}
             <TabsContent value="healthrecords" className="mt-4 space-y-3">
@@ -2347,6 +2351,7 @@ export function ClientDetailsEditor({
             <div><h2 className="text-lg font-semibold text-primary-dark">Financial Information</h2><p className="text-xs text-muted-foreground">The facts behind the Financial Needs Analysis.</p></div>
             <FinancialInformation clientId={client.id} />
           </TabsContent>
+          {isSelfService && <TabsContent value="myBroker" className="mt-4"><MyBroker key={client.id} clientId={client.id} /></TabsContent>}
 
           {/* === MY HEALTH RECORDS TAB (EDIT) === */}
           <TabsContent value="healthrecords" className="mt-4 space-y-3">
