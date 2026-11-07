@@ -20,6 +20,9 @@ import type { MapAvatars } from "./StepAvatar";
 import { CancelWorkflowButton, CancelledNotice } from "../workspace/CancelWorkflow";
 import { QuoteInsurerSelectionProvider, useSelectedQuoteInsurers } from "./QuoteInsurerSelection";
 
+/** Normal FICA collection tasks — shown as uploads in the step, never as red errors. */
+const FICA_TASKS = new Set(["Proof of residence", "Client ID document", "Client mandate (Form 1) not signed"]);
+
 interface Props {
   clientId: string;
   clientName?: string;
