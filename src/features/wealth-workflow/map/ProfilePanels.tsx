@@ -18,6 +18,7 @@ import { safeInvoke } from "@/services/edge/safeInvoke";
 import { FinancialInformation, SECTIONS, sectionProgress, GENERAL_NOTES_KEY, type SectionKey } from "@/features/clients/components/financial/FinancialInformation";
 import { useLiveSpeechTranscript } from "@/hooks/useLiveSpeechTranscript";
 import { detectMentionedTopics } from "@/lib/needsAnalysisTopics";
+import { NeedsQuestionFields } from "./NeedsQuestionFields";
 import { TranscriptButton } from "./DocumentTray";
 import { cn } from "@/lib/utils";
 
@@ -155,6 +156,7 @@ function NeedsAnalysisChecklist({ clientId, liveTranscript }: { clientId: string
           );
         })}
       </div>
+      <NeedsQuestionFields key={clientId} clientId={clientId} profile={profile} />
     </div>
   );
 }
@@ -278,11 +280,9 @@ export function CaptureFinancialsPanel({ clientId, sessions, financials, viewer,
         {financials?.extracted_at ? "Capture again" : "Capture financial information"}
       </Button>
       {financials?.extracted_at && (
-        <>
-          <p className="text-xs text-muted-foreground">Last captured {fmt(financials.extracted_at)}. Check and correct it before {clientFirst} verifies.</p>
-          {clientId && <FinancialInformation clientId={clientId} />}
-        </>
+        <p className="text-xs text-muted-foreground">Last captured {fmt(financials.extracted_at)}. Check and correct it before {clientFirst} verifies.</p>
       )}
+      {clientId && <FinancialInformation clientId={clientId} />}
     </div>
   );
 }
