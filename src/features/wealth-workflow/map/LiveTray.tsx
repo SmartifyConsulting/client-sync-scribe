@@ -25,9 +25,9 @@ interface Props {
 export const isMine = (owner: string, viewer: "manager" | "client") =>
   viewer === "client" ? owner === "client" : owner === "advisor" || owner === "wealth_manager";
 
-/** Tick colours match the legend badges: client green, Wealth Manager blue, System slate, insurer amber. */
+/** Tick colours match the legend badges. */
 export const ownerSolid = (owner: string) =>
-  owner === "advisor" || owner === "wealth_manager" ? "bg-blue-600" : owner === "client" ? "bg-emerald-600" : owner === "insurer" ? "bg-amber-600" : "bg-slate-600";
+  owner === "advisor" || owner === "wealth_manager" ? "bg-blue-600" : owner === "client" ? "bg-emerald-600" : owner === "insurer" ? "bg-amber-600" : owner === "system" ? "bg-[hsl(var(--owner-system-badge))]" : "bg-slate-600";
 
 function StepTick({ owner }: { owner: string }) {
   return (

@@ -9,7 +9,7 @@ export interface MapAvatars {
 export function StepAvatar({ owner, avatars, className }: { owner: string; avatars?: MapAvatars; className?: string }) {
   const key = owner === "wealth_manager" ? "advisor" : owner;
   const person = key === "client" ? avatars?.client : key === "advisor" ? avatars?.advisor : undefined;
-  const ring = key === "advisor" ? "ring-[hsl(var(--owner-advisor))]" : key === "client" ? "ring-[hsl(var(--owner-client))]" : "ring-muted-foreground";
+  const ring = key === "advisor" ? "ring-[hsl(var(--owner-advisor))]" : key === "client" ? "ring-[hsl(var(--owner-client))]" : key === "system" ? "ring-[hsl(var(--owner-system))]" : "ring-muted-foreground";
   const initials = (person?.name ?? (key === "insurer" ? "Insurer" : "System"))
     .split(" ").filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("");
   return (

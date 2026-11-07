@@ -8,7 +8,7 @@ import { useStartWorkflow } from "../hooks";
 import { OWNER_LABEL } from "./groups";
 import { useWorkflowMap, type GroupView } from "./useWorkflowMap";
 import { WorkflowCanvas } from "./WorkflowCanvas";
-import { LiveTray } from "./LiveTray";
+import { LiveTray, ownerSolid } from "./LiveTray";
 import { playChime } from "./chime";
 import { StageDetailSheet } from "./StageDetailSheet";
 import { WorkingWindow } from "./WorkingWindow";
@@ -155,7 +155,7 @@ function WorkflowMapContent({ clientId, clientName, onOpenDocuments, initialGrou
               <span className="mr-1 text-2xs uppercase tracking-[0.14em] text-muted-foreground">Legend</span>
               <SolidBadge className="bg-emerald-600">{clientFirst}</SolidBadge>
               <SolidBadge className="bg-blue-600">{avatars.advisor.name && avatars.advisor.name !== "Wealth Manager" ? avatars.advisor.name.split(" ")[0] : "Wealth Manager"}</SolidBadge>
-              <SolidBadge className="bg-slate-600">System</SolidBadge>
+              <SolidBadge className={ownerSolid("system")}>System</SolidBadge>
               {(shownGroup?.group.key === "quotes" || shownStep === "Quote 6 insurers, rank top 3"
                 ? quoteInsurers
                 : Array.from(new Set((m.records?.holdings ?? []).map((h: any) => h.provider as string)))).map((p) => <InsurerBadge key={p} provider={p} legend />)}
