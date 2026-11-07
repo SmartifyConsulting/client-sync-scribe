@@ -2,7 +2,7 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from "npm:zod@3";
 
-const Body = z.object({ patientId: z.string().uuid() });
+const Body = z.object({ patientId: z.string().uuid().optional(), clientId: z.string().uuid().optional() }).refine((b) => b.patientId || b.clientId);
 const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
     if (!auth) return json({ error: "Please sign in again." }, 401);
     const parsed = Body.safeParse(await req.json().catch(() => ({})));
     if (!parsed.success) return json({ error: "A valid client is required." }, 400);
-    const { patientId } = parsed.data;
+    const patientId = (parsed.data.clientId ?? parsed.data.patientId)!;
 
     const url = Deno.env.get("SUPABASE_URL")!;
     const userClient = createClient(url, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: auth } } });
