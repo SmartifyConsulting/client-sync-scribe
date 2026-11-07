@@ -147,10 +147,10 @@ export function WorkingWindow({ group: propGroup, stepLabel: propStepLabel, isLi
             t?.what && <p className="text-sm leading-relaxed text-muted-foreground">{wm(fillName(t.what, first))}</p>
           )}
 
-          {blockers.length > 0 && step.state === "next" && step.label !== "Upload FICA documents and confirm bank details" && (
+          {blockers.filter(b => !((step.label === "Upload FICA documents and confirm bank details") || (step.label === "Authorise debit order and sign life declaration" && b === "Required declarations not completed"))).length > 0 && step.state === "next" && (
             <div className="rounded-xl border border-destructive/40 bg-destructive/5 p-3 text-xs text-destructive">
               <p className="flex items-center gap-1.5 font-semibold"><Lock className="h-3.5 w-3.5" /> On hold because</p>
-              <ul className="mt-1 space-y-0.5">{blockers.map((b) => <li key={b}>{b}</li>)}</ul>
+              <ul className="mt-1 space-y-0.5">{blockers.filter(b => !(step.label === "Authorise debit order and sign life declaration" && b === "Required declarations not completed")).map((b) => <li key={b}>{b}</li>)}</ul>
             </div>
           )}
 

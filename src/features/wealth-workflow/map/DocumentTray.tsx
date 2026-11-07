@@ -29,7 +29,7 @@ export function useClientDocuments(clientId?: string) {
         // the authoritative signed copy is already listed from
         // wealth_signed_documents above — including both here doubled every
         // signed document in the tray.
-        db.from("documents").select("id,name,created_at").eq("patient_id", clientId).or("document_kind.is.null,document_kind.not.in.(loa_signed,disclosure_signed)").order("created_at", { ascending: false }).limit(50),
+        db.from("documents").select("id,name,created_at").eq("patient_id", clientId).or("document_kind.is.null,document_kind.not.in.(loa_signed,disclosure_signed,debit_order_signed,life_declaration_signed)").order("created_at", { ascending: false }).limit(50),
       ]);
       for (const result of [signed, sessions, files]) if (result.error) throw result.error;
       return [

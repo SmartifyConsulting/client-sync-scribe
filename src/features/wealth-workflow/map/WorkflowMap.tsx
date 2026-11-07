@@ -21,7 +21,7 @@ import { CancelWorkflowButton, CancelledNotice } from "../workspace/CancelWorkfl
 import { QuoteInsurerSelectionProvider, useSelectedQuoteInsurers } from "./QuoteInsurerSelection";
 
 /** Normal FICA collection tasks — shown as uploads in the step, never as red errors. */
-const FICA_TASKS = new Set(["Proof of residence", "Client ID document", "Client mandate (Form 1) not signed"]);
+const FICA_TASKS = new Set(["Proof of residence", "Client ID document", "Client mandate (Form 1) not signed", "Required declarations not completed"]);
 
 interface Props {
   clientId: string;
