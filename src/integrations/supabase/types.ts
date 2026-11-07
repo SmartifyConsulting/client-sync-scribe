@@ -4718,6 +4718,16 @@ export type Database = {
         Args: { _paused: boolean; _workflow_id: string }
         Returns: Json
       }
+      wealth_sign_authorisations: {
+        Args: {
+          _documents: Json
+          _quote_snapshot: Json
+          _recommendation_id: string
+          _signer_id: string
+          _workflow_id: string
+        }
+        Returns: Json
+      }
       wealth_sign_roa: {
         Args: {
           _content_hash: string
