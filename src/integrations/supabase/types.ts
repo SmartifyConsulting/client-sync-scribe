@@ -3050,6 +3050,35 @@ export type Database = {
           },
         ]
       }
+      wealth_needs_answers: {
+        Row: {
+          answer: string | null
+          client_id: string
+          question: string
+          status: string
+        }
+        Insert: {
+          answer?: string | null
+          client_id: string
+          question: string
+          status: string
+        }
+        Update: {
+          answer?: string | null
+          client_id?: string
+          question?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wealth_needs_answers_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wealth_portfolio_holdings: {
         Row: {
           asset_value: number | null
@@ -4594,6 +4623,15 @@ export type Database = {
         Returns: undefined
       }
       wealth_derive_stage: { Args: { _workflow_id: string }; Returns: Json }
+      wealth_file_roa: {
+        Args: {
+          _content: string
+          _summary: string
+          _version: number
+          _workflow_id: string
+        }
+        Returns: string
+      }
       wealth_financials_verify: {
         Args: { _patient_id: string }
         Returns: boolean
@@ -4639,6 +4677,15 @@ export type Database = {
       wealth_set_workflow_paused: {
         Args: { _paused: boolean; _workflow_id: string }
         Returns: Json
+      }
+      wealth_sign_roa: {
+        Args: {
+          _content_hash: string
+          _document_id: string
+          _name: string
+          _recommendation_id: string
+        }
+        Returns: string
       }
       wealth_start_annual_review: {
         Args: {
