@@ -67,6 +67,7 @@ import {
 } from "./sectionStyles";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DashboardPanels } from "@/pages/MyPersonalDashboard";
 import { FinancialInformation } from "./financial/FinancialInformation";
 import { MyBroker } from "./MyBroker";
 import { DocumentUploadList } from "./financial/DocumentUploadList";
@@ -1749,6 +1750,7 @@ export function ClientDetailsEditor({
             <TabsContent value="medical" className="mt-4 space-y-3">
               <div><h2 className="text-lg font-semibold text-primary-dark">Financial Information</h2><p className="text-xs text-muted-foreground">The facts behind the Financial Needs Analysis.</p></div>
               <FinancialInformation clientId={client.id} />
+              {isSelfService && <div className="pt-2"><DashboardPanels /></div>}
             </TabsContent>
             {isSelfService && <TabsContent value="myBroker" className="mt-4"><MyBroker key={client.id} clientId={client.id} /></TabsContent>}
 
@@ -2350,6 +2352,7 @@ export function ClientDetailsEditor({
           <TabsContent value="medical" className="mt-4 space-y-3">
             <div><h2 className="text-lg font-semibold text-primary-dark">Financial Information</h2><p className="text-xs text-muted-foreground">The facts behind the Financial Needs Analysis.</p></div>
             <FinancialInformation clientId={client.id} />
+            {isSelfService && <div className="pt-2"><DashboardPanels /></div>}
           </TabsContent>
           {isSelfService && <TabsContent value="myBroker" className="mt-4"><MyBroker key={client.id} clientId={client.id} /></TabsContent>}
 

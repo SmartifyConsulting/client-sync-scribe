@@ -7,7 +7,7 @@ import { ClientDetailsEditor } from "@/components/clients/ClientDetailsEditor";
 import { Client } from "@/hooks/useClients";
 import { useToast } from "@/hooks/use-toast";
 import { EmergencyContact } from "@/features/clients/components/EmergencyContactsSection";
-import { DashboardGreeting, DashboardPanels } from "@/pages/MyPersonalDashboard";
+import { DashboardGreeting } from "@/pages/MyPersonalDashboard";
 
 
 
@@ -232,11 +232,6 @@ export default function MyDetails({ embedded = false }: { embedded?: boolean } =
             onEmergencyContactsChange={setEmergencyContacts}
             section={section}
           />
-          {!embedded && section === "profile" && (
-            <div className="pt-2">
-              <DashboardPanels />
-            </div>
-          )}
         </>
       ) : (
         <div className="p-6 text-center text-muted-foreground border border-dashed border-border rounded-lg">
