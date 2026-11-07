@@ -59,8 +59,9 @@
     --insurer-badge: 35 85% 38%;
     --insurer-foreground: 0 0% 100%;
     --owner-insurer-bg: 40 90% 92%;
-    --owner-system-badge: 174 86% 23%;
-    --owner-system: var(--owner-system-badge);
+    --owner-system-badge: 174 57% 79%;
+    --owner-system-ink: 174 86% 16%;
+    --owner-system: 174 86% 23%;
     --owner-system-bg: 174 55% 92%;
     --primary-foreground: 0 0% 100%;
     --primary-glow: 30 61% 56%;

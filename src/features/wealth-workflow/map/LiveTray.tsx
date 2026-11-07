@@ -27,12 +27,13 @@ export const isMine = (owner: string, viewer: "manager" | "client") =>
 
 /** Tick colours match the legend badges. */
 export const ownerSolid = (owner: string) =>
-  owner === "advisor" || owner === "wealth_manager" ? "bg-blue-600" : owner === "client" ? "bg-emerald-600" : owner === "insurer" ? "bg-amber-600" : owner === "system" ? "bg-[hsl(var(--owner-system-badge))]" : "bg-slate-600";
+  owner === "system" ? "bg-[hsl(var(--owner-system-badge))] text-[hsl(var(--owner-system-ink))]" :
+  cn("text-white", owner === "advisor" || owner === "wealth_manager" ? "bg-blue-600" : owner === "client" ? "bg-emerald-600" : owner === "insurer" ? "bg-amber-600" : "bg-slate-600");
 
 function StepTick({ owner }: { owner: string }) {
   return (
     <span className={cn("flex h-[18px] w-[18px] flex-none items-center justify-center rounded-full", ownerSolid(owner))}>
-      <Check className="h-3.5 w-3.5 text-white" strokeWidth={5} />
+      <Check className="h-3.5 w-3.5" strokeWidth={5} />
     </span>
   );
 }
@@ -113,13 +114,13 @@ export function LiveTray({ groups, viewer, clientFirst, managerName, avatars, wo
               {doneSteps.map((s) => <DoneStep key={s.label} groupKey={g.group.key} label={s.label} owner={s.owner} history={history} />)}
               {cur && (
                 <li className={cn(
-                  "flex items-center gap-2 rounded-full px-3 py-1.5 text-xs text-white",
+                  "flex items-center gap-2 rounded-full px-3 py-1.5 text-xs",
                   ownerSolid(cur.owner),
                   mine && "animate-throb",
                 )}>
                   <StepAvatar owner={cur.owner} avatars={avatars} className="-ml-1.5 ring-white" />
                   <span className="font-medium">{cur.label}</span>
-                  {!mine && <Hourglass className="ml-auto h-3.5 w-3.5 flex-none animate-pulse-soft text-white" aria-label="In progress" />}
+                  {!mine && <Hourglass className="ml-auto h-3.5 w-3.5 flex-none animate-pulse-soft" aria-label="In progress" />}
                 </li>
               )}
             </ul>

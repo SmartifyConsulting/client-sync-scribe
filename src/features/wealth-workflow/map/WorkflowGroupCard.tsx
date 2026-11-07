@@ -80,7 +80,7 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
                   onSelectStep && reachable && "cursor-pointer hover:bg-muted/40",
                   !reachable && "opacity-50",
                   s.state === "next" && "mx-1 my-0.5 rounded-full",
-                  s.state === "next" && cn(ownerSolid(s.owner), "text-white"),
+                  s.state === "next" && ownerSolid(s.owner),
                   s.state === "next" && (viewer === "client" ? s.owner === "client" : s.owner === "advisor") && "animate-throb",
                   selectedStep === s.label && s.state !== "next" && "bg-muted/60",
                 )}
@@ -88,13 +88,13 @@ export function WorkflowGroupCard({ view, blockers, onOpen, selectedStep, onSele
                 <span className="flex w-5 flex-none items-center justify-center">
                   {s.state === "done" ? (
                     <span className={cn("flex h-[18px] w-[18px] items-center justify-center rounded-full", ownerSolid(s.owner))}>
-                      <Check className="h-3.5 w-3.5 text-white" strokeWidth={5} />
+                      <Check className="h-3.5 w-3.5" strokeWidth={5} />
                     </span>
                   ) : s.state === "next" ? (
                     <StepAvatar owner={s.owner} avatars={avatars} className="-ml-1 ring-white" />
                   ) : null}
                 </span>
-                <span className={cn("flex-1", s.state === "done" ? "text-muted-foreground" : s.state === "next" ? "font-medium text-white" : "text-foreground")}>{s.label}</span>
+                <span className={cn("flex-1", s.state === "done" ? "text-muted-foreground" : s.state === "next" ? "font-medium" : "text-foreground")}>{s.label}</span>
               </li>
               {inline && <li className="animate-fade-in px-2.5 pb-2 pt-1">{inline}</li>}
               </Fragment>

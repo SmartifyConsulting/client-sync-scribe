@@ -153,8 +153,8 @@ function WorkflowMapContent({ clientId, clientName, onOpenDocuments, initialGrou
               documents={(m.records?.docs ?? []) as any[]} onBackToCurrent={() => {}} onOpenDocuments={onOpenDocuments} />}
             legend={<>
               <span className="mr-1 text-2xs uppercase tracking-[0.14em] text-muted-foreground">Legend</span>
-              <SolidBadge className="bg-emerald-600">{clientFirst}</SolidBadge>
-              <SolidBadge className="bg-blue-600">{avatars.advisor.name && avatars.advisor.name !== "Wealth Manager" ? avatars.advisor.name.split(" ")[0] : "Wealth Manager"}</SolidBadge>
+              <SolidBadge className={ownerSolid("client")}>{clientFirst}</SolidBadge>
+              <SolidBadge className={ownerSolid("advisor")}>{avatars.advisor.name && avatars.advisor.name !== "Wealth Manager" ? avatars.advisor.name.split(" ")[0] : "Wealth Manager"}</SolidBadge>
               <SolidBadge className={ownerSolid("system")}>System</SolidBadge>
               {(shownGroup?.group.key === "quotes" || shownStep === "Quote 6 insurers, rank top 3"
                 ? quoteInsurers
@@ -182,7 +182,7 @@ function WorkflowMapContent({ clientId, clientName, onOpenDocuments, initialGrou
 }
 
 function SolidBadge({ className, children }: { className: string; children: ReactNode }) {
-  return <span className={`rounded-full px-2 py-0.5 text-2xs font-semibold text-white ${className}`}>{children}</span>;
+  return <span className={`rounded-full px-2 py-0.5 text-2xs font-semibold ${className}`}>{children}</span>;
 }
 
 function Field({ label, value, danger }: { label: string; value: string; danger?: boolean }) {
