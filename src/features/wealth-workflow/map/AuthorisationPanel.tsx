@@ -9,7 +9,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { renderSignaturePngBase64 } from "@/lib/signatureImage";
-import { DocCard } from "./OnboardingPanels";
+import { DocCard, useWorkflowPractice } from "./OnboardingPanels";
+import { authorisationHtml } from "./onboardingTemplates";
 
 const money = (n: number) => `R ${n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, " ")}`;
 
@@ -25,6 +26,7 @@ export function AuthorisationPanel({ viewer, workflowId, records, recommendation
   const [debitConsent, setDebitConsent] = useState(false);
   const [declarationConsent, setDeclarationConsent] = useState(false);
   const [busy, setBusy] = useState(false);
+  const { data: practice } = useWorkflowPractice(workflowId, true);
   const signed = (records?.signed ?? []).filter((d: any) => ["debit_order", "life_declaration"].includes(d.doc_type) && d.version === recommendation?.version);
   const quotes = (records?.quotes ?? []).filter((q: any) => q.selected);
   const premiumReady = quotes.length > 0 && quotes.every((q: any) => Number(q.monthly_premium) > 0);
@@ -49,7 +51,7 @@ export function AuthorisationPanel({ viewer, workflowId, records, recommendation
     finally { setBusy(false); }
   };
 
-  if (signed.length === 2) return <div className="space-y-2"><p className="flex items-center gap-2 text-xs text-primary"><CheckCircle2 className="h-4 w-4" />Both authorisations signed</p>{signed.map((d: any) => <DocCard key={d.id} workflowId={workflowId} viewer={viewer} clientName={clientName} signed={d} signable={false} doc={{ type: d.doc_type, title: d.title, html: d.content_html }} />)}</div>;
+  if (signed.length === 2) return <div className="space-y-2"><p className="flex items-center gap-2 text-xs text-primary"><CheckCircle2 className="h-4 w-4" />Both authorisations signed</p>{signed.map((d: any) => <DocCard key={d.id} workflowId={workflowId} viewer={viewer} clientName={clientName} signed={{ ...d, content_html: authorisationHtml(d.content_html, d.title, d.signer_name ?? clientName, practice) }} signable={false} doc={{ type: d.doc_type, title: d.title, html: authorisationHtml(d.content_html, d.title, d.signer_name ?? clientName, practice) }} />)}</div>;
 
   return <div className="space-y-4 text-xs">
     <div className="border-b border-border pb-3">

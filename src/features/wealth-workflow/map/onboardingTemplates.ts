@@ -73,6 +73,16 @@ ${h2("Client Declaration")}
 <p style="font-family:inherit;font-size:12.5px;line-height:1.7">I, <b>${client}</b>, hereby confirm that I have read and understood the contents of this document. I further confirm that all sections have been completed by me and reflect my intention.</p>`, p);
 }
 
+/** Adds the firm header, footer and page margins to debit order / life declaration
+ *  copies stored without them. Display-only: the sealed stored text is untouched. */
+export function authorisationHtml(contentHtml: string, title: string, client: string, p: any = null) {
+  if (contentHtml.includes("data-document-footer")) return contentHtml;
+  const inner = (contentHtml.match(/<div id="holarc-document"[^>]*>([\s\S]*)<\/div>\s*$/)?.[1] ?? contentHtml)
+    .replace(/<h2>[\s\S]*?<\/h2>/i, "").replace(/^\s*<p>[^<]*<\/p>/, "")
+    .replace(/<ul>/gi, `<ul style="margin:8px 0;padding-left:18px">`).replace(/<p>/gi, `<p style="margin:0 0 12px">`);
+  return wrap(esc(title), `Prepared for ${esc(client)}`, inner, p).replace("padding:11px 28px 26px", "padding:48px 56px 40px");
+}
+
 export function sealedHtml(doc: { content_html: string; signature_image: string; signer_name: string; signed_at: string; signer_ip: string | null; seal_hash: string; title: string }) {
   const at = new Date(doc.signed_at).toLocaleString("en-ZA");
   const sealBlock = `<div style="font-family:Arial,sans-serif;padding:0 28px 16px;color:#1f2937">
