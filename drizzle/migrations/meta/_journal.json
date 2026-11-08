@@ -120,6 +120,13 @@
       "when": 1794095585343,
       "tag": "0016_client_authorisation_signing",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1794096389801,
+      "tag": "0017_allow_client_authorisation_document_types",
+      "breakpoints": true
     }
   ]
 }

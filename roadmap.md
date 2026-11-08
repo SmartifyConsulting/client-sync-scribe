@@ -1,5 +1,6 @@
 # Roadmap — Step 5 Indigro copy
 ## Inline client authorisation — Nov 8
+- [x] Fix the live signed-document type constraint to accept debit_order and life_declaration alongside Disclosure/LOA; verify all four types and retain rejection of unsupported kinds.
 - [x] Replace the Documents detour with banking details, premium review and two explicit client consents; normal declarations no longer show as a red blocker.
 - [x] Deploy atomic sealed-document filing and workflow refresh, tied to accepted ROA and selected premiums; live broker signing rejected (403), service-only RPC grants verified, 11 isolated signing tests pass.
 - [x] Authenticated Georgia Demo manager step checked on desktop/mobile with no runtime errors or horizontal overflow; preview build OK.
