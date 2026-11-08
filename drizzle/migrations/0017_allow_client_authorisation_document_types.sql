@@ -1,0 +1,3 @@
+ALTER TABLE public.wealth_signed_documents DROP CONSTRAINT wealth_signed_documents_doc_type_check;
+ALTER TABLE public.wealth_signed_documents ADD CONSTRAINT wealth_signed_documents_doc_type_check CHECK (doc_type IN ('disclosure', 'loa', 'debit_order', 'life_declaration'));
+COMMENT ON CONSTRAINT wealth_signed_documents_doc_type_check ON public.wealth_signed_documents IS 'Allows onboarding signatures and client debit-order/life declarations; other document types remain rejected.';
