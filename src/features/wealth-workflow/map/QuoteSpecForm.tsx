@@ -6,7 +6,7 @@ import { useCompanionInstalled, useCompanionVersion } from "./companionDetection
 import { useCompanionRelease, companionVersionCurrent } from "./companionRelease";
 import { useEffect, useState, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Plus, X, Pencil, Check } from "lucide-react";
+import { Loader2, Plus, X, Pencil, Check, ChevronDown } from "lucide-react";
 import { QuoteOptionReference } from "./QuoteOptionReference";
 import { quoteReference, quoteResult, quoteSettingsKey, withQuoteReference } from "./quoteReferences";
 import { usePublishQuoteInsurers } from "./QuoteInsurerSelection";
@@ -224,6 +224,12 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const [setupOpen, setSetupOpen] = useState(false);
   const [portalEdit, setPortalEdit] = useState<string | null>(null);
   const [portalUrl, setPortalUrl] = useState("");
+  /** Manual expand/collapse overrides, keyed by a section id (e.g. "connect:Momentum" or
+   *  "product:Momentum:Life cover"). Absent = auto: collapsed once that step/product is
+   *  done, expanded otherwise — saves space without hiding anything still in progress. */
+  const [expandOverride, setExpandOverride] = useState<Record<string, boolean>>({});
+  const isExpanded = (key: string, autoDone: boolean) => expandOverride[key] ?? !autoDone;
+  const toggleExpand = (key: string, autoDone: boolean) => setExpandOverride(s => ({ ...s, [key]: !isExpanded(key, autoDone) }));
   const getToken = () => {
     try { const t = JSON.parse(sessionStorage.getItem(TOKEN_KEY) || "null"); return t && t.uid === user?.id && t.exp > Date.now() ? t.token as string : null; } catch { return null; }
   };
@@ -427,12 +433,13 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   visibleInsurer.current = activeTab;
   const connected = login[activeTab] === "connected";
 
-  /** Saved quote completion for one insurer across every product/option/pattern that
-   *  applies to it — derived from the persisted quote plan, so it survives navigating
-   *  away and back (unlike the ephemeral in-flight variantProgress tracker above). */
-  const insurerProgress = (ins: string) => {
+  /** Saved quote completion for one insurer, across every product/option/pattern that
+   *  applies to it (or just `onlyProduct` when given) — derived from the persisted quote
+   *  plan, so it survives navigating away and back (unlike the ephemeral in-flight
+   *  variantProgress tracker above). Also used to auto-collapse a finished product/step. */
+  const insurerProgress = (ins: string, onlyProduct?: string) => {
     let done = 0, total = 0;
-    for (const p of products) {
+    for (const p of onlyProduct ? [onlyProduct] : products) {
       const patterns = premiumPatternOptions(ins, p);
       if (!patterns) continue;
       for (const [i, option] of plan[p].entries()) {
@@ -612,10 +619,18 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
               );
             })}
           </div>
-          {source === "companion" && <section className={cn("frame p-3", connected && "quote-step-done")} aria-label="Connect insurer">
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] items-start gap-4">
+          {source === "companion" && (() => {
+            const connectKey = `connect:${activeTab}`;
+            const connectOpen = isExpanded(connectKey, connected);
+            return <section className={cn("frame p-3", connected && "quote-step-done")} aria-label="Connect insurer">
+          <button type="button" className="flex w-full items-center gap-2 text-left" onClick={() => toggleExpand(connectKey, connected)}>
+            <span className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-full font-semibold", connected ? "bg-success text-success-foreground" : "bg-primary/10 text-primary")}>{connected ? <Check className="h-3.5 w-3.5" aria-hidden="true" /> : "1"}</span>
+            <h4 className="font-semibold">Connect to {activeTab}</h4>
+            {connected && <span className="rounded-full bg-success px-2 py-0.5 text-[10px] font-semibold text-success-foreground">Done</span>}
+            <ChevronDown className={cn("ml-auto h-4 w-4 shrink-0 text-muted-foreground transition-transform", !connectOpen && "-rotate-90")} aria-hidden="true" />
+          </button>
+          {connectOpen && <div className="mt-3 grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] items-start gap-4">
           <div className="min-w-0 space-y-3">
-          <div className="flex items-center gap-2"><span className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-full font-semibold", connected ? "bg-success text-success-foreground" : "bg-primary/10 text-primary")}>{connected ? <Check className="h-3.5 w-3.5" aria-hidden="true" /> : "1"}</span><h4 className="font-semibold">Connect to {activeTab}</h4>{connected && <span className="rounded-full bg-success px-2 py-0.5 text-[10px] font-semibold text-success-foreground">Done</span>}</div>
           <InsurerActivity insurer={activeTab} activity={activity[activeTab]}
             onStop={()=>stopConnection(activeTab)} canStop={["connecting","challenge","connected"].includes(login[activeTab])||(jobs[activeTab]||[]).some(j=>["queued","submitting","generating"].includes(j.status))}
             idleText={!(companionInstalled || addonInstalled()) ? `Update to the latest Companion v${companionRelease.version}` : "Saved quote progress is available. Connect when you are ready to request more quotes."}
@@ -626,9 +641,6 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
               {login[activeTab] === "no-addon" && <Button variant="link" size="sm" className="h-auto px-1 text-xs" onClick={() => setSetupOpen(true)}>Update to Companion v{companionRelease.version}</Button>}
             </p>
           )}
-          <OtpDialog challenge={challenge} onClose={() => setChallenge(null)} onStop={()=>{if(challenge)stopConnection(challenge.insurer);}} onSubmit={submitChallenge} />
-          <ProtectorDialog open={!!askFor} busy={unlocking} onClose={() => setAskFor(null)} onSubmit={unlock} />
-          <CompanionSetup open={setupOpen} onClose={() => setSetupOpen(false)} onReady={() => openTab(activeTab)} />
           </div>
           <div className="min-w-0 space-y-2">
             <div className="flex items-center justify-end gap-2">
@@ -650,8 +662,12 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
               </div>
             </div>}
           </div>
-          </div>
-          </section>}
+          </div>}
+          <OtpDialog challenge={challenge} onClose={() => setChallenge(null)} onStop={()=>{if(challenge)stopConnection(challenge.insurer);}} onSubmit={submitChallenge} />
+          <ProtectorDialog open={!!askFor} busy={unlocking} onClose={() => setAskFor(null)} onSubmit={unlock} />
+          <CompanionSetup open={setupOpen} onClose={() => setSetupOpen(false)} onReady={() => openTab(activeTab)} />
+          </section>;
+          })()}
           <section ref={reviewSection} tabIndex={-1} className={cn("frame scroll-mt-6 p-3 space-y-3", connected && "quote-step-active")} aria-label="Review quote options" aria-current={connected ? "step" : undefined}>
             <div className="flex flex-wrap items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">2</span><h4 className="font-semibold">Review quote options</h4>{source === "companion" && connected && <span role="status" className="quote-progress-badge">In Progress</span>}{source === "companion" && connected && <Button className="ml-auto font-semibold" disabled={!allComplete || quotesRunning} title={!allComplete ? "Complete the option values first" : quotesRunning ? "Quote requests are already in progress" : undefined} onClick={() => submitScenarios(activeTab)}>Get quotes</Button>}</div>
             <p className="font-medium text-foreground">Review your options, then request quotes.</p>
@@ -677,13 +693,24 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
           {products.map((p) => {
             const fields = providerQuoteFields(activeTab, p);
             const hasPortalChoices = hasVerifiedProviderFields(activeTab, p);
+            const productProgress = insurerProgress(activeTab, p);
+            const productDone = productProgress.total > 0 && productProgress.done === productProgress.total;
+            const productKey = `product:${activeTab}:${p}`;
+            const productOpen = isExpanded(productKey, productDone);
             return (
               <section key={p} className="rounded-lg border border-border">
-                <div className="flex items-center justify-between gap-3 rounded-lg bg-muted/40 px-3 py-2">
-                  <span className="text-xs font-semibold">{p} <span className="font-normal text-muted-foreground">· {plan[p].filter((option, i) => !hasNoCurrentCover(p, option, i)).length * QUOTES_PER_COVER} quotes per insurer</span></span>
-                  <button aria-label={`Remove ${p}`} className="text-background/70 hover:text-background"
+                <div role="button" tabIndex={0} aria-expanded={productOpen} className="flex w-full items-center justify-between gap-3 rounded-lg bg-muted/40 px-3 py-2 text-left cursor-pointer"
+                  onClick={() => toggleExpand(productKey, productDone)}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleExpand(productKey, productDone); } }}>
+                  <span className="flex min-w-0 items-center gap-1.5 text-xs font-semibold">
+                    <ChevronDown className={cn("h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform", !productOpen && "-rotate-90")} aria-hidden="true" />
+                    {p} <span className="font-normal text-muted-foreground">· {plan[p].filter((option, i) => !hasNoCurrentCover(p, option, i)).length * QUOTES_PER_COVER} quotes per insurer</span>
+                    {productDone && <span className="rounded-full bg-success px-2 py-0.5 text-[10px] font-semibold text-success-foreground">Done</span>}
+                  </span>
+                  <button type="button" aria-label={`Remove ${p}`} className="shrink-0 text-background/70 hover:text-background"
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPlan((pl) => { const { [p]: _, ...rest } = pl; return rest; }); }}><X className="h-3 w-3" /></button>
                 </div>
+                {productOpen && <>
                 <div className="grid gap-2 p-3 sm:grid-cols-3">
                   {plan[p].map((option, i) => {
                     const settings = quoteSettingsKey(p, option, activeTab);
@@ -813,6 +840,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                 </table>
                 </div>
                 </details>
+                </>}
               </section>
             );
           })}
