@@ -1624,7 +1624,7 @@ export function ClientDetailsEditor({
             {renderTabsList()}
 
             {/* === PERSONAL / MEDICAL (top-level tabs) === */}
-<TabsContent value="personal" className="space-y-4 mt-4">
+<TabsContent value="personal" className="personal-gold space-y-4 mt-4">
               <div className="mb-1 flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-semibold text-primary-dark">{t("patientProfile.personalHeading")}</h2>
@@ -1855,7 +1855,7 @@ export function ClientDetailsEditor({
           )}
 
             {/* === PERSONAL / MEDICAL (top-level tabs) === */}
-<TabsContent value="personal" className="space-y-4 mt-4">
+<TabsContent value="personal" className="personal-gold space-y-4 mt-4">
             <div className="mb-1 flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-primary-dark">{t("patientProfile.personalHeading")}</h2>

@@ -671,3 +671,10 @@ textarea::placeholder {
 @media (prefers-reduced-motion: reduce) {
   .quote-segment-working { animation: none; }
 }
+
+/* Personal Information screen only: gold #DFB238 accent */
+.personal-gold {
+  --primary: 44 72% 55%;
+  --primary-glow: 44 72% 65%;
+  --ring: 44 72% 55%;
+}
