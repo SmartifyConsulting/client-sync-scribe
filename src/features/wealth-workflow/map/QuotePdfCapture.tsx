@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { DocPreviewDialog } from "./DocumentTray";
 
-export function QuotePdfCapture({ workflowId, clientId, insurer, onActivity, onScenarioSaved, premiumVariantFor }: { workflowId: string; clientId: string; insurer: string; onActivity?: (insurer: string, phase: "saving" | "saved" | "pdf-error", detail?: string) => void; onScenarioSaved?: (insurer: string, n: number) => void; premiumVariantFor?: (insurer: string, n: number) => string | undefined }) {
+export function QuotePdfCapture({ workflowId, clientId, insurer, onActivity, onScenarioSaved, premiumVariantFor, manualOnly = false }: { workflowId: string; clientId: string; insurer: string; onActivity?: (insurer: string, phase: "saving" | "saved" | "pdf-error", detail?: string) => void; onScenarioSaved?: (insurer: string, n: number) => void; premiumVariantFor?: (insurer: string, n: number) => string | undefined; manualOnly?: boolean }) {
   const qc = useQueryClient();
   const input = useRef<HTMLInputElement>(null);
   const processing = useRef(new Set<string>());
@@ -46,6 +46,7 @@ export function QuotePdfCapture({ workflowId, clientId, insurer, onActivity, onS
       } finally { setBusy(false); }
     };
   useEffect(() => {
+    if (manualOnly) return;
     const onMessage = (e: MessageEvent) => {
       const d = e.data;
       if (e.source !== window || e.origin !== location.origin || d?.source !== "holarc-extension" || d.workflowId !== workflowId) return;
@@ -54,7 +55,7 @@ export function QuotePdfCapture({ workflowId, clientId, insurer, onActivity, onS
     };
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, [workflowId, qc]);
+  }, [workflowId, qc, manualOnly]);
   const upload = async (file: File) => {
     if (!insurer) return toast.error("Choose an insurer first.");
     if (file.size > 5 * 1024 * 1024) return toast.error("Choose a PDF up to 5MB.");

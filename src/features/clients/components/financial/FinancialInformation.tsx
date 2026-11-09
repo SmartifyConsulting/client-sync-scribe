@@ -259,6 +259,7 @@ export function FinancialInformation({ clientId, showAgreedCover = false }: { cl
                   <legend className="mb-2 text-xs font-semibold">Quote assumptions and payment terms</legend>
                   {([
                     { key: "advice_scope", label: "Scope agreed before the fact-find", placeholder: "e.g. Full needs analysis or life cover only" },
+                    { key: "portable_items_quote", label: "Portable items to insure", placeholder: "e.g. Laptop or camera" },
                     { key: "quote_cpi", label: "Annual CPI assumption (%)", type: "number" },
                     { key: "retirement_payment_term", label: "Retirement income payment term", placeholder: "e.g. For life or 20 years" },
                     { key: "income_protection_term", label: "Income protection benefit payment term", options: ["3 months", "6 months", "12 months", "24 months", "5 years", "To retirement age", "For life", "Not applicable"] },

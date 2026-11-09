@@ -1,3 +1,4 @@
+import { directQuoteCategory } from "./directQuoteProviders";
 import { providerQuoteFields, hasVerifiedProviderFields, isOmpProduct, providerFieldApplies, ompSettingsComplete, withQuoteDefaults, premiumPatternField, premiumPatternOptions, premiumPatternElysianLabel, supportsPremiumVariants } from "./providerQuoteFields";
 import { OMP_RATING_OPTIONS, ompRatingIssues } from "./providerRatingFields";
 import { BidvestClientFields, bidvestIssues } from './BidvestClientFields';
@@ -55,7 +56,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   });
   const { data: fin, isFetched: finReady } = useQuery({
     queryKey: ["fin-needs", clientId], enabled: !!clientId,
-    queryFn: async () => (await db.from("client_financial_profiles").select("cash_flow,assets_liabilities,risk_portfolio,goals_risk").eq("patient_id", clientId).maybeSingle()).data,
+    queryFn: async () => (await db.from("client_financial_profiles").select("cash_flow,assets_liabilities,risk_portfolio,goals_risk,car_insurance").eq("patient_id", clientId).maybeSingle()).data,
   });
   const { data: quoteClient } = useQuery({
     queryKey: ["quote-client-inputs", clientId], enabled: !!clientId && isWM,
@@ -71,18 +72,21 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     queryFn: async () => {
       if (!user) return [];
       const [cat, creds] = await Promise.all([
-        db.from("app_integrations_catalog").select("id,name,portal_url").eq("category", "insurance").eq("is_active", true).order("display_order"),
+        db.from("app_integrations_catalog").select("id,name,portal_url,category").in("category", ["insurance", "financial_service_provider"]).eq("is_active", true).order("display_order"),
         supabase.functions.invoke("manage-broker-credentials", { body: { action: "list" } }),
       ]);
       const statuses = creds.data?.credentials ?? [];
       const ready = new Set(statuses.filter((c: any) => c.status === "configured" && c.is_enabled).map((c: any) => c.integration_id));
-      return (cat.data ?? []).filter((c: any) => ready.has(c.id)).map((c: any) => ({ ...c, portal_url: statuses.find((s: any) => s.integration_id === c.id)?.portal_url || c.portal_url })) as { id: string; name: string; portal_url: string | null }[];
+      return (cat.data ?? []).filter((c: any) => (directQuoteCategory(c.id) || ready.has(c.id))).map((c: any) => ({ ...c, portal_url: statuses.find((s: any) => s.integration_id === c.id)?.portal_url || c.portal_url })) as { id: string; name: string; portal_url: string | null; category: string }[];
     },
   });
 
   // Older cached entries were {name, ready}; always render plain names.
-  const insurers: string[] = (insurerRows as any[]).map((r) => (typeof r === "string" ? r : r?.name)).filter(Boolean);
+  const insurers: string[] = (insurerRows as any[]).filter(r => !directQuoteCategory(r.id) && (!r.category || r.category === "insurance")).map((r) => (typeof r === "string" ? r : r?.name)).filter(Boolean);
 
+  const [directProviderId, setDirectProviderId] = useState("");
+  const directProviders = insurerRows.filter(row => directQuoteCategory(row.id));
+  const directProvider = directProviders.find(row => row.id === directProviderId);
   const [draftPlan, setPlan] = useState<Plan>({});
   const submittedOptions = useRef<Record<string, {product:string; settings:string; pattern?: string}>>({});
   const specRevision = useRef<string>();
@@ -549,6 +553,11 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   if (!isWM) return null;
 
   const label = "text-xs text-muted-foreground";
+  const readyForBatch = chosen.some(ins => login[ins] === "connected" && products.some(product => supportsPremiumVariants(ins, product)));
+  const anySelectedQuoteRunning = chosen.some(ins => jobs[ins]?.some(job => ["queued", "submitting", "generating"].includes(job.status)));
+  const bulkQuoteReason = collectingAll || anySelectedQuoteRunning ? "Quote requests are already in progress."
+    : !chosen.some(ins => login[ins] === "connected") ? "Connect a selected insurer first."
+    : !readyForBatch ? "The connected insurers have no mapped premium variants for these products." : "";
   const incompleteOptions = products.flatMap(p => plan[p].flatMap((v, i) =>
     hasNoCurrentCover(p, v, i) || optionComplete(p, v) ? [] : [`${p} · ${coverOptionLabel(i)}`]));
   return (
@@ -558,15 +567,36 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
         <p className={label}>Collect three premium variants from each insurer for every applicable cover option on each product.</p>
       </div>
 
+      {directProviders.length > 0 && <section className="frame space-y-2 p-3" aria-label="Direct provider quotes">
+        <h4 className="font-semibold">Direct provider quotes</h4>
+        {(fin?.car_insurance?.wants_quote === "Yes" || fin?.goals_risk?.portable_items_quote?.trim()) &&
+          <p className="font-medium">Short-term insurance requested{fin?.car_insurance?.wants_quote === "Yes" ? " · Motor cover" : ""}{fin?.goals_risk?.portable_items_quote?.trim() ? " · Portable items" : ""}</p>}
+        <div className="flex flex-wrap items-center gap-2">
+          <select aria-label="Direct quote provider" className="h-8 rounded-md border border-input bg-background px-2"
+            value={directProviderId} onChange={event => setDirectProviderId(event.target.value)}>
+            <option value="">Choose a provider…</option>
+            {(["short_term", "investments"] as const).map(category => <optgroup key={category} label={category === "short_term" ? "Short-term insurance" : "Investments"}>
+              {directProviders.filter(row => directQuoteCategory(row.id) === category).map(row =>
+                <option key={row.id} value={row.id}>{row.name}</option>)}
+            </optgroup>)}
+          </select>
+          {directProvider?.portal_url?.startsWith("https://") && <Button asChild variant="outline" size="sm">
+            <a href={directProvider.portal_url} target="_blank" rel="noopener noreferrer">Open provider site</a>
+          </Button>}
+        </div>
+        <p className={label}>Prepare the quote or illustration on the provider site, then file its PDF here.</p>
+        {directProvider && clientId && <QuotePdfCapture workflowId={workflowId} clientId={clientId} insurer={directProvider.name} manualOnly />}
+      </section>}
       <QuoteSourceSelector value={source} onChange={setSource} />
       {source !== "companion" && Object.values(login).some(state => ["connecting", "challenge", "connected"].includes(state)) && <p role="status" className="text-xs text-muted-foreground">Previously started portal sessions remain open. Return to Live Companion RPA to monitor or stop them.</p>}
       <section className="frame p-3 space-y-3" aria-label="Choose insurers">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <h4 className="text-xs font-semibold">Choose insurers</h4>
-          {source === "companion" && chosen.length > 0 && <Button size="sm" disabled={collectingAll || quotesRunning || !chosen.some(ins => login[ins] === "connected")} onClick={() => void requestAllQuotes()}>
+          {source === "companion" && chosen.length > 0 && <Button size="sm" disabled={!!bulkQuoteReason} aria-describedby={bulkQuoteReason ? "bulk-quote-reason" : undefined} onClick={() => void requestAllQuotes()}>
             {collectingAll ? "Getting quotes…" : "Get quotes for selected insurers"}
           </Button>}
         </div>
+        {source === "companion" && chosen.length > 0 && bulkQuoteReason && <p id="bulk-quote-reason" className={label}>{bulkQuoteReason}</p>}
         {!insurers.length && <p className="text-[10px] text-muted-foreground">No saved insurer logins found.</p>}
         <div className="flex flex-wrap gap-1.5">
           {insurers.map((ins: string) => {

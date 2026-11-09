@@ -48,6 +48,7 @@ export function ActiveWorkspaceClients() {
                 <Link to={`/clients/${w.patient_id}?tab=live`} title={label} aria-label={`${w.patients?.name ?? "Client"} · ${label}`}
                   className={cn("rounded-full px-2 py-0.5 font-semibold text-white hover:opacity-90", ownerSolid(court))}>
                   {w.patients?.name ?? "Client"}
+                  <span className="ml-1 font-normal">· {label}</span>
                 </Link>
               );
             })()}

@@ -35,7 +35,10 @@ function PasswordInput(props: ComponentProps<typeof Input>) {
   );
 }
 
+import { directQuoteCategory } from "@/features/wealth-workflow/map/directQuoteProviders";
+
 type Category = "insurance" | "crm_planning" | "industry_portal" | "financial_service_provider";
+type DisplayCategory = Category | "short_term" | "investments";
 
 interface CatalogEntry {
   id: string;
@@ -56,7 +59,9 @@ interface CredentialStatus {
   portal_url?: string | null;
 }
 
-const CATEGORY_LABELS: Record<Category, string> = {
+const CATEGORY_LABELS: Record<DisplayCategory, string> = {
+  short_term: "Short-term insurance",
+  investments: "Investment providers",
   insurance: "Insurance Providers",
   crm_planning: "CRM & Financial Planning",
   industry_portal: "Industry Portals",
@@ -150,10 +155,10 @@ export default function AppIntegrations() {
   const statusFor = (integrationId: string) => (credentials.data ?? []).find((c) => c.integration_id === integrationId);
 
   const grouped = useMemo(() => {
-    const cats: Category[] = ["insurance", "crm_planning", "industry_portal", "financial_service_provider"];
+    const cats: DisplayCategory[] = ["insurance", "short_term", "investments", "crm_planning", "industry_portal", "financial_service_provider"];
     return cats.map((category) => ({
       category,
-      items: (catalog.data ?? []).filter((e) => e.category === category),
+      items: (catalog.data ?? []).filter((e) => (directQuoteCategory(e.id) ?? e.category) === category),
     }));
   }, [catalog.data]);
 
@@ -437,13 +442,13 @@ export default function AppIntegrations() {
             items.length === 0 ? null : (
               <div key={category}>
                 <h2 className="text-xs font-semibold uppercase tracking-wide text-[hsl(var(--navy))] mb-1.5">{CATEGORY_LABELS[category]}</h2>
-                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {items.map((entry) => {
                     const status = statusFor(entry.id);
                     const configured = status?.status === "configured";
                     return (
-                      <div key={entry.id} className="rounded-md border bg-card px-3 py-2.5 space-y-2">
-                        <div className="flex items-center justify-between gap-2">
+                      <div key={entry.id} className="min-w-0 rounded-md border bg-card px-2.5 py-2 space-y-1.5">
+                        <div className="flex flex-wrap items-center justify-between gap-1.5">
                           <a
             href={status?.portal_url || entry.portal_url}
                             target="_blank"
