@@ -36,7 +36,6 @@ import JoinTeamInvite from "./pages/JoinTeamInvite";
 import ReferrerSignup from "./pages/ReferrerSignup";
 import ReferrerDashboard from "./pages/referrer/ReferrerDashboard";
 import ReferrerCommissions from "./pages/referrer/ReferrerCommissions";
-import BrokerReferrers from "./pages/broker/Referrers";
 import AppIntegrations from "./pages/broker/AppIntegrations";
 import QuotesScreen from "./pages/broker/QuotesScreen";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -252,7 +251,7 @@ const App = () => (
             <Route path="/activity-log" element={<ActivityLog />} />
             <Route path="/referrer-dashboard" element={<ReferrerDashboard />} />
             <Route path="/referrer-commissions" element={<ReferrerCommissions />} />
-            <Route path="/referrers" element={<BrokerReferrers />} />
+            <Route path="/referrers" element={<Navigate to="/business?tab=referrers" replace />} />
             <Route path="/app-integrations" element={<AppIntegrations />} />
             <Route path="/quotes-screen" element={<QuotesScreen />} />
             <Route path="/earnings" element={<Navigate to="/business?tab=earnings" replace />} />

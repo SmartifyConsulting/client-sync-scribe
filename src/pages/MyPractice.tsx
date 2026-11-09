@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 
 import ReferralAdvisors from "@/pages/ReferralAdvisors";
+import BrokerReferrers from "@/pages/broker/Referrers";
 import { ComplianceForms } from "@/features/wealth-workflow/forms/ComplianceForms";
 import { TargetsCommission } from "@/features/wealth-workflow/TargetsCommission";
 
@@ -1256,8 +1257,8 @@ export default function MyPractice() {
         defaultValue={
           isSystemAdmin && new URLSearchParams(window.location.search).get("billing")
             ? "billing"
-            : new URLSearchParams(window.location.search).get("tab") === "earnings"
-              ? "earnings"
+            : activeTab === "earnings" || activeTab === "referrers"
+              ? activeTab
               : "practice"
         }
         className="w-full"
@@ -1286,6 +1287,9 @@ export default function MyPractice() {
             className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
           >
             Earnings
+          </TabsTrigger>
+          <TabsTrigger value="referrers" className="tab-brand whitespace-nowrap text-xs px-3 py-1.5">
+            {t("nav.referrers", "Referrers")}
           </TabsTrigger>
           {isSystemAdmin && <TabsTrigger
             value="billing"
@@ -1563,6 +1567,10 @@ export default function MyPractice() {
         </TabsContent>
 
         {/* === REFERRALS TAB === */}
+        <TabsContent value="referrers" className="mt-4 my-practice-tab-body">
+          <BrokerReferrers />
+        </TabsContent>
+
         <TabsContent value="referrals" className="mt-4 space-y-4 my-practice-tab-body">
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-2">

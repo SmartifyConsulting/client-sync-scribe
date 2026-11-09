@@ -4,7 +4,6 @@ import { Loader2, UserPlus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { PageHeader } from "@/components/ui/page-header";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -116,12 +115,11 @@ export default function Referrers() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <PageHeader
-        title="Referrers"
-        subtitle="Everyone referring clients to you, and the commission rate you offer each one."
-        actions={<Button size="sm" onClick={() => setInviteOpen(true)}><UserPlus className="h-4 w-4 mr-1.5" />Invite referrer</Button>}
-      />
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs text-muted-foreground">Everyone referring clients to you, and the commission rate you offer each one.</p>
+        <Button size="sm" onClick={() => setInviteOpen(true)}><UserPlus className="h-4 w-4 mr-1.5" />Invite referrer</Button>
+      </div>
 
       <div className="rounded-xl border border-border bg-card overflow-x-auto">
         {referrals.isLoading ? (
