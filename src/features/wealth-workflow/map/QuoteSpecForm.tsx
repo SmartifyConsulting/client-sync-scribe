@@ -348,6 +348,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   };
 
   const submittingVariants = useRef(false);
+  const [variantProgress, setVariantProgress] = useState<{ ins: string; product: string; done: number; total: number } | null>(null);
   /**
    * Requests all 3 premium-pattern variants for every option of one insurer/product (any
    * insurer/product with a pattern field, not just Momentum Life). Every pattern reuses the
@@ -362,6 +363,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     const patterns = premiumPatternOptions(ins, product);
     if (!patterns) return;
     submittingVariants.current = true;
+    setVariantProgress({ ins, product, done: 0, total: patterns.length });
     try {
       for (let index = 0; index < patterns.length; index++) {
         await submitScenarios(ins, undefined, product, index);
@@ -369,9 +371,11 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
         while (Date.now() < deadline && (jobsRef.current[ins] ?? []).some(j => ["queued", "submitting", "generating"].includes(j.status))) {
           await new Promise(resolve => setTimeout(resolve, 500));
         }
+        setVariantProgress({ ins, product, done: index + 1, total: patterns.length });
       }
     } finally {
       submittingVariants.current = false;
+      setVariantProgress(null);
     }
   };
 
@@ -651,7 +655,15 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                     </section>;
                   })}
                 </div>
-                {supportsPremiumVariants(activeTab, p) && source === "companion" && <Button className="m-2" size="sm" disabled={!connected || quotesRunning} onClick={() => void submitAllVariants(activeTab, p)}>Request all {p.toLowerCase()} variants</Button>}
+                {supportsPremiumVariants(activeTab, p) && source === "companion" && <div className="flex flex-wrap items-center gap-2 p-2">
+                  <Button size="sm" disabled={!connected || quotesRunning} onClick={() => void submitAllVariants(activeTab, p)}>Request all {p.toLowerCase()} variants</Button>
+                  {variantProgress && variantProgress.ins === activeTab && variantProgress.product === p && <div className="flex min-w-[140px] flex-1 items-center gap-2">
+                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                      <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.round((variantProgress.done / variantProgress.total) * 100)}%` }} />
+                    </div>
+                    <span className="whitespace-nowrap text-[10px] text-muted-foreground">{variantProgress.done}/{variantProgress.total} · {Math.round((variantProgress.done / variantProgress.total) * 100)}%</span>
+                  </div>}
+                </div>}
                 <details className="border-t border-border">
                   <summary className="cursor-pointer px-3 py-2 font-medium">Shared quote variables</summary>
                 <div className="overflow-x-auto">
