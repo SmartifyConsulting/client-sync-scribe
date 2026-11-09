@@ -19,13 +19,13 @@ export default function Dashboard() {
   const { isAdvisor, isClient, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   useGenerateWmActionItems();
-  // Today's Briefing stays half the height of the Live Workspaces frame, tracking it as it grows.
+  // Briefing takes 2/3 and Upcoming 1/3 of the Live Workspaces height, tracking it as it grows.
   const liveRef = useRef<HTMLDivElement>(null);
-  const [briefingHeight, setBriefingHeight] = useState(0);
+  const [liveHeight, setLiveHeight] = useState(0);
   useEffect(() => {
     const el = liveRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => setBriefingHeight(Math.max(160, Math.round(el.offsetHeight / 2))));
+    const ro = new ResizeObserver(() => setLiveHeight(window.innerWidth >= 1024 ? Math.max(360, el.offsetHeight) : 0));
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
@@ -85,13 +85,15 @@ export default function Dashboard() {
       <div className="grid gap-3 md:gap-6 grid-cols-1 lg:grid-cols-2 items-start">
         <div ref={liveRef}><ActiveWorkspaceClients /></div>
         <div className="flex flex-col gap-3 md:gap-6">
-          <div className="overflow-y-auto rounded-xl" style={briefingHeight ? { maxHeight: briefingHeight } : undefined}>
+          <div className="overflow-y-auto rounded-xl" style={liveHeight ? { height: Math.round(liveHeight * 2 / 3) } : undefined}>
             <TodaysBriefing />
           </div>
-          <UpcomingMeetings />
-          <PipelineOverview />
-          <EarningsThisMonth />
+          <div className="overflow-y-auto rounded-xl" style={liveHeight ? { height: Math.round(liveHeight / 3) } : undefined}>
+            <UpcomingMeetings />
+          </div>
         </div>
+        <PipelineOverview />
+        <EarningsThisMonth />
       </div>
     </div>
   );
