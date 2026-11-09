@@ -1,4 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+﻿import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { sendEmail } from "../_shared/email.ts";
 
 const corsHeaders = {
@@ -97,15 +97,15 @@ Deno.serve(async (req) => {
     if (sendByEmail && targetEmail) {
       const appUrl = Deno.env.get("APP_URL") || "https://holarchealth.com";
       const subject = action === "created"
-        ? "Your Holarc Health account is ready"
-        : "Your Holarc Health password has been reset";
+        ? "Your Elysian Financial Technologies account is ready"
+        : "Your Elysian Financial Technologies password has been reset";
       const html = `
         <!DOCTYPE html><html><body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#111">
           <div style="background:linear-gradient(135deg,#0d9488 0%,#0f766e 100%);padding:28px;border-radius:12px 12px 0 0;color:white">
-            <h1 style="margin:0;font-size:24px">${action === "created" ? "Welcome to Holarc Health" : "Password reset"}</h1>
+            <h1 style="margin:0;font-size:24px">${action === "created" ? "Welcome to Elysian Financial Technologies" : "Password reset"}</h1>
           </div>
           <div style="background:#f8fafc;padding:28px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 12px 12px">
-            <p>${action === "created" ? "An account has been created for you on Holarc Health." : "An administrator has reset your password."}</p>
+            <p>${action === "created" ? "An account has been created for you on Elysian Financial Technologies." : "An administrator has reset your password."}</p>
             <p>You can sign in with the credentials below. <strong>Please change your password after your first login.</strong></p>
             <div style="background:white;border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin:16px 0;font-family:'SF Mono',Menlo,monospace">
               <div><strong>Email:</strong> ${targetEmail}</div>

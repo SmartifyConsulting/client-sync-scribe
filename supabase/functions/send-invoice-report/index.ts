@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+﻿import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { sendEmail } from "../_shared/email.ts";
 import { brandedEmail } from "../_shared/brandEmail.ts";
 
@@ -121,7 +121,7 @@ const handler = async (req: Request): Promise<Response> => {
       subtitle: practiceNumber ? `${doctorName} · Practice No: ${practiceNumber}` : doctorName,
       senderName: doctorName,
       bodyHtml: reportBody,
-      footerNote: "This report was generated automatically by Holarc Health.",
+      footerNote: "This report was generated automatically by Elysian Financial Technologies.",
     });
 
 

@@ -1,5 +1,4 @@
 import { coverOptionLabel } from "./quoteSpec";
-import { momentumLifeVariantLabel } from "./portalPayload";
 import { useEffect, useState } from "react";
 import { CheckCircle2, AlertCircle, Clock, RotateCcw, Square } from "lucide-react";
 import { SegmentedProgress } from "./SegmentedProgress";
@@ -21,7 +20,7 @@ export function QuoteJobsPanel({ jobs, onRetry, onStop }: { jobs: QuoteJobs; onR
         const stalled = isStalled(j, now), retry = needsRetry(j, now);
         const active = ["submitting", "generating"].includes(j.status) && !stalled;
         const Icon = j.status === "captured" ? CheckCircle2 : retry ? AlertCircle : j.status === "stopped" ? Square : Clock;
-        const label = (ins === "Momentum" && momentumLifeVariantLabel(j.n)) || coverOptionLabel(j.n - 1);
+        const label = j.premiumVariant ? `${coverOptionLabel(j.n - 1)} · ${j.premiumVariant}` : coverOptionLabel(j.n - 1);
         return <section key={j.n} aria-label={`${ins} ${label} activity`} className="rounded-lg bg-muted/40 p-3">
           <div className="flex items-start gap-3">
             <Icon className={`h-5 w-5 shrink-0 ${retry ? "text-destructive" : j.status === "captured" ? "text-success" : ""}`} />

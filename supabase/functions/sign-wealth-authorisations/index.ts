@@ -1,4 +1,4 @@
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+﻿import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from "npm:zod@3";
 
@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
       { doc_type: "life_declaration", title: "Life assured declaration", body: "<p>I declare that the information I have provided is true, correct and complete to the best of my knowledge. I will disclose material changes before the insurer issues cover.</p><p>This acknowledgement does not replace insurer-specific declarations, underwriting questions or acceptance of an application.</p>" },
     ];
     const documents = await Promise.all(texts.map(async d => {
-      const content = `<div id="holarc-document"><h2>Holarc Wealth · ${d.title}</h2><p>${esc(p.signerName)}</p>${d.body}</div>`;
+      const content = `<div id="holarc-document"><h2>Elysian Financial Technologies · ${d.title}</h2><p>${esc(p.signerName)}</p>${d.body}</div>`;
       const contentHash = await sha(content);
       const seal = await sha([contentHash, await sha(p.signatureImage), session.user.id, signedAt, ip ?? ""].join("|"));
       const stamp = `<section><img src="${p.signatureImage}" alt="Client signature" width="220"/><p>${esc(p.signerName)} · Signed ${signedAt}</p><p>Seal: ${seal}</p></section>`;

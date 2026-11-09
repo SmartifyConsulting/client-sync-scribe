@@ -5,9 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { DocPreviewDialog } from "./DocumentTray";
-import { momentumLifeVariantLabel } from "./portalPayload";
 
-export function QuotePdfCapture({ workflowId, clientId, insurer, onActivity, onScenarioSaved }: { workflowId: string; clientId: string; insurer: string; onActivity?: (insurer: string, phase: "saving" | "saved" | "pdf-error", detail?: string) => void; onScenarioSaved?: (insurer: string, n: number) => void }) {
+export function QuotePdfCapture({ workflowId, clientId, insurer, onActivity, onScenarioSaved, premiumVariantFor }: { workflowId: string; clientId: string; insurer: string; onActivity?: (insurer: string, phase: "saving" | "saved" | "pdf-error", detail?: string) => void; onScenarioSaved?: (insurer: string, n: number) => void; premiumVariantFor?: (insurer: string, n: number) => string | undefined }) {
   const qc = useQueryClient();
   const input = useRef<HTMLInputElement>(null);
   const processing = useRef(new Set<string>());
@@ -24,19 +23,19 @@ export function QuotePdfCapture({ workflowId, clientId, insurer, onActivity, onS
       setBusy(true);
       onActivity?.(d.insurer, "saving");
       try {
-        const variant = d.insurer === "Momentum" ? momentumLifeVariantLabel(d.n) : undefined;
-        const filename = variant ? `${variant} · ${d.filename.slice(-160)}` : d.filename;
+        const variant = Number.isInteger(d.n) ? premiumVariantFor?.(d.insurer, d.n) : undefined;
+        const filename = variant ? `${d.insurer} · ${variant} · ${d.filename.slice(-160)}` : d.filename;
         const { data, error } = await supabase.functions.invoke("capture-insurer-quote", { body: { workflowId, insurer: d.insurer, filename, base64: d.base64 } });
         if (error || data?.error) throw new Error(data?.error ?? "Could not attach PDF.");
         if (variant && data.duplicate) {
           const { data: document } = await supabase.from("documents").select("name").eq("id", data.id).maybeSingle();
-          if (!document?.name?.startsWith(`Momentum · ${variant} · `)) {
+          if (!document?.name?.startsWith(`${d.insurer} · ${variant} · `)) {
             throw new Error("This PDF was already filed under a different quote. Check the portal before continuing.");
           }
         }
         toast.success(data.duplicate ? "Quote PDF is already filed." : "Quote PDF attached to Working Window and Documents.");
         onActivity?.(d.insurer, "saved", data.duplicate ? "Already filed, so the document count does not increase." : undefined);
-        if (variant || (Number.isInteger(d.n) && d.n >= 1 && d.n <= 6)) onScenarioSaved?.(d.insurer, d.n);
+        if (Number.isInteger(d.n) && d.n >= 1 && d.n <= 6) onScenarioSaved?.(d.insurer, d.n);
         await Promise.all(["quote-pdfs", "wealth-map-records", "wealth-doc-tray", "client-documents", "documents"].map((key) => qc.invalidateQueries({ queryKey: [key] })));
         window.postMessage({ source: "holarc", type: "insurer-pdf-ack", workflowId, captureId: d.captureId, ok: true }, location.origin);
       } catch (e) {

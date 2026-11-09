@@ -1,4 +1,4 @@
-// Public endpoint (no JWT): verify a TOTP code against the user's enrolled
+﻿// Public endpoint (no JWT): verify a TOTP code against the user's enrolled
 // authenticator factor; on success, set a new password via the admin API.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
@@ -141,7 +141,7 @@ Deno.serve(async (req) => {
         return json({ ok: false, error: "That didn't match. Check your code and try again." }, 400);
       }
       const totp = new OTPAuth.TOTP({
-        issuer: "Holarc Health",
+        issuer: "Elysian Financial Technologies",
         algorithm: "SHA1",
         digits: 6,
         period: 30,

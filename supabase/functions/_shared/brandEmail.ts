@@ -1,5 +1,5 @@
 /**
- * Shared Holarc Wealth email shell.
+ * Shared Elysian Financial Technologies email shell.
  *
  * Every outbound email (documents to patients, medical aids, pharmacies,
  * invoices and reports) is wrapped in this so recipients always see the
@@ -77,12 +77,12 @@ export function brandedEmail({
         <td align="center">
           <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;">
             <tr>
-              <td style="border-top:4px solid ${RED};padding:20px 28px 34px 28px;">
-                <a href="https://www.holarchealth.com" style="text-decoration:none;color:${TEAL_DARK};font-family:${HEADING_FONT};font-weight:700;font-size:18px;"><img src="${inlineLogo ? `cid:${HOLARC_LOGO_CID}` : HOLARC_LOGO_URL}" alt="Holarc Wealth" width="200" height="80" style="height:auto;width:200px;max-width:200px;display:block;border:0;outline:none;text-decoration:none;color:${TEAL_DARK};font-family:${HEADING_FONT};font-weight:700;font-size:18px;" /></a>
+              <td bgcolor="${RED}" style="background-color:${RED};padding:24px 28px;">
+                <img src="${inlineLogo ? `cid:${HOLARC_LOGO_CID}` : HOLARC_LOGO_URL}" alt="Elysian Financial Technologies" width="180" height="72" style="height:auto;width:180px;max-width:180px;display:block;border:0;outline:none;" />
               </td>
             </tr>
             <tr>
-              <td style="padding:8px 28px 8px 28px;">
+              <td style="padding:20px 28px 8px 28px;">
                 <h1 style="margin:0;font-family:${HEADING_FONT};font-size:20px;font-weight:700;color:${TEAL_DARK};">${escapeHtml(title)}</h1>
                 ${subtitle ? `<p style="margin:4px 0 0 0;font-size:13px;color:${MUTED};">${escapeHtml(subtitle)}</p>` : ""}
                 <div style="height:3px;width:56px;background:${TEAL};border-radius:2px;margin:12px 0 0 0;"></div>
@@ -93,7 +93,7 @@ export function brandedEmail({
                 ${bodyHtml}
                 ${documentUrl ? `
                 <div style="margin-top:24px;">
-                  <a href="${documentUrl}" style="display:inline-block;background:${TEAL};color:#ffffff;font-family:${HEADING_FONT};font-weight:600;font-size:14px;text-decoration:none;padding:11px 20px;border-radius:8px;">View this document in Holarc Wealth</a>
+                  <a href="${documentUrl}" style="display:inline-block;background-color:${TEAL};color:#ffffff;font-family:${HEADING_FONT};font-weight:600;font-size:14px;text-decoration:none;padding:11px 20px;border-radius:8px;">View this document in Elysian Financial Technologies</a>
                 </div>` : ""}
               </td>
             </tr>
@@ -102,7 +102,7 @@ export function brandedEmail({
                 ${signatureHtml ? `<div style="margin:0 0 10px 0;">${signatureHtml}</div>` : ""}
                 ${from ? `<p style="margin:0 0 6px 0;font-weight:600;color:${INK};">Sent by ${escapeHtml(from)}</p>` : ""}
                 <p style="margin:0 0 6px 0;">${escapeHtml(note)}</p>
-                <p style="margin:0;color:${TEAL_DARK};font-family:${HEADING_FONT};font-weight:600;">Holarc Wealth</p>
+                <p style="margin:0;color:${TEAL_DARK};font-family:${HEADING_FONT};font-weight:600;">Elysian Financial Technologies</p>
               </td>
             </tr>
           </table>

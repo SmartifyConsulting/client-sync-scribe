@@ -12,25 +12,18 @@ import {
   Trash2,
   Volume2,
   FileText,
-  FileEdit,
-  PenTool,
-  Languages,
   Download,
   Eye,
   AlertTriangle,
   Edit3,
   Send,
   Lock,
-  ChevronDown,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import { GeneralLetterEditor } from "@/components/sessions/GeneralLetterEditor";
-import { DrawingPad } from "@/components/drawings/DrawingPad";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useSession } from "@/hooks/useSessions";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,23 +35,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { useSessions } from "@/hooks/useSessions";
 import { DocumentPreviewWithLetterhead } from "@/features/documents/components/DocumentPreviewWithLetterhead";
 
 import { SessionResultPanels, AISummaryCard } from "@/features/sessions/components/SessionResultPanels";
 import { WealthClientOverview } from "@/features/sessions/components/WealthClientOverview";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 import { PrivacyBadge } from "@/components/permissions/PrivacyBadge";
@@ -67,19 +48,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { logProfileView } from "@/lib/logProfileView";
 import { getSignedAudioUrl } from "@/utils/audioUrl";
 
-const LANGUAGES = [
-  { code: "en", label: "English" }, { code: "af", label: "Afrikaans" }, { code: "zu", label: "Zulu" },
-  { code: "xh", label: "Xhosa" }, { code: "st", label: "Sesotho" }, { code: "tn", label: "Setswana" },
-  { code: "ts", label: "Tsonga" }, { code: "ss", label: "Swati" }, { code: "ve", label: "Venda" },
-  { code: "nr", label: "Ndebele" }, { code: "nso", label: "Sepedi" }, { code: "fr", label: "French" },
-  { code: "de", label: "German" }, { code: "es", label: "Spanish" }, { code: "pt", label: "Portuguese" },
-  { code: "it", label: "Italian" }, { code: "nl", label: "Dutch" }, { code: "ar", label: "Arabic" },
-  { code: "hi", label: "Hindi" }, { code: "zh", label: "Chinese" }, { code: "ja", label: "Japanese" },
-  { code: "ko", label: "Korean" }, { code: "ru", label: "Russian" }, { code: "sw", label: "Swahili" },
-  { code: "yo", label: "Yoruba" }, { code: "ig", label: "Igbo" }, { code: "ha", label: "Hausa" },
-  { code: "am", label: "Amharic" },
-];
-
 export default function SessionDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -87,11 +55,6 @@ export default function SessionDetail() {
   const { session, loading, refetch } = useSession(id || "");
   const { deleteSession } = useSessions();
   const { isAdmin } = useIsAdmin();
-  const [showGeneralLetterEditor, setShowGeneralLetterEditor] = useState(false);
-  const [showDrawingPad, setShowDrawingPad] = useState(false);
-  const [translatedSummary, setTranslatedSummary] = useState<string | null>(null);
-  const [isTranslating, setIsTranslating] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState<string>("");
   const [sessionDocs, setSessionDocs] = useState<any[]>([]);
   const [sendingDocId, setSendingDocId] = useState<string | null>(null);
   const [advisorName, setDoctorName] = useState<string>("");
@@ -178,31 +141,6 @@ export default function SessionDetail() {
   };
 
 
-  const handleTranslate = async (langCode: string) => {
-    if (!session?.summary || !langCode) return;
-    const lang = LANGUAGES.find(l => l.code === langCode);
-    if (!lang) return;
-    
-    setIsTranslating(true);
-    setSelectedLanguage(langCode);
-    try {
-      const { data, error } = await supabase.functions.invoke('summarize-session', {
-        body: {
-          action: 'translate',
-          text: session.summary,
-          targetLanguage: lang.label,
-        },
-      });
-      if (error) throw error;
-      setTranslatedSummary(data?.translatedText || data?.summary || session.summary);
-    } catch (err) {
-      console.error('Translation error:', err);
-      toast({ title: "Translation failed", description: "Could not translate the summary", variant: "destructive" });
-    } finally {
-      setIsTranslating(false);
-    }
-  };
-
   const handleDownloadAudio = async () => {
     if (!session?.audio_url) return;
     const url = signedAudioUrl || await getSignedAudioUrl(session.audio_url);
@@ -280,37 +218,6 @@ export default function SessionDetail() {
     </Button>
   );
 
-  const summaryActionsMenu = (
-    <>
-      {isTranslating && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-      <Select value={selectedLanguage} onValueChange={handleTranslate}>
-        <SelectTrigger className="w-[150px] h-8 text-xs">
-          <Languages className="h-3.5 w-3.5 mr-1.5" />
-          <SelectValue placeholder="Translate..." />
-        </SelectTrigger>
-        <SelectContent>
-          {LANGUAGES.map((lang) => (
-            <SelectItem key={lang.code} value={lang.code} className="text-sm">
-              {lang.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      {translatedSummary && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-xs h-8"
-          onClick={() => {
-            setTranslatedSummary(null);
-            setSelectedLanguage("");
-          }}
-        >
-          Original
-        </Button>
-      )}
-    </>
-  );
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -403,27 +310,6 @@ export default function SessionDetail() {
       </div>
 
 
-      {/* Quick Actions — brand teal dropdown, right-aligned directly above Client Overview */}
-      {session.status === "completed" && session.client && (
-        <div className="flex justify-end">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                className="inline-flex h-9 items-center justify-between gap-2 rounded-md border border-primary bg-primary px-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
-              >
-                Quick Actions
-                <ChevronDown className="h-4 w-4 opacity-80" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem onSelect={() => setShowGeneralLetterEditor(true)}><FileEdit className="mr-2 h-4 w-4" />General Letter</DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setShowDrawingPad(true)}><PenTool className="mr-2 h-4 w-4" />Drawing Pad</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      )}
-
       {/* Client Overview — full width */}
       <WealthClientOverview client={session.client} />
 
@@ -431,10 +317,9 @@ export default function SessionDetail() {
       <div>
         <p className="mb-2 text-xs text-muted-foreground">{format(new Date(session.started_at), "MMM d, yyyy · h:mm a")}</p>
         <AISummaryCard
-          summary={translatedSummary || session.summary}
+          summary={session.summary}
           audioUrl={signedAudioUrl}
           audioActions={audioActionsMenu}
-          summaryActions={summaryActionsMenu}
           showRetentionNotice={!!session.audio_url}
         />
       </div>
@@ -490,7 +375,7 @@ export default function SessionDetail() {
                 )}
               </div>
             </div>
-            <p className="mb-2 text-xs text-muted-foreground">Only visible to you. Not shared with the client or other wealth managers.</p>
+            <p className="mb-2 text-xs text-muted-foreground">Only visible to you.</p>
             <div className="max-h-[150px] overflow-y-auto">
               {editingPrivateNotes ? (
                 <Textarea
@@ -584,41 +469,6 @@ export default function SessionDetail() {
         <DocumentPreviewWithLetterhead document={previewDoc} onClose={() => setPreviewDoc(null)} />
       )}
 
-      {/* General Letter Editor Modal */}
-      {showGeneralLetterEditor && session.client && (
-        <GeneralLetterEditor
-          clientId={session.patient_id}
-          clientName={session.client.name}
-          sessionId={id}
-          onClose={() => setShowGeneralLetterEditor(false)}
-          onSave={() => {
-            toast({
-              title: "General Letter created",
-              description: "The letter has been saved.",
-            });
-          }}
-        />
-      )}
-
-      {/* Drawing Pad Modal */}
-      <Dialog open={showDrawingPad} onOpenChange={setShowDrawingPad}>
-        <DialogContent className="max-w-[95vw] w-full max-h-[90vh] h-[85vh] p-0">
-          <DialogHeader className="px-4 py-3 border-b">
-            <DialogTitle className="flex items-center gap-2">
-              <PenTool className="h-5 w-5 text-primary" />
-              Drawing Pad - {session.client?.name}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="flex-1 overflow-hidden h-full">
-            <DrawingPad
-              clientId={session.patient_id}
-              sessionId={id}
-              clientName={session.client?.name}
-              isModal
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

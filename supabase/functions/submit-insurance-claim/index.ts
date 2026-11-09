@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+﻿import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { sendEmail } from "../_shared/email.ts";
 
@@ -116,7 +116,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <p>Thank you for your assistance.</p>
               </div>
               <div class="footer">
-                <p>This claim was submitted via Holarc Healthcare Management System</p>
+                <p>This claim was submitted via Elysian Financial Technologiescare Management System</p>
               </div>
             </div>
           </body>

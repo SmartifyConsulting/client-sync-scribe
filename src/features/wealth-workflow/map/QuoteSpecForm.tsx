@@ -117,6 +117,8 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const JOBS_KEY = `holarc-quote-jobs-${workflowId}`;
   const [jobs, setJobs] = useState<QuoteJobs>(() => { try { return releaseBlockedQueues(JSON.parse(localStorage.getItem(JOBS_KEY) || "{}")); } catch { return {}; } });
   useEffect(() => { localStorage.setItem(JOBS_KEY, JSON.stringify(jobs)); }, [jobs, JOBS_KEY]);
+  const jobsRef = useRef(jobs);
+  useEffect(() => { jobsRef.current = jobs; }, [jobs]);
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [adding, setAdding] = useState("");
   const [params, setParams] = useState<NeedsParams>(DEFAULT_PARAMS);
@@ -331,7 +333,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
       (!only || only.includes(s.n)) && Object.values(requestedPlan).some(options => options[s.n - 1]) &&
       (premiumVariant || jobs[ins]?.find((j) => j.n === s.n)?.status !== "captured"));
     if (!scenarios.length) return toast({ title: "No remaining applicable quote requests." });
-    if(ins==='Old Mutual') for(const s of scenarios) submittedOptions.current[`${ins}:${s.n}`]={product:'Life cover',settings:quoteSettingsKey('Life cover',plan['Life cover'][s.n-1],ins),pattern:premiumVariant};
+    if (product) for (const s of scenarios) submittedOptions.current[`${ins}:${s.n}`] = { product, settings: quoteSettingsKey(product, plan[product][s.n - 1], ins), pattern: premiumVariant };
     setJobs((j) => {
       const queued = startJobs(j, ins, count, Date.now(), only);
       const submitted = new Set(scenarios.map(scenario => scenario.n));
@@ -344,14 +346,28 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   };
 
   const submittingVariants = useRef(false);
-  /** Requests all 3 premium-pattern variants for every option of one insurer/product (any insurer/product with a pattern field, not just Momentum Life). */
+  /**
+   * Requests all 3 premium-pattern variants for every option of one insurer/product (any
+   * insurer/product with a pattern field, not just Momentum Life). Every pattern reuses the
+   * same scenario number as its option (n = option index + 1) — the universal _premiumVariants
+   * model, not Momentum's old distinct-n-per-pattern range — so two patterns for the same option
+   * must never be in flight together: submittedOptions.current (keyed by insurer:n) can only
+   * remember one pattern at a time per n. Each pattern's batch is awaited to a terminal job
+   * status before the next pattern is submitted.
+   */
   const submitAllVariants = async (ins: string, product: string) => {
     if (submittingVariants.current) return;
     const patterns = premiumPatternOptions(ins, product);
     if (!patterns) return;
     submittingVariants.current = true;
     try {
-      for (let index = 0; index < patterns.length; index++) await submitScenarios(ins, undefined, product, index);
+      for (let index = 0; index < patterns.length; index++) {
+        await submitScenarios(ins, undefined, product, index);
+        const deadline = Date.now() + 3 * 60_000;
+        while (Date.now() < deadline && (jobsRef.current[ins] ?? []).some(j => ["queued", "submitting", "generating"].includes(j.status))) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
     } finally {
       submittingVariants.current = false;
     }
@@ -726,6 +742,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
           {source === "companion" && <QuoteJobsPanel jobs={Object.fromEntries(chosen.map(ins => [ins, jobs[ins] ?? []]))} onStop={stopConnection} onRetry={(ins, n) => void submitScenarios(ins, [n])} />}
           {clientId && <QuotePdfCapture workflowId={workflowId} clientId={clientId} insurer={activeTab}
             onActivity={(ins, phase, detail) => recordActivity(ins, phase, detail)}
+            premiumVariantFor={(ins, n) => jobs[ins]?.find((j) => j.n === n)?.premiumVariant}
             onScenarioSaved={(ins, n) => setJobs((j) => setStatus(j, ins, n, "captured", Date.now()))} />}
           {source === "companion" && /^discovery$/i.test(activeTab) && <DiscoveryScreenScan workflowId={workflowId} connected={login[activeTab] === "connected"} />}
 

@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+﻿import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from "https://esm.sh/zod@3.23.8";
 
@@ -101,7 +101,7 @@ async function createPayPalOrder(
         },
       ],
       application_context: {
-        brand_name: "Holarc Health",
+        brand_name: "Elysian Financial Technologies",
         landing_page: "NO_PREFERENCE",
         user_action: "PAY_NOW",
         return_url: `${Deno.env.get("SUPABASE_URL")}/functions/v1/paypal-subscription?action=capture`,
@@ -302,14 +302,14 @@ serve(async (req) => {
 
           await sendSubscriptionEmail(
             userEmail,
-            "Your Holarc Subscription Has Been Cancelled",
+            "Your Elysian Subscription Has Been Cancelled",
             `
               <h1>Subscription Cancelled</h1>
               <p>We're sorry to see you go!</p>
-              <p>Your Holarc subscription has been cancelled. You will continue to have access to all features until <strong>${endDate}</strong>.</p>
+              <p>Your Elysian Subscription has been cancelled. You will continue to have access to all features until <strong>${endDate}</strong>.</p>
               <p>If you change your mind, you can reactivate your subscription at any time from your Settings page.</p>
-              <p>Thank you for being a Holarc user.</p>
-              <p>Best regards,<br>The Holarc Team</p>
+              <p>Thank you for being a Elysian user.</p>
+              <p>Best regards,<br>The Elysian Team</p>
             `,
           );
         }
@@ -544,27 +544,27 @@ serve(async (req) => {
           const userEmailForNotif = await getUserEmail(supabase, subscription.user_id);
           if (userEmailForNotif) {
             const emailSubject = isTrial 
-              ? "Welcome to Holarc - Your 7-Day Free Trial Has Started!"
-              : "Welcome to Holarc - Subscription Activated!";
+              ? "Welcome to Elysian - Your 7-Day Free Trial Has Started!"
+              : "Welcome to Elysian - Subscription Activated!";
             
             const trialEndDate = trialEndsAt?.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
             const billingDate = periodEnd?.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 
             const emailContent = isTrial ? `
               <h1>Your Free Trial Has Started!</h1>
-              <p>Welcome to Holarc! Your 7-day free trial is now active.</p>
+              <p>Welcome to Elysian! Your 7-day free trial is now active.</p>
               <p><strong>Trial ends:</strong> ${trialEndDate}</p>
               <p><strong>Plan:</strong> ${plan?.name || "Subscription"}</p>
               <p><strong>After trial:</strong> $${plan?.price.toFixed(2) || "0.00"} USD/month</p>
-              <p>You have full access to all Holarc features during your trial. If you wish to cancel, please do so before ${trialEndDate} to avoid being charged.</p>
-              <p>Best regards,<br>The Holarc Team</p>
+              <p>You have full access to all Elysian features during your trial. If you wish to cancel, please do so before ${trialEndDate} to avoid being charged.</p>
+              <p>Best regards,<br>The Elysian Team</p>
             ` : `
               <h1>Your Subscription is Active!</h1>
-              <p>Thank you for subscribing to Holarc!</p>
+              <p>Thank you for subscribing to Elysian!</p>
               <p><strong>Plan:</strong> ${plan?.name || "Subscription"}</p>
               <p><strong>Amount:</strong> $${plan?.price.toFixed(2) || "0.00"} USD</p>
               <p><strong>Next billing date:</strong> ${billingDate}</p>
-              <p>Best regards,<br>The Holarc Team</p>
+              <p>Best regards,<br>The Elysian Team</p>
             `;
 
             await sendSubscriptionEmail(userEmailForNotif, emailSubject, emailContent);

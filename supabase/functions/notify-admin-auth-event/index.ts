@@ -1,6 +1,6 @@
-// Called (fire-and-forget) by Postgres triggers on auth.users — see the
+﻿// Called (fire-and-forget) by Postgres triggers on auth.users — see the
 // handle_new_user() and notify_admin_on_login() functions — to email the
-// admin whenever anyone signs up or logs in to Holarc Health.
+// admin whenever anyone signs up or logs in to Elysian Financial Technologies.
 import { sendEmail } from "../_shared/email.ts";
 
 const ADMIN_EMAIL = "georgia.adams@smartify.co.za";
@@ -30,12 +30,12 @@ Deno.serve(async (req) => {
     const when = new Date().toLocaleString("en-ZA", { timeZone: "Africa/Johannesburg" });
 
     const subject = type === "signup"
-      ? `New Holarc Health signup: ${fullName || email}`
-      : `Holarc Health login: ${fullName || email}`;
+      ? `New Elysian Financial Technologies signup: ${fullName || email}`
+      : `Elysian Financial Technologies login: ${fullName || email}`;
 
     const html = `
       <div style="font-family:Arial,sans-serif;padding:16px;color:#222;">
-        <p style="font-size:16px;font-weight:bold;">${type === "signup" ? "New sign-up" : "Login"} on Holarc Health</p>
+        <p style="font-size:16px;font-weight:bold;">${type === "signup" ? "New sign-up" : "Login"} on Elysian Financial Technologies</p>
         <table style="border-collapse:collapse;">
           <tr><td style="padding:4px 12px 4px 0;color:#666;">Name</td><td>${fullName || "—"}</td></tr>
           <tr><td style="padding:4px 12px 4px 0;color:#666;">Email</td><td>${email}</td></tr>

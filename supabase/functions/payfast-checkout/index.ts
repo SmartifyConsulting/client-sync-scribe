@@ -1,4 +1,4 @@
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+﻿import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from "npm:zod@3";
 import { PF_HOST, PF_MERCHANT_ID, PF_MERCHANT_KEY, PF_MODE, signApi, signOrdered } from "../_shared/payfast.ts";
@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
       ["email_address", user.email ?? ""],
       ["m_payment_id", sub.id],
       ["amount", amount],
-      ["item_name", `Holarc Wealth ${plan.name}`.slice(0, 100)],
+      ["item_name", `Elysian Financial Technologies ${plan.name}`.slice(0, 100)],
       ["custom_str1", user.id],
       ["subscription_type", "1"],
       ["recurring_amount", amount],

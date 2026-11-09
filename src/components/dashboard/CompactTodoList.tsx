@@ -485,7 +485,7 @@ export function CompactTodoList() {
 
         {/* Tabs */}
         <Tabs value={filter} onValueChange={(v) => setFilter(v as "active" | "completed")}>
-          <TabsList className="h-8 w-full bg-neutral-600 p-1">
+          <TabsList className="h-8 w-full bg-primary p-1">
             <TabsTrigger value="active" className="h-6 flex-1 tab-brand whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1">
               {t("doctorDashboard.active")} ({activeCount})
             </TabsTrigger>

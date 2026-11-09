@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+﻿import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { sendEmail } from "../_shared/email.ts";
 import {
@@ -108,7 +108,7 @@ serve(async (req) => {
         contentType: typeof a.contentType === "string" ? a.contentType : "application/pdf",
       }));
     let documentName = body.documentName || "Document";
-    let senderName = body.senderName || "Holarc Wealth";
+    let senderName = body.senderName || "Elysian Financial Technologies";
     let practiceName = body.practiceName;
 
     // Handle the { documentId, recipientEmail } pattern
@@ -253,7 +253,7 @@ serve(async (req) => {
     if (documentHtml) {
       // Caller supplied a fully-rendered HTML document (e.g. PAID invoice).
       // Keep the document markup exactly as rendered on screen, but drop it
-      // inside the Holarc Wealth branded shell.
+      // inside the Elysian Financial Technologies branded shell.
       const inner = extractBody(documentHtml);
       htmlContent = brandedEmail({
         title: documentName,
