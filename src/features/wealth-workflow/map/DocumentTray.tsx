@@ -11,7 +11,7 @@ import { sealedHtml } from "./onboardingTemplates";
 import { toast } from "@/hooks/use-toast";
 
 const db = supabase as any;
-type Doc = { id: string; kind: "signed" | "transcript" | "file"; title: string; date: string; html?: string; text?: string; url?: string };
+type Doc = { id: string; kind: "signed" | "transcript" | "file"; title: string; date: string; html?: string; text?: string; url?: string; clientId?: string; seal?: { at: string; ip: string | null; hash: string } | null };
 
 const fmt = (d: string) => new Date(d).toLocaleDateString("en-ZA", { day: "2-digit", month: "short", year: "numeric" });
 
@@ -43,15 +43,34 @@ export function useClientDocuments(clientId?: string) {
 
 async function loadDocument(doc: Doc): Promise<Doc> {
   const table = doc.kind === "signed" ? "wealth_signed_documents" : doc.kind === "transcript" ? "sessions" : "documents";
-  const columns = doc.kind === "signed" ? "*" : doc.kind === "transcript" ? "transcript" : "content,media_url";
+  const columns = doc.kind === "signed" ? "*" : doc.kind === "transcript" ? "transcript,patient_id,transcript_sealed_at,transcript_sealed_ip,transcript_seal_hash" : "content,media_url";
   const { data, error } = await db.from(table).select(columns).eq("id", doc.id).single();
   if (error) throw error;
   if (doc.kind === "signed") return { ...doc, html: sealedHtml(data) };
-  if (doc.kind === "transcript") return { ...doc, text: data.transcript };
+  if (doc.kind === "transcript") return withSeal(doc, data);
   const pdf = data.media_url?.startsWith("data:application/pdf;");
   const html = !pdf && /<[a-z][\s\S]*>/i.test(data.content ?? "");
   return { ...doc, html: html ? data.content : undefined, text: html || pdf ? undefined : data.content, url: data.media_url };
 }
+
+const withSeal = (doc: Doc, d: any): Doc => ({ ...doc, text: d.transcript, clientId: d.patient_id,
+  seal: d.transcript_seal_hash ? { at: d.transcript_sealed_at, ip: d.transcript_sealed_ip, hash: d.transcript_seal_hash } : null });
+
+/** Recomputes the server seal over the stored text; false means the text no longer matches its seal. */
+async function sealIntact(d: Doc) {
+  if (!d.seal || !d.text || !d.clientId) return false;
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${d.clientId}|${new Date(d.seal.at).toISOString()}|${d.seal.ip ?? ""}|${d.text}`));
+  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("") === d.seal.hash;
+}
+
+const sealStamp = (d: Doc, ok: boolean) => !d.seal
+  ? `<div data-pdf-keep-together style="margin-top:22px;border:1.5px dashed #999;border-radius:10px;padding:10px 12px;font-size:10px;color:#666;text-align:center">Not sealed · recorded before evidentiary sealing was introduced</div>`
+  : `<div data-pdf-keep-together style="margin-top:22px;display:flex;gap:14px;align-items:center;border:2px solid ${ok ? "#14532d" : "#991b1b"};border-radius:12px;padding:12px 14px;color:#111">
+<div style="flex-shrink:0;width:74px;height:74px;border-radius:50%;border:3px double ${ok ? "#14532d" : "#991b1b"};display:flex;align-items:center;justify-content:center;text-align:center;font-size:9px;font-weight:700;letter-spacing:.08em;color:${ok ? "#14532d" : "#991b1b"}">${ok ? "CERTIFIED<br/>ORIGINAL" : "SEAL<br/>BROKEN"}</div>
+<div style="font-size:10px;line-height:1.55"><div style="font-weight:700;letter-spacing:.18em;font-size:11px;margin-bottom:3px">EVIDENTIARY SEAL</div>
+Sealed: ${esc(fmtDate(d.seal.at))} (${esc(d.seal.at)})<br/>Recorded from IP address: ${esc(d.seal.ip ?? "not recorded")}<br/>
+${ok ? "Certified original copy recorded in Holarc Wealth. The text has not changed since it was sealed." : "Warning: this text no longer matches its seal and is not an original copy."}
+<div style="font-family:monospace;word-break:break-all;margin-top:3px">SHA-256 ${esc(d.seal.hash)}</div></div></div>`;
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const textHtml = (title: string, text: string) =>
@@ -59,27 +78,29 @@ const textHtml = (title: string, text: string) =>
 
 // Transcript PDF: header, running footer, Wealth Manager in bold, client in regular weight.
 const fmtDate = (d?: string) => d ? new Date(d).toLocaleString("en-ZA", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
-const transcriptShell = (title: string, date: string | undefined, body: string) =>
+const transcriptShell = (title: string, date: string | undefined, body: string, stamp = "") =>
   `<div id="holarc-document" data-document-running-title="${esc(title)}" style="width:794px;padding:40px 56px;background:#fff;font-family:Arial,Helvetica,sans-serif;color:#111">
 <div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #111;padding-bottom:10px;margin-bottom:18px">
 <div><div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#555">Consultation transcript</div><h2 style="font-size:18px;margin:4px 0 0">${esc(title)}</h2></div>
 <div style="font-size:11px;color:#555;text-align:right">${esc(fmtDate(date))}<br/><b style="color:#111">Wealth Manager</b> in bold · Client in regular</div></div>
 ${body}
+${stamp}
 <div data-document-footer style="margin-top:28px;border-top:1px solid #ccc;padding-top:8px;font-size:9.5px;color:#666;text-align:center">Confidential · Holarc Wealth consultation transcript · Generated ${esc(fmtDate(new Date().toISOString()))}</div></div>`;
-const transcriptHtml = (title: string, segments: { speaker: string; text: string }[], date?: string) => {
+const transcriptHtml = (title: string, segments: { speaker: string; text: string }[], date?: string, stamp = "") => {
   const body = segments.map((s) => {
     const b = s.speaker === "broker";
     return `<div data-pdf-keep-together style="display:flex;gap:14px;margin:0 0 10px;font-size:12px;line-height:1.6"><div style="width:110px;flex-shrink:0;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:${b ? "#111" : "#666"};padding-top:2px">${b ? "Wealth Manager" : "Client"}</div><div style="flex:1;font-weight:${b ? 700 : 400}">${esc(s.text)}</div></div>`;
   }).join("");
-  return transcriptShell(title, date, body);
+  return transcriptShell(title, date, body, stamp);
 };
 
 /** Best-effort speaker split for a transcript; falls back to a plain (uncoloured) block on failure. */
 async function buildTranscriptHtml(d: Doc): Promise<string> {
   if (!d.text) return transcriptShell(d.title, d.date, "");
+  const stamp = sealStamp(d, await sealIntact(d));
   const { data, error } = await supabase.functions.invoke("format-transcript", { body: { text: d.text } });
-  if (error || !data?.segments?.length) return transcriptShell(d.title, d.date, `<div style="white-space:pre-wrap;font-size:12px;line-height:1.6">${esc(d.text)}</div>`);
-  return transcriptHtml(d.title, data.segments, d.date);
+  if (error || !data?.segments?.length) return transcriptShell(d.title, d.date, `<div style="white-space:pre-wrap;font-size:12px;line-height:1.6">${esc(d.text)}</div>`, stamp);
+  return transcriptHtml(d.title, data.segments, d.date, stamp);
 }
 
 const docHtml = (d: Doc) => d.html ?? (d.text && d.kind !== "transcript" ? textHtml(d.title, d.text) : null);
@@ -197,10 +218,10 @@ export function DocumentTray({ clientId }: { clientId?: string }) {
 export function TranscriptButton({ sessionId, clientId }: { sessionId?: string | null; clientId?: string }) {
   const [doc, setDoc] = useState<Doc | null>(null);
   const open = async () => {
-    let q = db.from("sessions").select("id,title,transcript,created_at").not("transcript", "is", null);
+    let q = db.from("sessions").select("id,title,transcript,created_at,patient_id,transcript_sealed_at,transcript_sealed_ip,transcript_seal_hash").not("transcript", "is", null);
     q = sessionId ? q.eq("id", sessionId) : q.eq("patient_id", clientId).order("created_at", { ascending: false }).limit(1);
     const { data } = await q.maybeSingle();
-    if (data) setDoc({ id: data.id, kind: "transcript", title: `${data.title || "Meeting"} transcript`, date: data.created_at, text: data.transcript });
+    if (data) setDoc(withSeal({ id: data.id, kind: "transcript", title: `${data.title || "Meeting"} transcript`, date: data.created_at }, data));
   };
   return (
     <>
