@@ -3,7 +3,9 @@ import { insurerFields, insurerKey } from "./insurerDictionary";
 
 export function withQuoteDefaults(product: string, option: Record<string, any>, insurers: string[], fin: any) {
   const goals = fin?.goals_risk;
-  const cpi = String(goals?.quote_cpi ?? "");
+  // Defaults to the standard 5% until the Wealth Manager overrides it in Needs Analysis.
+  const rawCpi = goals?.quote_cpi;
+  const cpi = String(rawCpi == null || String(rawCpi).trim() === "" ? "5" : rawCpi);
   const term = String(goals?.income_protection_term ?? "");
   const retirementAge = String(goals?.retirement_age ?? "");
   const effective: Record<string, any> = {

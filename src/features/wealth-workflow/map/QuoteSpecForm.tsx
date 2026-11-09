@@ -300,8 +300,10 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
         return;
       }
     }
-    const goals = fin?.goals_risk;
-    if (goals?.quote_cpi == null || String(goals.quote_cpi).trim() === "" || !Number.isFinite(Number(goals.quote_cpi))) {
+    // Defaults to the standard 5% until the Wealth Manager overrides it in Needs Analysis.
+    const rawCpi = fin?.goals_risk?.quote_cpi;
+    const goals = { ...fin?.goals_risk, quote_cpi: rawCpi == null || String(rawCpi).trim() === "" ? "5" : rawCpi };
+    if (!Number.isFinite(Number(goals.quote_cpi))) {
       toast({ title: "Set the annual CPI assumption in Needs Analysis first." });
       return;
     }
@@ -576,7 +578,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
             <p className={label}>{quotesRunning ? "Quote requests are in progress. Follow the bars above each option." : "Waiting for your review. Open a product to review Desired, Current and Agreed Cover."}</p>
           <details className="rounded-lg border border-border p-2">
             <summary className="cursor-pointer text-xs font-medium">Calculation assumptions</summary>
-            <p className="mt-2 text-xs text-muted-foreground">Annual CPI assumption {fin?.goals_risk?.quote_cpi == null || fin.goals_risk.quote_cpi === "" ? "· Set in Needs Analysis" : `· ${fin.goals_risk.quote_cpi}%`}</p>
+            <p className="mt-2 text-xs text-muted-foreground">Annual CPI assumption · {fin?.goals_risk?.quote_cpi == null || fin.goals_risk.quote_cpi === "" ? "5" : fin.goals_risk.quote_cpi}% <span className="text-muted-foreground/70">(edit in Needs Analysis)</span></p>
             <div className="mt-2 flex flex-wrap items-center gap-2">
             <span className={label}>Desired Cover · income years</span>
             <Input aria-label="Income years" className="h-8 w-14 px-2 text-xs tabular-nums" inputMode="numeric" value={params.incomeYears}

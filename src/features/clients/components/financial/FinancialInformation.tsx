@@ -127,7 +127,13 @@ export function FinancialInformation({ clientId, showAgreedCover = false }: { cl
   }, [q.data, clientId]);
 
   const { retired } = useRetirementInfo(clientId);
-  const sec = (k: SectionKey) => data[k] ?? {};
+  const sec = (k: SectionKey) => {
+    const v = data[k] ?? {};
+    // Default CPI assumption to the standard 5% until the Wealth Manager overrides it;
+    // stays a normal editable field, this only fills the blank starting value.
+    if (k === "goals_risk" && (v.quote_cpi == null || v.quote_cpi === "")) return { ...v, quote_cpi: "5" };
+    return v;
+  };
   const set = (k: string, v: any) => {
     dirtySections.current.set(k, (dirtySections.current.get(k) ?? 0) + 1);
     setData((d) => ({ ...d, [k]: v }));
