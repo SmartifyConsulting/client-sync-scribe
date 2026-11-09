@@ -21,6 +21,7 @@ import { detectMentionedTopics } from "@/lib/needsAnalysisTopics";
 import { NeedsQuestionFields } from "./NeedsQuestionFields";
 import { TranscriptButton } from "./DocumentTray";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type Viewer = "manager" | "client";
 const db = supabase as any;
@@ -156,6 +157,18 @@ function NeedsAnalysisChecklist({ clientId, liveTranscript }: { clientId: string
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function MeetingQuestions({ clientId }: { clientId: string }) {
+  const { data: profile } = useQuery({
+    queryKey: ["client-financial-profile", clientId],
+    queryFn: async () => (await (supabase as any).from("client_financial_profiles").select("*").eq("patient_id", clientId).maybeSingle()).data,
+  });
+  return (
+    <div className="rounded-lg border border-border/70 p-2.5">
+      <p className="text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Questions to ask</p>
       <NeedsQuestionFields key={clientId} clientId={clientId} profile={profile} />
     </div>
   );
@@ -226,6 +239,8 @@ export function CaptureFinancialsPanel({ clientId, sessions, financials, viewer,
   const [sessionId, setSessionId] = useState<string>("");
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
+  const [tab, setTab] = useState<"meeting" | "profile">("meeting");
+  const [changes, setChanges] = useState<string[] | null>(null);
   const live = useLiveSpeechTranscript();
   useEffect(() => { if (!sessionId && usable[0]) setSessionId(usable[0].id); }, [usable.length]);
 
@@ -244,6 +259,7 @@ export function CaptureFinancialsPanel({ clientId, sessions, financials, viewer,
     setBusy(false);
     const msg = (data as any)?.error ?? error;
     if (msg || !data?.ok) return toast({ title: "Couldn't capture the financial information", description: msg ?? "Please try again.", variant: "destructive" });
+    setChanges(Array.isArray(data.changes) ? data.changes : []);
     await Promise.all([
       refresh(qc),
       qc.invalidateQueries({ queryKey: ["client-financial-profile", clientId] }),
@@ -254,43 +270,77 @@ export function CaptureFinancialsPanel({ clientId, sessions, financials, viewer,
       : { title: "No financial fields populated", description: "Review the consultation and enter any missing figures below." });
   };
 
+  const tabBtn = (k: typeof tab, label: string) => (
+    <button type="button" onClick={() => setTab(k)} aria-pressed={tab === k}
+      className={cn("rounded-full px-3 py-1 text-xs font-medium", tab === k ? "bg-foreground text-background" : "text-muted-foreground hover:bg-muted")}>{label}</button>
+  );
+
   return (
-    <div className="space-y-3 text-sm">
-      <p className="text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Record the meeting</p>
-      {clientId && (
-        <RecordMeeting
-          clientId={clientId}
-          onDone={(sid) => { setSessionId(sid); toast({ title: "Meeting transcript saved" }); refresh(qc); run(sid); }}
-          onStartLive={live.supported ? live.start : undefined}
-          onStopLive={live.supported ? live.stop : undefined}
-        />
-      )}
-      {clientId && <NeedsAnalysisChecklist clientId={clientId} liveTranscript={live.transcript} />}
-      <p className="text-2xs text-muted-foreground">Elysian AI transcribes the meeting and fills in the financial information automatically.</p>
-      <p className="pt-2 text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Or capture from an earlier consultation</p>
-      {usable.length > 0 && (
-        <div className="space-y-1.5">
-          <Label className="text-xs">Recorded consultation</Label>
-          <Select value={sessionId} onValueChange={setSessionId}>
-            <SelectTrigger><SelectValue placeholder="Choose a consultation" /></SelectTrigger>
-            <SelectContent>{usable.map((s) => <SelectItem key={s.id} value={s.id}>{s.title || "Meeting"} · {fmt(s.created_at)}</SelectItem>)}</SelectContent>
-          </Select>
-          {usable.some((s) => s.id === sessionId && s.hasTranscript) && <TranscriptButton sessionId={sessionId} clientId={clientId} />}
+    <div className="space-y-3 text-xs">
+      <div className="flex gap-1 rounded-full border border-border p-0.5 w-fit">
+        {tabBtn("meeting", "Meeting & questions")}
+        {tabBtn("profile", "Financial profile")}
+      </div>
+      {tab === "profile" ? (
+        clientId && <FinancialInformation clientId={clientId} showAgreedCover />
+      ) : (
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+          <div className="space-y-3">
+            <p className="text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">1 · Record the meeting</p>
+            {clientId && (
+              <RecordMeeting
+                clientId={clientId}
+                onDone={(sid) => { setSessionId(sid); toast({ title: "Meeting transcript saved" }); refresh(qc); run(sid); }}
+                onStartLive={live.supported ? live.start : undefined}
+                onStopLive={live.supported ? live.stop : undefined}
+              />
+            )}
+            {clientId && <NeedsAnalysisChecklist clientId={clientId} liveTranscript={live.transcript} />}
+            <p className="text-2xs text-muted-foreground">Elysian AI transcribes the meeting and updates the client's information. Every change is listed and saved with the consultation.</p>
+            <p className="pt-1 text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">2 · Or use an earlier consultation</p>
+            {usable.length > 0 && (
+              <div className="space-y-1.5">
+                <Select value={sessionId} onValueChange={setSessionId}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Choose a consultation" /></SelectTrigger>
+                  <SelectContent>{usable.map((s) => <SelectItem key={s.id} value={s.id} className="text-xs">{s.title || "Meeting"} · {fmt(s.created_at)}</SelectItem>)}</SelectContent>
+                </Select>
+                {usable.some((s) => s.id === sessionId && s.hasTranscript) && <TranscriptButton sessionId={sessionId} clientId={clientId} />}
+              </div>
+            )}
+            <Textarea rows={3} className="text-xs" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Or paste meeting notes, e.g. Earns R65,000 gross, bond of R1.2m…" />
+            <Button size="sm" className="w-full rounded-full text-xs" onClick={() => run()} disabled={busy || (!sessionId && !notes.trim())}>
+              {busy ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-2 h-3.5 w-3.5" />}
+              {financials?.extracted_at ? "Update from consultation" : "Capture financial information"}
+            </Button>
+            {financials?.extracted_at && <p className="text-2xs text-muted-foreground">Last updated {fmt(financials.extracted_at)}. {clientFirst} verifies it next.</p>}
+            {changes && (
+              <div className="rounded-lg border border-primary/40 bg-primary/5 p-2.5">
+                <p className="mb-1 text-2xs font-semibold uppercase tracking-[0.14em]">Summary of changes</p>
+                {changes.length ? <ul className="space-y-0.5">{changes.map((c) => <li key={c}>• {c}</li>)}</ul> : <p className="text-muted-foreground">No information changed.</p>}
+                <p className="mt-1 text-2xs text-muted-foreground">Saved with the consultation record.</p>
+              </div>
+            )}
+          </div>
+          {clientId && <MeetingQuestions clientId={clientId} />}
         </div>
       )}
-      <div className="space-y-1.5">
-        <Label className="text-xs">{usable.length ? "Or paste meeting notes" : "No recorded consultation yet. Paste meeting notes"}</Label>
-        <Textarea rows={4} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="e.g. Earns R65,000 gross, bond of R1.2m on the house…" />
-      </div>
-      <Button className="w-full rounded-full" onClick={() => run()} disabled={busy || (!sessionId && !notes.trim())}>
-        {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-        {financials?.extracted_at ? "Capture again" : "Capture financial information"}
-      </Button>
-      {financials?.extracted_at && (
-        <p className="text-xs text-muted-foreground">Last captured {fmt(financials.extracted_at)}. Check and correct it before {clientFirst} verifies.</p>
-      )}
-      {clientId && <FinancialInformation clientId={clientId} showAgreedCover />}
     </div>
+  );
+}
+
+/** Impromptu consultation: available from any step of the workflow. */
+export function ConsultationButton({ clientId, sessions, financials, clientFirst }: { clientId?: string; sessions: any[]; financials: any; clientFirst: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Button size="sm" variant="outline" className="h-7 rounded-full px-2.5 text-xs" onClick={() => setOpen(true)}><Mic className="mr-1.5 h-3.5 w-3.5" />Consultation</Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-h-[90vh] max-w-6xl overflow-y-auto">
+          <DialogHeader><DialogTitle className="text-base">Consultation with {clientFirst}</DialogTitle></DialogHeader>
+          <CaptureFinancialsPanel clientId={clientId} sessions={sessions} financials={financials} viewer="manager" clientFirst={clientFirst} />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 

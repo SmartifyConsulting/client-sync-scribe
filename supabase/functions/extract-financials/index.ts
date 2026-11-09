@@ -83,6 +83,17 @@ Deno.serve(async (req) => {
     if (typeof facts.general_notes === "string" && facts.general_notes.trim()) {
       row.general_notes = existing?.general_notes ? `${existing.general_notes}\n\n${facts.general_notes.trim()}` : facts.general_notes.trim();
     }
+    const SECTION_LABEL: Record<string, string> = { cash_flow: "Cash flow", assets_liabilities: "Assets & liabilities", risk_portfolio: "Existing cover", investments: "Investments", goals_risk: "Goals & risk", estate: "Estate", car_insurance: "Car insurance" };
+    const show = (v: unknown) => v == null || v === "" ? "blank" : typeof v === "object" ? (Array.isArray(v) ? `${v.length} item(s)` : "details") : String(v);
+    const changes: string[] = [];
+    for (const k of keys) {
+      if (!facts[k] || typeof facts[k] !== "object") continue;
+      for (const [f, v] of Object.entries(facts[k])) {
+        const before = existing?.[k]?.[f];
+        if (JSON.stringify(before ?? null) !== JSON.stringify(v ?? null)) changes.push(`${SECTION_LABEL[k]} · ${f.replace(/_/g, " ")}: ${show(before)} → ${show(v)}`);
+      }
+    }
+    if (row.general_notes && row.general_notes !== existing?.general_notes) changes.push("General notes · added meeting remarks");
     const { error } = await admin.from("client_financial_profiles").upsert(row, { onConflict: "patient_id" });
     if (error) { console.error(error); return json({ error: "Couldn't save the financial information." }, 500); }
 
@@ -95,9 +106,18 @@ Deno.serve(async (req) => {
         if (typeof v === "string" && v.trim() && !currentPat?.[k]) personalUpdate[k] = v.trim();
       }
       if (Object.keys(personalUpdate).length) await admin.from("clients").update(personalUpdate).eq("id", patientId);
+      for (const [k, v] of Object.entries(personalUpdate)) changes.push(`Personal · ${k.replace(/_/g, " ")}: blank → ${v}`);
     }
 
-    return json({ ok: true, sections: keys.filter((k) => row[k]) });
+    // Record a dated summary of what this consultation changed on the consultation itself.
+    if (sessionId) {
+      const stamp = new Date().toLocaleString("en-ZA", { timeZone: "Africa/Johannesburg" });
+      const block = `Summary of changes (${stamp}):\n${changes.length ? changes.map((c) => `• ${c}`).join("\n") : "• No information changed"}`;
+      const { data: s } = await admin.from("sessions").select("notes").eq("id", sessionId).maybeSingle();
+      await admin.from("sessions").update({ notes: s?.notes ? `${s.notes}\n\n${block}` : block }).eq("id", sessionId);
+    }
+
+    return json({ ok: true, sections: keys.filter((k) => row[k]), changes });
   } catch (e) {
     console.error(e);
     return json({ error: "Something went wrong. Please try again." }, 500);

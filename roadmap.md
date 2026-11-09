@@ -227,3 +227,8 @@
 - [x] Seed Marvin Madly test financials so Benefit Amounts fill in
 - [x] Per-insurer required variable list mapped to one standard Elysian name (spreadsheet)
 - [ ] Rename the app’s internal field keys to the agreed Elysian names — awaiting user approval of the list
+## Consultation & transcript — Nov 9
+- [x] Transcript PDF with header, footer, bold Wealth Manager / regular client dialogue
+- [x] Compact question dropdowns; meeting tab with questions on the right; financial profile in its own tab
+- [x] Consultation button at any step; each capture records a summary of changes on the consultation
+- [ ] Live recording + change summary readback with Georgia Demo — needs a signed-in Wealth Manager meeting
