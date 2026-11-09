@@ -261,7 +261,8 @@ export default function ReferralAdvisors({ hideHeader = false }: ReferralAdvisor
       .from("referral_partners")
       .select("*")
       .order("last_name", { ascending: true });
-    if (!error && data) setDoctors(data as any);
+    // Referrer contacts (managed on the Referrers tab) share this table; keep them out of this list.
+    if (!error && data) setDoctors((data as any[]).filter((d) => d.specialty !== "Referrer") as any);
     setLoading(false);
   };
 

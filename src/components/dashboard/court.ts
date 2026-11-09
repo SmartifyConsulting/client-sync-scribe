@@ -20,3 +20,13 @@ const STAGE_COURT: Record<string, Court> = {
 };
 
 export const courtFor = (stage: string): Court => STAGE_COURT[stage] ?? "advisor";
+
+import { WORKFLOW_GROUPS } from "@/features/wealth-workflow/map/groups";
+
+/** The task item waiting at this stage: the first step in its group owned by whoever holds the ball. */
+export function taskFor(stage: string): string | null {
+  const group = WORKFLOW_GROUPS.find((g) => (g.stages as string[]).includes(stage));
+  if (!group) return null;
+  const court = courtFor(stage);
+  return (group.steps.find((s) => s.owner === court) ?? group.steps[0])?.label ?? null;
+}

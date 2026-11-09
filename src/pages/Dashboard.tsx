@@ -1,5 +1,4 @@
 import { NewClientInvite } from "@/features/wealth-workflow/invites/NewClientInvite";
-import { CompactTodoList } from "@/components/dashboard/CompactTodoList";
 import { Navigate } from "react-router-dom";
 import { TodaysBriefing } from "@/components/dashboard/TodaysBriefing";
 import { PipelineOverview } from "@/components/dashboard/PipelineOverview";
@@ -76,7 +75,6 @@ export default function Dashboard() {
         <ActiveWorkspaceClients />
         <TodaysBriefing />
         <PipelineOverview />
-        <CompactTodoList />
         <UpcomingMeetings />
         <EarningsThisMonth />
       </div>

@@ -215,3 +215,8 @@
 ## FICA as a normal step — Nov 8
 - [x] Upload proof of address and bank letter inside the step (no Documents detour); upload ticks the step
 - [x] No red "On hold" for normal FICA items; signed Disclosure+LOA count as mandate, Didit KYC counts as ID
+
+## Dashboard, quote progress, referrers — Nov 9
+- [x] Remove dashboard To-Do list; Live Workspace rows show the actual waiting task
+- [x] Two-card quote progress: connected tick, insurer-coloured bar, product letter ticks (L/D/I/C/H), non-blocking "OTP waiting"; insurers run side by side
+- [x] Referrers: invited referrers with telephone, Pending sign-up status, add/edit/resend/delete

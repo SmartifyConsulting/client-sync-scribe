@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, UserPlus, Trash2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { ReferrerContacts } from "./ReferrerContacts";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -76,33 +76,6 @@ export default function Referrers() {
 
   const zar = (n: number) => `R${Math.round(n).toLocaleString("en-ZA")}`;
 
-  // Create — invite a prospective referrer by email.
-  const [inviteOpen, setInviteOpen] = useState(false);
-  const [inviteForm, setInviteForm] = useState({ firstName: "", lastName: "", email: "" });
-  const [inviting, setInviting] = useState(false);
-  const sendInvite = async () => {
-    if (!inviteForm.email.trim()) return;
-    setInviting(true);
-    try {
-      const recipientName = [inviteForm.firstName.trim(), inviteForm.lastName.trim()].filter(Boolean).join(" ");
-      const { error } = await supabase.functions.invoke("send-user-invitation", {
-        body: {
-          recipientEmail: inviteForm.email.trim(),
-          isReferral: true,
-          message: `${recipientName ? `Hello ${recipientName},\n\n` : ""}I'd like to invite you to refer clients to me on Holarc Wealth and earn commission on every policy that's issued.`,
-        },
-      });
-      if (error) throw error;
-      toast.success(`Invitation sent to ${inviteForm.email.trim()}`);
-      setInviteOpen(false);
-      setInviteForm({ firstName: "", lastName: "", email: "" });
-    } catch (e: any) {
-      toast.error(e.message || "Couldn't send the invitation.");
-    } finally {
-      setInviting(false);
-    }
-  };
-
   // Delete — remove a custom commission rate, reverting that referrer to the default.
   const [removeId, setRemoveId] = useState<string | null>(null);
   const removeRate = async () => {
@@ -118,8 +91,9 @@ export default function Referrers() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs text-muted-foreground">Everyone referring clients to you, and the commission rate you offer each one.</p>
-        <Button size="sm" onClick={() => setInviteOpen(true)}><UserPlus className="h-4 w-4 mr-1.5" />Invite referrer</Button>
       </div>
+
+      <ReferrerContacts />
 
       <div className="rounded-xl border border-border bg-card overflow-x-auto">
         {referrals.isLoading ? (
@@ -195,34 +169,6 @@ export default function Referrers() {
           </div>
         </div>
       )}
-
-      <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
-        <DialogContent className="settings-scope sm:max-w-md text-xs">
-          <DialogHeader>
-            <DialogTitle className="text-sm font-semibold">Invite a referrer</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <div className="space-y-1.5">
-              <Label className="text-xs font-bold" htmlFor="referrer-first-name">First Name</Label>
-              <Input className="text-xs" id="referrer-first-name" autoComplete="given-name" value={inviteForm.firstName} onChange={(e) => setInviteForm((f) => ({ ...f, firstName: e.target.value }))} placeholder="Optional" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-bold" htmlFor="referrer-last-name">Last Name</Label>
-              <Input className="text-xs" id="referrer-last-name" autoComplete="family-name" value={inviteForm.lastName} onChange={(e) => setInviteForm((f) => ({ ...f, lastName: e.target.value }))} placeholder="Optional" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-bold" htmlFor="referrer-email">Email</Label>
-              <Input id="referrer-email" className="text-xs" type="email" required value={inviteForm.email} onChange={(e) => setInviteForm((f) => ({ ...f, email: e.target.value }))} placeholder="referrer@email.com" />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setInviteOpen(false)} disabled={inviting}>Cancel</Button>
-            <Button onClick={sendInvite} disabled={inviting || !inviteForm.email.trim()}>
-              {inviting ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : null}Send invitation
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       <AlertDialog open={!!removeId} onOpenChange={(o) => !o && setRemoveId(null)}>
         <AlertDialogContent>
