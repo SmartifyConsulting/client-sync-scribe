@@ -72,13 +72,11 @@ export default function Dashboard() {
         />
       )}
 
-      {/* WM dashboard: Action Items, Pipeline, Active Workspace Clients,
-          Upcoming Meetings, Briefing for the day, Earnings for the month. */}
       <div className="grid gap-3 md:gap-6 grid-cols-1 lg:grid-cols-2">
-        <TodaysBriefing />
         <ActiveWorkspaceClients />
-        <CompactTodoList />
+        <TodaysBriefing />
         <PipelineOverview />
+        <CompactTodoList />
         <UpcomingMeetings />
         <EarningsThisMonth />
       </div>
