@@ -38,7 +38,7 @@
 
     /* Holarc brand palette */
     --brand-blue: 241.44 100% 24.5098%; /* #03007D */
-    --brand-yellow: 49.4694 98.3936% 48.8235%; /* #F7CC02 */
+    --brand-yellow: 48.9796 98.3936% 48.8235%; /* #F7CC02 */
     --primary: var(--brand-blue);
     /* Wealth workflow owner badges */
     /* Green is always the client, blue is always the Wealth Manager */
@@ -184,8 +184,8 @@
     --owner-system: 174 65% 66%;
     --owner-system-bg: 174 45% 15%;
     --primary-foreground: var(--brand-blue);
-    --primary-glow: 49.47 98.39% 63%;
-    --primary-dark: 49.47 98.39% 43%;
+    --primary-glow: 48.98 98.39% 63%;
+    --primary-dark: 48.98 98.39% 43%;
 
     --secondary: 222 22% 16%;
     --secondary-foreground: 0 0% 90%;
