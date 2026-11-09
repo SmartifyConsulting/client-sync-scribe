@@ -1,5 +1,4 @@
 import { providerQuoteFields, hasVerifiedProviderFields, isOmpProduct, providerFieldApplies, premiumPatternField, premiumPatternOptions } from "./providerQuoteFields";
-import { PREMIUM_PATTERNS, coverOptionLabel } from "./quoteSpec";
 import { insurerFields, insurerKey } from "./insurerDictionary";
 import { OMP_RATING_LABELS } from "./providerRatingFields";
 import { bidvestQuestions } from './BidvestClientFields';
@@ -52,27 +51,6 @@ export function buildPortalScenarios(plan: Record<string, Record<string, unknown
 }
 
 export const VARIANT_COMPANION_VERSION = "1.7.18";
-/** @deprecated kept only so existing call sites keep compiling until Phase 2/3 switch to the generic premium-variant path below. */
-const MOMENTUM_LIFE_PATTERNS = ["Level", "Compulsory", "Aggressive LifeStage"];
-/** @deprecated kept only so existing call sites keep compiling; use premiumPatternOptions("Old Mutual", product) instead. */
-export const OLD_MUTUAL_LIFE_PATTERNS = ["0% Annual Increase", "5% Annual Increase", "Increase with Age"];
-
-/** @deprecated numbered-scenario mechanism, superseded by the universal _premiumVariants model (see buildPremiumVariantScenario). */
-export function momentumLifeVariantLabel(n: number) {
-  if (!Number.isInteger(n) || n < 7 || n > 15) return undefined;
-  return `Life cover · ${coverOptionLabel(Math.floor((n - 7) / 3))} · ${PREMIUM_PATTERNS[(n - 7) % 3]}`;
-}
-
-/** @deprecated numbered-scenario mechanism, superseded by the universal _premiumVariants model (see buildPremiumVariantScenario). */
-export function buildMomentumLifeVariants(options: Record<string, unknown>[], client?: Record<string, unknown> | null) {
-  return options.flatMap((option, index) => {
-    if (!option || !(Number(option.benefit_amount) > 0)) return [];
-    return MOMENTUM_LIFE_PATTERNS.map((pattern, variant) => ({
-      ...buildPortalScenarios({ "Life cover": [{ ...option, "Momentum:myriad_pattern": pattern }] }, "Momentum", client)[0],
-      n: 7 + index * 3 + variant,
-    }));
-  });
-}
 
 /**
  * Architecture decision (Phase 1): every insurer/product now gets its 3

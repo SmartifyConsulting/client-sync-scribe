@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { PRODUCT_TYPES, variationComplete } from "./quoteSpec";
 import { DEFAULT_PARAMS, withCoverAmounts } from "./needsProducts";
-import { withQuoteDefaults } from "./providerQuoteFields";
-import { buildMomentumLifeVariants, momentumLifeVariantLabel } from "./portalPayload";
+import { withQuoteDefaults, premiumPatternOptions } from "./providerQuoteFields";
+import { buildPremiumVariantScenarios } from "./portalPayload";
 
 describe("quote option completeness", () => {
   const option = { benefit_amount: "1700000", increase_option: "No increase", growth: "" };
@@ -45,11 +45,21 @@ it("applies the shared CPI and maps only available insurer defaults", () => {
   expect(withQuoteDefaults("Income protection", {}, ["Momentum"], { goals_risk: { retirement_age: 63 } })["Momentum:myriad_retirement"]).toBeUndefined();
 });
 
-it("requests three distinct Momentum life patterns per applicable cover without renumbering Agreed Cover", () => {
-  const scenarios = buildMomentumLifeVariants([{ benefit_amount: "1000000" }, { benefit_amount: "0" }, { benefit_amount: "800000" }]);
-  expect(scenarios.map(s => s.n)).toEqual([7, 8, 9, 13, 14, 15]);
-  expect(scenarios.slice(0, 3).map(s => s.fields.find(field => field.label === "Premium pattern")?.value))
-    .toEqual(["Level", "Compulsory", "Aggressive LifeStage"]);
-  expect(scenarios[5].fields.find(field => field.label === "Benefit amount")?.value).toBe("800000");
-  expect(momentumLifeVariantLabel(15)).toBe("Life cover · Agreed Cover · Aggressive Increase");
+describe("premium-pattern quote variants apply to every insurer/product, not just Old Mutual Life", () => {
+  it("resolves exactly 3 curated patterns for Momentum Life cover", () => {
+    expect(premiumPatternOptions("Momentum", "Life cover")).toEqual(["Level", "Compulsory", "Aggressive LifeStage"]);
+  });
+  it("resolves the OMP compulsory-increase field's own 3 options for every Old Mutual product", () => {
+    expect(premiumPatternOptions("Old Mutual", "Life cover")).toEqual(["0% Annual Increase", "5% Annual Increase", "Increase with Age"]);
+    expect(premiumPatternOptions("Old Mutual", "Income protection")).toEqual(["0% Annual Increase", "5% Annual Increase", "Increase with Age"]);
+  });
+  it("resolves the generic PREMIUM_PATTERNS field for an unverified insurer", () => {
+    expect(premiumPatternOptions("Hollard", "Life cover")).toEqual(["Stable", "Inflationary Increase", "Aggressive Increase"]);
+  });
+  it("builds a scenario per pattern, applying the pattern to the option's own pattern field", () => {
+    const scenarios = buildPremiumVariantScenarios("Momentum", "Life cover", { benefit_amount: "1000000" });
+    expect(scenarios.map(s => s.pattern)).toEqual(["Level", "Compulsory", "Aggressive LifeStage"]);
+    expect(scenarios.map(s => s.scenario?.fields.find(field => field.label === "Premium pattern")?.value))
+      .toEqual(["Level", "Compulsory", "Aggressive LifeStage"]);
+  });
 });
