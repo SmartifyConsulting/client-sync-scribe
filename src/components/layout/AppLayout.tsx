@@ -53,7 +53,7 @@ export function AppLayout() {
         <div className="hidden md:flex justify-end px-8 pt-4">
           <TopBarIcons />
         </div>
-        <div className="px-6 py-6 md:px-8 md:pt-2 md:pb-8 w-full">
+        <div className="px-6 py-6 md:px-8 md:pt-5 md:pb-8 w-full">
           <AnimatePresence mode="wait">
             <PageTransition key={location.pathname}>
               <Outlet />
