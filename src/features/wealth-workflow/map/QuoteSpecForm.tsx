@@ -1,3 +1,4 @@
+import { quoteFieldLabel, quoteRatingLabel } from "./quoteVocabulary";
 import { DIRECT_QUOTE_ROUTES, directQuoteCategory } from "./directQuoteProviders";
 import { providerQuoteFields, hasVerifiedProviderFields, isOmpProduct, providerFieldApplies, ompSettingsComplete, withQuoteDefaults, premiumPatternField, premiumPatternOptions, premiumPatternElysianLabel, supportsPremiumVariants } from "./providerQuoteFields";
 import { OMP_RATING_OPTIONS, ompRatingIssues } from "./providerRatingFields";
@@ -341,9 +342,9 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     }
     if(ins==='Bidvest Life / FMI') {
       const issues=bidvestIssues(Object.values(requestedPlan)[0]?.[0]?._bidvestInputs);
-      if(issues.length){toast({title:'Complete the Bidvest client questions first.',description:issues.join('; '),variant:'destructive'});return;}
+      if(issues.length){toast({title:'Complete the Bidvest client questions first.',description:issues.map(quoteRatingLabel).join('; '),variant:'destructive'});return;}
     }
-    const missingRating = Object.entries(requestedPlan).flatMap(([p, options]) => options.flatMap((v,i) => isOmpProduct(ins,p) && (!only || only.includes(i+1)) ? ompRatingIssues(v._ompInputs).map(label=>`${p} ${coverOptionLabel(i)} · ${label}`) : []));
+    const missingRating = Object.entries(requestedPlan).flatMap(([p, options]) => options.flatMap((v,i) => isOmpProduct(ins,p) && (!only || only.includes(i+1)) ? ompRatingIssues(v._ompInputs).map(label=>`${p} ${coverOptionLabel(i)} · ${quoteRatingLabel(label)}`) : []));
     if(missingRating.length) {toast({title:'Complete the required insurer details first.',description:missingRating.slice(0,5).join('; '),variant:'destructive'});return;}
     if(ins==='Old Mutual' && Object.keys(requestedPlan).some(p=>p!=='Life cover')) {toast({title:'Use Get quote under a Life cover option. Other Old Mutual products are not yet mapped.'});return;}
     if (Object.entries(requestedPlan).some(([p, options]) => options.some((v,i) => (!only || only.includes(i+1)) && !ompSettingsComplete(ins, p, v)))) { toast({ title: "Complete the insurer’s required product settings first." }); return; }
@@ -852,7 +853,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                       {option._quoteReferences?.[activeTab]?.number && !quoteReference(p,option,activeTab) && <div className="my-2 rounded border border-border p-2 font-normal normal-case tracking-normal"><p className="font-semibold">Previous quote: {option._quoteReferences[activeTab].number}</p><p className="text-muted-foreground">Saved for earlier settings. Current draft requires a new calculation.</p>{option._quoteResults?.[activeTab]?.monthlyPremium>0&&<p>R {Number(option._quoteResults[activeTab].monthlyPremium).toFixed(2)} / month</p>}</div>}
                       {isWM && isOmpProduct(activeTab,p) && <>
                         <details className="my-2 normal-case tracking-normal font-normal"><summary className="cursor-pointer">Required rating details{ompRatingIssues(option._ompInputs).length ? ` · ${ompRatingIssues(option._ompInputs).length} to complete` : ' · Complete'}</summary>
-                          <div className="space-y-2 pt-2">{OMP_RATING_LABELS.map(label=><label key={label} className="block text-[10px] font-semibold">{label} *{OMP_RATING_OPTIONS[label] ? <select required aria-label={label} className="mt-1 h-7 w-full rounded border border-input bg-background px-1 text-xs font-normal" value={option._ompInputs?.[label]??''} onChange={e=>setVal(p,i,'_ompInputs',{...option._ompInputs,[label]:e.target.value})}><option value="" disabled>Select an insurer option</option>{OMP_RATING_OPTIONS[label].map(value=><option key={value}>{value}</option>)}</select> : <Input required type={label==='Date of birth'?'date':'text'} className="mt-1 h-7 text-xs font-normal" value={option._ompInputs?.[label] ?? ''} onChange={e=>setVal(p,i,'_ompInputs',{...option._ompInputs,[label]:e.target.value})} />}</label>)}{ompRatingIssues(option._ompInputs).length>0 && <p className="text-destructive" role="status">Complete or correct: {ompRatingIssues(option._ompInputs).join(', ')}.</p>}</div>
+                          <div className="space-y-2 pt-2">{OMP_RATING_LABELS.map(label=><label key={label} className="block text-[10px] font-semibold">{quoteRatingLabel(label)} *{OMP_RATING_OPTIONS[label] ? <select required aria-label={quoteRatingLabel(label)} className="mt-1 h-7 w-full rounded border border-input bg-background px-1 text-xs font-normal" value={option._ompInputs?.[label]??''} onChange={e=>setVal(p,i,'_ompInputs',{...option._ompInputs,[label]:e.target.value})}><option value="" disabled>Select an insurer option</option>{OMP_RATING_OPTIONS[label].map(value=><option key={value}>{value}</option>)}</select> : <Input required type={label==='Date of birth'?'date':'text'} className="mt-1 h-7 text-xs font-normal" value={option._ompInputs?.[label] ?? ''} onChange={e=>setVal(p,i,'_ompInputs',{...option._ompInputs,[label]:e.target.value})} />}</label>)}{ompRatingIssues(option._ompInputs).length>0 && <p className="text-destructive" role="status">Complete or correct: {ompRatingIssues(option._ompInputs).map(quoteRatingLabel).join(', ')}.</p>}</div>
                         </details>
                         {p === "Life cover" && <Button className="my-1 h-7 text-xs normal-case tracking-normal" size="sm" disabled={!connected || quotesRunning || collectingAll || !ompSettingsComplete(activeTab,p,option) || ompRatingIssues(option._ompInputs).length>0} onClick={()=>void submitScenarios(activeTab,[i+1],p)}>Get quote</Button>}
                       </>}
@@ -873,19 +874,25 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                     </tr>}
                     {fields.map((f) => (
                       <tr key={f.key} className={cn("border-t border-border/60", f.key.includes(":") && "bg-muted/30")}>
-                        <td className="px-2 py-1 text-xs leading-relaxed text-muted-foreground" title={f.label}>{f.label}</td>
+                        <td className="px-2 py-1 text-xs leading-relaxed text-muted-foreground" title={f.label}>{quoteFieldLabel(f)}</td>
                         {plan[p].map((v, i) => (
                           <td key={i} className="px-2 py-0.5">
                             {f.kind === "select" ? (
                               <select disabled={!providerFieldApplies(f,v)} className="h-6 w-full rounded border border-input bg-background px-1 text-[11px] disabled:opacity-50" value={providerFieldApplies(f,v) ? v[f.key] ?? (hasVerifiedProviderFields(activeTab, p) ? "" : f.options[0]) : ""} onChange={(e) => setVal(p, i, f.key, e.target.value)}>
                                 {hasVerifiedProviderFields(activeTab, p) && <option value="" disabled>{providerFieldApplies(f,v) ? "Select an insurer option" : "Not applicable"}</option>}
                                 {v[f.key] && !f.options.includes(v[f.key]) && <option value={v[f.key]} disabled>{v[f.key]} (saved)</option>}
-                                {f.options.map((o) => <option key={o}>{o}</option>)}
+                                {f.options.map((o) => {
+                                  const patternIndex = premiumPatternField(activeTab, p)?.key === f.key
+                                    ? premiumPatternOptions(activeTab, p)?.indexOf(o) ?? -1
+                                    : -1;
+                                  const standard = patternIndex >= 0 ? premiumPatternElysianLabel(activeTab, p, patternIndex) : undefined;
+                                  return <option key={o} value={o}>{standard ?? o}</option>;
+                                })}
                               </select>
                             ) : f.key === "benefit_amount" || f.key === "monthly_benefit" ? (
                               <span className="tabular-nums">{v[f.key] === "0" && i === 1 ? "No existing cover" : v[f.key] ? `R ${groupDigits(v[f.key])}` : i === 2 ? "Set in Needs Analysis" : "Financial information required"}</span>
                             ) : f.kind === "toggle" ? (
-                              <div className="flex h-6 items-center"><input type="checkbox" aria-label={f.label} checked={!!v[f.key]} onChange={(e) => setVal(p, i, f.key, e.target.checked)} /></div>
+                              <div className="flex h-6 items-center"><input type="checkbox" aria-label={quoteFieldLabel(f)} checked={!!v[f.key]} onChange={(e) => setVal(p, i, f.key, e.target.checked)} /></div>
                             ) : (
                               <div className="flex h-6 items-center gap-1">
                                 <span className="w-3 shrink-0 text-muted-foreground">{f.kind === "amount" ? "R" : ""}</span>

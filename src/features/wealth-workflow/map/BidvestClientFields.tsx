@@ -1,3 +1,4 @@
+import { quoteRatingLabel } from "./quoteVocabulary";
 import { Input } from '@/components/ui/input';
 
 export const BIDVEST_QUESTIONS: Record<string,string[]> = {
@@ -21,7 +22,7 @@ export function BidvestClientFields({answers,onChange}:{answers:Record<string,st
   const issues=bidvestIssues(answers);
   return <details className="rounded-lg border border-border p-3 text-xs"><summary className="cursor-pointer font-semibold">Bidvest client questions · {issues.length?`${issues.length} to complete`:'Complete'}</summary>
     <p className="my-2 text-muted-foreground">Record the client’s explicit answers. These details apply to all Bidvest options. Occupation-specific questions may also be required by the insurer.</p>
-    <div className="grid gap-3 sm:grid-cols-2">{bidvestQuestions(answers).map(([label,choices])=><label className="font-semibold" key={label}>{label} *<select aria-label={`Bidvest ${label}`} className="mt-1 h-9 w-full rounded border border-input bg-background px-2 font-normal" value={answers[label]??''} onChange={e=>onChange({...answers,[label]:e.target.value})}><option value="" disabled>Select an answer</option>{choices.map(choice=><option key={choice}>{choice}</option>)}</select></label>)}
-    {['Before-tax monthly income','After-tax monthly income'].map(label=><label className="font-semibold" key={label}>{label} (R) *<Input aria-label={`Bidvest ${label}`} className="mt-1 font-normal" inputMode="decimal" value={answers[label]??''} onChange={e=>onChange({...answers,[label]:e.target.value.replace(/[^\d.]/g,'')})}/></label>)}</div>
+    <div className="grid gap-3 sm:grid-cols-2">{bidvestQuestions(answers).map(([label,choices])=><label className="font-semibold" key={label}>{quoteRatingLabel(label)} *<select aria-label={`Bidvest ${quoteRatingLabel(label)}`} className="mt-1 h-9 w-full rounded border border-input bg-background px-2 font-normal" value={answers[label]??''} onChange={e=>onChange({...answers,[label]:e.target.value})}><option value="" disabled>Select an answer</option>{choices.map(choice=><option key={choice}>{choice}</option>)}</select></label>)}
+    {['Before-tax monthly income','After-tax monthly income'].map(label=><label className="font-semibold" key={label}>{quoteRatingLabel(label)} (R) *<Input aria-label={`Bidvest ${quoteRatingLabel(label)}`} className="mt-1 font-normal" inputMode="decimal" value={answers[label]??''} onChange={e=>onChange({...answers,[label]:e.target.value.replace(/[^\d.]/g,'')})}/></label>)}</div>
   </details>;
 }
