@@ -105,19 +105,14 @@ export function serviceAgreementHtml(client: string, date: string, practice: any
     ["Planner", esc(practice?.planner_name || "Marlin Moodley")],
     ["Client", esc(client)],
   ]);
-  const signatures = `<div data-pdf-keep-together style="margin:24px 0 12px">
-    <p>Signed at ________________________ on ________________________</p>
-    <p>Client ________________________</p>
-    <p>FSP as represented by the Planner ________________________</p>
-  </div>`;
   const body = `${parties}${h2("Service arrangement")}
-    ${paragraphs(serviceAgreement.terms)}${signatures}
+    ${paragraphs(serviceAgreement.terms)}
     ${h2("Services offered")}
     <table style="width:100%;border-collapse:collapse;font-size:11px">
       <thead><tr data-pdf-keep-together style="background:#eef2f6"><th>Service</th><th>Value proposition</th><th>Holistic advice (a)</th><th>Limited advice (b)</th><th>Product advice (c)</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
-    ${h2("Scope of advice")}${paragraphs(serviceAgreement.advice)}${signatures}`;
+    ${h2("Scope of advice")}${paragraphs(serviceAgreement.advice)}`;
   const masthead = { ...practice, fsp_name: "Masthead Financial Planning (Proprietary) Limited", registration_number: "2010/019601/07",
     fsb_licence: "43435", firm_address: "1st Floor Park Terraces, Golf Park, Mowbray 7700", firm_website: "www.mastheadfp.co.za" };
   return wrap(title, `Draft · Prepared for ${esc(client)} · ${esc(date)}`, body, masthead)
