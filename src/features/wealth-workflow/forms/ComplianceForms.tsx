@@ -37,17 +37,13 @@ const defaults: Template[] = COMPLIANCE_FORMS.flatMap(form => {
   }) }];
   if (form.id === "broker_change") return [{ ...base, content: complianceFormHtml("Broker Change Letter", client, date,
     `<p style="margin:0 0 12px">Current broker: [Current broker]<br>New broker: [New broker]<br>New firm or FSP: [New firm or FSP]<br>Insurers and policy numbers: [Insurers and policy numbers]</p>
-    <p style="margin:0 0 12px">I request that the named broker be appointed for the policies listed above.</p><p style="margin:0">Electronically signed by [Client signature] on ${escape(date)}.</p>`, defaultPractice) }];
+    <p style="margin:0">I request that the named broker be appointed for the policies listed above.</p>`, defaultPractice) }];
+  if (form.id === "limited_advice_waiver") return [{ ...base, content: complianceFormHtml("Limited Advice Waiver", client, date,
+    `<p style="margin:0 0 12px">I confirm the information I supplied is complete and correct for the advice requested. I decline a full financial needs analysis and understand that other needs may go unidentified.</p>
+    <p style="margin:0">Scope of advice: [Requested scope]</p>`, defaultPractice) }];
   return [{ ...base, content: complianceFormHtml(form.title, client, date,
     `<p style="margin:0 0 12px">Adviser: [Adviser name]</p>
-    ${form.fields.map(field => `<p style="margin:0 0 12px"><strong>${escape(field.label)}</strong>${field.type === "check" ? " ☐" : `: ${field.options ? escape(field.options.join(" / ")) : "[Response]"}`}</p>`).join("")}
-    <p style="margin:0">Client signature: [Client signature]${form.adviserSigns ? "<br>Adviser signature: [Adviser signature]" : ""}</p>`, defaultPractice) }];
-});
-defaults.push({
-  template_key: "limited_advice_waiver", title: "Limited Advice Waiver", archived: false,
-  content: complianceFormHtml("Limited Advice Waiver", client, date,
-    `<p style="margin:0 0 12px">I confirm the information I supplied is complete and correct for the advice requested. I decline a full financial needs analysis and understand that other needs may go unidentified.</p>
-    <p style="margin:0 0 12px">Scope of advice: [Requested scope]</p><p style="margin:0">Confirmed by the linked client on ${escape(date)}.</p>`, defaultPractice),
+    ${form.fields.map(field => `<p style="margin:0 0 12px"><strong>${escape(field.label)}</strong>${field.type === "check" ? " ☐" : `: ${field.options ? escape(field.options.join(" / ")) : "[Response]"}`}</p>`).join("")}`, defaultPractice) }];
 });
 
 function TemplateDialog({ item, viewing, onClose, onSave }: {

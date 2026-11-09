@@ -70,7 +70,15 @@ export const COMPLIANCE_FORMS: ComplianceForm[] = [
     ],
   },
   {
-    id: "fica", number: 4, title: "KYC Profile & FICA Verification", stage: "Stage 2 · Screening & compliance", kind: "fica",
+    id: "limited_advice_waiver", number: 4, title: "Limited Advice Waiver", stage: "Stage 3 · Analysis & planning", kind: "limited_advice_waiver",
+    when: "Optional. Use when the client declines a full financial needs analysis in favour of limited, single-need advice.",
+    fields: [
+      { key: "scope", label: "Requested scope of advice", type: "text", required: true },
+      { key: "declineFna", label: "Client declines a full financial needs analysis and understands other needs may go unidentified", type: "check", required: true },
+    ],
+  },
+  {
+    id: "fica", number: 5, title: "KYC Profile & FICA Verification", stage: "Stage 2 · Screening & compliance", kind: "fica",
     when: "After the portfolio pull, before formal advice.",
     fields: [
       { key: "idCopy", label: "Copy of ID / passport", type: "file", required: true },
@@ -82,7 +90,7 @@ export const COMPLIANCE_FORMS: ComplianceForm[] = [
     ],
   },
   {
-    id: "fna", number: 5, title: "Financial Needs Analysis & Option Waiver", stage: "Stage 3 · Analysis & planning", kind: "fna",
+    id: "fna", number: 6, title: "Financial Needs Analysis & Option Waiver", stage: "Stage 3 · Analysis & planning", kind: "fna",
     when: "Start of financial planning.",
     fields: [
       { key: "goals", label: "Family financial needs and goals", type: "textarea", required: true, fnaOnly: true },
@@ -94,7 +102,7 @@ export const COMPLIANCE_FORMS: ComplianceForm[] = [
     ],
   },
   {
-    id: "roa", number: 6, title: "Record of Advice (ROA)", stage: "Stage 3 · Advice", kind: "roa_signed",
+    id: "roa", number: 7, title: "Record of Advice (ROA)", stage: "Stage 3 · Advice", kind: "roa_signed",
     when: "After quotes are prepared, before any application is submitted.",
     adviserSigns: true,
     fields: [
@@ -108,7 +116,7 @@ export const COMPLIANCE_FORMS: ComplianceForm[] = [
     ],
   },
   {
-    id: "annual_review", number: 7, title: "Annual Review & Renewal Acknowledgment", stage: "Stage 4 · Ongoing", kind: "annual_review_ack",
+    id: "annual_review", number: 8, title: "Annual Review & Renewal Acknowledgment", stage: "Stage 4 · Ongoing", kind: "annual_review_ack",
     when: "Sent before each policy anniversary.",
     fields: [
       { key: "increase", label: "Upcoming premium increase / schedule changes", type: "text", required: true },
