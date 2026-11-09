@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import logoAsset from "@/assets/elysian-fs-logo-clear.png.asset.json";
+import logoAsset from "@/assets/elysian-logo-gold.png.asset.json";
 import logoNavy from "@/assets/elysian-logo-navy.png";
 
 const HEIGHT: Record<string, string> = {
