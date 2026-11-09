@@ -1273,7 +1273,7 @@ export default function CalendarView() {
                               Owned by {selectedEvent.ownerName || 'another Wealth Manager'}. Only they can change this.
                             </p>
                             {selectedEvent.type !== "internal" && selectedEvent.clientId && (
-                              <Button className="mt-3 w-full bg-primary hover:bg-primary-dark text-white" onClick={handleStartSession}>
+                              <Button className="mt-3 w-full bg-primary hover:bg-primary-dark text-primary-foreground" onClick={handleStartSession}>
                                 <Play className="h-3.5 w-3.5 mr-1" />
                                 Start Consultation
                               </Button>
@@ -1292,7 +1292,7 @@ export default function CalendarView() {
                               <Trash2 className="h-4 w-4" />
                             </Button>
                             {selectedEvent.type !== "internal" && selectedEvent.clientId && (
-                              <Button size="icon" className="h-11 w-11 bg-primary hover:bg-primary-dark text-white" onClick={handleStartSession}>
+                              <Button size="icon" className="h-11 w-11 bg-primary hover:bg-primary-dark text-primary-foreground" onClick={handleStartSession}>
                                 <Play className="h-4 w-4" />
                               </Button>
                             )}
@@ -1309,7 +1309,7 @@ export default function CalendarView() {
                               Delete
                             </Button>
                             {selectedEvent.type !== "internal" && selectedEvent.clientId && (
-                              <Button className="bg-primary hover:bg-primary-dark text-white" onClick={handleStartSession}>
+                              <Button className="bg-primary hover:bg-primary-dark text-primary-foreground" onClick={handleStartSession}>
                                 <Play className="h-3.5 w-3.5 mr-1" />
                                 Start Consultation
                               </Button>

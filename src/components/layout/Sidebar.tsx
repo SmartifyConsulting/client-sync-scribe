@@ -319,7 +319,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                 ? "bg-red-600 text-white shadow-sm"
                 : item.accent
                   ? "bg-maeve-dark text-maeve-foreground shadow-sm"
-                  : "bg-white text-black shadow-sm"
+                  : "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
               : item.danger
                 ? "bg-red-600 text-white border-red-600 hover:bg-red-700 hover:border-red-700"
                 : item.accent

@@ -36,8 +36,10 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 38% 13%;
 
-    /* Holarc brand accent #D1873C */
-    --primary: 30 61% 46%;
+    /* Holarc brand palette */
+    --brand-blue: 241.44 100% 24.5098%; /* #03007D */
+    --brand-yellow: 49.4694 98.3936% 48.8235%; /* #F7CC02 */
+    --primary: var(--brand-blue);
     /* Wealth workflow owner badges */
     /* Green is always the client, blue is always the Wealth Manager */
     --owner-client: 142 64% 32%;
@@ -64,8 +66,8 @@
     --owner-system: 174 86% 23%;
     --owner-system-bg: 174 55% 92%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 30 61% 56%;
-    --primary-dark: 220 18% 7%;
+    --primary-glow: 242 78% 46%;
+    --primary-dark: 242 100% 18%;
 
     /* Neutral grays - secondary surfaces */
     --secondary: 216 24% 94%;           /* #F5F5F5 */
@@ -74,11 +76,11 @@
     --muted: 216 24% 95%;               /* #F5F5F5 hover surface */
     --muted-foreground: 218 14% 42%;    /* #666 secondary text */
 
-    --brand-teal: 30 61% 52%;           /* #D1873C */
-    --navy: 212 59% 13%;
+    --brand-teal: var(--brand-blue);
+    --navy: var(--brand-blue);
     --navy-foreground: 0 0% 98%;
-    --accent: 30 45% 90%;               /* soft tint of the brand accent */
-    --accent-foreground: 220 18% 10%;
+    --accent: var(--brand-yellow);
+    --accent-foreground: var(--brand-blue);
 
     /* Status colors */
     --destructive: 0 64% 50%;        /* #D32F2F */
@@ -122,16 +124,16 @@
     --sos: 354 84% 54%;
     --sos-foreground: 0 0% 100%;
 
-    /* Ask Holarc — warm orange facilitation accent */
-    --maeve: 30 61% 46%;
+    /* Ask Holarc */
+    --maeve: var(--brand-blue);
     --maeve-foreground: 0 0% 100%;
-    --maeve-dark: 30 61% 36%;
+    --maeve-dark: 242 100% 18%;
     --gradient-sos: linear-gradient(135deg, hsl(222 50% 22%), hsl(214 70% 40%));
 
     /* Borders */
     --border: 216 20% 87%;              /* #E0E0E0 */
     --input: 216 20% 85%;
-    --ring: 30 61% 46%;
+    --ring: var(--brand-blue);
 
     /* Tertiary/disabled text helpers */
     --text-tertiary: 0 0% 60%;       /* #999 */
@@ -151,15 +153,15 @@
     --shadow-card-hover: 0 2px 4px rgb(13 13 13 / 0.06), 0 16px 40px -16px rgb(13 13 13 / 0.18);
     --shadow-elevated: 0 1px 2px rgb(13 13 13 / 0.06), 0 16px 40px -16px rgb(13 13 13 / 0.18);
 
-    /* Sidebar - clean white */
-    --sidebar-background: 212 59% 13%;
-    --sidebar-foreground: 0 0% 82%;
-    --sidebar-primary: 30 61% 52%;
-    --sidebar-primary-foreground: 212 59% 13%;
-    --sidebar-accent: 220 14% 14%;
-    --sidebar-accent-foreground: 30 61% 60%;
-    --sidebar-border: 220 14% 16%;
-    --sidebar-ring: 30 61% 52%;
+    /* Sidebar brand colors */
+    --sidebar-background: var(--brand-blue);
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: var(--brand-yellow);
+    --sidebar-primary-foreground: var(--brand-blue);
+    --sidebar-accent: 242 82% 34%;
+    --sidebar-accent-foreground: var(--brand-yellow);
+    --sidebar-border: 242 70% 40%;
+    --sidebar-ring: var(--brand-yellow);
   }
 
   .dark {
@@ -172,7 +174,7 @@
     --popover: 220 14% 10%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 30 61% 52%;
+    --primary: var(--brand-yellow);
     --owner-client: 142 55% 60%;
     --owner-client-bg: 142 40% 15%;
     --owner-advisor: 217 85% 70%;
@@ -181,9 +183,9 @@
     --owner-insurer-bg: 35 40% 16%;
     --owner-system: 174 65% 66%;
     --owner-system-bg: 174 45% 15%;
-    --primary-foreground: 0 0% 100%;
-    --primary-glow: 30 61% 62%;
-    --primary-dark: 30 61% 42%;
+    --primary-foreground: var(--brand-blue);
+    --primary-glow: 49.47 98.39% 63%;
+    --primary-dark: 49.47 98.39% 43%;
 
     --secondary: 222 22% 16%;
     --secondary-foreground: 0 0% 90%;
@@ -191,9 +193,9 @@
     --muted: 222 22% 16%;
     --muted-foreground: 218 14% 62%;
 
-    --brand-teal: 30 61% 52%;
-    --accent: 200 35% 28%;
-    --accent-foreground: 200 48% 82%;
+    --brand-teal: var(--brand-yellow);
+    --accent: 242 69% 34%;
+    --accent-foreground: var(--brand-yellow);
 
     --destructive: 356 67% 50%;
     --destructive-foreground: 0 0% 100%;
@@ -234,7 +236,7 @@
 
     --border: 222 20% 20%;
     --input: 222 20% 20%;
-    --ring: 30 61% 52%;
+    --ring: var(--brand-yellow);
 
     --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.2);
     --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
@@ -245,14 +247,14 @@
     --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 6px 16px rgb(0 0 0 / 0.3);
     --shadow-card-hover: 0 2px 8px 0 rgb(0 0 0 / 0.4), 0 12px 24px rgb(0 0 0 / 0.4);
 
-    --sidebar-background: 212 59% 10%;
-    --sidebar-foreground: 0 0% 75%;
-    --sidebar-primary: 30 61% 52%;
-    --sidebar-primary-foreground: 212 59% 13%;
-    --sidebar-accent: 214 30% 16%;
-    --sidebar-accent-foreground: 30 61% 62%;
-    --sidebar-border: 222 20% 16%;
-    --sidebar-ring: 30 61% 52%;
+    --sidebar-background: var(--brand-blue);
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: var(--brand-yellow);
+    --sidebar-primary-foreground: var(--brand-blue);
+    --sidebar-accent: 242 82% 34%;
+    --sidebar-accent-foreground: var(--brand-yellow);
+    --sidebar-border: 242 70% 40%;
+    --sidebar-ring: var(--brand-yellow);
   }
 }
 
@@ -349,7 +351,7 @@
   .frame-header { @apply flex items-center justify-between border-b border-border px-4 py-3 text-xs font-semibold text-primary-dark; }
   .section-label { @apply text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground; }
   .empty-state { @apply px-4 py-10 text-center text-xs text-muted-foreground; }
-  .tab-brand { @apply whitespace-nowrap px-3 py-1.5 text-xs !text-white hover:!text-white data-[state=active]:bg-background data-[state=active]:!text-foreground; }
+  .tab-brand { @apply whitespace-nowrap px-3 py-1.5 text-xs !text-primary-foreground hover:!text-primary-foreground data-[state=active]:bg-background data-[state=active]:!text-foreground; }
   .data-table { @apply w-full text-left text-xs; }
   .data-table th { @apply border-b border-border px-4 py-2.5 text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground; }
   .data-table td { @apply border-b border-border/60 px-4 py-2.5 align-middle text-foreground; }
@@ -521,8 +523,8 @@
   --admin-text-primary: 215 25% 15%;
   --admin-text-secondary: 215 14% 38%;
   --admin-text-tertiary: 215 12% 55%;
-  --admin-accent: 30 61% 46%;
-  --admin-accent-soft: 30 61% 46% / 0.08;
+  --admin-accent: var(--primary);
+  --admin-accent-soft: var(--primary) / 0.08;
   --admin-status-active: 152 60% 38%;
   --admin-status-pending: 38 92% 45%;
   --admin-status-suspended: 356 67% 48%;
@@ -536,8 +538,8 @@
   --admin-text-primary: 0 0% 95%;
   --admin-text-secondary: 0 0% 70%;
   --admin-text-tertiary: 0 0% 55%;
-  --admin-accent: 30 61% 56%;
-  --admin-accent-soft: 30 61% 56% / 0.12;
+  --admin-accent: var(--primary);
+  --admin-accent-soft: var(--primary) / 0.12;
 }
 
 .admin-shell {
@@ -670,11 +672,4 @@ textarea::placeholder {
 }
 @media (prefers-reduced-motion: reduce) {
   .quote-segment-working { animation: none; }
-}
-
-/* Personal Information screen only: gold #DFB238 accent */
-.personal-gold {
-  --primary: 44 72% 55%;
-  --primary-glow: 44 72% 65%;
-  --ring: 44 72% 55%;
 }
