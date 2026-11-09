@@ -48,3 +48,27 @@ test('Xplan requests manual verification when the Security Code and password are
   const result = attempt({ url: 'https://mastheadfs.xplan.iress.co.za/login2', xplanCode: true, submitted: true });
   assert.deepEqual(result, { state: 'xplan-verification', clicks: 0, values: ['', '', ''] });
 });
+
+test('Astute confirms only the observed signed-in CCP Home navigation', () => {
+  const origin = 'https://aol.astutefse.com';
+  const link = (textContent, path) => ({ textContent, href: origin + path, getClientRects: () => [1] });
+  const nav = [
+    link('My Clients', '/Online/Ccp/Client/ClientManager'),
+    link('Create Request', '/Online/Ccp/Request/'),
+    link('My Transactions', '/Online/Ccp/Response/'),
+  ];
+  function probe({ title = 'Astute Online CCP Home', path = '/Online/Ccp', links = nav, password = false } = {}) {
+    const input = { type: 'password', getClientRects: () => [1], getAttribute: () => null };
+    const document = { title, body: { innerText: 'CCP Quick Transact' },
+      querySelectorAll: s => s === 'a' ? links : s === 'input' && password ? [input] : [] };
+    const context = vm.createContext({ URL, location: { href: origin + path }, document });
+    vm.runInContext(drive, context);
+    return vm.runInContext("drive('', '', true, 'https://aol.astutefse.com', false, true, true)", context).state;
+  }
+  assert.equal(probe(), 'in');
+  assert.equal(probe({ path: '/online/account/login' }), 'waiting');
+  assert.equal(probe({ title: 'Astute Online Login' }), 'waiting');
+  assert.equal(probe({ links: nav.slice(0, 2) }), 'waiting');
+  assert.equal(probe({ links: [nav[0], nav[1], { ...nav[2], href: 'https://other.example/Online/Ccp/Response/' }] }), 'waiting');
+  assert.equal(probe({ password: true }), 'waiting');
+});

@@ -454,6 +454,24 @@ function drive(username, password, submitted, origin, discoveryRedirects, passwo
   };
   const inputs = query(document, "input").filter(i => i.type !== "hidden" && vis(i));
   const text = document.body.innerText || "";
+  // CCP Home hides sign-out in the account menu. Use the observed navigation
+  // routes before scanning the dashboard's client fields for login challenges.
+  if (u.origin === "https://aol.astutefse.com" && /^\/online\/ccp\/?$/i.test(u.pathname) &&
+      document.title === "Astute Online CCP Home" && !inputs.some(i => i.type === "password")) {
+    const links = query(document, "a").filter(vis);
+    const landmarks = [
+      ["My Clients", "/online/ccp/client/clientmanager"],
+      ["Create Request", "/online/ccp/request"],
+      ["My Transactions", "/online/ccp/response"],
+    ];
+    if (landmarks.every(([label, path]) => links.some(link => {
+      if (buttonText(link) !== label || !link.href) return false;
+      try {
+        const destination = new URL(link.href, u.origin);
+        return destination.origin === u.origin && destination.pathname.toLowerCase().replace(/\/$/, "") === path;
+      } catch { return false; }
+    }))) return { state: "in" };
+  }
   if (u.origin === "https://mastheadfs.xplan.iress.co.za" && u.pathname === "/login2" &&
       inputs.some(i => i.name === "tfa_token" && i.id === "tfa_token")) return { state: "xplan-verification" };
   const astuteLogin = u.origin === "https://aol.astutefse.com" && /^\/online\/account\/login\/?$/i.test(u.pathname);
