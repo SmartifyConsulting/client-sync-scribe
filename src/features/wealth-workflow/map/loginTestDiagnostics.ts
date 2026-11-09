@@ -6,6 +6,7 @@ export const LOGIN_TEST_STAGES = {
   credentials: "Companion attempted to submit the login",
   waiting: "Waiting for the provider to finish signing in",
   otp: "Provider requested a one-time PIN",
+  "xplan-verification": "Xplan requested a Security Code in its portal",
   email: "Provider requested email verification",
   verifying: "Verification sent to Companion",
   connected: "Companion recognised a signed-in portal",

@@ -48,6 +48,12 @@ export function CredentialLoginTest({ integrationId, provider, username, passwor
         !attempt.current || d.workflowId !== attempt.current || d.insurer !== provider) return;
       if (d.type === "insurer-login-progress") {
         lastResponse.current = Date.now();
+        if (d.phase === "xplan-verification") {
+          record("xplan-verification");
+          stopTimer();
+          setResult({ state: "verification", message: "Xplan is asking for a Security Code. Finish verification in the open Xplan tab." });
+          return;
+        }
         const stage = loginProgressStage(d.phase);
         if (stage) record(stage);
         else if (lastStage.current === "requested") record("acknowledged");
@@ -122,7 +128,7 @@ export function CredentialLoginTest({ integrationId, provider, username, passwor
     <div className="min-w-0 flex-1 pt-1.5">
     {!result && (!username.trim() || !password) && <p className="text-xs text-muted-foreground">Enter a username and password to test.</p>}
     {result && <p role="status" className={`text-xs break-words ${result.state === "error" ? "text-destructive" : result.state === "success" ? "text-emerald-700" : "text-muted-foreground"}`}>{result.state === "testing" ? LOGIN_TEST_STAGES[lastStage.current] : result.message}</p>}
-    {verifying && !challenge && <Button variant="link" size="sm" className="h-auto p-0 text-xs" onClick={() => { attempt.current = null; setResult(null); }}>Start a new test</Button>}
+    {verifying && !challenge && lastStage.current !== "xplan-verification" && <Button variant="link" size="sm" className="h-auto p-0 text-xs" onClick={() => { attempt.current = null; setResult(null); }}>Start a new test</Button>}
     </div>
     </div>
     {history.length > 0 && <details open={result?.state === "unknown" || result?.state === "error"} className="mt-2 text-xs">

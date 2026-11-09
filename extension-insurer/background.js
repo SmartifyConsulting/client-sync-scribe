@@ -318,6 +318,12 @@ async function checkPortal(tabId) {
     if (/^discovery$/i.test(job.insurer)) await scanPortal(tabId, job);
   }
   else if (r.state === "failed") { job.autoReconnect = false; job.done = true; job.username = ""; job.password = ""; job.pin = undefined; await saveRoute(tabId, job); tell(job, { type: "insurer-login-result", ok: false, message: r.reason === "locked" ? "The provider has locked your profile. Unlock it in the provider portal before trying again. No further login attempts will be made in this session." : "Login failed. The provider rejected the login. Please recheck your username and password and try again." }); }
+  else if (r.state === "xplan-verification") {
+    if (job.challenge !== r.state) tell(job, { type: "insurer-login-progress", state: "challenge", phase: "xplan-verification" });
+    job.challenge = r.state;
+    job.passwordSubmitted = true;
+    job.username = ""; job.password = "";
+  }
   else if (r.state === "blocked" || r.state === "captcha") {
     job.autoReconnect = false; job.done = true; job.username = ""; job.password = ""; job.pin = undefined; await saveRoute(tabId, job);
     void interfaceMonitor?.scan("unexpected-dialog", tabId).catch(() => {});
@@ -448,6 +454,8 @@ function drive(username, password, submitted, origin, discoveryRedirects, passwo
   };
   const inputs = query(document, "input").filter(i => i.type !== "hidden" && vis(i));
   const text = document.body.innerText || "";
+  if (u.origin === "https://mastheadfs.xplan.iress.co.za" && u.pathname === "/login2" &&
+      inputs.some(i => i.name === "tfa_token" && i.id === "tfa_token")) return { state: "xplan-verification" };
   const astuteLogin = u.origin === "https://aol.astutefse.com" && /^\/online\/account\/login\/?$/i.test(u.pathname);
   if (astuteLogin && !probeOnly && !passwordSubmitted && username && password && /^\d{4}$/.test(pin)) {
     const user = inputs.find(i => i.type === "text" && i.name === "Username");
