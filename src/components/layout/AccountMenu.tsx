@@ -14,6 +14,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
 
 interface AccountMenuProps {
   trigger: ReactNode;
@@ -98,25 +99,31 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
             <div className="max-h-64 overflow-y-auto">
               {TEST_PROFILES.map((p) => {
                 const Icon = p.icon;
-                const isCurrent = currentEmail.toLowerCase() === p.email;
+                const isCurrentAccount = currentEmail.toLowerCase() === p.email;
+                const isCurrent = isCurrentAccount && (!p.destination || `${location.pathname}${location.search}` === p.destination);
                 const isLoading = switching === p.email;
                 return (
-                  <button
-                    key={p.email}
-                    onClick={() => !isCurrent && impersonate(p.email)}
+                  <Button
+                    variant="ghost"
+                    key={p.destination ?? p.email}
+                    onClick={() => {
+                      if (isCurrent) return;
+                      if (isCurrentAccount && p.destination) navigate(p.destination);
+                      else impersonate(p.email, p.destination);
+                    }}
                     disabled={isCurrent || !!switching}
                     className={cn(
-                      "flex items-center gap-2 px-2 py-1.5 w-full rounded-md transition-colors text-left",
+                      "flex items-center justify-start gap-2 px-2 py-1.5 h-auto min-h-11 w-full rounded-md transition-colors text-left",
                       isCurrent ? "bg-primary/10 cursor-default" : "hover:bg-accent",
                       switching && !isLoading && "opacity-50",
                     )}
                   >
                     {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" /> : <Icon className="h-3.5 w-3.5 text-primary shrink-0" />}
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-foreground truncate">{liveNames[p.email] || p.name}</p>
+                      <p className="text-xs font-medium text-foreground truncate">{p.destination ? p.name : liveNames[p.email] || p.name}</p>
                       <p className="text-xs text-muted-foreground truncate">{p.role} · {p.email}</p>
                     </div>
-                  </button>
+                  </Button>
                 );
               })}
             </div>

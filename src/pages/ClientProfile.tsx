@@ -397,6 +397,7 @@ export default function ClientProfile() {
 
         <TabsContent value="workflow">
           <WorkflowMap clientId={client.id} clientName={client.name} onOpenDocuments={() => handleTabChange("documents")}
+            viewer={user?.id && patientUserId === user.id ? "client" : "manager"}
             initialGroup={searchParams.get("group") ?? undefined} />
         </TabsContent>
 
