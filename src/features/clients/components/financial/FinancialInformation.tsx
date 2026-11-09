@@ -271,8 +271,8 @@ export function FinancialInformation({ clientId, showAgreedCover = false }: { cl
                   <legend className="mb-2 text-xs font-semibold">Cover agreed in Needs Analysis</legend>
                   {["Life cover", "Lump sum disability", "Severe illness", "Income protection"].map(product => (
                     <div key={product} className="space-y-1.5">
-                      <Label htmlFor={`agreed-cover-${product.replace(/ /g, "-")}`} className="text-xs">{product} ({product === "Income protection" ? "R / month" : "R"})</Label>
-                      <Input id={`agreed-cover-${product.replace(/ /g, "-")}`} inputMode="decimal" value={v.agreed_cover?.[product] ?? ""}
+                      <Label htmlFor={`agreed-cover-${product.split(" ").join("-")}`} className="text-xs">{product} ({product === "Income protection" ? "R / month" : "R"})</Label>
+                      <Input id={`agreed-cover-${product.split(" ").join("-")}`} inputMode="decimal" value={v.agreed_cover?.[product] ?? ""}
                         onChange={e => {
                           const value = e.target.value;
                           if (/^\d*(\.\d{0,2})?$/.test(value)) set(s.key, { ...v, agreed_cover: { ...v.agreed_cover, [product]: value } });
