@@ -175,6 +175,18 @@ chrome.runtime.onMessage.addListener((d, sender) => {
     return;
   }
   if (d.type === "insurer-login") {
+    const masthead = d.integrationId === "masthead" || /^masthead$/i.test(d.insurer);
+    if (masthead) {
+      let portal;
+      try { portal = new URL(d.loginUrl); } catch { /* Report the invalid address below. */ }
+      if (portal?.origin !== "https://connect.masthead.co.za" || portal.username || portal.password ||
+          portal.pathname !== "/" || typeof d.idNumber !== "string" || !d.idNumber.trim()) {
+        tell({ appTabId, ...d }, { type: "insurer-login-result", ok: false, message: "Use the Masthead Connect address and enter your ID or passport number." });
+        return;
+      }
+      const { idNumber, ...details } = d;
+      d = { ...details, username: idNumber.trim() };
+    }
     if (!d.loginUrl || !d.username || !d.password) {
       chrome.tabs.sendMessage(appTabId, { type: "insurer-login-result", insurer: d.insurer, workflowId: d.workflowId, ok: false, message: "No saved login address or password." });
       return;
@@ -211,7 +223,7 @@ chrome.runtime.onMessage.addListener((d, sender) => {
       if(pending.cancelled||pendingLogins.get(pendingKey)!==pending){d.username="";d.password="";return;}
       pendingLogins.delete(pendingKey);
       if (!tab?.id) return;
-      const discoveryRedirects = !["astute", "xplan"].includes(d.integrationId) && new URL(origin).port === "" ? (baseDomain(new URL(origin).hostname) || false) : false;
+      const discoveryRedirects = !masthead && !["astute", "xplan"].includes(d.integrationId) && new URL(origin).port === "" ? (baseDomain(new URL(origin).hostname) || false) : false;
       const { pin, ...details } = d;
       const job = { ...details, pin: d.integrationId === "astute" ? pin : undefined, appTabId, appWindowId: sender.tab.windowId, origin, discoveryRedirects, step: 0, done: false, submitted: false, expires: Date.now() + 15 * 60 * 1000 };
       jobs.set(tab.id, job);
@@ -512,6 +524,22 @@ function drive(username, password, submitted, origin, discoveryRedirects, passwo
     return { state: "email", hint: m ? m[0] : "" };
   }
   const pw = inputs.find((i) => i.type === "password");
+  const mastheadLogin = u.origin === "https://connect.masthead.co.za" && u.pathname === "/" && document.title === "Connect Portal | Login";
+  if (mastheadLogin) {
+    const id = inputs.find(i => i.type === "text" && i.id === "IdNumber");
+    const actions = query(document, "button#loginSubmit, input#loginSubmit[type=submit]").filter(vis);
+    if (id && pw && actions.length === 1 && inputs.filter(i => i.type === "password").length === 1) {
+      if (probeOnly) return { state: "login" };
+      if (!passwordSubmitted && username && password) {
+        setVal(id, username);
+        setVal(pw, password);
+        actions[0].click();
+        return { state: "submitted", credentialStep: "password" };
+      }
+    }
+    return { state: "waiting" };
+  }
+  if (u.origin === "https://connect.masthead.co.za" && pw) return { state: "waiting" };
   // Observed authenticated Bidvest adviser dashboard keeps sign-out in a menu.
   if (u.hostname === "adviser.fmi.co.za" && !pw &&
       ["Clients", "Documents", "Commission"].every(label => query(document, "button").some(b => vis(b) && buttonText(b).replace(/arrow_drop_down/g, "").trim() === label)) &&

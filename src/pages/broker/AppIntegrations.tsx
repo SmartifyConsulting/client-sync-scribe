@@ -112,6 +112,10 @@ export default function AppIntegrations() {
   const [manageEntry, setManageEntry] = useState<CatalogEntry | null>(null);
   const [manageUsername, setManageUsername] = useState("");
   const [manageFields, setManageFields] = useState<Record<string, string>>({});
+  const mastheadConnect = manageEntry?.name.trim().toLowerCase() === "masthead" || manageEntry?.id === "masthead";
+  const manageRequiredFields = mastheadConnect
+    ? [...new Set(["id_number", "password", ...(manageEntry?.required_fields ?? []).filter(field => field !== "username")])]
+    : manageEntry?.required_fields ?? [];
   const [showSecrets, setShowSecrets] = useState(false);
   const [loadingReveal, setLoadingReveal] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -252,8 +256,8 @@ export default function AppIntegrations() {
 
   const handleSaveCredentials = async () => {
     if (!manageEntry || !reauthToken) return;
-    const missingUsername = manageEntry.required_fields.includes("username") && !manageUsername.trim();
-    const missingField = manageEntry.required_fields.some((f) => f !== "username" && !manageFields[f]?.trim());
+    const missingUsername = manageRequiredFields.includes("username") && !manageUsername.trim();
+    const missingField = manageRequiredFields.some((f) => f !== "username" && !manageFields[f]?.trim());
     if (missingUsername || missingField) {
       toast.error("Enter all required fields before saving.");
       return;
@@ -269,7 +273,7 @@ export default function AppIntegrations() {
       await invoke({
         action: "save",
         integrationId: manageEntry.id,
-        username: manageUsername || null,
+        username: mastheadConnect ? null : manageUsername || null,
         fields: manageFields,
         token: reauthToken,
       });
@@ -529,7 +533,7 @@ export default function AppIntegrations() {
                 <Input id="insurer-portal-url" type="url" placeholder="https://" value={manageFields.portal_url ?? manageEntry?.portal_url ?? ""}
                   onChange={(e) => setManageFields((f) => ({ ...f, portal_url: e.target.value }))} />
               </div>
-              {manageEntry?.required_fields.includes("username") && (
+              {manageRequiredFields.includes("username") && (
                 <div>
                   <Label>Username</Label>
                   <Input value={manageUsername} onChange={(e) => setManageUsername(e.target.value)} />
@@ -565,11 +569,12 @@ export default function AppIntegrations() {
                   </div>
                 );
               })()}
-              {manageEntry?.required_fields.filter((f) => f !== "username" && f !== "quote_email" && f !== "portal_url").map((field) => (
+              {manageRequiredFields.filter((f) => f !== "username" && f !== "quote_email" && f !== "portal_url").map((field) => (
                 <div key={field}>
-                  <Label className="capitalize">{field.replace(/_/g, " ")}</Label>
+                  <Label htmlFor={`portal-field-${field}`} className={field === "id_number" ? undefined : "capitalize"}>{field === "id_number" ? "ID or passport number" : field.replace(/_/g, " ")}</Label>
                   <div className="relative">
                     <Input
+                      id={`portal-field-${field}`}
                       type={showSecrets ? "text" : "password"}
                       value={manageFields[field] ?? ""}
                       onChange={(e) => setManageFields((f) => ({ ...f, [field]: e.target.value }))}
@@ -585,7 +590,8 @@ export default function AppIntegrations() {
                 </div>
               ))}
               {manageEntry && <CredentialLoginTest key={manageEntry.id} integrationId={manageEntry.id} provider={manageEntry.name}
-                username={manageUsername} password={manageFields.password ?? ""} pin={manageEntry.id === "astute" ? manageFields.pin : undefined}
+                username={mastheadConnect ? "" : manageUsername} idNumber={mastheadConnect ? manageFields.id_number ?? "" : undefined}
+                password={manageFields.password ?? ""} pin={manageEntry.id === "astute" ? manageFields.pin : undefined}
                 portalUrl={manageFields.portal_url ?? manageEntry.portal_url} disabled={saving} />}
             </div>
           )}

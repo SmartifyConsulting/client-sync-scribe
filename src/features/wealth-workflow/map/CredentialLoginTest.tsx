@@ -12,9 +12,10 @@ import { LOGIN_TEST_STAGES, loginProgressStage, loginTimeoutExplanation, type Lo
 type Result = { state: "testing" | "verification" | "success" | "error" | "unknown" | "stopped"; message: string };
 
 /** Tests the open credential editor's values, without saving or requesting quotes. */
-export function CredentialLoginTest({ integrationId, provider, username, password, pin, portalUrl, disabled = false }: {
-  integrationId: string; provider: string; username: string; password: string; pin?: string; portalUrl: string; disabled?: boolean;
+export function CredentialLoginTest({ integrationId, provider, username, idNumber, password, pin, portalUrl, disabled = false }: {
+  integrationId: string; provider: string; username: string; idNumber?: string; password: string; pin?: string; portalUrl: string; disabled?: boolean;
 }) {
+  const loginIdentifier = idNumber ?? username;
   const [result, setResult] = useState<Result | null>(null);
   const installedVersion=useCompanionVersion();
   const [setup, setSetup] = useState(false);
@@ -39,7 +40,7 @@ export function CredentialLoginTest({ integrationId, provider, username, passwor
     lastResponse.current = null;
     stopTimer();
     return stopTimer;
-  }, [integrationId, username, password, pin, portalUrl]);
+  }, [integrationId, username, idNumber, password, pin, portalUrl]);
 
   useEffect(() => {
     const receive = (e: MessageEvent) => {
@@ -110,7 +111,8 @@ export function CredentialLoginTest({ integrationId, provider, username, passwor
     setResult({ state: "testing", message: "Testing these credentials in the provider's portal…" });
     waitForResult();
     window.postMessage({ source: "holarc", type: "insurer-login", connectionAttemptId: attempt.current, integrationId, workflowId: attempt.current,
-      insurer: provider, loginUrl: portalUrl, username, password, ...(integrationId === "astute" ? { pin } : {}) }, location.origin);
+      insurer: provider, loginUrl: portalUrl, password, ...(idNumber === undefined ? { username } : { idNumber: idNumber.trim() }),
+      ...(integrationId === "astute" ? { pin } : {}) }, location.origin);
   };
   const verifying = result?.state === "verification";
   const stop = () => {
@@ -121,12 +123,12 @@ export function CredentialLoginTest({ integrationId, provider, username, passwor
   };
   return <div className="border-t border-border pt-3">
     <div role="group" aria-label="Credential login test" className="flex items-start gap-3">
-    <Button variant="outline" size="sm" className="shrink-0" title="Test entered credentials without saving or requesting quotes. Sign out of the provider first to verify a changed password. Requires the Companion." disabled={disabled || !username.trim() || !password || result?.state === "testing" || verifying} onClick={test}>
+    <Button variant="outline" size="sm" className="shrink-0" title="Test entered credentials without saving or requesting quotes. Sign out of the provider first to verify a changed password. Requires the Companion." disabled={disabled || !loginIdentifier.trim() || !password || result?.state === "testing" || verifying} onClick={test}>
       {result?.state === "testing" ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="mr-1.5 h-3.5 w-3.5" />}{result?.state === "testing" ? "Testing…" : "Test login"}
     </Button>
     {(result?.state === "testing" || verifying) && <Button variant="outline" size="sm" onClick={stop}>Stop</Button>}
     <div className="min-w-0 flex-1 pt-1.5">
-    {!result && (!username.trim() || !password) && <p className="text-xs text-muted-foreground">Enter a username and password to test.</p>}
+    {!result && (!loginIdentifier.trim() || !password) && <p className="text-xs text-muted-foreground">{idNumber === undefined ? "Enter a username and password to test." : "Enter your ID or passport number and password to test."}</p>}
     {result && <p role="status" className={`text-xs break-words ${result.state === "error" ? "text-destructive" : result.state === "success" ? "text-emerald-700" : "text-muted-foreground"}`}>{result.state === "testing" ? LOGIN_TEST_STAGES[lastStage.current] : result.message}</p>}
     {verifying && !challenge && lastStage.current !== "xplan-verification" && <Button variant="link" size="sm" className="h-auto p-0 text-xs" onClick={() => { attempt.current = null; setResult(null); }}>Start a new test</Button>}
     </div>
