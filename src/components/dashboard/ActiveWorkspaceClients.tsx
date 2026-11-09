@@ -9,7 +9,7 @@ import { STAGE_LABEL } from "@/components/dashboard/PipelineOverview";
 import { workspaceVisits } from "@/features/wealth-workflow/workspace/workspaceRecency";
 import { ownerSolid } from "@/features/wealth-workflow/map/LiveTray";
 import { cn } from "@/lib/utils";
-import { courtFor } from "./court";
+import { courtFor, taskFor } from "./court";
 
 type Wf = { id: string; current_stage: string; status: string; patient_id: string; updated_at: string; patients: { name: string } | null };
 
@@ -39,7 +39,7 @@ export function ActiveWorkspaceClients() {
       </p>
       <ul className="divide-y text-xs">
         {recentFirst.map((w) => (
-          <li key={w.id} className="flex items-center justify-between py-1.5">
+          <li key={w.id} className="flex items-center justify-between gap-2 py-1.5">
             {(() => {
               const court = courtFor(w.current_stage);
               const label = court === "client" ? "Client to act" : court === "insurer" ? "Insurer to act" : "Broker to act";
@@ -50,8 +50,11 @@ export function ActiveWorkspaceClients() {
                 </Link>
               );
             })()}
-            <span className="flex items-center gap-2">
-              <span className="text-muted-foreground">{STAGE_LABEL[w.current_stage] ?? w.current_stage}</span>
+            <span className="flex min-w-0 items-center gap-2 text-right">
+              <span className="min-w-0">
+                <span className="block truncate font-medium text-foreground">{taskFor(w.current_stage) ?? STAGE_LABEL[w.current_stage] ?? w.current_stage}</span>
+                <span className="block text-2xs text-muted-foreground">{STAGE_LABEL[w.current_stage] ?? w.current_stage}</span>
+              </span>
               {w.status === "blocked" && <Badge variant="destructive" className="text-2xs">Blocked</Badge>}
             </span>
           </li>
