@@ -560,9 +560,13 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
 
       <QuoteSourceSelector value={source} onChange={setSource} />
       {source !== "companion" && Object.values(login).some(state => ["connecting", "challenge", "connected"].includes(state)) && <p role="status" className="text-xs text-muted-foreground">Previously started portal sessions remain open. Return to Live Companion RPA to monitor or stop them.</p>}
-      <div className="grid gap-3 md:grid-cols-2">
       <section className="frame p-3 space-y-3" aria-label="Choose insurers">
-        <h4 className="text-xs font-semibold">Choose insurers</h4>
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <h4 className="text-xs font-semibold">Choose insurers</h4>
+          {source === "companion" && chosen.length > 0 && <Button size="sm" disabled={collectingAll || quotesRunning || !chosen.some(ins => login[ins] === "connected")} onClick={() => void requestAllQuotes()}>
+            {collectingAll ? "Getting quotes…" : "Get quotes for selected insurers"}
+          </Button>}
+        </div>
         {!insurers.length && <p className="text-[10px] text-muted-foreground">No saved insurer logins found.</p>}
         <div className="flex flex-wrap gap-1.5">
           {insurers.map((ins: string) => {
@@ -594,14 +598,8 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
               );
             })}
           </div>
-      </section>
-      {source === "companion" && chosen.length > 0 && <section className="frame p-3 space-y-3" aria-label="Quote progress">
-        <div className="flex justify-end">
-          <Button size="sm" disabled={collectingAll || quotesRunning || !chosen.some(ins => login[ins] === "connected")} onClick={() => void requestAllQuotes()}>
-            {collectingAll ? "Getting all quotes…" : "Get quotes for all insurers"}
-          </Button>
-        </div>
-        <div className="space-y-2">
+      {source === "companion" && chosen.length > 0 && <div className="space-y-3 pt-1" aria-label="Quote progress">
+        <div className="grid gap-x-6 gap-y-2 md:grid-cols-2">
           {chosen.map(ins => {
             const { done, total, pct } = insurerProgress(ins);
             const needsOtp = login[ins] === "challenge";
@@ -634,8 +632,8 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
           })}
         </div>
         <p className="text-[10px] text-muted-foreground">Green circle = connected. Letters show finished products (L Life, D Dread disease, I Income protection, C Car, H Home). Progress is saved — you can leave and come back.</p>
-      </section>}
-      </div>
+      </div>}
+      </section>
 
       {chosen.length > 0 && (
         <div className="space-y-2">

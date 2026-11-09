@@ -85,13 +85,13 @@ export default function Dashboard() {
       <div className="grid gap-3 md:gap-6 grid-cols-1 lg:grid-cols-2 items-start">
         <div ref={liveRef}><ActiveWorkspaceClients /></div>
         <div className="flex flex-col gap-3 md:gap-6">
-          <UpcomingMeetings />
           <div className="overflow-y-auto rounded-xl" style={briefingHeight ? { maxHeight: briefingHeight } : undefined}>
             <TodaysBriefing />
           </div>
+          <UpcomingMeetings />
+          <PipelineOverview />
+          <EarningsThisMonth />
         </div>
-        <PipelineOverview />
-        <EarningsThisMonth />
       </div>
     </div>
   );
