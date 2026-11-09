@@ -139,7 +139,7 @@ chrome.runtime.onMessage.addListener((d, sender) => {
     for (const [id, job] of jobs) {
       if (job.appTabId !== appTabId || job.insurer !== d.insurer || job.workflowId !== d.workflowId ||
           (d.connectionAttemptId && job.connectionAttemptId !== d.connectionAttemptId)) continue;
-      job.cancelled = true; job.done = true; job.username = ""; job.password = "";
+      job.cancelled = true; job.done = true; job.username = ""; job.password = ""; job.pin = undefined;
       jobs.delete(id);
       void chrome.storage.session.get(`portal-${id}`).then(async stored => {
         const route = stored[`portal-${id}`];
@@ -184,6 +184,10 @@ chrome.runtime.onMessage.addListener((d, sender) => {
     // access to the public website or sending credentials to its contact form.
     try {
       const entry = new URL(d.loginUrl);
+      if (entry.protocol === "https:" && !entry.port && !entry.username && !entry.password && entry.pathname === "/" && !entry.search && !entry.hash) {
+        if (d.integrationId === "xplan" && entry.hostname === "mastheadfs.xplan.iris.co.za") d.loginUrl = "https://mastheadfs.xplan.iress.co.za/";
+        if (d.integrationId === "astute" && ["www.astutefse.com", "astutefse.com"].includes(entry.hostname)) d.loginUrl = "https://aol.astutefse.com/online";
+      }
       if (/^Bidvest Life(?: \/ FMI)?$/i.test(d.insurer) && entry.protocol === "https:" && !entry.port && !entry.username && !entry.password &&
           ["www.bidvestlife.co.za", "bidvestlife.co.za"].includes(entry.hostname) && entry.pathname === "/" && !entry.search && !entry.hash) {
         d.loginUrl = "https://adviser.fmi.co.za/";
@@ -192,6 +196,10 @@ chrome.runtime.onMessage.addListener((d, sender) => {
     let origin;
     try { const u = new URL(d.loginUrl); if (u.protocol !== "https:" || u.username || u.password) throw new Error(); origin = u.origin; }
     catch { tell({ appTabId, ...d }, { type: "insurer-login-result", ok: false, message: "Set a valid HTTPS portal URL for this insurer." }); return; }
+    if (d.integrationId === "astute" && (origin !== "https://aol.astutefse.com" || !/^\d{4}$/.test(d.pin ?? ""))) {
+      tell({ appTabId, ...d }, { type: "insurer-login-result", ok: false, message: "Use the Astute Online portal address and enter your four-digit PIN." });
+      return;
+    }
     const existing = [...jobs.entries()].find(([, j]) => j.appTabId === appTabId && j.insurer === d.insurer && j.workflowId === d.workflowId);
     if (existing) { chrome.tabs.remove(existing[0]).catch(() => {}); jobs.delete(existing[0]); }
     // Creating then minimising a native window can flash on Windows. Keep the
@@ -203,8 +211,9 @@ chrome.runtime.onMessage.addListener((d, sender) => {
       if(pending.cancelled||pendingLogins.get(pendingKey)!==pending){d.username="";d.password="";return;}
       pendingLogins.delete(pendingKey);
       if (!tab?.id) return;
-      const discoveryRedirects = new URL(origin).port === "" ? (baseDomain(new URL(origin).hostname) || false) : false;
-      const job = { ...d, appTabId, appWindowId: sender.tab.windowId, origin, discoveryRedirects, step: 0, done: false, submitted: false, expires: Date.now() + 15 * 60 * 1000 };
+      const discoveryRedirects = !["astute", "xplan"].includes(d.integrationId) && new URL(origin).port === "" ? (baseDomain(new URL(origin).hostname) || false) : false;
+      const { pin, ...details } = d;
+      const job = { ...details, pin: d.integrationId === "astute" ? pin : undefined, appTabId, appWindowId: sender.tab.windowId, origin, discoveryRedirects, step: 0, done: false, submitted: false, expires: Date.now() + 15 * 60 * 1000 };
       jobs.set(tab.id, job);
       tell(job, { type: "insurer-login-progress", state: "connecting", phase: "opening" });
       // Persist only routing metadata, never passwords/PINs.
@@ -274,10 +283,10 @@ async function checkPortal(tabId) {
   const job = jobs.get(tabId);
   if (!job || job.checking) return;
   if (job.done) { await inspectSession(tabId, job); return; }
-  if (Date.now() >= job.expires) { job.autoReconnect = false; job.username = ""; job.password = ""; job.done = true; await saveRoute(tabId, job); tell(job, { type: "insurer-login-result", ok: false, message: "The 15-minute quote session expired. Unlock again." }); return; }
+  if (Date.now() >= job.expires) { job.autoReconnect = false; job.username = ""; job.password = ""; job.pin = undefined; job.done = true; await saveRoute(tabId, job); tell(job, { type: "insurer-login-result", ok: false, message: "The 15-minute quote session expired. Unlock again." }); return; }
   const tab = await chrome.tabs.get(tabId).catch(() => null);
   if (!portalAllowed(tab?.url, job)) {
-    job.done = true; job.autoReconnect = false; job.username = ""; job.password = ""; await saveRoute(tabId, job);
+    job.done = true; job.autoReconnect = false; job.username = ""; job.password = ""; job.pin = undefined; await saveRoute(tabId, job);
     tell(job, { type: "insurer-login-result", ok: false, message: "The portal redirected to another login site. Finish there, or update the portal URL in Holarc Wealth." }); return;
   }
   // Downloads must match the actual current portal origin, even after a safe redirect.
@@ -287,11 +296,12 @@ async function checkPortal(tabId) {
   if (stored[key]) await chrome.storage.session.set({ [key]: { ...stored[key], origin: new URL(tab.url).origin } });
   job.checking = true;
   job.step += 1;
-  if (job.step > 90) { job.done = true; job.autoReconnect = false; job.checking = false; job.username = ""; job.password = ""; await saveRoute(tabId, job); tell(job, { type: "insurer-login-result", ok: false, message: "The portal didn't finish logging in. Please finish in the insurer tab." }); return; }
+  if (job.step > 90) { job.done = true; job.autoReconnect = false; job.checking = false; job.username = ""; job.password = ""; job.pin = undefined; await saveRoute(tabId, job); tell(job, { type: "insurer-login-result", ok: false, message: "The portal didn't finish logging in. Please finish in the insurer tab." }); return; }
   // Give single-page portals a moment to draw the form.
   await new Promise((r) => setTimeout(r, 1200));
   if (job.cancelled || jobs.get(tabId) !== job) { job.checking = false; return; }
-  const [res] = await chrome.scripting.executeScript({ target: { tabId }, func: drive, args: [job.username, job.password, job.submitted, job.origin, job.discoveryRedirects, job.passwordSubmitted === true] }).catch(() => [{}]);
+  const pin = new URL(tab.url).origin === "https://aol.astutefse.com" ? job.pin : undefined;
+  const [res] = await chrome.scripting.executeScript({ target: { tabId }, func: drive, args: [job.username, job.password, job.submitted, job.origin, job.discoveryRedirects, job.passwordSubmitted === true, false, pin ?? ""] }).catch(() => [{}]);
   const r = res?.result || {};
   if (job.cancelled || jobs.get(tabId) !== job) { job.checking = false; return; }
   job.checking = false;
@@ -302,19 +312,20 @@ async function checkPortal(tabId) {
   else if (r.state === "waiting") tell(job, { type: "insurer-login-progress", state: "connecting", phase: job.submitted ? "waiting" : "loading" });
   else if (r.state === "in") {
     job.done = true; job.connected = true; job.recoverySpent = false; job.recoveryId = null;
-    job.username = ""; job.password = ""; await saveRoute(tabId, job);
+    job.username = ""; job.password = ""; job.pin = undefined; await saveRoute(tabId, job);
     if (job.reconnecting) tell(job, { type: "insurer-login-progress", state: "connected", phase: "reconnected" });
     tell(job, { type: "insurer-login-result", ok: true }); job.reconnecting = false;
     if (/^discovery$/i.test(job.insurer)) await scanPortal(tabId, job);
   }
-  else if (r.state === "failed") { job.autoReconnect = false; job.done = true; job.username = ""; job.password = ""; await saveRoute(tabId, job); tell(job, { type: "insurer-login-result", ok: false, message: r.reason === "locked" ? "The provider has locked your profile. Unlock it in the provider portal before trying again. No further login attempts will be made in this session." : "Login failed. The provider rejected the login. Please recheck your username and password and try again." }); }
+  else if (r.state === "failed") { job.autoReconnect = false; job.done = true; job.username = ""; job.password = ""; job.pin = undefined; await saveRoute(tabId, job); tell(job, { type: "insurer-login-result", ok: false, message: r.reason === "locked" ? "The provider has locked your profile. Unlock it in the provider portal before trying again. No further login attempts will be made in this session." : "Login failed. The provider rejected the login. Please recheck your username and password and try again." }); }
   else if (r.state === "blocked" || r.state === "captcha") {
-    job.autoReconnect = false; job.done = true; job.username = ""; job.password = ""; await saveRoute(tabId, job);
+    job.autoReconnect = false; job.done = true; job.username = ""; job.password = ""; job.pin = undefined; await saveRoute(tabId, job);
     void interfaceMonitor?.scan("unexpected-dialog", tabId).catch(() => {});
     tell(job, { type: "insurer-login-result", ok: false, message: r.state === "captcha" ? "Complete the CAPTCHA in the insurer tab, then reconnect." : "An unexpected portal message is blocking this connection. Automation has paused for review. No further login was submitted." });
   }
   if (r.state === "waiting" && !job.submitted && job.step === 5) void interfaceMonitor?.scan("login-stalled", tabId).catch(() => {});
   if (!job.done) setTimeout(() => checkPortal(tabId), 2500);
+  if (job.done || job.passwordSubmitted) job.pin = undefined;
 }
 
 async function scanPortal(tabId, job) {
@@ -395,7 +406,7 @@ async function readPdf(url) {
 }
 
 // ---- injected into the insurer page ----
-function drive(username, password, submitted, origin, discoveryRedirects, passwordSubmitted = false, probeOnly = false) {
+function drive(username, password, submitted, origin, discoveryRedirects, passwordSubmitted = false, probeOnly = false, pin = "") {
   // Recheck inside the page: navigation may occur between tab inspection and injection.
   const u = new URL(location.href);
   if (u.protocol !== "https:" || u.username || u.password || !(u.origin === origin || (typeof discoveryRedirects === "string" && !u.port && (u.hostname === discoveryRedirects || u.hostname.endsWith("." + discoveryRedirects))))) return { state: "waiting" };
@@ -410,6 +421,8 @@ function drive(username, password, submitted, origin, discoveryRedirects, passwo
   const buttonText = (el) => (el.value || el.textContent?.trim() || el.getAttribute("aria-label") || el.getRootNode?.().host?.textContent || "").trim();
   const brightRockIdentity = u.origin === "https://identity.brightrock.co.za" && u.pathname === "/authenticationendpoint/login.do";
   const isBrightRockLogin = (button) => brightRockIdentity && /^go!$/i.test(buttonText(button));
+  const isXplanLogin = (button) => u.origin === "https://mastheadfs.xplan.iress.co.za" &&
+    u.pathname === "/login2" && /^log ?on$/i.test(buttonText(button));
   const setVal = (el, v) => {
     const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set;
     el.focus(); setter.call(el, v);
@@ -426,7 +439,7 @@ function drive(username, password, submitted, origin, discoveryRedirects, passwo
     const momentumLogin = u.hostname === "adviser-account.momentum.co.za" ? ", a#btn-login" : "";
     const buttons = query(scope, "button, a[role=button], input[type=button], input[type=submit]" + momentumLogin).filter(vis);
     const named = buttons.filter(b => /^(log ?in|sign ?in|next|continue|submit|verify)$/i.test(buttonText(b)) ||
-      (form && from.type === "password" && isBrightRockLogin(b)));
+      (form && from.type === "password" && (isBrightRockLogin(b) || isXplanLogin(b))));
     const explicit = buttons.filter(b => b.type === "submit");
     const btn = named.length === 1 ? named[0] : named.length === 0 && explicit.length === 1 ? explicit[0] : null;
     if (btn) { btn.click(); return true; }
@@ -435,6 +448,21 @@ function drive(username, password, submitted, origin, discoveryRedirects, passwo
   };
   const inputs = query(document, "input").filter(i => i.type !== "hidden" && vis(i));
   const text = document.body.innerText || "";
+  const astuteLogin = u.origin === "https://aol.astutefse.com" && /^\/online\/account\/login\/?$/i.test(u.pathname);
+  if (astuteLogin && !probeOnly && !passwordSubmitted && username && password && /^\d{4}$/.test(pin)) {
+    const user = inputs.find(i => i.type === "text" && i.name === "Username");
+    const pw = inputs.find(i => i.type === "password" && i.name === "password");
+    const pinField = inputs.find(i => i.type === "password" && i.name === "pin");
+    const form = pw?.closest("form");
+    const actions = form ? query(form, 'input[type="submit"]#btnLogin').filter(vis) : [];
+    if (form && user?.closest("form") === form && pinField?.closest("form") === form && actions.length === 1 &&
+        !/invalid|incorrect|login failed|locked/i.test(text) &&
+        !query(document, 'dialog[open], [role="dialog"], [role="alertdialog"], iframe[src*="recaptcha"], iframe[src*="hcaptcha"], .g-recaptcha, .h-captcha, [id*="captcha-challenge"]').some(vis)) {
+      setVal(user, username); setVal(pw, password); setVal(pinField, pin);
+      actions[0].click();
+      return { state: "submitted", credentialStep: "password" };
+    }
+  }
   // AdviserConnect's signed-in home has no visible logout link. Recognise its
   // dashboard before treating the client-search box as a login/OTP field.
   const momentumHome = u.hostname === "adviserconnect.momentum.co.za" && u.pathname === "/" &&
@@ -480,12 +508,13 @@ function drive(username, password, submitted, origin, discoveryRedirects, passwo
   if (!pw && domainHostForPage(u.hostname, "oldmutual.co.za") && query(document, "button").some(b => vis(b) && /^Logged In as\b/i.test(buttonText(b)))) return { state: "in" };
   if (probeOnly) {
     const actions = query(document, "button, a[role=button], input[type=submit]" + (u.hostname === "adviser-account.momentum.co.za" ? ", a#btn-login" : "")).filter(vis);
-    const brightRockForm = brightRockIdentity ? pw?.closest("form") : null;
+    const loginForm = brightRockIdentity || u.origin === "https://mastheadfs.xplan.iress.co.za" ? pw?.closest("form") : null;
     const loginActions = actions.filter(b => /^(log ?in|sign ?in)$/i.test(buttonText(b)) ||
-      (brightRockForm && isBrightRockLogin(b) && b.closest("form") === brightRockForm));
+      (loginForm && (isBrightRockLogin(b) || isXplanLogin(b)) && b.closest("form") === loginForm));
     const emailFirst = u.hostname === "login.fmi.co.za" && user?.type === "email" && user.name === "email" && /Adviser Portal/i.test(text);
     return { state: (pw && inputs.filter(i => i.type === "password").length === 1 && loginActions.length === 1) || emailFirst ? "login" : "waiting" };
   }
+  if (astuteLogin) return { state: "waiting" };
   if (pw && !passwordSubmitted && username && password) {
     if (user && user.value !== username) setVal(user, username);
     setVal(pw, password);

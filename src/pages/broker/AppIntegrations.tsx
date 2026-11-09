@@ -585,7 +585,7 @@ export default function AppIntegrations() {
                 </div>
               ))}
               {manageEntry && <CredentialLoginTest key={manageEntry.id} integrationId={manageEntry.id} provider={manageEntry.name}
-                username={manageUsername} password={manageFields.password ?? ""}
+                username={manageUsername} password={manageFields.password ?? ""} pin={manageEntry.id === "astute" ? manageFields.pin : undefined}
                 portalUrl={manageFields.portal_url ?? manageEntry.portal_url} disabled={saving} />}
             </div>
           )}

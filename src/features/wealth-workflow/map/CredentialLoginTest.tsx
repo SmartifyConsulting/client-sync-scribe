@@ -12,8 +12,8 @@ import { LOGIN_TEST_STAGES, loginProgressStage, loginTimeoutExplanation, type Lo
 type Result = { state: "testing" | "verification" | "success" | "error" | "unknown" | "stopped"; message: string };
 
 /** Tests the open credential editor's values, without saving or requesting quotes. */
-export function CredentialLoginTest({ integrationId, provider, username, password, portalUrl, disabled = false }: {
-  integrationId: string; provider: string; username: string; password: string; portalUrl: string; disabled?: boolean;
+export function CredentialLoginTest({ integrationId, provider, username, password, pin, portalUrl, disabled = false }: {
+  integrationId: string; provider: string; username: string; password: string; pin?: string; portalUrl: string; disabled?: boolean;
 }) {
   const [result, setResult] = useState<Result | null>(null);
   const installedVersion=useCompanionVersion();
@@ -39,7 +39,7 @@ export function CredentialLoginTest({ integrationId, provider, username, passwor
     lastResponse.current = null;
     stopTimer();
     return stopTimer;
-  }, [integrationId, username, password, portalUrl]);
+  }, [integrationId, username, password, pin, portalUrl]);
 
   useEffect(() => {
     const receive = (e: MessageEvent) => {
@@ -88,6 +88,10 @@ export function CredentialLoginTest({ integrationId, provider, username, passwor
     }, 90_000);
   };
   const test = () => {
+    if (integrationId === "astute" && !/^\d{4}$/.test(pin ?? "")) {
+      setResult({ state: "error", message: "Enter Astute’s four-digit PIN before testing." });
+      return;
+    }
     if (!addonInstalled()) { setSetup(true); return; }
     try {
       const url = new URL(portalUrl);
@@ -100,7 +104,7 @@ export function CredentialLoginTest({ integrationId, provider, username, passwor
     setResult({ state: "testing", message: "Testing these credentials in the provider's portal…" });
     waitForResult();
     window.postMessage({ source: "holarc", type: "insurer-login", connectionAttemptId: attempt.current, integrationId, workflowId: attempt.current,
-      insurer: provider, loginUrl: portalUrl, username, password }, location.origin);
+      insurer: provider, loginUrl: portalUrl, username, password, ...(integrationId === "astute" ? { pin } : {}) }, location.origin);
   };
   const verifying = result?.state === "verification";
   const stop = () => {
