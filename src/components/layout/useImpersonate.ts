@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 export function useImpersonate() {
   const [switching, setSwitching] = useState<string | null>(null);
 
-  async function impersonate(email: string) {
+  async function impersonate(email: string, destination = "/dashboard") {
     if (switching) return;
     setSwitching(email);
     try {
@@ -20,7 +20,7 @@ export function useImpersonate() {
       const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: "email" });
       if (vErr) throw vErr;
       toast.success(`Signed in as ${email}`);
-      window.location.href = "/dashboard";
+      window.location.href = destination.startsWith("/") && !destination.startsWith("//") ? destination : "/dashboard";
     } catch (e: any) {
       toast.error(`Switch failed: ${e.message}`);
       setSwitching(null);

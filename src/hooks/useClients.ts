@@ -438,7 +438,7 @@ export function useClient(id: string) {
       // Duplicate-record resolution: if this row is linked to an auth user,
       // prefer the most recent non-archived sibling so clinical data (e.g.
       // hospital admissions) attached to any of the duplicates surfaces.
-      if (resolved?.patient_user_id) {
+      if (resolved?.patient_user_id && !resolved.is_sample) {
         const { data: siblings } = await supabase
           .from('clients')
           .select('*')
@@ -446,7 +446,7 @@ export function useClient(id: string) {
           .order('updated_at', { ascending: false });
         if (siblings && siblings.length > 1) {
           const preferred =
-            siblings.find((s) => !/\(archived\)/i.test(s.name || '')) || siblings[0];
+            siblings.find((s) => !s.is_sample && !/\(archived\)/i.test(s.name || ''));
           if (preferred) resolved = preferred;
         }
       }
