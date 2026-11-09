@@ -30,9 +30,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { PRODUCT_TYPES, QUOTES_PER_COVER, coverOptionLabel, variationComplete } from "./quoteSpec";
+import { PRODUCT_TYPES, PREMIUM_PATTERNS, QUOTES_PER_COVER, coverOptionLabel, variationComplete } from "./quoteSpec";
 import { groupDigits } from "./money";
-import { DEFAULT_PARAMS, type NeedsParams, defaultVariations, productsFromNeeds, withCoverAmounts } from "./needsProducts";
+import { DEFAULT_PARAMS, type NeedsParams, defaultVariations, productsFromNeeds, withCoverAmounts, hasNoCurrentCover } from "./needsProducts";
 
 const db = supabase as any;
 type Plan = Record<string, Record<string, any>[]>; // product -> variations
@@ -267,7 +267,14 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   /** Send each option (Quote 1 = Option A …) to the connected portal; values only, labelled by field name. */
   const submitScenarios = async (ins: string, only?: number[], product?: string) => {
     if (!canStartPortal(source)) return;
-    const requestedPlan = product ? {[product]:plan[product]} : plan;
+    const requestedPlan: Plan = {};
+    for (const [name, options] of Object.entries(product ? { [product]: plan[product] } : plan)) {
+      const eligible = options.slice();
+      options.forEach((option, index) => {
+        if (hasNoCurrentCover(name, option, index)) delete eligible[index];
+      });
+      if (eligible.some(Boolean)) requestedPlan[name] = eligible;
+    }
     const goals = fin?.goals_risk;
     if (goals?.quote_cpi == null || String(goals.quote_cpi).trim() === "" || !Number.isFinite(Number(goals.quote_cpi))) {
       toast({ title: "Set the annual CPI assumption in Needs Analysis first." });
@@ -297,9 +304,16 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     }
     const prods = Object.keys(plan);
     const count = Math.max(...prods.map((p) => plan[p].length), 0);
-    const scenarios = buildPortalScenarios(requestedPlan, ins, quoteClient).filter((s) => (!only || only.includes(s.n)) && jobs[ins]?.find((j) => j.n === s.n)?.status !== "captured");
+    const scenarios = buildPortalScenarios(requestedPlan, ins, quoteClient).filter((s) =>
+      (!only || only.includes(s.n)) && Object.values(requestedPlan).some(options => options[s.n - 1]) &&
+      jobs[ins]?.find((j) => j.n === s.n)?.status !== "captured");
+    if (!scenarios.length) return toast({ title: "No remaining applicable quote requests." });
     if(ins==='Old Mutual') for(const s of scenarios) submittedOptions.current[`${ins}:${s.n}`]={product:'Life cover',settings:quoteSettingsKey('Life cover',plan['Life cover'][s.n-1],ins)};
-    setJobs((j) => startJobs(j, ins, count, Date.now(), only));
+    setJobs((j) => {
+      const queued = startJobs(j, ins, count, Date.now(), only);
+      const submitted = new Set(scenarios.map(scenario => scenario.n));
+      return { ...queued, [ins]: queued[ins].flatMap(job => submitted.has(job.n) ? [job] : (j[ins] ?? []).filter(previous => previous.n === job.n)) };
+    });
     window.postMessage({ source: "holarc", type: "insurer-quote-submit", insurer: ins, workflowId, scenarios }, window.location.origin);
   };
 
@@ -392,9 +406,9 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   }, [source, activeTab, insurerRows.length, companionInstalled, resumePending]);
   const setVal = (p: string, i: number, k: string, val: any) =>
     setPlan((pl) => ({ ...pl, [p]: editQuoteOption(pl[p],i,k,val) }));
-  const total = products.reduce((a, p) => a + plan[p].length, 0);
+  const total = products.reduce((a, p) => a + plan[p].filter((option, i) => !hasNoCurrentCover(p, option, i)).length, 0);
   const optionComplete = (p: string, v: Record<string, any>) => hasVerifiedProviderFields(activeTab,p) ? ompSettingsComplete(activeTab,p,v) : variationComplete(PRODUCT_TYPES[p] ?? [],v);
-  const allComplete = products.length > 0 && products.every((p) => plan[p].every((v) => optionComplete(p,v)));
+  const allComplete = products.length > 0 && products.every((p) => plan[p].every((v, i) => hasNoCurrentCover(p, v, i) || optionComplete(p, v)));
 
   const save = async () => {
     setBusy(true);
@@ -402,7 +416,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     const { error } = spec ? await db.from("wealth_quote_specs").update(row).eq("id", spec.id) : await db.from("wealth_quote_specs").insert(row);
     setBusy(false);
     if (error) return toast({ title: "Couldn't save the quote plan", description: error.message, variant: "destructive" });
-    toast({ title: "Quote plan saved", description: `${total} option(s) × ${chosen.length} insurer(s) = ${total * chosen.length} planned quotes. Target ${total * QUOTES_PER_COVER}.` });
+    toast({ title: "Quote plan saved", description: `${total * chosen.length * QUOTES_PER_COVER} premium variants planned across the selected insurers.` });
     qc.invalidateQueries({ queryKey: ["wealth-quote-spec", workflowId] });
   };
 
@@ -412,12 +426,12 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
 
   const label = "text-xs text-muted-foreground";
   const incompleteOptions = products.flatMap(p => plan[p].flatMap((v, i) =>
-    optionComplete(p,v) ? [] : [`${p} · ${coverOptionLabel(i)}`]));
+    hasNoCurrentCover(p, v, i) || optionComplete(p, v) ? [] : [`${p} · ${coverOptionLabel(i)}`]));
   return (
     <div className="space-y-4 text-xs leading-relaxed">
       <div>
         <h3 className="text-sm font-semibold">Prepare insurer quotes</h3>
-        <p className={label}>Collect three insurer quotes for each cover option on each product.</p>
+        <p className={label}>Collect three premium variants from each insurer for every applicable cover option on each product.</p>
       </div>
 
       <QuoteSourceSelector value={source} onChange={setSource} />
@@ -500,8 +514,9 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
           </div>
           </section>}
           <section ref={reviewSection} tabIndex={-1} className={cn("frame scroll-mt-6 p-3 space-y-3", connected && "quote-step-active")} aria-label="Review quote options" aria-current={connected ? "step" : undefined}>
-            <div className="flex flex-wrap items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">2</span><h4 className="font-semibold">Review quote options</h4>{source === "companion" && connected && <span role="status" className="quote-progress-badge">In Progress</span>}{source === "companion" && connected && <Button className="ml-auto font-semibold" disabled={!allComplete || quotesRunning || products.some(p => plan[p].some(v => !ompSettingsComplete(activeTab, p, v)))} title={!allComplete ? "Complete the option values first" : quotesRunning ? "Quote requests are already in progress" : undefined} onClick={() => submitScenarios(activeTab)}>Get quotes</Button>}</div>
+            <div className="flex flex-wrap items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">2</span><h4 className="font-semibold">Review quote options</h4>{source === "companion" && connected && <span role="status" className="quote-progress-badge">In Progress</span>}{source === "companion" && connected && <Button className="ml-auto font-semibold" disabled={!allComplete || quotesRunning} title={!allComplete ? "Complete the option values first" : quotesRunning ? "Quote requests are already in progress" : undefined} onClick={() => submitScenarios(activeTab)}>Get quotes</Button>}</div>
             <p className="font-medium text-foreground">Review your options, then request quotes.</p>
+            {source === "companion" && <p className={label}>Get quotes requests the selected terms for each applicable cover option. Record the three premium variant references separately as you collect them.</p>}
             <p className={label}>{quotesRunning ? "Quote requests are in progress. Follow the bars above each option." : "Waiting for your review. Open a product to review Desired, Current and Agreed Cover."}</p>
           <details className="rounded-lg border border-border p-2">
             <summary className="cursor-pointer text-xs font-medium">Calculation assumptions</summary>
@@ -510,8 +525,8 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
             <span className={label}>Desired Cover · income years</span>
             <Input aria-label="Income years" className="h-8 w-14 px-2 text-xs tabular-nums" inputMode="numeric" value={params.incomeYears}
               onChange={(e) => setParams({ ...params, incomeYears: Number(e.target.value.replace(/\D/g, "")) || 0 })} />
-            <span className={label}>· income protection %</span>
-            <Input aria-label="Income protection percentage" className="h-8 w-14 px-2 text-xs tabular-nums" inputMode="numeric" value={params.ipPercent}
+            <span className={label}>· income protection % of net income</span>
+            <Input aria-label="Net income protection percentage" className="h-8 w-14 px-2 text-xs tabular-nums" inputMode="numeric" value={params.ipPercent}
               onChange={(e) => setParams({ ...params, ipPercent: Math.min(Number(e.target.value.replace(/\D/g, "")) || 0, 100) })} />
             </div>
           </details>
@@ -546,9 +561,30 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                         <p className="quote-option-status">{job.pdfReceived && job.status === "generating" ? "Saving quote PDF…" : SCENARIO_TEXT[job.status]}</p>
                       </div> : null; })()}
                       <span className="block">{coverOptionLabel(i)}</span>
-                      <span className="mt-1 block normal-case tracking-normal">
-                        {chosen.filter(ins => quoteReference(p, option, ins) || quoteResult(p, option, ins)).length} / {QUOTES_PER_COVER} insurer quote references
-                      </span>
+                      {hasNoCurrentCover(p, option, i)
+                        ? <span className="mt-1 block normal-case tracking-normal">No existing cover to re-quote</span>
+                        : <div className="my-2 space-y-1 font-normal normal-case tracking-normal">
+                            {PREMIUM_PATTERNS.map(pattern => {
+                              const settings = quoteSettingsKey(p, option, activeTab);
+                              const saved = option._premiumVariants?.[activeTab]?.[pattern];
+                              return <div key={pattern} className="rounded border border-border px-2 py-1">
+                                <span className="block font-medium">{pattern}</span>
+                                <QuoteOptionReference value={saved?.settings === settings ? saved.number : ""}
+                                  label={`${activeTab} ${p} ${coverOptionLabel(i)} ${pattern} reference`}
+                                  onChange={number => setPlan(previous => ({
+                                    ...previous,
+                                    [p]: previous[p].map((value, index) => index !== i ? value : {
+                                      ...value,
+                                      _premiumVariants: {
+                                        ...value._premiumVariants,
+                                        [activeTab]: { ...value._premiumVariants?.[activeTab], [pattern]: { number, settings } },
+                                      },
+                                    }),
+                                  }))} />
+                                {saved?.number && saved.settings !== settings && <span>Previous reference {saved.number}</span>}
+                              </div>;
+                            })}
+                          </div>}
                       {option._quoteReferences?.[activeTab]?.number && !quoteReference(p,option,activeTab) && <div className="my-2 rounded border border-border p-2 font-normal normal-case tracking-normal"><p className="font-semibold">Previous quote: {option._quoteReferences[activeTab].number}</p><p className="text-muted-foreground">Saved for earlier settings. Current draft requires a new calculation.</p>{option._quoteResults?.[activeTab]?.monthlyPremium>0&&<p>R {Number(option._quoteResults[activeTab].monthlyPremium).toFixed(2)} / month</p>}</div>}
                       {isWM && isOmpProduct(activeTab,p) && <>
                         <details className="my-2 normal-case tracking-normal font-normal"><summary className="cursor-pointer">Required rating details{ompRatingIssues(option._ompInputs).length ? ` · ${ompRatingIssues(option._ompInputs).length} to complete` : ' · Complete'}</summary>
@@ -615,7 +651,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
               onClick={() => { setPlan((pl) => ({ ...pl, [adding]: defaultVariations(adding) })); setAdding(""); }}><Plus className="mr-0.5 h-3 w-3" />Add</Button>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
-            <p className={label}>{total * chosen.length} planned quotes · {total * QUOTES_PER_COVER} required across all cover options</p>
+            <p className={label}>{total * chosen.length * QUOTES_PER_COVER} premium variants planned across {chosen.length} selected insurer{chosen.length === 1 ? "" : "s"}</p>
             <Button size="sm" disabled={busy || products.length === 0} onClick={save}>{busy && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}{spec ? "Update quote plan" : "Save quote plan"}</Button>
           </div>
           {!allComplete && <p className="text-xs text-destructive" role="status">{incompleteOptions.length ? `Complete missing values in: ${incompleteOptions.join(", ")}.` : "Add a product to prepare your quote plan."}</p>}

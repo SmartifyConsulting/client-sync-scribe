@@ -5,17 +5,17 @@ export type FieldDef =
   | { key: string; label: string; kind: "select"; options: string[] }
   | { key: string; label: string; kind: "toggle" };
 
-const PATTERN = ["Stable", "Inflationary Increase", "Aggressive Increase"];
+export const PREMIUM_PATTERNS = ["Stable", "Inflationary Increase", "Aggressive Increase"];
 const GUARANTEE = ["Standard", "Guarantee term extender"];
 const INCREASE = ["Cover increase: fixed percentage", "Cover increase: CPI rate", "No increase"];
 
 export const COVER_OPTIONS = ["Desired Cover", "Current Cover", "Agreed Cover"];
-export const QUOTES_PER_COVER = 3;
+export const QUOTES_PER_COVER = PREMIUM_PATTERNS.length;
 export const coverOptionLabel = (index: number) => COVER_OPTIONS[index] ?? `Option ${index + 1}`;
 
 const LUMP_SUM: FieldDef[] = [
   { key: "benefit_amount", label: "Benefit amount", kind: "amount" },
-  { key: "premium_pattern", label: "Premium pattern", kind: "select", options: PATTERN },
+  { key: "premium_pattern", label: "Premium pattern", kind: "select", options: PREMIUM_PATTERNS },
   { key: "premium_guarantee", label: "Premium guarantee option", kind: "select", options: GUARANTEE },
   { key: "increase_option", label: "Increase option", kind: "select", options: INCREASE },
   { key: "growth", label: "Cover growth", kind: "percent" },
@@ -29,7 +29,7 @@ export const PRODUCT_TYPES: Record<string, FieldDef[]> = {
     { key: "monthly_benefit", label: "Monthly benefit", kind: "amount" },
     { key: "waiting_period", label: "Waiting period", kind: "select", options: ["7 days", "14 days", "1 month", "3 months", "6 months"] },
     { key: "benefit_term", label: "Benefit term", kind: "select", options: ["3 months", "6 months", "12 months", "24 months", "5 years", "To retirement age", "For life"] },
-    { key: "premium_pattern", label: "Premium pattern", kind: "select", options: PATTERN },
+    { key: "premium_pattern", label: "Premium pattern", kind: "select", options: PREMIUM_PATTERNS },
     { key: "increase_option", label: "Increase option", kind: "select", options: INCREASE },
     { key: "growth", label: "Cover growth", kind: "percent" },
   ],
