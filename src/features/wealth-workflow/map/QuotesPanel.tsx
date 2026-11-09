@@ -133,7 +133,7 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
       );
     }
     case "Push profile to CRM":
-      return <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">Profile push pending. Holarc keeps the client profile here. Xplan profile export is unavailable, and quoting can continue while it is pending.</p>;
+      return <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">Profile push pending. Elysian Financial Services keeps the client profile here. Xplan profile export is unavailable, and quoting can continue while it is pending.</p>;
 
     case "Quote 6 insurers, rank top 3":
       if (!quotes.length) {
@@ -246,7 +246,7 @@ export function QuotesPanel({ label, viewer, workflowId, records, clientFirst }:
       return (
         <div className="space-y-2 text-xs">
           <p className="rounded-lg bg-muted/50 p-3 text-muted-foreground">
-            {isWM ? "Record the advice in your own words. Holarc includes the confirmed quotes and files the version for review before you present it." : "Your Wealth Manager prepares the Record of Advice."}
+            {isWM ? "Record the advice in your own words. Elysian Financial Services includes the confirmed quotes and files the version for review before you present it." : "Your Wealth Manager prepares the Record of Advice."}
           </p>
           {cur ? (
             <div className="space-y-2">

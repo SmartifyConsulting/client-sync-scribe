@@ -3,7 +3,7 @@ importScripts("portalJourney.js", "oldMutualJourney.js", "interfaceMonitor.js");
 const jobs = new Map(); // portalTabId -> job
 const pendingLogins = new Map();
 const RECOVERY_ALARM = "holarc-session-recovery";
-// Session storage contains routing only. A renewed password is fetched by Holarc
+// Session storage contains routing only. A renewed password is fetched by Elysian Financial Services
 // under its existing, still-valid Password Protector token and discarded on login.
 function routeFor(job, previous = {}) {
   return { ...previous, appTabId: job.appTabId, insurer: job.insurer, integrationId: job.integrationId,
@@ -299,7 +299,7 @@ async function checkPortal(tabId) {
   const tab = await chrome.tabs.get(tabId).catch(() => null);
   if (!portalAllowed(tab?.url, job)) {
     job.done = true; job.autoReconnect = false; job.username = ""; job.password = ""; job.pin = undefined; await saveRoute(tabId, job);
-    tell(job, { type: "insurer-login-result", ok: false, message: "The portal redirected to another login site. Finish there, or update the portal URL in Holarc Wealth." }); return;
+    tell(job, { type: "insurer-login-result", ok: false, message: "The portal redirected to another login site. Finish there, or update the portal URL in Elysian Financial Services." }); return;
   }
   // Downloads must match the actual current portal origin, even after a safe redirect.
   await interfaceMonitor?.remember(job.insurer, new URL(tab.url).origin).catch(() => {});

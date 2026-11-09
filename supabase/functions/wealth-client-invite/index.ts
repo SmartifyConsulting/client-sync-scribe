@@ -54,7 +54,7 @@ async function emailInviteLink(
     const html = `
       <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#1a1a1a;">
         <p>Hi ${firstName},</p>
-        <p>${manager}${fspName ? ` of ${fspName}` : ""} has invited you to set up your Elysian Financial Technologies account.</p>
+        <p>${manager}${fspName ? ` of ${fspName}` : ""} has invited you to set up your Elysian Financial Services account.</p>
         <p>Open this secure link to get started — it will walk you through a short onboarding step (KYC/AML/PEP screening):</p>
         <p style="margin:24px 0;">
           <a href="${url}" style="background:#000;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;display:inline-block;">Set up my account</a>
@@ -63,7 +63,7 @@ async function emailInviteLink(
         <p style="font-size:13px;color:#666;">This link works once and expires in 14 days.</p>
       </div>
     `;
-    const res = await sendEmail({ to, subject: `${manager} invited you to Elysian Financial Technologies`, html });
+    const res = await sendEmail({ to, subject: `${manager} invited you to Elysian Financial Services`, html });
     if (!res.ok) console.error("Invite email send failed", res.error);
     return res.ok;
   } catch (e) {

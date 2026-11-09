@@ -42,7 +42,7 @@ function ChangeBrokerForm({ clientId, broker, onClose }: { clientId: string; bro
     <DialogContent className="max-h-[90vh] overflow-y-auto">
       <DialogHeader>
         <DialogTitle>Change Broker</DialogTitle>
-        <DialogDescription>Complete and sign a Broker Change Letter for the policies you want to transfer. Holarc files the letter for you to share. Your current broker stays listed until the transfer is confirmed.</DialogDescription>
+        <DialogDescription>Complete and sign a Broker Change Letter for the policies you want to transfer. Elysian Financial Services files the letter for you to share. Your current broker stays listed until the transfer is confirmed.</DialogDescription>
       </DialogHeader>
       <form className="space-y-3" onSubmit={submit}>
         <p className="text-sm">Current broker <strong>{broker?.name ?? "None linked"}</strong></p>
@@ -76,7 +76,7 @@ export function MyBroker({ clientId }: { clientId: string }) {
   if (broker.isError) return <Button variant="outline" onClick={() => void broker.refetch()}>Could not load broker details · Retry</Button>;
   const info = broker.data;
   return <div className="space-y-3">
-    <div><h2 className="text-lg font-semibold text-primary-dark">My Broker</h2><p className="text-xs text-muted-foreground">The broker linked to your Holarc client record.</p></div>
+    <div><h2 className="text-lg font-semibold text-primary-dark">My Broker</h2><p className="text-xs text-muted-foreground">The broker linked to your Elysian Financial Services client record.</p></div>
     <div className="space-y-3 rounded-xl border border-border bg-card p-4">
       {info ? <dl className="grid gap-3 text-sm sm:grid-cols-2">
         {([["Broker", info.name], ["Firm or FSP", info.firm], ["FSP licence", info.licence], ["Email", info.email], ["Phone", info.phone]] as const)

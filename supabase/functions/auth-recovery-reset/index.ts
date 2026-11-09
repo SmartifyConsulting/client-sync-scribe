@@ -141,7 +141,7 @@ Deno.serve(async (req) => {
         return json({ ok: false, error: "That didn't match. Check your code and try again." }, 400);
       }
       const totp = new OTPAuth.TOTP({
-        issuer: "Elysian Financial Technologies",
+        issuer: "Elysian Financial Services",
         algorithm: "SHA1",
         digits: 6,
         period: 30,

@@ -2,18 +2,18 @@ import { LegalDocLayout } from "@/components/legal/LegalDocLayout";
 
 export default function TermsAndConditions() {
   return (
-    <LegalDocLayout title="Terms and Conditions" subtitle="The terms governing your use of Holarc Wealth">
+    <LegalDocLayout title="Terms and Conditions" subtitle="The terms governing your use of Elysian Financial Services">
       <>
         <h2>1. Acceptance of Terms</h2>
         <p>
-          By creating an account, accessing, or using Holarc Wealth (the "Platform"), you agree to be bound by
+          By creating an account, accessing, or using Elysian Financial Services (the "Platform"), you agree to be bound by
           these Terms and Conditions ("Terms"). If you do not agree to these Terms, you must not access or use the
           Platform.
         </p>
 
         <h2>2. Description of Service</h2>
         <p>
-          Holarc Wealth is a wealth-management communication platform that enables Wealth Managers and their
+          Elysian Financial Services is a wealth-management communication platform that enables Wealth Managers and their
           clients to interact through a unified client profile. The Platform facilitates information sharing,
           communication, and financial-planning coordination. It does not provide financial advice itself — all
           advice comes from your licensed Wealth Manager.
@@ -21,7 +21,7 @@ export default function TermsAndConditions() {
 
         <h2>3. Not a Licensed Financial Services Provider</h2>
         <p>
-          <strong>IMPORTANT:</strong> Holarc Wealth is a technology platform provider. We do not provide financial
+          <strong>IMPORTANT:</strong> Elysian Financial Services is a technology platform provider. We do not provide financial
           advice or make product recommendations. The Platform connects users but does not itself act as a
           Financial Services Provider under FAIS. All advice and financial decisions remain solely between your
           Wealth Manager and you.
@@ -45,12 +45,12 @@ export default function TermsAndConditions() {
         <h2>6. Fees and Payment</h2>
         <p>
           The Platform may charge subscription or usage fees to Wealth Managers. Any fees for financial advice or
-          services are a matter between you and your Wealth Manager and are not set by Holarc Wealth.
+          services are a matter between you and your Wealth Manager and are not set by Elysian Financial Services.
         </p>
 
         <h2 id="intellectual-property">7. Intellectual Property</h2>
         <p>
-          The Platform, including its design, text, graphics, and underlying software, is owned by Holarc Wealth
+          The Platform, including its design, text, graphics, and underlying software, is owned by Elysian Financial Services
           (Pty) Ltd and protected by intellectual property laws. You may not copy, modify, or distribute any part
           of the Platform without our written permission.
         </p>
@@ -76,7 +76,7 @@ export default function TermsAndConditions() {
         <h2>11. Limitation of Liability</h2>
         <p>
           <strong>
-            TO THE FULLEST EXTENT PERMITTED BY LAW, HOLARC WEALTH SHALL NOT BE LIABLE FOR ANY INDIRECT,
+            TO THE FULLEST EXTENT PERMITTED BY LAW, ELYSIAN FINANCIAL SERVICES SHALL NOT BE LIABLE FOR ANY INDIRECT,
             INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING FROM YOUR USE OF THE PLATFORM, INCLUDING ANY LOSS ARISING
             FROM FINANCIAL ADVICE GIVEN BY A WEALTH MANAGER, WHICH REMAINS THEIR SOLE RESPONSIBILITY.
           </strong>
@@ -109,9 +109,9 @@ export default function TermsAndConditions() {
         <p>
           For questions about these Terms, contact:
           <br />
-          <strong>Holarc Wealth (Pty) Ltd</strong>
+          <strong>Elysian Financial Services platform operator</strong>
           <br />
-          Email: support@holarchealth.com
+          <a href="mailto:support@holarchealth.com">Email platform support</a>
         </p>
       </>
     </LegalDocLayout>

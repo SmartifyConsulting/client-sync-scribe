@@ -69,7 +69,7 @@ const sealStamp = (d: Doc, ok: boolean) => !d.seal
 <div style="flex-shrink:0;width:74px;height:74px;border-radius:50%;border:3px double ${ok ? "#14532d" : "#991b1b"};display:flex;align-items:center;justify-content:center;text-align:center;font-size:9px;font-weight:700;letter-spacing:.08em;color:${ok ? "#14532d" : "#991b1b"}">${ok ? "CERTIFIED<br/>ORIGINAL" : "SEAL<br/>BROKEN"}</div>
 <div style="font-size:10px;line-height:1.55"><div style="font-weight:700;letter-spacing:.18em;font-size:11px;margin-bottom:3px">EVIDENTIARY SEAL</div>
 Sealed: ${esc(fmtDate(d.seal.at))} (${esc(d.seal.at)})<br/>Recorded from IP address: ${esc(d.seal.ip ?? "not recorded")}<br/>
-${ok ? "Certified original copy recorded in Holarc Wealth. The text has not changed since it was sealed." : "Warning: this text no longer matches its seal and is not an original copy."}
+${ok ? "Certified original copy recorded in Elysian Financial Services. The text has not changed since it was sealed." : "Warning: this text no longer matches its seal and is not an original copy."}
 <div style="font-family:monospace;word-break:break-all;margin-top:3px">SHA-256 ${esc(d.seal.hash)}</div></div></div>`;
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -85,7 +85,7 @@ const transcriptShell = (title: string, date: string | undefined, body: string, 
 <div style="font-size:11px;color:#555;text-align:right">${esc(fmtDate(date))}<br/><b style="color:#111">Wealth Manager</b> in bold · Client in regular</div></div>
 ${body}
 ${stamp}
-<div data-document-footer style="margin-top:28px;border-top:1px solid #ccc;padding-top:8px;font-size:9.5px;color:#666;text-align:center">Confidential · Holarc Wealth consultation transcript · Generated ${esc(fmtDate(new Date().toISOString()))}</div></div>`;
+<div data-document-footer style="margin-top:28px;border-top:1px solid #ccc;padding-top:8px;font-size:9.5px;color:#666;text-align:center">Confidential · Elysian Financial Services consultation transcript · Generated ${esc(fmtDate(new Date().toISOString()))}</div></div>`;
 const transcriptHtml = (title: string, segments: { speaker: string; text: string }[], date?: string, stamp = "") => {
   const body = segments.map((s) => {
     const b = s.speaker === "broker";

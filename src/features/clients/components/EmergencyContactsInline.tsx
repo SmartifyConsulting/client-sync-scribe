@@ -32,7 +32,7 @@ interface Props {
 }
 
 /**
- * My Holarc Care Team — the friends and family a client shares parts of their
+ * My Elysian Financial Services Care Team — the friends and family a client shares parts of their
  * profile with. Next of Kin is listed here by default; each member carries an
  * explicit list of what they can see.
  */

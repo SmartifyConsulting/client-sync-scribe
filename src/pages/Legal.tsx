@@ -4,16 +4,16 @@ import { FileText, ChevronRight } from "lucide-react";
 
 export default function Legal() {
   const docs = [
-    { to: "/terms-and-conditions", title: "Terms and Conditions", description: "The terms governing your use of Holarc Wealth" },
+    { to: "/terms-and-conditions", title: "Terms and Conditions", description: "The terms governing your use of Elysian Financial Services" },
     { to: "/wealth-manager-agreement", title: "Wealth Manager Operator Agreement", description: "Data processing terms for Wealth Managers using the Platform" },
     { to: "/privacy-policy", title: "Privacy Policy", description: "Privacy, client consent and Companion data practices" },
   ];
 
   return (
-    <LegalDocLayout title="Legal Documents" subtitle="Review the agreements that govern your use of Holarc Wealth">
+    <LegalDocLayout title="Legal Documents" subtitle="Review the agreements that govern your use of Elysian Financial Services">
       <>
         <p>
-          Review the legal documents that govern your use of the Holarc Wealth platform.
+          Review the legal documents that govern your use of the Elysian Financial Services platform.
         </p>
         <ul className="list-none p-0 m-0 flex flex-col gap-5 [&>li]:before:hidden">
           {docs.map((d) => (

@@ -37,7 +37,7 @@ export function Testimonials() {
             Trusted by clinicians and patients.
           </h2>
           <p className="text-base text-muted-foreground max-w-2xl mx-auto">
-            Real stories from doctors and patients running their care on Holarc.
+            Real stories from doctors and patients running their care on Elysian Financial Services.
           </p>
           <div className="mt-4 flex items-center justify-center gap-1">
             {[...Array(5)].map((_, i) => (

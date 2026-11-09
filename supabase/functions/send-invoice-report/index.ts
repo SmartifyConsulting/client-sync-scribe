@@ -121,7 +121,7 @@ const handler = async (req: Request): Promise<Response> => {
       subtitle: practiceNumber ? `${doctorName} · Practice No: ${practiceNumber}` : doctorName,
       senderName: doctorName,
       bodyHtml: reportBody,
-      footerNote: "This report was generated automatically by Elysian Financial Technologies.",
+      footerNote: "This report was generated automatically by Elysian Financial Services.",
     });
 
 

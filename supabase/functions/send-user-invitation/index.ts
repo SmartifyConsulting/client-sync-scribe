@@ -171,10 +171,10 @@ const handler = async (req: Request): Promise<Response> => {
     const senderRole = senderProfile?.role === "broker" ? "Wealth Manager" : "user";
 
     const BRAND = "#0284c7";
-    const LOGO_URL = "https://www.holarchealth.com/__l5e/assets-v1/8f35c2f6-23ea-4a43-9fc6-3569d0ef7fa8/holarc-wealth-logo-v2.png";
+    const LOGO_URL = new URL("/social-share.png", Deno.env.get("APP_URL") || "https://holarc-wealth.lovable.app").href;
     const banner = (heading: string) => `
         <div style="background-color: ${BRAND}; padding: 24px 30px; border-radius: 12px 12px 0 0; text-align: center;">
-          <img src="${LOGO_URL}" alt="Elysian Financial Technologies" width="160" style="height:auto;width:160px;max-width:160px;display:inline-block;border:0;margin-bottom:14px;" />
+          <img src="${LOGO_URL}" alt="Elysian Financial Services" width="160" style="height:auto;width:160px;max-width:160px;display:inline-block;border:0;margin-bottom:14px;" />
           <h1 style="color: white; margin: 0; font-size: 26px;">${heading}</h1>
         </div>`;
     const emailHtml = finalRecipientId && !isPracticePartner ? `
@@ -183,12 +183,12 @@ const handler = async (req: Request): Promise<Response> => {
         ${banner("New Connection Request")}
         <div style="background: #f8fafc; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
           <p style="font-size: 18px; margin-top: 0;">Hello,</p>
-          <p><strong>${senderName}</strong>${senderProfile?.specialty ? ` (${senderProfile.specialty})` : ""} would like to connect with you on Elysian Financial Technologies.</p>
+          <p><strong>${senderName}</strong>${senderProfile?.specialty ? ` (${senderProfile.specialty})` : ""} would like to connect with you on Elysian Financial Services.</p>
           ${message ? `<div style="background: white; border-left: 4px solid ${BRAND}; padding: 15px; margin: 20px 0; border-radius: 0 8px 8px 0;"><p style="margin: 0; color: #64748b; font-size: 14px;">Personal message:</p><p style="margin: 10px 0 0 0;">"${message}"</p></div>` : ""}
           <div style="text-align: center; margin: 30px 0;"><a href="${appUrl}/notifications" style="background-color: ${BRAND}; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block; font-size: 16px;">View Invitation</a></div>
-          <p style="color: #64748b; font-size: 14px;">Log in to Elysian Financial Technologies to accept or decline this invitation.</p>
+          <p style="color: #64748b; font-size: 14px;">Log in to Elysian Financial Services to accept or decline this invitation.</p>
           <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
-          <p style="color: #94a3b8; font-size: 12px; margin-bottom: 0;">Elysian Financial Technologies - Secure Wealth Management</p>
+          <p style="color: #94a3b8; font-size: 12px; margin-bottom: 0;">Elysian Financial Services - Secure Wealth Management</p>
         </div>
       </body></html>
     ` : `
@@ -197,13 +197,13 @@ const handler = async (req: Request): Promise<Response> => {
         ${banner(isPracticePartner ? "You've Been Added as a Practice Partner" : "You're Invited to Elysian")}
         <div style="background: #f8fafc; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
           <p style="font-size: 18px; margin-top: 0;">Hello${partnerName ? ` ${partnerName}` : ""},</p>
-          <p><strong>${senderName}</strong>, a ${senderRole} on Elysian Financial Technologies, has ${isPracticePartner ? "added you as a practice partner" : "invited you to join the platform"}.</p>
+          <p><strong>${senderName}</strong>, a ${senderRole} on Elysian Financial Services, has ${isPracticePartner ? "added you as a practice partner" : "invited you to join the platform"}.</p>
           ${isPracticePartner ? `<p>Your account has been created. Please log in and update your password to activate your account.</p>` : ""}
           ${message ? `<div style="background: white; border-left: 4px solid ${BRAND}; padding: 15px; margin: 20px 0; border-radius: 0 8px 8px 0;"><p style="margin: 0; color: #64748b; font-size: 14px;">Personal message:</p><p style="margin: 10px 0 0 0;">"${message}"</p></div>` : ""}
           <div style="text-align: center; margin: 30px 0;"><a href="${appUrl}" style="background-color: ${BRAND}; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block; font-size: 16px;">${isPracticePartner ? "Log In & Set Password" : "Join Elysian Now"}</a></div>
           <p style="color: #64748b; font-size: 14px;">This invitation expires in 7 days.</p>
           <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
-          <p style="color: #94a3b8; font-size: 12px; margin-bottom: 0;">Elysian Financial Technologies - Secure Wealth Management</p>
+          <p style="color: #94a3b8; font-size: 12px; margin-bottom: 0;">Elysian Financial Services - Secure Wealth Management</p>
         </div>
       </body></html>
     `;

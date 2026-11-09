@@ -187,7 +187,7 @@ describe("Companion avoids window flicker", () => {
     await h.listeners.created({ id: 3, openerTabId: 2, url: "https://partner.discovery.co.za/quote", windowId: 7, active: true });
     expect(h.windowChanges).toEqual([]); expect(h.tabChanges).toContainEqual({ id: 1, active: true });
   });
-  it("does not activate Holarc or minimise a separate insurer-created window", async () => {
+  it("does not activate Elysian Financial Services or minimise a separate insurer-created window", async () => {
     const h = harness(); h.login(); vm.runInContext("jobs.get(2).running = true",h.context);
     await h.listeners.created({ id: 3, openerTabId: 2, url: "https://partner.discovery.co.za/quote", windowId: 9, active: true });
     expect(h.windowChanges).toEqual([]); expect(h.tabChanges.some(change => change.id === 1 && change.active)).toBe(false);

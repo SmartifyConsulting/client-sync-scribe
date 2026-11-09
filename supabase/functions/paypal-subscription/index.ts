@@ -101,7 +101,7 @@ async function createPayPalOrder(
         },
       ],
       application_context: {
-        brand_name: "Elysian Financial Technologies",
+        brand_name: "Elysian Financial Services",
         landing_page: "NO_PREFERENCE",
         user_action: "PAY_NOW",
         return_url: `${Deno.env.get("SUPABASE_URL")}/functions/v1/paypal-subscription?action=capture`,

@@ -72,7 +72,7 @@ export function MfaChallengeScreen({ onVerified }: Props) {
             </div>
             <h1 className="text-xl font-semibold text-foreground">Two-Factor Verification</h1>
             <p className="text-sm text-muted-foreground mt-2">
-              Open your authenticator app and enter the 6-digit code for Holarc Wealth.
+              Open your authenticator app and enter the 6-digit code for Elysian Financial Services.
             </p>
           </div>
 

@@ -493,7 +493,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       {/* Invite fallback when client not found */}
                       {newPatient.name.length >= 3 && !searchingPatients && patientSuggestions.length === 0 && !selectedPatientUserId && (
                         <div className="mt-3 rounded-xl border border-dashed border-border p-4 space-y-3 bg-muted/30">
-                          <p className="text-sm text-muted-foreground">Client not found on Holarc Wealth? Send an invitation</p>
+                          <p className="text-sm text-muted-foreground">Client not found on Elysian Financial Services? Send an invitation</p>
                           <div className="flex gap-2">
                             <Input
                               type="email"

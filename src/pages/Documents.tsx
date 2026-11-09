@@ -422,7 +422,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
           subject: shareDocument.name,
           documentName: shareDocument.name,
           documentContent: shareDocument.content,
-          senderName: profile?.full_name || "Holarc User",
+          senderName: profile?.full_name || "Elysian Financial Services User",
           practiceName: profile?.practice_address ? `Practice #${profile.practice_number}` : undefined,
         },
       });

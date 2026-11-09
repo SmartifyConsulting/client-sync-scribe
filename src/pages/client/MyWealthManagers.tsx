@@ -152,7 +152,7 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
   });
 
   // General Practitioner — always shown in the list (by default), flagged
-  // with whether they're a registered Holarc Wealth advisor or an external GP.
+  // with whether they're a registered Elysian Financial Services advisor or an external GP.
   const { data: gpInfo } = useQuery({
     queryKey: ["patient-gp-holarc-status"],
     queryFn: async () => {
@@ -426,7 +426,7 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
         </div>
       )}
 
-      {/* General Practitioner — shown by default, flagged with Holarc status */}
+      {/* General Practitioner — shown by default, flagged with Elysian Financial Services status */}
       {gpInfo && (
         <Card>
           <CardContent className="p-4 flex items-center justify-between gap-3">
@@ -446,7 +446,7 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
               variant={gpInfo.onHolarc ? "default" : "secondary"}
               className={cn("text-xs shrink-0", gpInfo.onHolarc && "bg-primary text-primary-foreground")}
             >
-              {gpInfo.onHolarc ? "On Holarc Wealth" : "Not on Holarc Wealth"}
+              {gpInfo.onHolarc ? "On Elysian Financial Services" : "Not on Elysian Financial Services"}
             </Badge>
           </CardContent>
         </Card>
@@ -455,7 +455,7 @@ export default function MyWealthManagers({ hideHeader = false, showAccessReminde
       {/* Advisor Search */}
       <Card>
         <CardHeader className="pb-1 pt-3 px-4">
-          <CardTitle className="text-sm">Find a Wealth Manager on Holarc Wealth</CardTitle>
+          <CardTitle className="text-sm">Find a Wealth Manager on Elysian Financial Services</CardTitle>
           <CardDescription className="text-xs">Filter by name, specialty, language — or any combination</CardDescription>
         </CardHeader>
         <CardContent>

@@ -27,7 +27,7 @@ export function InsurerActivity({ insurer, activity, onRetry, onStop, canStop, i
       <SegmentedProgress label={`${insurer} connection progress`} completed={["connected", "reconnected", "fields", "no-fields", "capturing", "saving", "saved", "pdf-error"].includes(activity.phase) ? 4 : activity.phase === "verifying" ? 3 : ["credentials", "waiting", "otp", "email"].includes(activity.phase) ? 2 : ["opening", "loading", "reconnecting"].includes(activity.phase) ? 1 : 0} active={!complete && !error && !paused && !stalled} />
       <p role="status" className="font-medium text-foreground">{insurer} · {ACTIVITY_TEXT[activity.phase]}</p>
       {activity.detail && <p className="break-words text-destructive">{activity.detail}</p>}
-      {!complete && !error && <p className="text-muted-foreground">{paused ? "Waiting for your input" : ["unlocking", "opening"].includes(activity.phase) ? "Waiting for Holarc" : `Waiting for ${insurer}`} · {elapsed}s</p>}
+      {!complete && !error && <p className="text-muted-foreground">{paused ? "Waiting for your input" : ["unlocking", "opening"].includes(activity.phase) ? "Waiting for Elysian Financial Services" : `Waiting for ${insurer}`} · {elapsed}s</p>}
       {stalled && <p className="text-muted-foreground">No advance at this step. The portal may be slow or need attention.</p>}
       <details className="pt-1">
       <summary className="cursor-pointer text-xs text-muted-foreground">Connection history</summary>

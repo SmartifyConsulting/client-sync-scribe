@@ -38,7 +38,7 @@ export function SecurityBadges() {
             Built for the most sensitive data in your life.
           </h2>
           <p className="text-sm text-muted-foreground mt-2 max-w-2xl mx-auto">
-            Holarc treats health data like the high-stakes information it is. Every account is protected by
+            Elysian Financial Services treats health data like the high-stakes information it is. Every account is protected by
             mandatory two-factor authentication and end-to-end encryption.
           </p>
         </motion.div>

@@ -1,4 +1,4 @@
-// Minimal country dial-code list focused on Holarc Wealth's target markets,
+// Minimal country dial-code list focused on Elysian Financial Services's target markets,
 // with a long-tail fallback. Used by PhoneNumberInput.
 export interface CountryDial {
   code: string;       // ISO 3166-1 alpha-2

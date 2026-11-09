@@ -29,7 +29,7 @@ export function LegalDocLayout({
   effectiveDate = "1 January 2026",
   lastUpdated,
   version = "1.0",
-  owner = "Holarc Wealth (Pty) Ltd",
+  owner = "the operator of Elysian Financial Services",
   children,
 }: LegalDocLayoutProps) {
   const navigate = useNavigate();
@@ -197,7 +197,7 @@ export function LegalDocLayout({
             {/* Signature footer */}
             <div className="mt-12 pt-6 border-t border-border text-xs text-muted-foreground space-y-1">
               <p className="font-semibold text-foreground">{owner}</p>
-              <p>contact@holarchealth.com · legal@holarchealth.com</p>
+              <p><a href="mailto:contact@holarchealth.com">Contact us</a> · <a href="mailto:legal@holarchealth.com">Email the legal team</a></p>
               <p>This document is governed by the laws of the Republic of South Africa.</p>
               <p>
                 © {new Date().getFullYear()} {owner}. All rights reserved.

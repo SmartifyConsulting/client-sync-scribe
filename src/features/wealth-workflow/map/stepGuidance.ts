@@ -50,17 +50,17 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
   },
   "Astute pull: life, disability, investments": {
     client: { what: "We collect your existing life, disability and investment policies through Astute, using the LOA you signed. You don't need to do anything.", required: ["Your signed LOA"] },
-    manager: { what: "Holarc Wealth pulls {name}'s existing life, disability and investment policies from Astute.", required: ["Signed LOA on file"] },
+    manager: { what: "Elysian Financial Services pulls {name}'s existing life, disability and investment policies from Astute.", required: ["Signed LOA on file"] },
     unlocks: "A complete view of the current portfolio",
   },
   "Insurer schedules and claims history": {
     client: { what: "We collect your current policy schedules and any past claims from your insurers.", required: ["Nothing from you. We use your signed LOA"] },
-    manager: { what: "Holarc Wealth collects {name}'s policy schedules and claims history from each insurer.", required: ["Policy schedules from each insurer"] },
+    manager: { what: "Elysian Financial Services collects {name}'s policy schedules and claims history from each insurer.", required: ["Policy schedules from each insurer"] },
     unlocks: "Accurate cover comparison",
   },
   "Cross-alert check": {
     client: { what: "We check that no other brokerage has asked for your information recently. This protects you.", required: ["Nothing from you"] },
-    manager: { what: "Holarc Wealth checks whether another brokerage has queried {name} recently. If one has, the mandate must be re-signed.", required: ["Valid LOA on file"] },
+    manager: { what: "Elysian Financial Services checks whether another brokerage has queried {name} recently. If one has, the mandate must be re-signed.", required: ["Valid LOA on file"] },
     unlocks: "Profile can be shared with the CRM",
   },
   "Push profile to CRM": {
@@ -100,12 +100,12 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
   },
   "Life, short-term and investment gaps": {
     client: { what: "We calculate the gap between the cover you have and the cover you need.", required: ["Nothing from you"] },
-    manager: { what: "Holarc Wealth calculates the gap between {name}'s current cover and what they need.", required: ["Financial facts captured"] },
+    manager: { what: "Elysian Financial Services calculates the gap between {name}'s current cover and what they need.", required: ["Financial facts captured"] },
     unlocks: "Estate duty estimate and quotes",
   },
   "Estate duty estimate": {
     client: { what: "We estimate the estate duty and cash your estate would need.", required: ["Your assets, debts and will details"] },
-    manager: { what: "Holarc Wealth estimates {name}'s estate duty and liquidity needs.", required: ["Assets, liabilities and will details"] },
+    manager: { what: "Elysian Financial Services estimates {name}'s estate duty and liquidity needs.", required: ["Assets, liabilities and will details"] },
     unlocks: "Quotes and Record of Advice",
   },
   "Or: single-need disclaimer": {
@@ -125,7 +125,7 @@ export const STEP_GUIDANCE: Record<string, StepGuidance> = {
   },
   "Affordability check": {
     client: { what: "We confirm the recommended premiums fit your monthly budget.", required: ["Your monthly income and expenses"] },
-    manager: { what: "Holarc Wealth confirms the recommended premiums fit {name}'s budget.", required: ["Monthly income and expenses"] },
+    manager: { what: "Elysian Financial Services confirms the recommended premiums fit {name}'s budget.", required: ["Monthly income and expenses"] },
     unlocks: "Record of Advice (ROA)",
   },
   "Generate ROA (versioned)": {

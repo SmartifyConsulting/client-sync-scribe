@@ -1,9 +1,9 @@
 /**
- * Holarc Wealth wealth-management terminology. One name per concept — use these
+ * Elysian Financial Services wealth-management terminology. One name per concept — use these
  * everywhere user-facing copy refers to a person, object or stage.
  * Database/table/route identifiers are unchanged (client, advisor, session…).
  */
-export const BRAND = "Holarc Wealth";
+export const BRAND = "Elysian Financial Services";
 
 export const TERMS = {
   client: "Client", clients: "Clients",

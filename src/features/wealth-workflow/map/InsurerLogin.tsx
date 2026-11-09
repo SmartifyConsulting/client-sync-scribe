@@ -14,7 +14,7 @@ export const LOGIN_TEXT: Record<LoginState, string> = {
   connected: "Connected",
   failed: "Login failed — click the tab to try again.",
   stopped: "Stopped — connect when you are ready.",
-  "no-addon": "Holarc Wealth Companion has not been detected on this page yet.",
+  "no-addon": "Elysian Financial Services Companion has not been detected on this page yet.",
 };
 
 /** Small circular progress ring shown on an insurer tab while the add-on logs in. */
@@ -74,7 +74,7 @@ export function ProtectorDialog({ open, onClose, onSubmit, busy }: { open: boole
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-sm"><KeyRound className="h-4 w-4" />Unlock saved insurer logins</DialogTitle>
-          <DialogDescription className="text-xs">Unlock all insurer quotes for 30 minutes. After that, Elysian Financial Technologies asks for your Password Protector again.</DialogDescription>
+          <DialogDescription className="text-xs">Unlock all insurer quotes for 30 minutes. After that, Elysian Financial Services asks for your Password Protector again.</DialogDescription>
         </DialogHeader>
         <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (code) onSubmit(code); }}>
           <div className="relative flex-1">
@@ -94,5 +94,5 @@ export const addonInstalled = () => document.documentElement.dataset.holarcAddon
 export function downloadAddon() {
   return fetch(`${COMPANION_DOWNLOAD_URL}?checked=${Date.now()}`, { cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer" })
     .then((r) => { if (!r.ok) throw new Error(`Download failed: ${r.status}`); return r.blob(); })
-    .then((b) => { const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "holarc-insurer-addon.zip"; a.click(); URL.revokeObjectURL(a.href); })
+    .then((b) => { const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "elysian-companion.zip"; a.click(); URL.revokeObjectURL(a.href); })
 }

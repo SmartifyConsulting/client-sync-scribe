@@ -21,7 +21,7 @@ export const loginProgressStage = (phase: unknown): LoginTestStage | null =>
     ? phase as LoginTestStage : null;
 
 export function loginTimeoutExplanation(lastStage: LoginTestStage) {
-  if (lastStage === "requested") return "No response from the Companion. Refresh Holarc and check that the extension is enabled with access to this site.";
+  if (lastStage === "requested") return "No response from the Companion. Refresh Elysian Financial Services and check that the extension is enabled with access to this site.";
   if (["acknowledged", "opening", "loading"].includes(lastStage)) return "The Companion responded, but did not report a login submission. Check the portal for a loading page, redirect or login form the Companion did not recognise.";
   if (["credentials", "waiting", "verifying", "otp", "email"].includes(lastStage)) return "The login or verification was attempted, but no signed-in confirmation returned. Check the portal for verification, a security notice, or a signed-in page the Companion did not recognise.";
   return "No final confirmation returned. Check the provider portal and the last reported step below.";

@@ -58,7 +58,7 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
         }
         const { data, error } = await supabase.auth.mfa.enroll({
           factorType: "totp",
-          friendlyName: "Holarc Authenticator",
+          friendlyName: "Elysian Financial Services Authenticator",
         });
         if (error) throw error;
         if (data) {

@@ -90,11 +90,11 @@ if (typeof window !== "undefined" && !(window as any).__holarcNoticeShown) {
   );
   // eslint-disable-next-line no-console
   console.log(
-    "%cThis is a private application owned by Holarc Wealth (Pty) Ltd.\n" +
+    "%cThis is a private application owned by the operator of Elysian Financial Services.\n" +
       "Unauthorised access, scraping, reverse engineering, or any attempt to\n" +
       "copy, clone, or white-label this service is strictly prohibited and\n" +
       "may result in legal action.\n\n" +
-      "See https://holarchealth.com/intellectual-property",
+      "See the platform Terms and Conditions.",
     "color:#0F766E;font-size:13px;line-height:1.5;"
   );
 }

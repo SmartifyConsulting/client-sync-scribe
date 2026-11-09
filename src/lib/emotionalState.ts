@@ -1,5 +1,5 @@
 /**
- * Holarc emotional language system.
+ * Elysian Financial Services emotional language system.
  *
  * The dashboard never leads with raw data. Every card leads with what the
  * information *means* to the person reading it, and only then shows the

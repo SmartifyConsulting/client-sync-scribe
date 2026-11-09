@@ -365,7 +365,7 @@ export function SettingsContent() {
   };
 
   const handleDownloadReceipt = (payment: PaymentHistoryItem) => {
-    const receiptContent = `PAYMENT RECEIPT\n================\n\nTransaction ID: ${payment.paypal_transaction_id || "N/A"}\nDate: ${format(new Date(payment.created_at), "MMMM d, yyyy 'at' h:mm a")}\nDescription: ${payment.description}\nAmount: $${payment.amount.toFixed(2)} ${payment.currency}\nStatus: ${payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}\n\nThank you for your payment!\nHolarc`;
+    const receiptContent = `PAYMENT RECEIPT\n================\n\nTransaction ID: ${payment.paypal_transaction_id || "N/A"}\nDate: ${format(new Date(payment.created_at), "MMMM d, yyyy 'at' h:mm a")}\nDescription: ${payment.description}\nAmount: $${payment.amount.toFixed(2)} ${payment.currency}\nStatus: ${payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}\n\nThank you for your payment!\nElysian Financial Services`;
     const blob = new Blob([receiptContent], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");

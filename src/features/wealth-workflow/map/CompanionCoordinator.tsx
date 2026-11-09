@@ -40,7 +40,7 @@ export function CompanionCoordinator() {
     const observed = new Map<string, number>();
     let lastSaveError=0;
     const saveResult = (id:string,outcome:"success"|"failed") => recordPortalConnection(id,outcome).catch(()=>{
-      if(Date.now()-lastSaveError>60_000){lastSaveError=Date.now();toast.error("The connection time could not be saved. Please refresh Holarc.");}
+      if(Date.now()-lastSaveError>60_000){lastSaveError=Date.now();toast.error("The connection time could not be saved. Please refresh Elysian Financial Services.");}
     });
     let alive = true;
     const renew = async (request: any) => {

@@ -64,7 +64,7 @@
     "providerProfile": "Provider Profile",
     "backToAdmin": "Back to Admin",
     "liveSOS": "Canlı SOS",
-    "askMaeve": "Ask Holarc",
+    "askMaeve": "Ask Elysian Financial Services",
     "wardBoard": "Ward Board",
     "nurseDashboard": "Dashboard"
   },
@@ -771,7 +771,7 @@
       "badge": "AI-powered · Patient-controlled · HIPAA-aligned",
       "title": "A revolutionary healthcare ecosystem",
       "titleHighlight": "built around you.",
-      "description": "Holarc is one connected platform where doctors run their entire practice and patients own their entire 360° health story — from voice-recorded consultations and AI summaries, to video-verified medication adherence rewards, cross-specialist Round Tables, hospital admissions, prescriptions, billing, and a unified care calendar.",
+      "description": "Elysian Financial Services is one connected platform where doctors run their entire practice and patients own their entire 360° health story — from voice-recorded consultations and AI summaries, to video-verified medication adherence rewards, cross-specialist Round Tables, hospital admissions, prescriptions, billing, and a unified care calendar.",
       "cta": "Join the Ecosystem",
       "doctorsButton": "Doctors",
       "patientsButton": "Patients"
@@ -791,7 +791,7 @@
       "hospitalNetwork": "Hospital Network"
     },
     "mobile": {
-      "title": "Get Holarc on your phone",
+      "title": "Get Elysian Financial Services on your phone",
       "description": "Available on iOS and Android — your full health story in your pocket.",
       "appStore": "App Store",
       "googlePlay": "Google Play"
@@ -811,7 +811,7 @@
       "roundTableDescription": "Specialists coordinate per patient with shared notes and read-receipts.",
       "aiAssistant": "AI Clinical Assistant",
       "aiAssistantDescription": "Patient history summaries · medication conflict alerts · imaging analysis · auto-generated documents.",
-      "holarcHelp": "Holarc Help (SOS)",
+      "holarcHelp": "Elysian Financial Services Help (SOS)",
       "holarcHelpDescription": "One-tap dispatch to nearby emergency responders and hospitals with live location, ETA tracking, and full medical context shared on arrival.",
       "emergencyResponders": "Emergency responders",
       "hospitals": "Hospitals",
@@ -822,7 +822,7 @@
       "sectionBadge": "For Patients",
       "sectionTitle": "Your Health.",
       "sectionTitleHighlight": "View.",
-      "sectionDescription": "Holarc gives you a complete 360-degree view of your health profile—every consultation, prescription, and clinical note from every provider, unified in one place and entirely under your control.",
+      "sectionDescription": "Elysian Financial Services gives you a complete 360-degree view of your health profile—every consultation, prescription, and clinical note from every provider, unified in one place and entirely under your control.",
       "benefit1Title": "Complete Health Picture",
       "benefit1Description": "See your entire medical history, prescriptions, and care team in one unified view—no more scattered records.",
       "benefit2Title": "Connect Your Care Team",
@@ -855,7 +855,7 @@
       "button": "Get Started Today"
     },
     "roleDialog": {
-      "title": "Join Holarc",
+      "title": "Join Elysian Financial Services",
       "description": "How will you use the platform?",
       "label": "I am a...",
       "placeholder": "Select user type",

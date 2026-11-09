@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Holarc Wealth Companion",
-  "version": "1.7.19",
-  "description": "Connects insurer portals in background tabs using saved Holarc Wealth logins, relays verification and captures quote PDFs.",
+  "name": "Elysian Financial Services Companion",
+  "version": "1.7.20",
+  "description": "Connects insurer portals in background tabs using saved Elysian Financial Services logins, relays verification and captures quote PDFs.",
   "icons": { "48": "icon.png", "128": "icon.png" },
   "permissions": ["tabs", "scripting", "storage", "downloads", "alarms"],
   "host_permissions": [

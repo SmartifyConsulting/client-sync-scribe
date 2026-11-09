@@ -1,5 +1,5 @@
 /**
- * Shared Elysian Financial Technologies email shell.
+ * Shared Elysian Financial Services email shell.
  *
  * Every outbound email (documents to patients, medical aids, pharmacies,
  * invoices and reports) is wrapped in this so recipients always see the
@@ -13,7 +13,7 @@ export const HOLARC_LOGO_CID = "holarc-logo";
 export const HOLARC_SIGNATURE_CID = "holarc-signature";
 
 export const HOLARC_LOGO_URL =
-  "https://www.holarchealth.com/__l5e/assets-v1/8f35c2f6-23ea-4a43-9fc6-3569d0ef7fa8/holarc-wealth-logo-v2.png";
+  new URL("/social-share.png", Deno.env.get("APP_URL") || "https://holarc-wealth.lovable.app").href;
 
 /** Brand tokens mirrored from the app's design system. */
 const TEAL = "#0D7A75";
@@ -78,7 +78,7 @@ export function brandedEmail({
           <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;">
             <tr>
               <td bgcolor="${RED}" style="background-color:${RED};padding:24px 28px;">
-                <img src="${inlineLogo ? `cid:${HOLARC_LOGO_CID}` : HOLARC_LOGO_URL}" alt="Elysian Financial Technologies" width="180" height="72" style="height:auto;width:180px;max-width:180px;display:block;border:0;outline:none;" />
+                <img src="${inlineLogo ? `cid:${HOLARC_LOGO_CID}` : HOLARC_LOGO_URL}" alt="Elysian Financial Services" width="180" height="72" style="height:auto;width:180px;max-width:180px;display:block;border:0;outline:none;" />
               </td>
             </tr>
             <tr>
@@ -93,7 +93,7 @@ export function brandedEmail({
                 ${bodyHtml}
                 ${documentUrl ? `
                 <div style="margin-top:24px;">
-                  <a href="${documentUrl}" style="display:inline-block;background-color:${TEAL};color:#ffffff;font-family:${HEADING_FONT};font-weight:600;font-size:14px;text-decoration:none;padding:11px 20px;border-radius:8px;">View this document in Elysian Financial Technologies</a>
+                  <a href="${documentUrl}" style="display:inline-block;background-color:${TEAL};color:#ffffff;font-family:${HEADING_FONT};font-weight:600;font-size:14px;text-decoration:none;padding:11px 20px;border-radius:8px;">View this document in Elysian Financial Services</a>
                 </div>` : ""}
               </td>
             </tr>
@@ -102,7 +102,7 @@ export function brandedEmail({
                 ${signatureHtml ? `<div style="margin:0 0 10px 0;">${signatureHtml}</div>` : ""}
                 ${from ? `<p style="margin:0 0 6px 0;font-weight:600;color:${INK};">Sent by ${escapeHtml(from)}</p>` : ""}
                 <p style="margin:0 0 6px 0;">${escapeHtml(note)}</p>
-                <p style="margin:0;color:${TEAL_DARK};font-family:${HEADING_FONT};font-weight:600;">Elysian Financial Technologies</p>
+                <p style="margin:0;color:${TEAL_DARK};font-family:${HEADING_FONT};font-weight:600;">Elysian Financial Services</p>
               </td>
             </tr>
           </table>

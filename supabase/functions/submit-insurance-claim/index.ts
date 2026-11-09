@@ -116,7 +116,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <p>Thank you for your assistance.</p>
               </div>
               <div class="footer">
-                <p>This claim was submitted via Elysian Financial Technologiescare Management System</p>
+                <p>This claim was submitted via Elysian Financial Services</p>
               </div>
             </div>
           </body>

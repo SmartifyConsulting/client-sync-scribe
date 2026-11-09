@@ -59,7 +59,7 @@ export function BackupCodesScreen({ onContinue }: Props) {
   const download = () => {
     const blob = new Blob(
       [
-        `Holarc Wealth — Backup Codes\n` +
+        `Elysian Financial Services — Backup Codes\n` +
           `Generated: ${new Date().toLocaleString()}\n\n` +
           `Each code works once. Use one if you lose your phone.\n\n` +
           codesText +
@@ -70,7 +70,7 @@ export function BackupCodesScreen({ onContinue }: Props) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "holarc-backup-codes.txt";
+    a.download = "elysian-backup-codes.txt";
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -79,12 +79,12 @@ export function BackupCodesScreen({ onContinue }: Props) {
     const w = window.open("", "_blank", "noopener,noreferrer");
     if (!w) return;
     w.document.write(
-      `<html><head><title>Holarc Wealth Backup Codes</title>
+      `<html><head><title>Elysian Financial Services Backup Codes</title>
        <style>body{font-family:Arial,sans-serif;padding:24px}h1{font-size:18px}
        .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;font-family:monospace;font-size:18px}
        .code{padding:10px;border:1px solid #ccc;border-radius:6px;text-align:center}
        p{color:#444;font-size:13px}</style></head>
-       <body><h1>Holarc Wealth — Backup Codes</h1>
+       <body><h1>Elysian Financial Services — Backup Codes</h1>
        <p>Generated ${new Date().toLocaleString()}. Each code works once. Use one if you lose your phone.</p>
        <div class="grid">${codes.map((c) => `<div class="code">${c}</div>`).join("")}</div>
        </body></html>`

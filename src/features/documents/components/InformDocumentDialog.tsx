@@ -53,7 +53,7 @@ export function InformDocumentDialog({
       toast({
         title: "Link sent",
         description: data?.isRegistered
-          ? `${recipient} can open the document in Holarc Wealth.`
+          ? `${recipient} can open the document in Elysian Financial Services.`
           : `${recipient} was invited to register to access the document.`,
       });
       setEmail("");
@@ -80,7 +80,7 @@ export function InformDocumentDialog({
           </DialogTitle>
           <DialogDescription className="text-xs">
             Sends a secure link to “{documentName}”. The document itself is never
-            attached — it stays in Holarc Wealth.
+            attached — it stays in Elysian Financial Services.
           </DialogDescription>
         </DialogHeader>
 

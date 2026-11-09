@@ -14,11 +14,11 @@ export function CompanionStatus() {
 
   return (
     <>
-      <section aria-label="Holarc Wealth Companion" className="flex flex-col gap-3 border-b border-border bg-primary/5 px-3 py-3 text-left sm:flex-row sm:items-center sm:justify-between">
+      <section aria-label="Elysian Financial Services Companion" className="flex flex-col gap-3 border-b border-border bg-primary/5 px-3 py-3 text-left sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 items-start gap-2.5">
           {installed ? <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-success" /> : <Puzzle className="mt-0.5 h-5 w-5 shrink-0 text-primary" />}
           <div className="min-w-0 space-y-1">
-            <h2 className="text-sm font-semibold text-foreground">Holarc Wealth Companion</h2>
+            <h2 className="text-sm font-semibold text-foreground">Elysian Financial Services Companion</h2>
             <p role="status" className={`text-xs font-medium ${installed ? "text-success" : "text-muted-foreground"}`}>
               {installed ? "Companion active in this browser" : "Companion not detected on this page yet"}
             </p>

@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SYSTEM_ADMIN_EMAILS } from "@/components/layout/testProfiles";
 
 /**
- * Version 2.0 demo gate. Features still in v2 development (Biolog, Ask Holarc,
+ * Version 2.0 demo gate. Features still in v2 development (Biolog, Ask Elysian Financial Services,
  * the Enneagram relationship profile) are visible to everyone as a greyed-out
  * preview, but only usable by the two system admin accounts.
  */

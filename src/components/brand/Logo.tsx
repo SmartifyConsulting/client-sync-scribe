@@ -21,7 +21,7 @@ export function Logo({
 }) {
   return (
     <span className={cn("inline-flex", className)}>
-      <img src={logoAsset.url} alt="Elysian" className={cn(HEIGHT[size], "w-auto max-w-full object-contain object-left")} />
+      <img src={logoAsset.url} alt="Elysian Financial Services" className={cn(HEIGHT[size], "w-auto max-w-full object-contain object-left")} />
     </span>
   );
 }

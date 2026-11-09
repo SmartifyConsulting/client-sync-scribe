@@ -4,7 +4,7 @@ export default function WealthManagerAgreement() {
   return (
     <LegalDocLayout
       title="Wealth Manager Operator Agreement"
-      subtitle="Data processing terms between Holarc Wealth and Wealth Managers using the Platform"
+      subtitle="Data processing terms between Elysian Financial Services and Wealth Managers using the Platform"
     >
       <>
         <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-8">
@@ -18,7 +18,7 @@ export default function WealthManagerAgreement() {
         </div>
 
         <p>
-          This Wealth Manager Operator Agreement ("Agreement") is formed between Holarc Wealth (Pty) Ltd
+          This Wealth Manager Operator Agreement ("Agreement") is formed between the operator of Elysian Financial Services
           ("Operator") and any Wealth Manager who creates an account or uses the Platform to process client
           personal information on their own behalf as a "Responsible Party" under the Protection of Personal
           Information Act, 2013 ("POPIA").
@@ -29,7 +29,7 @@ export default function WealthManagerAgreement() {
         <p>By using the Platform as a Wealth Manager, you acknowledge that:</p>
         <ul>
           <li>You are a financial services provider, representative, or firm providing wealth-management services to clients</li>
-          <li>Operator provides technology services through the Holarc Wealth platform that involve the creation, receipt, storage, or transmission of your clients' personal information on your behalf</li>
+          <li>Operator provides technology services through the Elysian Financial Services platform that involve the creation, receipt, storage, or transmission of your clients' personal information on your behalf</li>
           <li>POPIA requires a written agreement between a Responsible Party and an Operator that processes personal information on its behalf</li>
           <li>Your use of the Platform constitutes your acceptance of this Agreement</li>
         </ul>
@@ -46,7 +46,7 @@ export default function WealthManagerAgreement() {
         </p>
         <p>
           <strong>"Responsible Party"</strong> means the Wealth Manager, who determines the purpose and means of
-          processing their clients' Personal Information. <strong>"Operator"</strong> means Holarc Wealth, which
+          processing their clients' Personal Information. <strong>"Operator"</strong> means Elysian Financial Services, which
           processes Personal Information on the Wealth Manager's behalf.
         </p>
 
@@ -155,7 +155,7 @@ export default function WealthManagerAgreement() {
           </p>
           <ul>
             <li>✓ You have read and understand this Agreement</li>
-            <li>✓ This Agreement is now in effect between you and Holarc Wealth</li>
+            <li>✓ This Agreement is now in effect between you and Elysian Financial Services</li>
             <li>✓ You remain responsible for POPIA and FAIS compliance as the Responsible Party</li>
             <li>✓ You accept Operator's security measures and breach notification procedures</li>
             <li>✓ You agree to the limitation of liability provisions</li>
@@ -168,9 +168,9 @@ export default function WealthManagerAgreement() {
         <p>
           For questions about this Agreement, contact:
           <br />
-          <strong>Holarc Wealth (Pty) Ltd</strong> — Privacy Officer
+          <strong>Elysian Financial Services platform operator</strong> — Privacy Officer
           <br />
-          Email: support@holarchealth.com
+          <a href="mailto:support@holarchealth.com">Email platform support</a>
         </p>
       </>
     </LegalDocLayout>

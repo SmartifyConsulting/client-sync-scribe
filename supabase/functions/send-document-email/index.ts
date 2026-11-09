@@ -108,7 +108,7 @@ serve(async (req) => {
         contentType: typeof a.contentType === "string" ? a.contentType : "application/pdf",
       }));
     let documentName = body.documentName || "Document";
-    let senderName = body.senderName || "Elysian Financial Technologies";
+    let senderName = body.senderName || "Elysian Financial Services";
     let practiceName = body.practiceName;
 
     // Handle the { documentId, recipientEmail } pattern
@@ -245,7 +245,7 @@ serve(async (req) => {
     // Inline the logo so recipients see it without trusting remote images.
     const logoAttachment = await fetchInlineAttachment(
       HOLARC_LOGO_URL,
-      "holarc-health.png",
+      "elysian-financial-services.png",
       HOLARC_LOGO_CID,
     );
 
@@ -253,7 +253,7 @@ serve(async (req) => {
     if (documentHtml) {
       // Caller supplied a fully-rendered HTML document (e.g. PAID invoice).
       // Keep the document markup exactly as rendered on screen, but drop it
-      // inside the Elysian Financial Technologies branded shell.
+      // inside the Elysian Financial Services branded shell.
       const inner = extractBody(documentHtml);
       htmlContent = brandedEmail({
         title: documentName,

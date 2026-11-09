@@ -26,14 +26,14 @@ export function DiscoveryScreenScan({ workflowId, connected }: { workflowId: str
   }, [workflowId]);
   useEffect(() => {
     if (!busy) return;
-    const timer = window.setTimeout(() => { setBusy(false); setError("No scan received. Load Companion version 1.3.0, refresh Holarc Wealth and reconnect Discovery."); }, 15000);
+    const timer = window.setTimeout(() => { setBusy(false); setError("No scan received. Load Companion version 1.3.0, refresh Elysian Financial Services and reconnect Discovery."); }, 15000);
     return () => window.clearTimeout(timer);
   }, [busy]);
   return <div className="space-y-1.5 border-y border-border py-2 text-xs">
     <div className="flex flex-wrap items-center justify-between gap-2">
       <span className="font-medium">Discovery · Field verification</span>
       <Button size="sm" variant="outline" className="h-7 text-xs" disabled={!connected || busy} onClick={() => {
-        if (!addonInstalled()) { setError("Set up the Holarc Wealth Companion first."); return; }
+        if (!addonInstalled()) { setError("Set up the Elysian Financial Services Companion first."); return; }
         setError(""); setBusy(true);
         window.postMessage({ source: "holarc", type: "insurer-scan", insurer: "Discovery", workflowId }, location.origin);
       }}>{busy ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <ScanSearch className="mr-1 h-3 w-3" />}Scan current screen</Button>

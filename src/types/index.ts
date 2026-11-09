@@ -1,5 +1,5 @@
 /**
- * Shared domain types for Holarc Wealth.
+ * Shared domain types for Elysian Financial Services.
  *
  * Wherever possible, types are derived from the auto-generated Supabase
  * `Database` definition (`@/integrations/supabase/types`) so any schema

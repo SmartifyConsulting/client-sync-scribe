@@ -145,7 +145,7 @@ export default function ResetPassword() {
             <div className="flex justify-center mb-4">
               <Logo size="lg" />
             </div>
-            <h1 className="page-title">Holarc Wealth</h1>
+            <h1 className="page-title">Elysian Financial Services</h1>
             <p className="text-muted-foreground mt-2">Set your new password</p>
           </div>
 

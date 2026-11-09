@@ -208,7 +208,7 @@ export function usePractice() {
           body: {
             recipientEmail: cleanEmail,
             senderName: "A colleague",
-            message: `You have been invited to share a practice calendar on Holarc Wealth (${practice.name}).`,
+            message: `You have been invited to share a practice calendar on Elysian Financial Services (${practice.name}).`,
             isPracticePartner: true,
             partnerName: cleanEmail,
           },
@@ -232,7 +232,7 @@ export function usePractice() {
           body: {
             recipientEmail: email,
             senderName: "A colleague",
-            message: `You have been invited to share a practice calendar on Holarc Wealth (${practice.name}).`,
+            message: `You have been invited to share a practice calendar on Elysian Financial Services (${practice.name}).`,
             isPracticePartner: true,
             partnerName: email,
           },

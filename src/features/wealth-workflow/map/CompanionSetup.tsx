@@ -25,7 +25,7 @@ export function CompanionSetup({ open, onClose, onReady }: { open: boolean; onCl
   const action = installed ? "Update Companion" : "Install Companion";
   return <Dialog open={open} onOpenChange={(value) => !value && onClose()}>
     <DialogContent className="max-w-sm">
-      <DialogHeader><DialogTitle>Holarc Wealth Companion</DialogTitle>
+      <DialogHeader><DialogTitle>Elysian Financial Services Companion</DialogTitle>
         <DialogDescription>Keep your insurer connection tools up to date.</DialogDescription></DialogHeader>
       <dl className="space-y-3 text-xs">
         <div className="flex justify-between gap-3"><dt className="font-semibold">Installed version</dt><dd>{installed ? version || "Older version · number unavailable" : "Not detected"}</dd></div>
@@ -40,8 +40,8 @@ export function CompanionSetup({ open, onClose, onReady }: { open: boolean; onCl
           }}><Download className="mr-2 h-4 w-4" />{downloading ? "Downloading…" : action}</Button>}
         {!release.checking && !release.verified && <p role="status" className="text-xs text-muted-foreground">Couldn’t check the latest version. You can still download the latest package.</p>}
         {downloadError && <p role="alert" className="text-xs text-destructive">Download failed. Check your connection and try again.</p>}
-        <p className="text-xs text-muted-foreground">{storeUrl ? "Chrome will guide you through installation. Refresh Holarc afterwards." : "Downloads the latest Companion package. Chrome setup is required."}</p>
-        {!storeUrl && downloaded && <p role="status" className="text-xs text-muted-foreground">{installed ? "Unzip into your existing Companion folder, replace the files, and click Reload in Chrome → Extensions. Then refresh Holarc." : "Unzip the download. In Chrome → Extensions, enable Developer mode, choose Load unpacked and select the unzipped folder. Then refresh Holarc."}</p>}
+        <p className="text-xs text-muted-foreground">{storeUrl ? "Chrome will guide you through installation. Refresh Elysian Financial Services afterwards." : "Downloads the latest Companion package. Chrome setup is required."}</p>
+        {!storeUrl && downloaded && <p role="status" className="text-xs text-muted-foreground">{installed ? "Unzip into your existing Companion folder, replace the files, and click Reload in Chrome → Extensions. Then refresh Elysian Financial Services." : "Unzip the download. In Chrome → Extensions, enable Developer mode, choose Load unpacked and select the unzipped folder. Then refresh Elysian Financial Services."}</p>}
       </>}
     </DialogContent>
   </Dialog>;

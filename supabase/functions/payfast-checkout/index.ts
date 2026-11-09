@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
       ["email_address", user.email ?? ""],
       ["m_payment_id", sub.id],
       ["amount", amount],
-      ["item_name", `Elysian Financial Technologies ${plan.name}`.slice(0, 100)],
+      ["item_name", `Elysian Financial Services ${plan.name}`.slice(0, 100)],
       ["custom_str1", user.id],
       ["subscription_type", "1"],
       ["recurring_amount", amount],

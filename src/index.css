@@ -17,7 +17,7 @@
 @font-face { font-family: 'Rock Salt'; src: url('/fonts/signatures/RockSalt-Regular.ttf') format('truetype'); font-display: swap; }
 @font-face { font-family: 'Sacramento'; src: url('/fonts/signatures/Sacramento-Regular.ttf') format('truetype'); font-display: swap; }
 
-/* Holarc Wealth - fintech design system */
+/* Elysian Financial Services - fintech design system */
 
 @layer base {
   :root {
@@ -26,7 +26,7 @@
     --topnav-height: 76px;
     --footer-height: 44px;
 
-    /* Holarc design system - light surfaces */
+    /* Elysian Financial Services design system - light surfaces */
     --background: 216 28% 97%;
     --foreground: 222 38% 13%;          /* #333 primary text */
 
@@ -36,7 +36,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 38% 13%;
 
-    /* Holarc brand palette */
+    /* Elysian Financial Services brand palette */
     --brand-blue: 241.52 100% 15.49%; /* #02004F */
     --brand-nav-blue: 241.52 100% 15.49%; /* #02004F */
     --brand-yellow: 48.9796 98.3936% 48.8235%; /* #F7CC02 */
@@ -115,7 +115,7 @@
     --clinical-checks-border: 220 12% 80%;
 
 
-    /* Holarc red accent (logo heart) — #E01837 */
+    /* Elysian Financial Services red accent (logo heart) — #E01837 */
     --terracotta: 222 47% 20%;
     --terracotta-foreground: 0 0% 100%;
     --terracotta-light: 214 45% 32%;
@@ -125,7 +125,7 @@
     --sos: 354 84% 54%;
     --sos-foreground: 0 0% 100%;
 
-    /* Ask Holarc */
+    /* Ask Elysian Financial Services */
     --maeve: var(--brand-blue);
     --maeve-foreground: 0 0% 100%;
     --maeve-dark: 242 100% 18%;
@@ -229,7 +229,7 @@
     --clinical-checks-border: 145 30% 34%;
 
 
-    /* Holarc red accent — #C0252F */
+    /* Elysian Financial Services red accent — #C0252F */
     --terracotta: 214 55% 52%;
     --terracotta-foreground: 0 0% 100%;
     --terracotta-light: 214 60% 62%;
@@ -284,7 +284,7 @@
     letter-spacing: -0.02em;
   }
 
-  /* Typographic hierarchy per Holarc design system */
+  /* Typographic hierarchy per Elysian Financial Services design system */
   h1 { @apply text-[28px] md:text-[32px] font-bold leading-[1.2] text-foreground; }
   h2 { @apply text-[20px] md:text-[24px] font-semibold leading-[1.2] text-foreground; }
   h3 { @apply text-[16px] md:text-[18px] font-semibold leading-[1.2] text-foreground; }
@@ -344,7 +344,7 @@
 }
 
 @layer components {
-  /* ── Holarc Wealth shared style sheet (reference: home dashboard) ── */
+  /* ── Elysian Financial Services shared style sheet (reference: home dashboard) ── */
   .page-container { @apply container mx-auto max-w-6xl p-4; }
   .page-title { @apply text-2xl font-bold tracking-tight text-foreground md:text-3xl; }
   .page-subtitle { @apply mt-1 text-xs text-muted-foreground; }

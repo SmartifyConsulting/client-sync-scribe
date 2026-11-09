@@ -55,7 +55,7 @@ export function ReferrerContacts() {
     const name = [c.first_name, c.last_name].filter(Boolean).join(" ");
     const { error } = await supabase.functions.invoke("send-user-invitation", {
       body: { recipientEmail: c.email.trim(), isReferral: true,
-        message: `${name ? `Hello ${name},\n\n` : ""}I'd like to invite you to refer clients to me on Holarc Wealth and earn commission on every policy that's issued.` },
+        message: `${name ? `Hello ${name},\n\n` : ""}I'd like to invite you to refer clients to me on Elysian Financial Services and earn commission on every policy that's issued.` },
     });
     if (error) throw error;
   };

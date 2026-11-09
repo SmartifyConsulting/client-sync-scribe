@@ -390,7 +390,7 @@ export function FinancialInformation({ clientId, showAgreedCover = false }: { cl
               )}
               {s.key === "risk_portfolio" && (issued.data as any[])?.length > 0 && (
                 <div className="text-sm space-y-1">
-                  <p className="font-medium text-primary-dark">Issued through Holarc Wealth</p>
+                  <p className="font-medium text-primary-dark">Issued through Elysian Financial Services</p>
                   {(issued.data as any[]).map((a) => (
                     <p key={a.id} className="text-muted-foreground">{a.product} · {a.provider}{a.monthly_premium ? ` · ${zar(num(a.monthly_premium))}/m` : ""}</p>
                   ))}

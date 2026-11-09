@@ -240,7 +240,7 @@ export default function ReferralAdvisors({ hideHeader = false }: ReferralAdvisor
         body: {
           recipientEmail: inviteEmail.trim(),
           senderName: profile?.full_name || "A colleague",
-          message: `${profile?.full_name || "A colleague"} has invited you to join Holarc Wealth for referrals. Sign up to connect and collaborate on client care.`,
+          message: `${profile?.full_name || "A colleague"} has invited you to join Elysian Financial Services for referrals. Sign up to connect and collaborate on client care.`,
         },
       });
       if (error) throw error;
@@ -376,7 +376,7 @@ export default function ReferralAdvisors({ hideHeader = false }: ReferralAdvisor
           {addMode === "search" && (
             <div className="space-y-4">
               <div className="relative">
-                <Label>Search for a wealth manager on Holarc Wealth</Label>
+                <Label>Search for a wealth manager on Elysian Financial Services</Label>
                 <div className="relative mt-1">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
@@ -414,7 +414,7 @@ export default function ReferralAdvisors({ hideHeader = false }: ReferralAdvisor
               {/* Not found → invite or manual */}
               {noSearchResults && (
                 <div className="rounded-xl border border-dashed border-border p-4 space-y-3 bg-muted/30">
-                  <p className="text-sm text-muted-foreground">Wealth Manager not found on Holarc Wealth</p>
+                  <p className="text-sm text-muted-foreground">Wealth Manager not found on Elysian Financial Services</p>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={() => setAddMode("invite")} className="gap-2">
                       <Mail className="h-4 w-4" /> Invite
@@ -443,7 +443,7 @@ export default function ReferralAdvisors({ hideHeader = false }: ReferralAdvisor
           {/* Invite Step */}
           {addMode === "invite" && (
             <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">Send an email invitation to join Holarc Wealth</p>
+              <p className="text-sm text-muted-foreground">Send an email invitation to join Elysian Financial Services</p>
               <div className="space-y-2">
                 <Label>Wealth Manager's Email</Label>
                 <Input
@@ -579,10 +579,10 @@ export default function ReferralAdvisors({ hideHeader = false }: ReferralAdvisor
             ))
           )}
 
-          {/* Advisors on Holarc Wealth who aren't in the saved list yet */}
+          {/* Advisors on Elysian Financial Services who aren't in the saved list yet */}
           {!loading && directoryMatches.length > 0 && (
             <div className="space-y-2 pt-2">
-              <p className="text-xs font-medium text-muted-foreground">On Holarc Wealth</p>
+              <p className="text-xs font-medium text-muted-foreground">On Elysian Financial Services</p>
               {directoryMatches.map((doc) => (
                 <div key={`dir-${doc.id}`} className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-primary/50 bg-card p-3">
                   <div className="flex items-center gap-3 min-w-0">

@@ -1784,7 +1784,7 @@ export function ClientDetailsEditor({
               <TabsContent value="history" className="mt-4">
                 <div className="mb-4">
                   <h2 className="text-lg font-semibold text-primary-dark">My Consultations</h2>
-                  <p className="text-xs text-muted-foreground">Your consultations with your advisers. You can also record meetings with advisers not on Holarc Wealth.</p>
+                  <p className="text-xs text-muted-foreground">Your consultations with your advisers. You can also record meetings with advisers not on Elysian Financial Services.</p>
                 </div>
                 <ClientSessionRecorder clientId={client.id} clientName={client.name} />
               </TabsContent>

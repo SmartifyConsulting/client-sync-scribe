@@ -58,7 +58,7 @@ interface NavItem {
   labelKey: string;
   to: string;
   danger?: boolean;
-  /** Ask Holarc — yellow-orange accent, distinct from the red SOS control. */
+  /** Ask Elysian Financial Services — yellow-orange accent, distinct from the red SOS control. */
   accent?: boolean;
   /** V2 preview feature the current account can't open (see useV2Demo). */
   v2Locked?: boolean;
@@ -113,7 +113,7 @@ const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: ClientFolder, label: "Documents", labelKey: "nav.clientDocuments", to: "/client/documents" },
   { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
   { icon: BedDouble, label: "My Admissions", labelKey: "nav.myAdmissions", to: "/client/admissions" },
-  { icon: Sparkles, label: "Ask Holarc Wealth", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
+  { icon: Sparkles, label: "Ask Elysian Financial Services", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
   { icon: MessageCircle, label: "Messenger", labelKey: "nav.messenger", to: "/messenger" },
 ];
 
@@ -210,7 +210,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const isReferrerMenu = role === "referral_agent";
   const isDoctorMenu = !isOnAdminRoute && !isPatientMenu && !isReferrerMenu && !(isAdmin && isOnAdminRoute);
 
-  /** Version 2.0 features (Ask Holarc) show for everyone as a greyed-out
+  /** Version 2.0 features (Ask Elysian Financial Services) show for everyone as a greyed-out
    *  preview; only the system admin accounts (useV2Demo) can actually open them. */
   const V2_PATHS = ["/ask-maeve"];
   const withShiftRule = (items: (NavItem & { tour?: string })[]) => {
