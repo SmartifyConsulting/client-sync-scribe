@@ -349,6 +349,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
 
   const submittingVariants = useRef(false);
   const [variantProgress, setVariantProgress] = useState<{ ins: string; product: string; done: number; total: number } | null>(null);
+  const [collectingAll, setCollectingAll] = useState(false);
   /**
    * Requests all 3 premium-pattern variants for every option of one insurer/product (any
    * insurer/product with a pattern field, not just Momentum Life). Every pattern reuses the
@@ -376,6 +377,25 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     } finally {
       submittingVariants.current = false;
       setVariantProgress(null);
+    }
+  };
+
+  /** Requests every premium-pattern variant for every connected insurer, one insurer/product at a
+   *  time (reuses submitAllVariants' own serialization), so the single button on the insurer row
+   *  collects everything instead of the Wealth Manager running each insurer's button separately. */
+  const requestAllQuotes = async () => {
+    if (collectingAll || submittingVariants.current) return;
+    setCollectingAll(true);
+    try {
+      for (const ins of chosen) {
+        if (login[ins] !== "connected") continue;
+        for (const p of products) {
+          if (!supportsPremiumVariants(ins, p)) continue;
+          await submitAllVariants(ins, p);
+        }
+      }
+    } finally {
+      setCollectingAll(false);
     }
   };
 
@@ -501,19 +521,25 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
       <section className="frame p-3 space-y-3" aria-label="Choose insurers">
         <h4 className="text-xs font-semibold">Choose insurers</h4>
         {!insurers.length && <p className="text-[10px] text-muted-foreground">No saved insurer logins found.</p>}
-        <div className="flex flex-wrap gap-1.5">
-          {insurers.map((ins: string) => {
-            const on = chosen.includes(ins);
-            const c = "var(--insurer-badge)"; // badges stay orange; only tabs use legend colours
-            return (
-              <button key={ins} type="button" aria-pressed={on}
-                onClick={() => setChosen((c) => (on ? c.filter((x) => x !== ins) : [...c, ins]))}
-                className="rounded-full border px-2.5 py-0.5 text-[11px] font-medium"
-                style={on ? { background: `hsl(${c})`, borderColor: `hsl(${c})`, color: "hsl(var(--insurer-foreground))" } : { borderColor: `hsl(${c})`, color: `hsl(${c})` }}>
-                {ins}
-              </button>
-            );
-          })}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap gap-1.5">
+            {insurers.map((ins: string) => {
+              const on = chosen.includes(ins);
+              const c = "var(--insurer-badge)"; // badges stay orange; only tabs use legend colours
+              return (
+                <button key={ins} type="button" aria-pressed={on}
+                  onClick={() => setChosen((c) => (on ? c.filter((x) => x !== ins) : [...c, ins]))}
+                  className="rounded-full border px-2.5 py-0.5 text-[11px] font-medium"
+                  style={on ? { background: `hsl(${c})`, borderColor: `hsl(${c})`, color: "hsl(var(--insurer-foreground))" } : { borderColor: `hsl(${c})`, color: `hsl(${c})` }}>
+                  {ins}
+                </button>
+              );
+            })}
+          </div>
+          {source === "companion" && chosen.length > 0 && <Button size="sm" disabled={collectingAll || quotesRunning || !chosen.some(ins => login[ins] === "connected")}
+            onClick={() => void requestAllQuotes()}>
+            {collectingAll ? "Getting all quotes…" : "Get quotes for all insurers"}
+          </Button>}
         </div>
       </section>
 
@@ -656,7 +682,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                   })}
                 </div>
                 {supportsPremiumVariants(activeTab, p) && source === "companion" && <div className="flex flex-wrap items-center gap-2 p-2">
-                  <Button size="sm" disabled={!connected || quotesRunning} onClick={() => void submitAllVariants(activeTab, p)}>Request all {p.toLowerCase()} variants</Button>
+                  <Button size="sm" disabled={!connected || quotesRunning || collectingAll} onClick={() => void submitAllVariants(activeTab, p)}>Request all {p.toLowerCase()} variants</Button>
                   {variantProgress && variantProgress.ins === activeTab && variantProgress.product === p && <div className="flex min-w-[140px] flex-1 items-center gap-2">
                     <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
                       <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.round((variantProgress.done / variantProgress.total) * 100)}%` }} />
@@ -683,7 +709,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                         <details className="my-2 normal-case tracking-normal font-normal"><summary className="cursor-pointer">Required rating details{ompRatingIssues(option._ompInputs).length ? ` · ${ompRatingIssues(option._ompInputs).length} to complete` : ' · Complete'}</summary>
                           <div className="space-y-2 pt-2">{OMP_RATING_LABELS.map(label=><label key={label} className="block text-[10px] font-semibold">{label} *{OMP_RATING_OPTIONS[label] ? <select required aria-label={label} className="mt-1 h-7 w-full rounded border border-input bg-background px-1 text-xs font-normal" value={option._ompInputs?.[label]??''} onChange={e=>setVal(p,i,'_ompInputs',{...option._ompInputs,[label]:e.target.value})}><option value="" disabled>Select an insurer option</option>{OMP_RATING_OPTIONS[label].map(value=><option key={value}>{value}</option>)}</select> : <Input required type={label==='Date of birth'?'date':'text'} className="mt-1 h-7 text-xs font-normal" value={option._ompInputs?.[label] ?? ''} onChange={e=>setVal(p,i,'_ompInputs',{...option._ompInputs,[label]:e.target.value})} />}</label>)}{ompRatingIssues(option._ompInputs).length>0 && <p className="text-destructive" role="status">Complete or correct: {ompRatingIssues(option._ompInputs).join(', ')}.</p>}</div>
                         </details>
-                        {p === "Life cover" && <Button className="my-1 h-7 text-xs normal-case tracking-normal" size="sm" disabled={!connected || quotesRunning || !ompSettingsComplete(activeTab,p,option) || ompRatingIssues(option._ompInputs).length>0} onClick={()=>void submitScenarios(activeTab,[i+1],p)}>Get quote</Button>}
+                        {p === "Life cover" && <Button className="my-1 h-7 text-xs normal-case tracking-normal" size="sm" disabled={!connected || quotesRunning || collectingAll || !ompSettingsComplete(activeTab,p,option) || ompRatingIssues(option._ompInputs).length>0} onClick={()=>void submitScenarios(activeTab,[i+1],p)}>Get quote</Button>}
                       </>}
                       <QuoteOptionReference key={`${activeTab}:${p}:${i}`} value={quoteReference(p, option, activeTab)} label={`${activeTab} ${p} ${coverOptionLabel(i)} quote number`}
                         onChange={number => setPlan(pl => ({ ...pl, [p]: pl[p].map((value, n) => n === i ? withQuoteReference(p, option, activeTab, number) : value) }))} />
