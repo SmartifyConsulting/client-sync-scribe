@@ -12,6 +12,7 @@ import { LiveTray, ownerSolid } from "./LiveTray";
 import { playChime } from "./chime";
 import { StageDetailSheet } from "./StageDetailSheet";
 import { WorkingWindow } from "./WorkingWindow";
+import { ConsultationButton } from "./ProfilePanels";
 import { useWorkflowRealtime } from "../workspace/useWorkflowRealtime";
 import { InsurerBadge } from "./insurerColors";
 import { useQuery } from "@tanstack/react-query";
@@ -177,7 +178,10 @@ function WorkflowMapContent({ clientId, clientName, onOpenDocuments, initialGrou
               <span className="h-2 w-2 animate-pulse rounded-full bg-primary" /> Working window
               {shownStep && <span className="normal-case tracking-normal text-foreground">· {shownStep}</span>}
             </span>
-            <DocumentTray clientId={clientId} />
+            <span className="flex items-center gap-2">
+              {viewer === "manager" && <ConsultationButton clientId={clientId} sessions={m.records?.sessions ?? []} financials={m.records?.financials} clientFirst={clientFirst} />}
+              <DocumentTray clientId={clientId} />
+            </span>
           </div>
           {!isLive && <button onClick={() => setPicked(null)} className="mb-2 text-xs font-medium text-primary hover:underline">← Back to current step</button>}
           {wf.paused_at ? <PausedWorkflowNotice pausedAt={wf.paused_at} /> : renderWorking(isLive)}
