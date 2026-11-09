@@ -9,6 +9,10 @@ const PATTERN = ["Level", "Compulsory", "Age-rated"];
 const GUARANTEE = ["Standard", "Guarantee term extender"];
 const INCREASE = ["Cover increase: fixed percentage", "Cover increase: CPI rate", "No increase"];
 
+export const COVER_OPTIONS = ["Desired Cover", "Current Cover", "Agreed Cover"];
+export const QUOTES_PER_COVER = 3;
+export const coverOptionLabel = (index: number) => COVER_OPTIONS[index] ?? `Option ${index + 1}`;
+
 const LUMP_SUM: FieldDef[] = [
   { key: "benefit_amount", label: "Benefit amount", kind: "amount" },
   { key: "premium_pattern", label: "Premium pattern", kind: "select", options: PATTERN },

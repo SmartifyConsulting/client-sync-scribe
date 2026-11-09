@@ -96,7 +96,7 @@ export function sectionProgress(s: SectionDef, profile: Record<string, any> | nu
   return { filled: fields.filter((f) => v[f.key] !== undefined && v[f.key] !== null && v[f.key] !== "").length, total: fields.length };
 }
 
-export function FinancialInformation({ clientId }: { clientId: string }) {
+export function FinancialInformation({ clientId, showAgreedCover = false }: { clientId: string; showAgreedCover?: boolean }) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const q = useQuery({
@@ -168,6 +168,7 @@ export function FinancialInformation({ clientId }: { clientId: string }) {
     if (dirtySections.current.get(k) === version) dirtySections.current.delete(k);
     toast.success("Saved");
     qc.invalidateQueries({ queryKey: ["client-financial-profile", clientId] });
+    qc.invalidateQueries({ queryKey: ["fin-needs", clientId] });
     await logChange(SECTIONS.find((s) => s.key === k)?.label ?? k);
   };
 
@@ -245,6 +246,21 @@ export function FinancialInformation({ clientId }: { clientId: string }) {
                     </div>
                   ))}
                 </div>
+              )}
+              {showAgreedCover && s.key === "goals_risk" && (
+                <fieldset className={FIELD_GRID_2_CLASS}>
+                  <legend className="mb-2 text-xs font-semibold">Cover agreed in Needs Analysis</legend>
+                  {["Life cover", "Lump sum disability", "Severe illness", "Income protection"].map(product => (
+                    <div key={product} className="space-y-1.5">
+                      <Label htmlFor={`agreed-cover-${product.replaceAll(" ", "-")}`} className="text-xs">{product} ({product === "Income protection" ? "R / month" : "R"})</Label>
+                      <Input id={`agreed-cover-${product.replaceAll(" ", "-")}`} inputMode="decimal" value={v.agreed_cover?.[product] ?? ""}
+                        onChange={e => {
+                          const value = e.target.value;
+                          if (/^\d*(\.\d{0,2})?$/.test(value)) set(s.key, { ...v, agreed_cover: { ...v.agreed_cover, [product]: value } });
+                        }} />
+                    </div>
+                  ))}
+                </fieldset>
               )}
               {s.list && s.key !== "assets_liabilities" && s.key !== "investments" && (
                 <div className="space-y-2">

@@ -12,7 +12,6 @@ import { quoteReference, quoteResult, quoteSettingsKey, withQuoteReference } fro
 import { usePublishQuoteInsurers } from "./QuoteInsurerSelection";
 import { SegmentedProgress } from "./SegmentedProgress";
 import { insurerColor } from "./insurerColors";
-import { insurerFields, insurerKey } from "./insurerDictionary";
 import { LoginRing, LOGIN_TEXT, OtpDialog, ProtectorDialog, addonInstalled, downloadAddon, type Challenge, type LoginState } from "./InsurerLogin";
 import { CompanionSetup } from "./CompanionSetup";
 import { QuotePdfCapture } from "./QuotePdfCapture";
@@ -31,9 +30,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { PRODUCT_TYPES, variationComplete } from "./quoteSpec";
+import { PRODUCT_TYPES, QUOTES_PER_COVER, coverOptionLabel, variationComplete } from "./quoteSpec";
 import { groupDigits } from "./money";
-import { DEFAULT_PARAMS, type NeedsParams, defaultVariations, productsFromNeeds, withAmount } from "./needsProducts";
+import { DEFAULT_PARAMS, type NeedsParams, defaultVariations, productsFromNeeds, withCoverAmounts } from "./needsProducts";
 
 const db = supabase as any;
 type Plan = Record<string, Record<string, any>[]>; // product -> variations
@@ -56,7 +55,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   });
   const { data: fin, isFetched: finReady } = useQuery({
     queryKey: ["fin-needs", clientId], enabled: !!clientId,
-    queryFn: async () => (await db.from("client_financial_profiles").select("cash_flow,assets_liabilities,risk_portfolio").eq("patient_id", clientId).maybeSingle()).data,
+    queryFn: async () => (await db.from("client_financial_profiles").select("cash_flow,assets_liabilities,risk_portfolio,goals_risk").eq("patient_id", clientId).maybeSingle()).data,
   });
   const { data: quoteClient } = useQuery({
     queryKey: ["quote-client-inputs", clientId], enabled: !!clientId && isWM,
@@ -84,7 +83,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   // Older cached entries were {name, ready}; always render plain names.
   const insurers: string[] = (insurerRows as any[]).map((r) => (typeof r === "string" ? r : r?.name)).filter(Boolean);
 
-  const [plan, setPlan] = useState<Plan>({});
+  const [draftPlan, setPlan] = useState<Plan>({});
   const submittedOptions = useRef<Record<string, {product:string; settings:string}>>({});
   const specRevision = useRef<string>();
   useEffect(()=>{specRevision.current=spec?.updated_at;},[spec?.id,spec?.updated_at]);
@@ -122,14 +121,14 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [adding, setAdding] = useState("");
   const [params, setParams] = useState<NeedsParams>(DEFAULT_PARAMS);
-  const needs = productsFromNeeds(fin, params);
-  const formulaFor = (p: string) => needs.find((n) => n.product === p)?.formula;
+  const plan: Plan = Object.fromEntries(Object.entries(draftPlan).map(([product, options]) =>
+    [product, withCoverAmounts(product, options, fin, params)]));
 
   useEffect(() => {
     if (isLoading) return;
     if (spec) { setPlan(toPlan(spec)); setChosen(spec.insurers ?? []); return; }
     if (clientId && !finReady) return;
-    setPlan(Object.fromEntries(productsFromNeeds(fin).map(({ product, amount }) => [product, defaultVariations(product, amount)])));
+    setPlan(Object.fromEntries(productsFromNeeds(fin).map(product => [product, defaultVariations(product)])));
   }, [spec, isLoading, fin, finReady, clientId]);
 
   // Messages from the broker-side add-on driving the insurer login.
@@ -158,8 +157,14 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
         const {data:saved,error}=await db.from('wealth_quote_specs').update({variations,updated_at:new Date().toISOString()}).eq('id',latest.id).eq('updated_at',latest.updated_at).select('id,updated_at');
         if(error || !saved?.length){toast({title:'Quote calculated but could not be saved. Keep the insurer tab open.',variant:'destructive'});return;}
         specRevision.current=saved[0].updated_at;
-        setPlan(previous=>({...previous,[submitted.product]:previous[submitted.product].map((v,i)=>i===d.n-1&&quoteSettingsKey(submitted.product,v,d.insurer)===submitted.settings?updated:v)}));
-        toast({title:`Quote ${result.number} saved to Option ${String.fromCharCode(64+d.n)}`,description:'Calculation recorded. PDF not yet filed.'});
+        setPlan(previous => ({
+          ...previous,
+          [submitted.product]: (previous[submitted.product] ?? []).map((value, index) => index === d.n - 1
+            ? { ...value, _quoteReferences: { ...value._quoteReferences, [d.insurer]: updated._quoteReferences[d.insurer] },
+                _quoteResults: { ...value._quoteResults, [d.insurer]: updated._quoteResults[d.insurer] } }
+            : value),
+        }));
+        toast({title:`Quote ${result.number} saved to ${coverOptionLabel(d.n - 1)}`,description:'Calculation recorded. PDF not yet filed.'});
         return;
       }
       if (d.type === "insurer-login-progress" && isActivityPhase(d.phase)) recordActivity(d.insurer, d.phase);
@@ -305,17 +310,6 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     window.postMessage({source:"holarc",type:"insurer-stop",insurer:ins,workflowId,...(connectionAttemptId?{connectionAttemptId}:{})},location.origin);
   };
 
-  /** Changing a formula input recalculates the suggested amount on all three options. */
-  const applyParams = (next: NeedsParams) => {
-    setParams(next);
-    const fresh = productsFromNeeds(fin, next);
-    setPlan((pl) => {
-      const out = { ...pl };
-      for (const n of fresh) if (out[n.product]) out[n.product] = withAmount(n.product, out[n.product], n.amount);
-      return out;
-    });
-  };
-
   const products = Object.keys(plan);
   const activeTab = chosen.includes(tab) ? tab : chosen[0] ?? "";
   visibleInsurer.current = activeTab;
@@ -397,7 +391,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     const { error } = spec ? await db.from("wealth_quote_specs").update(row).eq("id", spec.id) : await db.from("wealth_quote_specs").insert(row);
     setBusy(false);
     if (error) return toast({ title: "Couldn't save the quote plan", description: error.message, variant: "destructive" });
-    toast({ title: "Quote plan saved", description: `${total} option(s) × ${chosen.length} insurer(s) = ${total * chosen.length} quotes to collect.` });
+    toast({ title: "Quote plan saved", description: `${total} option(s) × ${chosen.length} insurer(s) = ${total * chosen.length} planned quotes. Target ${total * QUOTES_PER_COVER}.` });
     qc.invalidateQueries({ queryKey: ["wealth-quote-spec", workflowId] });
   };
 
@@ -407,12 +401,12 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
 
   const label = "text-xs text-muted-foreground";
   const incompleteOptions = products.flatMap(p => plan[p].flatMap((v, i) =>
-    optionComplete(p,v) ? [] : [`${p} · Option ${String.fromCharCode(65 + i)}`]));
+    optionComplete(p,v) ? [] : [`${p} · ${coverOptionLabel(i)}`]));
   return (
     <div className="space-y-4 text-xs leading-relaxed">
       <div>
         <h3 className="text-sm font-semibold">Prepare insurer quotes</h3>
-        <p className={label}>Choose your insurers, review the options, then request and collect your quotes.</p>
+        <p className={label}>Collect three insurer quotes for each cover option on each product.</p>
       </div>
 
       <QuoteSourceSelector value={source} onChange={setSource} />
@@ -497,22 +491,21 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
           <section ref={reviewSection} tabIndex={-1} className={cn("frame scroll-mt-6 p-3 space-y-3", connected && "quote-step-active")} aria-label="Review quote options" aria-current={connected ? "step" : undefined}>
             <div className="flex flex-wrap items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">2</span><h4 className="font-semibold">Review quote options</h4>{source === "companion" && connected && <span role="status" className="quote-progress-badge">In Progress</span>}{source === "companion" && connected && <Button className="ml-auto font-semibold" disabled={!allComplete || quotesRunning || products.some(p => plan[p].some(v => !ompSettingsComplete(activeTab, p, v)))} title={!allComplete ? "Complete the option values first" : quotesRunning ? "Quote requests are already in progress" : undefined} onClick={() => submitScenarios(activeTab)}>Get quotes</Button>}</div>
             <p className="font-medium text-foreground">Review your options, then request quotes.</p>
-            <p className={label}>{quotesRunning ? "Quote requests are in progress. Follow the bars above each option." : "Waiting for your review. Open a product to compare and edit Options A, B and C."}</p>
+            <p className={label}>{quotesRunning ? "Quote requests are in progress. Follow the bars above each option." : "Waiting for your review. Open a product to review Desired, Current and Agreed Cover."}</p>
           <details className="rounded-lg border border-border p-2">
             <summary className="cursor-pointer text-xs font-medium">Calculation assumptions</summary>
             <div className="mt-2 flex flex-wrap items-center gap-2">
-            <span className={label}>Shortfall formula · income years</span>
+            <span className={label}>Desired Cover · income years</span>
             <Input aria-label="Income years" className="h-8 w-14 px-2 text-xs tabular-nums" inputMode="numeric" value={params.incomeYears}
-              onChange={(e) => applyParams({ ...params, incomeYears: Number(e.target.value.replace(/\D/g, "")) || 0 })} />
+              onChange={(e) => setParams({ ...params, incomeYears: Number(e.target.value.replace(/\D/g, "")) || 0 })} />
             <span className={label}>· income protection %</span>
             <Input aria-label="Income protection percentage" className="h-8 w-14 px-2 text-xs tabular-nums" inputMode="numeric" value={params.ipPercent}
-              onChange={(e) => applyParams({ ...params, ipPercent: Math.min(Number(e.target.value.replace(/\D/g, "")) || 0, 100) })} />
+              onChange={(e) => setParams({ ...params, ipPercent: Math.min(Number(e.target.value.replace(/\D/g, "")) || 0, 100) })} />
             </div>
           </details>
 
           {activeTab==='Bidvest Life / FMI' && products.length>0 && <BidvestClientFields answers={plan[products[0]]?.[0]?._bidvestInputs??{}} onChange={answers=>setPlan(pl=>Object.fromEntries(Object.entries(pl).map(([product,options])=>[product,options.map(option=>({...option,_bidvestInputs:answers}))])))} />}
           {products.map((p) => {
-            const extra = activeTab ? insurerFields(activeTab, p).map((f) => ({ ...f, key: insurerKey(activeTab, f.key) })) : [];
             const fields = providerQuoteFields(activeTab, p);
             return (
               <details key={p} open={p === products[0]} className="rounded-lg border border-border">
@@ -524,16 +517,19 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                 <div className="overflow-x-auto">
                 {activeTab === "Momentum" && hasVerifiedProviderFields(activeTab,p) && <p className="px-2 py-2 text-xs text-muted-foreground">Select the Momentum product terms for each option. These choices match the named product shown below; other product variants still need verification. Saved generic choices are retained separately. Automated quoting is still being verified.</p>}
                 {isOmpProduct(activeTab, p) && <p className="px-2 py-2 text-xs text-muted-foreground">Choose Old Mutual’s product terms for each option. Saved generic settings are retained separately and are not automatically translated. {p === "Income protection" ? "The benefit term is determined in the insurer quote; the previous generic 2-year term does not apply automatically. " : ""}{isOmpLife(activeTab,p) ? "Companion currently supports fixed cover growth; linked increases require portal review. " : "These product choices are verified; automated submission still requires a completed product mapping. "}A calculated premium is shown separately from PDF filing.</p>}
-                {formulaFor(p) && <p className="border-t border-border/60 px-2 py-1 text-[10px] tabular-nums text-muted-foreground">{formulaFor(p)}</p>}
+
                 <table className="w-full min-w-[560px] table-fixed text-xs">
                   <colgroup><col className="w-44" />{plan[p].map((_, i) => <col key={i} />)}</colgroup>
                   <thead className="text-[10px] uppercase tracking-wide text-muted-foreground">
                     <tr><th className="px-2 py-1 text-left font-medium">Variable</th>{plan[p].map((option, i) => <th key={i} className="px-2 py-2 text-left align-top font-medium">
                       {(() => { const job = jobs[activeTab]?.find(j => j.n === i + 1); return job ? <div className="mb-2 min-w-0 space-y-1 font-normal normal-case tracking-normal" title="This option's request includes the selected products">
-                        <SegmentedProgress label={`${activeTab} ${p} Option ${String.fromCharCode(65 + i)} progress`} completed={quoteCheckpoints(job).filter(point => point.done).length} active={["submitting", "generating"].includes(job.status) && !isStalled(job, Date.now())} activeUntil={job.since + 90_000} />
+                        <SegmentedProgress label={`${activeTab} ${p} ${coverOptionLabel(i)} progress`} completed={quoteCheckpoints(job).filter(point => point.done).length} active={["submitting", "generating"].includes(job.status) && !isStalled(job, Date.now())} activeUntil={job.since + 90_000} />
                         <p className="quote-option-status">{job.pdfReceived && job.status === "generating" ? "Saving quote PDF…" : SCENARIO_TEXT[job.status]}</p>
                       </div> : null; })()}
-                      <span className="block">Option {String.fromCharCode(65 + i)}</span>
+                      <span className="block">{coverOptionLabel(i)}</span>
+                      <span className="mt-1 block normal-case tracking-normal">
+                        {chosen.filter(ins => quoteReference(p, option, ins) || quoteResult(p, option, ins)).length} / {QUOTES_PER_COVER} insurer quote references
+                      </span>
                       {option._quoteReferences?.[activeTab]?.number && !quoteReference(p,option,activeTab) && <div className="my-2 rounded border border-border p-2 font-normal normal-case tracking-normal"><p className="font-semibold">Previous quote: {option._quoteReferences[activeTab].number}</p><p className="text-muted-foreground">Saved for earlier settings. Current draft requires a new calculation.</p>{option._quoteResults?.[activeTab]?.monthlyPremium>0&&<p>R {Number(option._quoteResults[activeTab].monthlyPremium).toFixed(2)} / month</p>}</div>}
                       {isWM && isOmpProduct(activeTab,p) && <>
                         <details className="my-2 normal-case tracking-normal font-normal"><summary className="cursor-pointer">Required rating details{ompRatingIssues(option._ompInputs).length ? ` · ${ompRatingIssues(option._ompInputs).length} to complete` : ' · Complete'}</summary>
@@ -541,8 +537,8 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                         </details>
                         {isOmpLife(activeTab,p) && <Button className="my-1 h-7 text-xs normal-case tracking-normal" size="sm" disabled={!connected || quotesRunning || !ompSettingsComplete(activeTab,p,option) || ompRatingIssues(option._ompInputs).length>0} onClick={()=>void submitScenarios(activeTab,[i+1],p)}>Get quote</Button>}
                       </>}
-                      <QuoteOptionReference key={`${activeTab}:${p}:${i}`} value={quoteReference(p, option, activeTab)} label={`${activeTab} ${p} Option ${String.fromCharCode(65 + i)} quote number`}
-                        onChange={number => setPlan(pl => ({ ...pl, [p]: pl[p].map((value, n) => n === i ? withQuoteReference(p, value, activeTab, number) : value) }))} />
+                      <QuoteOptionReference key={`${activeTab}:${p}:${i}`} value={quoteReference(p, option, activeTab)} label={`${activeTab} ${p} ${coverOptionLabel(i)} quote number`}
+                        onChange={number => setPlan(pl => ({ ...pl, [p]: pl[p].map((value, n) => n === i ? withQuoteReference(p, option, activeTab, number) : value) }))} />
                       {(() => { const result = quoteResult(p, option, activeTab); return result ? <div className="mt-2 space-y-1 normal-case tracking-normal">
                         <p className="text-xs font-semibold text-foreground">{new Intl.NumberFormat("en-ZA", { style: "currency", currency: "ZAR", maximumFractionDigits: 2 }).format(result.monthlyPremium)} / month</p>
                         {typeof result.cashbackPremium === "number" && <p className="text-[10px] font-normal">Includes R{result.cashbackPremium} cashback premium</p>}
@@ -554,7 +550,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                   <tbody>
                     {source === "planning" && <tr className="border-t border-border bg-muted/30">
                       <td className="px-2 py-2 text-xs text-muted-foreground">Estimated premium / month <span className="block text-destructive">Unconfirmed · broker estimate</span></td>
-                      {plan[p].map((v, i) => <td key={i} className="px-2 py-2"><Input aria-label={`${activeTab} ${p} Option ${String.fromCharCode(65 + i)} estimated monthly premium`} className="h-8 text-xs tabular-nums" inputMode="decimal" placeholder="Not estimated" value={groupDigits(v[planningPremiumKey(activeTab)] ?? "")} onChange={e => setVal(p, i, planningPremiumKey(activeTab), e.target.value.replace(/[^\d.]/g, ""))} /></td>)}
+                      {plan[p].map((v, i) => <td key={i} className="px-2 py-2"><Input aria-label={`${activeTab} ${p} ${coverOptionLabel(i)} estimated monthly premium`} className="h-8 text-xs tabular-nums" inputMode="decimal" placeholder="Not estimated" value={groupDigits(v[planningPremiumKey(activeTab)] ?? "")} onChange={e => setVal(p, i, planningPremiumKey(activeTab), e.target.value.replace(/[^\d.]/g, ""))} /></td>)}
                     </tr>}
                     {fields.map((f) => (
                       <tr key={f.key} className={cn("border-t border-border/60", f.key.includes(":") && "bg-muted/30")}>
@@ -566,6 +562,8 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                                 {hasVerifiedProviderFields(activeTab, p) && <option value="" disabled>{providerFieldApplies(f,v) ? "Select an insurer option" : "Not applicable"}</option>}
                                 {f.options.map((o) => <option key={o}>{o}</option>)}
                               </select>
+                            ) : f.key === "benefit_amount" || f.key === "monthly_benefit" ? (
+                              <span className="tabular-nums">{v[f.key] === "0" && i === 1 ? "No existing cover" : v[f.key] ? `R ${groupDigits(v[f.key])}` : i === 2 ? "Set in Needs Analysis" : "Financial information required"}</span>
                             ) : f.kind === "toggle" ? (
                               <div className="flex h-6 items-center"><input type="checkbox" aria-label={f.label} checked={!!v[f.key]} onChange={(e) => setVal(p, i, f.key, e.target.checked)} /></div>
                             ) : (
@@ -594,10 +592,10 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
               {Object.keys(PRODUCT_TYPES).filter((p) => !plan[p]).map((p) => <option key={p}>{p}</option>)}
             </select>
             <Button size="sm" variant="ghost" className="h-6 px-2 text-[10px]" disabled={!adding}
-              onClick={() => { setPlan((pl) => ({ ...pl, [adding]: defaultVariations(adding, 0) })); setAdding(""); }}><Plus className="mr-0.5 h-3 w-3" />Add</Button>
+              onClick={() => { setPlan((pl) => ({ ...pl, [adding]: defaultVariations(adding) })); setAdding(""); }}><Plus className="mr-0.5 h-3 w-3" />Add</Button>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
-            <p className={label}>{total * chosen.length} quote options across {chosen.length} insurer{chosen.length === 1 ? "" : "s"}</p>
+            <p className={label}>{total * chosen.length} planned quotes · {total * QUOTES_PER_COVER} required across all cover options</p>
             <Button size="sm" disabled={busy || products.length === 0} onClick={save}>{busy && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}{spec ? "Update quote plan" : "Save quote plan"}</Button>
           </div>
           {!allComplete && <p className="text-xs text-destructive" role="status">{incompleteOptions.length ? `Complete missing values in: ${incompleteOptions.join(", ")}.` : "Add a product to prepare your quote plan."}</p>}

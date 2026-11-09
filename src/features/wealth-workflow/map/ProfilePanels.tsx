@@ -244,8 +244,14 @@ export function CaptureFinancialsPanel({ clientId, sessions, financials, viewer,
     setBusy(false);
     const msg = (data as any)?.error ?? error;
     if (msg || !data?.ok) return toast({ title: "Couldn't capture the financial information", description: msg ?? "Please try again.", variant: "destructive" });
-    toast({ title: "Financial information captured", description: `Check it below, then ${clientFirst} verifies it.` });
-    refresh(qc);
+    await Promise.all([
+      refresh(qc),
+      qc.invalidateQueries({ queryKey: ["client-financial-profile", clientId] }),
+      qc.invalidateQueries({ queryKey: ["fin-needs", clientId] }),
+    ]);
+    toast(data.sections?.length
+      ? { title: "Financial information captured", description: `Check it below, then ${clientFirst} verifies it.` }
+      : { title: "No financial fields populated", description: "Review the consultation and enter any missing figures below." });
   };
 
   return (
@@ -254,7 +260,7 @@ export function CaptureFinancialsPanel({ clientId, sessions, financials, viewer,
       {clientId && (
         <RecordMeeting
           clientId={clientId}
-          onDone={(sid) => { setSessionId(sid); refresh(qc); run(sid); }}
+          onDone={(sid) => { setSessionId(sid); toast({ title: "Meeting transcript saved" }); refresh(qc); run(sid); }}
           onStartLive={live.supported ? live.start : undefined}
           onStopLive={live.supported ? live.stop : undefined}
         />
@@ -269,6 +275,7 @@ export function CaptureFinancialsPanel({ clientId, sessions, financials, viewer,
             <SelectTrigger><SelectValue placeholder="Choose a consultation" /></SelectTrigger>
             <SelectContent>{usable.map((s) => <SelectItem key={s.id} value={s.id}>{s.title || "Meeting"} · {fmt(s.created_at)}</SelectItem>)}</SelectContent>
           </Select>
+          {usable.some((s) => s.id === sessionId && s.hasTranscript) && <TranscriptButton sessionId={sessionId} clientId={clientId} />}
         </div>
       )}
       <div className="space-y-1.5">
@@ -282,7 +289,7 @@ export function CaptureFinancialsPanel({ clientId, sessions, financials, viewer,
       {financials?.extracted_at && (
         <p className="text-xs text-muted-foreground">Last captured {fmt(financials.extracted_at)}. Check and correct it before {clientFirst} verifies.</p>
       )}
-      {clientId && <FinancialInformation clientId={clientId} />}
+      {clientId && <FinancialInformation clientId={clientId} showAgreedCover />}
     </div>
   );
 }

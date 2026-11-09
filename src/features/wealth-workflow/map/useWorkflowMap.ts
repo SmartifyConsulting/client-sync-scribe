@@ -52,7 +52,7 @@ export function useWorkflowRecords(workflowId?: string, clientId?: string) {
         financials: fin.data ?? null,
         quotes: (quotes.data ?? []) as any[],
         appointments: (appts.data ?? []) as any[],
-        sessions: ((sessions.data ?? []) as any[]).map((s) => ({ id: s.id, title: s.title, created_at: s.created_at, hasText: !!(s.transcript || s.notes || s.summary) })),
+        sessions: ((sessions.data ?? []) as any[]).map((s) => ({ id: s.id, title: s.title, created_at: s.created_at, hasTranscript: !!s.transcript?.trim(), hasText: !!(s.transcript || s.notes || s.summary) })),
         docRequests: (docRequests.data ?? []) as any[],
       };
     },
