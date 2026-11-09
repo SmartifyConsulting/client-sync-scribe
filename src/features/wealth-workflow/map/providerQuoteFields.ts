@@ -106,6 +106,42 @@ export function providerQuoteFields(insurer: string, product: string): FieldDef[
   return [...(PRODUCT_TYPES[product] || []), ...insurerFields(insurer, product).map(f => ({ ...f, key: insurerKey(insurer, f.key) }))];
 }
 
+/**
+ * Every insurer/product combination needs exactly 3 quoted premium-pattern
+ * variants per cover option (per the business rule already proven out for
+ * Old Mutual Life and Momentum Life). Each insurer names its own real portal
+ * field for this differently (generic/Bidvest: premium_pattern, Momentum:
+ * myriad_pattern, Old Mutual: omp_premium) but the underlying "3 quotes to
+ * request" concept is the same everywhere, so it is found and curated here
+ * once instead of per insurer.
+ */
+export function premiumPatternField(insurer: string, product: string): FieldDef | undefined {
+  return providerQuoteFields(insurer, product).find(
+    (f) => f.kind === "select" && /premium_pattern|myriad_pattern|omp_premium/.test(f.key)
+  );
+}
+
+/**
+ * Curated 3-of-N overrides for insurer/product combos whose real portal
+ * dropdown offers more than 3 premium-pattern choices. Carried over from the
+ * Momentum Life cover variant list that was already live and reviewed;
+ * add further entries here (never by branching UI code) as other combinations
+ * get the same business review.
+ */
+const CURATED_PREMIUM_PATTERNS: Record<string, string[]> = {
+  "Momentum:Life cover": ["Level", "Compulsory", "Aggressive LifeStage"],
+};
+
+/** The 3 premium-pattern labels to quote for this insurer/product, or undefined if it has no such field. */
+export function premiumPatternOptions(insurer: string, product: string): string[] | undefined {
+  const field = premiumPatternField(insurer, product);
+  if (!field || field.kind !== "select") return undefined;
+  return CURATED_PREMIUM_PATTERNS[`${insurer}:${product}`] ?? field.options.slice(0, 3);
+}
+
+/** Gate for the 3-quotes-per-option UI: any insurer/product with a premium-pattern field qualifies. */
+export const supportsPremiumVariants = (insurer: string, product: string) => premiumPatternOptions(insurer, product) !== undefined;
+
 export function ompSettingsComplete(insurer: string, product: string, option: Record<string, any>) {
   if (!hasVerifiedProviderFields(insurer, product)) return true;
   return providerQuoteFields(insurer, product).every(f => {

@@ -5,6 +5,14 @@ export type FieldDef =
   | { key: string; label: string; kind: "select"; options: string[] }
   | { key: string; label: string; kind: "toggle" };
 
+/**
+ * Generic 3-pattern set used by unverified insurers' plain `premium_pattern`
+ * field. Verified insurers (Old Mutual, Momentum, Bidvest Life / FMI) name
+ * and curate their own 3 patterns in providerQuoteFields.ts
+ * (premiumPatternOptions); every insurer/product combination still always
+ * resolves to exactly 3 quote slots per option, this array is just the
+ * generic fallback's wording.
+ */
 export const PREMIUM_PATTERNS = ["Stable", "Inflationary Increase", "Aggressive Increase"];
 const GUARANTEE = ["Standard", "Guarantee term extender"];
 const INCREASE = ["Cover increase: fixed percentage", "Cover increase: CPI rate", "No increase"];
