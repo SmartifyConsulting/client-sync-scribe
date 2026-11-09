@@ -60,6 +60,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
 import { SampleBadge } from "@/components/clients/SampleBadge";
 import { isSampleClient } from "@/lib/sampleClients";
+import { StartMeetingIcon } from "@/features/wealth-workflow/map/ProfilePanels";
 
 
 export default function Patients({ hideHeader = false }: { hideHeader?: boolean }) {
@@ -862,6 +863,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                   <th className="px-2 lg:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     {t("clients.colPatient")}
                   </th>
+                  <th className="w-12 px-1 py-2.5 text-center text-xs font-medium text-primary-foreground">Meet</th>
                   <th className="hidden lg:table-cell px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     {t("clients.colContact")}
                   </th>
@@ -898,6 +900,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                           </span>
                         </Link>
                       </td>
+                      <td className="w-12 px-1 py-2.5 text-center align-middle"><StartMeetingIcon clientId={mePatient.id} clientName={mePatient.name} /></td>
                       <td className="hidden lg:table-cell px-4 py-2.5">
                         <div className="space-y-0.5">
                           {mePatient.email && (
@@ -936,7 +939,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       className="cursor-pointer hover:bg-muted/30"
                       onClick={() => toggleLetterGroup(letter)}
                     >
-                      <td colSpan={5} className="px-4 py-1">
+                      <td colSpan={6} className="px-4 py-1">
                         <div className="flex items-center gap-2">
                           <span className="text-base font-bold text-[hsl(351,81%,49%)]">
                             {letter}
@@ -997,6 +1000,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                             </span>
                           </Link>
                         </td>
+                        <td className="w-12 px-1 py-2.5 text-center align-middle"><StartMeetingIcon clientId={client.id} clientName={client.name} /></td>
                         <td className="hidden lg:table-cell px-4 py-2.5">
                           <div className="space-y-0.5">
                             {client.email && (

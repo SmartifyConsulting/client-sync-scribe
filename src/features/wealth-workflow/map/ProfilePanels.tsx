@@ -398,3 +398,36 @@ export function VerifyFinancialsPanel({ clientId, financials, viewer, clientFirs
     </div>
   );
 }
+
+/** Clients list: icon that starts an impromptu meeting, loading the client's records only when opened. */
+export function StartMeetingIcon({ clientId, clientName }: { clientId: string; clientName: string }) {
+  const [open, setOpen] = useState(false);
+  const db = supabase as any;
+  const { data } = useQuery({
+    queryKey: ["start-meeting", clientId],
+    enabled: open,
+    queryFn: async () => {
+      const [s, f] = await Promise.all([
+        db.from("sessions").select("id,title,created_at,transcript,notes,summary").eq("patient_id", clientId).order("created_at", { ascending: false }).limit(10),
+        db.from("client_financial_profiles").select("extracted_at,verified_at,extracted_from_session_id").eq("patient_id", clientId).maybeSingle(),
+      ]);
+      return { sessions: s.data ?? [], financials: f.data };
+    },
+  });
+  const first = clientName.trim().split(/\s+/)[0] || clientName;
+  return (
+    <>
+      <button type="button" onClick={() => setOpen(true)} aria-label={`Start meeting with ${clientName}`} title={`Start meeting with ${clientName}`}
+        className="mx-auto flex h-8 w-8 items-center justify-center rounded-full text-primary hover:bg-primary/10">
+        <Mic className="h-4 w-4" />
+      </button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-h-[90vh] max-w-6xl overflow-y-auto">
+          <DialogHeader><DialogTitle className="text-base">Meeting with {first}</DialogTitle></DialogHeader>
+          {data ? <CaptureFinancialsPanel clientId={clientId} sessions={data.sessions} financials={data.financials} viewer="manager" clientFirst={first} />
+            : <p className="py-8 text-center text-sm text-muted-foreground">Loading…</p>}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
