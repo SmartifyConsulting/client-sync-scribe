@@ -50,6 +50,41 @@ test('submits the observed Momentum anchor control only on its exact trusted hos
   }
 });
 
+test('recognises and clicks BrightRock GO once on the verified identity password form', () => {
+  const loginPath = '/authenticationendpoint/login.do';
+  for (const [host, path, sameForm, expected] of [
+    ['identity.brightrock.co.za', loginPath, true, true],
+    ['identity.brightrock.co.za', loginPath, false, false],
+    ['identity.brightrock.co.za', '/other', true, false],
+    ['other.brightrock.co.za', loginPath, true, false],
+  ]) {
+    let clicks = 0;
+    const form = { querySelectorAll: selector => selector.includes('button') && sameForm ? [go] : [] };
+    const go = { textContent: 'GO!', type: 'button', getClientRects: () => [1], click: () => clicks++, closest: () => sameForm ? form : null };
+    class Input {
+      constructor(type, name) { this.type = type; this.name = name; this.current = ''; }
+      get value() { return this.current; }
+      set value(value) { this.current = value; }
+      closest() { return form; }
+      getClientRects() { return [1]; }
+      getAttribute() { return null; }
+      focus() {} blur() {} dispatchEvent() {}
+    }
+    const inputs = [new Input('text', 'username'), new Input('password', 'password')];
+    const document = { body: { innerText: 'Your login email\nYour password\nGO!' },
+      querySelectorAll: selector => selector === 'input' ? inputs : selector.includes('button') ? [go] : [] };
+    const context = vm.createContext({ URL, location: { href: `https://${host}${path}` }, document, HTMLInputElement: Input, Event: class {} });
+    vm.runInContext(drive, context);
+    const run = (submitted, passwordSubmitted, probeOnly) => vm.runInContext(
+      `drive('synthetic-user','synthetic-password',${submitted},'https://iris.brightrock.co.za','brightrock.co.za',${passwordSubmitted},${probeOnly})`, context);
+    assert.equal(run(false, false, true).state, expected ? 'login' : 'waiting');
+    assert.equal(inputs[1].value, '');
+    assert.equal(run(false, false, false).state, expected ? 'submitted' : 'waiting');
+    assert.equal(run(true, true, false).state, 'waiting');
+    assert.equal(clicks, expected ? 1 : 0);
+  }
+});
+
 test('reports the supplied BrightRock rejection without writing credentials or claiming success', () => {
   const context = vm.createContext({URL, location:{href:'https://iris.brightrock.co.za/login'}, document:{body:{innerText:'Login failed! Please recheck the username and password and try again.'},querySelectorAll:()=>[]}});
   vm.runInContext(drive,context);

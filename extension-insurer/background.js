@@ -408,6 +408,8 @@ function drive(username, password, submitted, origin, discoveryRedirects, passwo
   };
   const vis = (el) => el && !el.disabled && (el.getClientRects ? el.getClientRects().length > 0 : el.offsetParent !== null);
   const buttonText = (el) => (el.value || el.textContent?.trim() || el.getAttribute("aria-label") || el.getRootNode?.().host?.textContent || "").trim();
+  const brightRockIdentity = u.origin === "https://identity.brightrock.co.za" && u.pathname === "/authenticationendpoint/login.do";
+  const isBrightRockLogin = (button) => brightRockIdentity && /^go!$/i.test(buttonText(button));
   const setVal = (el, v) => {
     const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set;
     el.focus(); setter.call(el, v);
@@ -423,7 +425,8 @@ function drive(username, password, submitted, origin, discoveryRedirects, passwo
     // Match only its exact login control on the verified account host.
     const momentumLogin = u.hostname === "adviser-account.momentum.co.za" ? ", a#btn-login" : "";
     const buttons = query(scope, "button, a[role=button], input[type=button], input[type=submit]" + momentumLogin).filter(vis);
-    const named = buttons.filter(b => /^(log ?in|sign ?in|next|continue|submit|verify)$/i.test(buttonText(b)));
+    const named = buttons.filter(b => /^(log ?in|sign ?in|next|continue|submit|verify)$/i.test(buttonText(b)) ||
+      (form && from.type === "password" && isBrightRockLogin(b)));
     const explicit = buttons.filter(b => b.type === "submit");
     const btn = named.length === 1 ? named[0] : named.length === 0 && explicit.length === 1 ? explicit[0] : null;
     if (btn) { btn.click(); return true; }
@@ -477,7 +480,9 @@ function drive(username, password, submitted, origin, discoveryRedirects, passwo
   if (!pw && domainHostForPage(u.hostname, "oldmutual.co.za") && query(document, "button").some(b => vis(b) && /^Logged In as\b/i.test(buttonText(b)))) return { state: "in" };
   if (probeOnly) {
     const actions = query(document, "button, a[role=button], input[type=submit]" + (u.hostname === "adviser-account.momentum.co.za" ? ", a#btn-login" : "")).filter(vis);
-    const loginActions = actions.filter(b => /^(log ?in|sign ?in)$/i.test(buttonText(b)));
+    const brightRockForm = brightRockIdentity ? pw?.closest("form") : null;
+    const loginActions = actions.filter(b => /^(log ?in|sign ?in)$/i.test(buttonText(b)) ||
+      (brightRockForm && isBrightRockLogin(b) && b.closest("form") === brightRockForm));
     const emailFirst = u.hostname === "login.fmi.co.za" && user?.type === "email" && user.name === "email" && /Adviser Portal/i.test(text);
     return { state: (pw && inputs.filter(i => i.type === "password").length === 1 && loginActions.length === 1) || emailFirst ? "login" : "waiting" };
   }
