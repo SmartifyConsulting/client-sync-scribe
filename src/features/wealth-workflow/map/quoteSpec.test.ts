@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { PRODUCT_TYPES, variationComplete } from "./quoteSpec";
 import { DEFAULT_PARAMS, withCoverAmounts } from "./needsProducts";
 import { withQuoteDefaults } from "./providerQuoteFields";
+import { buildMomentumLifeVariants, momentumLifeVariantLabel } from "./portalPayload";
 
 describe("quote option completeness", () => {
   const option = { benefit_amount: "1700000", increase_option: "No increase", growth: "" };
@@ -42,4 +43,13 @@ it("applies the shared CPI and maps only available insurer defaults", () => {
   });
   expect(defaults["Old Mutual:omp_cover"]).toBeUndefined();
   expect(withQuoteDefaults("Income protection", {}, ["Momentum"], { goals_risk: { retirement_age: 63 } })["Momentum:myriad_retirement"]).toBeUndefined();
+});
+
+it("requests three distinct Momentum life patterns per applicable cover without renumbering Agreed Cover", () => {
+  const scenarios = buildMomentumLifeVariants([{ benefit_amount: "1000000" }, { benefit_amount: "0" }, { benefit_amount: "800000" }]);
+  expect(scenarios.map(s => s.n)).toEqual([7, 8, 9, 13, 14, 15]);
+  expect(scenarios.slice(0, 3).map(s => s.fields.find(field => field.label === "Premium pattern")?.value))
+    .toEqual(["Level", "Compulsory", "Aggressive LifeStage"]);
+  expect(scenarios[5].fields.find(field => field.label === "Benefit amount")?.value).toBe("800000");
+  expect(momentumLifeVariantLabel(15)).toBe("Life cover · Agreed Cover · Aggressive Increase");
 });

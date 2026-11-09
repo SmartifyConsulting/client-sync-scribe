@@ -2,7 +2,7 @@
  *  so a slow or failed scenario never holds back the others. Status only advances on Companion
  *  reports or a successfully saved PDF. */
 export type ScenarioStatus = "queued" | "submitting" | "generating" | "captured" | "calculated" | "no-fields" | "failed" | "stopped";
-export type ScenarioJob = { n: number; status: ScenarioStatus; since: number; detail?: string; pdfReceived?: boolean };
+export type ScenarioJob = { n: number; status: ScenarioStatus; since: number; detail?: string; pdfReceived?: boolean; settingsHash?: string };
 export type QuoteJobs = Record<string, ScenarioJob[]>;
 
 /** A blocked batch cannot advance its queued options. Also repairs saved older batches. */

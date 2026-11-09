@@ -624,11 +624,12 @@ async function runScenarios(tabId, job, scenarios) {
   if (route) await chrome.storage.session.set({ [initialKey]: { ...route, batchOpen: true } });
   let allSaved = true;
   try {
-    for (const sc of scenarios.slice(0, 6)) {
+    const limit = job.insurer === "Momentum" ? 15 : 6;
+    for (const sc of scenarios.slice(0, limit)) {
       if (job.cancelled) { allSaved = false; break; }
       const n = Number(sc?.n);
       const fields = (Array.isArray(sc?.fields) ? sc.fields : []).slice(0, 100).filter((f) => typeof f?.label === "string" && typeof f?.value === "string" && f.value.length <= 160);
-      if (!Number.isInteger(n) || n < 1 || n > 6) continue;
+      if (!Number.isInteger(n) || n < 1 || n > limit) continue;
       job.currentScenario = n; job.pdfSeen = false; job.pdfSaved = false; job.currentCaptureId = undefined;
       tell(job, { type: "insurer-quote-status", n, status: "submitting" });
       let step = "start", stopped = false, context = {};

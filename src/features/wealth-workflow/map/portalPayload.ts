@@ -1,5 +1,5 @@
 import { providerQuoteFields, hasVerifiedProviderFields, isOmpProduct, providerFieldApplies } from "./providerQuoteFields";
-import { PRODUCT_TYPES } from "./quoteSpec";
+import { PREMIUM_PATTERNS, coverOptionLabel } from "./quoteSpec";
 import { insurerFields, insurerKey } from "./insurerDictionary";
 import { OMP_RATING_LABELS } from "./providerRatingFields";
 import { bidvestQuestions } from './BidvestClientFields';
@@ -49,5 +49,23 @@ export function buildPortalScenarios(plan: Record<string, Record<string, unknown
       });
     })],
   }));
+}
+
+export const VARIANT_COMPANION_VERSION = "1.7.18";
+const MOMENTUM_LIFE_PATTERNS = ["Level", "Compulsory", "Aggressive LifeStage"];
+
+export function momentumLifeVariantLabel(n: number) {
+  if (!Number.isInteger(n) || n < 7 || n > 15) return undefined;
+  return `Life cover · ${coverOptionLabel(Math.floor((n - 7) / 3))} · ${PREMIUM_PATTERNS[(n - 7) % 3]}`;
+}
+
+export function buildMomentumLifeVariants(options: Record<string, unknown>[], client?: Record<string, unknown> | null) {
+  return options.flatMap((option, index) => {
+    if (!option || !(Number(option.benefit_amount) > 0)) return [];
+    return MOMENTUM_LIFE_PATTERNS.map((pattern, variant) => ({
+      ...buildPortalScenarios({ "Life cover": [{ ...option, "Momentum:myriad_pattern": pattern }] }, "Momentum", client)[0],
+      n: 7 + index * 3 + variant,
+    }));
+  });
 }
 
