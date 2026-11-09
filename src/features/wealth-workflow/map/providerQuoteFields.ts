@@ -1,4 +1,4 @@
-import { PRODUCT_TYPES, type FieldDef } from "./quoteSpec";
+import { PRODUCT_TYPES, PREMIUM_PATTERNS, type FieldDef } from "./quoteSpec";
 import { insurerFields, insurerKey } from "./insurerDictionary";
 
 export function withQuoteDefaults(product: string, option: Record<string, any>, insurers: string[], fin: any) {
@@ -125,13 +125,26 @@ export function premiumPatternField(insurer: string, product: string): FieldDef 
 
 /**
  * Curated 3-of-N overrides for insurer/product combos whose real portal
- * dropdown offers more than 3 premium-pattern choices. Carried over from the
- * Momentum Life cover variant list that was already live and reviewed;
- * add further entries here (never by branching UI code) as other combinations
- * get the same business review.
+ * dropdown offers more than 3 premium-pattern choices, OR whose real terms
+ * need reordering. The order here is load-bearing: position 0/1/2 must line
+ * up with Elysian's own Stable / Inflationary Increase / Aggressive Increase
+ * terminology (see premiumPatternElysianLabel below) — UI shows Elysian's
+ * wording at that position while the real insurer term here is what's
+ * actually selected on the portal and saved with the quote. Add further
+ * entries here (never by branching UI code) as other combinations get the
+ * same business review; a combination with no entry falls back to the
+ * portal field's raw option order, which is NOT guaranteed to already match
+ * Stable/Inflationary/Aggressive.
  */
 const CURATED_PREMIUM_PATTERNS: Record<string, string[]> = {
   "Momentum:Life cover": ["Level", "Compulsory", "Aggressive LifeStage"],
+  "Bidvest Life / FMI:Life cover": ["Level Premium", "5% Compulsory Increase", "Age Rated"],
+  "Bidvest Life / FMI:Severe illness": ["Level Premium", "5% Compulsory Increase", "Age Rated"],
+  "Bidvest Life / FMI:Income protection": ["Level Premium", "5% Compulsory Increase", "Age Rated"],
+  "Bidvest Life / FMI:Lump sum disability": ["Level Premium", "5% Compulsory Increase", "Age Rated"],
+  "Old Mutual:Life cover": ["0% Annual Increase", "5% Annual Increase", "Increase with Age"],
+  "Old Mutual:Severe illness": ["0% Annual Increase", "5% Annual Increase", "Increase with Age"],
+  "Old Mutual:Income protection": ["0% Annual Increase", "5% Annual Increase", "Increase with Age"],
 };
 
 /** The 3 premium-pattern labels to quote for this insurer/product, or undefined if it has no such field. */
@@ -139,6 +152,19 @@ export function premiumPatternOptions(insurer: string, product: string): string[
   const field = premiumPatternField(insurer, product);
   if (!field || field.kind !== "select") return undefined;
   return CURATED_PREMIUM_PATTERNS[`${insurer}:${product}`] ?? field.options.slice(0, 3);
+}
+
+/**
+ * Elysian's own wording for premium-pattern position 0/1/2 (Stable /
+ * Inflationary Increase / Aggressive Increase), shown in the UI instead of
+ * the insurer's own term at that position. Only trustworthy for insurers
+ * whose 3 terms are curated above in that exact order; an insurer still on
+ * the raw portal-option fallback hasn't been confirmed to be in Stable →
+ * Inflationary → Aggressive order, so its own term is shown instead.
+ */
+export function premiumPatternElysianLabel(insurer: string, product: string, index: number): string | undefined {
+  if (!CURATED_PREMIUM_PATTERNS[`${insurer}:${product}`] && !/^(Discovery|BrightRock|Sanlam|Liberty)$/.test(insurer)) return undefined;
+  return PREMIUM_PATTERNS[index];
 }
 
 /** Gate for the 3-quotes-per-option UI: any insurer/product with a premium-pattern field qualifies. */

@@ -1,4 +1,4 @@
-import { providerQuoteFields, hasVerifiedProviderFields, isOmpProduct, providerFieldApplies, ompSettingsComplete, withQuoteDefaults, premiumPatternField, premiumPatternOptions, supportsPremiumVariants } from "./providerQuoteFields";
+import { providerQuoteFields, hasVerifiedProviderFields, isOmpProduct, providerFieldApplies, ompSettingsComplete, withQuoteDefaults, premiumPatternField, premiumPatternOptions, premiumPatternElysianLabel, supportsPremiumVariants } from "./providerQuoteFields";
 import { OMP_RATING_OPTIONS, ompRatingIssues } from "./providerRatingFields";
 import { BidvestClientFields, bidvestIssues } from './BidvestClientFields';
 import {editQuoteOption} from './optionInheritance';
@@ -111,7 +111,12 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const reviewSection = useRef<HTMLElement>(null);
   const pendingReview = useRef<string | null>(null);
   const visibleInsurer = useRef("");
-  const [login, setLogin] = useState<Record<string, LoginState>>({});
+  // Persisted so the per-insurer progress/status bars (and the "needs attention" OTP
+  // indicator) survive navigating away from this screen and back — the Companion's
+  // managed portal tab keeps running in the background regardless of this page's mount state.
+  const LOGIN_KEY = `holarc-quote-login-${workflowId}`;
+  const [login, setLogin] = useState<Record<string, LoginState>>(() => { try { return JSON.parse(localStorage.getItem(LOGIN_KEY) || "{}"); } catch { return {}; } });
+  useEffect(() => { localStorage.setItem(LOGIN_KEY, JSON.stringify(login)); }, [login, LOGIN_KEY]);
   const [activity, setActivity] = useState<Record<string, QuoteActivity>>({});
   const recordActivity = (insurer: string, phase: ActivityPhase, detail?: string) => setActivity((s) => ({ ...s, [insurer]: updateActivity(s[insurer], phase, Date.now(), detail) }));
   const JOBS_KEY = `holarc-quote-jobs-${workflowId}`;
@@ -421,6 +426,25 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const activeTab = chosen.includes(tab) ? tab : chosen[0] ?? "";
   visibleInsurer.current = activeTab;
   const connected = login[activeTab] === "connected";
+
+  /** Saved quote completion for one insurer across every product/option/pattern that
+   *  applies to it — derived from the persisted quote plan, so it survives navigating
+   *  away and back (unlike the ephemeral in-flight variantProgress tracker above). */
+  const insurerProgress = (ins: string) => {
+    let done = 0, total = 0;
+    for (const p of products) {
+      const patterns = premiumPatternOptions(ins, p);
+      if (!patterns) continue;
+      for (const [i, option] of plan[p].entries()) {
+        if (hasNoCurrentCover(p, option, i)) continue;
+        const settings = quoteSettingsKey(p, option, ins);
+        const saved = option._premiumVariants?.[ins] ?? {};
+        total += patterns.length;
+        done += patterns.filter(pattern => saved[pattern]?.settings === settings && saved[pattern]?.number).length;
+      }
+    }
+    return { done, total, pct: total > 0 ? Math.round((done / total) * 100) : 0 };
+  };
   // Saved position is a hint only: Companion must verify the existing portal.
   // A refresh must never replay login or quote submission for a saved session.
   useEffect(() => {
@@ -541,6 +565,33 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
             {collectingAll ? "Getting all quotes…" : "Get quotes for all insurers"}
           </Button>}
         </div>
+        {source === "companion" && chosen.length > 0 && <div className="space-y-1.5 pt-1">
+          {chosen.map(ins => {
+            const { done, total, pct } = insurerProgress(ins);
+            const needsOtp = login[ins] === "challenge";
+            const c = insurerColor(ins);
+            return <div key={ins} className="flex items-center gap-2">
+              <span className="w-28 shrink-0 truncate text-[11px] font-medium">{ins}</span>
+              <div className="relative h-5 flex-1 overflow-hidden rounded-full bg-muted">
+                <div className="h-full rounded-full transition-all" style={{ width: `${Math.max(pct, total ? 4 : 0)}%`, background: `hsl(${c})` }} />
+                <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-[10px] font-semibold text-foreground mix-blend-difference">
+                  {total > 0 ? `${done}/${total} · ${pct}%` : "No variants"}
+                </span>
+              </div>
+              {needsOtp && <button type="button" className="shrink-0 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-semibold text-destructive hover:bg-destructive/20"
+                title={challenge?.insurer === ins ? "Enter the code in the dialog" : "The OTP prompt expired after navigating away — reconnect to try again"}
+                onClick={() => {
+                  openTab(ins);
+                  if (challenge?.insurer === ins) return; // Dialog is already up — just switched to its tab.
+                  if (!(companionInstalled || addonInstalled())) { setSetupOpen(true); return; }
+                  const token = getToken();
+                  if (token) void startLogin(ins, token); else setAskFor(ins);
+                }}>
+                OTP needed
+              </button>}
+            </div>;
+          })}
+        </div>}
       </section>
 
       {chosen.length > 0 && (
@@ -653,11 +704,15 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                       {hasNoCurrentCover(p, option, i)
                         ? <span className="mt-1 block normal-case tracking-normal">No existing cover to re-quote</span>
                         : <div className="my-2 space-y-1 font-normal normal-case tracking-normal">
-                            {patterns.map((pattern) => {
+                            {patterns.map((pattern, index) => {
                               const entry = saved[pattern];
+                              const elysianLabel = premiumPatternElysianLabel(activeTab, p, index);
                               return <div key={pattern} className="rounded border border-border px-2 py-1">
                                 <div className="flex flex-wrap items-center justify-between gap-1">
-                                  <span className="font-medium">{pattern}</span>
+                                  <span className="font-medium">
+                                    {elysianLabel ?? pattern}
+                                    {elysianLabel && elysianLabel !== pattern && <span className="block text-[9px] font-normal normal-case tracking-normal text-muted-foreground">Insurer term: {pattern}</span>}
+                                  </span>
                                   <QuoteOptionReference value={entry?.settings === settings ? entry.number : ""}
                                     label={`${activeTab} ${p} ${coverOptionLabel(i)} ${pattern} reference`}
                                     className="text-[10px] font-normal normal-case tracking-normal text-muted-foreground"
