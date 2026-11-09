@@ -725,6 +725,12 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                     {p} <span className="font-normal text-muted-foreground">· {plan[p].filter((option, i) => !hasNoCurrentCover(p, option, i)).length * QUOTES_PER_COVER} quotes per insurer</span>
                     {productDone && <span className="rounded-full bg-success px-2 py-0.5 text-[10px] font-semibold text-success-foreground">Done</span>}
                   </span>
+                  {source === "companion" && supportsPremiumVariants(activeTab, p) && <Button type="button" size="sm" className="ml-auto h-7 px-2 text-xs"
+                    disabled={login[activeTab] !== "connected" || collectingAll || variantProgress?.ins === activeTab}
+                    title={login[activeTab] !== "connected" ? `Connect ${activeTab} first` : `Get ${p} quotes from ${activeTab} only`}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); void submitAllVariants(activeTab, p); }}>
+                    {variantProgress?.ins === activeTab && variantProgress.product === p ? `Getting ${variantProgress.done}/${variantProgress.total}…` : "Get quote"}
+                  </Button>}
                   <button type="button" aria-label={`Remove ${p}`} className="shrink-0 text-background/70 hover:text-background"
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPlan((pl) => { const { [p]: _, ...rest } = pl; return rest; }); }}><X className="h-3 w-3" /></button>
                 </div>

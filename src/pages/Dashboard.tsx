@@ -85,10 +85,10 @@ export default function Dashboard() {
       <div className="grid gap-3 md:gap-6 grid-cols-1 lg:grid-cols-2 items-start">
         <div ref={liveRef}><ActiveWorkspaceClients /></div>
         <div className="flex flex-col gap-3 md:gap-6">
-          <div className="overflow-y-auto rounded-xl" style={liveHeight ? { height: Math.round(liveHeight * 2 / 3) } : undefined}>
+          <div className="overflow-y-auto rounded-xl lg:h-[480px]">
             <TodaysBriefing />
           </div>
-          <div className="overflow-y-auto rounded-xl" style={liveHeight ? { height: Math.round(liveHeight / 3) } : undefined}>
+          <div className="overflow-y-auto rounded-xl lg:h-[220px]">
             <UpcomingMeetings />
           </div>
         </div>
