@@ -44,6 +44,17 @@ const groups: { title: string; questions: Question[] }[] = [
       "Multiply or Vitality membership", "Satisfaction with medical cover",
       "Current or past medical conditions", "Current or most recent doctor", "Dependant medical history"),
   ] },
+  { title: "Insurer rating profile", questions: [
+    { label: "Title", options: ["Mr", "Mrs", "Ms", "Miss", "Dr", "Prof", "Adv", "Rev"] },
+    { label: "Old Mutual underwriting method", options: ["Medical tests, questions or both", "No medical tests - only questions"] },
+    { label: "Momentum disability definition", options: ["Own occupation", "Any occupation"] },
+    { label: "BrightRock needs category", options: ["Personal Needs", "Business Needs"] },
+    { label: "BrightRock life cover need", options: ["Cover to retirement", "Whole of life", "Debt cover"] },
+    { label: "BrightRock income need", options: ["Temporary expense", "Permanent income"] },
+    { label: "Discovery plan option", options: ["Classic", "Essential"] },
+    { label: "Discovery Vitality integration", options: ["Vitality Life Plan", "No Vitality"] },
+    { label: "Discovery severe illness option", options: ["Comprehensive", "Core"] },
+  ] },
   { title: "Existing cover, assets and debts", questions: prompts(
     "Existing policy insurer, cover, premium and fund value", "Property value, purchase details and bond",
     "Property rental income, levies, rates and taxes", "Timeshares and personal possessions",
