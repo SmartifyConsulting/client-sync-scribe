@@ -6,8 +6,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { Panel } from "@/components/ui/Panel";
 import { Badge } from "@/components/ui/badge";
 import { STAGE_LABEL } from "@/components/dashboard/PipelineOverview";
+import { workspaceVisits } from "@/features/wealth-workflow/workspace/workspaceRecency";
 
-type Wf = { id: string; current_stage: string; status: string; patient_id: string; patients: { name: string } | null };
+type Wf = { id: string; current_stage: string; status: string; patient_id: string; updated_at: string; patients: { name: string } | null };
 
 /** Every client whose workflow is currently open in the Live Workspace. */
 export function ActiveWorkspaceClients() {
@@ -17,15 +18,18 @@ export function ActiveWorkspaceClients() {
     enabled: !!user,
     queryFn: async () => {
       const { data } = await supabase.from("wealth_workflows" as any)
-        .select("id,current_stage,status,patient_id,patients:clients(name)").in("status", ["active", "blocked"]);
+        .select("id,current_stage,status,patient_id,updated_at,patients:clients(name)").in("status", ["active", "blocked"]);
       return (data ?? []) as unknown as Wf[];
     },
   });
+  const visits = user ? workspaceVisits(user.id) : {};
+  const lastUsed = (workflow: Wf) => Math.max(visits[workflow.id] ?? 0, Date.parse(workflow.updated_at) || 0);
+  const recentFirst = [...wfs].sort((a, b) => lastUsed(b) - lastUsed(a));
 
   return (
-    <Panel title="Active Workspace Clients" icon={Users2}>
+    <Panel title="Live Workspaces" icon={Users2}>
       <ul className="divide-y text-xs">
-        {wfs.map((w) => (
+        {recentFirst.map((w) => (
           <li key={w.id} className="flex items-center justify-between py-1.5">
             <Link to={`/clients/${w.patient_id}?tab=live`} className="font-medium hover:underline">{w.patients?.name ?? "Client"}</Link>
             <span className="flex items-center gap-2">
@@ -34,7 +38,7 @@ export function ActiveWorkspaceClients() {
             </span>
           </li>
         ))}
-        {!wfs.length && <li className="py-1.5 text-muted-foreground">No active clients yet.</li>}
+        {!recentFirst.length && <li className="py-1.5 text-muted-foreground">No live workspaces yet.</li>}
       </ul>
     </Panel>
   );

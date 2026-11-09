@@ -19,6 +19,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { MapAvatars } from "./StepAvatar";
 import { CancelWorkflowButton, CancelledNotice } from "../workspace/CancelWorkflow";
 import { QuoteInsurerSelectionProvider, useSelectedQuoteInsurers } from "./QuoteInsurerSelection";
+import { useAuth } from "@/hooks/useAuth";
+import { recordWorkspaceVisit } from "../workspace/workspaceRecency";
 
 /** Normal FICA collection tasks — shown as uploads in the step, never as red errors. */
 const FICA_TASKS = new Set(["Proof of residence", "Client ID document", "Client mandate (Form 1) not signed", "Required declarations not completed"]);
@@ -41,6 +43,11 @@ export function WorkflowMap(props: Props) {
 
 function WorkflowMapContent({ clientId, clientName, onOpenDocuments, initialGroup, onBackToLive, viewer = "manager" }: Props) {
   const m = useWorkflowMap(clientId, viewer);
+  const { user } = useAuth();
+  const workflowId = m.workflow?.id;
+  useEffect(() => {
+    if (viewer === "manager" && user?.id && workflowId) recordWorkspaceVisit(user.id, workflowId);
+  }, [viewer, user?.id, workflowId]);
   useWorkflowRealtime(clientId, m.workflow?.id);
   const [picked, setPicked] = useState<{ group: string; step: string } | null>(null);
   const start = useStartWorkflow();
