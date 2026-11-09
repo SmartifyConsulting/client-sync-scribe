@@ -2091,6 +2091,9 @@ export type Database = {
           summary: string | null
           title: string | null
           transcript: string | null
+          transcript_seal_hash: string | null
+          transcript_sealed_at: string | null
+          transcript_sealed_ip: string | null
           updated_at: string
           user_id: string
         }
@@ -2116,6 +2119,9 @@ export type Database = {
           summary?: string | null
           title?: string | null
           transcript?: string | null
+          transcript_seal_hash?: string | null
+          transcript_sealed_at?: string | null
+          transcript_sealed_ip?: string | null
           updated_at?: string
           user_id: string
         }
@@ -2141,6 +2147,9 @@ export type Database = {
           summary?: string | null
           title?: string | null
           transcript?: string | null
+          transcript_seal_hash?: string | null
+          transcript_sealed_at?: string | null
+          transcript_sealed_ip?: string | null
           updated_at?: string
           user_id?: string
         }

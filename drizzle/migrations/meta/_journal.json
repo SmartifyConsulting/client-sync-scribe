@@ -127,6 +127,13 @@
       "when": 1794096389801,
       "tag": "0017_allow_client_authorisation_document_types",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1794261579397,
+      "tag": "0018_session_transcript_seal",
+      "breakpoints": true
     }
   ]
 }
