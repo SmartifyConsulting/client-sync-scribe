@@ -51,7 +51,6 @@ import {
 } from "@/features/sessions/utils/pausedSession";
 
 
-import { DrawingPad } from "@/components/drawings/DrawingPad";
 import { PostSessionStepDialog, type PostSessionStepType } from "@/features/sessions/components/PostSessionStepDialog";
 import { SessionResultPanels } from "@/features/sessions/components/SessionResultPanels";
 import { renderAdvisoryHighlights } from "@/features/sessions/lib/advisoryHighlights";
@@ -586,7 +585,9 @@ export default function Sessions() {
 
   const handleAboutRecordingAck = () => {
     setShowAboutRecordingDialog(false);
-    startRecording();
+    // No auto-record: the Wealth Manager taps the microphone when ready.
+    setIsPreparingSession(false);
+    setPreparingMessage("");
   };
 
   const toggleRecording = () => {
@@ -621,23 +622,23 @@ export default function Sessions() {
       {/* Session start prompt — dismissible only via the button shown, never Escape/outside-click. */}
       <Dialog open={showAboutRecordingDialog} onOpenChange={() => {}}>
         <DialogContent
-          className="max-w-md"
+          className="max-w-sm p-4"
           onInteractOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Info className="h-5 w-5 text-success shrink-0" />
+            <DialogTitle className="flex items-center gap-1.5 text-sm font-semibold">
+              <Info className="h-4 w-4 text-success shrink-0" />
               Session Recordings
             </DialogTitle>
-            <DialogDescription className="text-base">
+            <DialogDescription className="text-xs leading-relaxed">
               This session recording is only shared between you and your client. It's
               automatically deleted from our servers within 7 days — download it beforehand
               if either of you wants to keep a copy.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={handleAboutRecordingAck}>Got it</Button>
+            <Button size="sm" onClick={handleAboutRecordingAck}>Got it</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1026,10 +1027,6 @@ export default function Sessions() {
                   <Lock className="h-3.5 w-3.5" />
                   Personal Notes
                 </TabsTrigger>
-                <TabsTrigger value="drawing" className="gap-1.5 tab-brand whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5">
-                  <PenTool className="h-3.5 w-3.5" />
-                  Drawing Pad
-                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="personal" className="mt-0">
@@ -1047,12 +1044,6 @@ export default function Sessions() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="drawing" className="mt-0">
-                <DrawingPad
-                  clientId={clientId || ""}
-                  sessionId={currentSessionId || undefined}
-                />
-              </TabsContent>
             </Tabs>
         </div>
         </>
