@@ -1,4 +1,4 @@
-import { directQuoteCategory } from "./directQuoteProviders";
+import { DIRECT_QUOTE_ROUTES, directQuoteCategory } from "./directQuoteProviders";
 import { providerQuoteFields, hasVerifiedProviderFields, isOmpProduct, providerFieldApplies, ompSettingsComplete, withQuoteDefaults, premiumPatternField, premiumPatternOptions, premiumPatternElysianLabel, supportsPremiumVariants } from "./providerQuoteFields";
 import { OMP_RATING_OPTIONS, ompRatingIssues } from "./providerRatingFields";
 import { BidvestClientFields, bidvestIssues } from './BidvestClientFields';
@@ -585,6 +585,15 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
           </Button>}
         </div>
         <p className={label}>Prepare the quote or illustration on the provider site, then file its PDF here.</p>
+        {directProvider && <details className="rounded-md border border-border p-2">
+          <summary className="cursor-pointer font-medium">Provider product references</summary>
+          <ul className="mt-2 space-y-1">
+            {DIRECT_QUOTE_ROUTES[directProvider.id]?.map(({ product, href }) => <li key={href}>
+              <a className="text-primary underline" href={href} target="_blank" rel="noopener noreferrer">{product}</a>
+            </li>)}
+          </ul>
+          <p className="mt-2 text-muted-foreground">The provider’s signed-in quote fields and PDF export still need verification.</p>
+        </details>}
         {directProvider && clientId && <QuotePdfCapture workflowId={workflowId} clientId={clientId} insurer={directProvider.name} manualOnly />}
       </section>}
       <QuoteSourceSelector value={source} onChange={setSource} />
