@@ -498,7 +498,9 @@ function drive(username, password, submitted, origin, discoveryRedirects, passwo
       [...(i.labels || [])].some(label => label.textContent.trim() === "Client search")) &&
     !inputs.some(i => i.type === "password");
   if (momentumHome) return { state: "in" };
-  if (/your (?:profile|account) has been locked/i.test(text)) return { state: "failed", reason: "locked" };
+  if (/your (?:profile|account) has been locked/i.test(text) ||
+      (u.origin === "https://mastheadfs.xplan.iress.co.za" && u.pathname === "/login2" &&
+        /account has been locked due to excessive failed login attempts/i.test(text))) return { state: "failed", reason: "locked" };
   if (/incorrect password|invalid (credentials|password|username)|login failed/i.test(text)) return { state: "failed" };
   const otp = inputs.find((i) => i.autocomplete === "one-time-code" || /otp|pin|token|code|verification/i.test(`${i.name} ${i.id} ${i.placeholder} ${i.getAttribute("aria-label") || ""}`));
   if (otp && !inputs.some((i) => i.type === "password")) {

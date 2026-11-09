@@ -5,7 +5,7 @@ const vm = require('node:vm');
 const source = fs.readFileSync(`${__dirname}/background.js`, 'utf8');
 const drive = source.slice(source.indexOf('function drive('), source.indexOf('function fillOtp('));
 
-function attempt({ url, astute = false, pin = '', submitted = false, blocked = false, xplanCode = false }) {
+function attempt({ url, astute = false, pin = '', submitted = false, blocked = false, xplanCode = false, text = 'Sign in' }) {
   let clicks = 0;
   const action = { value: astute ? 'Login' : 'Log On', type: 'button', getClientRects: () => [1], click: () => clicks++, closest: () => form };
   const form = { querySelectorAll: s => s.includes('button') || s.includes('#btnLogin') ? [action] : [] };
@@ -21,7 +21,7 @@ function attempt({ url, astute = false, pin = '', submitted = false, blocked = f
   const inputs = [new Input('text', 'Username'), new Input('password', 'password')];
   if (astute) inputs.push(new Input('password', 'pin'));
   if (xplanCode) inputs.push(Object.assign(new Input('text', 'tfa_token'), { id: 'tfa_token' }));
-  const document = { body: { innerText: 'Sign in' }, querySelectorAll: s => s === 'input' ? inputs : blocked && s.includes('dialog') ? [action] : [] };
+  const document = { body: { innerText: text }, querySelectorAll: s => s === 'input' ? inputs : blocked && s.includes('dialog') ? [action] : [] };
   const context = vm.createContext({ URL, location: { href: url }, document, HTMLInputElement: Input, Event: class {}, pin, submitted });
   vm.runInContext(drive, context);
   const result = vm.runInContext("drive('demo-user','demo-password',submitted,new URL(location.href).origin,false,submitted,false,pin)", context);
@@ -47,6 +47,11 @@ test('Xplan recognises Log On only on the supported Masthead login route', () =>
 test('Xplan requests manual verification when the Security Code and password are both visible', () => {
   const result = attempt({ url: 'https://mastheadfs.xplan.iress.co.za/login2', xplanCode: true, submitted: true });
   assert.deepEqual(result, { state: 'xplan-verification', clicks: 0, values: ['', '', ''] });
+});
+
+test('Xplan stops at the observed account lock without filling or clicking', () => {
+  const result = attempt({ url: 'https://mastheadfs.xplan.iress.co.za/login2', text: 'Account has been locked due to excessive failed login attempts. Please see your administrator to release the lock.' });
+  assert.deepEqual(result, { state: 'failed', clicks: 0, values: ['', ''] });
 });
 
 test('Astute confirms only the observed signed-in CCP Home navigation', () => {
