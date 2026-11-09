@@ -69,6 +69,7 @@ export async function buildDocumentPdfBase64(html: string): Promise<string | nul
     const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
+    const runningTitle = target.getAttribute("data-document-running-title");
     const margin = 20; // mm: reserved on every page, not only the outer HTML.
     const pixelsPerMm = canvas.width / pageWidth;
     const footerWidth = footerCanvas ? footerCanvas.width / pixelsPerMm : 0;
@@ -78,6 +79,12 @@ export async function buildDocumentPdfBase64(html: string): Promise<string | nul
     const pagePixels = Math.floor((pageHeight - margin - bottomMargin) * pixelsPerMm);
     const context = canvas.getContext("2d", { willReadFrequently: true });
     if (!context) throw new Error("Could not read document image");
+    const bounds = target.getBoundingClientRect();
+    const scale = canvas.width / bounds.width;
+    const keepTogether = Array.from(target.querySelectorAll("[data-pdf-keep-together]")).map(element => {
+      const rect = element.getBoundingClientRect();
+      return { start: Math.floor((rect.top - bounds.top) * scale), end: Math.ceil((rect.bottom - bounds.top) * scale) };
+    });
     let top = 0;
     while (top < canvas.height) {
       let bottom = Math.min(canvas.height, top + pagePixels);
@@ -95,12 +102,13 @@ export async function buildDocumentPdfBase64(html: string): Promise<string | nul
         }
       }
       if (bottom < canvas.height) {
-        const bounds = target.getBoundingClientRect();
-        const scale = canvas.width / bounds.width;
         for (const heading of target.querySelectorAll("h2, h3")) {
           const rect = heading.getBoundingClientRect();
           const y = Math.floor((rect.top - bounds.top) * scale);
           if (y > top && y < bottom && y + (rect.height + 60) * scale > bottom) bottom = y;
+        }
+        for (const block of keepTogether) {
+          if (block.start > top && block.start < bottom && block.end > bottom && block.end - block.start <= pagePixels) bottom = block.start;
         }
       }
       const slice = document.createElement("canvas");
@@ -110,6 +118,12 @@ export async function buildDocumentPdfBase64(html: string): Promise<string | nul
       if (!sliceContext) throw new Error("Could not create document page");
       sliceContext.drawImage(canvas, 0, top, canvas.width, slice.height, 0, 0, canvas.width, slice.height);
       if (top > 0) pdf.addPage();
+      if (runningTitle) {
+        pdf.setFontSize(9);
+        pdf.setTextColor(15, 39, 66);
+        pdf.text(runningTitle, 8, 12);
+        pdf.text(String(pdf.getNumberOfPages()), pageWidth - 8, 12, { align: "right" });
+      }
       pdf.addImage(slice.toDataURL("image/jpeg", 0.98), "JPEG", 0, margin, pageWidth, slice.height / pixelsPerMm, `document-body-${top}`);
       if (footerImage) {
         pdf.addImage(footerImage, "JPEG", (pageWidth - footerWidth) / 2, pageHeight - 8 - footerHeight, footerWidth, footerHeight, "document-footer");

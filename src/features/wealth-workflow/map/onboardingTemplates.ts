@@ -1,3 +1,5 @@
+import serviceAgreement from "./serviceAgreementContent.json";
+
 /** Draft Disclosure Agreement and LOA templates. Wording is a placeholder for the firm to replace. */
 const NAVY = "#0f2742", INK = "#1e293b", MUTED = "#64748b", RULE = "#d8dee8";
 const esc = (x: unknown) => String(x ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
@@ -83,9 +85,49 @@ export function authorisationHtml(contentHtml: string, title: string, client: st
   return wrap(esc(title), `Prepared for ${esc(client)}`, inner, p).replace("padding:11px 28px 26px", "padding:48px 56px 40px");
 }
 
+/** May 2024 Masthead service arrangement, with the source's fee and scope choices unselected. */
+export function serviceAgreementHtml(client: string, date: string, practice: any = null) {
+  const title = "Service Level Agreement";
+  const rows = serviceAgreement.services.map(([service, description]) => `<tr data-pdf-keep-together>
+    <th style="text-align:left;padding:6px;border:1px solid ${RULE}">${esc(service)}</th>
+    <td style="padding:6px;border:1px solid ${RULE}">${esc(description)}</td>
+    ${["Tax", "Medical Aid", "Short Term", "Drafting of Wills"].includes(service)
+      ? `<td colspan="3" style="border:1px solid ${RULE}"></td>`
+      : `<td style="width:48px;border:1px solid ${RULE}"></td>`.repeat(3)}
+  </tr>`).join("");
+  const headings = /^(?:2\. Client confidentiality|3\. Service Arrangement|4\. Client agrees to|4\.10 FSP undertakes to|5\. Termination|6\. General|7\. Fees|7\.1\.1 Commission|7\.1\.2 Asset Based Fee|7\.2 Time Based Fee|8\. Review)(?::|$)/;
+  const paragraphs = (lines: string[]) => lines.map(line =>
+    headings.test(line)
+      ? h2(esc(line.replace(/:(?=\s*\[|$)/, "")))
+      : `<p style="margin:0 0 9px">${esc(line)}</p>`).join("");
+  const parties = table([
+    ["Financial services provider", "Masthead Financial Planning (Pty) Ltd. · FSP 43435"],
+    ["Planner", esc(practice?.planner_name || "Marlin Moodley")],
+    ["Client", esc(client)],
+  ]);
+  const signatures = `<div data-pdf-keep-together style="margin:24px 0 12px">
+    <p>Signed at ________________________ on ________________________</p>
+    <p>Client ________________________</p>
+    <p>FSP as represented by the Planner ________________________</p>
+  </div>`;
+  const body = `${parties}${h2("Service arrangement")}
+    ${paragraphs(serviceAgreement.terms)}${signatures}
+    ${h2("Services offered")}
+    <table style="width:100%;border-collapse:collapse;font-size:11px">
+      <thead><tr data-pdf-keep-together style="background:#eef2f6"><th>Service</th><th>Value proposition</th><th>Holistic advice (a)</th><th>Limited advice (b)</th><th>Product advice (c)</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    ${h2("Scope of advice")}${paragraphs(serviceAgreement.advice)}${signatures}`;
+  const masthead = { ...practice, fsp_name: "Masthead Financial Planning (Proprietary) Limited", registration_number: "2010/019601/07",
+    fsb_licence: "43435", firm_address: "1st Floor Park Terraces, Golf Park, Mowbray 7700", firm_website: "www.mastheadfp.co.za" };
+  return wrap(title, `Draft · Prepared for ${esc(client)} · ${esc(date)}`, body, masthead)
+    .replace('id="holarc-document"', `id="holarc-document" data-document-running-title="${title}"`)
+    .replace(/<\/div><\/div>$/, "<br/>Dr R Nyakatawa (Chairperson), JD John (Managing Director), DH Clothier, IA Middleton, GL Muller</div></div>");
+}
+
 export function sealedHtml(doc: { content_html: string; signature_image: string; signer_name: string; signed_at: string; signer_ip: string | null; seal_hash: string; title: string }) {
   const at = new Date(doc.signed_at).toLocaleString("en-ZA");
-  const sealBlock = `<div style="font-family:Arial,sans-serif;padding:0 28px 16px;color:#1f2937">
+  const sealBlock = `<div data-pdf-keep-together style="font-family:Arial,sans-serif;padding:0 28px 16px;color:#1f2937">
 <div style="padding-top:10px;margin-top:6px"><img src="${doc.signature_image}" style="height:84px;display:block"/><p style="margin:2px 0;font-size:11px"><b>${doc.signer_name}</b> · Digitally signed ${at}</p></div>
 <div style="border:1.5px solid #334155;border-radius:10px;padding:10px 12px;margin-top:10px;font-size:10px">
 <p style="text-align:center;letter-spacing:.2em;font-weight:bold;font-size:11px;margin:0 0 6px">SEAL CERTIFICATE</p>

@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { buildDocumentPdfBase64 } from "@/features/documents/utils/documentPdf";
 import { PdfFromHtml } from "@/features/documents/components/PdfFromHtml";
 import { Logo } from "@/components/brand/Logo";
-import { disclosureHtml, loaHtml, sealedHtml } from "./onboardingTemplates";
+import { disclosureHtml, loaHtml, sealedHtml, serviceAgreementHtml } from "./onboardingTemplates";
 import { renderSignaturePngBase64 } from "@/lib/signatureImage";
 import { flyToDocuments } from "./StepAvatar";
 import { useRef } from "react";
@@ -163,6 +163,11 @@ export function SignDocsPanel({ workflowId, signed, viewer, clientName }: { work
       {docs.map((d) => (
         <DocCard key={d.type} workflowId={workflowId} doc={d} signed={signed.find((s) => s.doc_type === d.type)} viewer={viewer} clientName={clientName} />
       ))}
+      {viewer === "manager" && String(practice?.fsb_licence ?? "").trim() === "43435" && (
+        <DocCard workflowId={workflowId} viewer={viewer} clientName={clientName} signable={false}
+          status="Draft for adviser review"
+          doc={{ type: "service_agreement", title: "Service Level Agreement", html: serviceAgreementHtml(clientName, today, practice) }} />
+      )}
     </div>
   );
 }

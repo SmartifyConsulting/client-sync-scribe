@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TemplateSectionEditor } from "@/features/documents/templates/TemplateSectionEditor";
-import { disclosureHtml, loaHtml, roaHtml } from "../map/onboardingTemplates";
+import { disclosureHtml, loaHtml, roaHtml, serviceAgreementHtml } from "../map/onboardingTemplates";
 import { defaultRoaBody } from "../map/RoaDraftForm";
 import { COMPLIANCE_FORMS } from "./definitions";
 
@@ -26,6 +26,7 @@ const defaults: Template[] = COMPLIANCE_FORMS.flatMap(form => {
   if (form.id === "mandate") return [
     { ...base, template_key: "disclosure", title: "Disclosure Agreement", content: disclosureHtml(client, date) },
     { ...base, template_key: "loa", title: "Letter of Authority", content: loaHtml(client, date) },
+    { ...base, template_key: "service_agreement", title: "Masthead Service Level Agreement", content: serviceAgreementHtml(client, date) },
   ];
   if (form.id === "roa") return [{ ...base, content: roaHtml(defaultRoaBody(), client, date, "[Version]", null, {
     adviceDate: "[Advice date]", adviser: "[Adviser name]", contact: "[Client contact]",
