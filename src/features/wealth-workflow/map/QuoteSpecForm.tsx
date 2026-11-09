@@ -10,6 +10,7 @@ import { Loader2, Plus, X, Pencil, Check, ChevronDown } from "lucide-react";
 import { QuoteOptionReference } from "./QuoteOptionReference";
 import { quoteReference, quoteResult, quoteSettingsKey, withQuoteReference } from "./quoteReferences";
 import { usePublishQuoteInsurers } from "./QuoteInsurerSelection";
+import { productLetter } from "./productLetter";
 import { insurerColor } from "./insurerColors";
 import { LoginRing, LOGIN_TEXT, OtpDialog, ProtectorDialog, addonInstalled, downloadAddon, type Challenge, type LoginState } from "./InsurerLogin";
 import { CompanionSetup } from "./CompanionSetup";
@@ -549,62 +550,26 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
 
       <QuoteSourceSelector value={source} onChange={setSource} />
       {source !== "companion" && Object.values(login).some(state => ["connecting", "challenge", "connected"].includes(state)) && <p role="status" className="text-xs text-muted-foreground">Previously started portal sessions remain open. Return to Live Companion RPA to monitor or stop them.</p>}
+      <div className="grid gap-3 md:grid-cols-2">
       <section className="frame p-3 space-y-3" aria-label="Choose insurers">
         <h4 className="text-xs font-semibold">Choose insurers</h4>
         {!insurers.length && <p className="text-[10px] text-muted-foreground">No saved insurer logins found.</p>}
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex flex-wrap gap-1.5">
-            {insurers.map((ins: string) => {
-              const on = chosen.includes(ins);
-              const c = "var(--insurer-badge)"; // badges stay orange; only tabs use legend colours
-              return (
-                <button key={ins} type="button" aria-pressed={on}
-                  onClick={() => setChosen((c) => (on ? c.filter((x) => x !== ins) : [...c, ins]))}
-                  className="rounded-full border px-2.5 py-0.5 text-[11px] font-medium"
-                  style={on ? { background: `hsl(${c})`, borderColor: `hsl(${c})`, color: "hsl(var(--insurer-foreground))" } : { borderColor: `hsl(${c})`, color: `hsl(${c})` }}>
-                  {ins}
-                </button>
-              );
-            })}
-          </div>
-          {source === "companion" && chosen.length > 0 && <Button size="sm" disabled={collectingAll || quotesRunning || !chosen.some(ins => login[ins] === "connected")}
-            onClick={() => void requestAllQuotes()}>
-            {collectingAll ? "Getting all quotes…" : "Get quotes for all insurers"}
-          </Button>}
-        </div>
-        {source === "companion" && chosen.length > 0 && <div className="space-y-1.5 pt-1">
-          {chosen.map(ins => {
-            const { done, total, pct } = insurerProgress(ins);
-            const needsOtp = login[ins] === "challenge";
-            const c = insurerColor(ins);
-            return <div key={ins} className="flex items-center gap-2">
-              <span className="w-28 shrink-0 truncate text-[11px] font-medium">{ins}</span>
-              <div className="relative h-5 flex-1 overflow-hidden rounded-full bg-muted">
-                <div className="h-full rounded-full transition-all" style={{ width: `${Math.max(pct, total ? 4 : 0)}%`, background: `hsl(${c})` }} />
-                <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-[10px] font-semibold text-foreground mix-blend-difference">
-                  {total > 0 ? `${done}/${total} · ${pct}%` : "No variants"}
-                </span>
-              </div>
-              {needsOtp && <button type="button" className="shrink-0 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-semibold text-destructive hover:bg-destructive/20"
-                title={challenge?.insurer === ins ? "Enter the code in the dialog" : "The OTP prompt expired after navigating away — reconnect to try again"}
-                onClick={() => {
-                  openTab(ins);
-                  if (challenge?.insurer === ins) return; // Dialog is already up — just switched to its tab.
-                  if (!(companionInstalled || addonInstalled())) { setSetupOpen(true); return; }
-                  const token = getToken();
-                  if (token) void startLogin(ins, token); else setAskFor(ins);
-                }}>
-                OTP needed
-              </button>}
-            </div>;
+        <div className="flex flex-wrap gap-1.5">
+          {insurers.map((ins: string) => {
+            const on = chosen.includes(ins);
+            const c = "var(--insurer-badge)"; // badges stay orange; only tabs use legend colours
+            return (
+              <button key={ins} type="button" aria-pressed={on}
+                onClick={() => setChosen((c) => (on ? c.filter((x) => x !== ins) : [...c, ins]))}
+                className="rounded-full border px-2.5 py-0.5 text-[11px] font-medium"
+                style={on ? { background: `hsl(${c})`, borderColor: `hsl(${c})`, color: "hsl(var(--insurer-foreground))" } : { borderColor: `hsl(${c})`, color: `hsl(${c})` }}>
+                {ins}
+              </button>
+            );
           })}
-        </div>}
-      </section>
-
-      {chosen.length > 0 && (
-        <div className="space-y-2">
-          <p className={label}>Select an insurer to view its connection and quote options.</p>
-          <div role="tablist" aria-label="Insurer workspaces" className="flex flex-wrap items-center gap-2 border-b border-border pb-3" style={{ borderColor: activeTab ? `hsl(${insurerColor(activeTab)})` : undefined }}>
+        </div>
+        {chosen.length > 0 && <p className={label}>Select an insurer to view its connection and quote options.</p>}
+          <div role="tablist" aria-label="Insurer workspaces" className="flex flex-wrap items-center gap-2">
             {chosen.map((t) => {
               const c = insurerColor(t);
               const on = activeTab === t;
@@ -619,6 +584,51 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
               );
             })}
           </div>
+      </section>
+      {source === "companion" && chosen.length > 0 && <section className="frame p-3 space-y-3" aria-label="Quote progress">
+        <div className="flex justify-end">
+          <Button size="sm" disabled={collectingAll || quotesRunning || !chosen.some(ins => login[ins] === "connected")} onClick={() => void requestAllQuotes()}>
+            {collectingAll ? "Getting all quotes…" : "Get quotes for all insurers"}
+          </Button>
+        </div>
+        <div className="space-y-2">
+          {chosen.map(ins => {
+            const { done, total, pct } = insurerProgress(ins);
+            const needsOtp = login[ins] === "challenge";
+            const isConnected = login[ins] === "connected" || done > 0;
+            const c = insurerColor(ins);
+            const finished = products.filter(p => { const pr = insurerProgress(ins, p); return pr.total > 0 && pr.done === pr.total; });
+            return <div key={ins} className="flex items-center gap-2" aria-label={`${ins} quote progress`}>
+              <span className="w-24 shrink-0 truncate text-[11px] font-medium">{ins}</span>
+              <span title={isConnected ? "Connected" : LOGIN_TEXT[login[ins]] ?? "Not connected"} className={cn("flex h-5 w-5 shrink-0 items-center justify-center rounded-full", isConnected ? "bg-success text-success-foreground" : "border border-border bg-muted")}>
+                {isConnected ? <Check className="h-3 w-3" aria-label="Connected" /> : login[ins] === "connecting" ? <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" /> : null}
+              </span>
+              <div className="relative h-5 min-w-16 flex-1 overflow-hidden rounded-full bg-muted" title={total ? `${done}/${total} quotes` : "No quotes planned"}>
+                <div className="h-full rounded-full transition-all" style={{ width: `${Math.max(pct, 8)}%`, background: `hsl(${c})` }} />
+              </div>
+              {finished.map(p => <span key={p} title={`${p} quotes complete`} className="relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-success text-[10px] font-bold text-success-foreground">
+                {productLetter(p)}<Check className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-background text-success" aria-hidden="true" />
+              </span>)}
+              {needsOtp && <button type="button" className="shrink-0 rounded-full bg-warning/20 px-2 py-0.5 text-[10px] font-semibold text-foreground hover:bg-warning/30"
+                title={challenge?.insurer === ins ? "Enter the code in the dialog — other insurers keep running" : "Code still needed — other insurers keep running"}
+                onClick={() => {
+                  openTab(ins);
+                  if (challenge?.insurer === ins) return;
+                  if (!(companionInstalled || addonInstalled())) { setSetupOpen(true); return; }
+                  const token = getToken();
+                  if (token) void startLogin(ins, token); else setAskFor(ins);
+                }}>
+                OTP waiting
+              </button>}
+            </div>;
+          })}
+        </div>
+        <p className="text-[10px] text-muted-foreground">Green circle = connected. Letters show finished products (L Life, D Dread disease, I Income protection, C Car, H Home). Progress is saved — you can leave and come back.</p>
+      </section>}
+      </div>
+
+      {chosen.length > 0 && (
+        <div className="space-y-2">
           {source === "companion" && (() => {
             const connectKey = `connect:${activeTab}`;
             const connectOpen = isExpanded(connectKey, connected);
