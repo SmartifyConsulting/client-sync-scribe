@@ -11,9 +11,10 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TemplateSectionEditor } from "@/features/documents/templates/TemplateSectionEditor";
-import { disclosureHtml, loaHtml, roaHtml, serviceAgreementHtml } from "../map/onboardingTemplates";
+import { disclosureHtml, loaHtml, roaHtml, serviceAgreementHtml, complianceFormHtml } from "../map/onboardingTemplates";
 import { defaultRoaBody } from "../map/RoaDraftForm";
 import { COMPLIANCE_FORMS } from "./definitions";
+import defaultLogo from "@/assets/elysian-logo-navy.png";
 
 type Template = { template_key: string; title: string; content: string; archived: boolean };
 const db = supabase as any;
@@ -21,26 +22,32 @@ const clean = (html: string) => DOMPurify.sanitize(html, { USE_PROFILES: { html:
 const escape = (value: string) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const client = "[Client name]";
 const date = "[Record date]";
+// Template previews have no specific Wealth Manager's saved firm profile to
+// pull a logo from, so show the platform's own logo rather than a blank header.
+const defaultPractice = { __businessLogo: defaultLogo };
 const defaults: Template[] = COMPLIANCE_FORMS.flatMap(form => {
   const base = { template_key: form.id, title: `Form ${form.number} · ${form.title}`, archived: false };
   if (form.id === "mandate") return [
-    { ...base, template_key: "disclosure", title: "Disclosure Agreement", content: disclosureHtml(client, date) },
-    { ...base, template_key: "loa", title: "Letter of Authority", content: loaHtml(client, date) },
-    { ...base, template_key: "service_agreement", title: "Masthead Service Level Agreement", content: serviceAgreementHtml(client, date) },
+    { ...base, template_key: "disclosure", title: "Disclosure Agreement", content: disclosureHtml(client, date, defaultPractice) },
+    { ...base, template_key: "loa", title: "Letter of Authority", content: loaHtml(client, date, defaultPractice) },
+    { ...base, template_key: "service_agreement", title: "Masthead Service Level Agreement", content: serviceAgreementHtml(client, date, defaultPractice) },
   ];
-  if (form.id === "roa") return [{ ...base, content: roaHtml(defaultRoaBody(), client, date, "[Version]", null, {
+  if (form.id === "roa") return [{ ...base, content: roaHtml(defaultRoaBody(), client, date, "[Version]", defaultPractice, {
     adviceDate: "[Advice date]", adviser: "[Adviser name]", contact: "[Client contact]",
   }) }];
-  if (form.id === "broker_change") return [{ ...base, content: `<h2>Broker Change Letter</h2>
-    <p>Client: ${client}<br>Current broker: [Current broker]<br>New broker: [New broker]<br>New firm or FSP: [New firm or FSP]<br>Insurers and policy numbers: [Insurers and policy numbers]</p>
-    <p>I request that the named broker be appointed for the policies listed above.</p><p>Electronically signed by [Client signature] on ${date}.</p>` }];
-  return [{ ...base, content: `<h2>${escape(form.title)}</h2><p>Client: ${client}<br>Adviser: [Adviser name]<br>Date: ${date}</p>
-    ${form.fields.map(field => `<p><strong>${escape(field.label)}</strong>${field.type === "check" ? " ☐" : `: ${field.options ? escape(field.options.join(" / ")) : "[Response]"}`}</p>`).join("")}
-    <p>Client signature: [Client signature]${form.adviserSigns ? "<br>Adviser signature: [Adviser signature]" : ""}</p>` }];
+  if (form.id === "broker_change") return [{ ...base, content: complianceFormHtml("Broker Change Letter", client, date,
+    `<p style="margin:0 0 12px">Current broker: [Current broker]<br>New broker: [New broker]<br>New firm or FSP: [New firm or FSP]<br>Insurers and policy numbers: [Insurers and policy numbers]</p>
+    <p style="margin:0 0 12px">I request that the named broker be appointed for the policies listed above.</p><p style="margin:0">Electronically signed by [Client signature] on ${escape(date)}.</p>`, defaultPractice) }];
+  return [{ ...base, content: complianceFormHtml(form.title, client, date,
+    `<p style="margin:0 0 12px">Adviser: [Adviser name]</p>
+    ${form.fields.map(field => `<p style="margin:0 0 12px"><strong>${escape(field.label)}</strong>${field.type === "check" ? " ☐" : `: ${field.options ? escape(field.options.join(" / ")) : "[Response]"}`}</p>`).join("")}
+    <p style="margin:0">Client signature: [Client signature]${form.adviserSigns ? "<br>Adviser signature: [Adviser signature]" : ""}</p>`, defaultPractice) }];
 });
 defaults.push({
   template_key: "limited_advice_waiver", title: "Limited Advice Waiver", archived: false,
-  content: `<h2>Limited Advice Waiver</h2><p>Client: ${client}</p><p>I confirm the information I supplied is complete and correct for the advice requested. I decline a full financial needs analysis and understand that other needs may go unidentified.</p><p>Scope of advice: [Requested scope]</p><p>Confirmed by the linked client on ${date}.</p>`,
+  content: complianceFormHtml("Limited Advice Waiver", client, date,
+    `<p style="margin:0 0 12px">I confirm the information I supplied is complete and correct for the advice requested. I decline a full financial needs analysis and understand that other needs may go unidentified.</p>
+    <p style="margin:0 0 12px">Scope of advice: [Requested scope]</p><p style="margin:0">Confirmed by the linked client on ${escape(date)}.</p>`, defaultPractice),
 });
 
 function TemplateDialog({ item, viewing, onClose, onSave }: {
