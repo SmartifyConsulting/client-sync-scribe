@@ -7,6 +7,9 @@ import { Panel } from "@/components/ui/Panel";
 import { Badge } from "@/components/ui/badge";
 import { STAGE_LABEL } from "@/components/dashboard/PipelineOverview";
 import { workspaceVisits } from "@/features/wealth-workflow/workspace/workspaceRecency";
+import { ownerSolid } from "@/features/wealth-workflow/map/LiveTray";
+import { cn } from "@/lib/utils";
+import { courtFor } from "./court";
 
 type Wf = { id: string; current_stage: string; status: string; patient_id: string; updated_at: string; patients: { name: string } | null };
 
@@ -28,10 +31,25 @@ export function ActiveWorkspaceClients() {
 
   return (
     <Panel title="Live Workspaces" icon={Users2}>
+      <p className="mb-1 flex flex-wrap gap-2 text-2xs text-muted-foreground">
+        <span className={cn("rounded-full px-2 py-0.5", ownerSolid("advisor"))}>Broker</span>
+        <span className={cn("rounded-full px-2 py-0.5", ownerSolid("client"))}>Client</span>
+        <span className={cn("rounded-full px-2 py-0.5", ownerSolid("insurer"))}>Insurer</span>
+        <span>· whose turn it is</span>
+      </p>
       <ul className="divide-y text-xs">
         {recentFirst.map((w) => (
           <li key={w.id} className="flex items-center justify-between py-1.5">
-            <Link to={`/clients/${w.patient_id}?tab=live`} className="font-medium hover:underline">{w.patients?.name ?? "Client"}</Link>
+            {(() => {
+              const court = courtFor(w.current_stage);
+              const label = court === "client" ? "Client to act" : court === "insurer" ? "Insurer to act" : "Broker to act";
+              return (
+                <Link to={`/clients/${w.patient_id}?tab=live`} title={label} aria-label={`${w.patients?.name ?? "Client"} · ${label}`}
+                  className={cn("rounded-full px-2 py-0.5 font-semibold text-white hover:opacity-90", ownerSolid(court))}>
+                  {w.patients?.name ?? "Client"}
+                </Link>
+              );
+            })()}
             <span className="flex items-center gap-2">
               <span className="text-muted-foreground">{STAGE_LABEL[w.current_stage] ?? w.current_stage}</span>
               {w.status === "blocked" && <Badge variant="destructive" className="text-2xs">Blocked</Badge>}
