@@ -74,7 +74,7 @@ export function ProtectorDialog({ open, onClose, onSubmit, busy }: { open: boole
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-sm"><KeyRound className="h-4 w-4" />Unlock saved insurer logins</DialogTitle>
-          <DialogDescription className="text-xs">Unlock all insurer quotes for 15 minutes. After that, Holarc Wealth asks for your Password Protector again.</DialogDescription>
+          <DialogDescription className="text-xs">Unlock all insurer quotes for 30 minutes. After that, Elysian Financial Technologies asks for your Password Protector again.</DialogDescription>
         </DialogHeader>
         <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (code) onSubmit(code); }}>
           <div className="relative flex-1">

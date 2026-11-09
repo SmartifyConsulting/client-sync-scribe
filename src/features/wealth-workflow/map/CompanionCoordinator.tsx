@@ -19,7 +19,7 @@ export function CompanionCoordinator() {
     try {
       const { data, error } = await supabase.functions.invoke("manage-broker-credentials", { body: { action: "reauth", passcode } });
       if (error || data?.error || !data?.token) { toast.error("Password Protector could not be unlocked. Please try again."); return; }
-      sessionStorage.setItem("holarc-cred-token", JSON.stringify({ token: data.token, uid: user?.id, exp: Date.now() + Math.min(data.expiresInMs ?? 900000, 900000) }));
+      sessionStorage.setItem("holarc-cred-token", JSON.stringify({ token: data.token, uid: user?.id, exp: Date.now() + Math.min(data.expiresInMs ?? 1800000, 1800000) }));
       setUnlockOpen(false); resume.current?.();
     } catch { toast.error("Password Protector could not be unlocked. Please try again."); }
     finally { setUnlockBusy(false); }

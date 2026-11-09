@@ -251,7 +251,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     const { data, error } = await supabase.functions.invoke("manage-broker-credentials", { body: { action: "reauth", passcode } });
     setUnlocking(false);
     if (error || data?.error) return toast({ title: data?.error ?? "Incorrect Password Protector", variant: "destructive" });
-    sessionStorage.setItem(TOKEN_KEY, JSON.stringify({ token: data.token, uid: user?.id, exp: Date.now() + Math.min(data.expiresInMs ?? 900000, 900000) }));
+    sessionStorage.setItem(TOKEN_KEY, JSON.stringify({ token: data.token, uid: user?.id, exp: Date.now() + Math.min(data.expiresInMs ?? 1800000, 1800000) }));
     const ins = askFor; setAskFor(null);
     if (ins) startLogin(ins, data.token);
   };
@@ -623,25 +623,26 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                       {hasNoCurrentCover(p, option, i)
                         ? <span className="mt-1 block normal-case tracking-normal">No existing cover to re-quote</span>
                         : <div className="my-2 space-y-1 font-normal normal-case tracking-normal">
-                            {patterns.map((pattern, index) => {
+                            {patterns.map((pattern) => {
                               const entry = saved[pattern];
                               return <div key={pattern} className="rounded border border-border px-2 py-1">
-                                <span className="block font-medium">{pattern}</span>
+                                <div className="flex flex-wrap items-center justify-between gap-1">
+                                  <span className="font-medium">{pattern}</span>
+                                  <QuoteOptionReference value={entry?.settings === settings ? entry.number : ""}
+                                    label={`${activeTab} ${p} ${coverOptionLabel(i)} ${pattern} reference`}
+                                    className="text-[10px] font-normal normal-case tracking-normal text-muted-foreground"
+                                    onChange={number => setPlan(previous => ({
+                                      ...previous,
+                                      [p]: previous[p].map((value, index) => index !== i ? value : {
+                                        ...value,
+                                        _premiumVariants: {
+                                          ...value._premiumVariants,
+                                          [activeTab]: { ...value._premiumVariants?.[activeTab], [pattern]: { number, settings } },
+                                        },
+                                      }),
+                                    }))} />
+                                </div>
                                 {entry?.settings === settings && entry.source === "companion-verified" && <p className={label}>R {Number(entry.monthlyPremium).toFixed(2)} / month · PDF pending</p>}
-                                {supportsPremiumVariants(activeTab, p) && source === "companion" && <Button size="sm" variant="outline" className="mt-1 h-6 px-2 text-[10px]"
-                                  disabled={!connected || quotesRunning} onClick={() => void submitScenarios(activeTab, [i + 1], p, index)}>Calculate</Button>}
-                                <QuoteOptionReference value={entry?.settings === settings ? entry.number : ""}
-                                  label={`${activeTab} ${p} ${coverOptionLabel(i)} ${pattern} reference`}
-                                  onChange={number => setPlan(previous => ({
-                                    ...previous,
-                                    [p]: previous[p].map((value, index) => index !== i ? value : {
-                                      ...value,
-                                      _premiumVariants: {
-                                        ...value._premiumVariants,
-                                        [activeTab]: { ...value._premiumVariants?.[activeTab], [pattern]: { number, settings } },
-                                      },
-                                    }),
-                                  }))} />
                                 {entry?.number && entry.settings !== settings && <span>Previous reference {entry.number}</span>}
                               </div>;
                             })}

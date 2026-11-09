@@ -127,7 +127,7 @@ chrome.runtime.onMessage.addListener((d, sender) => {
     job.recoveryId = null; // consume once, including duplicate/in-flight replies
     job.reconnecting = true; job.done = false; job.checking = false;
     job.submitted = false; job.passwordSubmitted = false; job.challenge = null; job.step = 0;
-    job.username = d.username; job.password = d.password; job.expires = Date.now() + 15 * 60 * 1000;
+    job.username = d.username; job.password = d.password; job.expires = Date.now() + 30 * 60 * 1000;
     tell(job, { type: "insurer-login-progress", state: "connecting", phase: "reconnecting" });
     void saveRoute(tabId, job).then(() => checkPortal(tabId));
     return;
@@ -225,7 +225,7 @@ chrome.runtime.onMessage.addListener((d, sender) => {
       if (!tab?.id) return;
       const discoveryRedirects = !masthead && !["astute", "xplan"].includes(d.integrationId) && new URL(origin).port === "" ? (baseDomain(new URL(origin).hostname) || false) : false;
       const { pin, ...details } = d;
-      const job = { ...details, pin: d.integrationId === "astute" ? pin : undefined, appTabId, appWindowId: sender.tab.windowId, origin, discoveryRedirects, step: 0, done: false, submitted: false, expires: Date.now() + 15 * 60 * 1000 };
+      const job = { ...details, pin: d.integrationId === "astute" ? pin : undefined, appTabId, appWindowId: sender.tab.windowId, origin, discoveryRedirects, step: 0, done: false, submitted: false, expires: Date.now() + 30 * 60 * 1000 };
       jobs.set(tab.id, job);
       tell(job, { type: "insurer-login-progress", state: "connecting", phase: "opening" });
       // Persist only routing metadata, never passwords/PINs.
