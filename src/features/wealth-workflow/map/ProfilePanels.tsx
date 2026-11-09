@@ -292,8 +292,6 @@ export function VerifyFinancialsPanel({ clientId, financials, viewer, clientFirs
   const qc = useQueryClient();
   const [complete, setComplete] = useState(false);
   const [correct, setCorrect] = useState(false);
-  const [waiveFullAnalysis, setWaiveFullAnalysis] = useState(false);
-  const [scope, setScope] = useState("");
   const [busy, setBusy] = useState(false);
 
   if (financials?.verified_at) {
@@ -314,10 +312,10 @@ export function VerifyFinancialsPanel({ clientId, financials, viewer, clientFirs
   }
 
   const verify = async () => {
-    if (!clientId || !complete || !correct || (waiveFullAnalysis && !scope.trim())) return;
+    if (!clientId || !complete || !correct) return;
     setBusy(true);
     const { error } = await db.rpc("wealth_confirm_financial_information", {
-      _client_id: clientId, _waiver_scope: waiveFullAnalysis ? scope.trim() : null,
+      _client_id: clientId, _waiver_scope: null,
     });
     setBusy(false);
     if (error) return toast({ title: "Couldn't record your confirmation", description: error.message, variant: "destructive" });
@@ -334,18 +332,10 @@ export function VerifyFinancialsPanel({ clientId, financials, viewer, clientFirs
       <TranscriptButton sessionId={financials?.extracted_from_session_id} clientId={clientId} />
       {clientId && <FinancialInformation clientId={clientId} />}
       <div className="space-y-3 rounded-lg border border-border/70 p-3">
-        <label className="flex items-start gap-2.5 text-xs leading-relaxed"><Checkbox checked={complete} onCheckedChange={(v) => setComplete(v === true)} className="mt-0.5 shrink-0" /><span>I confirm this financial information is <strong>complete</strong>{waiveFullAnalysis ? " for the advice I have requested." : ". Nothing important is missing."}</span></label>
+        <label className="flex items-start gap-2.5 text-xs leading-relaxed"><Checkbox checked={complete} onCheckedChange={(v) => setComplete(v === true)} className="mt-0.5 shrink-0" /><span>I confirm this financial information is <strong>complete</strong>. Nothing important is missing.</span></label>
         <label className="flex items-start gap-2.5 text-xs leading-relaxed"><Checkbox checked={correct} onCheckedChange={(v) => setCorrect(!!v)} className="mt-0.5 shrink-0" /><span>I confirm the figures, assets and debts above are <strong>correct</strong>.</span></label>
-        <label className="flex items-start gap-2.5 border-t border-border pt-3 text-xs leading-relaxed">
-          <Checkbox checked={waiveFullAnalysis} onCheckedChange={v => { setWaiveFullAnalysis(v === true); setComplete(false); }} className="mt-0.5 shrink-0" />
-          <span><strong>Limit the scope of my advice (optional).</strong> I decline a full financial needs analysis and request advice on the need below. I understand this may leave other needs unidentified.</span>
-        </label>
-        {waiveFullAnalysis && <div className="space-y-1.5">
-          <Label htmlFor="financial-waiver-scope">Which need should your Wealth Manager advise on?</Label>
-          <Input id="financial-waiver-scope" value={scope} maxLength={500} onChange={e => setScope(e.target.value)} placeholder="e.g. Life cover to protect my home loan" />
-        </div>}
       </div>
-      <Button className="w-full rounded-full" onClick={verify} disabled={busy || !complete || !correct || (waiveFullAnalysis && !scope.trim())}>
+      <Button className="w-full rounded-full" onClick={verify} disabled={busy || !complete || !correct}>
         {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}Confirm my financial information
       </Button>
     </div>

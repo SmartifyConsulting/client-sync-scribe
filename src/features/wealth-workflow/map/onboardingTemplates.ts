@@ -7,11 +7,11 @@ const logo = (u?: string | null) => (u ? `<img src="${esc(u)}" alt="" style="max
 const footer = (p: any) => p?.fsp_name
   ? `${esc(p.fsp_name)} · Reg No ${esc(p.registration_number ?? "–")} · FSP ${esc(p.fsb_licence ?? "–")}<br/>${esc(p.firm_address ?? "")}${p.firm_website ? " · " + esc(p.firm_website) : ""}`
   : "Masthead Financial Planning (Proprietary) Limited · Reg No 2010/019601/07 · FSP 43435<br/>1st Floor Park Terraces, Golf Park, Mowbray 7700 · www.mastheadfp.co.za";
-const wrap = (title: string, subtitle: string, body: string, p: any = null) => `<div id="holarc-document" style="font-family:'Helvetica Neue',Arial,sans-serif;color:${INK};background:#fff;padding:11px 28px 26px;font-size:12.5px;line-height:1.7;letter-spacing:0.15px;word-spacing:1px;max-width:820px;margin:0 auto">
+const wrap = (title: string, subtitle: string, body: string, p: any = null, uniformFont = false) => `<div id="holarc-document" style="font-family:${uniformFont ? "Arial,sans-serif" : "'Helvetica Neue',Arial,sans-serif"};color:${INK};background:#fff;padding:11px 28px 26px;font-size:12.5px;line-height:1.7;letter-spacing:0.15px;word-spacing:1px;max-width:820px;margin:0 auto">
 ${p?.__businessLogo || p?.__fspLogo ? `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">${logo(p.__fspLogo) || "<span></span>"}${logo(p.__businessLogo) || "<span></span>"}</div>` : ""}
 <div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid ${NAVY};padding-bottom:10px;margin-bottom:20px">
 <div><p style="margin:0;font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:${MUTED}">${subtitle}</p>
-<h1 style="margin:4px 0 0;font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:23px;color:${NAVY};letter-spacing:.01em;white-space:nowrap">${title}</h1></div>
+<h1 style="margin:4px 0 0;font-family:${uniformFont ? "inherit" : "Georgia,'Times New Roman',serif"};font-weight:400;font-size:23px;color:${NAVY};letter-spacing:.01em;white-space:nowrap">${title}</h1></div>
 <p style="margin:0;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:${NAVY};font-weight:600">${esc(p?.business_name || p?.fsp_name || "")}</p></div>
 ${body}
 <div data-document-footer="true" style="margin-top:36px;padding-top:12px;border-top:1px solid ${RULE};font-size:9.5px;color:${MUTED};text-align:center;line-height:1.5">${footer(p)}</div></div>`;
@@ -95,27 +95,29 @@ export function serviceAgreementHtml(client: string, date: string, practice: any
       ? `<td colspan="3" style="border:1px solid ${RULE}"></td>`
       : `<td style="width:48px;border:1px solid ${RULE}"></td>`.repeat(3)}
   </tr>`).join("");
-  const headings = /^(?:2\. Client confidentiality|3\. Service Arrangement|4\. Client agrees to|4\.10 FSP undertakes to|5\. Termination|6\. General|7\. Fees|7\.1\.1 Commission|7\.1\.2 Asset Based Fee|7\.2 Time Based Fee|8\. Review)(?::|$)/;
-  const paragraphs = (lines: string[]) => lines.map(line =>
-    headings.test(line)
-      ? h2(esc(line.replace(/:(?=\s*\[|$)/, "")))
-      : `<p style="margin:0 0 9px">${esc(line)}</p>`).join("");
+  const headings = /^(2\. Client confidentiality|3\. Service Arrangement|4\. Client agrees to|4\.10 FSP undertakes to|5\. Termination|6\. General|7\. Fees|7\.1\.1 Commission|7\.1\.2 Asset Based Fee|7\.2 Time Based Fee|8\. Review)(?::\s*(.*))?$/;
+  const heading = (label: string) => `<h2 style="margin:20px 0 8px;font:700 12.5px/1.7 Arial,sans-serif;letter-spacing:inherit;color:${NAVY}">${esc(label)}</h2>`;
+  const paragraph = (line: string) => `<p style="margin:0 0 9px;font:inherit;letter-spacing:inherit">${esc(line)}</p>`;
+  const paragraphs = (lines: string[]) => lines.map(line => {
+    const match = line.match(headings);
+    return match ? heading(match[1]) + (match[2] ? paragraph(match[2]) : "") : paragraph(line);
+  }).join("");
   const parties = table([
     ["Financial services provider", "Masthead Financial Planning (Pty) Ltd. · FSP 43435"],
     ["Planner", esc(practice?.planner_name || "Marlin Moodley")],
     ["Client", esc(client)],
   ]);
-  const body = `${parties}${h2("Service arrangement")}
+  const body = `${parties}${heading("Service arrangement")}
     ${paragraphs(serviceAgreement.terms)}
-    ${h2("Services offered")}
+    ${heading("Services offered")}
     <table style="width:100%;border-collapse:collapse;font-size:11px">
       <thead><tr data-pdf-keep-together style="background:#eef2f6"><th>Service</th><th>Value proposition</th><th>Holistic advice (a)</th><th>Limited advice (b)</th><th>Product advice (c)</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
-    ${h2("Scope of advice")}${paragraphs(serviceAgreement.advice)}`;
+    ${heading("Scope of advice")}${paragraphs(serviceAgreement.advice)}`;
   const masthead = { ...practice, fsp_name: "Masthead Financial Planning (Proprietary) Limited", registration_number: "2010/019601/07",
     fsb_licence: "43435", firm_address: "1st Floor Park Terraces, Golf Park, Mowbray 7700", firm_website: "www.mastheadfp.co.za" };
-  return wrap(title, `Draft · Prepared for ${esc(client)} · ${esc(date)}`, body, masthead)
+  return wrap(title, `Draft · Prepared for ${esc(client)} · ${esc(date)}`, body, masthead, true)
     .replace('id="holarc-document"', `id="holarc-document" data-document-running-title="${title}"`)
     .replace(/<\/div><\/div>$/, "<br/>Dr R Nyakatawa (Chairperson), JD John (Managing Director), DH Clothier, IA Middleton, GL Muller</div></div>");
 }
