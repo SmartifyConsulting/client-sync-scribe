@@ -57,23 +57,29 @@ const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 const textHtml = (title: string, text: string) =>
   `<div id="holarc-document" style="width:794px;padding:48px 56px;background:#fff;font-family:Georgia,serif;color:#111"><h2 style="font-size:18px;margin:0 0 12px">${esc(title)}</h2><div style="white-space:pre-wrap;font-size:12px;line-height:1.6">${esc(text)}</div></div>`;
 
-// Speaker-coloured transcript: teal for the Wealth Manager, black for the client.
-const BROKER_COLOR = "hsl(var(--primary))";
-const CLIENT_COLOR = "#111111";
-const transcriptHtml = (title: string, segments: { speaker: string; text: string }[]) => {
+// Transcript PDF: header, running footer, Wealth Manager in bold, client in regular weight.
+const fmtDate = (d?: string) => d ? new Date(d).toLocaleString("en-ZA", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
+const transcriptShell = (title: string, date: string | undefined, body: string) =>
+  `<div id="holarc-document" data-document-running-title="${esc(title)}" style="width:794px;padding:40px 56px;background:#fff;font-family:Arial,Helvetica,sans-serif;color:#111">
+<div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #111;padding-bottom:10px;margin-bottom:18px">
+<div><div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#555">Consultation transcript</div><h2 style="font-size:18px;margin:4px 0 0">${esc(title)}</h2></div>
+<div style="font-size:11px;color:#555;text-align:right">${esc(fmtDate(date))}<br/><b style="color:#111">Wealth Manager</b> in bold · Client in regular</div></div>
+${body}
+<div data-document-footer style="margin-top:28px;border-top:1px solid #ccc;padding-top:8px;font-size:9.5px;color:#666;text-align:center">Confidential · Holarc Wealth consultation transcript · Generated ${esc(fmtDate(new Date().toISOString()))}</div></div>`;
+const transcriptHtml = (title: string, segments: { speaker: string; text: string }[], date?: string) => {
   const body = segments.map((s) => {
-    const isBroker = s.speaker === "broker";
-    return `<p style="margin:0 0 10px;font-size:12px;line-height:1.6"><span style="display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${isBroker ? BROKER_COLOR : CLIENT_COLOR}">${isBroker ? "Wealth Manager" : "Client"}</span><span style="color:${isBroker ? BROKER_COLOR : CLIENT_COLOR}">${esc(s.text)}</span></p>`;
+    const b = s.speaker === "broker";
+    return `<div data-pdf-keep-together style="display:flex;gap:14px;margin:0 0 10px;font-size:12px;line-height:1.6"><div style="width:110px;flex-shrink:0;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:${b ? "#111" : "#666"};padding-top:2px">${b ? "Wealth Manager" : "Client"}</div><div style="flex:1;font-weight:${b ? 700 : 400}">${esc(s.text)}</div></div>`;
   }).join("");
-  return `<div id="holarc-document" style="width:794px;padding:48px 56px;background:#fff;font-family:Georgia,serif"><h2 style="font-size:18px;margin:0 0 16px;color:#111">${esc(title)}</h2>${body}</div>`;
+  return transcriptShell(title, date, body);
 };
 
 /** Best-effort speaker split for a transcript; falls back to a plain (uncoloured) block on failure. */
 async function buildTranscriptHtml(d: Doc): Promise<string> {
-  if (!d.text) return textHtml(d.title, "");
+  if (!d.text) return transcriptShell(d.title, d.date, "");
   const { data, error } = await supabase.functions.invoke("format-transcript", { body: { text: d.text } });
-  if (error || !data?.segments?.length) return textHtml(d.title, d.text);
-  return transcriptHtml(d.title, data.segments);
+  if (error || !data?.segments?.length) return transcriptShell(d.title, d.date, `<div style="white-space:pre-wrap;font-size:12px;line-height:1.6">${esc(d.text)}</div>`);
+  return transcriptHtml(d.title, data.segments, d.date);
 }
 
 const docHtml = (d: Doc) => d.html ?? (d.text && d.kind !== "transcript" ? textHtml(d.title, d.text) : null);

@@ -97,27 +97,27 @@ function QuestionRow({ question, saved, existing, onSave }: {
   }
 
   return (
-    <div className="space-y-1.5 border-t border-border/70 py-2">
+    <div className="space-y-1 border-t border-border/70 py-1.5 text-xs">
       <div className="flex flex-wrap items-baseline justify-between gap-x-2">
         <span className="font-semibold">{status === "answered" ? "✓ " : ""}{question.label}</span>
-        <span className={status === "answered" ? "text-primary" : "text-muted-foreground"}>{labels[status]}</span>
+        <span className={status === "answered" ? "text-2xs text-primary" : "text-2xs text-muted-foreground"}>{labels[status]}</span>
       </div>
-      {existing && !saved?.answer && <p className="text-muted-foreground">On file · {existing}</p>}
+      {existing && !saved?.answer && <p className="text-2xs text-muted-foreground">On file · {existing}</p>}
       <div className="flex flex-wrap items-center gap-1.5">
         {question.options ? (
-          <select aria-label={question.label} className="h-8 min-w-0 flex-1 rounded-md border border-input bg-background px-2"
+          <select aria-label={question.label} className="h-7 min-w-0 flex-1 rounded-md border border-input bg-background px-2 text-xs"
             value={answer} disabled={busy} onChange={e => setDraft(e.target.value)}>
             <option value="">Select an answer</option>
             {question.options.map(option => <option key={option}>{option}</option>)}
           </select>
         ) : (
-          <Input aria-label={question.label} placeholder="Enter an answer" className="h-8 min-w-0 flex-1 text-xs"
+          <Input aria-label={question.label} placeholder="Enter an answer" className="h-7 min-w-0 flex-1 text-xs"
             value={answer} disabled={busy} onChange={e => setDraft(e.target.value)} />
         )}
-        <Button size="sm" variant="outline" disabled={busy || !answer.trim() || draft === undefined} onClick={() => void save("answered")}>Save</Button>
-        {status === "unanswered" && <Button size="sm" variant="ghost" disabled={busy || !!draft} onClick={() => void save("discussed")}>Mark discussed</Button>}
-        {status !== "answered" && status !== "skipped" && <Button size="sm" variant="ghost" disabled={busy || !!draft} onClick={() => void save("skipped")}>Skip</Button>}
-        {(status === "skipped" || status === "discussed") && <Button size="sm" variant="ghost" disabled={busy || !!draft} onClick={() => void save("unanswered")}>Reopen</Button>}
+        <Button size="sm" variant="outline" className="h-7 px-2 text-xs" disabled={busy || !answer.trim() || draft === undefined} onClick={() => void save("answered")}>Save</Button>
+        {status === "unanswered" && <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" disabled={busy || !!draft} onClick={() => void save("discussed")}>Mark discussed</Button>}
+        {status !== "answered" && status !== "skipped" && <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" disabled={busy || !!draft} onClick={() => void save("skipped")}>Skip</Button>}
+        {(status === "skipped" || status === "discussed") && <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" disabled={busy || !!draft} onClick={() => void save("unanswered")}>Reopen</Button>}
       </div>
     </div>
   );
@@ -164,7 +164,7 @@ export function NeedsQuestionFields({ clientId, profile }: { clientId: string; p
   }
 
   if (answers.isPending) return <p className="text-xs text-muted-foreground">Loading meeting questions…</p>;
-  if (answers.isError) return <Button size="sm" variant="outline" onClick={() => void answers.refetch()}>Checklist could not load · Retry</Button>;
+  if (answers.isError) return <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => void answers.refetch()}>Checklist could not load · Retry</Button>;
 
   return (
     <div className="mt-3 space-y-2 text-xs">
