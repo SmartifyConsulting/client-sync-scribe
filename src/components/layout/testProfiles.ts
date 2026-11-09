@@ -15,7 +15,7 @@ export const SYSTEM_ADMIN_EMAILS = [ADMIN_EMAIL, "georgia.adams@smartify.co.za"]
 
 /** Wealth demo accounts — the four roles used to trace one case end to end. */
 export const WEALTH_DEMO_PROFILES: TestProfile[] = [
-  { email: "georgia.client@demo.holarcwealth.co.za", name: "Marlin Mooodley — LOA Demo", role: "as Demo Client · simulated checks", icon: HeartPulse, destination: "/clients/caefec42-4c52-4dc3-b5d7-f459baec8e4c?tab=workflow" },
+  { email: "georgia.client@demo.holarcwealth.co.za", name: "Marlin Mooodley — LOA Demo", role: "as Demo Client · simulated checks", icon: HeartPulse, destination: "/client/loa-demo" },
   { email: "georgia.client@demo.holarcwealth.co.za", name: "Georgia Adams", role: "as Client", icon: HeartPulse },
   { email: "jaco.steyn@demo.holarcwealth.co.za", name: "Jaco Steyn", role: "as Wealth Manager", icon: Stethoscope },
   { email: "sipho.nkosi@demo.holarcwealth.co.za", name: "Sipho Nkosi", role: "as FSP / Key Individual", icon: ShieldCheck },

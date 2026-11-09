@@ -55,6 +55,7 @@ import MyWealthManagers from "./pages/client/MyWealthManagers";
 import ClientTasks from "./pages/client/ClientTasks";
 import ClientDocuments from "./pages/client/ClientDocuments";
 import MyDetails from "./pages/client/MyDetails";
+import LoaDemo from "./pages/client/LoaDemo";
 
 import MyPractice from "./pages/MyPractice";
 import PracticeClients from "./pages/practice/PracticeClients";
@@ -209,6 +210,7 @@ const App = () => (
             <Route path="/client/tasks" element={<ClientTasks />} />
             <Route path="/client/documents" element={<ClientDocuments />} />
             <Route path="/client/details" element={<MyDetails />} />
+            <Route path="/client/loa-demo" element={<LoaDemo />} />
             <Route path="/sessions/:id" element={<SessionDetail />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
