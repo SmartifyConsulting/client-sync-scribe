@@ -1,4 +1,4 @@
-import { providerQuoteFields, hasVerifiedProviderFields, isOmpLife, isOmpProduct, providerFieldApplies, ompSettingsComplete, withQuoteDefaults } from "./providerQuoteFields";
+import { providerQuoteFields, hasVerifiedProviderFields, isOmpProduct, providerFieldApplies, ompSettingsComplete, withQuoteDefaults, premiumPatternField, premiumPatternOptions, supportsPremiumVariants } from "./providerQuoteFields";
 import { OMP_RATING_OPTIONS, ompRatingIssues } from "./providerRatingFields";
 import { BidvestClientFields, bidvestIssues } from './BidvestClientFields';
 import {editQuoteOption} from './optionInheritance';
@@ -18,7 +18,7 @@ import { DiscoveryScreenScan } from "./DiscoveryScreenScan";
 import { InsurerActivity } from "./InsurerActivity";
 import { isActivityPhase, updateActivity, type QuoteActivity, type ActivityPhase } from "./quoteActivity";
 import { releaseBlockedQueues, startJobs, setStatus, type QuoteJobs } from "./quoteJobs";
-import { buildMomentumLifeVariants, buildPortalScenarios, momentumLifeVariantLabel, OLD_MUTUAL_LIFE_PATTERNS, OMP_RATING_LABELS, VARIANT_COMPANION_VERSION } from "./portalPayload";
+import { buildPortalScenarios, OMP_RATING_LABELS } from "./portalPayload";
 import { QuoteJobsPanel } from "./QuoteJobsPanel";
 import { QuoteSourceSelector } from "./QuoteSourceSelector";
 import { DocumentRequestComposer } from "./DocumentRequestComposer";
@@ -284,12 +284,15 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
       });
       if (eligible.some(Boolean)) requestedPlan[name] = eligible;
     }
-    const premiumVariant = pattern == null ? undefined : PREMIUM_PATTERNS[pattern];
-    if (premiumVariant && ins === "Old Mutual" && requestedPlan["Life cover"]) {
-      requestedPlan["Life cover"] = requestedPlan["Life cover"].map(option => ({
-        ...option, "Old Mutual:omp_premium": OLD_MUTUAL_LIFE_PATTERNS[pattern!],
+    // Any insurer/product with a premium-pattern field (see providerQuoteFields.premiumPatternOptions)
+    // can be requested under one of its 3 pattern variants; `pattern` is the index into that list.
+    const patternField = product && pattern != null ? premiumPatternField(ins, product) : undefined;
+    const premiumVariant = patternField && product ? premiumPatternOptions(ins, product)?.[pattern!] : undefined;
+    if (premiumVariant && patternField && product && requestedPlan[product]) {
+      requestedPlan[product] = requestedPlan[product].map(option => ({
+        ...option, [patternField.key]: premiumVariant,
       }));
-      if (requestedPlan["Life cover"].some((option, index) => only?.includes(index + 1) &&
+      if (ins === "Old Mutual" && requestedPlan[product].some((option, index) => only?.includes(index + 1) &&
           !["0% fixed rate", "5% fixed rate", "10% fixed rate"].includes(option["Old Mutual:omp_cover"]))) {
         toast({ title: "Old Mutual’s inflation-linked growth requires portal review. Use the portal for these variants." });
         return;
@@ -341,47 +344,14 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   };
 
   const submittingVariants = useRef(false);
-  const submitMomentumVariants = async (only?: number) => {
-    if (!canStartPortal(source) || login.Momentum !== "connected" || quotesRunning || submittingVariants.current) return;
-    if (!companionVersionCurrent(installedVersion, VARIANT_COMPANION_VERSION)) {
-      setSetupOpen(true);
-      return;
-    }
-    const options = plan["Life cover"] ?? [];
-    const applicable = options.filter((option, index) => !hasNoCurrentCover("Life cover", option, index));
-    if (!applicable.length || applicable.some(option => !ompSettingsComplete("Momentum", "Life cover", {
-      ...option, "Momentum:myriad_pattern": "Level",
-    }))) {
-      toast({ title: "Complete the Momentum life-cover amounts and terms first." });
-      return;
-    }
+  /** Requests all 3 premium-pattern variants for every option of one insurer/product (any insurer/product with a pattern field, not just Momentum Life). */
+  const submitAllVariants = async (ins: string, product: string) => {
+    if (submittingVariants.current) return;
+    const patterns = premiumPatternOptions(ins, product);
+    if (!patterns) return;
     submittingVariants.current = true;
     try {
-      const previous = jobs.Momentum ?? [];
-      const candidates = buildMomentumLifeVariants(options, quoteClient).filter(scenario => only == null || scenario.n === only);
-      const prepared = await Promise.all(candidates.map(async scenario => {
-        const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(JSON.stringify(scenario.fields)));
-        const settingsHash = Array.from(new Uint8Array(bytes), byte => byte.toString(16).padStart(2, "0")).join("");
-        return { scenario, settingsHash };
-      }));
-      const pending = prepared.filter(({ scenario, settingsHash }) => !previous.some(job =>
-        job.n === scenario.n && job.status === "captured" && job.settingsHash === settingsHash));
-      const scenarios = pending.map(({ scenario }) => scenario);
-      if (!scenarios.length) {
-        toast({ title: "No remaining Momentum life-cover variants to request." });
-        return;
-      }
-      const submitted = new Set(scenarios.map(scenario => scenario.n));
-      setJobs(current => ({
-        ...current,
-        Momentum: [
-          ...(current.Momentum ?? []).filter(job => !submitted.has(job.n)),
-          ...pending.map(({ scenario, settingsHash }) => ({ n: scenario.n, settingsHash, status: "queued" as const, since: Date.now() })),
-        ].sort((a, b) => a.n - b.n),
-      }));
-      window.postMessage({ source: "holarc", type: "insurer-quote-submit", insurer: "Momentum", workflowId, scenarios }, location.origin);
-    } catch {
-      toast({ title: "Couldn't prepare the Momentum quote batch.", variant: "destructive" });
+      for (let index = 0; index < patterns.length; index++) await submitScenarios(ins, undefined, product, index);
     } finally {
       submittingVariants.current = false;
     }
@@ -619,16 +589,11 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                   {plan[p].map((option, i) => {
                     const settings = quoteSettingsKey(p, option, activeTab);
                     const saved = option._premiumVariants?.[activeTab] ?? {};
-                    const mapped = activeTab === "Momentum" && p === "Life cover";
-                    const variantJobs = mapped ? PREMIUM_PATTERNS.map((_, pattern) =>
-                      jobs[activeTab]?.find(job => job.n === 7 + i * 3 + pattern)) : [];
+                    const patterns = premiumPatternOptions(activeTab, p) ?? PREMIUM_PATTERNS;
                     const legacyJob = jobs[activeTab]?.find(job => job.n === i + 1);
-                    const active = [...variantJobs, legacyJob].some(job =>
-                      job && ["queued", "submitting", "generating"].includes(job.status));
-                    const complete = PREMIUM_PATTERNS.every((pattern, index) =>
-                      (saved[pattern]?.settings === settings && saved[pattern]?.number) || variantJobs[index]?.status === "captured");
-                    const needsReview = [...variantJobs, legacyJob].some(job =>
-                      job && ["failed", "no-fields", "calculated", "stopped"].includes(job.status));
+                    const active = legacyJob && ["queued", "submitting", "generating"].includes(legacyJob.status);
+                    const complete = patterns.every((pattern) => saved[pattern]?.settings === settings && saved[pattern]?.number);
+                    const needsReview = legacyJob && ["failed", "no-fields", "calculated", "stopped"].includes(legacyJob.status);
                     const reference = quoteReference(p, option, activeTab);
                     return <section key={i} className="min-w-0 rounded-lg border border-border p-2.5">
                       <div className="flex flex-wrap items-center justify-between gap-1">
@@ -640,14 +605,13 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                       {hasNoCurrentCover(p, option, i)
                         ? <span className="mt-1 block normal-case tracking-normal">No existing cover to re-quote</span>
                         : <div className="my-2 space-y-1 font-normal normal-case tracking-normal">
-                            {PREMIUM_PATTERNS.map((pattern, index) => {
+                            {patterns.map((pattern, index) => {
                               const entry = saved[pattern];
                               return <div key={pattern} className="rounded border border-border px-2 py-1">
                                 <span className="block font-medium">{pattern}</span>
                                 {entry?.settings === settings && entry.source === "companion-verified" && <p className={label}>R {Number(entry.monthlyPremium).toFixed(2)} / month · PDF pending</p>}
-                                {isOmpLife(activeTab, p) && source === "companion" && <Button size="sm" variant="outline" className="mt-1 h-6 px-2 text-[10px]"
+                                {supportsPremiumVariants(activeTab, p) && source === "companion" && <Button size="sm" variant="outline" className="mt-1 h-6 px-2 text-[10px]"
                                   disabled={!connected || quotesRunning} onClick={() => void submitScenarios(activeTab, [i + 1], p, index)}>Calculate</Button>}
-                                {variantJobs[index]?.status === "captured" && <span className="text-success">PDF filed</span>}
                                 <QuoteOptionReference value={entry?.settings === settings ? entry.number : ""}
                                   label={`${activeTab} ${p} ${coverOptionLabel(i)} ${pattern} reference`}
                                   onChange={number => setPlan(previous => ({
@@ -668,7 +632,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                     </section>;
                   })}
                 </div>
-                {activeTab === "Momentum" && p === "Life cover" && source === "companion" && <Button className="m-2" size="sm" disabled={!connected || quotesRunning} onClick={() => submitMomentumVariants()}>Request all life-cover variants</Button>}
+                {supportsPremiumVariants(activeTab, p) && source === "companion" && <Button className="m-2" size="sm" disabled={!connected || quotesRunning} onClick={() => void submitAllVariants(activeTab, p)}>Request all {p.toLowerCase()} variants</Button>}
                 <details className="border-t border-border">
                   <summary className="cursor-pointer px-3 py-2 font-medium">Shared quote variables</summary>
                 <div className="overflow-x-auto">
@@ -676,7 +640,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                 {activeTab === "Discovery" && p === "Life cover" && <p className="px-2 py-2 text-xs text-muted-foreground">Discovery also lists Purple Life and Dollar Life publicly. Confirm their availability and terms directly with Discovery.</p>}
                 {activeTab === "Bidvest Life / FMI" && p === "Income protection" && <p className="px-2 py-2 text-xs text-muted-foreground">Extended Income Protection is also listed by Bidvest Life. Confirm eligibility and terms in the portal.</p>}
                 {activeTab === "Momentum" && hasVerifiedProviderFields(activeTab,p) && <p className="px-2 py-2 text-xs text-muted-foreground">Select the Momentum product terms for each option. These choices match the named product shown below; other product variants still need verification. Saved generic choices are retained separately. Automated quoting is still being verified.</p>}
-                {isOmpProduct(activeTab, p) && <p className="px-2 py-2 text-xs text-muted-foreground">Choose Old Mutual’s product terms for each option. Saved generic settings are retained separately and are not automatically translated. {p === "Income protection" ? "The benefit term is determined in the insurer quote; the previous generic 2-year term does not apply automatically. " : ""}{isOmpLife(activeTab,p) ? "Companion currently supports fixed cover growth; linked increases require portal review. " : "These product choices are verified; automated submission still requires a completed product mapping. "}A calculated premium is shown separately from PDF filing.</p>}
+                {isOmpProduct(activeTab, p) && <p className="px-2 py-2 text-xs text-muted-foreground">Choose Old Mutual’s product terms for each option. Saved generic settings are retained separately and are not automatically translated. {p === "Income protection" ? "The benefit term is determined in the insurer quote; the previous generic 2-year term does not apply automatically. " : ""}{p === "Life cover" ? "Companion currently supports fixed cover growth; linked increases require portal review. " : "These product choices are verified; automated submission still requires a completed product mapping. "}A calculated premium is shown separately from PDF filing.</p>}
 
                 <table className="w-full min-w-[560px] table-fixed text-xs">
                   <colgroup><col className="w-44" />{plan[p].map((_, i) => <col key={i} />)}</colgroup>
@@ -688,7 +652,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                         <details className="my-2 normal-case tracking-normal font-normal"><summary className="cursor-pointer">Required rating details{ompRatingIssues(option._ompInputs).length ? ` · ${ompRatingIssues(option._ompInputs).length} to complete` : ' · Complete'}</summary>
                           <div className="space-y-2 pt-2">{OMP_RATING_LABELS.map(label=><label key={label} className="block text-[10px] font-semibold">{label} *{OMP_RATING_OPTIONS[label] ? <select required aria-label={label} className="mt-1 h-7 w-full rounded border border-input bg-background px-1 text-xs font-normal" value={option._ompInputs?.[label]??''} onChange={e=>setVal(p,i,'_ompInputs',{...option._ompInputs,[label]:e.target.value})}><option value="" disabled>Select an insurer option</option>{OMP_RATING_OPTIONS[label].map(value=><option key={value}>{value}</option>)}</select> : <Input required type={label==='Date of birth'?'date':'text'} className="mt-1 h-7 text-xs font-normal" value={option._ompInputs?.[label] ?? ''} onChange={e=>setVal(p,i,'_ompInputs',{...option._ompInputs,[label]:e.target.value})} />}</label>)}{ompRatingIssues(option._ompInputs).length>0 && <p className="text-destructive" role="status">Complete or correct: {ompRatingIssues(option._ompInputs).join(', ')}.</p>}</div>
                         </details>
-                        {isOmpLife(activeTab,p) && <Button className="my-1 h-7 text-xs normal-case tracking-normal" size="sm" disabled={!connected || quotesRunning || !ompSettingsComplete(activeTab,p,option) || ompRatingIssues(option._ompInputs).length>0} onClick={()=>void submitScenarios(activeTab,[i+1],p)}>Get quote</Button>}
+                        {p === "Life cover" && <Button className="my-1 h-7 text-xs normal-case tracking-normal" size="sm" disabled={!connected || quotesRunning || !ompSettingsComplete(activeTab,p,option) || ompRatingIssues(option._ompInputs).length>0} onClick={()=>void submitScenarios(activeTab,[i+1],p)}>Get quote</Button>}
                       </>}
                       <QuoteOptionReference key={`${activeTab}:${p}:${i}`} value={quoteReference(p, option, activeTab)} label={`${activeTab} ${p} ${coverOptionLabel(i)} quote number`}
                         onChange={number => setPlan(pl => ({ ...pl, [p]: pl[p].map((value, n) => n === i ? withQuoteReference(p, option, activeTab, number) : value) }))} />
@@ -759,7 +723,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
             <div className="flex items-center gap-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">3</span><h4 className="font-semibold">Request & collect quotes</h4></div>
           {source === "planning" && <p className="text-xs text-muted-foreground">Save estimates with the quote plan. They stay separate from insurer quotes, do not increase the document count and do not unlock recommendations. Replace them with confirmed insurer figures before proceeding.</p>}
           {source === "email" && clientId && <DocumentRequestComposer unframed kind="quotes" workflowId={workflowId} clientId={clientId} clientName={[quoteClient?.first_name, quoteClient?.last_name].filter(Boolean).join(" ") || "the client"} />}
-          {source === "companion" && <QuoteJobsPanel jobs={Object.fromEntries(chosen.map(ins => [ins, jobs[ins] ?? []]))} onStop={stopConnection} onRetry={(ins, n) => ins === "Momentum" && momentumLifeVariantLabel(n) ? submitMomentumVariants(n) : submitScenarios(ins, [n])} />}
+          {source === "companion" && <QuoteJobsPanel jobs={Object.fromEntries(chosen.map(ins => [ins, jobs[ins] ?? []]))} onStop={stopConnection} onRetry={(ins, n) => void submitScenarios(ins, [n])} />}
           {clientId && <QuotePdfCapture workflowId={workflowId} clientId={clientId} insurer={activeTab}
             onActivity={(ins, phase, detail) => recordActivity(ins, phase, detail)}
             onScenarioSaved={(ins, n) => setJobs((j) => setStatus(j, ins, n, "captured", Date.now()))} />}
