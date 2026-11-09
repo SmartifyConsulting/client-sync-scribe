@@ -600,7 +600,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
             const finished = products.filter(p => { const pr = insurerProgress(ins, p); return pr.total > 0 && pr.done === pr.total; });
             return <div key={ins} className="flex items-center gap-2" aria-label={`${ins} quote progress`}>
               <span className="w-24 shrink-0 truncate text-[11px] font-medium">{ins}</span>
-              <span title={isConnected ? "Connected" : LOGIN_TEXT[login[ins]] ?? "Not connected"} className={cn("flex h-5 w-5 shrink-0 items-center justify-center rounded-full", isConnected ? "bg-success text-success-foreground" : "border border-border bg-muted")}>
+              <span title={isConnected ? "Connected" : login[ins] ? LOGIN_TEXT[login[ins]] : "Not connected"} className={cn("flex h-5 w-5 shrink-0 items-center justify-center rounded-full", isConnected ? "bg-success text-success-foreground" : "border border-border bg-muted")}>
                 {isConnected ? <Check className="h-3 w-3" aria-label="Connected" /> : login[ins] === "connecting" ? <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" /> : null}
               </span>
               <div className="relative h-5 min-w-16 flex-1 overflow-hidden rounded-full bg-muted" title={total ? `${done}/${total} quotes` : "No quotes planned"}>
