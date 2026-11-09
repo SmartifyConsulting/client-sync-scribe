@@ -30,13 +30,14 @@ export function ActiveWorkspaceClients() {
   const recentFirst = [...wfs].sort((a, b) => lastUsed(b) - lastUsed(a));
 
   return (
-    <Panel title="Live Workspaces" icon={Users2}>
-      <p className="mb-1 flex flex-wrap gap-2 text-2xs text-muted-foreground">
+    <Panel title="Live Workspaces" icon={Users2} action={
+      <p className="flex flex-wrap items-center justify-end gap-1.5 text-2xs text-muted-foreground">
         <span className={cn("rounded-full px-2 py-0.5", ownerSolid("advisor"))}>Broker</span>
         <span className={cn("rounded-full px-2 py-0.5", ownerSolid("client"))}>Client</span>
         <span className={cn("rounded-full px-2 py-0.5", ownerSolid("insurer"))}>Insurer</span>
-        <span>· whose turn it is</span>
+        <span>· Assigned task</span>
       </p>
+    }>
       <ul className="divide-y text-xs">
         {recentFirst.map((w) => (
           <li key={w.id} className="flex items-center justify-between gap-2 py-1.5">
