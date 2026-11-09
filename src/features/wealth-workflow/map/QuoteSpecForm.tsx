@@ -10,7 +10,6 @@ import { Loader2, Plus, X, Pencil, Check } from "lucide-react";
 import { QuoteOptionReference } from "./QuoteOptionReference";
 import { quoteReference, quoteResult, quoteSettingsKey, withQuoteReference } from "./quoteReferences";
 import { usePublishQuoteInsurers } from "./QuoteInsurerSelection";
-import { SegmentedProgress } from "./SegmentedProgress";
 import { insurerColor } from "./insurerColors";
 import { LoginRing, LOGIN_TEXT, OtpDialog, ProtectorDialog, addonInstalled, downloadAddon, type Challenge, type LoginState } from "./InsurerLogin";
 import { CompanionSetup } from "./CompanionSetup";
@@ -18,7 +17,7 @@ import { QuotePdfCapture } from "./QuotePdfCapture";
 import { DiscoveryScreenScan } from "./DiscoveryScreenScan";
 import { InsurerActivity } from "./InsurerActivity";
 import { isActivityPhase, updateActivity, type QuoteActivity, type ActivityPhase } from "./quoteActivity";
-import { releaseBlockedQueues, startJobs, setStatus, quoteCheckpoints, isStalled, SCENARIO_TEXT, type QuoteJobs } from "./quoteJobs";
+import { releaseBlockedQueues, startJobs, setStatus, type QuoteJobs } from "./quoteJobs";
 import { buildMomentumLifeVariants, buildPortalScenarios, momentumLifeVariantLabel, OMP_RATING_LABELS, VARIANT_COMPANION_VERSION } from "./portalPayload";
 import { QuoteJobsPanel } from "./QuoteJobsPanel";
 import { QuoteSourceSelector } from "./QuoteSourceSelector";
@@ -589,38 +588,43 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
             const fields = providerQuoteFields(activeTab, p);
             const hasPortalChoices = hasVerifiedProviderFields(activeTab, p);
             return (
-              <details key={p} open={p === products[0]} className="rounded-lg border border-border">
-                <summary className="flex cursor-pointer items-center justify-between gap-3 rounded-lg bg-muted/40 px-3 py-2">
-                  <span className="text-xs font-semibold">{p} <span className="font-normal text-muted-foreground">· {plan[p].length} options</span></span>
+              <section key={p} className="rounded-lg border border-border">
+                <div className="flex items-center justify-between gap-3 rounded-lg bg-muted/40 px-3 py-2">
+                  <span className="text-xs font-semibold">{p} <span className="font-normal text-muted-foreground">· {plan[p].filter((option, i) => !hasNoCurrentCover(p, option, i)).length * QUOTES_PER_COVER} quotes per insurer</span></span>
                   <button aria-label={`Remove ${p}`} className="text-background/70 hover:text-background"
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPlan((pl) => { const { [p]: _, ...rest } = pl; return rest; }); }}><X className="h-3 w-3" /></button>
-                </summary>
-                <div className="overflow-x-auto">
-                {!hasPortalChoices && activeTab !== "BrightRock" && <p className="px-2 py-2 text-xs text-muted-foreground">Check the product and terms against the insurer’s portal before requesting the quote.</p>}
-                {activeTab === "Discovery" && p === "Life cover" && <p className="px-2 py-2 text-xs text-muted-foreground">Discovery also lists Purple Life and Dollar Life publicly. Confirm their availability and terms directly with Discovery.</p>}
-                {activeTab === "Bidvest Life / FMI" && p === "Income protection" && <p className="px-2 py-2 text-xs text-muted-foreground">Extended Income Protection is also listed by Bidvest Life. Confirm eligibility and terms in the portal.</p>}
-                {activeTab === "Momentum" && p === "Life cover" && source === "companion" && <Button className="m-2" size="sm" disabled={!connected || quotesRunning} onClick={() => submitMomentumVariants()}>Request all life-cover variants</Button>}
-                {activeTab === "Momentum" && hasVerifiedProviderFields(activeTab,p) && <p className="px-2 py-2 text-xs text-muted-foreground">Select the Momentum product terms for each option. These choices match the named product shown below; other product variants still need verification. Saved generic choices are retained separately. Automated quoting is still being verified.</p>}
-                {isOmpProduct(activeTab, p) && <p className="px-2 py-2 text-xs text-muted-foreground">Choose Old Mutual’s product terms for each option. Saved generic settings are retained separately and are not automatically translated. {p === "Income protection" ? "The benefit term is determined in the insurer quote; the previous generic 2-year term does not apply automatically. " : ""}{isOmpLife(activeTab,p) ? "Companion currently supports fixed cover growth; linked increases require portal review. " : "These product choices are verified; automated submission still requires a completed product mapping. "}A calculated premium is shown separately from PDF filing.</p>}
-
-                <table className="w-full min-w-[560px] table-fixed text-xs">
-                  <colgroup><col className="w-44" />{plan[p].map((_, i) => <col key={i} />)}</colgroup>
-                  <thead className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                    <tr><th className="px-2 py-1 text-left font-medium">Variable</th>{plan[p].map((option, i) => <th key={i} className="px-2 py-2 text-left align-top font-medium">
-                      {(() => { const job = jobs[activeTab]?.find(j => j.n === i + 1); return job ? <div className="mb-2 min-w-0 space-y-1 font-normal normal-case tracking-normal" title="This option's request includes the selected products">
-                        <SegmentedProgress label={`${activeTab} ${p} ${coverOptionLabel(i)} progress`} completed={quoteCheckpoints(job).filter(point => point.done).length} active={["submitting", "generating"].includes(job.status) && !isStalled(job, Date.now())} activeUntil={job.since + 90_000} />
-                        <p className="quote-option-status">{job.pdfReceived && job.status === "generating" ? "Saving quote PDF…" : SCENARIO_TEXT[job.status]}</p>
-                      </div> : null; })()}
-                      <span className="block">{coverOptionLabel(i)}</span>
+                </div>
+                <div className="grid gap-2 p-3 sm:grid-cols-3">
+                  {plan[p].map((option, i) => {
+                    const settings = quoteSettingsKey(p, option, activeTab);
+                    const saved = option._premiumVariants?.[activeTab] ?? {};
+                    const mapped = activeTab === "Momentum" && p === "Life cover";
+                    const variantJobs = mapped ? PREMIUM_PATTERNS.map((_, pattern) =>
+                      jobs[activeTab]?.find(job => job.n === 7 + i * 3 + pattern)) : [];
+                    const legacyJob = jobs[activeTab]?.find(job => job.n === i + 1);
+                    const active = [...variantJobs, legacyJob].some(job =>
+                      job && ["queued", "submitting", "generating"].includes(job.status));
+                    const complete = PREMIUM_PATTERNS.every((pattern, index) =>
+                      (saved[pattern]?.settings === settings && saved[pattern]?.number) || variantJobs[index]?.status === "captured");
+                    const needsReview = [...variantJobs, legacyJob].some(job =>
+                      job && ["failed", "no-fields", "calculated", "stopped"].includes(job.status));
+                    const reference = quoteReference(p, option, activeTab);
+                    return <section key={i} className="min-w-0 rounded-lg border border-border p-2.5">
+                      <div className="flex flex-wrap items-center justify-between gap-1">
+                        <h5 className="font-semibold">{coverOptionLabel(i)}</h5>
+                        {!hasNoCurrentCover(p, option, i) && <span role="status" className={active ? "quote-progress-badge" : label}>
+                          {active ? "In progress" : complete ? "Complete" : needsReview ? "Needs review" : "Pending"}
+                        </span>}
+                      </div>
                       {hasNoCurrentCover(p, option, i)
                         ? <span className="mt-1 block normal-case tracking-normal">No existing cover to re-quote</span>
                         : <div className="my-2 space-y-1 font-normal normal-case tracking-normal">
-                            {PREMIUM_PATTERNS.map(pattern => {
-                              const settings = quoteSettingsKey(p, option, activeTab);
-                              const saved = option._premiumVariants?.[activeTab]?.[pattern];
+                            {PREMIUM_PATTERNS.map((pattern, index) => {
+                              const entry = saved[pattern];
                               return <div key={pattern} className="rounded border border-border px-2 py-1">
                                 <span className="block font-medium">{pattern}</span>
-                                <QuoteOptionReference value={saved?.settings === settings ? saved.number : ""}
+                                {variantJobs[index]?.status === "captured" && <span className="text-success">PDF filed</span>}
+                                <QuoteOptionReference value={entry?.settings === settings ? entry.number : ""}
                                   label={`${activeTab} ${p} ${coverOptionLabel(i)} ${pattern} reference`}
                                   onChange={number => setPlan(previous => ({
                                     ...previous,
@@ -632,10 +636,29 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                                       },
                                     }),
                                   }))} />
-                                {saved?.number && saved.settings !== settings && <span>Previous reference {saved.number}</span>}
+                                {entry?.number && entry.settings !== settings && <span>Previous reference {entry.number}</span>}
                               </div>;
                             })}
                           </div>}
+                      {reference && <p className={label}>Configured quote no. {reference}</p>}
+                    </section>;
+                  })}
+                </div>
+                {activeTab === "Momentum" && p === "Life cover" && source === "companion" && <Button className="m-2" size="sm" disabled={!connected || quotesRunning} onClick={() => submitMomentumVariants()}>Request all life-cover variants</Button>}
+                <details className="border-t border-border">
+                  <summary className="cursor-pointer px-3 py-2 font-medium">Shared quote variables</summary>
+                <div className="overflow-x-auto">
+                {!hasPortalChoices && activeTab !== "BrightRock" && <p className="px-2 py-2 text-xs text-muted-foreground">Check the product and terms against the insurer’s portal before requesting the quote.</p>}
+                {activeTab === "Discovery" && p === "Life cover" && <p className="px-2 py-2 text-xs text-muted-foreground">Discovery also lists Purple Life and Dollar Life publicly. Confirm their availability and terms directly with Discovery.</p>}
+                {activeTab === "Bidvest Life / FMI" && p === "Income protection" && <p className="px-2 py-2 text-xs text-muted-foreground">Extended Income Protection is also listed by Bidvest Life. Confirm eligibility and terms in the portal.</p>}
+                {activeTab === "Momentum" && hasVerifiedProviderFields(activeTab,p) && <p className="px-2 py-2 text-xs text-muted-foreground">Select the Momentum product terms for each option. These choices match the named product shown below; other product variants still need verification. Saved generic choices are retained separately. Automated quoting is still being verified.</p>}
+                {isOmpProduct(activeTab, p) && <p className="px-2 py-2 text-xs text-muted-foreground">Choose Old Mutual’s product terms for each option. Saved generic settings are retained separately and are not automatically translated. {p === "Income protection" ? "The benefit term is determined in the insurer quote; the previous generic 2-year term does not apply automatically. " : ""}{isOmpLife(activeTab,p) ? "Companion currently supports fixed cover growth; linked increases require portal review. " : "These product choices are verified; automated submission still requires a completed product mapping. "}A calculated premium is shown separately from PDF filing.</p>}
+
+                <table className="w-full min-w-[560px] table-fixed text-xs">
+                  <colgroup><col className="w-44" />{plan[p].map((_, i) => <col key={i} />)}</colgroup>
+                  <thead className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                    <tr><th className="px-2 py-1 text-left font-medium">Variable</th>{plan[p].map((option, i) => <th key={i} className="px-2 py-2 text-left align-top font-medium">
+                      <span className="block">{coverOptionLabel(i)}</span>
                       {option._quoteReferences?.[activeTab]?.number && !quoteReference(p,option,activeTab) && <div className="my-2 rounded border border-border p-2 font-normal normal-case tracking-normal"><p className="font-semibold">Previous quote: {option._quoteReferences[activeTab].number}</p><p className="text-muted-foreground">Saved for earlier settings. Current draft requires a new calculation.</p>{option._quoteResults?.[activeTab]?.monthlyPremium>0&&<p>R {Number(option._quoteResults[activeTab].monthlyPremium).toFixed(2)} / month</p>}</div>}
                       {isWM && isOmpProduct(activeTab,p) && <>
                         <details className="my-2 normal-case tracking-normal font-normal"><summary className="cursor-pointer">Required rating details{ompRatingIssues(option._ompInputs).length ? ` · ${ompRatingIssues(option._ompInputs).length} to complete` : ' · Complete'}</summary>
@@ -689,7 +712,8 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                   </tbody>
                 </table>
                 </div>
-              </details>
+                </details>
+              </section>
             );
           })}
 
