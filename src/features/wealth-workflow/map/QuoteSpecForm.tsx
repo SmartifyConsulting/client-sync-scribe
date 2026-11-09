@@ -302,8 +302,18 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     // can be requested under one of its 3 pattern variants; `pattern` is the index into that list.
     const patternField = product && pattern != null ? premiumPatternField(ins, product) : undefined;
     const premiumVariant = patternField && product ? premiumPatternOptions(ins, product)?.[pattern!] : undefined;
+    if (premiumVariant && product && requestedPlan[product]) {
+      // Never redo work: drop options whose quote for this pattern is already saved with the same settings.
+      const remaining = requestedPlan[product].slice();
+      remaining.forEach((option, index) => {
+        const saved = option?._premiumVariants?.[ins]?.[premiumVariant];
+        if (saved?.number && saved.settings === quoteSettingsKey(product, option, ins)) delete remaining[index];
+      });
+      if (!remaining.some(Boolean)) return;
+      requestedPlan[product] = remaining;
+    }
     if (premiumVariant && patternField && product && requestedPlan[product]) {
-      requestedPlan[product] = requestedPlan[product].map(option => ({
+      requestedPlan[product] = requestedPlan[product].map(option => option && ({
         ...option, [patternField.key]: premiumVariant,
       }));
       if (ins === "Old Mutual" && requestedPlan[product].some((option, index) => only?.includes(index + 1) &&

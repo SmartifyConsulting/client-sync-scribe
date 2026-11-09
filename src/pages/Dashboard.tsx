@@ -1,5 +1,6 @@
 import { NewClientInvite } from "@/features/wealth-workflow/invites/NewClientInvite";
 import { Navigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 import { TodaysBriefing } from "@/components/dashboard/TodaysBriefing";
 import { PipelineOverview } from "@/components/dashboard/PipelineOverview";
 import { ActiveWorkspaceClients } from "@/components/dashboard/ActiveWorkspaceClients";
@@ -18,6 +19,16 @@ export default function Dashboard() {
   const { isAdvisor, isClient, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   useGenerateWmActionItems();
+  // Today's Briefing stays half the height of the Live Workspaces frame, tracking it as it grows.
+  const liveRef = useRef<HTMLDivElement>(null);
+  const [briefingHeight, setBriefingHeight] = useState(0);
+  useEffect(() => {
+    const el = liveRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setBriefingHeight(Math.max(160, Math.round(el.offsetHeight / 2))));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const shouldRedirectPatient = !roleLoading && isClient;
 
@@ -59,7 +70,7 @@ export default function Dashboard() {
             <span className="block md:inline"> {formattedDate}</span>
           </p>
         </div>
-        {isAdvisor && <NewClientInvite />}
+        {isAdvisor && <div className="pt-3 md:pt-4"><NewClientInvite /></div>}
       </div>
 
       {doctorIncomplete && (
@@ -71,11 +82,15 @@ export default function Dashboard() {
         />
       )}
 
-      <div className="grid gap-3 md:gap-6 grid-cols-1 lg:grid-cols-2">
-        <ActiveWorkspaceClients />
-        <TodaysBriefing />
+      <div className="grid gap-3 md:gap-6 grid-cols-1 lg:grid-cols-2 items-start">
+        <div ref={liveRef}><ActiveWorkspaceClients /></div>
+        <div className="flex flex-col gap-3 md:gap-6">
+          <UpcomingMeetings />
+          <div className="overflow-y-auto rounded-xl" style={briefingHeight ? { maxHeight: briefingHeight } : undefined}>
+            <TodaysBriefing />
+          </div>
+        </div>
         <PipelineOverview />
-        <UpcomingMeetings />
         <EarningsThisMonth />
       </div>
     </div>
