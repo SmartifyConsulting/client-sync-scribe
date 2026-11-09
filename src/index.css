@@ -38,6 +38,7 @@
 
     /* Holarc brand palette */
     --brand-blue: 241.44 100% 24.5098%; /* #03007D */
+    --brand-nav-blue: 241.52 100% 15.49%; /* #02004F */
     --brand-yellow: 48.9796 98.3936% 48.8235%; /* #F7CC02 */
     --primary: var(--brand-blue);
     /* Wealth workflow owner badges */
@@ -154,7 +155,7 @@
     --shadow-elevated: 0 1px 2px rgb(13 13 13 / 0.06), 0 16px 40px -16px rgb(13 13 13 / 0.18);
 
     /* Sidebar brand colors */
-    --sidebar-background: var(--brand-blue);
+    --sidebar-background: var(--brand-nav-blue);
     --sidebar-foreground: 0 0% 95%;
     --sidebar-primary: var(--brand-yellow);
     --sidebar-primary-foreground: var(--brand-blue);
@@ -247,7 +248,7 @@
     --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 6px 16px rgb(0 0 0 / 0.3);
     --shadow-card-hover: 0 2px 8px 0 rgb(0 0 0 / 0.4), 0 12px 24px rgb(0 0 0 / 0.4);
 
-    --sidebar-background: var(--brand-blue);
+    --sidebar-background: var(--brand-nav-blue);
     --sidebar-foreground: 0 0% 95%;
     --sidebar-primary: var(--brand-yellow);
     --sidebar-primary-foreground: var(--brand-blue);
