@@ -359,7 +359,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     window.postMessage({ source: "holarc", type: "insurer-quote-submit", insurer: ins, workflowId, scenarios }, window.location.origin);
   };
 
-  const submittingVariants = useRef(false);
+  const submittingVariants = useRef(new Set<string>()); // per insurer: one insurer waiting on an OTP never holds up the others
   const [variantProgress, setVariantProgress] = useState<{ ins: string; product: string; done: number; total: number } | null>(null);
   const [collectingAll, setCollectingAll] = useState(false);
   /**
@@ -372,10 +372,10 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
    * status before the next pattern is submitted.
    */
   const submitAllVariants = async (ins: string, product: string) => {
-    if (submittingVariants.current) return;
+    if (submittingVariants.current.has(ins)) return;
     const patterns = premiumPatternOptions(ins, product);
     if (!patterns) return;
-    submittingVariants.current = true;
+    submittingVariants.current.add(ins);
     setVariantProgress({ ins, product, done: 0, total: patterns.length });
     try {
       for (let index = 0; index < patterns.length; index++) {
@@ -387,7 +387,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
         setVariantProgress({ ins, product, done: index + 1, total: patterns.length });
       }
     } finally {
-      submittingVariants.current = false;
+      submittingVariants.current.delete(ins);
       setVariantProgress(null);
     }
   };
@@ -396,16 +396,16 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
    *  time (reuses submitAllVariants' own serialization), so the single button on the insurer row
    *  collects everything instead of the Wealth Manager running each insurer's button separately. */
   const requestAllQuotes = async () => {
-    if (collectingAll || submittingVariants.current) return;
+    if (collectingAll || submittingVariants.current.size) return;
     setCollectingAll(true);
     try {
-      for (const ins of chosen) {
-        if (login[ins] !== "connected") continue;
+      // Insurers run side by side; products within one insurer stay sequential.
+      await Promise.all(chosen.filter(ins => login[ins] === "connected").map(async ins => {
         for (const p of products) {
           if (!supportsPremiumVariants(ins, p)) continue;
           await submitAllVariants(ins, p);
         }
-      }
+      }));
     } finally {
       setCollectingAll(false);
     }
