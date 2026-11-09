@@ -239,7 +239,7 @@ export function FinancialInformation({ clientId, showAgreedCover = false }: { cl
               <>
               {s.fields && (
                 <div className={FIELD_GRID_2_CLASS}>
-                  {s.fields.filter(f => !(retired && s.key === "goals_risk" && f.key === "retirement_age") && !(s.key === "cash_flow" && v.not_earning && ["gross_income", "net_salary"].includes(f.key))).map((f) => (
+                  {s.fields.filter(f => !(retired && !showAgreedCover && s.key === "goals_risk" && f.key === "retirement_age") && !(s.key === "cash_flow" && v.not_earning && ["gross_income", "net_salary"].includes(f.key))).map((f) => (
                     <div key={f.key} className={f.type === "textarea" ? "space-y-1.5 sm:col-span-2" : "space-y-1.5"}>
                       <Label className="text-xs">{retired && f.key === "net_salary" ? "Net monthly retirement income (R)" : retired && f.key === "gross_income" ? "Gross monthly retirement income (R)" : retired && f.key === "retirement_income" ? "Required retirement income (R / month)" : f.label}</Label>
                       {renderInput(v[f.key], (nv) => set(s.key, { ...v, [f.key]: nv }), f)}
@@ -248,6 +248,20 @@ export function FinancialInformation({ clientId, showAgreedCover = false }: { cl
                 </div>
               )}
               {showAgreedCover && s.key === "goals_risk" && (
+                <>
+                <fieldset className={FIELD_GRID_2_CLASS}>
+                  <legend className="mb-2 text-xs font-semibold">Quote assumptions and payment terms</legend>
+                  {([
+                    { key: "quote_cpi", label: "Annual CPI assumption (%)", type: "number" },
+                    { key: "retirement_payment_term", label: "Retirement income payment term", placeholder: "e.g. For life or 20 years" },
+                    { key: "income_protection_term", label: "Income protection benefit payment term", options: ["3 months", "6 months", "12 months", "24 months", "5 years", "To retirement age", "For life", "Not applicable"] },
+                  ] satisfies Field[]).map(field => (
+                    <div key={field.key} className="space-y-1.5">
+                      <Label className="text-xs">{field.label}</Label>
+                      {renderInput(v[field.key], value => set(s.key, { ...v, [field.key]: value }), field)}
+                    </div>
+                  ))}
+                </fieldset>
                 <fieldset className={FIELD_GRID_2_CLASS}>
                   <legend className="mb-2 text-xs font-semibold">Cover agreed in Needs Analysis</legend>
                   {["Life cover", "Lump sum disability", "Severe illness", "Income protection"].map(product => (
@@ -261,6 +275,7 @@ export function FinancialInformation({ clientId, showAgreedCover = false }: { cl
                     </div>
                   ))}
                 </fieldset>
+                </>
               )}
               {s.list && s.key !== "assets_liabilities" && s.key !== "investments" && (
                 <div className="space-y-2">

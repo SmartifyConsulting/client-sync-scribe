@@ -1,4 +1,4 @@
-import { providerQuoteFields, hasVerifiedProviderFields, isOmpLife, isOmpProduct, providerFieldApplies, ompSettingsComplete } from "./providerQuoteFields";
+import { providerQuoteFields, hasVerifiedProviderFields, isOmpLife, isOmpProduct, providerFieldApplies, ompSettingsComplete, withQuoteDefaults } from "./providerQuoteFields";
 import { OMP_RATING_OPTIONS, ompRatingIssues } from "./providerRatingFields";
 import { BidvestClientFields, bidvestIssues } from './BidvestClientFields';
 import {editQuoteOption} from './optionInheritance';
@@ -122,7 +122,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const [adding, setAdding] = useState("");
   const [params, setParams] = useState<NeedsParams>(DEFAULT_PARAMS);
   const plan: Plan = Object.fromEntries(Object.entries(draftPlan).map(([product, options]) =>
-    [product, withCoverAmounts(product, options, fin, params)]));
+    [product, withCoverAmounts(product, options, fin, params).map(option => withQuoteDefaults(product, option, chosen, fin))]));
 
   useEffect(() => {
     if (isLoading) return;
@@ -268,11 +268,22 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const submitScenarios = async (ins: string, only?: number[], product?: string) => {
     if (!canStartPortal(source)) return;
     const requestedPlan = product ? {[product]:plan[product]} : plan;
+    const goals = fin?.goals_risk;
+    if (goals?.quote_cpi == null || String(goals.quote_cpi).trim() === "" || !Number.isFinite(Number(goals.quote_cpi))) {
+      toast({ title: "Set the annual CPI assumption in Needs Analysis first." });
+      return;
+    }
+    if (requestedPlan["Income protection"] &&
+        (!Number(goals.retirement_age) || !goals.retirement_payment_term?.trim() ||
+          !goals.income_protection_term || goals.income_protection_term === "Not applicable")) {
+      toast({ title: "Complete the retirement age and benefit payment terms in Needs Analysis first." });
+      return;
+    }
     if(ins==='Bidvest Life / FMI') {
       const issues=bidvestIssues(Object.values(requestedPlan)[0]?.[0]?._bidvestInputs);
       if(issues.length){toast({title:'Complete the Bidvest client questions first.',description:issues.join('; '),variant:'destructive'});return;}
     }
-    const missingRating = Object.entries(requestedPlan).flatMap(([p, options]) => options.flatMap((v,i) => isOmpProduct(ins,p) && (!only || only.includes(i+1)) ? ompRatingIssues(v._ompInputs).map(label=>`${p} ${String.fromCharCode(65+i)}: ${label}`) : []));
+    const missingRating = Object.entries(requestedPlan).flatMap(([p, options]) => options.flatMap((v,i) => isOmpProduct(ins,p) && (!only || only.includes(i+1)) ? ompRatingIssues(v._ompInputs).map(label=>`${p} ${coverOptionLabel(i)} · ${label}`) : []));
     if(missingRating.length) {toast({title:'Complete the required insurer details first.',description:missingRating.slice(0,5).join('; '),variant:'destructive'});return;}
     if(ins==='Old Mutual' && Object.keys(requestedPlan).some(p=>p!=='Life cover')) {toast({title:'Use Get quote under a Life cover option. Other Old Mutual products are not yet mapped.'});return;}
     if (Object.entries(requestedPlan).some(([p, options]) => options.some((v,i) => (!only || only.includes(i+1)) && !ompSettingsComplete(ins, p, v)))) { toast({ title: "Complete the insurer’s required product settings first." }); return; }
@@ -494,6 +505,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
             <p className={label}>{quotesRunning ? "Quote requests are in progress. Follow the bars above each option." : "Waiting for your review. Open a product to review Desired, Current and Agreed Cover."}</p>
           <details className="rounded-lg border border-border p-2">
             <summary className="cursor-pointer text-xs font-medium">Calculation assumptions</summary>
+            <p className="mt-2 text-xs text-muted-foreground">Annual CPI assumption {fin?.goals_risk?.quote_cpi == null || fin.goals_risk.quote_cpi === "" ? "· Set in Needs Analysis" : `· ${fin.goals_risk.quote_cpi}%`}</p>
             <div className="mt-2 flex flex-wrap items-center gap-2">
             <span className={label}>Desired Cover · income years</span>
             <Input aria-label="Income years" className="h-8 w-14 px-2 text-xs tabular-nums" inputMode="numeric" value={params.incomeYears}
@@ -503,10 +515,14 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
               onChange={(e) => setParams({ ...params, ipPercent: Math.min(Number(e.target.value.replace(/\D/g, "")) || 0, 100) })} />
             </div>
           </details>
+          {activeTab === "BrightRock" && <p className="rounded-lg bg-muted/40 p-3 text-xs text-muted-foreground">
+            BrightRock uses one needs-matched individual life policy. The Companion can open a proposal and fill recognised fields. Review the cover in the portal and upload the quote PDF after retrieving it through BrightRock.
+          </p>}
 
           {activeTab==='Bidvest Life / FMI' && products.length>0 && <BidvestClientFields answers={plan[products[0]]?.[0]?._bidvestInputs??{}} onChange={answers=>setPlan(pl=>Object.fromEntries(Object.entries(pl).map(([product,options])=>[product,options.map(option=>({...option,_bidvestInputs:answers}))])))} />}
           {products.map((p) => {
             const fields = providerQuoteFields(activeTab, p);
+            const hasPortalChoices = hasVerifiedProviderFields(activeTab, p);
             return (
               <details key={p} open={p === products[0]} className="rounded-lg border border-border">
                 <summary className="flex cursor-pointer items-center justify-between gap-3 rounded-lg bg-muted/40 px-3 py-2">
@@ -515,6 +531,9 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPlan((pl) => { const { [p]: _, ...rest } = pl; return rest; }); }}><X className="h-3 w-3" /></button>
                 </summary>
                 <div className="overflow-x-auto">
+                {!hasPortalChoices && activeTab !== "BrightRock" && <p className="px-2 py-2 text-xs text-muted-foreground">Check the product and terms against the insurer’s portal before requesting the quote.</p>}
+                {activeTab === "Discovery" && p === "Life cover" && <p className="px-2 py-2 text-xs text-muted-foreground">Discovery also lists Purple Life and Dollar Life publicly. Confirm their availability and terms directly with Discovery.</p>}
+                {activeTab === "Bidvest Life / FMI" && p === "Income protection" && <p className="px-2 py-2 text-xs text-muted-foreground">Extended Income Protection is also listed by Bidvest Life. Confirm eligibility and terms in the portal.</p>}
                 {activeTab === "Momentum" && hasVerifiedProviderFields(activeTab,p) && <p className="px-2 py-2 text-xs text-muted-foreground">Select the Momentum product terms for each option. These choices match the named product shown below; other product variants still need verification. Saved generic choices are retained separately. Automated quoting is still being verified.</p>}
                 {isOmpProduct(activeTab, p) && <p className="px-2 py-2 text-xs text-muted-foreground">Choose Old Mutual’s product terms for each option. Saved generic settings are retained separately and are not automatically translated. {p === "Income protection" ? "The benefit term is determined in the insurer quote; the previous generic 2-year term does not apply automatically. " : ""}{isOmpLife(activeTab,p) ? "Companion currently supports fixed cover growth; linked increases require portal review. " : "These product choices are verified; automated submission still requires a completed product mapping. "}A calculated premium is shown separately from PDF filing.</p>}
 
@@ -560,6 +579,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                             {f.kind === "select" ? (
                               <select disabled={!providerFieldApplies(f,v)} className="h-6 w-full rounded border border-input bg-background px-1 text-[11px] disabled:opacity-50" value={providerFieldApplies(f,v) ? v[f.key] ?? (hasVerifiedProviderFields(activeTab, p) ? "" : f.options[0]) : ""} onChange={(e) => setVal(p, i, f.key, e.target.value)}>
                                 {hasVerifiedProviderFields(activeTab, p) && <option value="" disabled>{providerFieldApplies(f,v) ? "Select an insurer option" : "Not applicable"}</option>}
+                                {v[f.key] && !f.options.includes(v[f.key]) && <option value={v[f.key]} disabled>{v[f.key]} (saved)</option>}
                                 {f.options.map((o) => <option key={o}>{o}</option>)}
                               </select>
                             ) : f.key === "benefit_amount" || f.key === "monthly_benefit" ? (
@@ -570,7 +590,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                               <div className="flex h-6 items-center gap-1">
                                 <span className="w-3 shrink-0 text-muted-foreground">{f.kind === "amount" ? "R" : ""}</span>
                                 <Input className="h-6 w-full px-1.5 text-[11px] tabular-nums" inputMode="decimal" value={f.kind === "amount" ? groupDigits(v[f.key]) : v[f.key]}
-                                  disabled={!providerFieldApplies(f,v) || (f.key === "growth" && String(v.increase_option).includes("No increase"))}
+                                  disabled={!providerFieldApplies(f,v) || (f.key === "growth" && (v.increase_option === "No increase" || v.increase_option === "Cover increase: CPI rate"))}
                                   onChange={(e) => setVal(p, i, f.key, e.target.value.replace(/[^\d.]/g, ""))} />
                                 <span className="w-3 shrink-0 text-muted-foreground">{f.kind === "percent" ? "%" : ""}</span>
                               </div>

@@ -1,6 +1,43 @@
 import { PRODUCT_TYPES, type FieldDef } from "./quoteSpec";
 import { insurerFields, insurerKey } from "./insurerDictionary";
 
+export function withQuoteDefaults(product: string, option: Record<string, any>, insurers: string[], fin: any) {
+  const goals = fin?.goals_risk;
+  const cpi = String(goals?.quote_cpi ?? "");
+  const term = String(goals?.income_protection_term ?? "");
+  const retirementAge = String(goals?.retirement_age ?? "");
+  const effective: Record<string, any> = {
+    premium_pattern: "Stable",
+    premium_guarantee: "Standard",
+    increase_option: "Cover increase: CPI rate",
+    ...(product === "Income protection" ? { benefit_term: term } : {}),
+    ...option,
+  };
+  if (effective.increase_option === "Cover increase: CPI rate") effective.growth = cpi;
+
+  for (const insurer of insurers) {
+    if (!hasVerifiedProviderFields(insurer, product)) continue;
+    const defaults: Record<string, string> = {
+      "Bidvest Life / FMI:annual_increase": "CPI",
+      "Bidvest Life / FMI:benefit_term": term,
+      "Momentum:myriad_guarantee": "Standard",
+      "Momentum:myriad_increase": "Cover increase: CPI rate",
+      "Momentum:myriad_retirement": retirementAge,
+    };
+    for (const field of providerQuoteFields(insurer, product)) {
+      if (effective[field.key] != null && effective[field.key] !== "") continue;
+      if (field.kind === "select") {
+        const value = field.options.length === 1 ? field.options[0] : defaults[field.key];
+        if (field.options.includes(value)) effective[field.key] = value;
+      }
+      if (field.key === "Momentum:myriad_net_income" && Number(fin?.cash_flow?.net_salary) > 0) {
+        effective[field.key] = String(fin.cash_flow.net_salary);
+      }
+    }
+  }
+  return effective;
+}
+
 export const isOmpLife = (insurer: string, product: string) => insurer === "Old Mutual" && product === "Life cover";
 export const isOmpProduct = (insurer: string, product: string) => insurer === "Old Mutual" && ["Life cover", "Severe illness", "Income protection"].includes(product);
 export const isMyriadProduct = (insurer: string, product: string) => insurer === "Momentum" && ["Life cover", "Severe illness", "Income protection"].includes(product);

@@ -17,12 +17,8 @@ export function productsFromNeeds(fin: any) {
 
 export function defaultVariations(product: string) {
   const fields = PRODUCT_TYPES[product] ?? [];
-  return COVER_OPTIONS.map(() => {
-    const option = defaultVariation(fields);
-    if ("increase_option" in option) option.increase_option = "Cover increase: fixed percentage";
-    if ("growth" in option) option.growth = "6";
-    return option;
-  });
+  return COVER_OPTIONS.map(() => defaultVariation(fields.filter(field =>
+    !["premium_pattern", "premium_guarantee", "increase_option", "growth", "benefit_term"].includes(field.key))));
 }
 
 export function withCoverAmounts(product: string, vars: Record<string, any>[], fin: any, params: NeedsParams) {

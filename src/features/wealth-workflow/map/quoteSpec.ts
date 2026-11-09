@@ -5,7 +5,7 @@ export type FieldDef =
   | { key: string; label: string; kind: "select"; options: string[] }
   | { key: string; label: string; kind: "toggle" };
 
-const PATTERN = ["Level", "Compulsory", "Age-rated"];
+const PATTERN = ["Stable", "Inflationary Increase", "Aggressive Increase"];
 const GUARANTEE = ["Standard", "Guarantee term extender"];
 const INCREASE = ["Cover increase: fixed percentage", "Cover increase: CPI rate", "No increase"];
 
@@ -28,7 +28,7 @@ export const PRODUCT_TYPES: Record<string, FieldDef[]> = {
   "Income protection": [
     { key: "monthly_benefit", label: "Monthly benefit", kind: "amount" },
     { key: "waiting_period", label: "Waiting period", kind: "select", options: ["7 days", "14 days", "1 month", "3 months", "6 months"] },
-    { key: "benefit_term", label: "Benefit term", kind: "select", options: ["2 years", "5 years", "To age 60", "To age 65"] },
+    { key: "benefit_term", label: "Benefit term", kind: "select", options: ["3 months", "6 months", "12 months", "24 months", "5 years", "To retirement age", "For life"] },
     { key: "premium_pattern", label: "Premium pattern", kind: "select", options: PATTERN },
     { key: "increase_option", label: "Increase option", kind: "select", options: INCREASE },
     { key: "growth", label: "Cover growth", kind: "percent" },
