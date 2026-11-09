@@ -222,7 +222,8 @@
 - [x] Referrers: invited referrers with telephone, Pending sign-up status, add/edit/resend/delete
 
 ## Dashboard, footer, Marvin, standard variables — Nov 9
-- [ ] Footer reads Elysian Digital (Pty) Ltd
-- [ ] Briefing 2/3 and Upcoming 1/3 of Live Workspaces height; Pipeline + Earnings on next row
-- [ ] Seed Marvin Madly test financials so Benefit Amounts fill in
-- [ ] Per-insurer required variable list mapped to one standard Elysian name
+- [x] Footer reads Elysian Digital (Pty) Ltd
+- [x] Briefing 2/3 and Upcoming 1/3 of Live Workspaces height; Pipeline + Earnings on next row
+- [x] Seed Marvin Madly test financials so Benefit Amounts fill in
+- [x] Per-insurer required variable list mapped to one standard Elysian name (spreadsheet)
+- [ ] Rename the app’s internal field keys to the agreed Elysian names — awaiting user approval of the list
