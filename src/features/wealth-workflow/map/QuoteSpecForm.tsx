@@ -18,7 +18,7 @@ import { DiscoveryScreenScan } from "./DiscoveryScreenScan";
 import { InsurerActivity } from "./InsurerActivity";
 import { isActivityPhase, updateActivity, type QuoteActivity, type ActivityPhase } from "./quoteActivity";
 import { releaseBlockedQueues, startJobs, setStatus, type QuoteJobs } from "./quoteJobs";
-import { buildMomentumLifeVariants, buildPortalScenarios, momentumLifeVariantLabel, OMP_RATING_LABELS, VARIANT_COMPANION_VERSION } from "./portalPayload";
+import { buildMomentumLifeVariants, buildPortalScenarios, momentumLifeVariantLabel, OLD_MUTUAL_LIFE_PATTERNS, OMP_RATING_LABELS, VARIANT_COMPANION_VERSION } from "./portalPayload";
 import { QuoteJobsPanel } from "./QuoteJobsPanel";
 import { QuoteSourceSelector } from "./QuoteSourceSelector";
 import { DocumentRequestComposer } from "./DocumentRequestComposer";
@@ -83,7 +83,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const insurers: string[] = (insurerRows as any[]).map((r) => (typeof r === "string" ? r : r?.name)).filter(Boolean);
 
   const [draftPlan, setPlan] = useState<Plan>({});
-  const submittedOptions = useRef<Record<string, {product:string; settings:string}>>({});
+  const submittedOptions = useRef<Record<string, {product:string; settings:string; pattern?: string}>>({});
   const specRevision = useRef<string>();
   useEffect(()=>{specRevision.current=spec?.updated_at;},[spec?.id,spec?.updated_at]);
   const [source, setSource] = useState<QuoteSource>("companion");
@@ -150,8 +150,16 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
         if(readError || !option || quoteSettingsKey(submitted.product,option,d.insurer)!==submitted.settings) {
           toast({title:'Quote calculated, but its settings have changed. Review the portal result before saving it.',variant:'destructive'}); return;
         }
-        const updated=withQuoteReference(submitted.product,option,d.insurer,result.number);
-        updated._quoteResults={...option._quoteResults,[d.insurer]:{...result,settings:submitted.settings,source:'companion-verified',verifiedAt:new Date().toISOString()}};
+        const evidence = { ...result, settings: submitted.settings, source: "companion-verified", verifiedAt: new Date().toISOString() };
+        const updated = submitted.pattern ? {
+          ...option,
+          _premiumVariants: { ...option._premiumVariants, [d.insurer]: {
+            ...option._premiumVariants?.[d.insurer], [submitted.pattern]: evidence,
+          } },
+        } : {
+          ...withQuoteReference(submitted.product, option, d.insurer, result.number),
+          _quoteResults: { ...option._quoteResults, [d.insurer]: evidence },
+        };
         const variations={...current,[submitted.product]:current[submitted.product].map((v,i)=>i===d.n-1?updated:v)};
         const {data:saved,error}=await db.from('wealth_quote_specs').update({variations,updated_at:new Date().toISOString()}).eq('id',latest.id).eq('updated_at',latest.updated_at).select('id,updated_at');
         if(error || !saved?.length){toast({title:'Quote calculated but could not be saved. Keep the insurer tab open.',variant:'destructive'});return;}
@@ -159,8 +167,10 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
         setPlan(previous => ({
           ...previous,
           [submitted.product]: (previous[submitted.product] ?? []).map((value, index) => index === d.n - 1
-            ? { ...value, _quoteReferences: { ...value._quoteReferences, [d.insurer]: updated._quoteReferences[d.insurer] },
-                _quoteResults: { ...value._quoteResults, [d.insurer]: updated._quoteResults[d.insurer] } }
+            ? submitted.pattern
+              ? { ...value, _premiumVariants: { ...value._premiumVariants, [d.insurer]: { ...value._premiumVariants?.[d.insurer], [submitted.pattern]: evidence } } }
+              : { ...value, _quoteReferences: { ...value._quoteReferences, [d.insurer]: (updated as any)._quoteReferences[d.insurer] },
+                _quoteResults: { ...value._quoteResults, [d.insurer]: (updated as any)._quoteResults[d.insurer] } }
             : value),
         }));
         toast({title:`Quote ${result.number} saved to ${coverOptionLabel(d.n - 1)}`,description:'Calculation recorded. PDF not yet filed.'});
@@ -264,7 +274,7 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   };
 
   /** Send each option (Quote 1 = Option A …) to the connected portal; values only, labelled by field name. */
-  const submitScenarios = async (ins: string, only?: number[], product?: string) => {
+  const submitScenarios = async (ins: string, only?: number[], product?: string, pattern?: number) => {
     if (!canStartPortal(source)) return;
     const requestedPlan: Plan = {};
     for (const [name, options] of Object.entries(product ? { [product]: plan[product] } : plan)) {
@@ -273,6 +283,17 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
         if (hasNoCurrentCover(name, option, index)) delete eligible[index];
       });
       if (eligible.some(Boolean)) requestedPlan[name] = eligible;
+    }
+    const premiumVariant = pattern == null ? undefined : PREMIUM_PATTERNS[pattern];
+    if (premiumVariant && ins === "Old Mutual" && requestedPlan["Life cover"]) {
+      requestedPlan["Life cover"] = requestedPlan["Life cover"].map(option => ({
+        ...option, "Old Mutual:omp_premium": OLD_MUTUAL_LIFE_PATTERNS[pattern!],
+      }));
+      if (requestedPlan["Life cover"].some((option, index) => only?.includes(index + 1) &&
+          !["0% fixed rate", "5% fixed rate", "10% fixed rate"].includes(option["Old Mutual:omp_cover"]))) {
+        toast({ title: "Old Mutual’s inflation-linked growth requires portal review. Use the portal for these variants." });
+        return;
+      }
     }
     const goals = fin?.goals_risk;
     if (goals?.quote_cpi == null || String(goals.quote_cpi).trim() === "" || !Number.isFinite(Number(goals.quote_cpi))) {
@@ -305,15 +326,15 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
     const count = Math.max(...prods.map((p) => plan[p].length), 0);
     const scenarios = buildPortalScenarios(requestedPlan, ins, quoteClient).filter((s) =>
       (!only || only.includes(s.n)) && Object.values(requestedPlan).some(options => options[s.n - 1]) &&
-      jobs[ins]?.find((j) => j.n === s.n)?.status !== "captured");
+      (premiumVariant || jobs[ins]?.find((j) => j.n === s.n)?.status !== "captured"));
     if (!scenarios.length) return toast({ title: "No remaining applicable quote requests." });
-    if(ins==='Old Mutual') for(const s of scenarios) submittedOptions.current[`${ins}:${s.n}`]={product:'Life cover',settings:quoteSettingsKey('Life cover',plan['Life cover'][s.n-1],ins)};
+    if(ins==='Old Mutual') for(const s of scenarios) submittedOptions.current[`${ins}:${s.n}`]={product:'Life cover',settings:quoteSettingsKey('Life cover',plan['Life cover'][s.n-1],ins),pattern:premiumVariant};
     setJobs((j) => {
       const queued = startJobs(j, ins, count, Date.now(), only);
       const submitted = new Set(scenarios.map(scenario => scenario.n));
       return { ...queued, [ins]: [
         ...(j[ins] ?? []).filter(job => !submitted.has(job.n)),
-        ...queued[ins].filter(job => submitted.has(job.n)),
+        ...queued[ins].filter(job => submitted.has(job.n)).map(job => premiumVariant ? { n: job.n, status: "queued" as const, since: Date.now(), premiumVariant } : job),
       ].sort((a, b) => a.n - b.n) };
     });
     window.postMessage({ source: "holarc", type: "insurer-quote-submit", insurer: ins, workflowId, scenarios }, window.location.origin);
@@ -623,6 +644,9 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
                               const entry = saved[pattern];
                               return <div key={pattern} className="rounded border border-border px-2 py-1">
                                 <span className="block font-medium">{pattern}</span>
+                                {entry?.settings === settings && entry.source === "companion-verified" && <p className={label}>R {Number(entry.monthlyPremium).toFixed(2)} / month · PDF pending</p>}
+                                {isOmpLife(activeTab, p) && source === "companion" && <Button size="sm" variant="outline" className="mt-1 h-6 px-2 text-[10px]"
+                                  disabled={!connected || quotesRunning} onClick={() => void submitScenarios(activeTab, [i + 1], p, index)}>Calculate</Button>}
                                 {variantJobs[index]?.status === "captured" && <span className="text-success">PDF filed</span>}
                                 <QuoteOptionReference value={entry?.settings === settings ? entry.number : ""}
                                   label={`${activeTab} ${p} ${coverOptionLabel(i)} ${pattern} reference`}

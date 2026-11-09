@@ -53,6 +53,7 @@ export function buildPortalScenarios(plan: Record<string, Record<string, unknown
 
 export const VARIANT_COMPANION_VERSION = "1.7.18";
 const MOMENTUM_LIFE_PATTERNS = ["Level", "Compulsory", "Aggressive LifeStage"];
+export const OLD_MUTUAL_LIFE_PATTERNS = ["0% Annual Increase", "5% Annual Increase", "Increase with Age"];
 
 export function momentumLifeVariantLabel(n: number) {
   if (!Number.isInteger(n) || n < 7 || n > 15) return undefined;
