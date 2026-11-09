@@ -83,7 +83,6 @@ const DOCTOR_SECTIONS: NavSection[] = [
       { icon: Settings2, label: "My Business", labelKey: "nav.myPractice", to: "/business", tour: "practice-settings" },
       { icon: Users, label: "My Clients", labelKey: "nav.myPatients", to: "/clients", tour: "import-clients" },
       { icon: BedDouble, label: "Admissions", labelKey: "nav.admissions", to: "/admissions" },
-      { icon: Stethoscope, label: "Consultations", labelKey: "nav.mySessions", to: "/sessions" },
       { icon: FolderOpen, label: "Documents", labelKey: "nav.allDocuments", to: "/documents" },
       { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
       { icon: Plug, label: "App Integrations", labelKey: "nav.appIntegrations", to: "/app-integrations" },

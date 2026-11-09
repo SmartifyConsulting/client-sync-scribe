@@ -56,8 +56,14 @@ Deno.serve(async (req) => {
     const text = String(out?.text ?? "").trim();
     if (!text) return json({ error: "No speech was heard in the recording. Check your microphone and try again." }, 422);
 
+    // Evidentiary seal: server-side time + caller IP + SHA-256 over the exact text.
+    const sealedAt = new Date().toISOString();
+    const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || req.headers.get("cf-connecting-ip") || null;
+    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${patientId}|${sealedAt}|${ip ?? ""}|${text}`));
+    const sealHash = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
     const { data: s, error: se } = await admin.from("sessions").insert({
       user_id: uid, patient_id: patientId, title: "Financial health meeting", transcript: text, status: "completed",
+      transcript_sealed_at: sealedAt, transcript_sealed_ip: ip, transcript_seal_hash: sealHash,
     }).select("id").single();
     if (se) { console.error(se); return json({ error: "The transcript couldn't be saved. Please try again." }, 500); }
     return json({ ok: true, sessionId: s.id, chars: text.length });
