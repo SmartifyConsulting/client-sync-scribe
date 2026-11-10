@@ -40,6 +40,15 @@ const db = supabase as any;
 type Plan = Record<string, Record<string, any>[]>; // product -> variations
 
 /** Saved specs were one product + array; newer ones are product -> variations. */
+const ASSUMPTION_FIELDS = [
+  ["retirement_age", "Target retirement age", "Age in years"],
+  ["retirement_payment_term", "Retirement income payment term", "For life"],
+  ["income_protection_term", "Income protection benefit payment term", "To retirement age"],
+  ["quote_cpi", "Annual CPI assumption (%)", "5"],
+  ["employer_income_duration", "Employer income continuation", "e.g. None or 3 months"],
+] as const;
+type QuoteAssumptions = Partial<Record<(typeof ASSUMPTION_FIELDS)[number][0], string>>;
+
 const toPlan = (spec: any): Plan =>
   Array.isArray(spec?.variations) ? { [spec.product_type]: spec.variations } : (spec?.variations ?? {});
 
@@ -133,12 +142,39 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [adding, setAdding] = useState("");
   const [params, setParams] = useState<NeedsParams>(DEFAULT_PARAMS);
+  const [assumptions, setAssumptions] = useState<QuoteAssumptions>({});
+  const goals = {
+    ...fin?.goals_risk,
+    retirement_payment_term: String(fin?.goals_risk?.retirement_payment_term ?? "").trim() || "For life",
+    income_protection_term: String(fin?.goals_risk?.income_protection_term ?? "").trim() || "To retirement age",
+    quote_cpi: String(fin?.goals_risk?.quote_cpi ?? "").trim() || "5",
+    ...assumptions,
+  };
+  const quoteFinancials = { ...fin, goals_risk: goals };
   const plan: Plan = Object.fromEntries(Object.entries(draftPlan).map(([product, options]) =>
-    [product, withCoverAmounts(product, options, fin, params).map(option => withQuoteDefaults(product, option, chosen, fin))]));
+    [product, withCoverAmounts(product, options, fin, params).map(option => {
+      const draft: Record<string, any> = { ...option, _quoteAssumptions: assumptions };
+      if (product === "Income protection") {
+        if (assumptions.retirement_age !== undefined && assumptions.retirement_age !== option._quoteAssumptions?.retirement_age) {
+          delete draft["Momentum:myriad_retirement"];
+        }
+        if (assumptions.income_protection_term !== undefined && assumptions.income_protection_term !== option._quoteAssumptions?.income_protection_term) {
+          draft.benefit_term = goals.income_protection_term;
+          delete draft["Bidvest Life / FMI:benefit_term"];
+        }
+      }
+      return withQuoteDefaults(product, draft, chosen, quoteFinancials);
+    })]));
 
   useEffect(() => {
     if (isLoading) return;
-    if (spec) { setPlan(toPlan(spec)); setChosen(spec.insurers ?? []); return; }
+    if (spec) {
+      const savedPlan = toPlan(spec);
+      setPlan(savedPlan);
+      setChosen(spec.insurers ?? []);
+      setAssumptions(Object.values(savedPlan).flat().find(option => option?._quoteAssumptions)?._quoteAssumptions ?? {});
+      return;
+    }
     if (clientId && !finReady) return;
     setPlan(Object.fromEntries(productsFromNeeds(fin).map(product => [product, defaultVariations(product)])));
   }, [spec, isLoading, fin, finReady, clientId]);
@@ -327,17 +363,15 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
         return;
       }
     }
-    // Defaults to the standard 5% until the Wealth Manager overrides it in Needs Analysis.
-    const rawCpi = fin?.goals_risk?.quote_cpi;
-    const goals = { ...fin?.goals_risk, quote_cpi: rawCpi == null || String(rawCpi).trim() === "" ? "5" : rawCpi };
-    if (!Number.isFinite(Number(goals.quote_cpi))) {
-      toast({ title: "Set the annual CPI assumption in Needs Analysis first." });
+    if (!String(goals.quote_cpi).trim() || !Number.isFinite(Number(goals.quote_cpi))) {
+      toast({ title: "Enter the annual CPI rate under Calculation assumptions." });
       return;
     }
     if (requestedPlan["Income protection"] &&
-        (!Number(goals.retirement_age) || !goals.retirement_payment_term?.trim() ||
-          !goals.income_protection_term || goals.income_protection_term === "Not applicable")) {
-      toast({ title: "Complete the retirement age and benefit payment terms in Needs Analysis first." });
+        (!Number.isInteger(Number(goals.retirement_age)) || Number(goals.retirement_age) <= 0 ||
+          !String(goals.retirement_payment_term ?? "").trim() ||
+          !String(goals.income_protection_term ?? "").trim() || goals.income_protection_term === "Not applicable")) {
+      toast({ title: "Review the retirement age and payment terms under Calculation assumptions." });
       return;
     }
     if(ins==='Bidvest Life / FMI') {
@@ -733,7 +767,17 @@ export function QuoteSpecForm({ workflowId, isWM, clientId }: { workflowId: stri
             <p className={label}>{quotesRunning ? "Quote requests are in progress. Follow the bars above each option." : "Waiting for your review. Open a product to review Desired, Current and Agreed Cover."}</p>
           <details className="rounded-lg border border-border p-2">
             <summary className="cursor-pointer text-xs font-medium">Calculation assumptions</summary>
-            <p className="mt-2 text-xs text-muted-foreground">Annual CPI assumption · {fin?.goals_risk?.quote_cpi == null || fin.goals_risk.quote_cpi === "" ? "5" : fin.goals_risk.quote_cpi}% <span className="text-muted-foreground/70">(edit in Needs Analysis)</span></p>
+            <p className="mt-2 text-xs text-muted-foreground">Defaults fill missing payment terms. Save changes with the quote plan.</p>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              {ASSUMPTION_FIELDS.map(([key, title, placeholder]) => (
+                <label key={key} className="space-y-1 text-xs font-medium">
+                  <span>{title}</span>
+                  <Input value={goals[key] ?? ""} placeholder={placeholder}
+                    inputMode={key === "retirement_age" ? "numeric" : key === "quote_cpi" ? "decimal" : "text"}
+                    onChange={event => setAssumptions(previous => ({ ...previous, [key]: event.target.value }))} />
+                </label>
+              ))}
+            </div>
             <div className="mt-2 flex flex-wrap items-center gap-2">
             <span className={label}>Desired Cover · income years</span>
             <Input aria-label="Income years" className="h-8 w-14 px-2 text-xs tabular-nums" inputMode="numeric" value={params.incomeYears}
