@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/input";
+import { isXplanList, mapXplanRow, parseCsv, XPLAN_MAPPED_COLUMNS } from "../lib/xplanImport";
 import { Progress } from "@/components/ui/progress";
 import {
   Table,
@@ -267,6 +268,7 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
   const [isAiProcessing, setIsAiProcessing] = useState(false);
   const [parsedClients, setParsedClients] = useState<ParsedClient[]>([]);
   const [unmappedColumns, setUnmappedColumns] = useState<string[]>([]);
+  const [mappingWarnings, setMappingWarnings] = useState<string[]>([]);
   const [importProgress, setImportProgress] = useState(0);
   const [isImporting, setIsImporting] = useState(false);
   const [importResults, setImportResults] = useState<{ success: number; failed: number } | null>(null);
@@ -309,6 +311,7 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
   const processSpreadsheet = useCallback(async (file: File) => {
     setIsProcessing(true);
     setUnmappedColumns([]);
+    setMappingWarnings([]);
     setParsedClients([]);
     setImportResults(null);
 
@@ -318,25 +321,7 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
 
       if (extension === 'csv') {
         const text = await file.text();
-        const lines = text.split('\n').map(line => {
-          const result: string[] = [];
-          let current = '';
-          let inQuotes = false;
-          for (let i = 0; i < line.length; i++) {
-            const char = line[i];
-            if (char === '"') {
-              inQuotes = !inQuotes;
-            } else if (char === ',' && !inQuotes) {
-              result.push(current.trim());
-              current = '';
-            } else {
-              current += char;
-            }
-          }
-          result.push(current.trim());
-          return result;
-        }).filter(row => row.some(cell => cell !== ''));
-        jsonData = lines;
+        jsonData = parseCsv(text);
       } else {
         const rows = await readXlsxFile(file);
         jsonData = rows.map(row => row.map(cell => cell === null ? '' : cell));
@@ -351,6 +336,18 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
 
       // First row is headers
       const headers = jsonData[0] as string[];
+      if (isXplanList(headers)) {
+        const mapped = jsonData.slice(1).filter(row => row.some(cell => cell !== '' && cell != null))
+          .map(row => mapXplanRow(headers, row));
+        setParsedClients(mapped.map(result => result.client).filter(client => client.name));
+        setUnmappedColumns(headers.filter(header => !XPLAN_MAPPED_COLUMNS.includes(header)));
+        setMappingWarnings([
+          'Xplan preview: only client identity, contact, birth date and residential address are mapped. Check existing clients before importing; this importer does not automatically resolve duplicates.',
+          ...mapped.flatMap((result, index) => result.warnings.map(warning => `Row ${index + 1}: ${warning}`)),
+        ]);
+        setIsProcessing(false);
+        return;
+      }
       const columnMap: Record<number, keyof ParsedClient> = {};
 
       // Map headers to our fields
@@ -441,6 +438,7 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
     
     if (extension === 'txt') {
       setUnmappedColumns([]);
+      setMappingWarnings([]);
       // Text/Notepad file - use AI parsing
       setIsProcessing(true);
       setParsedClients([]);
@@ -554,6 +552,7 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
 
   const clearData = () => {
     setUnmappedColumns([]);
+    setMappingWarnings([]);
     setParsedClients([]);
     setImportResults(null);
     setImportProgress(0);
@@ -638,6 +637,11 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
             </Button>
           </div>
 
+          {mappingWarnings.length > 0 && (
+            <div role="alert" className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">
+              {mappingWarnings.map((warning, index) => <p key={index}>{warning}</p>)}
+            </div>
+          )}
           {unmappedColumns.length > 0 && (
             <div role="alert" className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">
               <p className="font-semibold">Columns not mapped by the spreadsheet importer</p>

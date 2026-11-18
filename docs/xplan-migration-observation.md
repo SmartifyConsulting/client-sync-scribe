@@ -1,6 +1,6 @@
 # Xplan migration observation — 18 November 2026
 
-Status: live list inspected; CSV requested; download not yet retrieved; no import performed.
+Status: CSV downloaded and loaded into the live Elysian preview; no import performed. Mapping corrections verified locally against the downloaded file.
 This records a manual browser observation. It is not an implemented Companion adapter.
 
 ## Observed export journey
@@ -10,7 +10,39 @@ This records a manual browser observation. It is not an implemented Companion ad
 3. List reports three visible records and no next page.
 4. CSV button above results is enabled. No rows were checked.
 5. Clicking CSV displays: “A CSV report generated asynchronously in the background. A message will be sent to you when it has been completed and ready for download. You will be notified by the bell at the top right hand corner.”
-6. Dismissed acknowledgement. Notification button did not visibly open a panel, including after a screenshot-confirmed click. Report availability and actual export contents remain unverified. Do not request another export simply because a download has not started.
+6. A browser alert must be dismissed using the browser dialog API. The initial accessibility observations did not reliably expose that blocking alert.
+7. The Notifications bell opens a **separate browser window/tab**, rather than a drawer in the source client-list tab. Detect the new Xplan tab at `/home/usermsg?login_role=user`.
+8. Its message subject is `csv File Generated`; its body confirms `Client List CSV` has been generated. Follow its `Download File` link (`/store/transient/clientlist.csv?fileid=...`); the file ID is dynamic and must not be hardcoded.
+9. Download verified at the user's local Downloads/clientlist.csv path. Parsed count is three records, with 22 headings. Do not commit the actual CSV or client values.
+
+## Selection and temporary table configuration
+
+- Open the result heading's gear (`config_button`), then `Temp. Table Config`.
+- Observe checkbox state before setting it. User requested all available columns and all client records selected; previously unticked Skype and the second DOB variant were checked. All other available column boxes were already checked. `Save Current Config` was left unchecked; applied with `Ok`.
+- In results iframe `search_frame`, set Select All only when unchecked. The verified confirmation is `All 3 clients are selected.` All three row boxes were checked.
+- CSV was requested again after this selection/configuration change. Do not generate repeated exports just to poll completion.
+- The retrieved CSV headings differ from the visible table: Address is present while Skype is absent. Automation must inspect the actual downloaded headers instead of assuming temporary table preferences define the file exactly. Confirm message recency/report identity before a production migration.
+
+## Elysian upload rehearsal (verified live)
+
+1. In authenticated broker Elysian session, My Clients (`/clients`).
+2. Click `Import`, then `Select File` in `Import Clients`.
+3. Choose downloaded `clientlist.csv` via file chooser.
+4. UI confirms `Found 3 clients to import` and `Preview (3 clients)`.
+5. **Stop before `Import Clients`**. No database import was submitted.
+6. Live preview revealed unmapped DOB headings, surname-first names and Python-style address strings. The broker's own client was visibly already present in the Elysian list. This is an existing-record match requiring resolution, not permission to duplicate or overwrite it.
+
+## Restricted mapping correction
+
+Only Name/First Name (normalised to first and last name), Email, Phone, full-year Date of Birth, ID and Address map to existing client fields. No source category, adviser role, referrer, policy, commission or planning fields are imported through this correction.
+
+`src/features/clients/lib/xplanImport.ts` detects the observed Xplan header pattern, reads the full-year birth-date column, preserves identity/phone text, normalises a single residential address without executing its source representation, and lists ambiguous values for review. CSV parser preserves quoted commas, escaped quotes and multiline fields. Unsupported columns remain explicit in preview.
+
+Local verification using the actual downloaded sample: 3 rows, 3 parsed birth dates, 3 separated names and 3 normalised addresses; no mapping warnings. Three synthetic regression tests passed. This does not prove duplicate handling or the database import itself; neither has been implemented/verified as part of this rehearsal.
+
+## Requested connection setup (not implemented)
+
+The user requested this migration as the first setup process after a broker successfully connects Xplan credentials in Elysian. Desired sequence: authenticate, verify broker scope, select/export, await message/download, preview required fields, resolve duplicates, import, reconcile. This document is evidence for that work; there is no automatic connection-triggered migration yet. Credentials alone do not prove export permissions or satisfy OTP requirements.
 
 ## Candidate mappings from visible list headings
 
