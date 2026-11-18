@@ -16,12 +16,17 @@ export function AstutePanel({ clientId, holdings, viewer }: { clientId?: string;
   const ref = holdings[0]?.reference;
 
   const pull = async () => {
-    if (!clientId) return;
+    if (!clientId || holdings.length > 0 || busy) return;
     setBusy(true);
     const { data, error } = await safeInvoke<any>("astute-sync", { patientId: clientId });
     setBusy(false);
     const msg = (data as any)?.error ?? error;
-    if (msg || !data?.ok) { toast({ title: "Astute pull didn't finish", description: msg ?? "Please try again.", variant: "destructive" }); return; }
+    if (msg || !data?.ok) {
+      const description = typeof msg === "string" && msg.includes("Astute has no results for this client yet")
+        ? "No completed Astute report was found for this client's ID in the account checked. No policy evidence was imported or changed. This action imports an available report; it does not request a new enquiry."
+        : msg ?? "The import could not be confirmed. Check the saved policy evidence before trying again.";
+      toast({ title: "No Astute report imported", description, variant: "destructive" }); return;
+    }
     toast({ title: `${data.count} policies pulled from Astute`, description: `Reference ${data.reference}` });
     qc.invalidateQueries({ queryKey: ["wealth-map-records"] });
   };
@@ -30,18 +35,23 @@ export function AstutePanel({ clientId, holdings, viewer }: { clientId?: string;
     <div className="text-sm">
       <div className="mb-2 flex items-center justify-between gap-2">
         <div>
-          <p className="text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Policies found by Astute</p>
+          <p className="text-2xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Astute policy snapshot</p>
           <p className="text-2xs text-muted-foreground">
-            {last ? `Last synced ${format(new Date(last), "d MMM yyyy, HH:mm")}${ref ? ` · ${ref}` : ""}` : "Not synced yet"}
+            {last ? `Captured ${format(new Date(last), "d MMM yyyy, HH:mm")}${ref ? ` · ${ref}` : ""}` : holdings.length ? "Capture date unavailable" : "No report captured yet"}
           </p>
         </div>
-        {viewer === "manager" && (
+        {viewer === "manager" && holdings.length === 0 && (
           <Button size="sm" variant="outline" className="rounded-full" onClick={pull} disabled={busy || !clientId}>
             <RefreshCw className={busy ? "mr-1.5 h-3.5 w-3.5 animate-spin" : "mr-1.5 h-3.5 w-3.5"} />
-            {busy ? "Pulling…" : "Pull from Astute"}
+            {busy ? "Importing…" : "Import available report"}
           </Button>
         )}
       </div>
+      {holdings.length > 0 && (
+        <p className="mb-3 text-xs text-muted-foreground">
+          These policies are the saved evidence for this stage of the advice process. This panel does not refresh or replace an existing snapshot.
+        </p>
+      )}
       {holdings.length ? (
         <div className="overflow-x-auto rounded-lg border">
           <table className="w-full text-xs">
@@ -63,7 +73,7 @@ export function AstutePanel({ clientId, holdings, viewer }: { clientId?: string;
         </div>
       ) : (
         <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
-          {viewer === "manager" ? "Pull from Astute to bring in this client's life, disability and investment policies." : "Your Wealth Manager will bring in your existing policies here."}
+          {viewer === "manager" ? "Import a completed Astute report to record this client's existing policies. This does not request a new enquiry." : "Your Wealth Manager will record your existing policies here."}
         </p>
       )}
     </div>
