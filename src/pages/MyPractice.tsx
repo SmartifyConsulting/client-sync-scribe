@@ -35,6 +35,8 @@ import ReferralAdvisors from "@/pages/ReferralAdvisors";
 import BrokerReferrers from "@/pages/broker/Referrers";
 import { ComplianceForms } from "@/features/wealth-workflow/forms/ComplianceForms";
 import { TargetsCommission } from "@/features/wealth-workflow/TargetsCommission";
+import { PlanningCalculators } from "@/features/wealth-workflow/planning/PlanningCalculators";
+import { ClientCrm } from "@/features/wealth-workflow/crm/ClientCrm";
 
 import Clients from "@/pages/Clients";
 import Documents from "@/pages/Documents";
@@ -1257,7 +1259,7 @@ export default function MyPractice() {
         defaultValue={
           isSystemAdmin && new URLSearchParams(window.location.search).get("billing")
             ? "billing"
-            : activeTab === "earnings" || activeTab === "referrers"
+            : activeTab === "earnings" || activeTab === "referrers" || activeTab === "planning" || activeTab === "crm"
               ? activeTab
               : "practice"
         }
@@ -1291,6 +1293,8 @@ export default function MyPractice() {
           <TabsTrigger value="referrers" className="tab-brand whitespace-nowrap text-xs px-3 py-1.5">
             {t("nav.referrers", "Referrers")}
           </TabsTrigger>
+          <TabsTrigger value="planning" className="tab-brand whitespace-nowrap text-xs px-3 py-1.5">Planning</TabsTrigger>
+          <TabsTrigger value="crm" className="tab-brand whitespace-nowrap text-xs px-3 py-1.5">CRM</TabsTrigger>
           {isSystemAdmin && <TabsTrigger
             value="billing"
             className="tab-brand whitespace-nowrap text-xs px-3 py-1.5"
@@ -1748,6 +1752,8 @@ export default function MyPractice() {
         <TabsContent value="earnings" className="mt-4 my-practice-tab-body">
           <TargetsCommission />
         </TabsContent>
+        <TabsContent value="planning" className="mt-4 my-practice-tab-body"><PlanningCalculators /></TabsContent>
+        <TabsContent value="crm" className="mt-4 my-practice-tab-body"><ClientCrm /></TabsContent>
 
       </Tabs>
     </div>

@@ -26,12 +26,12 @@ export function TargetsCommission() {
   });
 
   const { data: apps = [] } = useQuery({
-    queryKey: ["wealth-issued", year],
+    queryKey: ["wealth-issued", user?.id, year],
     enabled: !!user,
     queryFn: async () => {
       const { data } = await supabase.from("wealth_applications" as any)
         .select("id, product, provider, monthly_premium, commission_amount, issued_at")
-        .eq("status", "issued").gte("issued_at", `${year}-01-01`);
+        .eq("status", "issued").gte("issued_at", `${year}-01-01T00:00:00+02:00`).lt("issued_at", `${year + 1}-01-01T00:00:00+02:00`);
       return (data as any[]) ?? [];
     },
   });
@@ -74,7 +74,7 @@ export function TargetsCommission() {
   const rows = [
     { label: "Policies issued", actual: policies, goal: Number(form.policies) || 0, show: (n: number) => String(n) },
     { label: "Monthly premium written", actual: premium, goal: Number(form.premium) || 0, show: fmt },
-    { label: "Commission earned", actual: commission, goal: Number(form.commission) || 0, show: fmt },
+    { label: "Expected commission", actual: commission, goal: Number(form.commission) || 0, show: fmt },
   ];
 
   return (

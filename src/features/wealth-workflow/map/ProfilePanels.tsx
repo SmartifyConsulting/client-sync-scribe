@@ -1,4 +1,5 @@
 import { useRetirementInfo } from "@/features/clients/components/financial/useRetirementInfo";
+import { PlanningCalculators } from "@/features/wealth-workflow/planning/PlanningCalculators";
 import { dobFromSaId } from "@/lib/saId";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -239,7 +240,7 @@ export function CaptureFinancialsPanel({ clientId, sessions, financials, viewer,
   const [sessionId, setSessionId] = useState<string>("");
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
-  const [tab, setTab] = useState<"meeting" | "profile">("meeting");
+  const [tab, setTab] = useState<"meeting" | "profile" | "planning">("meeting");
   const [changes, setChanges] = useState<string[] | null>(null);
   const live = useLiveSpeechTranscript();
   useEffect(() => { if (!sessionId && usable[0]) setSessionId(usable[0].id); }, [usable.length]);
@@ -280,8 +281,9 @@ export function CaptureFinancialsPanel({ clientId, sessions, financials, viewer,
       <div className="flex gap-1 rounded-full border border-border p-0.5 w-fit">
         {tabBtn("meeting", "Meeting & questions")}
         {tabBtn("profile", "Financial profile")}
+        {tabBtn("planning", "Planning")}
       </div>
-      {tab === "profile" ? (
+      {tab === "planning" ? <PlanningCalculators key={clientId} clientId={clientId} /> : tab === "profile" ? (
         clientId && <FinancialInformation clientId={clientId} showAgreedCover />
       ) : (
         <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
