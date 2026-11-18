@@ -466,6 +466,40 @@ function drive(username, password, submitted, origin, discoveryRedirects, passwo
   };
   const inputs = query(document, "input").filter(i => i.type !== "hidden" && vis(i));
   const text = document.body.innerText || "";
+  // Observed Discovery Adviser360 dashboard is in a same-origin iframe; its
+  // product-renaming notice is a Bootstrap modal without role=dialog.
+  if (u.origin === "https://www.discovery.co.za" && u.pathname === "/portal/intermediary/dashboard" &&
+      document.title === "Dashboard - Discovery" && !inputs.some(i => i.type === "password")) {
+    const frames = query(document, "iframe").filter(frame => {
+      try {
+        const source = new URL(frame.getAttribute("src") || "", u.origin);
+        return source.origin === u.origin && source.pathname === "/faz-dashboard-ui/" && source.hash === "#/dashboard-material" && vis(frame);
+      } catch { return false; }
+    });
+    if (frames.length === 1) {
+      let dashboard;
+      try { dashboard = frames[0].contentDocument; } catch { /* inaccessible frame is not proof of login */ }
+      if (dashboard?.title === "FazDashboardUi" &&
+          /Search for a client/.test(dashboard.body?.innerText || "") && /Client summary/.test(dashboard.body?.innerText || "") &&
+          query(dashboard, "button").some(button => vis(button) && buttonText(button) === "VIEW ALL PROSPECTS & CLIENTS") &&
+          query(dashboard, "a").some(link => {
+            try { return vis(link) && buttonText(link) === "HOME" && new URL(link.getAttribute("href"), u.origin).href === `${u.origin}/portal/intermediary/home`; }
+            catch { return false; }
+          }) && !query(dashboard, "input").some(input => vis(input) && (input.type === "password" || input.autocomplete === "one-time-code"))) {
+        if (query(document, 'iframe[src*="recaptcha"], iframe[src*="hcaptcha"], .g-recaptcha, .h-captcha, [id*="captcha-challenge"]').some(vis)) return { state: "captcha" };
+        const modals = query(document, 'dialog[open], [role="dialog"], [role="alertdialog"], .modal.show, .modal.in').filter(vis);
+        if (modals.length) {
+          const notice = modals.length === 1 ? modals[0] : null;
+          const expected = 'Notice From 1 January 2027, our gap cover products will have new names. Discovery Gap Comprehensive will be Discovery Gap 500, Discovery Gap Core will be Discovery Gap 250, Discovery Gap Active will be Discovery Gap 100. close';
+          if (!notice || notice.id !== 'unDecoratedModal' || (notice.innerText || '').replace(/\s+/g, ' ').trim() !== expected) return { state: "blocked" };
+          const close = query(notice, 'a[data-dismiss="modal"]').filter(link => vis(link) && buttonText(link) === 'close');
+          if (close.length !== 1) return { state: "blocked" };
+          if (!probeOnly) close[0].click();
+        }
+        return { state: "in" };
+      }
+    }
+  }
   // CCP Home hides sign-out in the account menu. Use the observed navigation
   // routes before scanning the dashboard's client fields for login challenges.
   if (u.origin === "https://aol.astutefse.com" && /^\/online\/ccp\/?$/i.test(u.pathname) &&
