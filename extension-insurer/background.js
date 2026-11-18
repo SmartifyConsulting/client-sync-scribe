@@ -38,7 +38,7 @@ function discoveryDashboardProbe() {
   const text = document.body?.innerText || '';
   const action = [...document.querySelectorAll('button')].some(button => visible(button) && button.textContent.trim() === 'VIEW ALL PROSPECTS & CLIENTS');
   const home = [...document.querySelectorAll('a')].some(link => {
-    try { const href = new URL(link.getAttribute('href'),url.origin); return visible(link) && link.textContent.trim() === 'HOME' && href.origin === url.origin && href.pathname === '/portal/intermediary/home'; }
+    try { const href = new URL(link.getAttribute('href'),url.origin); return visible(link) && /^home$/i.test(link.textContent.trim()) && href.origin === url.origin && href.pathname === '/portal/intermediary/home'; }
     catch { return false; }
   });
   return {authenticated:action && home && /Search for a client/.test(text) && /Client summary/.test(text)};
@@ -511,7 +511,7 @@ function drive(username, password, submitted, origin, discoveryRedirects, passwo
           /Search for a client/.test(dashboard.body?.innerText || "") && /Client summary/.test(dashboard.body?.innerText || "") &&
           query(dashboard, "button").some(button => vis(button) && buttonText(button) === "VIEW ALL PROSPECTS & CLIENTS") &&
           query(dashboard, "a").some(link => {
-            try { return vis(link) && buttonText(link) === "HOME" && new URL(link.getAttribute("href"), u.origin).href === `${u.origin}/portal/intermediary/home`; }
+            try { return vis(link) && /^home$/i.test(buttonText(link)) && new URL(link.getAttribute("href"), u.origin).href === `${u.origin}/portal/intermediary/home`; }
             catch { return false; }
           }) && !query(dashboard, "input").some(input => vis(input) && (input.type === "password" || input.autocomplete === "one-time-code")))) {
         if (query(document, 'iframe[src*="recaptcha"], iframe[src*="hcaptcha"], .g-recaptcha, .h-captcha, [id*="captcha-challenge"]').some(vis)) return { state: "captcha" };
