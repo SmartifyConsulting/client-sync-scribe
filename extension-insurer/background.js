@@ -17,6 +17,32 @@ async function saveRoute(tabId, job) {
   const key = `portal-${tabId}`, stored = await chrome.storage.session.get(key);
   if (!job.cancelled && jobs.get(tabId) === job) await chrome.storage.session.set({ [key]: routeFor(job, stored[key]) });
 }
+// Probe inaccessible Discovery frames in their own document, with no credentials.
+// Only the verified dashboard frame can attest authentication; top-page notice
+// checks still run afterwards, so a frame cannot bypass a consent/CAPTCHA stop.
+async function confirmDiscoveryFrame(tabId, result, route, probeOnly) {
+  if (result?.state !== 'discovery-frame') return result;
+  const frames = await chrome.scripting.executeScript({target:{tabId,allFrames:true},func:discoveryDashboardProbe}).catch(() => []);
+  if (frames.filter(frame => frame.frameId !== 0 && frame.result?.authenticated === true).length !== 1) return {state:'waiting'};
+  const [verified] = await chrome.scripting.executeScript({target:{tabId},func:drive,
+    args:['','',true,route.origin,route.discoveryRedirects,true,probeOnly,'',true]}).catch(() => []);
+  return verified?.result || {state:'waiting'};
+}
+function discoveryDashboardProbe() {
+  const url = new URL(location.href);
+  if (!['https://www.discovery.co.za','https://discovery.co.za'].includes(url.origin) ||
+      url.pathname !== '/faz-dashboard-ui/' || url.hash !== '#/dashboard-material' || document.title !== 'FazDashboardUi') return {authenticated:false};
+  const visible = element => element && !element.disabled && element.getClientRects().length > 0;
+  if ([...document.querySelectorAll('input')].some(input => visible(input) && (input.type === 'password' || input.autocomplete === 'one-time-code')) ||
+      [...document.querySelectorAll('dialog[open], [role="dialog"], [role="alertdialog"], iframe[src*="recaptcha"], iframe[src*="hcaptcha"]')].some(visible)) return {authenticated:false};
+  const text = document.body?.innerText || '';
+  const action = [...document.querySelectorAll('button')].some(button => visible(button) && button.textContent.trim() === 'VIEW ALL PROSPECTS & CLIENTS');
+  const home = [...document.querySelectorAll('a')].some(link => {
+    try { const href = new URL(link.getAttribute('href'),url.origin); return visible(link) && link.textContent.trim() === 'HOME' && href.origin === url.origin && href.pathname === '/portal/intermediary/home'; }
+    catch { return false; }
+  });
+  return {authenticated:action && home && /Search for a client/.test(text) && /Client summary/.test(text)};
+}
 async function inspectSession(tabId, job) {
   if (!job.connected || !job.autoReconnect || job.cancelled || job.recoveryChecking) return;
   job.recoveryChecking = true;
@@ -27,7 +53,8 @@ async function inspectSession(tabId, job) {
     const [probe] = await chrome.scripting.executeScript({ target: { tabId }, func: drive,
       args: ["", "", true, job.origin, job.discoveryRedirects, true, true] }).catch(() => []);
     if (job.cancelled || jobs.get(tabId) !== job) return;
-    const state = probe?.result?.state;
+    const probeResult = await confirmDiscoveryFrame(tabId, probe?.result, job, true);
+    const state = probeResult?.state;
     if (["otp", "email"].includes(state)) {
       if (job.challenge !== state) tell(job, { type: "insurer-challenge", method: state, hint: probe.result.hint });
       job.challenge = state;
@@ -105,7 +132,8 @@ chrome.runtime.onMessage.addListener((d, sender) => {
         const latest = (await chrome.storage.session.get(key))[key];
         if (!latest || latest.cancelled) continue;
         connectionAttemptId = route.connectionAttemptId;
-        state = probe?.result?.state === "in" ? "connected" : probe?.result?.state === "login" ? "expired" : "unknown";
+        const probeResult = await confirmDiscoveryFrame(tabId, probe?.result, route, true);
+        state = probeResult?.state === "in" ? "connected" : probeResult?.state === "login" ? "expired" : "unknown";
         if (state === "connected" && !jobs.has(tabId)) jobs.set(tabId, { ...latest, connected: true, done: true, username: "", password: "" });
         break;
       }
@@ -314,7 +342,7 @@ async function checkPortal(tabId) {
   if (job.cancelled || jobs.get(tabId) !== job) { job.checking = false; return; }
   const pin = new URL(tab.url).origin === "https://aol.astutefse.com" ? job.pin : undefined;
   const [res] = await chrome.scripting.executeScript({ target: { tabId }, func: drive, args: [job.username, job.password, job.submitted, job.origin, job.discoveryRedirects, job.passwordSubmitted === true, false, pin ?? ""] }).catch(() => [{}]);
-  const r = res?.result || {};
+  const r = await confirmDiscoveryFrame(tabId, res?.result || {}, job, false);
   if (job.cancelled || jobs.get(tabId) !== job) { job.checking = false; return; }
   job.checking = false;
   if (r.state === "otp" || r.state === "email") {
@@ -424,7 +452,7 @@ async function readPdf(url) {
 }
 
 // ---- injected into the insurer page ----
-function drive(username, password, submitted, origin, discoveryRedirects, passwordSubmitted = false, probeOnly = false, pin = "") {
+function drive(username, password, submitted, origin, discoveryRedirects, passwordSubmitted = false, probeOnly = false, pin = "", discoveryFrameConfirmed = false) {
   // Recheck inside the page: navigation may occur between tab inspection and injection.
   const u = new URL(location.href);
   if (u.protocol !== "https:" || u.username || u.password || !(u.origin === origin || (typeof discoveryRedirects === "string" && !u.port && (u.hostname === discoveryRedirects || u.hostname.endsWith("." + discoveryRedirects))))) return { state: "waiting" };
@@ -479,13 +507,13 @@ function drive(username, password, submitted, origin, discoveryRedirects, passwo
     if (frames.length === 1) {
       let dashboard;
       try { dashboard = frames[0].contentDocument; } catch { /* inaccessible frame is not proof of login */ }
-      if (dashboard?.title === "FazDashboardUi" &&
+      if (discoveryFrameConfirmed || (dashboard?.title === "FazDashboardUi" &&
           /Search for a client/.test(dashboard.body?.innerText || "") && /Client summary/.test(dashboard.body?.innerText || "") &&
           query(dashboard, "button").some(button => vis(button) && buttonText(button) === "VIEW ALL PROSPECTS & CLIENTS") &&
           query(dashboard, "a").some(link => {
             try { return vis(link) && buttonText(link) === "HOME" && new URL(link.getAttribute("href"), u.origin).href === `${u.origin}/portal/intermediary/home`; }
             catch { return false; }
-          }) && !query(dashboard, "input").some(input => vis(input) && (input.type === "password" || input.autocomplete === "one-time-code"))) {
+          }) && !query(dashboard, "input").some(input => vis(input) && (input.type === "password" || input.autocomplete === "one-time-code")))) {
         if (query(document, 'iframe[src*="recaptcha"], iframe[src*="hcaptcha"], .g-recaptcha, .h-captcha, [id*="captcha-challenge"]').some(vis)) return { state: "captcha" };
         const modals = query(document, 'dialog[open], [role="dialog"], [role="alertdialog"], .modal.show, .modal.in').filter(vis);
         if (modals.length) {
@@ -498,6 +526,7 @@ function drive(username, password, submitted, origin, discoveryRedirects, passwo
         }
         return { state: "in" };
       }
+      if (!dashboard) return { state: "discovery-frame" };
     }
   }
   // CCP Home hides sign-out in the account menu. Use the observed navigation

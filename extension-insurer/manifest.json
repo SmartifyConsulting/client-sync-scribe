@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Elysian Financial Services Companion",
-  "version": "1.7.21",
+  "version": "1.7.22",
   "description": "Connects insurer portals in background tabs using saved Elysian Financial Services logins, relays verification and captures quote PDFs.",
   "icons": { "48": "icon.png", "128": "icon.png" },
   "permissions": ["tabs", "scripting", "storage", "downloads", "alarms"],
