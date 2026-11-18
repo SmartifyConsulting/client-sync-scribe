@@ -125,10 +125,9 @@ const COLUMN_MAPPINGS: Record<string, keyof ParsedClient> = {
   "medical scheme": "medical_aid",
   "scheme": "medical_aid",
   "medical aid number": "medical_aid_number",
-  "membership number": "medical_aid_number",
-  "member number": "medical_aid_number",
-  "policy number": "medical_aid_number",
-  "insurance number": "medical_aid_number",
+  "medical aid membership number": "medical_aid_number",
+  "medical scheme membership number": "medical_aid_number",
+  "medical_aid_number": "medical_aid_number",
   "medical insurance product": "medical_insurance_product",
   "plan": "medical_insurance_product",
   "product": "medical_insurance_product",
@@ -267,6 +266,7 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isAiProcessing, setIsAiProcessing] = useState(false);
   const [parsedClients, setParsedClients] = useState<ParsedClient[]>([]);
+  const [unmappedColumns, setUnmappedColumns] = useState<string[]>([]);
   const [importProgress, setImportProgress] = useState(0);
   const [isImporting, setIsImporting] = useState(false);
   const [importResults, setImportResults] = useState<{ success: number; failed: number } | null>(null);
@@ -308,6 +308,7 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
 
   const processSpreadsheet = useCallback(async (file: File) => {
     setIsProcessing(true);
+    setUnmappedColumns([]);
     setParsedClients([]);
     setImportResults(null);
 
@@ -361,6 +362,8 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
           }
         }
       });
+
+      setUnmappedColumns(headers.filter(header => header && !mapColumnName(String(header))).map(String));
 
       // Check if we have at least a name column or first/last name columns
       const hasNameColumn = Object.values(columnMap).includes("name");
@@ -437,6 +440,7 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
     const extension = file.name.split('.').pop()?.toLowerCase();
     
     if (extension === 'txt') {
+      setUnmappedColumns([]);
       // Text/Notepad file - use AI parsing
       setIsProcessing(true);
       setParsedClients([]);
@@ -549,6 +553,7 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
   };
 
   const clearData = () => {
+    setUnmappedColumns([]);
     setParsedClients([]);
     setImportResults(null);
     setImportProgress(0);
@@ -633,6 +638,13 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
             </Button>
           </div>
 
+          {unmappedColumns.length > 0 && (
+            <div role="alert" className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">
+              <p className="font-semibold">Columns not mapped by the spreadsheet importer</p>
+              <p>{unmappedColumns.join(", ")}</p>
+              <p>Review these separately before importing. Policy numbers and ambiguous membership numbers must not be used as medical aid numbers.</p>
+            </div>
+          )}
           <div className="border rounded-lg overflow-hidden">
             <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight: '400px' }}>
             <Table style={{ minWidth: '1100px' }}>

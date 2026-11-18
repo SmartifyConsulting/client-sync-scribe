@@ -90,7 +90,7 @@ Extract the following fields where available:
 - physical_address (residential/physical address)
 - postal_address (mailing/postal address)
 - medical_aid (medical insurance provider name)
-- medical_aid_number (membership/policy number)
+- medical_aid_number (explicitly identified medical aid or medical scheme membership number only; never a life, investment or other insurance policy number, or an ambiguous membership number)
 - medical_insurance_product (plan/option name)
 - allergies (known allergies)
 - employer (employer/company name)
