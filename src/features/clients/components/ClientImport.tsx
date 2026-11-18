@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/input";
 import { isXplanList, mapXplanRow, parseCsv, XPLAN_MAPPED_COLUMNS } from "../lib/xplanImport";
+import { planClientImport } from "../lib/importDuplicates";
+import { useQuery } from "@tanstack/react-query";
 import { Progress } from "@/components/ui/progress";
 import {
   Table,
@@ -260,6 +262,17 @@ interface ClientImportProps {
   onImportComplete?: () => void;
 }
 
+async function loadExistingClients(ownerId: string) {
+  const records = [];
+  for (let offset = 0; ; offset += 500) {
+    const { data, error } = await supabase.from('clients').select('*')
+      .eq('user_id', ownerId).order('id').range(offset, offset + 499);
+    if (error) throw error;
+    records.push(...(data ?? []));
+    if (!data || data.length < 500) return records;
+  }
+}
+
 export function ClientImport({ onImportComplete }: ClientImportProps) {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -269,9 +282,19 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
   const [parsedClients, setParsedClients] = useState<ParsedClient[]>([]);
   const [unmappedColumns, setUnmappedColumns] = useState<string[]>([]);
   const [mappingWarnings, setMappingWarnings] = useState<string[]>([]);
+  const [reviewOnly, setReviewOnly] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
   const [isImporting, setIsImporting] = useState(false);
-  const [importResults, setImportResults] = useState<{ success: number; failed: number } | null>(null);
+  const [importResults, setImportResults] = useState<{ success: number; failed: number; skipped: number; review: number } | null>(null);
+  const existingClients = useQuery({
+    queryKey: ['client-import-existing', user?.id],
+    enabled: !!user && parsedClients.length > 0,
+    queryFn: () => loadExistingClients(user!.id),
+    staleTime: 0,
+  });
+  const decisions = existingClients.data
+    ? planClientImport(parsedClients.map(client => ({...client})), existingClients.data) : [];
+  const newCount = decisions.filter(row => row.status === 'new').length;
 
   const processWithAI = useCallback(async (content: string, fileType: string) => {
     setIsAiProcessing(true);
@@ -310,6 +333,7 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
 
   const processSpreadsheet = useCallback(async (file: File) => {
     setIsProcessing(true);
+    setReviewOnly(false);
     setUnmappedColumns([]);
     setMappingWarnings([]);
     setParsedClients([]);
@@ -342,7 +366,7 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
         setParsedClients(mapped.map(result => result.client).filter(client => client.name));
         setUnmappedColumns(headers.filter(header => !XPLAN_MAPPED_COLUMNS.includes(header)));
         setMappingWarnings([
-          'Xplan preview: only client identity, contact, birth date and residential address are mapped. Check existing clients before importing; this importer does not automatically resolve duplicates.',
+          'Xplan preview: only client identity, contact, birth date and residential address are mapped. Possible duplicates and changed details are held for review; existing records are never overwritten.',
           ...mapped.flatMap((result, index) => result.warnings.map(warning => `Row ${index + 1}: ${warning}`)),
         ]);
         setIsProcessing(false);
@@ -481,15 +505,30 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
   };
 
   const handleImport = async () => {
-    if (!user || parsedClients.length === 0) return;
+    if (!user || parsedClients.length === 0 || isImporting) return;
 
     setIsImporting(true);
     setImportProgress(0);
     let successCount = 0;
     let failedCount = 0;
+    // Re-read immediately before writing; a preview may have been left open.
+    let currentDecisions;
+    try {
+      currentDecisions = planClientImport(parsedClients.map(client => ({...client})), await loadExistingClients(user.id));
+    } catch {
+      setIsImporting(false);
+      toast({title:'Duplicate check failed',description:'No clients were imported. Retry the check before continuing.',variant:'destructive'});
+      return;
+    }
+    const skipped = currentDecisions.filter(row => row.status === 'existing').length;
+    const review = currentDecisions.filter(row => row.status === 'review').length;
 
     for (let i = 0; i < parsedClients.length; i++) {
       const client = parsedClients[i];
+      if (currentDecisions[i].status !== 'new') {
+        setImportProgress(Math.round(((i + 1) / parsedClients.length) * 100));
+        continue;
+      }
       
       try {
         const { error } = await supabase.from("clients").insert({
@@ -519,13 +558,11 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
         });
 
         if (error) {
-          console.error("Error importing client:", client.name, error);
           failedCount++;
         } else {
           successCount++;
         }
       } catch (err) {
-        console.error("Error importing client:", client.name, err);
         failedCount++;
       }
 
@@ -533,15 +570,14 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
     }
 
     setIsImporting(false);
-    setImportResults({ success: successCount, failed: failedCount });
+    setImportResults({ success: successCount, failed: failedCount, skipped, review });
 
     if (successCount > 0) {
       toast({
         title: "Import completed",
         description: `Successfully imported ${successCount} client${successCount === 1 ? "" : "s"}${failedCount > 0 ? `. ${failedCount} failed.` : ""}`,
       });
-      onImportComplete?.();
-    } else {
+    } else if (failedCount > 0) {
       toast({
         title: "Import failed",
         description: "Could not import any clients. Please check the data.",
@@ -551,6 +587,7 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
   };
 
   const clearData = () => {
+    setReviewOnly(false);
     setUnmappedColumns([]);
     setMappingWarnings([]);
     setParsedClients([]);
@@ -637,6 +674,17 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
             </Button>
           </div>
 
+          <div role="status" className="rounded-lg border p-3 text-sm">
+            {existingClients.isFetching ? 'Checking all rows against your client list…' : existingClients.isError
+              ? 'Duplicate check failed. Import is blocked until the check succeeds.'
+              : `${newCount} new · ${decisions.filter(row => row.status === 'existing').length} already present/repeated · ${decisions.filter(row => row.status === 'review').length} need review`}
+            <p>Only new records will be imported. Existing records and review items remain unchanged.</p>
+            <Button variant="outline" disabled={isImporting} onClick={() => setReviewOnly(!reviewOnly)}>
+              {reviewOnly ? 'Show all rows' : 'Show only items needing review'}
+            </Button>
+            {existingClients.isError && <Button variant="outline" onClick={() => existingClients.refetch()}>Retry check</Button>}
+          </div>
+
           {mappingWarnings.length > 0 && (
             <div role="alert" className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">
               {mappingWarnings.map((warning, index) => <p key={index}>{warning}</p>)}
@@ -655,6 +703,7 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
               <TableHeader>
                 <TableRow>
                   <TableHead className="sticky top-0 bg-card z-10 w-[30px] px-1">#</TableHead>
+                  <TableHead className="sticky top-0 bg-card z-10 min-w-[130px] px-1">Import check</TableHead>
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[110px] px-1">Name</TableHead>
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[130px] px-1">Email</TableHead>
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[90px] px-1">Phone</TableHead>
@@ -670,9 +719,13 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {parsedClients.map((client, index) => (
+                {parsedClients.map((client, index) => reviewOnly && decisions[index]?.status !== 'review' ? null : (
                   <TableRow key={index}>
                     <TableCell className="text-muted-foreground text-xs px-1">{index + 1}</TableCell>
+                    <TableCell className="text-xs px-1" title={decisions[index]?.reason}>
+                      {decisions[index]?.status === 'new' ? 'New' : decisions[index]?.status === 'existing' ? 'Already present / repeated' : decisions[index]?.status === 'review' ? 'Needs review' : 'Checking…'}
+                      {decisions[index]?.status === 'review' && <p>{decisions[index].reason}</p>}
+                    </TableCell>
                     <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={client.name} onChange={(e) => { const updated = [...parsedClients]; updated[index] = { ...updated[index], name: e.target.value }; setParsedClients(updated); }} /></TableCell>
                     <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={client.email || ""} onChange={(e) => { const updated = [...parsedClients]; updated[index] = { ...updated[index], email: e.target.value }; setParsedClients(updated); }} /></TableCell>
                     <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={client.phone || ""} onChange={(e) => { const updated = [...parsedClients]; updated[index] = { ...updated[index], phone: e.target.value }; setParsedClients(updated); }} /></TableCell>
@@ -706,13 +759,13 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
           )}
 
           <div className="flex gap-3">
-            <Button onClick={handleImport} disabled={isImporting} className="gap-2">
+            <Button onClick={handleImport} disabled={isImporting || existingClients.isFetching || existingClients.isError || !existingClients.data || newCount === 0} className="gap-2">
               {isImporting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <Check className="h-4 w-4" />
               )}
-              {isImporting ? "Importing..." : "Import Clients"}
+              {isImporting ? "Importing..." : `Import ${newCount} new clients`}
             </Button>
             <Button variant="outline" onClick={clearData} disabled={isImporting}>
               Cancel
@@ -734,11 +787,14 @@ export function ClientImport({ onImportComplete }: ClientImportProps) {
                   <span className="text-destructive"> · {importResults.failed} failed</span>
                 )}
               </p>
+              <p className="text-sm">{importResults.skipped} already present/repeated · {importResults.review} held for review. Existing records were not changed.</p>
             </div>
           </div>
           <Button variant="outline" onClick={clearData}>
             Import More Clients
           </Button>
+          <Button variant="outline" onClick={() => { setImportResults(null); setReviewOnly(true); existingClients.refetch(); }}>Review rows</Button>
+          <Button onClick={onImportComplete}>Done</Button>
         </div>
       )}
 

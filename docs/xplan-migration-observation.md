@@ -1,6 +1,6 @@
 # Xplan migration observation — 18 November 2026
 
-Status: CSV downloaded and loaded into the live Elysian preview; no import performed. Mapping corrections verified locally against the downloaded file.
+Status: CSV downloaded and loaded into the live Elysian preview. User subsequently clicked Import Clients and completed the import. Source-to-field mapping corrections were verified locally; post-import inspection confirmed the live importer used at that time still had the earlier mapping behaviour.
 This records a manual browser observation. It is not an implemented Companion adapter.
 
 ## Observed export journey
@@ -43,6 +43,17 @@ Local verification using the actual downloaded sample: 3 rows, 3 parsed birth da
 ## Requested connection setup (not implemented)
 
 The user requested this migration as the first setup process after a broker successfully connects Xplan credentials in Elysian. Desired sequence: authenticate, verify broker scope, select/export, await message/download, preview required fields, resolve duplicates, import, reconcile. This document is evidence for that work; there is no automatic connection-triggered migration yet. Credentials alone do not prove export permissions or satisfy OTP requirements.
+
+## Post-import verification and duplicate safeguard
+
+- All three source clients were found as newly created Elysian entries after the user's final click. Inspected personal-information fields still showed surname-first full names split incorrectly and blank DOB; an inspected address still contained the source representation. This confirms the corrected GitHub mapper was not the importer used in that live session.
+- The user clarified that multiple older records for the broker were deliberately created for testing. Do not infer that every historical name match was caused by this import. No existing records were edited, merged or deleted during verification.
+- A user-run identity-number check showed an identity collision between two differently named test clients. Treat such cases as review items, never as authority to merge.
+- Added import-side batch classification: New, Already present/repeated, Needs review. It compares the complete incoming batch with all paginated owner-scoped client records. Identity numbers ignore spaces/hyphens/case; contact numbers recognise South African local/international equivalents. Name, email and phone matches are conservative review candidates, not proof of identity.
+- Only a single matching saved record with all supplied fields unchanged is skipped automatically. Differing names/details, multiple candidate records and conflicting rows within the file are held. Identical repeat rows within the file are imported once. Empty fields do not authorise erasing existing data.
+- Preview gives totals and a review-only filter. It re-reads existing clients before importing new rows; failure to read blocks writes. Results retain counts for new, skipped, held and failed rows until Done.
+- No source reference ledger, cross-session locking, merge workflow or automatic migration trigger was added. Concurrent imports in two sessions can still race; database-backed idempotency is a separate migration requiring a reviewed proposal. Current safeguards cover sequential imports from this app, not arbitrary other writers.
+- Seven focused regression tests passed, including 400-record planning and repeat-import classification, intra-file collisions and the differently named shared-ID case. Existing production/test records remain unchanged.
 
 ## Candidate mappings from visible list headings
 
