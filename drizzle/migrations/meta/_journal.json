@@ -134,6 +134,13 @@
       "when": 1794261579397,
       "tag": "0018_session_transcript_seal",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1794999749554,
+      "tag": "0019_tighten_practice_info_and_config_reads",
+      "breakpoints": true
     }
   ]
 }

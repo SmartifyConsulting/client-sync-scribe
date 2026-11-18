@@ -4456,6 +4456,7 @@ export type Database = {
         Args: { _provider_id: string; _user_id: string }
         Returns: boolean
       }
+      is_client_of_owner: { Args: { _owner: string }; Returns: boolean }
       is_hospital_admin: {
         Args: { _hospital_id: string; _user_id: string }
         Returns: boolean
